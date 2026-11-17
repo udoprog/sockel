@@ -1023,6 +1023,31 @@ mod tests {
     }
 
     #[test]
+    fn a_menu_rows_edge_is_a_border_unless_set() {
+        // The focus rule of its own, not the one it shares with hover.
+        let focus_of = |css: &str| {
+            let at = css.find("\n.plinth-menu-item:focus-visible {").unwrap();
+            declarations(&css[at..], ".plinth-menu-item:focus-visible")
+        };
+        let plain = Config::new().build().unwrap();
+        let focus = focus_of(&plain.css);
+        assert!(focus.contains(&"outline: none".to_owned()), "{focus:?}");
+        let row = declarations(&plain.css, ".plinth-menu-item");
+        assert!(!row.contains(&"border-width: 0".to_owned()));
+        let tuned = Config::new()
+            .with("menu-item-edge", "outline")
+            .build()
+            .unwrap();
+        let row = declarations(&tuned.css, ".plinth-menu-item");
+        assert!(row.contains(&"border-width: 0".to_owned()), "{row:?}");
+        let focus = focus_of(&tuned.css);
+        assert!(
+            focus.contains(&"outline-offset: calc(-1 * var(--space-px))".to_owned()),
+            "{focus:?}"
+        );
+    }
+
+    #[test]
     fn a_buttons_line_height_is_a_setting() {
         let plain = Config::new().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");

@@ -381,6 +381,7 @@ page can still override them at runtime.
 | `$menu-edge`, `$menu-ground`, `$menu-shadow`, `$menu-padding`, `$menu-text` | `null` each (a menu's border colour, background, shadow, padding and font size; `null` keeps the list's: `--border`, `--surface-raised`, `--shadow-1`, `--nest-inset`, inherited) |
 | `$menu-scroll-gutter` | `null` (a menu's `scrollbar-gutter`; `null` keeps the list's `stable`, `auto` gives the room to the rows until the menu scrolls) |
 | `$menu-item-height`, `$menu-item-padding`, `$menu-item-gap`, `$menu-item-radius`, `$menu-item-hover-fill` | `null` each (a menu row's least height, padding, gap, corners and hover/focus fill; `null` keeps the row's: `--control-height`, `var(--space-1) var(--space-3)`, `var(--space-2)`, the nested radius, 7% of `--text`) |
+| `$menu-item-edge` | `null` (a menu row's reserved 1px border, its focus edge; `outline` reserves none and draws the focus edge as a 1px inset outline in the same place, so a row taller than its least height is its content's height) |
 | `$menu-radius` | `null` (a menu's corners; `null` keeps `--radius-md`) |
 | `$menu-item-phone-height` | `null` (a menu row's least height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
 | `$menu-item-mark-ink` | `null` (a check's or radio's mark; `null` keeps `--accent`, `currentColor` draws it as the row's text) |

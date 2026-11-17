@@ -196,6 +196,10 @@ $menu-item-padding: null !default;
 $menu-item-gap: null !default;
 $menu-item-radius: null !default;
 $menu-item-hover-fill: null !default;
+// `outline`: a menu row reserves no border and draws its focus edge as an
+// inset outline in the same place, so a row taller than its least height is
+// its content's height; `null` keeps the reserved border.
+$menu-item-edge: null !default;
 // A menu's corners (`null`: `--radius-md`), its rows' height below the
 // phone breakpoint (`null`: as above it; as `$button-phone-height`) and the
 // ink of a check's or radio's mark (`null`: `--accent`).
