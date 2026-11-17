@@ -965,7 +965,9 @@ Dismissal (`Dismiss`), only while no overlay opened after it is open:
 where the press put it; `Escape` and `Close` (the
 sheet's button) return focus to the anchor, as does any close by its owner
 that leaves focus nowhere after focus or a press was inside the popover (one
-the pointer only passed over, a hover card, leaves focus alone).
+the pointer only passed over, a hover card, leaves focus alone). Focus goes
+back to what had it inside the anchor when it opened, such as the button of
+a row the popover lines up with, else to the anchor itself.
 
 `use_popover(open, anchor, popover, side, align, on_dismiss)` is the hook
 under it, for a component that renders its own surface (a menu, a select):

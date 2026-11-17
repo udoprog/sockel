@@ -493,8 +493,16 @@ fn use_placement(
             let inside = Rc::new(Cell::new(false));
             let mut held: Vec<Listener> = Vec::new();
             let mut observer = None;
+            // What had focus inside the anchor (the button of a row it
+            // lines up with), to hand focus back to rather than the anchor.
+            let mut opener = None;
 
             if open {
+                opener = web_sys::window()
+                    .and_then(|w| w.document())
+                    .and_then(|d| d.active_element())
+                    .filter(|a| anchor.get().is_some_and(|n| n.contains(Some(a))))
+                    .and_then(|a| a.dyn_into::<HtmlElement>().ok());
                 if let Some(element) = popover.cast::<Element>() {
                     for kind in ["focusin", "pointerdown"] {
                         let inside = inside.clone();
@@ -636,16 +644,24 @@ fn use_placement(
                 if let Some((watch, _)) = observer {
                     watch.disconnect();
                 }
+                // Unmounted by its owner, it still holds the focus it is
+                // about to drop.
+                let holds = web_sys::window()
+                    .and_then(|w| w.document())
+                    .and_then(|d| d.active_element())
+                    .is_some_and(|a| popover.get().is_some_and(|p| p.contains(Some(&a))));
                 if open
                     && hands_back(refocus.get(), inside.get())
-                    && focus_lost()
-                    && let Some(anchor) = anchor.cast::<HtmlElement>()
+                    && (holds || focus_lost())
+                    && let Some(target) = opener
+                        .filter(|o| o.is_connected())
+                        .or_else(|| anchor.cast::<HtmlElement>())
                 {
                     // Where the page stands: the anchor may be scrolled
                     // away under a sheet.
                     let options = web_sys::FocusOptions::new();
                     options.set_prevent_scroll(true);
-                    _ = anchor.focus_with_options(&options);
+                    _ = target.focus_with_options(&options);
                 }
             }
         });
