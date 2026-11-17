@@ -696,6 +696,10 @@ pub struct PopoverProps {
     /// answer, such as a confirm.
     #[prop_or_default]
     pub trap: bool,
+    /// A body without padding (`plinth::class::FLUSH`), for content that
+    /// lays out its own edges, such as a list running to the surface's.
+    #[prop_or_default]
+    pub flush: bool,
     /// Its accessible name, and the sheet's heading.
     #[prop_or_default]
     pub title: Option<AttrValue>,
@@ -804,7 +808,9 @@ pub fn Popover(props: &PopoverProps) -> Html {
                 onpointerleave={props.on_pointer_leave.clone()}
                 data-testid={props.testid.clone()}>
                 { for head }
-                <div class={class::POPOVER_BODY}>{ props.children.clone() }</div>
+                <div class={classes!(class::POPOVER_BODY, props.flush.then_some(class::FLUSH))}>
+                    { props.children.clone() }
+                </div>
             </div>
         </>
     })
@@ -1040,6 +1046,16 @@ mod tests {
     }
 
     fn render_with(open: bool, sheet: bool, head: bool, title: Option<&'static str>) -> String {
+        render_props(open, sheet, head, title, false)
+    }
+
+    fn render_props(
+        open: bool,
+        sheet: bool,
+        head: bool,
+        title: Option<&'static str>,
+        flush: bool,
+    ) -> String {
         let props = PopoverProps {
             anchor: NodeRef::default(),
             open,
@@ -1050,6 +1066,7 @@ mod tests {
             sheet,
             head,
             trap: false,
+            flush,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
             focus: None,
@@ -1098,5 +1115,16 @@ mod tests {
         assert!(!html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(html.contains("aria-label=\"Filters\""), "{html}");
+    }
+
+    #[test]
+    fn a_flush_body_is_a_modifier() {
+        let flush = format!("class=\"{} {}\"", class::POPOVER_BODY, class::FLUSH);
+        assert!(render_props(true, false, true, None, true).contains(&flush));
+        let plain = render_props(true, false, true, None, false);
+        assert!(
+            plain.contains(&format!("class=\"{}\"", class::POPOVER_BODY)),
+            "{plain}"
+        );
     }
 }

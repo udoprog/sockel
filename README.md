@@ -968,6 +968,9 @@ the owner cuts it, and its events still bubble through the owner. Props:
   that window, not its neighbour. Without a match, the viewport.
 - `trap`: Tab stays inside it, from its last control to its first, as in a
   `Dialog`; for a popover that asks for an answer (`ConfirmPopover` sets it).
+- `flush`: a body without padding (`plinth::class::FLUSH` on
+  `.plinth-popover-body`), for content that lays out its own edges, such as
+  a list that runs to the surface's; off by default.
 - `on_pointer_enter` and `on_pointer_leave` (`Option<Callback<PointerEvent>>`):
   the pointer over the surface, for an owner that keeps it open while the
   pointer is there (it is in the overlay layer, so the owner's own
