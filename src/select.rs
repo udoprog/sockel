@@ -1,11 +1,13 @@
 //! Select: a field's box showing what is chosen, opening a [`Listbox`] of
 //! its options (`style/_select.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, face_label, listbox, listbox_option, option_id};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::roving::printable;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class,
@@ -198,11 +200,11 @@ pub struct SelectProps<T: PartialEq + 'static> {
     #[prop_or_default]
     pub filter_from: Option<usize>,
     /// The filter field's placeholder and accessible name.
-    #[prop_or(AttrValue::Static("Filter"))]
-    pub filter_label: AttrValue,
+    #[prop_or_default]
+    pub filter_label: Option<AttrValue>,
     /// Shown when the filter matches no option.
-    #[prop_or(AttrValue::Static("No matches"))]
-    pub no_match: AttrValue,
+    #[prop_or_default]
+    pub no_match: Option<AttrValue>,
     /// Picks several values ([`SelectProps::values`]) in place of one: a
     /// pick checks or unchecks its option and the list stays open.
     #[prop_or_default]
@@ -226,8 +228,8 @@ pub struct SelectProps<T: PartialEq + 'static> {
     #[prop_or_default]
     pub sheet: bool,
     /// The sheet's close button's accessible name.
-    #[prop_or(AttrValue::Static("Close"))]
-    pub close_label: AttrValue,
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
 }
 
 /// The indexes of the options picked: `values` with `multiple`, else the
@@ -266,6 +268,8 @@ pub fn Select<T>(props: &SelectProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let phrases = use_phrases_with(&L10N);
+    let filter_label = label(&phrases, &props.filter_label, "plinth-select-filter-label");
     let overlays = use_overlays();
     let id = use_state(|| crate::tooltip::next_id("select"));
     let face = use_node_ref();
@@ -674,8 +678,8 @@ where
                     <span class={input_box(InputSize::Regular, false, false, false)}>
                         <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
                         <input ref={input.clone()} class={class::INPUT_CONTROL} type="text"
-                            value={(*filter).clone()} placeholder={props.filter_label.clone()}
-                            aria-label={props.filter_label.clone()} role="combobox"
+                            value={(*filter).clone()} placeholder={filter_label.clone()}
+                            aria-label={filter_label.clone()} role="combobox"
                             aria-autocomplete="list" aria-expanded="true"
                             aria-controls={list_id.clone()}
                             aria-activedescendant={active.map(|i| option_id(&id, i))}
@@ -686,7 +690,7 @@ where
                 </div>
         });
         let empty = empty.then(|| html! {
-            <p class={class::SELECT_EMPTY}>{ props.no_match.clone() }</p>
+            <p class={class::SELECT_EMPTY}>{ label(&phrases, &props.no_match, "plinth-select-no-match") }</p>
         });
         if !props.sheet {
             return overlays.portal(html! {
@@ -721,7 +725,7 @@ where
                         <span class={class::SELECT_TITLE}>{ props.label.clone() }</span>
                         <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                             icon={html! { <Icon glyph={Glyph::Close} /> }}
-                            label={props.close_label.clone()} onclick={close} />
+                            label={label(&phrases, &props.close_label, "plinth-select-close")} onclick={close} />
                     </div>
                     <div class={class::SELECT_BODY}>
                         { for filter_field }

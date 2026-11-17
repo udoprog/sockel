@@ -1,7 +1,9 @@
 //! Stepper (`style/_stepper.scss`).
 
 use crate::input::{InputSize, input_box};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Glyph, Icon, class};
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -74,10 +76,10 @@ pub struct StepperProps {
     pub step: i64,
     /// The accessible name of the number.
     pub label: AttrValue,
-    #[prop_or("Decrease".into())]
-    pub less_label: AttrValue,
-    #[prop_or("Increase".into())]
-    pub more_label: AttrValue,
+    #[prop_or_default]
+    pub less_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub more_label: Option<AttrValue>,
     #[prop_or_default]
     pub id: Option<AttrValue>,
     #[prop_or_default]
@@ -106,6 +108,9 @@ pub struct StepperProps {
 /// least value to the most.
 #[function_component]
 pub fn Stepper(props: &StepperProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let less_label = label(&phrases, &props.less_label, "plinth-stepper-decrease");
+    let more_label = label(&phrases, &props.more_label, "plinth-stepper-increase");
     let draft = use_state(|| None::<String>);
     let (min, max) = (props.min, props.max.max(props.min));
     let chars = min.to_string().len().max(max.to_string().len());
@@ -188,14 +193,14 @@ pub fn Stepper(props: &StepperProps) -> Html {
             props.class.clone()
         )} role="group" aria-busy={props.busy.then_some("true")}
             style={format!("--stepper-chars: {chars}")}>
-            { button(-1, Glyph::Minus, &props.less_label, props.value <= min) }
+            { button(-1, Glyph::Minus, &less_label, props.value <= min) }
             <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0).then_some(class::ZERO))}
                 id={props.id.clone()} type="text" inputmode="numeric" autocomplete="off"
                 value={shown} aria-label={props.label.clone()}
                 aria-invalid={(props.invalid || !typed_ok).then_some("true")}
                 disabled={props.disabled} data-testid={props.testid.clone()}
                 {oninput} {onchange} {onblur} {onfocus} {onkeydown} />
-            { button(1, Glyph::Plus, &props.more_label, props.value >= max) }
+            { button(1, Glyph::Plus, &more_label, props.value >= max) }
         </span>
     }
 }
@@ -224,8 +229,8 @@ mod tests {
             max: 100,
             step: 1,
             label: "Count".into(),
-            less_label: "Decrease".into(),
-            more_label: "Increase".into(),
+            less_label: None,
+            more_label: None,
             id: None,
             size: InputSize::Regular,
             invalid: false,

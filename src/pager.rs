@@ -1,6 +1,9 @@
 //! Pager (`style/_pager.scss`).
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Glyph, Icon, class};
+use phrasebook02::args;
+use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
 
 /// The fewest slots a pager can lay out: first, a gap, the current page, a
@@ -79,20 +82,20 @@ pub struct PagerProps {
     #[prop_or_default]
     pub titles: bool,
     /// What the navigation is for (`aria-label` of the `nav`).
-    #[prop_or("Pages".into())]
-    pub label: AttrValue,
-    #[prop_or("First page".into())]
-    pub first_label: AttrValue,
-    #[prop_or("Previous page".into())]
-    pub previous_label: AttrValue,
-    #[prop_or("Next page".into())]
-    pub next_label: AttrValue,
-    #[prop_or("Last page".into())]
-    pub last_label: AttrValue,
-    /// The accessible name of a numbered button; the page's number is
-    /// appended ("Page 3").
-    #[prop_or("Page".into())]
-    pub page_label: AttrValue,
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
+    #[prop_or_default]
+    pub first_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub previous_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub next_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub last_label: Option<AttrValue>,
+    /// The accessible name of a numbered button, with the page's number
+    /// appended ("Page 3"); else the catalog's.
+    #[prop_or_default]
+    pub page_label: Option<AttrValue>,
     #[prop_or_default]
     pub disabled: bool,
     /// Loading the page: the buttons keep their room and ignore presses.
@@ -126,6 +129,16 @@ pub fn pager_button(edge: bool) -> Classes {
 /// its colour and background, never its weight.
 #[function_component]
 pub fn Pager(props: &PagerProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let nav_label = label(&phrases, &props.label, "plinth-pager-pages");
+    let first_label = label(&phrases, &props.first_label, "plinth-pager-first");
+    let previous_label = label(&phrases, &props.previous_label, "plinth-pager-previous");
+    let next_label = label(&phrases, &props.next_label, "plinth-pager-next");
+    let last_label = label(&phrases, &props.last_label, "plinth-pager-last");
+    let page_label = |n: usize| match &props.page_label {
+        Some(given) => format!("{given} {n}"),
+        None => phrases.msg("plinth-pager-page", &args([("page", n)])),
+    };
     let pages = props.pages.max(1);
     let page = props.page.min(pages - 1);
     let blocked = props.disabled || props.busy;
@@ -156,7 +169,7 @@ pub fn Pager(props: &PagerProps) -> Html {
             Slot::Gap => html! { <span class={class::PAGER_GAP} aria-hidden="true">{ "…" }</span> },
             Slot::Page(n) => {
                 let current = n == page;
-                let label = format!("{} {}", props.page_label, n + 1);
+                let label = page_label(n + 1);
                 html! {
                     <button type="button" class={class::PAGER_BUTTON}
                         title={props.titles.then(|| label.clone())}
@@ -172,17 +185,17 @@ pub fn Pager(props: &PagerProps) -> Html {
 
     html! {
         <nav class={classes!(pager(props.disabled, props.busy), props.class.clone())}
-            aria-label={props.label.clone()} aria-busy={props.busy.then_some("true")}
+            aria-label={nav_label} aria-busy={props.busy.then_some("true")}
             style={format!("--pager-chars: {}", pages.to_string().len())}
             data-testid={props.testid.clone()}>
             if props.edges {
-                { step(&props.first_label, false, 0, page == 0, true) }
+                { step(&first_label, false, 0, page == 0, true) }
             }
-            { step(&props.previous_label, false, page.saturating_sub(1), page == 0, false) }
+            { step(&previous_label, false, page.saturating_sub(1), page == 0, false) }
             { for numbers }
-            { step(&props.next_label, true, (page + 1).min(pages - 1), page + 1 >= pages, false) }
+            { step(&next_label, true, (page + 1).min(pages - 1), page + 1 >= pages, false) }
             if props.edges {
-                { step(&props.last_label, true, pages - 1, page + 1 >= pages, true) }
+                { step(&last_label, true, pages - 1, page + 1 >= pages, true) }
             }
         </nav>
     }

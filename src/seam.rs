@@ -1,9 +1,11 @@
 //! Seam: two panes and the divider dragged between them (`style/_seam.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::class;
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::size::Framed;
 
 /// Which way a seam divides its box.
@@ -84,8 +86,8 @@ pub struct SeamProps {
     #[prop_or(0.5)]
     pub reset: f64,
     /// The divider's name, for assistive technology.
-    #[prop_or(AttrValue::Static("Resize panes"))]
-    pub label: AttrValue,
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -141,6 +143,7 @@ fn along(e: &PointerEvent, axis: SeamAxis) -> f64 {
 /// `--seam-min` long, so neither collapses and the divider keeps its box.
 #[function_component]
 pub fn Seam(props: &SeamProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let root = use_node_ref();
     let grip = use_node_ref();
     let start = use_node_ref();
@@ -254,7 +257,7 @@ pub fn Seam(props: &SeamProps) -> Html {
             data-testid={props.testid.clone()}>
             <div ref={start} class={class::SEAM_PANE}>{ props.start.clone() }</div>
             <div ref={grip} class={class::SEAM_GRIP} role="separator" tabindex="0"
-                aria-orientation={orientation} aria-label={props.label.clone()}
+                aria-orientation={orientation} aria-label={label(&phrases, &props.label, "plinth-seam-resize")}
                 aria-valuemin="0" aria-valuemax="100"
                 aria-valuenow={format!("{:.0}", at * 100.0)}
                 {onpointerdown} {onpointermove}

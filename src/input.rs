@@ -1,6 +1,8 @@
 //! TextInput, Textarea, SearchField and InputGroup (`style/_inputs.scss`).
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Glyph, Icon, class};
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -308,8 +310,8 @@ pub struct SearchFieldProps {
     /// The placeholder and the accessible name.
     pub label: AttrValue,
     /// The clear button's accessible name.
-    #[prop_or("Clear".into())]
-    pub clear_label: AttrValue,
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
     #[prop_or_default]
     pub id: Option<AttrValue>,
     #[prop_or_default]
@@ -343,6 +345,7 @@ pub struct SearchFieldProps {
 /// text.
 #[function_component]
 pub fn SearchField(props: &SearchFieldProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let own = use_node_ref();
     let input = props.input_ref.clone().unwrap_or(own);
     let empty = props.value.is_empty();
@@ -392,7 +395,7 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
                 data-testid={props.testid.clone()} ref={input}
                 {oninput} {onkeydown} />
             <button type="button" class={classes!(class::INPUT_CLEAR, empty.then_some(class::EMPTY))}
-                aria-label={props.clear_label.clone()} disabled={props.disabled || empty}
+                aria-label={label(&phrases, &props.clear_label, "plinth-search-field-clear")} disabled={props.disabled || empty}
                 aria-hidden={empty.then_some("true")} tabindex={empty.then_some("-1")} {onclick}>
                 <Icon glyph={Glyph::Close} />
             </button>
@@ -421,7 +424,7 @@ mod tests {
             value: value.to_owned().into(),
             on_input: Callback::noop(),
             label: "Search".into(),
-            clear_label: "Clear".into(),
+            clear_label: None,
             id: None,
             size: InputSize::Regular,
             invalid: false,

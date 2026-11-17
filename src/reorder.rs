@@ -3,10 +3,13 @@
 use std::cell::RefCell;
 use std::rc::Rc;
 
+use phrasebook02::yew023::use_phrases_with;
+use phrasebook02::{Args, Phrases};
 use wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::L10N;
 use crate::tooltip::next_id;
 use crate::{Glyph, Icon, RowListItem, class, row_list};
 
@@ -76,35 +79,52 @@ pub enum ReorderText {
     },
 }
 
-/// The English text of a [`ReorderText`], `Reorder`'s default.
+/// The catalog's English text of a [`ReorderText`].
 pub fn reorder_text(text: &ReorderText) -> String {
-    match text {
-        ReorderText::Handle { name } => format!("Move {name}"),
-        ReorderText::Hint => {
-            "Drag, or press Space to lift, the arrow keys to move and Space to drop. Escape cancels."
-                .to_owned()
-        }
+    phrase(&Phrases::from_catalog(&L10N), text)
+}
+
+fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
+    let (id, name, place) = match text {
+        ReorderText::Handle { name } => ("plinth-reorder-handle", Some(name), None),
+        ReorderText::Hint => ("plinth-reorder-hint", None, None),
         ReorderText::Lifted {
             name,
             position,
             count,
-        } => format!("{name} lifted, position {position} of {count}"),
+        } => ("plinth-reorder-lifted", Some(name), Some((position, count))),
         ReorderText::Moving {
             name,
             position,
             count,
-        } => format!("{name}, position {position} of {count}"),
+        } => ("plinth-reorder-moving", Some(name), Some((position, count))),
         ReorderText::Dropped {
             name,
             position,
             count,
-        } => format!("Moved {name} to {position} of {count}"),
+        } => (
+            "plinth-reorder-dropped",
+            Some(name),
+            Some((position, count)),
+        ),
         ReorderText::Cancelled {
             name,
             position,
             count,
-        } => format!("{name} back at position {position} of {count}"),
+        } => (
+            "plinth-reorder-cancelled",
+            Some(name),
+            Some((position, count)),
+        ),
+    };
+    let mut args = Args::new();
+    if let Some(name) = name {
+        args.set("name", name.as_str());
     }
+    if let Some((position, count)) = place {
+        args.set("position", *position).set("count", *count);
+    }
+    phrases.msg(id, &args)
 }
 
 /// The index a row lifted from `from` lands at when dropped in `slot` (the
@@ -214,8 +234,7 @@ pub struct ReorderProps {
     /// A row moved from `from` to `to`, an index in the list without it:
     /// apply it with [`move_item`].
     pub on_move: Callback<(usize, usize)>,
-    /// The texts, an app's own words (from its phrasebook); English by
-    /// default ([`reorder_text`]).
+    /// The texts, overriding the catalog's.
     #[prop_or_default]
     pub text: Option<Callback<ReorderText, String>>,
     #[prop_or_default]
@@ -282,12 +301,13 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     let list = use_node_ref();
     let hint_id = use_state(|| next_id("reorder-hint"));
     let count = props.rows.len();
+    let phrases = use_phrases_with(&L10N);
     let say: Rc<dyn Fn(ReorderText) -> String> = match &props.text {
         Some(text) => {
             let text = text.clone();
             Rc::new(move |t| text.emit(t))
         }
-        None => Rc::new(|t| reorder_text(&t)),
+        None => Rc::new(move |t| phrase(&phrases, &t)),
     };
 
     {
@@ -682,6 +702,27 @@ mod tests {
                 count: 4
             }),
             "Moved Alpha to 3 of 4"
+        );
+    }
+
+    #[test]
+    fn the_announcements_are_in_the_provided_language() {
+        use phrasebook02::{Lang, Phrasebook};
+
+        let sv = Lang::new("sv-SE");
+        let book = Phrasebook::builder()
+            .language(Lang::EN_US, "English")
+            .language(sv, "Svenska")
+            .catalog(&L10N)
+            .build();
+        let text = ReorderText::Cancelled {
+            name: "Alfa".into(),
+            position: 2,
+            count: 5,
+        };
+        assert_eq!(
+            phrase(&book.phrases(sv), &text),
+            "Alfa tillbaka på plats 2 av 5"
         );
     }
 }

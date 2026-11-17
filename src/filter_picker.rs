@@ -1,10 +1,12 @@
 //! FilterPicker: a list's filter button of one width, opening a listbox of
 //! choices to check (`style/_filter-picker.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::picker::{ChoiceList, ChoicePopup, PickerOption, SEARCH_FROM};
 use crate::roving::printable;
 use crate::select::scroll_to;
@@ -63,8 +65,8 @@ pub struct FilterPickerProps<T: PartialEq + 'static> {
     pub label: AttrValue,
     /// The button's words when nothing is chosen, and the all option's
     /// (the app's phrasebook).
-    #[prop_or("All".into())]
-    pub all: AttrValue,
+    #[prop_or_default]
+    pub all: Option<AttrValue>,
     #[prop_or_default]
     pub disabled: bool,
     #[prop_or_default]
@@ -85,6 +87,8 @@ pub fn FilterPicker<T>(props: &FilterPickerProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let phrases = use_phrases_with(&L10N);
+    let all = label(&phrases, &props.all, "plinth-filter-picker-all");
     let id = use_state(|| crate::tooltip::next_id("filter-picker"));
     let overlays = use_overlays();
     let face = use_node_ref();
@@ -123,7 +127,7 @@ where
     let choices = &props.choices;
     // Option 0 is all; option i + 1 is choice i.
     let pickable: Vec<usize> = (0..=choices.len()).collect();
-    let labels: Vec<String> = std::iter::once(props.all.to_string())
+    let labels: Vec<String> = std::iter::once(all.to_string())
         .chain(choices.iter().map(|c| c.label.to_string()))
         .collect();
     let chosen_labels: Vec<&str> = props
@@ -132,7 +136,7 @@ where
         .filter_map(|v| choices.iter().find(|c| &c.value == v))
         .map(|c| c.label.as_str())
         .collect();
-    let (text, more) = filter_summary(&props.all, &chosen_labels);
+    let (text, more) = filter_summary(&all, &chosen_labels);
     let is_chosen = |i: usize| match i {
         0 => props.chosen.is_empty(),
         _ => props.chosen.contains(&choices[i - 1].value),
@@ -218,7 +222,7 @@ where
     let list_id = format!("{}-list", *id);
     let name = format!("{}: {}", props.label, chosen_labels.join(", "));
     let name = if chosen_labels.is_empty() {
-        format!("{}: {}", props.label, props.all)
+        format!("{}: {}", props.label, all)
     } else {
         name
     };
@@ -240,7 +244,7 @@ where
                 })
             });
             let label = match i {
-                0 => props.all.clone(),
+                0 => all.clone(),
                 _ => choices[i - 1].label.clone(),
             };
             html! {
@@ -277,7 +281,7 @@ where
     });
 
     let search = searchable.then(|| {
-        let options: Vec<PickerOption<usize>> = std::iter::once(props.all.clone())
+        let options: Vec<PickerOption<usize>> = std::iter::once(all.clone())
             .chain(choices.iter().map(|c| c.label.clone()))
             .enumerate()
             .map(|(i, l)| PickerOption::new(i, l))

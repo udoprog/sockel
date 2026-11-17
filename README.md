@@ -1143,8 +1143,9 @@ row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
 - `text: Callback<ReorderText, String>` gives the handle's name
   (`Handle`), its hint (`Hint`, its `aria-describedby`) and the
   announcements (`Lifted`, `Moving`, `Dropped`, `Cancelled`, positions from
-  1), read from a `role="status"` region: an app passes its phrasebook's
-  words; the default is `reorder_text` ("Moved Alpha to 3 of 5").
+  1), read from a `role="status"` region. Without it they are the
+  catalog's `plinth-reorder-*` messages ("Moved Alpha to 3 of 5");
+  `reorder_text` gives their English.
 - `DragHandle` is the grip alone (the `IconSet`'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
   `testid`. Helpers: `reorder_row(index, lift)`, `drag_handle(lifted)`,

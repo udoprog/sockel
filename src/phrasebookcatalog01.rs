@@ -57,7 +57,7 @@ mod tests {
     use yew::prelude::*;
 
     use super::{L10N, SV_SE};
-    use crate::SaveBar;
+    use crate::{Pager, SaveBar};
 
     #[derive(Properties, PartialEq)]
     struct Shown {
@@ -110,6 +110,59 @@ mod tests {
         );
     }
 
+    #[derive(Properties, PartialEq)]
+    struct Paged {
+        phrases: Option<Phrases>,
+        page_label: Option<AttrValue>,
+    }
+
+    #[function_component]
+    fn ShowPager(props: &Paged) -> Html {
+        let pager = html! {
+            <Pager page={0} pages={3} on_page={Callback::noop()}
+                page_label={props.page_label.clone()} />
+        };
+        match &props.phrases {
+            Some(phrases) => html! {
+                <ContextProvider<Phrases> context={phrases.clone()}>{ pager }</ContextProvider<Phrases>>
+            },
+            None => pager,
+        }
+    }
+
+    #[test]
+    fn a_numbered_page_is_named_in_the_language() {
+        let render = |phrases, page_label: Option<&'static str>| {
+            let page_label = page_label.map(AttrValue::from);
+            futures::executor::block_on(
+                yew::LocalServerRenderer::<ShowPager>::with_props(Paged {
+                    phrases,
+                    page_label,
+                })
+                .hydratable(false)
+                .render(),
+            )
+        };
+        let book = Phrasebook::builder()
+            .language(Lang::EN_US, "English")
+            .language(SV_SE, "Svenska")
+            .catalog(&L10N)
+            .build();
+
+        let en = render(None, None);
+        assert!(
+            en.contains("aria-label=\"Page 2\"") && en.contains("aria-label=\"Next page\""),
+            "{en}"
+        );
+        let sv = render(Some(book.phrases(SV_SE)), None);
+        assert!(
+            sv.contains("aria-label=\"Sida 2\"") && sv.contains("aria-label=\"Nästa sida\""),
+            "{sv}"
+        );
+        let given = render(Some(book.phrases(SV_SE)), Some("Blad"));
+        assert!(given.contains("aria-label=\"Blad 2\""), "{given}");
+    }
+
     #[test]
     fn catalog() {
         check::catalog(&L10N).unwrap();
@@ -139,9 +192,10 @@ mod tests {
                     continue;
                 }
                 // Class names share the prefix: a message id is the argument
-                // of a lookup, `text("plinth-..")` or `label(.., "plinth-..")`.
+                // of a lookup, `text("plinth-..")` or `label(.., "plinth-..")`,
+                // or a match arm's `=> ("plinth-..", ..)`.
                 let before = source[..start].trim_end();
-                if ["text(", "msg(", ","]
+                if ["text(", "msg(", ",", "=> ("]
                     .iter()
                     .any(|end| before.ends_with(end))
                 {

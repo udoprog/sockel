@@ -2,10 +2,12 @@
 //! in a list with a search field over it, opened from a field, a button or
 //! a dialog (`style/_picker.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::{Element, HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox_option, option_id};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::roving::{menu_step, printable};
 use crate::select::scroll_to;
 use crate::{
@@ -192,11 +194,11 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     #[prop_or_default]
     pub always_search: bool,
     /// The search field's placeholder and name (the app's phrasebook).
-    #[prop_or("Search".into())]
-    pub search_label: AttrValue,
+    #[prop_or_default]
+    pub search_label: Option<AttrValue>,
     /// Said when nothing matches.
-    #[prop_or("No matches".into())]
-    pub empty_label: AttrValue,
+    #[prop_or_default]
+    pub empty_label: Option<AttrValue>,
     /// Takes the focus when its dialog or popup opens (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
@@ -230,6 +232,8 @@ pub fn ChoiceList<T>(props: &ChoiceListProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let phrases = use_phrases_with(&L10N);
+    let search_label = label(&phrases, &props.search_label, "plinth-picker-search");
     let id = use_state(|| crate::tooltip::next_id("choice-list"));
     let query = use_state_eq(String::new);
     let state = use_mut_ref(Listbox::default);
@@ -440,7 +444,7 @@ where
                 <span class={classes!(input_box(InputSize::Regular, false, false, false), class::CHOICE_LIST_SEARCH)}>
                     <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
                     <input class={class::INPUT_CONTROL} type="text" value={(*query).clone()}
-                        placeholder={props.search_label.clone()} aria-label={props.search_label.clone()}
+                        placeholder={search_label.clone()} aria-label={search_label}
                         role="combobox" aria-autocomplete="list" aria-expanded="true"
                         aria-controls={list_id.clone()} aria-activedescendant={active_id.clone()}
                         autocomplete="off" spellcheck="false"
@@ -458,7 +462,7 @@ where
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
                 onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
                 if shown.is_empty() {
-                    <div class={class::CHOICE_LIST_NOTE} role="status">{ props.empty_label.clone() }</div>
+                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "plinth-picker-empty") }</div>
                 } else {
                     { for shown.iter().copied().map(option) }
                 }
@@ -570,10 +574,10 @@ pub struct PickerProps<T: PartialEq + 'static> {
     /// See [`ChoiceListProps::always_search`].
     #[prop_or_default]
     pub always_search: bool,
-    #[prop_or("Search".into())]
-    pub search_label: AttrValue,
-    #[prop_or("No matches".into())]
-    pub empty_label: AttrValue,
+    #[prop_or_default]
+    pub search_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub empty_label: Option<AttrValue>,
     #[prop_or_default]
     pub id: Option<AttrValue>,
     #[prop_or_default]
@@ -725,10 +729,10 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     pub disabled: bool,
     #[prop_or_default]
     pub always_search: bool,
-    #[prop_or("Search".into())]
-    pub search_label: AttrValue,
-    #[prop_or("No matches".into())]
-    pub empty_label: AttrValue,
+    #[prop_or_default]
+    pub search_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub empty_label: Option<AttrValue>,
     /// See [`ChoiceListProps::on_search`].
     #[prop_or_default]
     pub on_search: Callback<String>,
@@ -819,10 +823,10 @@ pub struct PickerDialogProps<T: PartialEq + 'static> {
     /// Each pick; the owner closes it after a single one.
     #[prop_or_default]
     pub on_pick: Callback<T>,
-    #[prop_or("Search".into())]
-    pub search_label: AttrValue,
-    #[prop_or("No matches".into())]
-    pub empty_label: AttrValue,
+    #[prop_or_default]
+    pub search_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub empty_label: Option<AttrValue>,
     #[prop_or_default]
     pub size: DialogSize,
     /// The footer's buttons, such as Done for a multi-select.

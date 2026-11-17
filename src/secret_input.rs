@@ -3,8 +3,10 @@
 use std::rc::Rc;
 
 use crate::input::{InputSize, input_box};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::timer::use_timeout;
 use crate::{Glyph, Icon, class};
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -78,14 +80,14 @@ pub struct SecretInputProps {
     /// clipboard too).
     #[prop_or_default]
     pub on_copy: Callback<String>,
-    #[prop_or("Show".into())]
-    pub show_label: AttrValue,
-    #[prop_or("Hide".into())]
-    pub hide_label: AttrValue,
-    #[prop_or("Copy".into())]
-    pub copy_label: AttrValue,
-    #[prop_or("Clear".into())]
-    pub clear_label: AttrValue,
+    #[prop_or_default]
+    pub show_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub hide_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub copy_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
     #[prop_or_default]
     pub placeholder: Option<AttrValue>,
     /// Milliseconds a shown secret stays shown.
@@ -116,6 +118,11 @@ pub struct SecretInputProps {
 /// hidden), so showing, copying or typing moves nothing.
 #[function_component]
 pub fn SecretInput(props: &SecretInputProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let show_label = label(&phrases, &props.show_label, "plinth-secret-input-show");
+    let hide_label = label(&phrases, &props.hide_label, "plinth-secret-input-hide");
+    let copy_label = label(&phrases, &props.copy_label, "plinth-secret-input-copy");
+    let clear_label = label(&phrases, &props.clear_label, "plinth-secret-input-clear");
     let state = use_reducer(RevealState::default);
     let reveal = state.0;
     let empty = props.value.is_empty();
@@ -167,9 +174,9 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
         }
     };
     let (glyph, label) = if shown {
-        (Glyph::EyeOff, &props.hide_label)
+        (Glyph::EyeOff, &hide_label)
     } else {
-        (Glyph::Eye, &props.show_label)
+        (Glyph::Eye, &show_label)
     };
 
     html! {
@@ -185,8 +192,8 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
                 data-autofocus={props.autofocus.then_some("")}
                 data-testid={props.testid.clone()} {oninput} />
             { action(glyph, label, toggle) }
-            { action(Glyph::Copy, &props.copy_label, copy) }
-            { action(Glyph::Close, &props.clear_label, clear) }
+            { action(Glyph::Copy, &copy_label, copy) }
+            { action(Glyph::Close, &clear_label, clear) }
         </span>
     }
 }
@@ -209,10 +216,10 @@ mod tests {
             on_input: Callback::noop(),
             label: "Key".into(),
             on_copy: Callback::noop(),
-            show_label: "Show".into(),
-            hide_label: "Hide".into(),
-            copy_label: "Copy".into(),
-            clear_label: "Clear".into(),
+            show_label: None,
+            hide_label: None,
+            copy_label: None,
+            clear_label: None,
             placeholder: None,
             reveal_ms: REVEAL_MS,
             id: None,

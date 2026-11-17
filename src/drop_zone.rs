@@ -3,11 +3,13 @@
 use std::cell::Cell;
 use std::rc::Rc;
 
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::File;
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Button, ButtonSize, class};
 
 /// Why a file was not taken.
@@ -243,14 +245,14 @@ pub struct DropZoneProps {
     #[prop_or_default]
     pub multiple: bool,
     /// What the overlay says while a file is dragged near.
-    #[prop_or(AttrValue::Static("Drop to upload"))]
-    pub label: AttrValue,
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
     /// What it says of a file of a type it does not take.
-    #[prop_or(AttrValue::Static("This file type is not accepted"))]
-    pub reject: AttrValue,
+    #[prop_or_default]
+    pub reject: Option<AttrValue>,
     /// What it says of a file over `max_size`.
-    #[prop_or(AttrValue::Static("This file is too large"))]
-    pub too_large: AttrValue,
+    #[prop_or_default]
+    pub too_large: Option<AttrValue>,
     /// Set while a file taken is being worked on: what the overlay says
     /// meanwhile. The zone takes no other file then.
     #[prop_or_default]
@@ -308,6 +310,9 @@ enum Over {
 /// that carries no files passes through untouched.
 #[function_component]
 pub fn DropZone(props: &DropZoneProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let drop_label = label(&phrases, &props.label, "plinth-drop-zone-drop");
+    let reject = label(&phrases, &props.reject, "plinth-drop-zone-reject");
     let page_drag = use_state_eq(|| false);
     let over = use_state_eq(|| Over::No);
     let refused = use_state_eq(|| None::<Refusal>);
@@ -550,8 +555,8 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
 
     let problem = props.error.clone().or_else(|| {
         refused.map(|why| match why {
-            Refusal::Type => props.reject.clone(),
-            Refusal::TooLarge => props.too_large.clone(),
+            Refusal::Type => reject.clone(),
+            Refusal::TooLarge => label(&phrases, &props.too_large, "plinth-drop-zone-too-large"),
         })
     });
 
@@ -563,9 +568,9 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
         (DropState::Error, Some(problem))
     } else {
         match (*over, *page_drag) {
-            (Over::Refused, _) => (DropState::Refused, Some(props.reject.clone())),
-            (Over::Yes, _) => (DropState::Over, Some(props.label.clone())),
-            (Over::No, true) => (DropState::Dragging, Some(props.label.clone())),
+            (Over::Refused, _) => (DropState::Refused, Some(reject)),
+            (Over::Yes, _) => (DropState::Over, Some(drop_label.clone())),
+            (Over::No, true) => (DropState::Dragging, Some(drop_label)),
             (Over::No, false) => (DropState::Idle, None),
         }
     };

@@ -1,10 +1,12 @@
 //! SearchSelect: a text field filtering a [`Listbox`] of options under it
 //! (`style/_search-select.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::select::scroll_to;
 use crate::{
     Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays,
@@ -146,11 +148,11 @@ pub struct SearchSelectProps<T: PartialEq + 'static> {
     /// The placeholder and the accessible name.
     pub label: AttrValue,
     /// The loading row's words (the app's phrasebook).
-    #[prop_or("Loading".into())]
-    pub loading_label: AttrValue,
+    #[prop_or_default]
+    pub loading_label: Option<AttrValue>,
     /// Said when nothing matches.
-    #[prop_or("No matches".into())]
-    pub empty_label: AttrValue,
+    #[prop_or_default]
+    pub empty_label: Option<AttrValue>,
     #[prop_or_default]
     pub id: Option<AttrValue>,
     #[prop_or_default]
@@ -183,6 +185,7 @@ pub fn SearchSelect<T>(props: &SearchSelectProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let phrases = use_phrases_with(&L10N);
     let id = use_state(|| crate::tooltip::next_id("search-select"));
     let overlays = use_overlays();
     let field = use_node_ref();
@@ -369,11 +372,11 @@ where
             Listed::Loading => html! {
                 <div class={class::SEARCH_SELECT_NOTE} role="status">
                     <Icon glyph={Glyph::Spinner} />
-                    { props.loading_label.clone() }
+                    { label(&phrases, &props.loading_label, "plinth-search-select-loading") }
                 </div>
             },
             Listed::Options(rows) if rows.is_empty() => html! {
-                <div class={class::SEARCH_SELECT_NOTE} role="status">{ props.empty_label.clone() }</div>
+                <div class={class::SEARCH_SELECT_NOTE} role="status">{ label(&phrases, &props.empty_label, "plinth-search-select-empty") }</div>
             },
             Listed::Options(rows) => html! {
                 { for groups(options, rows).into_iter().enumerate().map(|(g, (label, members))| {

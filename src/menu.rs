@@ -3,10 +3,12 @@
 
 use std::rc::Rc;
 
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::roving::{Typeahead, menu_step, printable, typeahead};
 use crate::timer::Timer;
 use crate::{
@@ -894,8 +896,8 @@ pub struct RowActionsProps {
     #[prop_or_default]
     pub more: Option<Html>,
     /// The overflow menu's opener's accessible name.
-    #[prop_or(AttrValue::Static("More actions"))]
-    pub more_label: AttrValue,
+    #[prop_or_default]
+    pub more_label: Option<AttrValue>,
     /// The menu holds nothing for this row: its opener stays, disabled, so
     /// every row ends the same way.
     #[prop_or_default]
@@ -928,6 +930,8 @@ pub struct RowActionsProps {
 /// danger ones last, then its overflow menu.
 #[function_component]
 pub fn RowActions(props: &RowActionsProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let more_label = label(&phrases, &props.more_label, "plinth-row-actions-more");
     let tips = props.tips;
     let button = |action: &RowAction| {
         let (title, tip) = if tips {
@@ -953,8 +957,8 @@ pub fn RowActions(props: &RowActionsProps) -> Html {
             { for danger }
             if let Some(more) = &props.more {
                 <Menu variant={ButtonVariant::Quiet} size={ButtonSize::Small}
-                    label={props.more_label.clone()} disabled={props.disabled || props.more_disabled}
-                    tip={tips.then(|| props.more_label.clone())} testid={props.more_testid.clone()}
+                    label={more_label.clone()} disabled={props.disabled || props.more_disabled}
+                    tip={tips.then_some(more_label)} testid={props.more_testid.clone()}
                     open={props.open} on_toggle={props.on_toggle.clone()}>
                     { more.clone() }
                 </Menu>
@@ -976,8 +980,8 @@ pub struct SplitButtonProps {
     #[prop_or_default]
     pub icon: Option<Html>,
     /// The chevron's accessible name.
-    #[prop_or(AttrValue::Static("More options"))]
-    pub menu_label: AttrValue,
+    #[prop_or_default]
+    pub menu_label: Option<AttrValue>,
     #[prop_or_default]
     pub width: MenuWidth,
     #[prop_or_default]
@@ -997,6 +1001,7 @@ pub struct SplitButtonProps {
 /// parts sharing a height and a border.
 #[function_component]
 pub fn SplitButton(props: &SplitButtonProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     html! {
         <span class={classes!(class::SPLIT_BUTTON, props.class.clone())}>
             <Button variant={props.variant} size={props.size} class={class::SPLIT_BUTTON_MAIN}
@@ -1007,7 +1012,7 @@ pub fn SplitButton(props: &SplitButtonProps) -> Html {
             <Menu variant={props.variant} size={props.size}
                 opener_class={class::SPLIT_BUTTON_TOGGLE}
                 icon={html! { <Icon glyph={Glyph::ChevronDown} /> }}
-                label={props.menu_label.clone()} width={props.width}
+                label={label(&phrases, &props.menu_label, "plinth-split-button-menu")} width={props.width}
                 disabled={props.disabled || props.busy}
                 testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-menu")))}>
                 { props.children.clone() }
