@@ -2,7 +2,9 @@
 // styles: hooks for an app's own rules (`.plinth-page-head.plinth-crumb`,
 // `.plinth-page-head-back`, `.plinth-iconed.plinth-trailing`, an image's
 // `.plinth-loading` and `.plinth-empty`, `.plinth-ratio` for one of its own
-// ratio). plinth-build makes a constant of each; they add no CSS.
+// ratio, a stepper's `.plinth-zero` unless its settings style it), and
+// `#plinth-overlay`, the overlay layer's id. plinth-build makes a constant
+// of each; they add no CSS.
 
 $classes: (
     "plinth-crumb",
@@ -10,5 +12,7 @@ $classes: (
     "plinth-trailing",
     "plinth-loading",
     "plinth-empty",
-    "plinth-ratio"
+    "plinth-ratio",
+    "plinth-overlay",
+    "plinth-zero"
 );

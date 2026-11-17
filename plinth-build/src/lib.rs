@@ -12,6 +12,8 @@ use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
+#[cfg(test)]
+mod features;
 mod usage;
 pub use usage::{Report, Usage};
 
@@ -66,6 +68,46 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_utilities.scss",
 );
 
+/// plinth's Cargo features and the partials (`style/_<name>.scss`) each
+/// adds to the stylesheet. Partials no feature names (tokens, hooks, the
+/// utilities and what components share) are always in.
+pub const FEATURES: &[(&str, &[&str])] = &[
+    ("action-group", &["actions"]),
+    ("badge", &["badges"]),
+    ("button", &["buttons"]),
+    ("card-grid", &["card-grid"]),
+    ("color-select", &["color-select"]),
+    ("confirm", &["confirm"]),
+    ("disclosure", &["disclosure"]),
+    ("drop-zone", &["drop"]),
+    ("field", &["fields"]),
+    ("head", &["heads"]),
+    ("icons", &["icons"]),
+    ("input", &["inputs"]),
+    ("layout", &["layout"]),
+    ("library-toolbar", &[]),
+    ("loadable", &[]),
+    ("media", &["media"]),
+    ("menu", &["menu"]),
+    ("notice", &["notices"]),
+    ("overlay", &["popover", "dialog"]),
+    ("pager", &["pager"]),
+    ("panel", &["panel"]),
+    ("picker", &["picker", "filter-picker"]),
+    ("reorder", &["reorder"]),
+    ("rows", &["rows"]),
+    ("search-select", &["search-select"]),
+    ("seam", &["seam"]),
+    ("select", &["listbox", "select"]),
+    ("skeleton", &["skeleton"]),
+    ("stepper", &["stepper"]),
+    ("table", &["table"]),
+    ("tabs", &["tabs"]),
+    ("toast", &["toast"]),
+    ("toggles", &["toggles"]),
+    ("tooltip", &["tooltip"]),
+];
+
 /// Styles each hook class of `_hooks.scss`, so its class is found like any other.
 const HOOKS_PROBE: &str =
     "@use \"plinth/hooks\";\n@each $class in hooks.$classes { .#{$class} { --hook: 0; } }\n";
@@ -77,7 +119,10 @@ const ROOT: &str = "plinth";
 /// absolute ones: a project's files are always loaded by absolute path, so
 /// nothing on disk can stand in for plinth's sources.
 #[derive(Debug)]
-struct Sources;
+struct Sources {
+    /// Stands in for `_index.scss`: the index of a subset of features.
+    index: Option<String>,
+}
 
 impl Sources {
     /// A relative path without its `.` components.
@@ -87,9 +132,12 @@ impl Sources {
             .collect()
     }
 
-    fn embedded(path: &Path) -> Option<&'static str> {
+    fn embedded(&self, path: &Path) -> Option<&str> {
         let path = Self::relative(path);
         let name = path.strip_prefix(ROOT).ok()?.to_str()?;
+        if let (Some(index), "_index.scss") = (&self.index, name) {
+            return Some(index);
+        }
         SOURCES
             .iter()
             .find(|(file, _)| *file == name)
@@ -110,7 +158,7 @@ impl grass::Fs for Sources {
         if path.is_absolute() {
             path.is_file()
         } else {
-            Self::embedded(path).is_some()
+            self.embedded(path).is_some()
         }
     }
 
@@ -118,7 +166,7 @@ impl grass::Fs for Sources {
         if path.is_absolute() {
             return std::fs::read(path);
         }
-        Self::embedded(path)
+        self.embedded(path)
             .map(|source| source.as_bytes().to_vec())
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, path.display().to_string()))
     }
@@ -151,6 +199,8 @@ pub enum Error {
     NoIndex(PathBuf),
     /// plinth's CSS did not come out first and unchanged.
     NotVerbatim,
+    /// A name [`FEATURES`] does not list.
+    Feature(String),
 }
 
 impl fmt::Display for Error {
@@ -172,6 +222,7 @@ impl fmt::Display for Error {
                 write!(f, "{} has no _index.scss or index.scss", dir.display())
             }
             Error::NotVerbatim => write!(f, "plinth's CSS did not come first and unchanged"),
+            Error::Feature(name) => write!(f, "plinth has no feature `{name}`"),
         }
     }
 }
@@ -197,6 +248,7 @@ pub struct Config {
     local: Option<PathBuf>,
     prefix: Option<String>,
     with: Vec<(String, String)>,
+    features: Option<Vec<String>>,
 }
 
 /// A build's results.
@@ -244,6 +296,46 @@ impl Config {
         self
     }
 
+    /// Builds plinth's CSS from only these [`FEATURES`] (each with the
+    /// features it depends on already in), instead of all of them.
+    pub fn features<I>(mut self, features: I) -> Self
+    where
+        I: IntoIterator,
+        I::Item: Into<String>,
+    {
+        self.features = Some(features.into_iter().map(Into::into).collect());
+        self
+    }
+
+    /// `_index.scss` without the `@use` of each partial whose feature is off.
+    fn index(&self) -> Result<Option<String>, Error> {
+        let Some(enabled) = &self.features else {
+            return Ok(None);
+        };
+        if let Some(unknown) = enabled
+            .iter()
+            .find(|name| !FEATURES.iter().any(|(feature, _)| feature == name))
+        {
+            return Err(Error::Feature(unknown.clone()));
+        }
+        let off = |partial: &str| {
+            FEATURES.iter().any(|(feature, partials)| {
+                partials.contains(&partial) && !enabled.iter().any(|name| name == feature)
+            })
+        };
+        let (_, index) = SOURCES
+            .iter()
+            .find(|(name, _)| *name == "_index.scss")
+            .expect("_index.scss is embedded");
+        let lines = index.lines().filter(|line| {
+            let partial = line
+                .strip_prefix("@use \"")
+                .and_then(|rest| rest.strip_suffix("\";"));
+            !partial.is_some_and(off)
+        });
+        Ok(Some(lines.map(|line| format!("{line}\n")).collect()))
+    }
+
     fn plinth_use(&self) -> String {
         if self.with.is_empty() {
             return "@use \"plinth\";\n".to_owned();
@@ -257,7 +349,10 @@ impl Config {
     }
 
     pub fn build(&self) -> Result<Output, Error> {
-        let options = grass::Options::default().fs(&Sources).load_path("");
+        let sources = Sources {
+            index: self.index()?,
+        };
+        let options = grass::Options::default().fs(&sources).load_path("");
         let plinth_css = grass::from_string(self.plinth_use(), &options)?;
         let hooks = grass::from_string(HOOKS_PROBE, &options)?;
         let mut plinth_classes = class_names(&plinth_css);
@@ -577,7 +672,9 @@ mod tests {
     }
 
     fn compile_probe(probe: &str) -> Result<String, Box<grass::Error>> {
-        let options = grass::Options::default().fs(&Sources).load_path("");
+        let options = grass::Options::default()
+            .fs(&Sources { index: None })
+            .load_path("");
         grass::from_string(format!("@use \"plinth\" as p;\n{probe}"), &options)
     }
 

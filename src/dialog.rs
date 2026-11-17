@@ -186,7 +186,9 @@ fn outside(layer: &Element) -> Vec<Element> {
         }
         on_path = parent;
     }
-    out.retain(|e| !e.has_attribute("inert") && !has(e, class::TOAST_HOST));
+    out.retain(|e| !e.has_attribute("inert"));
+    #[cfg(feature = "toast")]
+    out.retain(|e| !has(e, class::TOAST_HOST));
     out
 }
 
