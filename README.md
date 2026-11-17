@@ -279,6 +279,7 @@ page can still override them at runtime.
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
 | `$glyph-size` | `1em` |
 | `$filter-width` | `10.5rem` |
+| `$avatar-sm`, `$avatar-md`, `$avatar-lg`, `$avatar-xl` | `1.75rem`, `2.5rem`, `3.5rem`, `7rem` |
 | `$page-workspace`, `$page-reading`, `$page-wide`, `$page-gutter` | `64rem`, `40rem`, `90rem`, `var(--space-8)` |
 | `$card-padding` | `var(--space-4)` |
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
@@ -343,6 +344,38 @@ is stretched to it. A swapped set, whatever its icons' own width and height,
 cannot change a control's size. Icons should draw in `currentColor`. The
 spinner's box turns (slower under `prefers-reduced-motion`); the set's
 spinner need not animate itself.
+
+## Image and Avatar
+
+`Image` is a picture in a box whose ratio is fixed before it loads, so the
+page does not shift as pictures arrive. Props:
+
+- `ratio` (required; there is no default, so no image lacks a box):
+  `Ratio::Poster` (2/3), `Screenshot` (16/9), `Banner` (21/4), `Square`, or
+  `Explicit(width, height)`, which also sets the `<img>`'s `width` and
+  `height` attributes.
+- `src` (`Option`), `alt`, `lazy` (default on: `loading="lazy"`), `class`,
+  `onload`, `onerror` and `testid`.
+
+Its modifiers are the ratio's classes (`POSTER`, `SCREENSHOT`, `BANNER`,
+`SQUARE`, `RATIO`) and its status's: `LOADING`, `ERROR`, `EMPTY` (no `src`) and
+`LOADED`. The status follows the `<img>`'s `load` and `error` events and starts
+over when `src` changes.
+
+Size guarantees: the box is `aspect-ratio` at the width it is given (the
+container's, unless `class` sets one), and the picture is laid over it with
+`object-fit: cover`, so the loading, error and empty placeholders (a glyph
+from the icon set, centred) and the loaded picture all fill the same box.
+A picture of another shape is cropped, never stretched; the box never
+resizes.
+
+`Avatar` is a round portrait of a fixed size: `name` (its initials, the first
+letters of its first and last word, show behind the picture and are its
+accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
+`Large`, `Huge`: the `--avatar-sm`, `-md`, `-lg` and `-xl` tokens), `lazy`,
+`class` and `testid`. The box is `--avatar-*` square whether the picture is
+loading, failed, missing or loaded. `initials(name)` is the same function for
+a place of your own.
 
 ## Against jitter: mixins and utilities
 

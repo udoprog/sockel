@@ -1,6 +1,14 @@
 // Classes plinth's markup sets, or asks an app to set, that no plinth rule
 // styles: hooks for an app's own rules (`.plinth-page-head.plinth-crumb`,
-// `.plinth-page-head-back`, `.plinth-iconed.plinth-trailing`). plinth-build makes a constant of
-// each; they add no CSS.
+// `.plinth-page-head-back`, `.plinth-iconed.plinth-trailing`, an image's
+// `.plinth-loading` and `.plinth-empty`, `.plinth-ratio` for one of its own
+// ratio). plinth-build makes a constant of each; they add no CSS.
 
-$classes: ("plinth-crumb", "plinth-page-head-back", "plinth-trailing");
+$classes: (
+    "plinth-crumb",
+    "plinth-page-head-back",
+    "plinth-trailing",
+    "plinth-loading",
+    "plinth-empty",
+    "plinth-ratio"
+);

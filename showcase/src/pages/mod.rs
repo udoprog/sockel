@@ -4,6 +4,7 @@ mod heads;
 mod icons;
 mod layout;
 mod library;
+mod media;
 mod styles;
 
 use yew::prelude::*;
@@ -113,6 +114,40 @@ pub const PAGES: &[Page] = &[
                 plinth::class::ICONED,
                 Size::Height,
                 Across::Only(&["Icon set", "glyph", "disabled", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "image",
+        title: "Image",
+        about: "A picture in a box of a fixed ratio: its placeholder while it loads, when it fails and when there is none is drawn in the same box. Switch the source and the ratio.",
+        covers: &["Image", "ImageProps", "Ratio", "Status", "image"],
+        render: || html! { <media::ImagePage /> },
+        holds: &[
+            hold(
+                plinth::class::IMAGE,
+                Size::Width,
+                Across::Except(&["Width"]),
+            ),
+            hold(
+                plinth::class::IMAGE,
+                Size::Box,
+                Across::Only(&["Source", "alt", "lazy", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "avatar",
+        title: "Avatar",
+        about: "A round portrait of a fixed size, its initials behind the picture: loading, loaded, failed or missing, it is the same box.",
+        covers: &["Avatar", "AvatarProps", "AvatarSize", "avatar", "initials"],
+        render: || html! { <media::AvatarPage /> },
+        holds: &[
+            hold(plinth::class::AVATAR, Size::Both, Across::Except(&["Size"])),
+            hold(
+                plinth::class::AVATAR,
+                Size::Box,
+                Across::Only(&["Source", "Name", "focus", "click"]),
             ),
         ],
     },

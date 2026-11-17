@@ -96,3 +96,22 @@ fn icon_keeps_a_passed_class() {
         &format!("{MINE} {}", class::GLYPH),
     );
 }
+
+#[test]
+fn media_keeps_a_passed_class() {
+    let mine = || classes!(MINE);
+    keeps(
+        render::<Image>(yew::props!(ImageProps {
+            ratio: Ratio::Poster,
+            class: mine()
+        })),
+        &format!("{MINE} {} {} {}", class::IMAGE, class::POSTER, class::EMPTY),
+    );
+    keeps(
+        render::<Avatar>(yew::props!(AvatarProps {
+            name: "Ada Lovelace",
+            class: mine()
+        })),
+        &format!("{MINE} {}", class::AVATAR),
+    );
+}

@@ -1,0 +1,102 @@
+// Image and Avatar (src/image.rs): pictures in boxes fixed before they load.
+//
+// - `.plinth-image`: a box of one ratio and the width it is given, its
+//   picture (`.plinth-picture`) laid over a placeholder that shows while it
+//   loads (`.plinth-loading`), fails (`.plinth-error`) or is missing
+//   (`.plinth-empty`). The ratio is `.plinth-poster` (2/3),
+//   `.plinth-screenshot` (16/9), `.plinth-banner` (21/4), `.plinth-square`,
+//   or `.plinth-ratio` with `--ratio` set. None of the states changes the box.
+// - `.plinth-avatar`: a round portrait of one fixed size, its initials
+//   behind the picture; `-small`, `-large` and `-huge` set the other sizes.
+
+.plinth-picture {
+    position: absolute;
+    inset: 0;
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    opacity: 0;
+
+    &.plinth-loaded {
+        opacity: 1;
+    }
+}
+
+.plinth-image {
+    --ratio: 1 / 1;
+    position: relative;
+    display: block;
+    box-sizing: border-box;
+    width: 100%;
+    max-width: 100%;
+    aspect-ratio: var(--ratio);
+    overflow: hidden;
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    color: var(--muted);
+
+    &.plinth-poster {
+        --ratio: 2 / 3;
+    }
+
+    &.plinth-screenshot {
+        --ratio: 16 / 9;
+    }
+
+    &.plinth-banner {
+        --ratio: 21 / 4;
+    }
+
+    &.plinth-square {
+        --ratio: 1 / 1;
+    }
+
+    &.plinth-error {
+        color: var(--danger);
+    }
+}
+
+.plinth-placeholder {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--text-xl);
+}
+
+.plinth-avatar {
+    --size: var(--avatar-md);
+    position: relative;
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    box-sizing: border-box;
+    width: var(--size);
+    height: var(--size);
+    overflow: hidden;
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--muted);
+    font-size: calc(var(--size) * 0.4);
+    font-weight: 600;
+    line-height: 1;
+    vertical-align: middle;
+    user-select: none;
+
+    &.plinth-avatar-small {
+        --size: var(--avatar-sm);
+    }
+
+    &.plinth-avatar-large {
+        --size: var(--avatar-lg);
+    }
+
+    &.plinth-avatar-huge {
+        --size: var(--avatar-xl);
+    }
+}
+
+.plinth-avatar-initials {
+    white-space: nowrap;
+}

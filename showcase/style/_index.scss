@@ -184,6 +184,15 @@ body {
     }
 }
 
+// The widths an image is shown at: its box is fixed by the width it is given.
+.showcase-width-small {
+    width: 6rem;
+}
+
+.showcase-width-medium {
+    width: 12rem;
+}
+
 // A layout's own bounds, outlined.
 .showcase-outlined {
     outline: 1px dotted var(--accent);

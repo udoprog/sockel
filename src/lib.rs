@@ -23,6 +23,9 @@
 //!   the app supplies.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
 //!   the set an app provides or a built-in one, in a fixed box.
+//! - [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
+//!   placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
+//!   initials behind it.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -53,6 +56,7 @@ mod action_group;
 mod head;
 mod icon_button;
 mod icons;
+mod image;
 mod layout;
 mod library_toolbar;
 mod styles;
@@ -61,6 +65,9 @@ pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
+pub use image::{
+    Avatar, AvatarProps, AvatarSize, Image, ImageProps, Ratio, Status, avatar, image, initials,
+};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,

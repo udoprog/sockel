@@ -9,6 +9,7 @@
 // - `--control-height` and `--control-height-small`: every field, button
 //   and picker button is one of the two, so a row of them never jumps.
 // - `--glyph-size`: the box of one of plinth's own icons, whatever icon fills it.
+// - `--avatar-sm`, `-md`, `-lg`, `-xl`: an avatar's fixed sizes.
 // - `--filter-width`: a list's filter button, one width whatever it says.
 // - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
 // - `--page-workspace` and `--page-reading`: the two content columns;
@@ -110,6 +111,10 @@ $mark-height: 1.5rem !default;
 $touch-height: 2.75rem !default;
 $glyph-size: 1em !default;
 $filter-width: 10.5rem !default;
+$avatar-sm: 1.75rem !default;
+$avatar-md: 2.5rem !default;
+$avatar-lg: 3.5rem !default;
+$avatar-xl: 7rem !default;
 $page-workspace: 64rem !default;
 $page-reading: 40rem !default;
 $page-wide: 90rem !default;
@@ -176,6 +181,11 @@ $visibility-breakpoint: "phone" !default;
     --glyph-size: #{$glyph-size};
     // A library page's filter button (`.picker.filter`).
     --filter-width: #{$filter-width};
+    // An avatar's sizes (`.plinth-avatar`, its `-small`, `-large`, `-huge`).
+    --avatar-sm: #{$avatar-sm};
+    --avatar-md: #{$avatar-md};
+    --avatar-lg: #{$avatar-lg};
+    --avatar-xl: #{$avatar-xl};
 
     // The two content columns: the
     // workspace for lists, sheets and the manual, the reading column for
