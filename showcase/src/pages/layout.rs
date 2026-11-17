@@ -9,6 +9,7 @@ use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, button, samples}
 
 const GAPS: &[(&str, Gap)] = &[
     ("Normal", Gap::Normal),
+    ("None", Gap::None),
     ("Hair", Gap::Hair),
     ("Snug", Gap::Snug),
     ("Tight", Gap::Tight),
@@ -46,6 +47,8 @@ pub fn StackPage() -> Html {
     let tag = use_state(|| "div");
     let count = use_state(|| 3);
     let text = use_state(|| Text::Short);
+    let flush = use_state(|| false);
+    let paragraphs = use_state(|| false);
 
     let controls = html! {
         <>
@@ -53,12 +56,16 @@ pub fn StackPage() -> Html {
             <Select<&'static str> label="tag" options={TAGS} value={*tag} on_change={bind(&tag)} />
             <Select<usize> label="Items" options={COUNTS} value={*count} on_change={bind(&count)} />
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
+            <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
+            <Toggle label="Items are paragraphs" value={*paragraphs} on_change={bind(&paragraphs)} />
         </>
     };
 
     html! {
         <Demo {controls}>
-            <Stack gap={*gap} tag={*tag} class="outlined">{ samples(*count, *text, false) }</Stack>
+            <Stack gap={*gap} tag={*tag} flush={*flush} class="outlined">
+                { samples(*count, *text, false, *paragraphs) }
+            </Stack>
         </Demo>
     }
 }
@@ -71,6 +78,9 @@ pub fn ClusterPage() -> Html {
     let nowrap = use_state(|| false);
     let inline = use_state(|| false);
     let mixed = use_state(|| true);
+    let lines = use_state(|| false);
+    let flush = use_state(|| false);
+    let paragraphs = use_state(|| false);
     let count = use_state(|| 3);
     let text = use_state(|| Text::Short);
 
@@ -83,15 +93,18 @@ pub fn ClusterPage() -> Html {
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="nowrap" value={*nowrap} on_change={bind(&nowrap)} />
             <Toggle label="inline" value={*inline} on_change={bind(&inline)} />
+            <Toggle label="lines" value={*lines} on_change={bind(&lines)} />
+            <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
             <Toggle label="Mixed heights" value={*mixed} on_change={bind(&mixed)} />
+            <Toggle label="Items are paragraphs" value={*paragraphs} on_change={bind(&paragraphs)} />
         </>
     };
 
     html! {
         <Demo {controls}>
             <Cluster gap={*gap} justify={*justify} align={*align} nowrap={*nowrap} inline={*inline}
-                class="outlined">
-                { samples(*count, *text, *mixed) }
+                lines={*lines} flush={*flush} class="outlined">
+                { samples(*count, *text, *mixed, *paragraphs) }
             </Cluster>
         </Demo>
     }
@@ -150,7 +163,7 @@ pub fn CardPage() -> Html {
     };
 
     let content = if *list {
-        html! { <Stack gap={Gap::Hair}>{ samples(4, *text, false) }</Stack> }
+        html! { <Stack gap={Gap::Hair}>{ samples(4, *text, false, false) }</Stack> }
     } else {
         html! { <p class="prose">{ text.of("A card's content") }</p> }
     };
@@ -198,9 +211,9 @@ pub fn ClassesPage() -> Html {
         <Demo {controls}>
             <Stack gap={Gap::Loose}>
                 { shown("stack(gap)", &stack) }
-                <ul class={classes!(stack, "plain-list", "outlined")}>{ samples(3, Text::Short, false) }</ul>
+                <ul class={classes!(stack, "plain-list", "outlined")}>{ samples(3, Text::Short, false, false) }</ul>
                 { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
-                <ul class={classes!(cluster, "plain-list", "outlined")}>{ samples(3, Text::Short, true) }</ul>
+                <ul class={classes!(cluster, "plain-list", "outlined")}>{ samples(3, Text::Short, true, false) }</ul>
                 { shown("toolbar(boxed)", &toolbar) }
                 <nav class={toolbar} aria-label="Toolbar classes">
                     { button("One".into(), false, false) }

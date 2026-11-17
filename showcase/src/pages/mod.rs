@@ -1,3 +1,4 @@
+mod actions;
 mod heads;
 mod layout;
 mod library;
@@ -34,6 +35,20 @@ pub const PAGES: &[Page] = &[
         about: "A row that wraps, its items centred.",
         covers: &["Cluster", "ClusterProps", "Justify", "Align"],
         render: || html! { <layout::ClusterPage /> },
+    },
+    Page {
+        id: "action-group",
+        title: "ActionGroup",
+        about: "The buttons that end a form, a panel or a section, the primary first.",
+        covers: &["ActionGroup", "ActionGroupProps", "action_group"],
+        render: || html! { <actions::ActionGroupPage /> },
+    },
+    Page {
+        id: "icon-button",
+        title: "IconButton",
+        about: "A button that leads with (or ends in) an icon the app supplies. Click it; tab to it.",
+        covers: &["IconButton", "IconButtonProps", "icon_button"],
+        render: || html! { <actions::IconButtonPage /> },
     },
     Page {
         id: "toolbar",

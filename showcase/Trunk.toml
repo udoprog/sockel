@@ -4,3 +4,6 @@ dist = "dist"
 
 [tools]
 sass = "1.104.1"
+
+[watch]
+watch = [".", "../src", "../style"]

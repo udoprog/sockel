@@ -122,7 +122,7 @@ frame (drag its corner to widen it) beside a wide one. Run it with
 
 ```sh
 cd showcase
-trunk serve --port 8150 --open
+trunk serve --port 8095 --open
 ```
 
 Pick a free port. A new component lands with its showcase page: add it to

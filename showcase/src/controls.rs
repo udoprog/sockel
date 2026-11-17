@@ -133,15 +133,18 @@ pub fn Demo(props: &DemoProps) -> Html {
     }
 }
 
-/// `count` placeholder items, every other one taller when `mixed`.
-pub fn samples(count: usize, text: Text, mixed: bool) -> Html {
+/// `count` placeholder items, every other one taller when `mixed`; as
+/// paragraphs, they keep their default margins.
+pub fn samples(count: usize, text: Text, mixed: bool, paragraphs: bool) -> Html {
+    let tag = if paragraphs { "p" } else { "div" };
+
     (1..=count)
         .map(|n| {
             let tall = mixed && n % 2 == 0;
             html! {
-                <div class={classes!("sample", tall.then_some("tall"))}>
+                <@{tag} class={classes!("sample", tall.then_some("tall"))}>
                     { text.of(&format!("Item {n}")) }
-                </div>
+                </@>
             }
         })
         .collect()
