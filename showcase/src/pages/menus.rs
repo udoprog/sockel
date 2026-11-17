@@ -65,7 +65,9 @@ fn SampleItems(props: &ItemsProps) -> Html {
     let label = props.text.of("Duplicate");
 
     match props.items {
-        Items::Empty => html! { <MenuNote>{ "Nothing to do here." }</MenuNote> },
+        Items::Empty => {
+            html! { <MenuNote testid="menu-empty">{ "Nothing to do here." }</MenuNote> }
+        }
         Items::Actions => html! {
             <>
                 <MenuHeading>{ "Edit" }</MenuHeading>
@@ -76,6 +78,10 @@ fn SampleItems(props: &ItemsProps) -> Html {
                 <MenuItem disabled={props.disabled} onclick={pick("move")}>{ "Move to…" }</MenuItem>
                 <MenuItem onclick={pick("copy")}>{ "Copy link" }</MenuItem>
                 <MenuItem href="#menu" current=true detail="A link row, the page shown">{ "Open this page" }</MenuItem>
+                <MenuItem href="https://example.org/" new_tab=true detail="A link row in a new tab"
+                    detail_html={html! { <>{ " · " }<em>{ "example.org" }</em></> }}>
+                    { "Look it up" }
+                </MenuItem>
                 <MenuSeparator />
                 <MenuItem danger=true onclick={pick("delete")}>{ "Delete" }</MenuItem>
             </>
@@ -95,7 +101,8 @@ fn SampleItems(props: &ItemsProps) -> Html {
             };
             html! {
                 <>
-                    <MenuCheck checked={*wrap} on_change={toggle} disabled={props.disabled}>
+                    <MenuCheck checked={*wrap} on_change={toggle} disabled={props.disabled}
+                        icon={html! { <Icon glyph={Glyph::Search} /> }}>
                         { "Wrap lines" }
                     </MenuCheck>
                     <MenuSeparator />

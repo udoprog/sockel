@@ -472,12 +472,20 @@ pub struct MenuItemProps {
     /// A second line under the label (an option's detail).
     #[prop_or_default]
     pub detail: Option<AttrValue>,
+    /// Markup in the second line, after [`MenuItemProps::detail`]: a mark
+    /// or chips the app renders.
+    #[prop_or_default]
+    pub detail_html: Option<Html>,
     /// A note at the row's end, such as its shortcut.
     #[prop_or_default]
     pub hint: Option<AttrValue>,
     /// A link row (`<a>`): picking it follows the link and closes the menu.
     #[prop_or_default]
     pub href: Option<AttrValue>,
+    /// A link row opening in a new tab (`target="_blank"`,
+    /// `rel="noopener noreferrer"`): another site's page.
+    #[prop_or_default]
+    pub new_tab: bool,
     /// The page shown (`aria-current="page"`), marked, in a menu of links.
     #[prop_or_default]
     pub current: bool,
@@ -524,8 +532,13 @@ impl Row<'_> {
         let icon = p.icon.clone().map(|icon| {
             html! { <span class={class::MENU_ITEM_ICON} aria-hidden="true">{ icon }</span> }
         });
-        let detail = p.detail.clone().map(|detail| {
-            html! { <span class={class::MENU_ITEM_DETAIL}>{ detail }</span> }
+        let detail = (p.detail.is_some() || p.detail_html.is_some()).then(|| {
+            html! {
+                <span class={class::MENU_ITEM_DETAIL}>
+                    { for p.detail.clone() }
+                    { for p.detail_html.clone() }
+                </span>
+            }
         });
         let hint = p.hint.clone().map(|hint| {
             html! { <span class={class::MENU_ITEM_HINT}>{ hint }</span> }
@@ -556,6 +569,8 @@ impl Row<'_> {
             Some(href) => html! {
                 <a role={self.role} tabindex="-1" {class}
                     href={(!p.disabled).then(|| href.clone())}
+                    target={p.new_tab.then_some("_blank")}
+                    rel={p.new_tab.then_some("noopener noreferrer")}
                     aria-disabled={disabled} aria-current={current}
                     data-testid={p.testid.clone()} {onclick}>
                     { content }
@@ -590,6 +605,9 @@ pub struct MenuCheckProps {
     pub checked: bool,
     /// Told the new state; the menu stays open.
     pub on_change: Callback<bool>,
+    /// Its icon, in the box after its mark.
+    #[prop_or_default]
+    pub icon: Option<Html>,
     #[prop_or_default]
     pub detail: Option<AttrValue>,
     #[prop_or_default]
@@ -605,6 +623,7 @@ pub struct MenuCheckProps {
 }
 
 fn item_props(
+    icon: &Option<Html>,
     detail: &Option<AttrValue>,
     hint: &Option<AttrValue>,
     disabled: bool,
@@ -613,10 +632,12 @@ fn item_props(
     children: &Html,
 ) -> MenuItemProps {
     MenuItemProps {
-        icon: None,
+        icon: icon.clone(),
         detail: detail.clone(),
+        detail_html: None,
         hint: hint.clone(),
         href: None,
+        new_tab: false,
         current: false,
         danger: false,
         disabled,
@@ -632,6 +653,7 @@ fn item_props(
 #[function_component]
 pub fn MenuCheck(props: &MenuCheckProps) -> Html {
     let item = item_props(
+        &props.icon,
         &props.detail,
         &props.hint,
         props.disabled,
@@ -654,6 +676,9 @@ pub struct MenuRadioProps {
     pub checked: bool,
     /// Picked; the menu closes.
     pub on_pick: Callback<()>,
+    /// Its icon, in the box after its mark.
+    #[prop_or_default]
+    pub icon: Option<Html>,
     #[prop_or_default]
     pub detail: Option<AttrValue>,
     #[prop_or_default]
@@ -673,6 +698,7 @@ pub struct MenuRadioProps {
 #[function_component]
 pub fn MenuRadio(props: &MenuRadioProps) -> Html {
     let item = item_props(
+        &props.icon,
         &props.detail,
         &props.hint,
         props.disabled,
@@ -694,20 +720,24 @@ pub struct MenuPartProps {
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    #[prop_or_default]
     pub children: Html,
 }
 
 /// A rule between groups of items.
 #[function_component]
 pub fn MenuSeparator(props: &MenuPartProps) -> Html {
-    html! { <div role="separator" class={classes!(class::MENU_SEPARATOR, props.class.clone())}></div> }
+    html! { <div role="separator" class={classes!(class::MENU_SEPARATOR, props.class.clone())}
+    data-testid={props.testid.clone()}></div> }
 }
 
 /// A group's heading, on one line.
 #[function_component]
 pub fn MenuHeading(props: &MenuPartProps) -> Html {
     html! {
-        <div role="presentation" class={classes!(class::MENU_HEADING, props.class.clone())}>
+        <div role="presentation" class={classes!(class::MENU_HEADING, props.class.clone())}
+            data-testid={props.testid.clone()}>
             { props.children.clone() }
         </div>
     }
@@ -717,7 +747,8 @@ pub fn MenuHeading(props: &MenuPartProps) -> Html {
 #[function_component]
 pub fn MenuNote(props: &MenuPartProps) -> Html {
     html! {
-        <p role="presentation" class={classes!(class::MENU_NOTE, props.class.clone())}>
+        <p role="presentation" class={classes!(class::MENU_NOTE, props.class.clone())}
+            data-testid={props.testid.clone()}>
             { props.children.clone() }
         </p>
     }
@@ -1161,6 +1192,38 @@ mod tests {
         }));
         assert!(!html.contains("href"), "{html}");
         assert!(html.contains("aria-disabled=\"true\""), "{html}");
+    }
+
+    #[test]
+    fn a_new_tab_link_row_opens_apart_and_its_detail_takes_markup() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("https://example.org/")),
+            new_tab: true,
+            detail: Some(AttrValue::Static("Lookup")),
+            detail_html: Some(html! { <em>{ "chips" }</em> }),
+        }));
+        assert!(html.contains("target=\"_blank\""), "{html}");
+        assert!(html.contains("rel=\"noopener noreferrer\""), "{html}");
+        assert!(html.contains("Lookup<em>chips</em>"), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/help")),
+        }));
+        assert!(!html.contains("target"), "{html}");
+        assert!(!html.contains(class::MENU_ITEM_DETAIL), "{html}");
+    }
+
+    #[test]
+    fn a_choice_takes_an_icon_and_a_note_a_testid() {
+        let html = render::<MenuRadio>(yew::props!(MenuRadioProps {
+            checked: false,
+            on_pick: Callback::noop(),
+            icon: Some(html! { <svg /> }),
+        }));
+        assert!(html.contains(class::MENU_ITEM_ICON), "{html}");
+        let html = render::<MenuNote>(yew::props!(MenuPartProps {
+            testid: Some(AttrValue::Static("none")),
+        }));
+        assert!(html.contains("data-testid=\"none\""), "{html}");
     }
 
     #[test]

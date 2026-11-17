@@ -125,8 +125,8 @@ $button-press-shade: null !default;
 $button-transition: null !default;
 // A button's colours per variant, over plinth's: a map from `secondary`,
 // `primary`, `ghost`, `quiet`, `danger` or `success` to any of `fill`,
-// `ink`, `edge`, `hover-edge`, `hover-fill`, `pressed-fill`, `pressed-ink`
-// and `pressed-edge`. A variant falls back on the plain button's.
+// `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`,
+// `pressed-ink` and `pressed-edge`. A variant falls back on the plain button's.
 $button-colours: () !default;
 // A button's type size (`null`: its parent's) and a small one's, the gap
 // between its icon and label, a leading icon's inline-start margin beside a
@@ -714,7 +714,7 @@ $sheet-breakpoint: "phone" !default;
 
     @if map.has-key($button-colours, $variant) {
         @each $part, $colour in map.get($button-colours, $variant) {
-            @if not list.index(fill ink edge hover-edge hover-fill pressed-fill pressed-ink pressed-edge, $part) {
+            @if not list.index(fill ink edge hover-edge hover-fill hover-ink pressed-fill pressed-ink pressed-edge, $part) {
                 @error "$button-colours: #{$part} is not a button colour";
             }
             --button-#{$part}: #{$colour};
@@ -766,6 +766,7 @@ $sheet-breakpoint: "phone" !default;
 
     &:where(:hover:not(:disabled, [aria-disabled="true"], [aria-pressed="true"])) {
         background: var(--button-hover-fill, var(--button-fill));
+        color: var(--button-hover-ink, var(--button-ink));
     }
 
     @if $button-press-shade {

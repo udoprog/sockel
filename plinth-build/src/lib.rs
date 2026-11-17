@@ -822,7 +822,7 @@ mod tests {
             .with("button-press-shade", "rgba(0, 0, 0, 0.2)")
             .with(
                 "button-colours",
-                "(secondary: (fill: var(--raised), hover-fill: var(--raised-high)), danger: (edge: var(--border)))",
+                "(secondary: (fill: var(--raised), hover-fill: var(--raised-high), hover-ink: var(--text-high)), danger: (edge: var(--border)))",
             )
             .build()
             .unwrap();
@@ -833,6 +833,7 @@ mod tests {
             "transition: background-color 80ms ease",
             "--button-fill: var(--raised)",
             "--button-hover-fill: var(--raised-high)",
+            "--button-hover-ink: var(--text-high)",
         ] {
             assert!(base.contains(&line.to_owned()), "{line} in {base:?}");
         }
