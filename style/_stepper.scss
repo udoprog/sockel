@@ -11,6 +11,9 @@
 //   `.plinth-zero` while the value is 0. `$stepper-number-weight`, and
 //   `$stepper-zero-ink` and `$stepper-zero-weight` at zero, restyle it
 //   (`null`: as the field's text).
+// - `.plinth-touch`: `$stepper-touch-number-size`, `-number-weight` and
+//   `$stepper-touch-glyph-size` enlarge the number and the glyphs (`null`:
+//   as the other sizes').
 // - `.plinth-stepper-button`: a square of the box's height.
 
 @use "tokens" as base;
@@ -36,6 +39,19 @@
     &.plinth-zero {
         color: base.$stepper-zero-ink;
         font-weight: base.$stepper-zero-weight;
+    }
+}
+
+.plinth-stepper.plinth-touch {
+    .plinth-stepper-control {
+        font-size: base.$stepper-touch-number-size;
+        font-weight: base.$stepper-touch-number-weight;
+    }
+
+    @if base.$stepper-touch-glyph-size {
+        .plinth-stepper-button {
+            --glyph-size: #{base.$stepper-touch-glyph-size};
+        }
     }
 }
 

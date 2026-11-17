@@ -692,7 +692,9 @@ and `max` in `ch` with `numeric` figures, so its box is the same from the
 least value to the most, the buttons only disabled at a bound; the number wears `.plinth-zero`
 (`ZERO`) at 0, and the settings `$stepper-number-weight`,
 `$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
-text) restyle the number and the zero; the
+text) restyle the number and the zero, and `$stepper-touch-number-size`,
+`$stepper-touch-number-weight` and `$stepper-touch-glyph-size` (`null`: as the
+other sizes') the touch size's number and glyphs; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
 `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs

@@ -184,6 +184,11 @@ $select-sheet-row-height: null !default;
 $stepper-number-weight: null !default;
 $stepper-zero-ink: null !default;
 $stepper-zero-weight: null !default;
+// The touch size's number (size and weight) and button glyphs (`null`: as
+// the other sizes'), for steppers used at arm's length.
+$stepper-touch-number-size: null !default;
+$stepper-touch-number-weight: null !default;
+$stepper-touch-glyph-size: null !default;
 $listbox-group-name-transform: null !default;
 $listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;
