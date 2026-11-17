@@ -189,6 +189,12 @@ $stepper-zero-weight: null !default;
 $stepper-touch-number-size: null !default;
 $stepper-touch-number-weight: null !default;
 $stepper-touch-glyph-size: null !default;
+// A Stepper's box: its edge, ground and shadow (`null`: the field's edge
+// and ground, no shadow), for a stepper that reads as a raised control
+// rather than a text field.
+$stepper-edge: null !default;
+$stepper-ground: null !default;
+$stepper-shadow: null !default;
 $listbox-group-name-transform: null !default;
 $listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;

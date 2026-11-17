@@ -14,6 +14,9 @@
 // - `.plinth-touch`: `$stepper-touch-number-size`, `-number-weight` and
 //   `$stepper-touch-glyph-size` enlarge the number and the glyphs (`null`:
 //   as the other sizes').
+// - `$stepper-edge`, `$stepper-ground` and `$stepper-shadow` restyle the
+//   box at rest (`null`: the field's edge and ground, no shadow); hover,
+//   invalid and focus still mark it as on any field.
 // - `.plinth-stepper-button`: a square of the box's height.
 
 @use "tokens" as base;
@@ -24,6 +27,12 @@
     width: auto;
     max-width: 100%;
     padding-inline: 0;
+    background: base.$stepper-ground;
+    box-shadow: base.$stepper-shadow;
+
+    @if base.$stepper-edge {
+        --input-edge: #{base.$stepper-edge};
+    }
 }
 
 .plinth-stepper-control {

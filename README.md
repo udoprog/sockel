@@ -694,7 +694,10 @@ least value to the most, the buttons only disabled at a bound; the number wears 
 `$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
 text) restyle the number and the zero, and `$stepper-touch-number-size`,
 `$stepper-touch-number-weight` and `$stepper-touch-glyph-size` (`null`: as the
-other sizes') the touch size's number and glyphs; the
+other sizes') the touch size's number and glyphs, and `$stepper-edge`,
+`$stepper-ground` and `$stepper-shadow` (`null`: the field's edge and
+ground, no shadow) the box at rest, for a stepper that reads as a raised
+control; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
 `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs
