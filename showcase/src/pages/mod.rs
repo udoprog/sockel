@@ -1396,8 +1396,8 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "overlays",
         title: "Overlays",
-        about: "Overlays nested in one another, with and without an OverlayHost. Open a dialog, then a menu or a toast from it (the toast's Undo still works), or a popover with a tooltip on its button: Escape and a press outside close the innermost first and focus goes back. Turn the host off to see the fallback at the end of <body>; set the frame's colours to see a host inside it take them and the fallback not.",
-        covers: &["OverlayHost", "use_overlays"],
+        about: "Overlays nested in one another, with and without an OverlayHost. Open a dialog, then a menu or a toast from it (the toast's Undo still works), a panel of the app's own (use_overlay) with a menu in it, or a popover with a tooltip on its button: Escape and a press outside close the innermost first and focus goes back. Turn the host off to see the fallback at the end of <body>; set the frame's colours to see a host inside it take them and the fallback not.",
+        covers: &["OverlayHost", "use_overlays", "use_overlay"],
         render: || html! { <overlays::OverlaysPage /> },
         holds: &[
             hold(plinth::class::BUTTON, Size::Box, Across::All),

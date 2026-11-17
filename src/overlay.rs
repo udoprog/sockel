@@ -3,11 +3,13 @@
 
 use std::rc::Rc;
 
+use wasm_bindgen::JsCast;
 use web_sys::Element;
 use yew::prelude::*;
 
 use crate::class;
 use crate::layer::{Layer, ScrollLock, Stack};
+use crate::popover::Listener;
 
 /// The id of the fallback overlay layer, the last child of `<body>`.
 pub const OVERLAY_ID: &str = class::OVERLAY;
@@ -59,6 +61,13 @@ impl Overlays {
             Some(host) => create_portal(content, host),
             None => content,
         }
+    }
+
+    /// Whether anything but a tip is open on this stack: a popover, menu,
+    /// list or dialog, or an overlay of the app's own ([`use_overlay`]). An
+    /// app's own keyboard shortcuts can stand aside while one is.
+    pub fn any_open(&self) -> bool {
+        self.stack.borrow().any_open()
     }
 
     pub(crate) fn layer(&self) -> Layer {
@@ -114,6 +123,33 @@ pub fn overlay(content: Html) -> Html {
 #[hook]
 pub fn use_overlays() -> Overlays {
     use_context::<Overlays>().unwrap_or_else(Overlays::fallback)
+}
+
+/// Puts an overlay of the app's own (a full-screen panel, a drawer) on the
+/// stack while `open`, so the overlays opened over it close first: Escape
+/// calls `on_escape` only while nothing opened after it is open, and not
+/// when an element in it acted on the key itself (prevented its default).
+#[hook]
+pub fn use_overlay(open: bool, on_escape: Callback<()>) {
+    let overlays = use_overlays();
+    let latest = use_mut_ref(Callback::noop);
+    *latest.borrow_mut() = on_escape;
+
+    use_effect_with(open, move |&open| {
+        let held = open
+            .then(|| web_sys::window().and_then(|w| w.document()))
+            .flatten()
+            .map(|document| {
+                let layer = overlays.layer();
+                Listener::new(document.into(), "keydown", false, move |e| {
+                    let e = e.unchecked_ref::<web_sys::KeyboardEvent>();
+                    if e.key() == "Escape" && !e.default_prevented() && layer.is_top() {
+                        latest.borrow().emit(());
+                    }
+                })
+            });
+        move || drop(held)
+    });
 }
 
 /// A provider's overlays: its own host, and the stack of the provider it

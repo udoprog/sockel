@@ -830,7 +830,14 @@ overlays render in place.
 
 For a component of your own, `use_overlays()` returns the nearest host's
 `Overlays` (or the fallback), and `.portal(html)` renders into it.
-`use_popover` already takes its place on the stack from it. The free
+`use_popover` already takes its place on the stack from it. An overlay the
+app draws itself (a full-screen panel, a drawer) joins the stack with
+`use_overlay(open, on_escape)`: while it is open, Escape calls `on_escape`
+only when nothing opened after it is still open, so a menu or dialog opened
+from it closes first, and not when an element in it acted on Escape itself
+(by preventing the key's default). `Overlays::any_open()` says whether
+anything but a tip is open, for an app's own keyboard shortcuts to stand
+aside meanwhile. The free
 `overlay(html)` always uses the fallback layer, since a plain function
 cannot see a context. Prefer `use_overlays().portal(html)` in components.
 

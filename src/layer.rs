@@ -23,6 +23,11 @@ impl Layers {
         self.open.retain(|&(o, _)| o != id);
     }
 
+    /// Whether anything but a tip is open.
+    pub(crate) fn any_open(&self) -> bool {
+        self.open.iter().any(|&(_, transient)| !transient)
+    }
+
     pub(crate) fn is_top(&self, id: u32) -> bool {
         match self.open.iter().find(|&&(o, _)| o == id) {
             Some(&(_, true)) => self.open.last().is_some_and(|&(o, _)| o == id),
@@ -125,6 +130,19 @@ mod tests {
         assert!(layers.is_top(confirm));
         layers.remove(confirm);
         assert!(!layers.is_top(confirm));
+    }
+
+    #[test]
+    fn any_open_counts_all_but_tips() {
+        let mut layers = Layers::default();
+        assert!(!layers.any_open());
+        let tip = layers.push(true);
+        assert!(!layers.any_open());
+        let panel = layers.push(false);
+        assert!(layers.any_open());
+        layers.remove(panel);
+        layers.remove(tip);
+        assert!(!layers.any_open());
     }
 
     #[test]

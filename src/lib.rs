@@ -96,7 +96,8 @@
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
 //!   page's or a section's title, its help and its actions.
 //! - [`OverlayHost`] (`.overlay-host`): the optional root of the overlay
-//!   layer, which [`use_overlays`] finds ([`overlay`] without one).
+//!   layer, which [`use_overlays`] finds ([`overlay`] without one);
+//!   [`use_overlay`] puts an app's own overlay on its stack.
 //! - [`Popover`] (`.popover`): a surface beside its anchor in the overlay
 //!   layer, placed before it shows ([`place`], [`use_popover`]),
 //!   dismissed by a press outside or Escape, a sheet on a phone.
@@ -271,7 +272,8 @@ pub use menu::{
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 pub use notice::{Notice, NoticeProps, notice};
 pub use overlay::{
-    OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlays,
+    OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlay,
+    use_overlays,
 };
 pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_button, pager_slots};
 pub use panel::{Panel, PanelGround, PanelProps, panel};
