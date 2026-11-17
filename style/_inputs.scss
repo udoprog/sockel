@@ -23,68 +23,13 @@
 
 @use "tokens" as base;
 
-@mixin box {
-    --input-height: var(--control-height);
-    --input-edge: var(--field-border);
-
-    box-sizing: border-box;
-    margin: 0;
-    @include base.reserved-border(var(--input-edge));
-    border-radius: var(--radius-inner, var(--radius-sm));
-    background: var(--field-bg);
-    color: var(--text);
-    font: inherit;
-
-    &:hover {
-        --input-edge: var(--accent);
-    }
-
-    &.plinth-small {
-        --input-height: var(--control-height-small);
-        font-size: var(--text-sm);
-    }
-
-    &.plinth-touch {
-        --input-height: var(--touch-height);
-    }
-
-    &.plinth-busy {
-        cursor: progress;
-    }
-}
 
 .plinth-input {
-    @include box;
-    flex: none;
-    width: 100%;
-    min-width: 0;
-    // A face that is a button keeps this height under an app's own
-    // `button { min-height }`.
-    min-height: 0;
-    height: var(--input-height);
-    padding-block: 0;
-    padding-inline: var(--space-2);
-    text-overflow: ellipsis;
-
-    &::placeholder {
-        color: var(--muted);
-        opacity: 1;
-    }
-
-    &[aria-invalid="true"] {
-        --input-edge: var(--danger);
-    }
-
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    @include base.focus-ring;
+    @include base.input;
 }
 
 .plinth-textarea {
-    @include box;
+    @include base.input-box;
     display: block;
     width: 100%;
     min-width: 0;
@@ -112,7 +57,7 @@
 }
 
 .plinth-input-box {
-    @include box;
+    @include base.input-box;
     display: flex;
     flex: none;
     align-items: center;

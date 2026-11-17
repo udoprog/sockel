@@ -689,3 +689,66 @@ $sheet-breakpoint: "phone" !default;
         cursor: not-allowed;
     }
 }
+
+// The box of a text field (`.plinth-input`, `.plinth-textarea`,
+// `.plinth-input-box`): its border, fill and the size modifiers.
+@mixin input-box {
+    --input-height: var(--control-height);
+    --input-edge: var(--field-border);
+
+    box-sizing: border-box;
+    margin: 0;
+    @include reserved-border(var(--input-edge));
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: var(--field-bg);
+    color: var(--text);
+    font: inherit;
+
+    &:hover {
+        --input-edge: var(--accent);
+    }
+
+    &.plinth-small {
+        --input-height: var(--control-height-small);
+        font-size: var(--text-sm);
+    }
+
+    &.plinth-touch {
+        --input-height: var(--touch-height);
+    }
+
+    &.plinth-busy {
+        cursor: progress;
+    }
+}
+
+// `.plinth-input`: a bare text input.
+@mixin input {
+    @include input-box;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    // A face that is a button keeps this height under an app's own
+    // `button { min-height }`.
+    min-height: 0;
+    height: var(--input-height);
+    padding-block: 0;
+    padding-inline: var(--space-2);
+    text-overflow: ellipsis;
+
+    &::placeholder {
+        color: var(--muted);
+        opacity: 1;
+    }
+
+    &[aria-invalid="true"] {
+        --input-edge: var(--danger);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include focus-ring;
+}

@@ -655,6 +655,7 @@ mod tests {
              .x-field { @include p.field; }\n\
              .x-label { @include p.field-label; }\n\
              .x-button { @include p.button; }\n\
+             .x-input { @include p.input; }\n\
              .x-primary { @include p.button(primary); }\n",
         )
         .unwrap();
@@ -666,6 +667,7 @@ mod tests {
             (".x-field", ".plinth-field"),
             (".x-label", ".plinth-field-label"),
             (".x-button", ".plinth-button"),
+            (".x-input", ".plinth-input"),
             (".x-button:hover", ".plinth-button:hover"),
             (
                 ".x-button:disabled, .x-button[aria-disabled=true]",

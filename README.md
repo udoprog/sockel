@@ -1600,6 +1600,7 @@ plinth's own: `.auth-card { @include p.card; }`.
 | `cluster($gap: var(--space-2), $wrap: true)` | `.plinth-cluster` (`$wrap: false` for `.plinth-nowrap`) |
 | `card` | `.plinth-card` |
 | `field`, `field-label` | `.plinth-field`, `.plinth-field-label` |
+| `input`, `input-box` | `.plinth-input`; `input-box` is the box every text field shares (border, fill, sizes) |
 | `button($variant: secondary)` | `.plinth-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
 | `table-base`, `table-head-cell`, `table-cell`, `table-row-hover` | a table's (see Table) |
 
