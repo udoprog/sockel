@@ -34,6 +34,12 @@ pub fn parse_number(text: &str) -> Option<i64> {
     text.trim().parse().ok()
 }
 
+/// The number a `live` stepper reports as `text` is typed: one within
+/// `min..=max` other than `value`; nothing when not `live`.
+fn live_value(live: bool, text: &str, value: i64, min: i64, max: i64) -> Option<i64> {
+    parse_number(text).filter(|n| live && *n != value && (min..=max).contains(n))
+}
+
 /// The value a key moves a stepper to, if it is one of its keys: the arrows
 /// step, Page Up and Down ten steps, Home and End go to the bounds.
 pub fn key_value(key: &str, value: i64, step: i64, min: i64, max: i64) -> Option<i64> {
@@ -74,6 +80,10 @@ pub struct StepperProps {
     pub disabled: bool,
     #[prop_or_default]
     pub busy: bool,
+    /// Report each number typed within the bounds at once, not only when
+    /// it is committed; the typed text stays until then.
+    #[prop_or_default]
+    pub live: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -121,8 +131,14 @@ pub fn Stepper(props: &StepperProps) -> Html {
 
     let oninput = {
         let draft = draft.clone();
+        let on_change = props.on_change.clone();
+        let (value, live) = (props.value, props.live);
         Callback::from(move |e: InputEvent| {
-            draft.set(Some(e.target_unchecked_into::<HtmlInputElement>().value()));
+            let text = e.target_unchecked_into::<HtmlInputElement>().value();
+            if let Some(n) = live_value(live, &text, value, min, max) {
+                on_change.emit(n);
+            }
+            draft.set(Some(text));
         })
     };
     let onchange = commit.reform(|_: Event| ());
@@ -206,6 +222,7 @@ mod tests {
             invalid: false,
             disabled: false,
             busy: false,
+            live: false,
             class: Classes::new(),
             testid: None,
         }
@@ -255,6 +272,15 @@ mod tests {
         assert_eq!(step_from(7, 1, 10, 5, 0, 100), 55);
         assert_eq!(key_value("ArrowUp", 7, 5, 0, 100), Some(10));
         assert_eq!(key_value("PageDown", 60, 5, 0, 100), Some(10));
+    }
+
+    #[test]
+    fn a_live_stepper_reports_numbers_within_its_bounds_as_typed() {
+        assert_eq!(live_value(true, "12", 7, 0, 100), Some(12));
+        assert_eq!(live_value(true, "7", 7, 0, 100), None);
+        assert_eq!(live_value(true, "150", 7, 0, 100), None);
+        assert_eq!(live_value(true, "", 7, 0, 100), None);
+        assert_eq!(live_value(false, "12", 7, 0, 100), None);
     }
 
     #[test]

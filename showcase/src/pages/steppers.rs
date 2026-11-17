@@ -27,6 +27,7 @@ pub fn StepperPage() -> Html {
     let invalid = use_state(|| false);
     let disabled = use_state(|| false);
     let busy = use_state(|| false);
+    let live = use_state(|| false);
     let value = use_state(|| 7i64);
 
     let controls = html! {
@@ -37,6 +38,7 @@ pub fn StepperPage() -> Html {
             <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
+            <Toggle label="live" value={*live} on_change={bind(&live)} />
         </>
     };
     let code = snippet(
@@ -51,14 +53,15 @@ pub fn StepperPage() -> Html {
             .variant("size", *size)
             .flag("invalid", *invalid)
             .flag("disabled", *disabled)
-            .flag("busy", *busy),
+            .flag("busy", *busy)
+            .flag("live", *live),
     );
     let clamped = (*value).clamp(0, *max);
 
     html! {
         <Demo {controls} {code}>
             <Stepper value={clamped} on_change={bind(&value)} min={0} max={*max} step={*step}
-                label="Copies" size={*size} invalid={*invalid} disabled={*disabled} busy={*busy} />
+                label="Copies" size={*size} invalid={*invalid} disabled={*disabled} busy={*busy} live={*live} />
             { shown("stepper(size, invalid, disabled, busy)", &stepper(*size, *invalid, *disabled, *busy)) }
             <p class={class::CONTROL_LABEL}>{ format!("Value {clamped}") }</p>
         </Demo>
