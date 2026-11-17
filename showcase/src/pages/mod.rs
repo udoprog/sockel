@@ -18,6 +18,7 @@ mod rows;
 mod steppers;
 mod styles;
 mod tables;
+mod tabs;
 mod toggles;
 mod tooltips;
 
@@ -1068,6 +1069,37 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["Scrolled items", "scroll-area"]),
             ),
         ],
+    },
+    Page {
+        id: "tabs",
+        title: "Tabs",
+        about: "A tab list: the selected tab is marked by its colour and an underline inside its box, and tabs past the width scroll sideways. Tab to it, then use the arrow keys.",
+        covers: &["Tabs", "SubTabs", "TabsProps", "TabItem", "tabs"],
+        render: || html! { <tabs::TabsPage /> },
+        holds: &[
+            hold(
+                plinth::class::TABS,
+                Size::Height,
+                Across::Except(&["small"]),
+            ),
+            hold(
+                plinth::class::TAB,
+                Size::Box,
+                Across::Only(&["Selected", "disabled", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "nav-list",
+        title: "NavList",
+        about: "A side or settings navigation: the current entry is marked by aria-current, its colour and a tint, never its weight.",
+        covers: &["NavList", "NavListProps", "NavItem", "nav_list"],
+        render: || html! { <tabs::NavListPage /> },
+        holds: &[hold(
+            plinth::class::NAV_ITEM,
+            Size::Box,
+            Across::Only(&["Current", "disabled", "links", "icons", "focus", "click"]),
+        )],
     },
     Page {
         id: "styles",

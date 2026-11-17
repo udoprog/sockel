@@ -388,6 +388,37 @@ a list is at least one chip high, so an empty list does not collapse and
 grow when chips arrive. New tokens: `$check-size`, `$switch-width`,
 `$switch-height`, `$choice-width`.
 
+## Tabs, SubTabs and NavList
+
+The current tab or entry is marked by colour, background or an inset
+shadow, never by weight, through the `current` mixin, so selecting one
+changes no box. Every component takes `class`.
+
+- `Tabs` (`.plinth-tabs`): a `tablist` of `TabItem`s (`new(value, label)`,
+  `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
+  (the list's name); `tabs(small)` gives its classes. Roving tabindex: the
+  selected tab, or the first enabled, is the one tab stop; the arrows (with
+  wrap), Home and End select and focus the next enabled tab. The selected
+  tab takes the accent colour and an underline of `--tab-underline` drawn
+  as an inset shadow. Icons are hidden below the phone breakpoint. Tabs
+  past the width scroll sideways with the scrollbar hidden and the edge
+  that has hidden tabs faded (the `scroll-fade` mixin, shared with
+  `Toolbar`); no tab is hidden or reflowed.
+- `SubTabs`: the same props, at the small control height (`SMALL`).
+- `NavList` (`.plinth-nav-list`): a `nav` of a column of `NavItem`s
+  (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
+  link with an `href` and a button without. `value` is the current entry
+  (`aria-current="page"`; colour and a tint), `on_select(value)`, `label`;
+  `nav_list()` gives its classes.
+
+Size guarantees: a tab is `--tab-height` high (the control height, or the
+small one) and as wide as its content whichever is selected; the underline
+is a shadow, hover and focus add no border (focus is an inset outline). An
+empty tab list keeps its height. A nav entry is at least the control
+height with a reserved border, so the current one keeps its box. New
+tokens: `--tab-height` and `--tab-underline` (custom properties on
+`.plinth-tabs`); new mixin `scroll-fade`.
+
 ## Field and FormRows
 
 `Field` is a label, the control (its `children`), a hint and an error,
@@ -974,6 +1005,7 @@ rule of the same weight; none uses `!important`.
 | `visually-hidden` | `.plinth-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
 | `phone-only`, `desktop-only` | `.plinth-phone-only`, `.plinth-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
+| `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded (`Toolbar`, `Tabs`). |
 
 Layers: `--layer-sticky`, `--layer-overlay`, `--layer-dialog`,
 `--layer-toast` and `--layer-tooltip` are the one `z-index` scale for what

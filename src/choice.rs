@@ -1,6 +1,6 @@
 //! Choice (`style/_toggles.scss`).
 
-use crate::class;
+use crate::{class, roving};
 use web_sys::wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
@@ -100,38 +100,17 @@ pub fn choice(fit: ChoiceFit, small: bool, invalid: bool, disabled: bool) -> Cla
     )
 }
 
-/// The option holding the tab stop: the selected one, else the first that
-/// is enabled.
-fn roving(options: &[ChoiceOption], value: Option<&AttrValue>) -> Option<usize> {
-    options
-        .iter()
-        .position(|o| !o.disabled && Some(&o.value) == value)
-        .or_else(|| options.iter().position(|o| !o.disabled))
+fn disabled(options: &[ChoiceOption]) -> Vec<bool> {
+    options.iter().map(|o| o.disabled).collect()
 }
 
-/// The enabled option a key moves to from `from`: the arrows step (and
-/// wrap), Home and End jump; `None` for any other key.
+fn roving(options: &[ChoiceOption], value: Option<&AttrValue>) -> Option<usize> {
+    let selected = options.iter().position(|o| Some(&o.value) == value);
+    roving::stop(&disabled(options), selected)
+}
+
 fn step(options: &[ChoiceOption], from: usize, key: &str) -> Option<usize> {
-    let len = options.len();
-    let enabled = |i: &usize| !options[*i].disabled;
-    let walk = |forward: bool| {
-        (1..len)
-            .map(|n| {
-                if forward {
-                    (from + n) % len
-                } else {
-                    (from + len - n) % len
-                }
-            })
-            .find(enabled)
-    };
-    match key {
-        "ArrowRight" | "ArrowDown" => walk(true),
-        "ArrowLeft" | "ArrowUp" => walk(false),
-        "Home" => (0..len).find(enabled),
-        "End" => (0..len).rev().find(enabled),
-        _ => None,
-    }
+    roving::step(&disabled(options), from, key)
 }
 
 /// A segmented pick-one group (`role="radiogroup"`): options of one width

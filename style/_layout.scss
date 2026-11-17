@@ -232,24 +232,7 @@
     flex-wrap: nowrap;
     align-items: center;
     gap: base.$toolbar-gap;
-    min-width: 0;
-    overflow-x: auto;
-    scrollbar-width: none;
-    // A scroll-driven animation (no script) fades the edge that has
-    // hidden controls; it does not run when nothing overflows.
-    mask-image: linear-gradient(
-        to right,
-        transparent,
-        #000 var(--plinth-fade-start),
-        #000 calc(100% - var(--plinth-fade-end)),
-        transparent
-    );
-    animation: plinth-toolbar-fade linear;
-    animation-timeline: scroll(self inline);
-
-    &::-webkit-scrollbar {
-        display: none;
-    }
+    @include base.scroll-fade;
 
     &.plinth-boxed {
         @include base.reserved-border(var(--border));

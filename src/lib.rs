@@ -66,6 +66,9 @@
 //!   scroll area, its bulk actions' room reserved; [`SortHeader`]
 //!   (`.sort-header`): a column heading whose sort mark keeps its box.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
+//! - [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
+//!   an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
+//!   navigation, the current entry marked by `aria-current`.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
 //!   page's or a section's title, its help and its actions.
@@ -127,8 +130,10 @@ mod layout;
 mod library_toolbar;
 mod loadable;
 mod menu;
+mod nav_list;
 mod notice;
 mod popover;
+mod roving;
 mod rows;
 mod secret_input;
 mod selection;
@@ -139,6 +144,7 @@ mod status;
 mod stepper;
 mod styles;
 mod table;
+mod tabs;
 mod tooltip;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
@@ -180,6 +186,7 @@ pub use menu::{
     MenuWidth, RowAction, RowActions, RowActionsProps, SplitButton, SplitButtonProps, menu,
     menu_item, menu_step, typeahead,
 };
+pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 pub use notice::{Notice, NoticeProps, notice};
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
@@ -205,6 +212,7 @@ pub use table::{
     Table, TableCell, TableCellProps, TableProps, TableRow, TableRowProps, table, table_bulk,
     table_cell, table_wrap,
 };
+pub use tabs::{SubTabs, TabItem, Tabs, TabsProps, tabs};
 pub use tooltip::{
     DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,
     TOOLTIP_DELAY, Tooltip, TooltipProps, hover_card, reason_text, tooltip,

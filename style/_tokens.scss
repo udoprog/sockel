@@ -40,7 +40,7 @@
 // - `page($width)`, `nests($radius, $border)`.
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
 //   `scroll-area`, `truncate`, `clamp($lines)`, `visually-hidden`,
-//   `phone-only`, `desktop-only`, `current($by)`.
+//   `phone-only`, `desktop-only`, `current($by)`, `scroll-fade`.
 // - Tables, for markup plinth does not render: `table-base`,
 //   `table-head-cell`, `table-cell`, `table-row-hover`.
 // - `tones`: the `--tone` modifiers (accent, busy, success, warning, danger).
@@ -415,6 +415,28 @@ $sheet-breakpoint: "phone" !default;
 
 @mixin desktop-only {
     @include below($visibility-breakpoint) {
+        display: none;
+    }
+}
+
+// Scrolls sideways with the scrollbar hidden and the edge that has hidden
+// content faded (a scroll-driven animation, none runs when nothing
+// overflows; `@property` and keyframes are in `_layout.scss`).
+@mixin scroll-fade {
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 var(--plinth-fade-start),
+        #000 calc(100% - var(--plinth-fade-end)),
+        transparent
+    );
+    animation: plinth-toolbar-fade linear;
+    animation-timeline: scroll(self inline);
+
+    &::-webkit-scrollbar {
         display: none;
     }
 }

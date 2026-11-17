@@ -1,0 +1,223 @@
+//! Tabs and SubTabs (`style/_tabs.scss`).
+
+use crate::{class, roving};
+use web_sys::wasm_bindgen::JsCast;
+use web_sys::{Element, HtmlElement};
+use yew::prelude::*;
+
+/// One tab of [`Tabs`].
+#[derive(Clone, Debug, PartialEq)]
+pub struct TabItem {
+    pub value: AttrValue,
+    pub label: AttrValue,
+    /// An icon the app supplies, before the label; hidden on a phone.
+    pub icon: Option<Html>,
+    pub disabled: bool,
+}
+
+impl TabItem {
+    pub fn new(value: impl Into<AttrValue>, label: impl Into<AttrValue>) -> Self {
+        Self {
+            value: value.into(),
+            label: label.into(),
+            icon: None,
+            disabled: false,
+        }
+    }
+
+    pub fn icon(mut self, icon: Html) -> Self {
+        self.icon = Some(icon);
+        self
+    }
+
+    pub fn disabled(mut self, disabled: bool) -> Self {
+        self.disabled = disabled;
+        self
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct TabsProps {
+    #[prop_or_default]
+    pub class: Classes,
+    pub tabs: Vec<TabItem>,
+    /// The selected tab's value; none selected when it matches no tab.
+    #[prop_or_default]
+    pub value: Option<AttrValue>,
+    /// Called with the newly selected value, by click or arrow key.
+    pub on_change: Callback<AttrValue>,
+    /// What the tabs switch between (`aria-label` of the tablist).
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+}
+
+/// A tab list's classes: `tabs`, and `small` for the smaller variant.
+pub fn tabs(small: bool) -> Classes {
+    classes!(class::TABS, small.then_some(class::SMALL))
+}
+
+fn disabled(tabs: &[TabItem]) -> Vec<bool> {
+    tabs.iter().map(|t| t.disabled).collect()
+}
+
+fn selected(tabs: &[TabItem], value: Option<&AttrValue>) -> Option<usize> {
+    tabs.iter().position(|t| Some(&t.value) == value)
+}
+
+fn render(props: &TabsProps, small: bool) -> Html {
+    let off = disabled(&props.tabs);
+    let stop = roving::stop(&off, selected(&props.tabs, props.value.as_ref()));
+
+    let onkeydown = {
+        let on_change = props.on_change.clone();
+        let tabs = props.tabs.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            let Some(from) = stop else { return };
+            let Some(next) = roving::step(&disabled(&tabs), from, &e.key()) else {
+                return;
+            };
+            e.prevent_default();
+            on_change.emit(tabs[next].value.clone());
+            let focused = e
+                .current_target()
+                .and_then(|t| t.dyn_into::<Element>().ok())
+                .and_then(|list| list.query_selector_all("[role=tab]").ok())
+                .and_then(|nodes| nodes.item(next as u32))
+                .and_then(|node| node.dyn_into::<HtmlElement>().ok());
+            if let Some(tab) = focused {
+                let _ = tab.focus();
+            }
+        })
+    };
+
+    html! {
+        <div role="tablist" class={classes!(tabs(small), props.class.clone())}
+            aria-label={props.label.clone()}
+            data-testid={props.testid.clone()}
+            {onkeydown}>
+            { for props.tabs.iter().enumerate().map(|(i, tab)| {
+                let selected = props.value.as_ref() == Some(&tab.value);
+                let onclick = {
+                    let on_change = props.on_change.clone();
+                    let value = tab.value.clone();
+                    Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
+                };
+                html! {
+                    <button type="button" role="tab" class={class::TAB}
+                        aria-selected={selected.to_string()}
+                        tabindex={if stop == Some(i) { "0" } else { "-1" }}
+                        disabled={tab.disabled}
+                        {onclick}>
+                        { for tab.icon.clone().map(|icon| html! {
+                            <span class={class::TAB_ICON} aria-hidden="true">{ icon }</span>
+                        }) }
+                        <span class={class::TAB_LABEL}>{ tab.label.clone() }</span>
+                    </button>
+                }
+            }) }
+        </div>
+    }
+}
+
+/// A row of tabs (`role="tablist"`): the selected one marked by its colour
+/// and an underline drawn inside its box, so none changes size when selected.
+/// One tab stop; arrows, Home and End select and focus a tab. Tabs past the
+/// width scroll sideways, none is hidden.
+#[function_component]
+pub fn Tabs(props: &TabsProps) -> Html {
+    render(props, false)
+}
+
+/// [`Tabs`] at the small control height, for tabs inside a panel.
+#[function_component]
+pub fn SubTabs(props: &TabsProps) -> Html {
+    render(props, true)
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn names(classes: Classes) -> Vec<String> {
+        classes.into_iter().map(|c| c.to_string()).collect()
+    }
+
+    fn items() -> Vec<TabItem> {
+        ["a", "b", "c"]
+            .iter()
+            .map(|v| TabItem::new(*v, v.to_uppercase()))
+            .collect()
+    }
+
+    fn props(value: Option<&str>, tabs: Vec<TabItem>) -> TabsProps {
+        yew::props!(TabsProps {
+            tabs: tabs,
+            value: value.map(AttrValue::from),
+            on_change: Callback::noop(),
+            label: "Sections"
+        })
+    }
+
+    fn html_of<C: BaseComponent<Properties = TabsProps>>(p: TabsProps) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<C>::with_props(p)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn each_modifier_is_its_class() {
+        assert_eq!(names(tabs(false)), [class::TABS]);
+        assert_eq!(names(tabs(true)), [class::TABS, class::SMALL]);
+    }
+
+    #[test]
+    fn sub_tabs_are_the_small_variant() {
+        let html = html_of::<SubTabs>(props(Some("a"), items()));
+        assert!(html.contains(class::SMALL), "{html}");
+        let html = html_of::<Tabs>(props(Some("a"), items()));
+        assert!(!html.contains(class::SMALL), "{html}");
+    }
+
+    #[test]
+    fn arrows_home_and_end_move_and_wrap() {
+        let off = disabled(&items());
+        assert_eq!(roving::step(&off, 0, "ArrowRight"), Some(1));
+        assert_eq!(roving::step(&off, 2, "ArrowRight"), Some(0));
+        assert_eq!(roving::step(&off, 0, "ArrowLeft"), Some(2));
+        assert_eq!(roving::step(&off, 1, "Home"), Some(0));
+        assert_eq!(roving::step(&off, 0, "End"), Some(2));
+        assert_eq!(roving::step(&off, 0, "Tab"), None);
+    }
+
+    #[test]
+    fn arrows_skip_a_disabled_tab() {
+        let mut t = items();
+        t[1] = t[1].clone().disabled(true);
+        assert_eq!(roving::step(&disabled(&t), 0, "ArrowRight"), Some(2));
+        t[0] = t[0].clone().disabled(true);
+        assert_eq!(roving::step(&disabled(&t), 2, "Home"), Some(2));
+    }
+
+    #[test]
+    fn the_selected_tab_alone_is_selected_and_the_tab_stop() {
+        let html = html_of::<Tabs>(props(Some("b"), items()));
+        assert_eq!(html.matches("aria-selected=\"true\"").count(), 1, "{html}");
+        assert_eq!(html.matches("aria-selected=\"false\"").count(), 2, "{html}");
+        assert_eq!(html.matches("tabindex=\"0\"").count(), 1, "{html}");
+        assert!(html.find("tabindex=\"0\"") > html.find("aria-selected=\"false\""));
+        assert!(html.contains("role=\"tablist\""), "{html}");
+    }
+
+    #[test]
+    fn with_none_selected_the_first_enabled_is_the_tab_stop() {
+        let mut t = items();
+        t[0] = t[0].clone().disabled(true);
+        let html = html_of::<Tabs>(props(None, t));
+        assert_eq!(html.matches("aria-selected=\"true\"").count(), 0, "{html}");
+        assert_eq!(html.matches("tabindex=\"0\"").count(), 1, "{html}");
+        assert!(html.find("tabindex=\"0\"") > html.find("disabled"));
+    }
+}

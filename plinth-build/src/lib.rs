@@ -43,6 +43,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_skeleton.scss",
     "_stepper.scss",
     "_table.scss",
+    "_tabs.scss",
     "_toggles.scss",
     "_tokens.scss",
     "_tooltip.scss",
