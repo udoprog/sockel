@@ -46,7 +46,11 @@ pub const PAGES: &[Page] = &[
         about: "A column, its blocks a gap apart.",
         covers: &["Stack", "StackProps", "Gap"],
         render: || html! { <layout::StackPage /> },
-        holds: &[hold(plinth::class::STACK, Size::Width, Across::All)],
+        holds: &[
+            hold(plinth::class::STACK, Size::Width, Across::All),
+            hold(plinth::class::STACK, Size::Box, Across::Only(&["tag"])),
+            hold(class::SAMPLE, Size::Box, Across::Only(&["tag"])),
+        ],
     },
     Page {
         id: "cluster",
@@ -54,11 +58,15 @@ pub const PAGES: &[Page] = &[
         about: "A row that wraps, its items centred.",
         covers: &["Cluster", "ClusterProps", "Justify", "Align"],
         render: || html! { <layout::ClusterPage /> },
-        holds: &[hold(
-            plinth::class::CLUSTER,
-            Size::Width,
-            Across::Except(&["inline"]),
-        )],
+        holds: &[
+            hold(
+                plinth::class::CLUSTER,
+                Size::Width,
+                Across::Except(&["inline"]),
+            ),
+            hold(plinth::class::CLUSTER, Size::Box, Across::Only(&["tag"])),
+            hold(class::SAMPLE, Size::Box, Across::Only(&["tag"])),
+        ],
     },
     Page {
         id: "action-group",
@@ -210,7 +218,10 @@ pub const PAGES: &[Page] = &[
         about: "A surface lifted off the page.",
         covers: &["Card", "CardProps", "Inset"],
         render: || html! { <layout::CardPage /> },
-        holds: &[hold(plinth::class::CARD, Size::Width, Across::All)],
+        holds: &[
+            hold(plinth::class::CARD, Size::Width, Across::All),
+            hold(plinth::class::CARD, Size::Box, Across::Only(&["tag"])),
+        ],
     },
     Page {
         id: "page-head",

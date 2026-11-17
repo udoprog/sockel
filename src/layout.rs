@@ -178,10 +178,15 @@ pub struct StackProps {
     pub children: Html,
 }
 
+/// A list tag drops the browser's bullets, margin and padding.
+fn list_reset(tag: &str) -> Option<&'static str> {
+    matches!(tag, "ul" | "ol").then_some(class::PLAIN_LIST)
+}
+
 #[function_component]
 pub fn Stack(props: &StackProps) -> Html {
     html! {
-        <@{props.tag} class={classes!(stack_with(props.gap, props.flush), props.class.clone())}
+        <@{props.tag} class={classes!(stack_with(props.gap, props.flush), list_reset(props.tag), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </@>
@@ -231,7 +236,7 @@ pub fn Cluster(props: &ClusterProps) -> Html {
     );
 
     html! {
-        <@{props.tag} class={classes!(classes, props.class.clone())}
+        <@{props.tag} class={classes!(classes, list_reset(props.tag), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </@>
@@ -302,7 +307,7 @@ pub struct CardProps {
 #[function_component]
 pub fn Card(props: &CardProps) -> Html {
     html! {
-        <@{props.tag} class={classes!(card(props.inset, false), props.class.clone())}
+        <@{props.tag} class={classes!(card(props.inset, false), list_reset(props.tag), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </@>
@@ -404,6 +409,14 @@ mod tests {
             )),
             [class::CLUSTER, class::LINES, class::FLUSH]
         );
+    }
+
+    #[test]
+    fn a_list_tag_takes_the_plain_list_class() {
+        assert_eq!(list_reset("ul"), Some(class::PLAIN_LIST));
+        assert_eq!(list_reset("ol"), Some(class::PLAIN_LIST));
+        assert_eq!(list_reset("div"), None);
+        assert_eq!(list_reset("section"), None);
     }
 
     #[test]

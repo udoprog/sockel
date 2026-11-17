@@ -136,9 +136,14 @@ pub fn Demo(props: &DemoProps) -> Html {
 }
 
 /// `count` placeholder items, every other one taller when `mixed`; as
-/// paragraphs, they keep their default margins.
-pub fn samples(count: usize, text: Text, mixed: bool, paragraphs: bool) -> Html {
-    let tag = if paragraphs { "p" } else { "div" };
+/// paragraphs, they keep their default margins. In a list container (`ul` or
+/// `ol`, named by `container`) they are `li`s.
+pub fn samples(container: &str, count: usize, text: Text, mixed: bool, paragraphs: bool) -> Html {
+    let tag = match container {
+        "ul" | "ol" => "li",
+        _ if paragraphs => "p",
+        _ => "div",
+    };
 
     (1..=count)
         .map(|n| {

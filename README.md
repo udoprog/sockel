@@ -329,6 +329,15 @@ box does not change with it.
 children are the icon and label together); a new button should be a
 `Button`.
 
+## Stack, Cluster and Card
+
+`Stack` and `Cluster` (and `Card`) take a `tag` (`div` by default). A list
+tag, `ul` or `ol`, renders with no bullets, margin or padding
+(`plinth::class::PLAIN_LIST` is added for it), so it lays out exactly as a
+`div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
+working. `stack_with` and `cluster_with` return the same classes for any
+tag, so a list built from them adds `PLAIN_LIST` itself.
+
 ## Heads
 
 `PageHead` and `SectionHead` take one set of props (`HeadProps`):

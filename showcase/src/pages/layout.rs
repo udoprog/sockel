@@ -41,7 +41,12 @@ const INSETS: &[(&str, Inset)] = &[
     ("Flush", Inset::Flush),
 ];
 
-const TAGS: &[(&str, &str)] = &[("div", "div"), ("section", "section"), ("ul", "ul")];
+const TAGS: &[(&str, &str)] = &[
+    ("div", "div"),
+    ("section", "section"),
+    ("ul", "ul"),
+    ("ol", "ol"),
+];
 
 #[function_component]
 pub fn StackPage() -> Html {
@@ -66,7 +71,7 @@ pub fn StackPage() -> Html {
     html! {
         <Demo {controls}>
             <Stack gap={*gap} tag={*tag} flush={*flush} class={class::OUTLINED}>
-                { samples(*count, *text, false, *paragraphs) }
+                { samples(*tag, *count, *text, false, *paragraphs) }
             </Stack>
         </Demo>
     }
@@ -75,6 +80,7 @@ pub fn StackPage() -> Html {
 #[function_component]
 pub fn ClusterPage() -> Html {
     let gap = use_state(|| Gap::Normal);
+    let tag = use_state(|| "div");
     let justify = use_state(|| Justify::Start);
     let align = use_state(|| Align::Center);
     let nowrap = use_state(|| false);
@@ -89,6 +95,7 @@ pub fn ClusterPage() -> Html {
     let controls = html! {
         <>
             <Select<Gap> label="gap" options={GAPS} value={*gap} on_change={bind(&gap)} />
+            <Select<&'static str> label="tag" options={TAGS} value={*tag} on_change={bind(&tag)} />
             <Select<Justify> label="justify" options={JUSTIFIES} value={*justify} on_change={bind(&justify)} />
             <Select<Align> label="align" options={ALIGNS} value={*align} on_change={bind(&align)} />
             <Select<usize> label="Items" options={COUNTS} value={*count} on_change={bind(&count)} />
@@ -105,8 +112,8 @@ pub fn ClusterPage() -> Html {
     html! {
         <Demo {controls}>
             <Cluster gap={*gap} justify={*justify} align={*align} nowrap={*nowrap} inline={*inline}
-                lines={*lines} flush={*flush} class={class::OUTLINED}>
-                { samples(*count, *text, *mixed, *paragraphs) }
+                lines={*lines} flush={*flush} tag={*tag} class={class::OUTLINED}>
+                { samples(*tag, *count, *text, *mixed, *paragraphs) }
             </Cluster>
         </Demo>
     }
@@ -167,9 +174,14 @@ pub fn CardPage() -> Html {
     };
 
     let content = if *list {
-        html! { <Stack gap={Gap::Hair}>{ samples(4, *text, false, false) }</Stack> }
+        html! { <Stack gap={Gap::Hair}>{ samples("div", 4, *text, false, false) }</Stack> }
     } else {
         html! { <p class={class::PROSE}>{ text.of("A card's content") }</p> }
+    };
+
+    let content = match *tag {
+        "ul" | "ol" => html! { <li>{ content }</li> },
+        _ => content,
     };
 
     html! {
@@ -215,9 +227,9 @@ pub fn ClassesPage() -> Html {
         <Demo {controls}>
             <Stack gap={Gap::Loose}>
                 { shown("stack(gap)", &stack) }
-                <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples(3, Text::Short, false, false) }</ul>
+                <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
                 { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
-                <ul class={classes!(cluster, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples(3, Text::Short, true, false) }</ul>
+                <ul class={classes!(cluster, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, true, false) }</ul>
                 { shown("toolbar(boxed)", &toolbar) }
                 <nav class={toolbar} aria-label="Toolbar classes">
                     { button("One".into(), false, false) }

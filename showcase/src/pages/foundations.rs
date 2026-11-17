@@ -95,7 +95,7 @@ pub fn FoundationsPage() -> Html {
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "Scroll area" }</span>
                         <div class={classes!(class::SCROLL_BOX, scroll_area.then_some(plinth::class::SCROLL_AREA))}>
-                            <Stack gap={Gap::Snug}>{ samples(*count, Text::Short, false, false) }</Stack>
+                            <Stack gap={Gap::Snug}>{ samples("div", *count, Text::Short, false, false) }</Stack>
                         </div>
                     </Stack>
                     <Stack gap={Gap::Snug}>
