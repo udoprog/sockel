@@ -75,7 +75,7 @@ fn SampleItems(props: &ItemsProps) -> Html {
                 <MenuItem detail="Keeps its history" onclick={pick("rename")}>{ "Rename" }</MenuItem>
                 <MenuItem disabled={props.disabled} onclick={pick("move")}>{ "Move to…" }</MenuItem>
                 <MenuItem onclick={pick("copy")}>{ "Copy link" }</MenuItem>
-                <MenuItem href="#menu" detail="A link row">{ "Open this page" }</MenuItem>
+                <MenuItem href="#menu" current=true detail="A link row, the page shown">{ "Open this page" }</MenuItem>
                 <MenuSeparator />
                 <MenuItem danger=true onclick={pick("delete")}>{ "Delete" }</MenuItem>
             </>

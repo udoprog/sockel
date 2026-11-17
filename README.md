@@ -1189,7 +1189,8 @@ overlay layer, through `use_popover`. Props:
 
 Its children are the items: `MenuItem` (an action; `icon`, `detail` under
 the label, `hint` at the end, `danger`, `disabled`, `onclick`; with `href`
-a link row, an `<a>` that loses its `href` when disabled),
+a link row, an `<a>` that loses its `href` when disabled; `current` marks
+the page shown, `aria-current="page"`, by the accent's ground and ink),
 `MenuCheck` (`menuitemcheckbox`: `checked`, `on_change`; the menu stays
 open), `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), `MenuSeparator`,
 `MenuHeading` and `MenuNote` (a line such as "nothing here"). Each takes

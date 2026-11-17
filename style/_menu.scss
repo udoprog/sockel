@@ -140,6 +140,16 @@
         color: var(--danger);
     }
 
+    // The page shown, in a menu of links: by ground and its label's ink.
+    &[aria-current="page"] {
+        background: color-mix(in srgb, var(--accent) 14%, transparent);
+
+        .plinth-menu-item-label {
+            color: var(--accent);
+            font-weight: 600;
+        }
+    }
+
     &[aria-disabled="true"] {
         color: var(--muted);
         cursor: default;

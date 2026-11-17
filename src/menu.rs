@@ -478,6 +478,9 @@ pub struct MenuItemProps {
     /// A link row (`<a>`): picking it follows the link and closes the menu.
     #[prop_or_default]
     pub href: Option<AttrValue>,
+    /// The page shown (`aria-current="page"`), marked, in a menu of links.
+    #[prop_or_default]
+    pub current: bool,
     /// In the danger colour (Delete).
     #[prop_or_default]
     pub danger: bool,
@@ -548,18 +551,21 @@ impl Row<'_> {
         };
         let class = classes!(menu_item(p.danger), p.class.clone());
         let disabled = p.disabled.then_some("true");
+        let current = p.current.then_some("page");
         match &p.href {
             Some(href) => html! {
                 <a role={self.role} tabindex="-1" {class}
                     href={(!p.disabled).then(|| href.clone())}
-                    aria-disabled={disabled} data-testid={p.testid.clone()} {onclick}>
+                    aria-disabled={disabled} aria-current={current}
+                    data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </a>
             },
             None => html! {
                 <button type="button" role={self.role} tabindex="-1" {class}
                     aria-checked={self.checked.map(|on| on.to_string())}
-                    aria-disabled={disabled} data-testid={p.testid.clone()} {onclick}>
+                    aria-disabled={disabled} aria-current={current}
+                    data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </button>
             },
@@ -611,6 +617,7 @@ fn item_props(
         detail: detail.clone(),
         hint: hint.clone(),
         href: None,
+        current: false,
         danger: false,
         disabled,
         onclick: Callback::noop(),
@@ -1154,6 +1161,19 @@ mod tests {
         }));
         assert!(!html.contains("href"), "{html}");
         assert!(html.contains("aria-disabled=\"true\""), "{html}");
+    }
+
+    #[test]
+    fn a_current_item_is_marked_as_the_page_shown() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/users")),
+            current: true,
+        }));
+        assert!(html.contains("aria-current=\"page\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/users")),
+        }));
+        assert!(!html.contains("aria-current"), "{html}");
     }
 
     #[test]
