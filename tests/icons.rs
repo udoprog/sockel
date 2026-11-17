@@ -10,11 +10,19 @@ fn Bare() -> Html {
 }
 
 #[function_component]
+fn Named() -> Html {
+    let set = IconSet::default().with_named("trash", html! { <b>{ "bin" }</b> });
+    html! {
+        <ContextProvider<IconSet> context={set}>
+            <Icon name="trash" />
+            <Icon name="nope" />
+        </ContextProvider<IconSet>>
+    }
+}
+
+#[function_component]
 fn Provided() -> Html {
-    let set = IconSet {
-        close: html! { <b>{ "custom close" }</b> },
-        ..IconSet::default()
-    };
+    let set = IconSet::default().with(Glyph::Close, html! { <b>{ "custom close" }</b> });
     html! {
         <ContextProvider<IconSet> context={set}>
             <Icon glyph={Glyph::Close} />
@@ -58,4 +66,12 @@ fn the_box_is_the_same_whichever_set_fills_it() {
             .to_owned()
     };
     assert_eq!(box_of(&render::<Bare>()), box_of(&render::<Provided>()));
+}
+
+#[test]
+fn a_named_icon_renders_and_a_missing_one_is_the_empty_box() {
+    let html = render::<Named>();
+    assert!(html.contains("<b>bin</b>"), "{html}");
+    let empty = format!("class=\"{}\"></span>", class::GLYPH);
+    assert!(html.contains(&empty), "{html}");
 }

@@ -711,7 +711,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "icon",
         title: "Icon",
-        about: "plinth's own glyphs, from the app's IconSet or the built-in one, always in the same box. Swap the set; the sizes do not move.",
+        about: "plinth's glyphs and the app's own icons by name, from the app's IconSet or the built-in one, always in the same box. A missing icon is the empty box; swap the set and the sizes do not move.",
         covers: &[
             "Icon",
             "IconProps",
@@ -719,6 +719,7 @@ pub const PAGES: &[Page] = &[
             "Glyph",
             "icon",
             "use_icon",
+            "use_icon_named",
             "use_icons",
         ],
         render: || html! { <icons::IconPage /> },
@@ -726,12 +727,12 @@ pub const PAGES: &[Page] = &[
             hold(
                 plinth::class::GLYPH,
                 Size::Both,
-                Across::Only(&["Icon set", "glyph", "disabled", "focus", "click"]),
+                Across::Only(&["Icon set", "icon", "disabled", "focus", "click"]),
             ),
             hold(
                 plinth::class::ICONED,
                 Size::Height,
-                Across::Only(&["Icon set", "glyph", "disabled", "focus", "click"]),
+                Across::Only(&["Icon set", "icon", "disabled", "focus", "click"]),
             ),
         ],
     },

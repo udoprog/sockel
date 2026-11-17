@@ -566,8 +566,7 @@ least value to the most, the buttons only disabled at a bound; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
 `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs
-`Eye`, `EyeOff` and `Copy`: an app's own `IconSet` literal needs three more
-fields. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
+`Eye`, `EyeOff` and `Copy`. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
 set per Stepper).
 
 ## Heads
@@ -586,22 +585,24 @@ set per Stepper).
 ## Icons
 
 plinth's own chrome (a dialog's close, a select's chevron, a busy spinner)
-draws its icons from an `IconSet`: one `Html` per `Glyph` (`Close`,
-`ChevronDown`, `ChevronUp`, `ChevronRight`, `Check`, `Plus`, `Minus`,
-`Spinner`, `Grip`, `Ellipsis`, `Search`, `Eye`, `EyeOff`, `Copy`). It is the one place plinth uses a
-context for something other than a runtime setting, and it carries icons
-only: classes never go through it.
+draws its icons from an `IconSet`, and the app keeps its own icons in the same
+set. The set is opaque, built with a builder, so adding a glyph to plinth never
+breaks an adopter. `Glyph` (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`,
+`Check`, `Plus`, `Minus`, `Spinner`, `Grip`, `Ellipsis`, `Search`, `Eye`,
+`EyeOff`, `Copy`) is `#[non_exhaustive]`: a `match` on it needs a wildcard. It is
+the one place plinth uses a context for something other than a runtime setting,
+and it carries icons only: classes never go through it.
 
-Without a provider plinth uses `IconSet::default()`, a built-in set of inline
-svg, so it renders standalone. An app supplies its own once at its root,
-mapping its icon component; a set may override only some glyphs:
+`IconSet::default()` holds nothing of its own: a glyph the app did not set is
+the built-in inline svg, built when it is first drawn, so an app that
+overrides a glyph does not build the built-in one. Without a provider plinth
+uses the default set, so it renders standalone. An app supplies its set once at
+its root:
 
 ```rust
-let set = IconSet {
-    close: html! { <MyIcon name="x" /> },
-    chevron_down: html! { <MyIcon name="caret-down" /> },
-    ..IconSet::default()
-};
+let set = IconSet::default()
+    .with(Glyph::Close, html! { <MyIcon name="x" /> })
+    .with_named("trash", html! { <MyIcon name="bin" /> });
 
 html! {
     <ContextProvider<IconSet> context={set}>
@@ -610,10 +611,12 @@ html! {
 }
 ```
 
-`<Icon glyph={Glyph::Close} class=.../>` renders a glyph; `use_icon(glyph)` and
-`use_icons()` return the icon(s) for a component of your own, and `icon(class,
-glyph)` gives the box's classes (`plinth::class::GLYPH`, plus `SPIN` for
-`Spinner`).
+`<Icon glyph={Glyph::Close} class=.../>` renders a glyph and `<Icon
+name="trash"/>` an app icon; `use_icon(glyph)`, `use_icon_named(name)` and
+`use_icons()` (`get`, `get_named`) return icons for a component of your own,
+and `icon(class, glyph)` gives the box's classes (`plinth::class::GLYPH`, plus
+`SPIN` for `Spinner`). A name the set lacks renders the same empty box, and a
+debug build warns in the console with the name. Cloning a set shares its icons.
 
 Size guarantees: the glyph sits in a `.plinth-glyph` box of `--glyph-size`
 (`1em`, so it follows the text) square, `overflow: hidden`, and what fills it

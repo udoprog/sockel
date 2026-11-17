@@ -39,7 +39,7 @@
 //!   password with show, copy and clear slots that keep their room.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
-//! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
+//! - [`Icon`] (`.glyph` or `.name`), [`IconSet`], [`use_icon`]: plinth's and the app's icons, from
 //!   the set an app provides or a built-in one, in a fixed box.
 //! - [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
 //!   placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
@@ -246,7 +246,7 @@ pub use filter_picker::{
 };
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
-pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
+pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icon_named, use_icons};
 pub use image::{
     Avatar, AvatarProps, AvatarSize, Image, ImageProps, Ratio, Status, avatar, image, initials,
 };
