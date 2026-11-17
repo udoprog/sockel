@@ -43,8 +43,8 @@
 // - `--seam-grip` and `--seam-min`: a seam's divider and each pane's least length.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
-//   `--field-border`, `--field-bg`, `--panel-ground`, `--panel-tint`): each a
-//   default an app overrides by name.
+//   `--field-border`, `--field-bg`, `--card-border`, `--panel-ground`,
+//   `--panel-tint`): each a default an app overrides by name.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
@@ -204,6 +204,7 @@ $surface-raised: var(--surface) !default;
 $scrim: rgb(0 0 0 / 0.45) !default;
 $field-border: var(--border) !default;
 $field-bg: var(--surface) !default;
+$card-border: var(--border) !default;
 $panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
 $panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
 // The breakpoint `phone-only` and `desktop-only` switch at.
@@ -348,6 +349,8 @@ $sheet-breakpoint: "phone" !default;
     // edge of a checkbox, switch and choice.
     --field-border: #{$field-border};
     --field-bg: #{$field-bg};
+    // A card's edge.
+    --card-border: #{$card-border};
     // A panel's sunken ground, and a tinted panel's.
     --panel-ground: #{$panel-ground};
     --panel-tint: #{$panel-tint};
@@ -585,7 +588,7 @@ $sheet-breakpoint: "phone" !default;
 // `.plinth-card`: a surface lifted off the page.
 @mixin card {
     padding: $card-padding;
-    @include reserved-border(var(--border));
+    @include reserved-border(var(--card-border));
     border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-1);

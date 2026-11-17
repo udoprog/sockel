@@ -697,6 +697,7 @@ mod tests {
             "--surface-raised: var(--surface)",
             "--field-border: var(--border)",
             "--field-bg: var(--surface)",
+            "--card-border: var(--border)",
             "--focus-ring-color: var(--accent)",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");
