@@ -25,8 +25,9 @@
 // - `--page-workspace` and `--page-reading`: the two content columns;
 //   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
 // - `--focus-ring-*`: the focus ring's colour, width and offset.
-// - `--layer-*`: the stacking order of what floats (sticky, overlay,
-//   dialog, toast, tooltip).
+// - `--layer-*`: the stacking order of what floats (sticky, overlay, toast,
+//   tooltip). Popovers, menus, lists and dialogs share `--layer-overlay`; the
+//   one opened later is later in the overlay host, so it is on top.
 // - `--tooltip-max-width`: a tooltip's widest; `--toast-max-width`: a toast's.
 //   An app with a tray at the window's bottom sets `--toast-tray` to its height.
 // - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
@@ -171,6 +172,7 @@ $focus-ring-width: 2px !default;
 $focus-ring-offset: 2px !default;
 $layer-sticky: 10 !default;
 $layer-overlay: 100 !default;
+// Kept so a `with()` config that sets it still compiles; nothing reads it.
 $layer-dialog: 200 !default;
 $layer-toast: 300 !default;
 $layer-tooltip: 400 !default;
@@ -304,7 +306,6 @@ $sheet-breakpoint: "phone" !default;
 
     --layer-sticky: #{$layer-sticky};
     --layer-overlay: #{$layer-overlay};
-    --layer-dialog: #{$layer-dialog};
     --layer-toast: #{$layer-toast};
     --layer-tooltip: #{$layer-tooltip};
 

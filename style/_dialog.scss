@@ -27,7 +27,7 @@
 .plinth-dialog-layer {
     position: fixed;
     inset: 0;
-    z-index: var(--layer-dialog);
+    z-index: var(--layer-overlay);
     display: flex;
     align-items: flex-start;
     justify-content: center;

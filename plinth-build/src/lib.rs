@@ -654,7 +654,6 @@ mod tests {
             "--on-accent: var(--bg)",
             "--surface-raised: var(--surface)",
             "--focus-ring-color: var(--accent)",
-            "--layer-dialog: 200",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");
         }
@@ -675,6 +674,17 @@ mod tests {
         }
         let tuned = Config::new().with("danger", "#c00").build().unwrap();
         assert!(declarations(&tuned.css, ":root").contains(&"--danger: #c00".to_owned()));
+    }
+
+    #[test]
+    fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
+        let plain = Config::new().build().unwrap();
+        assert!(
+            declarations(&plain.css, ".plinth-dialog-layer")
+                .contains(&"z-index: var(--layer-overlay)".to_owned())
+        );
+        assert!(!plain.css.contains("--layer-dialog"));
+        assert!(Config::new().with("layer-dialog", "250").build().is_ok());
     }
 
     fn fixture(name: &str) -> PathBuf {

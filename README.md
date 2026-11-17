@@ -290,7 +290,7 @@ page can still override them at runtime.
 | `$toolbar-gap` | `var(--space-1)` |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
-| `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` |
+| `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim` | see [Theming](#theming) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
@@ -806,9 +806,10 @@ For a component of your own, `use_overlays()` returns the nearest host's
 `overlay(html)` always uses the fallback layer, since a plain function
 cannot see a context. Prefer `use_overlays().portal(html)` in components.
 
-Layer order between kinds is the `--layer-*` scale (overlay, dialog, toast,
-tooltip, lowest first). Within one kind, the one opened later is on top.
-An open dialog puts the page and the overlays opened before it out of
+Every stacked overlay (popover, menu, list, hover card, dialog) is at
+`--layer-overlay`, and the one opened later is later in the host, so on top.
+Toasts and tooltips (`--layer-toast`, `--layer-tooltip`) stay above. Within
+this, ordering is by opening, not kind. An open dialog puts the page and the overlays opened before it out of
 reach (`inert`), but never the toast region: a toast's Undo over a dialog
 still works, and it is still announced.
 
@@ -1542,9 +1543,9 @@ rule of the same weight; none uses `!important`.
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
 | `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded (`Toolbar`, `Tabs`). |
 
-Layers: `--layer-sticky`, `--layer-overlay`, `--layer-dialog`,
-`--layer-toast` and `--layer-tooltip` are the one `z-index` scale for what
-floats, lowest first.
+Layers: `--layer-sticky`, `--layer-overlay`, `--layer-toast` and
+`--layer-tooltip` are the one `z-index` scale for what floats, lowest first.
+Popovers, menus, lists and dialogs all sit at `--layer-overlay`.
 
 ## Showcase
 
