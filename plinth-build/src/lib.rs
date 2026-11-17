@@ -883,6 +883,73 @@ mod tests {
     }
 
     #[test]
+    fn a_pager_takes_its_look_from_settings() {
+        let tuned = Config::new()
+            .with("pager-gap", "2px")
+            .with("pager-button-radius", "999px")
+            .with("pager-button-ink", "var(--muted)")
+            .with("pager-button-text", "14px")
+            .with("pager-button-hover-fill", "var(--hover)")
+            .with("pager-button-hover-ink", "var(--text)")
+            .with("pager-current-fill", "var(--chosen)")
+            .with("pager-current-ink", "var(--on-chosen)")
+            .with("pager-step-ink", "var(--text)")
+            .with("pager-phone-height", "44px")
+            .build()
+            .unwrap();
+        assert!(declarations(&tuned.css, ".plinth-pager").contains(&"gap: 2px".to_owned()));
+        let button = declarations(&tuned.css, ".plinth-pager-button");
+        for line in [
+            "border-radius: 999px",
+            "color: var(--muted)",
+            "font-size: 14px",
+        ] {
+            assert!(button.contains(&line.to_owned()), "{line} in {button:?}");
+        }
+        let hover = declarations(&tuned.css, ".plinth-pager-button:hover:not(:disabled)");
+        assert!(
+            hover.contains(&"color: var(--text)".to_owned()),
+            "{hover:?}"
+        );
+        assert!(tuned.css.contains("background: var(--chosen)"));
+        assert!(tuned.css.contains("--control-height: 44px"));
+        let mark = declarations(&tuned.css, ".plinth-pager-mark");
+        assert!(mark.contains(&"color: var(--text)".to_owned()), "{mark:?}");
+    }
+
+    #[test]
+    fn a_skeleton_takes_its_look_from_settings() {
+        let plain = Config::new().build().unwrap();
+        assert!(
+            !declarations(&plain.css, ".plinth-skeleton")
+                .iter()
+                .any(|l| l.starts_with("box-shadow"))
+        );
+        let tuned = Config::new()
+            .with("skeleton-fill", "var(--glass)")
+            .with("skeleton-edge", "var(--soft)")
+            .with("skeleton-radius", "0")
+            .with("skeleton-line-height", "24px")
+            .with("skeleton-line-inset", "0")
+            .with("skeleton-phone-height", "44px")
+            .build()
+            .unwrap();
+        let block = declarations(&tuned.css, ".plinth-skeleton");
+        for line in [
+            "border-radius: 0",
+            "background-color: var(--glass)",
+            "box-shadow: inset 0 0 0 1px var(--soft)",
+        ] {
+            assert!(block.contains(&line.to_owned()), "{line} in {block:?}");
+        }
+        let line = declarations(&tuned.css, ".plinth-skeleton.plinth-line");
+        for decl in ["--skeleton-height: 24px", "--skeleton-inset: 0"] {
+            assert!(line.contains(&decl.to_owned()), "{decl} in {line:?}");
+        }
+        assert!(tuned.css.contains("--skeleton-height: 44px"));
+    }
+
+    #[test]
     fn a_pick_row_takes_its_look_from_settings() {
         let tuned = Config::new()
             .with("pick-row-height", "36px")

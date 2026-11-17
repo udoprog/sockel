@@ -237,6 +237,32 @@ $pick-row-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
 $pick-row-detail-ink: color-mix(in srgb, currentcolor 70%, transparent) !default;
 $pick-row-detail-text: var(--text-sm) !default;
 
+// A skeleton's fill, edge (a 1px line inside it; `null`: none), corners,
+// a line's height and the transparent inset that thins it (`null`: a fifth
+// of a line), and a block's height below the phone breakpoint (`null`: as
+// above it).
+$skeleton-fill: color-mix(in srgb, var(--text) 8%, var(--surface)) !default;
+$skeleton-edge: null !default;
+$skeleton-radius: var(--radius-sm) !default;
+$skeleton-line-height: 1lh !default;
+$skeleton-line-inset: null !default;
+$skeleton-phone-height: null !default;
+
+// A pager's gap, its buttons' corners, ink, type size (`null`: inherited),
+// hover fill and ink (`null`: as at rest), the current page's fill and ink,
+// the chevrons' ink (`null`: the button's), and its controls' height below
+// the phone breakpoint (`null`: as above it).
+$pager-gap: var(--space-1) !default;
+$pager-button-radius: var(--radius-sm) !default;
+$pager-button-ink: var(--text) !default;
+$pager-button-text: null !default;
+$pager-button-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
+$pager-button-hover-ink: null !default;
+$pager-current-fill: var(--accent) !default;
+$pager-current-ink: var(--on-accent) !default;
+$pager-step-ink: null !default;
+$pager-phone-height: null !default;
+
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
 $text-3xs: 0.625rem !default;

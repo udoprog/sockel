@@ -26,6 +26,9 @@ pub struct SkeletonProps {
     /// How many, in a column; the last of several lines is shorter.
     #[prop_or(1)]
     pub count: usize,
+    /// Its width (a CSS length, such as the text it stands for).
+    #[prop_or_default]
+    pub width: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
 }
@@ -48,11 +51,16 @@ pub fn skeleton(shape: SkeletonShape, short: bool) -> Classes {
 /// say what is loading with a status ([`Loadable`](crate::Loadable)).
 #[function_component]
 pub fn Skeleton(props: &SkeletonProps) -> Html {
-    let style = match props.shape {
+    let ratio = match props.shape {
         SkeletonShape::Image(Ratio::Explicit(width, height)) => {
             Some(format!("--ratio: {width} / {height}"))
         }
         _ => None,
+    };
+    let width = props.width.as_ref().map(|width| format!("width: {width}"));
+    let style = match (ratio, width) {
+        (Some(ratio), Some(width)) => Some(format!("{ratio}; {width}")),
+        (ratio, width) => ratio.or(width),
     };
     let one = |short: bool, extra: Classes, testid: Option<AttrValue>| {
         html! {

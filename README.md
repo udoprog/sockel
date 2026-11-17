@@ -336,6 +336,10 @@ page can still override them at runtime.
 | `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
 | `$glyph-size` | `1em` |
 | `$skeleton-duration` | `1.4s` |
+| `$pager-gap`, `$pager-button-radius`, `$pager-button-ink`, `$pager-button-text` | `var(--space-1)`, `var(--radius-sm)`, `var(--text)`, `null` (inherited) (a pager's gap and its buttons' corners, ink and size) |
+| `$pager-button-hover-fill`, `$pager-button-hover-ink`, `$pager-current-fill`, `$pager-current-ink`, `$pager-step-ink`, `$pager-phone-height` | 12% of `--accent`, `null` (as at rest), `var(--accent)`, `var(--on-accent)`, `null` (the button's), `null` (a button's hover, the current page's fill and ink, the chevrons' ink, and the controls' height below the phone breakpoint) |
+| `$skeleton-fill`, `$skeleton-edge`, `$skeleton-radius` | 8% of `--text` over `--surface`, `null` (none), `var(--radius-sm)` (a skeleton's fill, the 1px line inside its edge and its corners) |
+| `$skeleton-line-height`, `$skeleton-line-inset`, `$skeleton-phone-height` | `1lh`, `null` (a fifth of a line), `null` (a line's height and the transparent inset that thins it; a block's height below the phone breakpoint) |
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 | `$filter-width` | `10.5rem` |
@@ -842,8 +846,9 @@ classes, `POSTER` and the rest). `count` stacks several in a column
 (`SKELETON_GROUP`); the last of several lines is `SHORT`. A group reserves
 the 1px border a `RowList` does, so `count` skeleton rows are exactly as high
 as `count` one-line rows. It is `aria-hidden` and shimmers, still under
-`prefers-reduced-motion` (`--skeleton-duration`). `skeleton(shape, short)`
-gives the classes.
+`prefers-reduced-motion` (`--skeleton-duration`). `width` sets its width (each
+one's, with `count`), such as the length of the text it stands for.
+`skeleton(shape, short)` gives the classes.
 
 `Loadable` is one box for content that loads. `state` (`LoadState`):
 `Loading` shows the placeholder (`placeholder`, or `rows` skeleton rows),
@@ -1387,7 +1392,10 @@ same rules. New token: `--table-max-height`.
 numbers with gaps (`…`), next and last. `page` (from 0), `pages`, `on_page`
 (called with the page asked for), `slots` (default 7, at least `MIN_SLOTS`,
 5), `edges` (default true: the first and last page buttons; hidden below the
-phone breakpoint, and worth turning off in a narrow container), `label` ("Pages"),
+phone breakpoint, and worth turning off in a narrow container), `phone_steps`
+(default true: the previous and next page buttons below the phone breakpoint;
+false hides them there with `DESKTOP_ONLY`, so `_utilities.scss` must be
+loaded), `label` ("Pages"),
 `first_label`, `previous_label`, `next_label`, `last_label`, `page_label`
 ("Page", the number appended) and `disabled` and `busy` (the buttons keep
 their room and ignore presses). `pager_slots(pages, page, slots)` is the pure

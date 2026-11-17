@@ -71,6 +71,10 @@ pub struct PagerProps {
     /// First and last page buttons, hidden on a phone.
     #[prop_or(true)]
     pub edges: bool,
+    /// The previous and next page buttons below the phone breakpoint;
+    /// `false` hides them there (`DESKTOP_ONLY`, from `_utilities.scss`).
+    #[prop_or(true)]
+    pub phone_steps: bool,
     /// What the navigation is for (`aria-label` of the `nav`).
     #[prop_or("Pages".into())]
     pub label: AttrValue,
@@ -130,8 +134,9 @@ pub fn Pager(props: &PagerProps) -> Html {
     let step = |label: &AttrValue, forward: bool, to: usize, off: bool, edge: bool| {
         let double =
             edge.then(|| html! { <Icon glyph={Glyph::ChevronRight} class={class::PAGER_ECHO} /> });
+        let hidden = (!edge && !props.phone_steps).then_some(class::DESKTOP_ONLY);
         html! {
-            <button type="button" class={pager_button(edge)} aria-label={label.clone()}
+            <button type="button" class={classes!(pager_button(edge), hidden)} aria-label={label.clone()}
                 disabled={blocked || off} onclick={go(to)}>
                 <span class={classes!(class::PAGER_MARK, (!forward).then_some(class::PAGER_FLIP))} aria-hidden="true">
                     <Icon glyph={Glyph::ChevronRight} />

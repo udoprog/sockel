@@ -26,9 +26,15 @@
     flex-wrap: nowrap;
     align-items: center;
     justify-content: center;
-    gap: var(--space-1);
+    gap: base.$pager-gap;
     max-width: 100%;
     @include base.numeric;
+
+    @if base.$pager-phone-height {
+        @include base.below(phone) {
+            --control-height: #{base.$pager-phone-height};
+        }
+    }
 
     &.plinth-disabled,
     &.plinth-busy {
@@ -52,22 +58,24 @@
     margin: 0;
     padding: 0;
     @include base.reserved-border;
-    border-radius: var(--radius-sm);
+    border-radius: base.$pager-button-radius;
     background: transparent;
-    color: var(--text);
+    color: base.$pager-button-ink;
     font: inherit;
+    font-size: base.$pager-button-text;
     line-height: 1;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
+        background: base.$pager-button-hover-fill;
+        color: base.$pager-button-hover-ink;
     }
 
     @include base.focus-ring;
 
     &[aria-current]:not([aria-current="false"]) {
-        background: var(--accent);
-        color: var(--on-accent);
+        background: base.$pager-current-fill;
+        color: base.$pager-current-ink;
         cursor: default;
     }
 
@@ -98,6 +106,7 @@
 .plinth-pager-mark {
     display: inline-flex;
     align-items: center;
+    color: base.$pager-step-ink;
 
     &.plinth-pager-flip {
         transform: rotate(180deg);

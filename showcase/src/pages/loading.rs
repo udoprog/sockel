@@ -56,16 +56,20 @@ const SHAPES: &[(&str, SkeletonShape)] = &[
 
 const COUNT: &[(&str, usize)] = &[("3", 3), ("1", 1), ("5", 5), ("8", 8)];
 
+const WIDTHS: &[(&str, &str)] = &[("none", ""), ("14rem", "14rem"), ("50%", "50%")];
+
 #[function_component]
 pub fn SkeletonPage() -> Html {
     let shape = use_state(|| SkeletonShape::Row);
     let count = use_state(|| 3);
+    let width = use_state(|| "");
     let compare = use_state(|| true);
 
     let controls = html! {
         <>
             <Select<SkeletonShape> label="shape" options={SHAPES} value={*shape} on_change={bind(&shape)} />
             <Select<usize> label="count" options={COUNT} value={*count} on_change={bind(&count)} />
+            <Select<&'static str> label="width" options={WIDTHS} value={*width} on_change={bind(&width)} />
             <Toggle label="RowList beside" value={*compare} on_change={bind(&compare)} />
         </>
     };
@@ -87,13 +91,15 @@ pub fn SkeletonPage() -> Html {
                     other => format!("SkeletonShape::{other:?}"),
                 },
             )
-            .expr_if(*count != 1, "count", count.to_string()),
+            .expr_if(*count != 1, "count", count.to_string())
+            .text_if(!width.is_empty(), "width", &width),
     );
+    let shown_width = (!width.is_empty()).then(|| AttrValue::from(*width));
 
     html! {
         <Demo {controls} {code}>
             { shown(&format!("skeleton({name}, short)"), &skeleton(*shape, false)) }
-            <Skeleton shape={*shape} count={*count} />
+            <Skeleton shape={*shape} count={*count} width={shown_width} />
             if *compare {
                 <RowList divided=true>
                     { for (1..=*count).map(|n| html! {
