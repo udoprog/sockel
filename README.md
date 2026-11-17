@@ -685,7 +685,10 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   key first (preventing escape's default keeps the text). `controls` (a
   listbox's id) makes it that list's combobox (`role="combobox"`,
   `aria-controls`, autocomplete off), `activedescendant` naming its active
-  option. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
+  option, and `expanded` (unset is shown) its `aria-expanded`. `placeholder`
+  replaces the label as the placeholder, `title` is the text's tooltip,
+  `keyshortcuts` its `aria-keyshortcuts`, and `on_focus`/`on_blur` see the
+  text's focus. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
   and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the `IconSet`'s
   search glyph.
 - `InputGroup` (`.plinth-input-group`): controls joined in a row. Give each

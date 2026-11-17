@@ -343,6 +343,23 @@ pub struct SearchFieldProps {
     /// With `controls`, the active option's id (`aria-activedescendant`).
     #[prop_or_default]
     pub activedescendant: Option<AttrValue>,
+    /// With `controls`, whether the list shows (`aria-expanded`); unset is
+    /// shown.
+    #[prop_or_default]
+    pub expanded: Option<bool>,
+    /// A placeholder other than the `label`.
+    #[prop_or_default]
+    pub placeholder: Option<AttrValue>,
+    /// The text's tooltip (`title`).
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
+    /// The keys that focus it from elsewhere (`aria-keyshortcuts`).
+    #[prop_or_default]
+    pub keyshortcuts: Option<AttrValue>,
+    #[prop_or_default]
+    pub on_focus: Option<Callback<FocusEvent>>,
+    #[prop_or_default]
+    pub on_blur: Option<Callback<FocusEvent>>,
 }
 
 /// A search icon, the text and a button that clears it. The icon's and the
@@ -396,17 +413,20 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
         )} aria-busy={props.busy.then_some("true")}>
             <span class={class::INPUT_MARK}><Icon {glyph} /></span>
             <input class={class::INPUT_CONTROL} type="search" id={props.id.clone()}
-                value={props.value.clone()} placeholder={props.label.clone()}
+                value={props.value.clone()}
+                placeholder={props.placeholder.clone().unwrap_or_else(|| props.label.clone())}
+                title={props.title.clone()} aria-keyshortcuts={props.keyshortcuts.clone()}
                 aria-label={props.label.clone()} aria-invalid={props.invalid.then_some("true")}
                 disabled={props.disabled} enterkeyhint="search"
                 data-autofocus={props.autofocus.then_some("")}
                 role={combobox.then_some("combobox")}
                 aria-autocomplete={combobox.then_some("list")}
-                aria-expanded={combobox.then_some("true")}
+                aria-expanded={combobox.then(|| if props.expanded.unwrap_or(true) { "true" } else { "false" })}
                 aria-controls={props.controls.clone()}
                 aria-activedescendant={props.activedescendant.clone()}
                 autocomplete={combobox.then_some("off")} spellcheck={combobox.then_some("false")}
                 data-testid={props.testid.clone()} ref={input}
+                onfocus={props.on_focus.clone()} onblur={props.on_blur.clone()}
                 {oninput} {onkeydown} />
             <button type="button" class={classes!(class::INPUT_CLEAR, empty.then_some(class::EMPTY))}
                 aria-label={label(&phrases, &props.clear_label, "plinth-search-field-clear")} disabled={props.disabled || empty}
@@ -451,6 +471,12 @@ mod tests {
             on_keydown: None,
             controls: None,
             activedescendant: None,
+            expanded: None,
+            placeholder: None,
+            title: None,
+            keyshortcuts: None,
+            on_focus: None,
+            on_blur: None,
         }
     }
 
@@ -586,6 +612,33 @@ mod tests {
         assert!(html.contains("aria-controls=\"list\""), "{html}");
         assert!(html.contains("aria-activedescendant=\"list-2\""), "{html}");
         assert!(html.contains(class::INPUT_CLEAR), "{html}");
+        assert!(html.contains("aria-expanded=\"true\""), "{html}");
+        let shut = render::<SearchField>(SearchFieldProps {
+            controls: Some("list".into()),
+            expanded: Some(false),
+            ..search("ab")
+        });
+        assert!(shut.contains("aria-expanded=\"false\""), "{shut}");
+    }
+
+    #[test]
+    fn a_placeholder_title_and_shortcut_are_its_own() {
+        let plain = render::<SearchField>(search(""));
+        assert!(plain.contains("placeholder=\"Search\""), "{plain}");
+        assert!(
+            !plain.contains("title=") && !plain.contains("aria-keyshortcuts"),
+            "{plain}"
+        );
+        let html = render::<SearchField>(SearchFieldProps {
+            placeholder: Some("Find a rule".into()),
+            title: Some("Search the rules".into()),
+            keyshortcuts: Some("/".into()),
+            ..search("")
+        });
+        assert!(html.contains("placeholder=\"Find a rule\""), "{html}");
+        assert!(html.contains("aria-label=\"Search\""), "{html}");
+        assert!(html.contains("title=\"Search the rules\""), "{html}");
+        assert!(html.contains("aria-keyshortcuts=\"/\""), "{html}");
     }
 
     #[test]
