@@ -688,7 +688,10 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 
 Size guarantees: the Stepper's number has the room of the longest of `min`
 and `max` in `ch` with `numeric` figures, so its box is the same from the
-least value to the most, the buttons only disabled at a bound; the
+least value to the most, the buttons only disabled at a bound; the number wears `.plinth-zero`
+(`ZERO`) at 0, and the settings `$stepper-number-weight`,
+`$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
+text) restyle the number and the zero; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
 `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs

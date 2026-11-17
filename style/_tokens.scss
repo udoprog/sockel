@@ -179,6 +179,11 @@ $listbox-shadow: null !default;
 // A Select's rows in its phone sheet (`null`: `--control-height`, as
 // above the breakpoint; `var(--touch-height)` gives a finger room).
 $select-sheet-row-height: null !default;
+// A Stepper's number's weight, and its ink and weight at zero (`null`:
+// the field's, as any other number).
+$stepper-number-weight: null !default;
+$stepper-zero-ink: null !default;
+$stepper-zero-weight: null !default;
 $listbox-group-name-transform: null !default;
 $listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;

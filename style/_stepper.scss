@@ -7,7 +7,10 @@
 //   buttons and the number's room.
 // - `.plinth-stepper-control`: the number, `--stepper-chars` wide in `ch`
 //   (the digits of the longest of min and max, set by the component), its
-//   figures of one width, so the box holds from min to max.
+//   figures of one width, so the box holds from min to max;
+//   `.plinth-zero` while the value is 0. `$stepper-number-weight`, and
+//   `$stepper-zero-ink` and `$stepper-zero-weight` at zero, restyle it
+//   (`null`: as the field's text).
 // - `.plinth-stepper-button`: a square of the box's height.
 
 @use "tokens" as base;
@@ -25,8 +28,15 @@
     box-sizing: content-box;
     width: calc(var(--stepper-chars) * 1ch);
     padding-inline: var(--space-2);
+    min-height: 0;
     text-align: center;
+    font-weight: base.$stepper-number-weight;
     @include base.numeric;
+
+    &.plinth-zero {
+        color: base.$stepper-zero-ink;
+        font-weight: base.$stepper-zero-weight;
+    }
 }
 
 .plinth-stepper-button {
@@ -37,6 +47,7 @@
     box-sizing: border-box;
     width: var(--input-height);
     height: 100%;
+    min-height: 0;
     margin: 0;
     padding: 0;
     border: 0;

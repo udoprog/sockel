@@ -180,7 +180,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
         )} role="group" aria-busy={props.busy.then_some("true")}
             style={format!("--stepper-chars: {chars}")}>
             { button(-1, Glyph::Minus, &props.less_label, props.value <= min) }
-            <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL)}
+            <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0).then_some(class::ZERO))}
                 id={props.id.clone()} type="text" inputmode="numeric" autocomplete="off"
                 value={shown} aria-label={props.label.clone()}
                 aria-invalid={(props.invalid || !typed_ok).then_some("true")}
@@ -281,6 +281,12 @@ mod tests {
         assert_eq!(live_value(true, "150", 7, 0, 100), None);
         assert_eq!(live_value(true, "", 7, 0, 100), None);
         assert_eq!(live_value(false, "12", 7, 0, 100), None);
+    }
+
+    #[test]
+    fn the_number_is_marked_at_zero() {
+        assert!(render(props(0)).contains(class::ZERO));
+        assert!(!render(props(5)).contains(class::ZERO));
     }
 
     #[test]
