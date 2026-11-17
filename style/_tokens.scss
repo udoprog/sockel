@@ -61,6 +61,7 @@
 //   `table-head-cell`, `table-cell`, `table-row-hover`.
 // - `tones`: the `--tone` modifiers (accent, busy, success, warning, danger).
 
+@use "sass:list";
 @use "sass:map";
 
 // The widths a layout changes at: `below` styles up to one, `above` from
@@ -114,6 +115,18 @@ $toolbar-gap: var(--space-1) !default;
 $button-padding: var(--space-3) !default;
 $button-padding-small: var(--space-2) !default;
 $button-primary-weight: null !default;
+// A button's corners, the gap between what an app's markup puts straight in
+// it, the colour laid over it while it is pressed down and its transition
+// (`null`: none of the last three).
+$button-radius: var(--radius-inner, var(--radius-sm)) !default;
+$button-gap: null !default;
+$button-press-shade: null !default;
+$button-transition: null !default;
+// A button's colours per variant, over plinth's: a map from `secondary`,
+// `primary`, `ghost`, `quiet`, `danger` or `success` to any of `fill`,
+// `ink`, `edge`, `hover-edge`, `hover-fill`, `pressed-fill`, `pressed-ink`
+// and `pressed-edge`. A variant falls back on the plain button's.
+$button-colours: () !default;
 // A dialog's padding (the head's start, the body's sides and bottom, the
 // foot's sides), that padding below `$sheet-breakpoint` (`null`: the
 // same), the gap between its body's children (`null`: the body is a plain
@@ -682,6 +695,15 @@ $sheet-breakpoint: "phone" !default;
     } @else {
         @error "button-variant: secondary, primary, ghost, quiet, danger or success, not #{$variant}";
     }
+
+    @if map.has-key($button-colours, $variant) {
+        @each $part, $colour in map.get($button-colours, $variant) {
+            @if not list.index(fill ink edge hover-edge hover-fill pressed-fill pressed-ink pressed-edge, $part) {
+                @error "$button-colours: #{$part} is not a button colour";
+            }
+            --button-#{$part}: #{$colour};
+        }
+    }
 }
 
 // `.plinth-button`, the plain one; pass a variant for another. Its states
@@ -707,7 +729,7 @@ $sheet-breakpoint: "phone" !default;
     padding-block: 0;
     padding-inline: var(--button-pad-x, #{$button-padding});
     @include reserved-border(var(--button-edge));
-    border-radius: var(--radius-inner, var(--radius-sm));
+    border-radius: $button-radius;
     background: var(--button-fill);
     color: var(--button-ink);
     font: inherit;
@@ -716,16 +738,29 @@ $sheet-breakpoint: "phone" !default;
     white-space: nowrap;
     vertical-align: middle;
     cursor: pointer;
+    gap: $button-gap;
+    transition: $button-transition;
 
     &:hover {
         border-color: var(--button-hover-edge);
     }
 
+    &:where(:hover:not(:disabled, [aria-disabled="true"], [aria-pressed="true"])) {
+        background: var(--button-hover-fill, var(--button-fill));
+    }
+
+    @if $button-press-shade {
+        &:where(:active:not(:disabled, [aria-disabled="true"], [aria-busy="true"])) {
+            background-image: linear-gradient($button-press-shade, $button-press-shade);
+        }
+    }
+
     @include focus-ring;
 
     &[aria-pressed="true"] {
-        border-color: var(--accent);
-        background: color-mix(in srgb, var(--accent) 16%, var(--button-fill));
+        border-color: var(--button-pressed-edge, var(--accent));
+        background: var(--button-pressed-fill, color-mix(in srgb, var(--accent) 16%, var(--button-fill)));
+        color: var(--button-pressed-ink, var(--button-ink));
     }
 
     &[aria-busy="true"] {

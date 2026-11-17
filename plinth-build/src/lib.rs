@@ -798,6 +798,62 @@ mod tests {
     }
 
     #[test]
+    fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
+        let plain = Config::new().build().unwrap();
+        let base = declarations(&plain.css, ".plinth-button");
+        assert!(base.contains(&"border-radius: var(--radius-inner, var(--radius-sm))".to_owned()));
+        assert!(
+            !base
+                .iter()
+                .any(|line| line.starts_with("gap") || line.starts_with("transition"))
+        );
+        assert!(!plain.css.contains(":where(:active"));
+        assert!(
+            !declarations(&plain.css, ".plinth-button.plinth-danger")
+                .iter()
+                .any(|line| line.starts_with("--button-fill"))
+        );
+
+        let tuned = Config::new()
+            .with("button-radius", "3px")
+            .with("button-gap", "4px")
+            .with("button-transition", "background-color 80ms ease")
+            .with("button-press-shade", "rgba(0, 0, 0, 0.2)")
+            .with(
+                "button-colours",
+                "(secondary: (fill: var(--raised), hover-fill: var(--raised-high)), danger: (edge: var(--border)))",
+            )
+            .build()
+            .unwrap();
+        let base = declarations(&tuned.css, ".plinth-button");
+        for line in [
+            "border-radius: 3px",
+            "gap: 4px",
+            "transition: background-color 80ms ease",
+            "--button-fill: var(--raised)",
+            "--button-hover-fill: var(--raised-high)",
+        ] {
+            assert!(base.contains(&line.to_owned()), "{line} in {base:?}");
+        }
+        assert!(
+            declarations(&tuned.css, ".plinth-button.plinth-danger")
+                .contains(&"--button-edge: var(--border)".to_owned())
+        );
+        assert!(
+            tuned.css.contains(
+                "background-image: linear-gradient(rgba(0, 0, 0, 0.2), rgba(0, 0, 0, 0.2))"
+            )
+        );
+
+        assert!(
+            Config::new()
+                .with("button-colours", "(secondary: (glow: red))")
+                .build()
+                .is_err()
+        );
+    }
+
+    #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
         let plain = Config::new().build().unwrap();
         assert!(

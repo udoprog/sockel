@@ -286,7 +286,8 @@ selector:
 
 Breakpoints and the component settings (`$card-padding`,
 `$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
-`$button-primary-weight`, `$dialog-padding`, `$dialog-padding-phone`,
+`$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
+`$button-transition`, `$button-colours`, `$dialog-padding`, `$dialog-padding-phone`,
 `$dialog-body-gap`, `$dialog-shadow`, `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
@@ -339,6 +340,9 @@ page can still override them at runtime.
 | `$toolbar-gap` | `var(--space-1)` |
 | `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.plinth-button`'s sides, regular and small) |
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
+| `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
+| `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |
+| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `pressed-fill`, `pressed-ink`, `pressed-edge` over plinth's; a variant falls back on the plain button's |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap), `var(--shadow-1)` |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
@@ -382,7 +386,10 @@ Size guarantees: the height is the size's token, whatever the label (one
 line, cut with an ellipsis; the button never grows past its container) and
 whatever `min-height` an app gives its own `button` elements.
 The border is always there (`reserved-border`), so hover, pressed and the
-variants change colours only; focus is an outline. Pressed never changes
+variants change colours only; focus is an outline. Hover lights the border
+(`hover-edge`) and, when `$button-colours` gives one, the fill
+(`hover-fill`); pressed takes `pressed-fill`, `pressed-ink` and
+`pressed-edge`, by default the accent's border over a tint of the fill. Pressed never changes
 the font weight. Busy hides the icon and label with `visibility`, so the
 box keeps their width. Fold swaps at a fixed breakpoint, and the icon's
 box does not change with it.
