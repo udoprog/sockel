@@ -55,10 +55,7 @@
 @use "tokens" as base;
 
 .plinth-stack {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
+    @include base.stack;
 }
 
 // A stack whose items keep their own width (a message over its button).
@@ -124,11 +121,7 @@
 }
 
 .plinth-cluster {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-    min-width: 0;
+    @include base.cluster;
 
     &.plinth-inline {
         display: inline-flex;
@@ -308,12 +301,7 @@
 }
 
 .plinth-card {
-    padding: base.$card-padding;
-    @include base.reserved-border(var(--border));
-    border-radius: var(--radius-lg);
-    background: var(--surface);
-    box-shadow: var(--shadow-1);
-    color: var(--text);
+    @include base.card;
 
     &.plinth-compact {
         padding: var(--space-3);

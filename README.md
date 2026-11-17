@@ -1571,6 +1571,26 @@ rule of the same weight; none uses `!important`.
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
 | `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded (`Toolbar`, `Tabs`). |
 
+### Recipes for markup plinth does not render
+
+A dependency's markup (a sign-in form, a user table) cannot wear plinth's
+classes. The mixins below are the rules of the classes they name, which
+include them, so such markup styled with them looks and behaves as
+plinth's own: `.auth-card { @include p.card; }`.
+
+| Mixin | The rule of |
+| --- | --- |
+| `stack($gap: var(--space-3))` | `.plinth-stack` (a gap of the scale for its modifiers) |
+| `cluster($gap: var(--space-2), $wrap: true)` | `.plinth-cluster` (`$wrap: false` for `.plinth-nowrap`) |
+| `card` | `.plinth-card` |
+| `field`, `field-label` | `.plinth-field`, `.plinth-field-label` |
+| `button($variant: secondary)` | `.plinth-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
+| `table-base`, `table-head-cell`, `table-cell`, `table-row-hover` | a table's (see Table) |
+
+A button styled this way lays out its own content (plinth's puts it in
+`.plinth-button-content`): give the markup a gap of its own if it holds an
+icon and a label.
+
 Layers: `--layer-sticky`, `--layer-overlay`, `--layer-toast` and
 `--layer-tooltip` are the one `z-index` scale for what floats, lowest first.
 Popovers, menus, lists and dialogs all sit at `--layer-overlay`.

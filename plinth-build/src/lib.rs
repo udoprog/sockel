@@ -646,6 +646,46 @@ mod tests {
     }
 
     #[test]
+    fn the_recipe_mixins_are_their_classes_rules() {
+        let css = compile_probe(
+            ".x-stack { @include p.stack; }\n\
+             .x-cluster { @include p.cluster; }\n\
+             .x-line { @include p.cluster($wrap: false); }\n\
+             .x-card { @include p.card; }\n\
+             .x-field { @include p.field; }\n\
+             .x-label { @include p.field-label; }\n\
+             .x-button { @include p.button; }\n\
+             .x-primary { @include p.button(primary); }\n",
+        )
+        .unwrap();
+        let (plinth, probe) = css.split_at(css.find(".x-stack").unwrap());
+        for (probe_rule, class) in [
+            (".x-stack", ".plinth-stack"),
+            (".x-cluster", ".plinth-cluster"),
+            (".x-card", ".plinth-card"),
+            (".x-field", ".plinth-field"),
+            (".x-label", ".plinth-field-label"),
+            (".x-button", ".plinth-button"),
+            (".x-button:hover", ".plinth-button:hover"),
+            (
+                ".x-button:disabled, .x-button[aria-disabled=true]",
+                ".plinth-button:disabled, .plinth-button[aria-disabled=true]",
+            ),
+        ] {
+            assert_eq!(
+                declarations(probe, probe_rule),
+                declarations(plinth, class),
+                "{class}"
+            );
+        }
+        assert!(declarations(probe, ".x-line").contains(&"flex-wrap: nowrap".to_owned()));
+        let primary = declarations(probe, ".x-primary");
+        assert!(primary.contains(&"--button-fill: var(--accent)".to_owned()));
+        assert!(primary.contains(&"height: var(--control-height)".to_owned()));
+        assert!(compile_probe(".x { @include p.button(loud); }").is_err());
+    }
+
+    #[test]
     fn the_colour_contract_defaults_and_configures() {
         let plain = Config::new().build().unwrap();
         let root = declarations(&plain.css, ":root");

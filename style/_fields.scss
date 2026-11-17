@@ -17,10 +17,7 @@
 @use "tokens" as base;
 
 .plinth-field {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    min-width: 0;
+    @include base.field;
 
     &.plinth-busy {
         cursor: progress;
@@ -35,9 +32,7 @@
 }
 
 .plinth-field-label {
-    min-width: 0;
-    font-size: var(--text-sm);
-    overflow-wrap: anywhere;
+    @include base.field-label;
 }
 
 .plinth-field-required {

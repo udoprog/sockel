@@ -545,3 +545,141 @@ $sheet-breakpoint: "phone" !default;
 @mixin table-row-hover {
     background: color-mix(in srgb, var(--text) 4%, transparent);
 }
+
+// The recipes of plinth's own classes, for markup plinth does not render (a
+// dependency's sign-in forms, say), so it looks the same. Each is the rule
+// of the class it names, which includes it.
+
+// `.plinth-stack`: a column, its blocks `$gap` apart.
+@mixin stack($gap: var(--space-3)) {
+    display: flex;
+    flex-direction: column;
+    gap: $gap;
+    min-width: 0;
+}
+
+// `.plinth-cluster`: a row, its items centred, `$gap` apart; `$wrap: false`
+// keeps it to one line.
+@mixin cluster($gap: var(--space-2), $wrap: true) {
+    display: flex;
+    @if $wrap {
+        flex-wrap: wrap;
+    } @else {
+        flex-wrap: nowrap;
+    }
+    align-items: center;
+    gap: $gap;
+    min-width: 0;
+}
+
+// `.plinth-card`: a surface lifted off the page.
+@mixin card {
+    padding: $card-padding;
+    @include reserved-border(var(--border));
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+    color: var(--text);
+}
+
+// `.plinth-field`: a label, its control, a hint and an error, stacked.
+@mixin field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+// `.plinth-field-label`.
+@mixin field-label {
+    min-width: 0;
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
+}
+
+// The colours of a `.plinth-button` variant: `secondary` (the plain
+// button), `primary`, `ghost`, `quiet`, `danger` or `success`.
+@mixin button-variant($variant) {
+    @if $variant == secondary {
+        --button-fill: var(--surface);
+        --button-ink: var(--text);
+        --button-edge: var(--border);
+        --button-hover-edge: var(--accent);
+    } @else if $variant == primary {
+        --button-fill: var(--accent);
+        --button-ink: var(--on-accent);
+        --button-edge: var(--accent);
+        --button-hover-edge: var(--text);
+    } @else if $variant == ghost {
+        --button-fill: transparent;
+    } @else if $variant == quiet {
+        --button-fill: transparent;
+        --button-ink: var(--muted);
+        --button-edge: transparent;
+        --button-hover-edge: var(--border);
+    } @else if $variant == danger {
+        --button-ink: var(--danger);
+        --button-edge: var(--danger);
+        --button-hover-edge: var(--text);
+    } @else if $variant == success {
+        --button-ink: var(--success);
+        --button-edge: var(--success);
+        --button-hover-edge: var(--text);
+    } @else {
+        @error "button-variant: secondary, primary, ghost, quiet, danger or success, not #{$variant}";
+    }
+}
+
+// `.plinth-button`, the plain one; pass a variant for another. Its states
+// (hover, focus, `aria-pressed`, `aria-busy`, disabled) come with it. A
+// button's content is laid out by the app's markup, as a row with a gap.
+@mixin button($variant: secondary) {
+    @include button-variant(secondary);
+    @if $variant != secondary {
+        @include button-variant($variant);
+    }
+
+    position: relative;
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    max-width: 100%;
+    height: var(--control-height);
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--button-pad-x, var(--space-3));
+    @include reserved-border(var(--button-edge));
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: var(--button-fill);
+    color: var(--button-ink);
+    font: inherit;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--button-hover-edge);
+    }
+
+    @include focus-ring;
+
+    &[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 16%, var(--button-fill));
+    }
+
+    &[aria-busy="true"] {
+        cursor: progress;
+    }
+
+    &:disabled,
+    &[aria-disabled="true"] {
+        border-color: var(--button-edge);
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}

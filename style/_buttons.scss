@@ -23,83 +23,26 @@
 @use "tokens" as base;
 
 .plinth-button {
-    --button-fill: var(--surface);
-    --button-ink: var(--text);
-    --button-edge: var(--border);
-    --button-hover-edge: var(--accent);
-
-    position: relative;
-    display: inline-flex;
-    flex: 0 1 auto;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    max-width: 100%;
-    height: var(--control-height);
-    margin: 0;
-    padding-block: 0;
-    padding-inline: var(--button-pad-x, var(--space-3));
-    @include base.reserved-border(var(--button-edge));
-    border-radius: var(--radius-inner, var(--radius-sm));
-    background: var(--button-fill);
-    color: var(--button-ink);
-    font: inherit;
-    line-height: 1;
-    text-decoration: none;
-    white-space: nowrap;
-    vertical-align: middle;
-    cursor: pointer;
-
-    &:hover {
-        border-color: var(--button-hover-edge);
-    }
-
-    @include base.focus-ring;
-
-    &[aria-pressed="true"] {
-        border-color: var(--accent);
-        background: color-mix(in srgb, var(--accent) 16%, var(--button-fill));
-    }
-
-    &[aria-busy="true"] {
-        cursor: progress;
-    }
-
-    &:disabled,
-    &[aria-disabled="true"] {
-        border-color: var(--button-edge);
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
+    @include base.button;
 
     &.plinth-primary {
-        --button-fill: var(--accent);
-        --button-ink: var(--on-accent);
-        --button-edge: var(--accent);
-        --button-hover-edge: var(--text);
+        @include base.button-variant(primary);
     }
 
     &.plinth-ghost {
-        --button-fill: transparent;
+        @include base.button-variant(ghost);
     }
 
     &.plinth-quiet {
-        --button-fill: transparent;
-        --button-ink: var(--muted);
-        --button-edge: transparent;
-        --button-hover-edge: var(--border);
+        @include base.button-variant(quiet);
     }
 
     &.plinth-danger {
-        --button-ink: var(--danger);
-        --button-edge: var(--danger);
-        --button-hover-edge: var(--text);
+        @include base.button-variant(danger);
     }
 
     &.plinth-success {
-        --button-ink: var(--success);
-        --button-edge: var(--success);
-        --button-hover-edge: var(--text);
+        @include base.button-variant(success);
     }
 
     &.plinth-small {
