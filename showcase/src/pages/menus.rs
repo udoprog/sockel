@@ -82,6 +82,8 @@ fn SampleItems(props: &ItemsProps) -> Html {
                     detail_html={html! { <>{ " · " }<em>{ "example.org" }</em></> }}>
                     { "Look it up" }
                 </MenuItem>
+                <MenuItem href="data:text/plain,plinth" download=true title="Saves a small text file"
+                    detail="A link row that downloads">{ "Download" }</MenuItem>
                 <MenuSeparator />
                 <MenuItem danger=true tip="Delete this file" onclick={pick("delete")}>{ "Delete" }</MenuItem>
             </>
@@ -178,7 +180,7 @@ fn DialogMenu() -> Html {
     html! {
         <>
             <Menu text={html! { "File" }} label="File">
-                <MenuItem onclick={show}>{ "Properties…" }</MenuItem>
+                <MenuItem dialog={Some(*open)} onclick={show}>{ "Properties…" }</MenuItem>
             </Menu>
             <Dialog open={*open} {on_dismiss} title="Properties">
                 <p>{ "Close this dialog: focus goes back to File." }</p>
@@ -197,6 +199,7 @@ pub fn MenuPage() -> Html {
     let icon_only = use_state(|| false);
     let tight = use_state(|| false);
     let sheet = use_state(|| false);
+    let keep_mounted = use_state(|| false);
     let disabled = use_state(|| false);
     let item_disabled = use_state(|| true);
 
@@ -210,6 +213,7 @@ pub fn MenuPage() -> Html {
             <Toggle label="icon only" value={*icon_only} on_change={bind(&icon_only)} />
             <Toggle label="tight" value={*tight} on_change={bind(&tight)} />
             <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
+            <Toggle label="keep_mounted" value={*keep_mounted} on_change={bind(&keep_mounted)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="an item disabled" value={*item_disabled} on_change={bind(&item_disabled)} />
         </>
@@ -225,6 +229,7 @@ pub fn MenuPage() -> Html {
             .variant("width", *width)
             .flag("tight", *tight)
             .flag("sheet", *sheet)
+            .flag("keep_mounted", *keep_mounted)
             .flag("disabled", *disabled)
             .child(
                 El::new("MenuItem")
@@ -246,7 +251,7 @@ pub fn MenuPage() -> Html {
                 <Cluster>
                     <Menu text={if *icon_only { Html::default() } else { html! { "Actions" } }}
                         label="Actions" variant={*variant} size={*size} width={*width}
-                        tight={*tight} sheet={*sheet} disabled={*disabled}>
+                        tight={*tight} sheet={*sheet} keep_mounted={*keep_mounted} disabled={*disabled}>
                         <SampleItems items={*items} text={*text} disabled={*item_disabled} />
                     </Menu>
                     <button type="button" class={classes!(class::BUTTON)}>{ "Beside it" }</button>

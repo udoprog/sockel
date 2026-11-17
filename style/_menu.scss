@@ -9,7 +9,8 @@
 //   (`--menu-width-wide`), `.plinth-wider` (`--menu-width-wider`),
 //   `.plinth-panel` (`--menu-width-panel`, fixed), `.plinth-tight` (no gap
 //   between rows), `.plinth-sheet` (below `$sheet-breakpoint` a sheet from
-//   the bottom over `.plinth-menu-scrim`).
+//   the bottom over `.plinth-menu-scrim`). `[hidden]`: closed, its items
+//   kept (`keep_mounted`).
 // - `.plinth-menu-item`: a row at `--control-height`, its border reserved,
 //   so hover and focus change its fill only. Parts: `-mark` (a check's or
 //   radio's, its box kept when off, `.plinth-off`), `-icon`, `-text`
@@ -59,6 +60,11 @@
 
     &.plinth-tight {
         gap: 0;
+    }
+
+    // Closed, its items kept (`keep_mounted`).
+    &[hidden] {
+        display: none;
     }
 }
 

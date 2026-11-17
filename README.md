@@ -1289,13 +1289,18 @@ overlay layer, through `use_popover`. Props:
   `Popover` is.
 - `side`, `align` (`End` by default), `within` (as `Popover`'s),
   `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
-  `testid` (the list's; the opener's is it suffixed `-toggle`).
+  `testid` (the list's; the opener's is it suffixed `-toggle`, or
+  `opener_testid` when set); `keep_mounted` (off by default) keeps the
+  list rendered, `hidden`, while closed, for an item that owns what it
+  opens (a dialog) and must not be dropped when the menu closes.
 
 Its children are the items: `MenuItem` (an action; `icon`, `detail` under
 the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 `disabled`, `onclick`; with `href` a link row, an `<a>` that loses its
 `href` when disabled, `new_tab` opening it in a new tab (`target="_blank"`,
-`rel="noopener noreferrer"`); `current` marks the page shown,
+`rel="noopener noreferrer"`), `download` a link that downloads; `title` the
+row's native tooltip; `dialog: Some(open)` a button row opening a dialog
+(`aria-haspopup="dialog"`, `aria-expanded`); `current` marks the page shown,
 `aria-current="page"`, by the accent's ground and ink; `tip` a styled tip,
 `data-tip`, naming what it acts on), `MenuCheck`
 (`menuitemcheckbox`: `checked`, `on_change`; the menu stays open),

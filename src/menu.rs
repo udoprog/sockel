@@ -249,6 +249,9 @@ struct ListProps {
     label: Option<AttrValue>,
     class: Classes,
     testid: Option<AttrValue>,
+    /// Rendered, hidden, while closed.
+    #[prop_or_default]
+    keep_mounted: bool,
     children: Html,
 }
 
@@ -276,7 +279,7 @@ fn MenuList(props: &ListProps) -> Html {
         props.on_dismiss.reform(|()| Dismiss::Close),
     );
 
-    if !props.open {
+    if !props.open && !props.keep_mounted {
         return Html::default();
     }
 
@@ -304,12 +307,13 @@ fn MenuList(props: &ListProps) -> Html {
 
     overlays.portal(html! {
         <>
-            if props.sheet {
+            if props.sheet && props.open {
                 <div class={class::MENU_SCRIM} aria-hidden="true"></div>
             }
             <div ref={list}
                 class={classes!(menu(props.width, props.tight, placed.is_some()),
                     props.sheet.then_some(class::SHEET), props.class.clone())}
+                hidden={!props.open}
                 role="menu" aria-label={props.label.clone()} {style}
                 data-testid={props.testid.clone()} {onclick} {onkeydown}>
                 { props.children.clone() }
@@ -404,6 +408,15 @@ pub struct MenuProps {
     /// The menu's test id; its opener's is it suffixed `-toggle`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The opener's test id, in place of [`MenuProps::testid`] suffixed
+    /// `-toggle`.
+    #[prop_or_default]
+    pub opener_testid: Option<AttrValue>,
+    /// Keep the items rendered, hidden, while the menu is closed: for an
+    /// item that owns what it opens (a dialog), which closing the menu must
+    /// not drop. Off by default: a closed menu renders no list.
+    #[prop_or_default]
+    pub keep_mounted: bool,
     /// The items: [`MenuItem`], [`MenuCheck`], [`MenuRadio`],
     /// [`MenuSeparator`], [`MenuHeading`], [`MenuNote`].
     #[prop_or_default]
@@ -480,7 +493,9 @@ pub fn Menu(props: &MenuProps) -> Html {
             disabled={props.disabled}
             pressed={props.pressed}
             expanded={Some(is_open)} haspopup={AttrValue::Static("menu")}
-            testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))}
+            testid={props.opener_testid.clone().or_else(|| {
+                props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))
+            })}
             {onclick} {onkeydown}>
             { props.text.clone() }
         </Button>
@@ -498,7 +513,7 @@ pub fn Menu(props: &MenuProps) -> Html {
                 side={props.side} align={props.align} within={props.within.clone()}
                 width={props.width} tight={props.tight} sheet={props.sheet}
                 label={props.label.clone()} class={props.class.clone()}
-                testid={props.testid.clone()}>
+                testid={props.testid.clone()} keep_mounted={props.keep_mounted}>
                 { props.children.clone() }
             </MenuList>
         </>
@@ -527,6 +542,16 @@ pub struct MenuItemProps {
     /// `rel="noopener noreferrer"`): another site's page.
     #[prop_or_default]
     pub new_tab: bool,
+    /// A link row that downloads what it links to (`download`).
+    #[prop_or_default]
+    pub download: bool,
+    /// The row's native tooltip (`title`).
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
+    /// A button row that opens a dialog: whether it is open now
+    /// (`aria-haspopup="dialog"`, `aria-expanded`).
+    #[prop_or_default]
+    pub dialog: Option<bool>,
     /// The page shown (`aria-current="page"`), marked, in a menu of links.
     #[prop_or_default]
     pub current: bool,
@@ -616,6 +641,7 @@ impl Row<'_> {
                     href={(!p.disabled).then(|| href.clone())}
                     target={p.new_tab.then_some("_blank")}
                     rel={p.new_tab.then_some("noopener noreferrer")}
+                    download={p.download.then_some("")} title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                     data-testid={p.testid.clone()} {onclick}>
                     { content }
@@ -624,6 +650,9 @@ impl Row<'_> {
             None => html! {
                 <button type="button" role={self.role} tabindex="-1" {class}
                     aria-checked={self.checked.map(|on| on.to_string())}
+                    aria-haspopup={p.dialog.map(|_| "dialog")}
+                    aria-expanded={p.dialog.map(|open| open.to_string())}
+                    title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                     data-testid={p.testid.clone()} {onclick}>
                     { content }
@@ -683,6 +712,9 @@ fn item_props(
         hint: hint.clone(),
         href: None,
         new_tab: false,
+        download: false,
+        title: None,
+        dialog: None,
         current: false,
         tip: None,
         danger: false,
@@ -1225,6 +1257,46 @@ mod tests {
             html.contains(&format!("{} {}", class::MENU_ITEM, class::DANGER)),
             "{html}"
         );
+    }
+
+    #[test]
+    fn a_kept_menu_renders_its_items_hidden_while_closed() {
+        let html = render::<Menu>(yew::props!(MenuProps {
+            text: html! { "More" },
+            keep_mounted: true,
+            sheet: true,
+            opener_testid: Some(AttrValue::Static("more")),
+            children: html! { <MenuItem dialog={Some(false)}>{ "Rename…" }</MenuItem> },
+        }));
+        assert!(html.contains("aria-expanded=\"false\""), "{html}");
+        assert!(html.contains("data-testid=\"more\""), "{html}");
+        assert!(html.contains("role=\"menu\""), "{html}");
+        assert!(html.contains(" hidden"), "{html}");
+        assert!(!html.contains(class::MENU_SCRIM), "{html}");
+        assert!(html.contains("aria-haspopup=\"dialog\""), "{html}");
+        let html = render::<Menu>(yew::props!(MenuProps {
+            open: Some(true),
+            keep_mounted: true,
+            children: html! { <MenuItem>{ "Rename…" }</MenuItem> },
+        }));
+        assert!(html.contains("role=\"menu\""), "{html}");
+        assert!(!html.contains(" hidden"), "{html}");
+    }
+
+    #[test]
+    fn a_download_row_downloads_and_takes_a_title() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/export")),
+            download: true,
+            title: Some(AttrValue::Static("As a file")),
+        }));
+        assert!(html.contains("download=\"\""), "{html}");
+        assert!(html.contains("title=\"As a file\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/export")),
+        }));
+        assert!(!html.contains("download"), "{html}");
+        assert!(!html.contains("title"), "{html}");
     }
 
     #[test]
