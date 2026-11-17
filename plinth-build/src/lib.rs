@@ -842,6 +842,47 @@ mod tests {
     }
 
     #[test]
+    fn a_menu_and_its_rows_take_their_look_from_settings() {
+        let plain = Config::new().build().unwrap();
+        let menu = declarations(&plain.css, ".plinth-menu");
+        assert!(menu.contains(&"background: var(--surface-raised)".to_owned()));
+        assert!(!menu.iter().any(|l| l.starts_with("font-size")));
+        let tuned = Config::new()
+            .with("menu-edge", "var(--edge)")
+            .with("menu-ground", "var(--ground)")
+            .with("menu-shadow", "var(--lift)")
+            .with("menu-padding", "6px")
+            .with("menu-text", "13px")
+            .with("menu-item-height", "28px")
+            .with("menu-item-padding", "0 8px")
+            .with("menu-item-gap", "8px")
+            .with("menu-item-radius", "4px")
+            .with("menu-item-hover-fill", "var(--hover)")
+            .build()
+            .unwrap();
+        let menu = declarations(&tuned.css, ".plinth-menu");
+        for line in [
+            "border-color: var(--edge)",
+            "padding: 6px",
+            "background: var(--ground)",
+            "box-shadow: var(--lift)",
+            "font-size: 13px",
+        ] {
+            assert!(menu.contains(&line.to_owned()), "{line} in {menu:?}");
+        }
+        let item = declarations(&tuned.css, ".plinth-menu-item");
+        for line in [
+            "gap: 8px",
+            "min-height: 28px",
+            "padding: 0 8px",
+            "border-radius: 4px",
+        ] {
+            assert!(item.contains(&line.to_owned()), "{line} in {item:?}");
+        }
+        assert!(tuned.css.contains("background: var(--hover)"));
+    }
+
+    #[test]
     fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
         let plain = Config::new().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");

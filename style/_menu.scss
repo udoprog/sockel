@@ -33,6 +33,11 @@
     --menu-least: var(--menu-width);
 
     @include list(var(--menu-least), var(--menu-open-width, 0px));
+    border-color: base.$menu-edge;
+    padding: base.$menu-padding;
+    background: base.$menu-ground;
+    box-shadow: base.$menu-shadow;
+    font-size: base.$menu-text;
 
     &.plinth-wide {
         --menu-least: var(--menu-width-wide);
@@ -56,12 +61,17 @@
 
 .plinth-menu-item {
     @include item;
+    gap: base.$menu-item-gap;
+    min-height: base.$menu-item-height;
+    padding: base.$menu-item-padding;
+    border-radius: base.$menu-item-radius;
 
     text-decoration: none;
 
     &:hover,
     &:focus-visible {
         @include item-active;
+        background: base.$menu-item-hover-fill;
     }
 
     &:focus-visible {

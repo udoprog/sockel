@@ -171,6 +171,19 @@ $popover-padding: var(--space-3) !default;
 $listbox-max-width: var(--popover-max-width) !default;
 $listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
 $popover-shadow: var(--shadow-1) !default;
+// A menu's surface (its edge, ground, shadow, padding and type) and its
+// rows (height, padding, gap, corners, hover fill); `null` keeps the
+// shared list's and row's.
+$menu-edge: null !default;
+$menu-ground: null !default;
+$menu-shadow: null !default;
+$menu-padding: null !default;
+$menu-text: null !default;
+$menu-item-height: null !default;
+$menu-item-padding: null !default;
+$menu-item-gap: null !default;
+$menu-item-radius: null !default;
+$menu-item-hover-fill: null !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
