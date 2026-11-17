@@ -272,12 +272,15 @@ pub struct Config {
     with: Vec<(String, String)>,
     features: Option<Vec<String>>,
     foreign: Vec<String>,
+    layer: Option<String>,
+    layer_order: Vec<String>,
 }
 
 /// A build's results.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Output {
-    /// The app's one stylesheet: sockel's CSS, then the local styles' CSS.
+    /// The app's one stylesheet: sockel's CSS (in [`Config::layer`]'s layer,
+    /// after [`Config::layer_order`]'s statement), then the local styles' CSS.
     pub css: String,
     /// sockel's classes: every class its selectors name and every hook class, sorted.
     pub sockel_classes: Vec<String>,
@@ -433,6 +436,46 @@ impl Config {
         Ok(classes)
     }
 
+    /// Puts sockel's CSS in the cascade layer `name` (`@layer name { ... }`),
+    /// for an app whose own styles are in layers: unlayered, sockel's rules
+    /// would win over every one of them.
+    pub fn layer(mut self, name: impl Into<String>) -> Self {
+        self.layer = Some(name.into());
+        self
+    }
+
+    /// Declares the app's cascade layers in this order (`@layer a, b;`)
+    /// before sockel's CSS, so a layer the app puts below
+    /// [`Config::layer`]'s comes first.
+    pub fn layer_order<I>(mut self, names: I) -> Self
+    where
+        I: IntoIterator,
+        I::Item: Into<String>,
+    {
+        self.layer_order = names.into_iter().map(Into::into).collect();
+        self
+    }
+
+    /// sockel's CSS as it starts the stylesheet: in its layer, after the
+    /// layer order.
+    fn layered(&self, sockel_css: &str) -> String {
+        let mut css = String::new();
+        if !self.layer_order.is_empty() {
+            css.push_str(&format!("@layer {};\n", self.layer_order.join(", ")));
+        }
+        match &self.layer {
+            Some(name) => {
+                css.push_str(&format!("@layer {name} {{\n{sockel_css}"));
+                if !sockel_css.ends_with('\n') {
+                    css.push('\n');
+                }
+                css.push_str("}\n");
+            }
+            None => css.push_str(sockel_css),
+        }
+        css
+    }
+
     pub fn build(&self) -> Result<Output, Error> {
         let enabled = self.enabled();
         let style = self.style_dir()?;
@@ -451,7 +494,7 @@ impl Config {
 
         let Some(dir) = &self.local else {
             return Ok(Output {
-                css: sockel_css,
+                css: self.layered(&sockel_css),
                 sockel_classes,
                 local_classes: Vec::new(),
             });
@@ -461,8 +504,9 @@ impl Config {
         // One compilation, sockel first, so a local `@use "sockel"` reuses
         // the module loaded here and emits nothing again.
         let entry = format!("{sockel_use}@use \"{}\";\n", sass_string(&index));
-        let css = sasso::compile(&entry, &options)?;
-        let local_css = css.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
+        let whole = sasso::compile(&entry, &options)?;
+        let local_css = whole.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
+        let css = format!("{}{local_css}", self.layered(&sockel_css));
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
         for class in class_names(local_css) {
@@ -1477,6 +1521,31 @@ mod tests {
         assert_eq!(
             output.local_classes,
             ["fixture-panel", "fixture-panel-title"]
+        );
+    }
+
+    #[test]
+    fn puts_sockel_in_a_layer_after_the_layer_order() {
+        let base = sockel().build().unwrap();
+        let output = sockel()
+            .local(fixture("fixture/style"))
+            .prefix("fixture-")
+            .layer("sockel")
+            .layer_order(["reset", "sockel", "app"])
+            .build()
+            .unwrap();
+        let wrapped = format!("@layer reset, sockel, app;\n@layer sockel {{\n{}", base.css);
+        let rest = output.css.strip_prefix(&wrapped).unwrap();
+        assert!(rest.trim_start().starts_with('}'));
+        assert!(rest.contains(".fixture-panel {"));
+        assert_eq!(output.sockel_classes, base.sockel_classes);
+        assert_eq!(
+            output.local_classes,
+            ["fixture-panel", "fixture-panel-title"]
+        );
+        assert_eq!(
+            sockel().layer_order(["a"]).build().unwrap().css,
+            format!("@layer a;\n{}", base.css)
         );
     }
 

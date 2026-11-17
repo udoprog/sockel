@@ -502,6 +502,27 @@ the custom properties, so a page can still override them at runtime.
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
 
+### Cascade layers
+
+An app whose Sass puts its rules in cascade layers puts sockel's in one too:
+unlayered, sockel's rules would win over every layer of the app's. `layer`
+wraps sockel's CSS in `@layer sockel { ... }`, and `layer_order` declares
+the app's layers before it, so a layer meant to sit below sockel's (a reset)
+comes first:
+
+```rust
+sockel_build::Config::new()
+    .local("style/")
+    .prefix("app-")
+    .layer("sockel")
+    .layer_order(["reset", "sockel", "components"])
+    .compile();
+```
+
+The app's partials then put their own rules in their layers
+(`@layer components { ... }`). Without either call the stylesheet is
+unchanged.
+
 ### Leaving parts out
 
 `$omit` names the optional parts an app never renders, and sockel leaves them
