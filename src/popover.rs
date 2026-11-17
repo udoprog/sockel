@@ -500,6 +500,14 @@ pub struct PopoverProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The pointer entering and leaving the surface, for an owner that keeps
+    /// it open while the pointer is over it (a card opened on hover): the
+    /// surface is in the overlay layer, so the owner's own `pointerleave`
+    /// fires as the pointer moves onto it.
+    #[prop_or_default]
+    pub on_pointer_enter: Option<Callback<PointerEvent>>,
+    #[prop_or_default]
+    pub on_pointer_leave: Option<Callback<PointerEvent>>,
     #[prop_or_default]
     pub children: Html,
 }
@@ -571,6 +579,8 @@ pub fn Popover(props: &PopoverProps) -> Html {
             <div ref={node}
                 class={classes!(popover(props.sheet, placed.is_some()), props.class.clone())}
                 role="dialog" aria-label={props.title.clone()} {style}
+                onpointerenter={props.on_pointer_enter.clone()}
+                onpointerleave={props.on_pointer_leave.clone()}
                 data-testid={props.testid.clone()}>
                 { for head }
                 <div class={class::POPOVER_BODY}>{ props.children.clone() }</div>
@@ -758,6 +768,8 @@ mod tests {
             focus: None,
             class: Classes::new(),
             testid: None,
+            on_pointer_enter: None,
+            on_pointer_leave: None,
             children: html! { "Body" },
         };
         futures::executor::block_on(

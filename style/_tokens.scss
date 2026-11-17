@@ -146,6 +146,9 @@ $dialog-padding: var(--space-5) !default;
 $dialog-padding-phone: null !default;
 $dialog-body-gap: null !default;
 $dialog-shadow: var(--shadow-1) !default;
+// A popover's body padding and its shadow (a hover card's too).
+$popover-padding: var(--space-3) !default;
+$popover-shadow: var(--shadow-1) !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.

@@ -14,6 +14,7 @@
 //   `-scrim` behind it.
 // - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom
 //   over the scrim, with its head.
+// - Settings: `$popover-padding` (the body's) and `$popover-shadow`.
 
 @use "tokens" as base;
 
@@ -40,7 +41,7 @@
     border-radius: var(--radius-md);
     background: var(--surface-raised);
     color: var(--text);
-    box-shadow: var(--shadow-1);
+    box-shadow: base.$popover-shadow;
     visibility: hidden;
 
     &.plinth-placed {
@@ -51,7 +52,7 @@
 .plinth-popover-body {
     @include base.scroll-area;
     flex: 1 1 auto;
-    padding: var(--space-3);
+    padding: base.$popover-padding;
 }
 
 .plinth-popover-head {

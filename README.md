@@ -290,7 +290,8 @@ Breakpoints and the component settings (`$card-padding`,
 `$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
 `$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
 `$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
-`$dialog-body-gap`, `$dialog-shadow`, `$visibility-breakpoint`) are Sass-only: an app built with
+`$dialog-body-gap`, `$dialog-shadow`, `$popover-padding`, `$popover-shadow`,
+`$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
 ## Configuration
@@ -351,6 +352,7 @@ page can still override them at runtime.
 | `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap), `var(--shadow-1)` |
+| `$popover-padding`, `$popover-shadow` | `var(--space-3)`, `var(--shadow-1)` (a popover's body padding and its shadow, a hover card's included) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
@@ -935,6 +937,10 @@ the owner cuts it, and its events still bubble through the owner. Props:
   `title` as its heading and a close button (`close_label`, "Close").
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
+- `on_pointer_enter` and `on_pointer_leave` (`Option<Callback<PointerEvent>>`):
+  the pointer over the surface, for an owner that keeps it open while the
+  pointer is there (it is in the overlay layer, so the owner's own
+  `pointerleave` fires as the pointer moves onto it).
 
 Dismissal (`Dismiss`), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus

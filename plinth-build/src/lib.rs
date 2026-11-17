@@ -855,6 +855,32 @@ mod tests {
     }
 
     #[test]
+    fn a_popover_takes_its_padding_and_shadow_from_settings() {
+        let plain = Config::new().build().unwrap();
+        assert!(
+            declarations(&plain.css, ".plinth-popover-body")
+                .contains(&"padding: var(--space-3)".to_owned())
+        );
+        assert!(
+            declarations(&plain.css, ".plinth-popover")
+                .contains(&"box-shadow: var(--shadow-1)".to_owned())
+        );
+        let tuned = Config::new()
+            .with("popover-padding", "var(--space-3) var(--space-4)")
+            .with("popover-shadow", "var(--shadow-2)")
+            .build()
+            .unwrap();
+        assert!(
+            declarations(&tuned.css, ".plinth-popover-body")
+                .contains(&"padding: var(--space-3) var(--space-4)".to_owned())
+        );
+        assert!(
+            declarations(&tuned.css, ".plinth-popover")
+                .contains(&"box-shadow: var(--shadow-2)".to_owned())
+        );
+    }
+
+    #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
         let plain = Config::new().build().unwrap();
         assert!(
