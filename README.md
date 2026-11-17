@@ -766,7 +766,8 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
 - `native_select(size, invalid, fill)` (`.plinth-input.plinth-native-select`):
   a native `<select>` in a text field's look, the browser's arrow replaced
   by a chevron in `--muted` and its options on `--surface`. It is as wide as
-  its widest option, cut at its container; `fill` makes it its container's
+  its widest option, cut at its container, and in a row it shrinks to give
+  way to the items beside it; `fill` makes it its container's
   width. Set `aria-invalid` with `invalid`, as on a bare input.
 - `Textarea` (`.plinth-textarea`): `rows` (default 3), at least `--input-height`
   high, resized vertically by the user only.

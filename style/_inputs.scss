@@ -13,7 +13,8 @@
 //   the browser's arrow replaced by a chevron in `--muted` (two gradients, so
 //   it takes the theme's colour), room kept for it at the end, its options on
 //   `--surface`. As wide as its widest option (`max-content`, cut at its
-//   container); `.plinth-fill`: as wide as its container.
+//   container, shrinking in a row beside other items); `.plinth-fill`: as
+//   wide as its container.
 // - `.plinth-textarea`: lines of text, as high as its rows and at least
 //   `--input-height`; the user may resize it vertically.
 // - Sizes: regular, `.plinth-small` (`--control-height-small`) and
@@ -45,6 +46,9 @@
     .plinth-native-select {
         width: max-content;
         max-width: 100%;
+        // Beside other items in a row it gives way to them, as the bare
+        // input's `flex: none` would not.
+        flex-shrink: 1;
         appearance: none;
         cursor: pointer;
         padding-inline-end: 1.75rem;
