@@ -68,6 +68,9 @@ pub struct DialogProps {
     pub sheet: bool,
     #[prop_or(AttrValue::Static("Close"))]
     pub close_label: AttrValue,
+    /// The close button's `data-testid`.
+    #[prop_or_default]
+    pub close_testid: Option<AttrValue>,
     /// The foot's actions at its end, the primary last.
     #[prop_or_default]
     pub actions: Html,
@@ -309,7 +312,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
         html! {
             <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                 icon={html! { <Icon glyph={Glyph::Close} /> }}
-                label={props.close_label.clone()} {onclick} />
+                label={props.close_label.clone()} testid={props.close_testid.clone()} {onclick} />
         }
     });
     let foot =
@@ -394,6 +397,7 @@ mod tests {
             dismiss,
             sheet: true,
             close_label: "Close".into(),
+            close_testid: Some("close".into()),
             actions,
             actions_start: Html::default(),
             class: Classes::new(),
@@ -417,6 +421,7 @@ mod tests {
         assert!(html.contains("aria-label=\"Close\""), "{html}");
         assert!(html.contains(class::DIALOG_FOOT), "{html}");
         assert!(html.contains(class::DIALOG_LAYER), "{html}");
+        assert!(html.contains("data-testid=\"close\""), "{html}");
     }
 
     #[test]

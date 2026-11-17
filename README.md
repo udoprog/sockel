@@ -286,7 +286,8 @@ selector:
 
 Breakpoints and the component settings (`$card-padding`,
 `$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
-`$button-primary-weight`, `$visibility-breakpoint`) are Sass-only: an app built with
+`$button-primary-weight`, `$dialog-padding`, `$dialog-padding-phone`,
+`$dialog-body-gap`, `$dialog-shadow`, `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
 ## Configuration
@@ -338,6 +339,8 @@ page can still override them at runtime.
 | `$toolbar-gap` | `var(--space-1)` |
 | `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.plinth-button`'s sides, regular and small) |
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
+| `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
+| `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap), `var(--shadow-1)` |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
@@ -1038,7 +1041,8 @@ included, so a popover or menu opened inside it could not be used). Props:
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
   at its start: a Delete), each an `ActionGroup` in `.plinth-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
-  the bottom, up to `--dialog-sheet-height`. `close_label`, `class`, `testid`.
+  the bottom, up to `--dialog-sheet-height`. `close_label` and
+  `close_testid` (the close button's), `class`, `testid`.
 
 `dialog(size, sheet)` gives the classes. Parts: `.plinth-dialog-layer` (the
 scrim), `-head` (a `SectionHead`), `-body` (what scrolls), `-foot`.

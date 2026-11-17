@@ -759,6 +759,45 @@ mod tests {
     }
 
     #[test]
+    fn a_dialog_takes_its_padding_body_gap_and_shadow_from_settings() {
+        let plain = Config::new().build().unwrap();
+        assert!(
+            declarations(&plain.css, ".plinth-dialog")
+                .contains(&"--dialog-pad: var(--space-5)".to_owned())
+        );
+        assert!(
+            declarations(&plain.css, ".plinth-dialog")
+                .contains(&"box-shadow: var(--shadow-1)".to_owned())
+        );
+        let body_gap = |css: &str| {
+            css.match_indices(".plinth-dialog-body {")
+                .flat_map(|(at, _)| declarations(&css[at..], ".plinth-dialog-body"))
+                .find(|line| line.starts_with("gap"))
+        };
+        assert_eq!(body_gap(&plain.css), None);
+        let tuned = Config::new()
+            .with("dialog-padding", "var(--space-6)")
+            .with("dialog-padding-phone", "var(--space-4)")
+            .with("dialog-body-gap", "var(--space-4)")
+            .with("dialog-shadow", "var(--shadow-2)")
+            .build()
+            .unwrap();
+        assert!(
+            declarations(&tuned.css, ".plinth-dialog")
+                .contains(&"--dialog-pad: var(--space-6)".to_owned())
+        );
+        assert!(
+            declarations(&tuned.css, ".plinth-dialog.plinth-sheet")
+                .contains(&"--dialog-pad: var(--space-4)".to_owned())
+        );
+        assert_eq!(body_gap(&tuned.css).as_deref(), Some("gap: var(--space-4)"));
+        assert!(
+            declarations(&tuned.css, ".plinth-dialog")
+                .contains(&"box-shadow: var(--shadow-2)".to_owned())
+        );
+    }
+
+    #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
         let plain = Config::new().build().unwrap();
         assert!(

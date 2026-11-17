@@ -13,6 +13,9 @@
 //   up to `--dialog-sheet-height`.
 // - `.plinth-scroll-locked` on the root while a dialog is open, with
 //   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays.
+// - Settings: `$dialog-padding` (and `$dialog-padding-phone` below
+//   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
+//   with that gap when set) and `$dialog-shadow`.
 
 @use "tokens" as base;
 
@@ -39,6 +42,7 @@
 
 .plinth-dialog {
     --dialog-room: calc(100dvh - var(--dialog-top) - var(--space-4));
+    --dialog-pad: #{base.$dialog-padding};
 
     display: flex;
     flex-direction: column;
@@ -50,7 +54,7 @@
     border-radius: var(--radius-lg);
     background: var(--surface-raised);
     color: var(--text);
-    box-shadow: var(--shadow-1);
+    box-shadow: base.$dialog-shadow;
     outline: none;
 
     &.plinth-wide {
@@ -64,13 +68,21 @@
 
 .plinth-dialog-head {
     flex: none;
-    padding: var(--space-3) var(--space-3) 0 var(--space-5);
+    padding: var(--space-3) var(--space-3) 0 var(--dialog-pad);
 }
 
 .plinth-dialog-body {
     @include base.scroll-area;
     flex: 1 1 auto;
-    padding: var(--space-3) var(--space-5) var(--space-5);
+    padding: var(--space-3) var(--dialog-pad) var(--dialog-pad);
+}
+
+@if base.$dialog-body-gap {
+    .plinth-dialog-body {
+        display: flex;
+        flex-direction: column;
+        gap: base.$dialog-body-gap;
+    }
 }
 
 .plinth-dialog-foot {
@@ -79,7 +91,7 @@
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
-    padding: var(--space-3) var(--space-5);
+    padding: var(--space-3) var(--dialog-pad);
     border-top: var(--space-px) solid var(--border);
 }
 
@@ -91,6 +103,9 @@
 
     .plinth-dialog.plinth-sheet {
         --dialog-room: var(--dialog-sheet-height);
+        @if base.$dialog-padding-phone {
+            --dialog-pad: #{base.$dialog-padding-phone};
+        }
 
         width: 100%;
         border-bottom-color: transparent;
