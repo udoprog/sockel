@@ -18,7 +18,7 @@
 //   are cut) and `$listbox-active-fill` (the active row's fill).
 
 @use "tokens" as base;
-@use "menu";
+@use "menu-surface" as menu;
 
 .plinth-listbox {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));

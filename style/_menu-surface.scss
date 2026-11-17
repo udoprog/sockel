@@ -1,0 +1,74 @@
+// The menu's surface, row and mark as mixins, with no rules of their own:
+// what the menu (_menu.scss), the listbox (_listbox.scss) and the colour
+// list (_color-select.scss) are made of, so loading one loads no other.
+
+@use "tokens" as base;
+
+// A list beside its opener in the overlay layer, at least `$least` and
+// `$open` wide; the listbox's surface too (_listbox.scss).
+@mixin list($least, $open) {
+    position: fixed;
+    top: var(--popover-top, 0);
+    left: var(--popover-left, 0);
+    z-index: var(--layer-overlay);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-0);
+    box-sizing: border-box;
+    width: max-content;
+    min-width: min(max($least, $open), calc(100vw - 2 * var(--space-2)));
+    max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--space-2)));
+    max-height: var(--popover-max-height, none);
+    @include base.scroll-area;
+    @include base.reserved-border(var(--border));
+    @include base.nests(var(--radius-md));
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+    visibility: hidden;
+
+    &.plinth-placed {
+        visibility: visible;
+    }
+}
+
+// One row of such a list, at `--control-height`, its border reserved.
+@mixin item {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    width: 100%;
+    min-height: var(--control-height);
+    margin: 0;
+    padding: var(--space-1) var(--space-3);
+    @include base.reserved-border;
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: none;
+    color: var(--text);
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+}
+
+// The fill of the row under the pointer or the keyboard.
+@mixin item-active {
+    background: color-mix(in srgb, var(--text) 7%, transparent);
+}
+
+// A row's check, its box kept when off (`.plinth-off`).
+@mixin mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--glyph-size);
+    height: var(--glyph-size);
+    color: var(--accent);
+
+    &.plinth-off {
+        visibility: hidden;
+    }
+}

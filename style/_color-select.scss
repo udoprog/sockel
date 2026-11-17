@@ -20,7 +20,7 @@
 //   under the grid, with its `-label`.
 
 @use "tokens" as base;
-@use "menu";
+@use "menu-surface" as menu;
 
 .plinth-color-select {
     width: var(--color-select-width);

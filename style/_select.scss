@@ -18,6 +18,7 @@
 //   head and scrim are not shown and the list is as without.
 
 @use "tokens" as base;
+@use "hidden";
 
 .plinth-select {
     width: max-content;

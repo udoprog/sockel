@@ -1455,8 +1455,10 @@ out, hidden until placed), at least as wide as the face
 border reserved, and the active row changes only its fill. Labels are one
 line; a description under one wraps, and makes its row taller. New
 tokens: none (the two custom properties are set by the component). New partials: `_listbox.scss`, `_select.scss`. The menu's
-surface, row and mark are now the mixins `list`, `item`, `item-active` and
-`mark` in `_menu.scss`, with the same output.
+surface, row and mark are the mixins `list`, `item`, `item-active` and
+`mark` of `_menu-surface.scss` (forwarded by `_menu.scss`), which emits no
+rules, so the listbox and the Select load none of the menu's. `.plinth-hidden`
+is `_hidden.scss`, which `_badges.scss` and `_select.scss` both load.
 
 ## DropZone
 

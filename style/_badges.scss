@@ -24,10 +24,7 @@
 //   state.
 
 @use "tokens" as base;
-
-.plinth-hidden {
-    visibility: hidden;
-}
+@use "hidden";
 
 .plinth-pill {
     --tone: var(--muted);
