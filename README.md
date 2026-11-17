@@ -1386,6 +1386,12 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   match) or by default the first and how many more (`Small +2`); that text
   joins the labels' cell, so a summary longer than every label widens it.
   `picked(options, multiple, value, values)` gives the picked indexes.
+- `sheet` (off by default): below the phone breakpoint the list is a
+  sheet from the bottom over a scrim (`SELECT_SHEET`, `SELECT_SCRIM`),
+  headed by `label` and a close button (`SELECT_HEAD`, `SELECT_TITLE`;
+  `close_label`, "Close") above what scrolls (`SELECT_BODY`); its filter
+  field is not focused on opening there, so the keyboard does not cover
+  the sheet. Above the breakpoint the list is as without it.
 - `id` and `describedby` inside a `Field` (its label names and opens it),
   `label` (the accessible name without one), `class` (the face's), `testid`
   (the face's; the list's is it suffixed `-options`).

@@ -46,6 +46,7 @@ struct Settings {
     groups: bool,
     filter: bool,
     multiple: bool,
+    sheet: bool,
 }
 
 #[derive(Properties, PartialEq)]
@@ -98,17 +99,17 @@ fn Sample(props: &SampleProps) -> Html {
                     width={s.width} size={s.size} invalid={s.invalid} disabled={s.disabled}
                     busy={s.busy} {filter_from} describedby={field_describedby(&id, false, s.invalid)}
                     multiple={s.multiple} values={props.values.clone()}
-                    on_change_values={props.on_change_values.clone()} />
+                    on_change_values={props.on_change_values.clone()} sheet={s.sheet} />
             </Field>
             <InputGroup>
                 <Select<usize> class={joined[0].clone()} label="Size" {options} value={props.value}
                     on_change={props.on_change.clone()} {placeholder} width={s.width} size={s.size}
                     invalid={s.invalid} disabled={s.disabled} busy={s.busy} {filter_from}
                     multiple={s.multiple} values={props.values.clone()}
-                    on_change_values={props.on_change_values.clone()} />
+                    on_change_values={props.on_change_values.clone()} sheet={s.sheet} />
                 <Button class={joined[1].clone()}>{ "Apply" }</Button>
             </InputGroup>
-            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes. With the filter, typing narrows the list (by label or group) and Home, End and Space stay the field's. Multiple: a pick checks or unchecks and the list stays open; the face names the first and how many more." }</p>
+            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes. With the filter, typing narrows the list (by label or group) and Home, End and Space stay the field's. Sheet: on a phone the list is a sheet from the bottom, headed by the label. Multiple: a pick checks or unchecks and the list stays open; the face names the first and how many more." }</p>
         </Stack>
     }
 }
@@ -128,6 +129,7 @@ pub fn SelectPage() -> Html {
         groups: false,
         filter: false,
         multiple: false,
+        sheet: false,
     });
     let value = use_state(|| Some(1usize));
     let values = use_state(|| vec![0usize, 3]);
@@ -173,6 +175,7 @@ pub fn SelectPage() -> Html {
             <Toggle label="groups" value={s.groups} on_change={set(|s, on| s.groups = on)} />
             <Toggle label="filter" value={s.filter} on_change={set(|s, on| s.filter = on)} />
             <Toggle label="multiple" value={s.multiple} on_change={set(|s, on| s.multiple = on)} />
+            <Toggle label="sheet" value={s.sheet} on_change={set(|s, on| s.sheet = on)} />
         </>
     };
 
@@ -211,7 +214,8 @@ pub fn SelectPage() -> Html {
             .expr_if(s.filter, "filter_from", "Some(4)")
             .flag("multiple", s.multiple)
             .expr_if(s.multiple, "values", "sizes")
-            .expr_if(s.multiple, "on_change_values", "set_sizes"),
+            .expr_if(s.multiple, "on_change_values", "set_sizes")
+            .flag("sheet", s.sheet),
     );
 
     html! {

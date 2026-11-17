@@ -12,6 +12,10 @@
 // - With a filter field, the list (`.plinth-listbox`) is `.plinth-select-popup`:
 //   `-filter` (the field, staying at its top as the options scroll under
 //   it), `-options` (the `role="listbox"`), `-empty` (no option matches).
+// - With `sheet`, the list is also `.plinth-select-sheet`: below
+//   `$sheet-breakpoint` a sheet from the bottom over `-scrim`, its `-head`
+//   (`-title`, the close button) above `-body`, which scrolls; above it the
+//   head and scrim are not shown and the list is as without.
 
 @use "tokens" as base;
 
@@ -93,4 +97,58 @@
     padding: var(--space-2) var(--space-3);
     color: var(--muted);
     font-size: var(--text-sm);
+}
+
+.plinth-select-head,
+.plinth-select-scrim {
+    display: none;
+}
+
+.plinth-select-title {
+    @include base.truncate;
+    font-weight: 600;
+}
+
+@include base.below(base.$sheet-breakpoint) {
+    .plinth-select-sheet {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        max-height: var(--popover-sheet-height);
+        overflow: hidden;
+        border-bottom-color: transparent;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-top: var(--nest-inset);
+        padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
+    }
+
+    .plinth-select-head {
+        display: flex;
+        flex: none;
+        align-items: center;
+        justify-content: space-between;
+        gap: var(--space-2);
+        padding: 0 0 var(--space-1) var(--space-3);
+    }
+
+    .plinth-select-body {
+        display: flex;
+        flex: 1 1 auto;
+        flex-direction: column;
+        min-height: 0;
+        overflow-y: auto;
+        overscroll-behavior: contain;
+    }
+
+    .plinth-select-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: var(--layer-overlay);
+        display: block;
+        background: var(--scrim);
+    }
 }

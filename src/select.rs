@@ -7,7 +7,10 @@ use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, face_label, listbox, listbox_option, option_id};
 use crate::roving::printable;
-use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
+use crate::{
+    Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class,
+    input_box, use_overlays,
+};
 
 /// One option of a [`Select`].
 #[derive(Clone, Debug, PartialEq)]
@@ -186,6 +189,15 @@ pub struct SelectProps<T: PartialEq + 'static> {
     /// (`Small +2`).
     #[prop_or_default]
     pub summary: Option<AttrValue>,
+    /// Below the phone breakpoint, the list is a sheet from the bottom over
+    /// a scrim, headed by `label` and a close button, its filter field (if
+    /// any) not focused on opening so the keyboard does not cover it. Off
+    /// by default.
+    #[prop_or_default]
+    pub sheet: bool,
+    /// The sheet's close button's accessible name.
+    #[prop_or(AttrValue::Static("Close"))]
+    pub close_label: AttrValue,
 }
 
 /// The indexes of the options picked: `values` with `multiple`, else the
@@ -237,6 +249,8 @@ where
     // What the filter field holds, and the field.
     let filter = use_state(String::new);
     let input = use_node_ref();
+    // The sheet's head, shown only while the list is a sheet.
+    let head = use_node_ref();
 
     let on_dismiss = {
         let open = open.clone();
@@ -255,9 +269,16 @@ where
         .filter_from
         .is_some_and(|from| props.options.len() >= from);
     {
-        let input = input.clone();
+        let (input, head) = (input.clone(), head.clone());
         use_effect_with(placed.is_some() && filtering, move |&focus| {
-            if focus && let Some(input) = input.cast::<web_sys::HtmlInputElement>() {
+            // Not on a sheet: the keyboard would cover it.
+            let sheet = head
+                .cast::<HtmlElement>()
+                .is_some_and(|h| h.offset_height() > 0);
+            if focus
+                && !sheet
+                && let Some(input) = input.cast::<web_sys::HtmlInputElement>()
+            {
                 let options = web_sys::FocusOptions::new();
                 options.set_prevent_scroll(true);
                 _ = input.focus_with_options(&options);
@@ -542,7 +563,7 @@ where
             .testid
             .as_ref()
             .map(|t| AttrValue::from(format!("{t}-options")));
-        if !filtering {
+        if !filtering && !props.sheet {
             return overlays.portal(html! {
                 <div ref={list.clone()} id={list_id.clone()} role="listbox"
                     class={listbox(placed.is_some())} aria-label={props.label.clone()}
@@ -587,10 +608,15 @@ where
                 redraw.force_update();
             })
         };
-        let empty = pickable.is_empty() && shown.is_empty();
-        overlays.portal(html! {
-            <div ref={list.clone()} class={classes!(listbox(placed.is_some()), class::SELECT_POPUP)}
-                {style} {onmousedown} data-testid={testid}>
+        let empty = filtering && pickable.is_empty() && shown.is_empty();
+        let options = html! {
+            <div id={list_id.clone()} role="listbox" class={class::SELECT_OPTIONS}
+                aria-label={props.label.clone()}
+                aria-multiselectable={multiple.then_some("true")}>
+                { for rows }
+            </div>
+        };
+        let filter_field = filtering.then(|| html! {
                 <div class={class::SELECT_FILTER}>
                     <span class={input_box(InputSize::Regular, false, false, false)}>
                         <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
@@ -605,15 +631,52 @@ where
                             {oninput} {onkeydown} />
                     </span>
                 </div>
-                <div id={list_id.clone()} role="listbox" class={class::SELECT_OPTIONS}
-                    aria-label={props.label.clone()}
-                    aria-multiselectable={multiple.then_some("true")}>
-                    { for rows }
+        });
+        let empty = empty.then(|| html! {
+            <p class={class::SELECT_EMPTY}>{ props.no_match.clone() }</p>
+        });
+        if !props.sheet {
+            return overlays.portal(html! {
+                <div ref={list.clone()} class={classes!(listbox(placed.is_some()), class::SELECT_POPUP)}
+                    {style} {onmousedown} data-testid={testid}>
+                    { for filter_field }
+                    { options }
+                    { for empty }
                 </div>
-                if empty {
-                    <p class={class::SELECT_EMPTY}>{ props.no_match.clone() }</p>
+            });
+        }
+        let close = {
+            let (open, face) = (open.clone(), face.clone());
+            Callback::from(move |_: MouseEvent| {
+                if let Some(face) = face.cast::<HtmlElement>() {
+                    _ = face.focus();
                 }
-            </div>
+                open.set(false);
+            })
+        };
+        overlays.portal(html! {
+            <>
+                <div class={class::SELECT_SCRIM} aria-hidden="true"></div>
+                <div ref={list.clone()}
+                    class={classes!(
+                        listbox(placed.is_some()),
+                        filtering.then_some(class::SELECT_POPUP),
+                        class::SELECT_SHEET
+                    )}
+                    {style} {onmousedown} data-testid={testid}>
+                    <div ref={head.clone()} class={class::SELECT_HEAD}>
+                        <span class={class::SELECT_TITLE}>{ props.label.clone() }</span>
+                        <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                            icon={html! { <Icon glyph={Glyph::Close} /> }}
+                            label={props.close_label.clone()} onclick={close} />
+                    </div>
+                    <div class={class::SELECT_BODY}>
+                        { for filter_field }
+                        { options }
+                        { for empty }
+                    </div>
+                </div>
+            </>
         })
     });
 
@@ -803,6 +866,20 @@ mod tests {
         assert!(html.contains(&shown), "{html}");
         // Every label hidden, the summary in their cell.
         assert_eq!(html.matches(class::HIDDEN).count(), 3, "{html}");
+    }
+
+    #[test]
+    fn a_sheet_leaves_the_closed_face_as_it_was() {
+        let face = |sheet| {
+            render(yew::props!(SelectProps<u32> {
+                options: sizes(),
+                value: Some(1),
+                label: Some(AttrValue::Static("Size")),
+                sheet,
+            }))
+        };
+        assert_eq!(face(true), face(false));
+        assert!(!face(true).contains(class::SELECT_SHEET));
     }
 
     #[test]

@@ -558,6 +558,7 @@ pub const PAGES: &[Page] = &[
                     "descriptions",
                     "groups",
                     "filter",
+                    "sheet",
                     "focus",
                     "click",
                 ]),
