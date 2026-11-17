@@ -536,6 +536,7 @@ pub const PAGES: &[Page] = &[
             "select",
             "chosen",
             "filter_matches",
+            "picked",
             "Listbox",
             "ListKey",
             "LISTBOX_PAGE",

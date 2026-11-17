@@ -170,6 +170,47 @@ pub struct SelectProps<T: PartialEq + 'static> {
     /// Shown when the filter matches no option.
     #[prop_or(AttrValue::Static("No matches"))]
     pub no_match: AttrValue,
+    /// Picks several values ([`SelectProps::values`]) in place of one: a
+    /// pick checks or unchecks its option and the list stays open.
+    #[prop_or_default]
+    pub multiple: bool,
+    /// What is picked, with `multiple`.
+    #[prop_or_default]
+    pub values: Vec<T>,
+    /// Told the values picked after one was checked or unchecked, in the
+    /// options' order, with `multiple`.
+    #[prop_or_default]
+    pub on_change_values: Callback<Vec<T>>,
+    /// The face's text while several are picked, such as how many rows
+    /// they match together; by default the first picked and how many more
+    /// (`Small +2`).
+    #[prop_or_default]
+    pub summary: Option<AttrValue>,
+}
+
+/// The indexes of the options picked: `values` with `multiple`, else the
+/// one holding `value`.
+pub fn picked<T: PartialEq>(
+    options: &[SelectOption<T>],
+    multiple: bool,
+    value: Option<&T>,
+    values: &[T],
+) -> Vec<usize> {
+    if !multiple {
+        return chosen(options, value).into_iter().collect();
+    }
+    (0..options.len())
+        .filter(|&i| values.contains(&options[i].value))
+        .collect()
+}
+
+/// A multiple face's text while several are picked: `summary`, else the
+/// first and how many more.
+fn summarize(first: &str, picked: usize, summary: Option<&AttrValue>) -> Option<AttrValue> {
+    (picked > 1).then(|| match summary {
+        Some(summary) => summary.clone(),
+        None => format!("{first} +{}", picked - 1).into(),
+    })
 }
 
 /// The WAI-ARIA select-only combobox: a face in the tab order (a button,
@@ -247,7 +288,15 @@ where
     }
 
     let options = &props.options;
-    let current = chosen(options, props.value.as_ref());
+    let multiple = props.multiple;
+    let checked = picked(options, multiple, props.value.as_ref(), &props.values);
+    // The one on the face, and where the list opens.
+    let current = checked.first().copied();
+    let many = summarize(
+        current.map_or("", |i| options[i].label.as_str()),
+        checked.len(),
+        props.summary.as_ref(),
+    );
     let shown: Vec<usize> = (0..options.len())
         .filter(|&i| !filtering || filter_matches(&options[i], &filter))
         .collect();
@@ -284,14 +333,26 @@ where
     };
     let pick = {
         let (open, on_change) = (open.clone(), props.on_change.clone());
+        let on_change_values = props.on_change_values.clone();
         let values: Vec<(T, bool)> = options
             .iter()
             .map(|o| (o.value.clone(), o.disabled))
             .collect();
+        let checked = checked.clone();
         move |i: usize| {
             let Some((value, false)) = values.get(i) else {
                 return;
             };
+            if multiple {
+                // Checked or unchecked, the list kept open.
+                let on = !checked.contains(&i);
+                let next = (0..values.len())
+                    .filter(|&j| if j == i { on } else { checked.contains(&j) })
+                    .map(|j| values[j].0.clone())
+                    .collect();
+                on_change_values.emit(next);
+                return;
+            }
             open.set(false);
             if current != Some(i) {
                 on_change.emit(value.clone());
@@ -372,7 +433,7 @@ where
     let list_id = format!("{}-list", *id);
 
     let text = |(i, option): (usize, &SelectOption<T>)| {
-        let shown = current == Some(i);
+        let shown = current == Some(i) && many.is_none();
         html! {
             <span class={classes!(class::SELECT_TEXT, (!shown).then_some(class::HIDDEN))}
                 aria-hidden={(!shown).then_some("true")}>
@@ -390,9 +451,13 @@ where
         }
     });
 
+    let summary = many.clone().map(|text| {
+        html! { <span class={class::SELECT_TEXT}>{ text }</span> }
+    });
+
     let popup = (*open).then(|| {
         let option = |(i, o): (usize, &SelectOption<T>)| {
-            let selected = current == Some(i);
+            let selected = checked.contains(&i);
             let is_active = active == Some(i);
             let onclick = {
                 let pick = pick.clone();
@@ -481,7 +546,7 @@ where
             return overlays.portal(html! {
                 <div ref={list.clone()} id={list_id.clone()} role="listbox"
                     class={listbox(placed.is_some())} aria-label={props.label.clone()}
-                    {style} {onmousedown} data-testid={testid}>
+                    aria-multiselectable={multiple.then_some("true")} {style} {onmousedown} data-testid={testid}>
                     { for rows }
                 </div>
             });
@@ -541,7 +606,8 @@ where
                     </span>
                 </div>
                 <div id={list_id.clone()} role="listbox" class={class::SELECT_OPTIONS}
-                    aria-label={props.label.clone()}>
+                    aria-label={props.label.clone()}
+                    aria-multiselectable={multiple.then_some("true")}>
                     { for rows }
                 </div>
                 if empty {
@@ -561,7 +627,10 @@ where
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
                 aria-activedescendant={(*open && !filtering).then(|| active.map(|i| option_id(&id, i))).flatten()}
-                aria-label={face_label(props.label.as_ref(), current.map(|i| options[i].label.as_str()))}
+                aria-label={face_label(
+                    props.label.as_ref(),
+                    many.as_deref().or(current.map(|i| options[i].label.as_str())),
+                )}
                 aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
@@ -569,6 +638,7 @@ where
                 {onclick} {onmousedown} {onkeydown}>
                 <span class={class::SELECT_VALUE}>
                     { for options.iter().enumerate().map(text) }
+                    { for summary }
                     { for placeholder }
                 </span>
                 <span class={class::SELECT_CHEVRON} aria-hidden="true">
@@ -712,6 +782,27 @@ mod tests {
         assert!(filter_matches(&option, "MAGA"));
         assert!(filter_matches(&option, "battle"));
         assert!(!filter_matches(&option, "carnifex"));
+    }
+
+    #[test]
+    fn several_picked_are_summarized_on_the_face() {
+        let options = sizes();
+        assert_eq!(picked(&options, true, None, &[3, 1]), [0, 2]);
+        assert_eq!(picked(&options, false, Some(&3), &[1]), [2]);
+        assert_eq!(summarize("S", 1, None), None);
+        assert_eq!(summarize("S", 3, None).as_deref(), Some("S +2"));
+        let summary = AttrValue::Static("12 units");
+        assert_eq!(summarize("S", 2, Some(&summary)), Some(summary));
+
+        let html = render(yew::props!(SelectProps<u32> {
+            options: sizes(),
+            multiple: true,
+            values: vec![1, 3],
+        }));
+        let shown = format!("<span class=\"{}\">S +1", class::SELECT_TEXT);
+        assert!(html.contains(&shown), "{html}");
+        // Every label hidden, the summary in their cell.
+        assert_eq!(html.matches(class::HIDDEN).count(), 3, "{html}");
     }
 
     #[test]

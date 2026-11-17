@@ -1378,6 +1378,14 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   `SELECT_POPUP`: the field (`SELECT_FILTER`, staying at the top as the
   options scroll), the `role="listbox"` (`SELECT_OPTIONS`) and
   `SELECT_EMPTY`; the field's test id is the face's suffixed `-filter`.
+- `multiple`: picks several, `values: Vec<T>` in place of `value`, told
+  through `on_change_values` (the values picked after a check or uncheck,
+  in the options' order). A pick leaves the list open; each picked option
+  shows its check, the list is `aria-multiselectable`. The face names the
+  first picked, or while several are, `summary` (such as how many rows they
+  match) or by default the first and how many more (`Small +2`); that text
+  joins the labels' cell, so a summary longer than every label widens it.
+  `picked(options, multiple, value, values)` gives the picked indexes.
 - `id` and `describedby` inside a `Field` (its label names and opens it),
   `label` (the accessible name without one), `class` (the face's), `testid`
   (the face's; the list's is it suffixed `-options`).

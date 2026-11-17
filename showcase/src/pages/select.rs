@@ -45,6 +45,7 @@ struct Settings {
     descriptions: bool,
     groups: bool,
     filter: bool,
+    multiple: bool,
 }
 
 #[derive(Properties, PartialEq)]
@@ -52,6 +53,8 @@ struct SampleProps {
     settings: Settings,
     value: Option<usize>,
     on_change: Callback<usize>,
+    values: Vec<usize>,
+    on_change_values: Callback<Vec<usize>>,
 }
 
 /// A Select in a Field and one joined to a button, each frame with ids of
@@ -93,15 +96,19 @@ fn Sample(props: &SampleProps) -> Html {
                 <Select<usize> id={id.clone()} options={options.clone()} value={props.value}
                     on_change={props.on_change.clone()} placeholder={placeholder.clone()}
                     width={s.width} size={s.size} invalid={s.invalid} disabled={s.disabled}
-                    busy={s.busy} {filter_from} describedby={field_describedby(&id, false, s.invalid)} />
+                    busy={s.busy} {filter_from} describedby={field_describedby(&id, false, s.invalid)}
+                    multiple={s.multiple} values={props.values.clone()}
+                    on_change_values={props.on_change_values.clone()} />
             </Field>
             <InputGroup>
                 <Select<usize> class={joined[0].clone()} label="Size" {options} value={props.value}
                     on_change={props.on_change.clone()} {placeholder} width={s.width} size={s.size}
-                    invalid={s.invalid} disabled={s.disabled} busy={s.busy} {filter_from} />
+                    invalid={s.invalid} disabled={s.disabled} busy={s.busy} {filter_from}
+                    multiple={s.multiple} values={props.values.clone()}
+                    on_change_values={props.on_change_values.clone()} />
                 <Button class={joined[1].clone()}>{ "Apply" }</Button>
             </InputGroup>
-            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes. With the filter, typing narrows the list (by label or group) and Home, End and Space stay the field's." }</p>
+            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes. With the filter, typing narrows the list (by label or group) and Home, End and Space stay the field's. Multiple: a pick checks or unchecks and the list stays open; the face names the first and how many more." }</p>
         </Stack>
     }
 }
@@ -120,8 +127,10 @@ pub fn SelectPage() -> Html {
         descriptions: false,
         groups: false,
         filter: false,
+        multiple: false,
     });
     let value = use_state(|| Some(1usize));
+    let values = use_state(|| vec![0usize, 3]);
     let s = *settings;
     let set = |f: fn(&mut Settings, bool)| {
         let settings = settings.clone();
@@ -134,6 +143,10 @@ pub fn SelectPage() -> Html {
     let pick = {
         let value = value.clone();
         Callback::from(move |v: usize| value.set(Some(v)))
+    };
+    let pick_many = {
+        let values = values.clone();
+        Callback::from(move |v: Vec<usize>| values.set(v))
     };
 
     let controls = html! {
@@ -159,6 +172,7 @@ pub fn SelectPage() -> Html {
             <Toggle label="descriptions" value={s.descriptions} on_change={set(|s, on| s.descriptions = on)} />
             <Toggle label="groups" value={s.groups} on_change={set(|s, on| s.groups = on)} />
             <Toggle label="filter" value={s.filter} on_change={set(|s, on| s.filter = on)} />
+            <Toggle label="multiple" value={s.multiple} on_change={set(|s, on| s.multiple = on)} />
         </>
     };
 
@@ -194,12 +208,16 @@ pub fn SelectPage() -> Html {
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled)
             .flag("busy", s.busy)
-            .expr_if(s.filter, "filter_from", "Some(4)"),
+            .expr_if(s.filter, "filter_from", "Some(4)")
+            .flag("multiple", s.multiple)
+            .expr_if(s.multiple, "values", "sizes")
+            .expr_if(s.multiple, "on_change_values", "set_sizes"),
     );
 
     html! {
         <Demo {controls} {code}>
-            <Sample settings={s} value={*value} on_change={pick} />
+            <Sample settings={s} value={*value} on_change={pick}
+                values={(*values).clone()} on_change_values={pick_many} />
         </Demo>
     }
 }
