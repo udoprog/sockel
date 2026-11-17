@@ -2,13 +2,15 @@
 //
 // - `.plinth-disclosure`: a rule above the row; `.plinth-open` while the
 //   body shows.
-// - `.plinth-disclosure-head`: the row, one `--control-height` high shut or
-//   open: the toggle (`.plinth-disclosure-summary`, a button across the
-//   row) and the actions (`.plinth-disclosure-actions`) at its end.
+// - `.plinth-disclosure-head`: the row, one `$disclosure-row-height`
+//   (`--control-height`) high shut or open: the toggle
+//   (`.plinth-disclosure-summary`, a button across the row) and the
+//   actions (`.plinth-disclosure-actions`) at its end.
 // - `.plinth-disclosure-mark`: the chevron in a box of its own; open turns
 //   it (`.plinth-open`) a quarter turn inside the box, which changes nothing around it.
 // - `.plinth-disclosure-title` and `.plinth-disclosure-detail`: the title and
-//   the muted summary of what it holds while shut, each cut to one line.
+//   the muted summary of what it holds while shut, each cut to one line;
+//   `$disclosure-title-ink` colours the title (`null`: the text's).
 // - `.plinth-disclosure-body`: the content, shown while open.
 // - `.plinth-disclosure-heading`: the heading the toggle sits in when the
 //   section's title is one; `.plinth-disclosure-summary.plinth-heading` sets
@@ -25,7 +27,7 @@
     align-items: center;
     gap: var(--space-2);
     box-sizing: border-box;
-    height: var(--control-height);
+    height: base.$disclosure-row-height;
 }
 
 .plinth-disclosure-summary {
@@ -87,6 +89,7 @@
     flex: none;
     max-width: 100%;
     @include base.truncate;
+    color: base.$disclosure-title-ink;
     font-weight: 600;
 }
 

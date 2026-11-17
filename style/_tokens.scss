@@ -195,6 +195,10 @@ $stepper-touch-glyph-size: null !default;
 $stepper-edge: null !default;
 $stepper-ground: null !default;
 $stepper-shadow: null !default;
+// A Disclosure's row height (`var(--touch-height)` gives a finger room),
+// and its title's ink (`null`: the text's).
+$disclosure-row-height: var(--control-height) !default;
+$disclosure-title-ink: null !default;
 $listbox-group-name-transform: null !default;
 $listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;

@@ -1479,7 +1479,10 @@ button and gap is as wide as the widest page number (`--pager-chars`, the
 digits of `pages`) with `numeric` figures, at least `--control-height`, so
 its width holds from the first page to the last (in a container too narrow
 the buttons shrink together, the same at every page); the current page adds
-no weight. The Disclosure's row is `--control-height` high shut or open, the
+no weight. The Disclosure's row is `--control-height` high shut or open
+(the setting `$disclosure-row-height` sets another, such as
+`var(--touch-height)`; `$disclosure-title-ink`, `null` by default, colours
+the title), the
 mark turns inside its own box, and the title and summary are cut to one line;
 only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
 `PAGER_MARK`, `PAGER_FLIP`, `PAGER_ECHO`, `PAGER_EDGE`, `DISCLOSURE`,
