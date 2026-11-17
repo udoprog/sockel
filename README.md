@@ -358,6 +358,7 @@ rule of the same weight; none uses `!important`.
 | `reserved-border($color: transparent, $width: var(--space-px))` | | The border is always there; a state changes only its colour. |
 | `numeric` | `.plinth-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
 | `scroll-area` | `.plinth-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
+| | `.plinth-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard scroll as before. |
 | `truncate` | `.plinth-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |
 | `clamp($lines)` | `.plinth-clamp-2`, `-3`, `-4` (`CLAMP_2`...) | At most that many lines, the last cut with an ellipsis. |
 | `visually-hidden` | `.plinth-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |

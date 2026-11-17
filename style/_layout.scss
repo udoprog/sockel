@@ -17,7 +17,7 @@
 //   gap. `.plinth-stack.plinth-flush` and `.plinth-cluster.plinth-flush` zero the block margins of their
 //   direct children (a paragraph's default).
 // - `.plinth-toolbar`: one line of controls, `--space-1` apart, scrolling sideways
-//   when it runs out of room, the gap scale setting another;
+//   when it runs out of room with its scrollbar hidden and the edge that has hidden controls faded, the gap scale setting another;
 //   `.plinth-toolbar-spacer` pushes what follows to the end. `.plinth-boxed` draws it as
 //   a bar of its own.
 // - `.plinth-library-toolbar`: a library page's search (`.plinth-library-search`, which
@@ -197,6 +197,36 @@
     row-gap: var(--space-1);
 }
 
+@property --plinth-fade-start {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@property --plinth-fade-end {
+    syntax: "<length>";
+    inherits: false;
+    initial-value: 0;
+}
+
+@keyframes plinth-toolbar-fade {
+    0% {
+        --plinth-fade-start: 0;
+        --plinth-fade-end: var(--space-7);
+    }
+
+    10%,
+    90% {
+        --plinth-fade-start: var(--space-7);
+        --plinth-fade-end: var(--space-7);
+    }
+
+    100% {
+        --plinth-fade-start: var(--space-7);
+        --plinth-fade-end: 0;
+    }
+}
+
 .plinth-toolbar {
     display: flex;
     flex-wrap: nowrap;
@@ -204,7 +234,22 @@
     gap: base.$toolbar-gap;
     min-width: 0;
     overflow-x: auto;
-    scrollbar-width: thin;
+    scrollbar-width: none;
+    // A scroll-driven animation (no script) fades the edge that has
+    // hidden controls; it does not run when nothing overflows.
+    mask-image: linear-gradient(
+        to right,
+        transparent,
+        #000 var(--plinth-fade-start),
+        #000 calc(100% - var(--plinth-fade-end)),
+        transparent
+    );
+    animation: plinth-toolbar-fade linear;
+    animation-timeline: scroll(self inline);
+
+    &::-webkit-scrollbar {
+        display: none;
+    }
 
     &.plinth-boxed {
         @include base.reserved-border(var(--border));
