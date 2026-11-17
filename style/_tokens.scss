@@ -148,6 +148,13 @@ $dialog-padding: var(--space-5) !default;
 $dialog-padding-phone: null !default;
 $dialog-body-gap: null !default;
 $dialog-shadow: var(--shadow-1) !default;
+// A dialog's head padding, the rule under its head (`null`: none), its
+// body's padding, and its title's size and weight (`null`: a section head's).
+$dialog-head-padding: var(--space-3) var(--space-3) 0 var(--dialog-pad) !default;
+$dialog-head-rule: null !default;
+$dialog-body-padding: var(--space-3) var(--dialog-pad) var(--dialog-pad) !default;
+$dialog-title-size: null !default;
+$dialog-title-weight: null !default;
 // A popover's body padding and its shadow (a hover card's too).
 $popover-padding: var(--space-3) !default;
 $popover-shadow: var(--shadow-1) !default;

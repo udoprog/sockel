@@ -49,6 +49,7 @@ struct Setup {
     title: Text,
     body: Body,
     icon: bool,
+    head: bool,
     sheet: bool,
     actions: bool,
     start: bool,
@@ -154,6 +155,10 @@ fn DialogOf(props: &DialogDemoProps) -> Html {
             </>
         }
     });
+    let head = s.head.then(|| {
+        html! { <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+        icon={html! { <Icon glyph={Glyph::Ellipsis} /> }} label="More" /> }
+    });
     let start = s.start.then(|| {
         html! { <Button variant={ButtonVariant::Danger} disabled={s.busy} onclick={cancel.clone()}>{ "Delete" }</Button> }
     });
@@ -162,6 +167,7 @@ fn DialogOf(props: &DialogDemoProps) -> Html {
         <Dialog open={props.open} on_dismiss={close} title={s.title.of("Rename the list")}
             icon={s.icon.then(|| html! { <Icon glyph={Glyph::Ellipsis} /> })}
             size={s.size} dismiss={s.dismiss} sheet={s.sheet}
+            head_actions={head.unwrap_or_default()}
             actions={actions.unwrap_or_default()} actions_start={start.unwrap_or_default()}>
             <Content body={s.body} />
         </Dialog>
@@ -200,6 +206,7 @@ pub fn DialogPage() -> Html {
     let title = use_state(|| Text::Short);
     let body = use_state(|| Body::Short);
     let icon = use_state(|| false);
+    let head = use_state(|| false);
     let sheet = use_state(|| true);
     let actions = use_state(|| true);
     let start = use_state(|| false);
@@ -212,6 +219,7 @@ pub fn DialogPage() -> Html {
         title: *title,
         body: *body,
         icon: *icon,
+        head: *head,
         sheet: *sheet,
         actions: *actions,
         start: *start,
@@ -224,6 +232,7 @@ pub fn DialogPage() -> Html {
             <Select<Text> label="title" options={Text::OPTIONS} value={*title} on_change={bind(&title)} />
             <Select<Body> label="Body" options={BODIES} value={*body} on_change={bind(&body)} />
             <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
+            <Toggle label="head_actions" value={*head} on_change={bind(&head)} />
             <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
             <Toggle label="actions" value={*actions} on_change={bind(&actions)} />
             <Toggle label="actions_start" value={*start} on_change={bind(&start)} />
@@ -247,6 +256,11 @@ pub fn DialogPage() -> Html {
             .expr("on_dismiss", "on_dismiss")
             .text("title", &title.of("Rename the list"))
             .expr_if(*icon, "icon", "html! { <Icon glyph={Glyph::Ellipsis} /> }")
+            .expr_if(
+                *head,
+                "head_actions",
+                "html! { <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small} icon={more} label=\"More\" /> }",
+            )
             .variant("size", *size)
             .variant("dismiss", *dismiss)
             .expr_if(!*sheet, "sheet", "false")

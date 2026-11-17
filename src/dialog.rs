@@ -71,6 +71,9 @@ pub struct DialogProps {
     /// The close button's `data-testid`.
     #[prop_or_default]
     pub close_testid: Option<AttrValue>,
+    /// Tools in the head, before the close button.
+    #[prop_or_default]
+    pub head_actions: Html,
     /// The foot's actions at its end, the primary last.
     #[prop_or_default]
     pub actions: Html,
@@ -337,6 +340,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
                 data-testid={props.testid.clone()}>
                 <SectionHead class={class::DIALOG_HEAD} title={html! { props.title.clone() }}
                     icon={props.icon.clone()}>
+                    { props.head_actions.clone() }
                     { for close }
                 </SectionHead>
                 <div class={class::DIALOG_BODY}>{ props.children.clone() }</div>
@@ -398,6 +402,7 @@ mod tests {
             sheet: true,
             close_label: "Close".into(),
             close_testid: Some("close".into()),
+            head_actions: html! { <button>{ "Import" }</button> },
             actions,
             actions_start: Html::default(),
             class: Classes::new(),
@@ -422,6 +427,8 @@ mod tests {
         assert!(html.contains(class::DIALOG_FOOT), "{html}");
         assert!(html.contains(class::DIALOG_LAYER), "{html}");
         assert!(html.contains("data-testid=\"close\""), "{html}");
+        let head = html.find("Import").expect("head action");
+        assert!(head < html.find("aria-label=\"Close\"").unwrap(), "{html}");
     }
 
     #[test]

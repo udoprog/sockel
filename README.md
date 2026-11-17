@@ -290,7 +290,8 @@ Breakpoints and the component settings (`$card-padding`,
 `$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
 `$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
 `$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
-`$dialog-body-gap`, `$dialog-shadow`, `$popover-padding`, `$popover-shadow`,
+`$dialog-body-gap`, `$dialog-shadow`, `$dialog-head-padding`, `$dialog-head-rule`,
+`$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$popover-padding`, `$popover-shadow`,
 `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
@@ -352,6 +353,9 @@ page can still override them at runtime.
 | `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap), `var(--shadow-1)` |
+| `$dialog-head-padding`, `$dialog-head-rule` | `var(--space-3) var(--space-3) 0 var(--dialog-pad)`, `null` (no rule under the head; set, its `border-bottom`) |
+| `$dialog-body-padding` | `var(--space-3) var(--dialog-pad) var(--dialog-pad)` |
+| `$dialog-title-size`, `$dialog-title-weight` | `null`, `null` (the section head's; set, the dialog title's own) |
 | `$popover-padding`, `$popover-shadow` | `var(--space-3)`, `var(--shadow-1)` (a popover's body padding and its shadow, a hover card's included) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
@@ -1068,6 +1072,7 @@ included, so a popover or menu opened inside it could not be used). Props:
 - `dismiss`: `DialogDismiss::Any` (Escape, the close button, a press on the
   scrim), `NoOutside` (not the scrim) or `Actions` (no close button, Escape
   does nothing). `DialogDismiss::allows(Dismiss)` tells which.
+- `head_actions`: tools in the head, before the close button.
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
   at its start: a Delete), each an `ActionGroup` in `.plinth-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from

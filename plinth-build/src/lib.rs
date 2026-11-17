@@ -801,6 +801,45 @@ mod tests {
     }
 
     #[test]
+    fn a_dialog_head_and_body_take_their_padding_rule_and_title_from_settings() {
+        let plain = Config::new().build().unwrap();
+        let head = declarations(&plain.css, ".plinth-dialog-head");
+        assert!(
+            head.contains(&"padding: var(--space-3) var(--space-3) 0 var(--dialog-pad)".to_owned())
+        );
+        assert!(
+            !head
+                .iter()
+                .any(|l| l.starts_with("border-bottom") || l.starts_with("--section-title-size"))
+        );
+        assert!(
+            !plain
+                .css
+                .contains(".plinth-dialog-head > .plinth-head-heading")
+        );
+        let tuned = Config::new()
+            .with("dialog-head-padding", "var(--space-3) var(--space-4)")
+            .with("dialog-head-rule", "1px solid var(--border)")
+            .with("dialog-body-padding", "0")
+            .with("dialog-title-size", "var(--text-sm)")
+            .with("dialog-title-weight", "500")
+            .build()
+            .unwrap();
+        let head = declarations(&tuned.css, ".plinth-dialog-head");
+        assert!(head.contains(&"padding: var(--space-3) var(--space-4)".to_owned()));
+        assert!(head.contains(&"border-bottom: 1px solid var(--border)".to_owned()));
+        assert!(head.contains(&"--section-title-size: var(--text-sm)".to_owned()));
+        assert!(declarations(&tuned.css, ".plinth-dialog-body").contains(&"padding: 0".to_owned()));
+        assert!(
+            declarations(
+                &tuned.css,
+                ".plinth-dialog-head > .plinth-head-heading > .plinth-section-head-title"
+            )
+            .contains(&"font-weight: 500".to_owned())
+        );
+    }
+
+    #[test]
     fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
         let plain = Config::new().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");

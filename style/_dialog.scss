@@ -15,7 +15,9 @@
 //   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays.
 // - Settings: `$dialog-padding` (and `$dialog-padding-phone` below
 //   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
-//   with that gap when set) and `$dialog-shadow`.
+//   with that gap when set), `$dialog-shadow`, `$dialog-head-padding`,
+//   `$dialog-head-rule` (a border under the head), `$dialog-body-padding`,
+//   `$dialog-title-size` and `$dialog-title-weight`.
 
 @use "tokens" as base;
 
@@ -68,13 +70,25 @@
 
 .plinth-dialog-head {
     flex: none;
-    padding: var(--space-3) var(--space-3) 0 var(--dialog-pad);
+    padding: base.$dialog-head-padding;
+    @if base.$dialog-head-rule {
+        border-bottom: base.$dialog-head-rule;
+    }
+    @if base.$dialog-title-size {
+        --section-title-size: #{base.$dialog-title-size};
+    }
+}
+
+@if base.$dialog-title-weight {
+    .plinth-dialog-head > .plinth-head-heading > .plinth-section-head-title {
+        font-weight: base.$dialog-title-weight;
+    }
 }
 
 .plinth-dialog-body {
     @include base.scroll-area;
     flex: 1 1 auto;
-    padding: var(--space-3) var(--dialog-pad) var(--dialog-pad);
+    padding: base.$dialog-body-padding;
 }
 
 @if base.$dialog-body-gap {
