@@ -102,7 +102,7 @@ pub fn button(variant: ButtonVariant, size: ButtonSize, icon_only: bool, fold: b
     )
 }
 
-fn is_empty(html: &Html) -> bool {
+pub(crate) fn is_empty(html: &Html) -> bool {
     match html {
         Html::VList(list) => list.iter().all(is_empty),
         Html::VText(text) => text.text.is_empty(),

@@ -471,6 +471,40 @@ cannot change a control's size. Icons should draw in `currentColor`. The
 spinner's box turns (slower under `prefers-reduced-motion`); the set's
 spinner need not animate itself.
 
+## Notice, ErrorBox and EmptyState
+
+`Notice` is an inline message. `tone` (`NoticeTone`): `Info` (the default,
+the accent), `Success` (`SUCCESS`), `Warning` (`WARNING`), `Error`
+(`ERROR`), each coloured from `--accent`, `--success`, `--warning` or
+`--danger`. `icon` is the app's icon, before the text; `action` is Html
+(a link or button) after it; `onclose: Some(callback)` shows a close button
+(`close_label`, "Dismiss", names it). The notice does not remove itself: the
+app stops rendering it, and the space it held collapses at once, which is
+intended. A warning or an error has `role="alert"`, the others
+`role="status"`. `notice(tone)` gives the classes.
+
+`ErrorBox` is an error: `title`, the message (its children), `cause` (the
+technical text, cut to three lines, whole in its `title` attribute) and
+`onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
+busy and ignore clicks).
+
+`EmptyState` is what stands where there is nothing: `title`, `icon`, `hint`
+and actions (its children). `compact` (`COMPACT`) is one row for a list or a
+table. `empty_state(compact)` gives the classes.
+
+Every one takes `class` and `testid`. Parts: `NOTICE_ICON`, `NOTICE_BODY`,
+`NOTICE_ACTION`, `NOTICE_CLOSE`, `ERROR_BOX_TITLE`, `ERROR_BOX_MESSAGE`,
+`ERROR_BOX_CAUSE`, `ERROR_BOX_ACTIONS`, `EMPTY_STATE_ICON`,
+`EMPTY_STATE_TITLE`, `EMPTY_STATE_HINT`, `EMPTY_STATE_ACTIONS`.
+
+Size guarantees: a notice is at least one small control plus its padding
+high, its text centred in that, so one line is as high with a close button
+and an action as without; its text wraps, it never widens. An error box
+keeps its retry button's box while retrying. A compact empty state is
+exactly `--control-height` high whatever it says (title and hint cut to one
+line, its actions kept at the end), so it replaces a row of that height
+without moving what follows; the regular one grows with its text.
+
 ## Image and Avatar
 
 `Image` is a picture in a box whose ratio is fixed before it loads, so the

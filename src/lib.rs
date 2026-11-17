@@ -37,6 +37,10 @@
 //! - [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
 //!   placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
 //!   initials behind it.
+//! - [`Notice`] (`.notice`): an inline message in a tone, its action and
+//!   close; [`ErrorBox`] (`.error-box`): an error, its cause and a retry;
+//!   [`EmptyState`] (`.empty-state`): what stands where there is nothing,
+//!   compact for a row.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -69,12 +73,15 @@ mod checkbox;
 mod chip;
 mod choice;
 mod field;
+mod empty_state;
+mod error_box;
 mod head;
 mod icon_button;
 mod icons;
 mod image;
 mod layout;
 mod library_toolbar;
+mod notice;
 mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
@@ -86,6 +93,8 @@ pub use field::{
     Field, FieldCheck, FieldCheckProps, FieldProps, Fieldset, FieldsetProps, FormRow, FormRows,
     FormRowsProps, field, field_describedby, field_error, form_row, form_rows,
 };
+pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
+pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
@@ -97,4 +106,5 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
+pub use notice::{Notice, NoticeProps, NoticeTone, notice};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};

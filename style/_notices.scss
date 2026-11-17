@@ -1,0 +1,183 @@
+// Notice, ErrorBox and EmptyState (src/notice.rs, src/error_box.rs,
+// src/empty_state.rs).
+//
+// - `.plinth-notice`: an inline message, its tone a modifier (`.plinth-info`,
+//   `.plinth-success`, `.plinth-warning`, `.plinth-error`) that sets
+//   `--notice-tone`. Parts: `-icon`, `-body`, `-action`, `-close`. Its
+//   least height is one small control plus its padding, so a notice of one
+//   line is as high with a close button as without. Closing one removes it
+//   and the space it held: the content below moves up at once, by design.
+// - `.plinth-error-box`: an error with its cause and a retry. Parts:
+//   `-title`, `-message`, `-cause` (at most three lines, cut) and
+//   `-actions`.
+// - `.plinth-empty-state`: what stands where a list or page has nothing.
+//   Parts: `-icon`, `-title`, `-hint`, `-actions`. `.plinth-compact` is one
+//   row high (`--control-height`), its title and hint cut to one line, so
+//   it replaces a row without moving what follows.
+
+@use "tokens" as base;
+
+.plinth-notice {
+    --notice-tone: var(--accent);
+
+    display: flex;
+    gap: var(--space-2);
+    align-items: flex-start;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px));
+    padding: var(--space-2) var(--space-3);
+    @include base.reserved-border(color-mix(in srgb, var(--notice-tone) 45%, var(--border)));
+    border-radius: var(--radius-md);
+    background: color-mix(in srgb, var(--notice-tone) 10%, var(--surface));
+    color: var(--text);
+
+    &.plinth-success {
+        --notice-tone: var(--success);
+    }
+
+    &.plinth-warning {
+        --notice-tone: var(--warning);
+    }
+
+    &.plinth-error {
+        --notice-tone: var(--danger);
+    }
+}
+
+.plinth-notice-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-height-small);
+    color: var(--notice-tone);
+}
+
+// The text sits in the middle of the least height, whatever its lines.
+.plinth-notice-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-block: calc((var(--control-height-small) - 1lh) / 2);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.plinth-notice-action,
+.plinth-notice-close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    height: var(--control-height-small);
+}
+
+.plinth-error-box {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-width: 0;
+    padding: var(--space-4);
+    @include base.reserved-border(color-mix(in srgb, var(--danger) 45%, var(--border)));
+    border-radius: var(--radius-lg);
+    background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+    color: var(--text);
+}
+
+.plinth-error-box-title {
+    margin: 0;
+    color: var(--danger);
+    font-size: var(--text-md);
+    font-weight: 600;
+    overflow-wrap: anywhere;
+}
+
+.plinth-error-box-message {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.plinth-error-box-cause {
+    @include base.clamp(3);
+    margin: 0;
+    color: var(--muted);
+    font-family: ui-monospace, monospace;
+    font-size: var(--text-xs);
+    overflow-wrap: anywhere;
+}
+
+.plinth-error-box-actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    align-items: center;
+}
+
+.plinth-empty-state {
+    --empty-icon-size: var(--text-2xl);
+    --empty-nowrap: normal;
+    --empty-hint-flex: 0 1 auto;
+    --empty-actions-margin: var(--space-2) 0 0;
+
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 0;
+    padding: var(--space-7) var(--space-4);
+    color: var(--muted);
+    text-align: center;
+
+    &.plinth-compact {
+        --empty-icon-size: inherit;
+        --empty-nowrap: nowrap;
+        --empty-hint-flex: 1 1 0;
+        --empty-actions-margin: 0 0 0 auto;
+
+        flex-direction: row;
+        height: var(--control-height);
+        padding: 0 var(--space-3);
+        overflow: hidden;
+        text-align: start;
+    }
+}
+
+.plinth-empty-state-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    font-size: var(--empty-icon-size);
+    line-height: 1;
+}
+
+.plinth-empty-state-title,
+.plinth-empty-state-hint {
+    min-width: 0;
+    margin: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: var(--empty-nowrap);
+    overflow-wrap: anywhere;
+}
+
+.plinth-empty-state-title {
+    flex: 0 1 auto;
+    color: var(--text);
+    font-size: var(--text-md);
+    font-weight: 600;
+}
+
+.plinth-empty-state-hint {
+    flex: var(--empty-hint-flex);
+}
+
+.plinth-empty-state-actions {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+    justify-content: center;
+    margin: var(--empty-actions-margin);
+}

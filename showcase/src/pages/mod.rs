@@ -7,6 +7,7 @@ mod icons;
 mod layout;
 mod library;
 mod media;
+mod notices;
 mod styles;
 mod toggles;
 
@@ -313,6 +314,55 @@ pub const PAGES: &[Page] = &[
                 plinth::class::AVATAR,
                 Size::Box,
                 Across::Only(&["Source", "Name", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "notice",
+        title: "Notice",
+        about: "An inline message in a tone, with an optional icon, action and close. Closing one collapses its space, by design.",
+        covers: &["Notice", "NoticeProps", "NoticeTone", "notice"],
+        render: || html! { <notices::NoticePage /> },
+        holds: &[
+            hold(
+                plinth::class::NOTICE,
+                Size::Width,
+                Across::Except(&["click"]),
+            ),
+            hold(
+                plinth::class::NOTICE,
+                Size::Height,
+                Across::Only(&["tone", "icon", "action", "onclose", "focus"]),
+            ),
+        ],
+    },
+    Page {
+        id: "error-box",
+        title: "ErrorBox",
+        about: "An error with its cause and a retry; a retry in progress keeps the button's box.",
+        covers: &["ErrorBox", "ErrorBoxProps"],
+        render: || html! { <notices::ErrorBoxPage /> },
+        holds: &[
+            hold(plinth::class::ERROR_BOX, Size::Width, Across::All),
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Only(&["retrying", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "empty-state",
+        title: "EmptyState",
+        about: "What stands where there is nothing. Compact, it is one row high, like the row it replaces.",
+        covers: &["EmptyState", "EmptyStateProps", "empty_state"],
+        render: || html! { <notices::EmptyStatePage /> },
+        holds: &[
+            hold(plinth::class::EMPTY_STATE, Size::Width, Across::All),
+            hold(
+                plinth::class::EMPTY_STATE,
+                Size::Height,
+                Across::Except(&["compact"]),
             ),
         ],
     },
