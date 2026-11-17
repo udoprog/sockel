@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Badge, Button, ButtonSize, ButtonVariant, ChoiceList, ChoicePopup, Cluster, Dismiss, Field,
     Glyph, Icon, PickerDialog, PickerMenu, PickerOption, PickerVariant, Stack, field_describedby,
     toggled,
@@ -123,7 +123,7 @@ fn PickerSample(props: &SampleProps) -> Html {
         <Stack>
             <Field id={id.clone()} label={html! { "Language" }} error={error} reserve_error=true
                 disabled={s.disabled}>
-                <plinth::Picker<usize> id={id.clone()} options={s.options()} page_size={s.page_size()}
+                <sockel::Picker<usize> id={id.clone()} options={s.options()} page_size={s.page_size()}
                     value={props.value} on_change={props.on_change.clone()}
                     label="Language" placeholder="Choose a language" variant={s.variant}
                     fill={s.fill} invalid={s.invalid} disabled={s.disabled}
@@ -371,7 +371,7 @@ pub fn PickerDialogPage() -> Html {
                     chosen={(*chosen).clone()} on_pick={on_pick.clone()} label="Languages"
                     always_search={s.always_search} page_size={s.page_size()} testid="choice-list" />
                 <p class={class::SAMPLE}>{ "The same ChoiceList inline: filtering keeps its height. The dialog holds it, its search field focused." }</p>
-                <PickerDialog<usize> open={*open} on_dismiss={close.reform(|_: plinth::Dismiss| ())} title="Languages"
+                <PickerDialog<usize> open={*open} on_dismiss={close.reform(|_: sockel::Dismiss| ())} title="Languages"
                     {options} value={*value} multi={*multi} chosen={(*chosen).clone()} {on_pick}
                     actions={actions.unwrap_or_default()} testid="picker-dialog" />
             </Stack>

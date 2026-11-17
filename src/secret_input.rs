@@ -128,10 +128,10 @@ pub struct SecretInputProps {
 #[function_component]
 pub fn SecretInput(props: &SecretInputProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let show_label = label(&phrases, &props.show_label, "plinth-secret-input-show");
-    let hide_label = label(&phrases, &props.hide_label, "plinth-secret-input-hide");
-    let copy_label = label(&phrases, &props.copy_label, "plinth-secret-input-copy");
-    let clear_label = label(&phrases, &props.clear_label, "plinth-secret-input-clear");
+    let show_label = label(&phrases, &props.show_label, "sockel-secret-input-show");
+    let hide_label = label(&phrases, &props.hide_label, "sockel-secret-input-hide");
+    let copy_label = label(&phrases, &props.copy_label, "sockel-secret-input-copy");
+    let clear_label = label(&phrases, &props.clear_label, "sockel-secret-input-clear");
     let state = use_reducer(RevealState::default);
     let reveal = state.0;
     // With `commit`, what is typed and not yet committed: the field shows

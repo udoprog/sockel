@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, EmptyState, ErrorBox, Glyph, Icon, SortDirection,
     SortHeader, Table, TableCell, TableRow, next_sort, sort_header, sort_mark, table, table_bulk,
     table_cell, table_wrap,

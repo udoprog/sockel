@@ -16,7 +16,7 @@ pub const OVERLAY_ID: &str = class::OVERLAY;
 
 #[derive(Clone, Debug, PartialEq)]
 enum Host {
-    /// The fallback's `#plinth-overlay`, made on first use.
+    /// The fallback's `#sockel-overlay`, made on first use.
     Body,
     Element(Element),
     /// No document (server rendering): overlays render in place.

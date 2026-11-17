@@ -1,6 +1,6 @@
 //! Every component keeps the classes passed in its `class` prop beside its own.
 
-use plinth::*;
+use sockel::*;
 use yew::LocalServerRenderer;
 use yew::prelude::*;
 

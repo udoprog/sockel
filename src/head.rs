@@ -8,10 +8,10 @@ pub struct HeadProps {
     /// The title's content: text, or formatted names and spans.
     pub title: Html,
     /// An icon before the title's text, inside the heading (a
-    /// `plinth-head-icon` span, in the accent).
+    /// `sockel-head-icon` span, in the accent).
     #[prop_or_default]
     pub icon: Option<Html>,
-    /// One muted line under the head's row (`plinth-head-subtitle`).
+    /// One muted line under the head's row (`sockel-head-subtitle`).
     #[prop_or_default]
     pub subtitle: Option<Html>,
     /// The pages above this one, outermost first: each a link, stacked in
@@ -266,10 +266,10 @@ mod tests {
         };
         assert!(at("<nav") < at("<h1"));
         assert!(at("<h1") < at("<button>Go"));
-        assert!(at("<button>Go") < at("<p class=\"plinth-head-subtitle\">Facts"));
+        assert!(at("<button>Go") < at("<p class=\"sockel-head-subtitle\">Facts"));
         assert!(html.contains("aria-label=\"Trail\""), "{html}");
         assert_eq!(html.matches("<li ").count(), 2, "{html}");
-        assert!(html.contains("<h1 class=\"plinth-page-head-title\"><span class=\"plinth-head-icon\">*</span><b>Name</b></h1>"), "{html}");
+        assert!(html.contains("<h1 class=\"sockel-page-head-title\"><span class=\"sockel-head-icon\">*</span><b>Name</b></h1>"), "{html}");
     }
 
     fn names(classes: Classes) -> Vec<String> {
@@ -292,7 +292,7 @@ mod tests {
     fn a_head_is_as_high_with_or_without_its_actions() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
-            .split(".plinth-page-head,\n.plinth-section-head {")
+            .split(".sockel-page-head,\n.sockel-section-head {")
             .nth(1)
             .and_then(|rest| rest.split('}').next())
             .expect("the heads' shared rule");
@@ -306,13 +306,13 @@ mod tests {
     fn a_label_head_is_its_lines_height_and_no_head_has_margins() {
         let sass = include_str!("../style/_heads.scss");
         let shared = sass
-            .split(".plinth-page-head,\n.plinth-section-head {")
+            .split(".sockel-page-head,\n.sockel-section-head {")
             .nth(1)
             .and_then(|rest| rest.split('}').next())
             .expect("the heads' shared rule");
         assert!(shared.contains("margin: 0;"), "{shared}");
         let label = sass
-            .split(".plinth-section-head.plinth-label {")
+            .split(".sockel-section-head.sockel-label {")
             .nth(1)
             .and_then(|rest| rest.split('}').next())
             .expect("the label head's rule");
@@ -323,9 +323,9 @@ mod tests {
     fn a_compact_heads_icons_never_shrink_under_its_title() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
-            .split(".plinth-page-head.plinth-compact {\n            flex-wrap: nowrap;")
+            .split(".sockel-page-head.sockel-compact {\n            flex-wrap: nowrap;")
             .nth(1)
-            .and_then(|rest| rest.split("> .plinth-page-head-actions {").nth(1))
+            .and_then(|rest| rest.split("> .sockel-page-head-actions {").nth(1))
             .and_then(|rest| rest.split('}').next())
             .expect("the compact head's actions on a phone");
         assert!(rule.contains("flex-shrink: 0;"), "{rule}");
@@ -335,7 +335,7 @@ mod tests {
     fn the_help_stays_beside_a_wrapping_title() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
-            .split(".plinth-head-heading {")
+            .split(".sockel-head-heading {")
             .nth(1)
             .and_then(|rest| rest.split('}').next())
             .expect("the heading group's rule");
@@ -346,7 +346,7 @@ mod tests {
     fn a_heads_actions_shrink_with_its_column() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
-            .split(".plinth-page-head-actions,\n.plinth-section-head-actions {")
+            .split(".sockel-page-head-actions,\n.sockel-section-head-actions {")
             .nth(1)
             .and_then(|rest| rest.split('}').next())
             .expect("the heads' actions rule");

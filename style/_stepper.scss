@@ -1,28 +1,28 @@
 // Stepper (src/stepper.rs): a number between a minus and a plus button.
 //
-// - `.plinth-stepper`: worn with `.plinth-input-box`, which gives it the
-//   border, the sizes (`.plinth-small`, `.plinth-touch`), the states
-//   (`.plinth-invalid`, `.plinth-disabled`, `.plinth-busy`) and the focus
+// - `.sockel-stepper`: worn with `.sockel-input-box`, which gives it the
+//   border, the sizes (`.sockel-small`, `.sockel-touch`), the states
+//   (`.sockel-invalid`, `.sockel-disabled`, `.sockel-busy`) and the focus
 //   ring; it only drops that box's stretch and padding. Its width is its
 //   buttons and the number's room (`fit-content`, so a flex column or a
 //   grid cell does not stretch it either).
-// - `.plinth-stepper-control`: the number, `--stepper-chars` wide in `ch`
+// - `.sockel-stepper-control`: the number, `--stepper-chars` wide in `ch`
 //   (the digits of the longest of min and max, set by the component), its
 //   figures of one width, so the box holds from min to max;
-//   `.plinth-zero` while the value is 0. `$stepper-number-weight`, and
+//   `.sockel-zero` while the value is 0. `$stepper-number-weight`, and
 //   `$stepper-zero-ink` and `$stepper-zero-weight` at zero, restyle it
 //   (`null`: as the field's text).
-// - `.plinth-touch`: `$stepper-touch-number-size`, `-number-weight` and
+// - `.sockel-touch`: `$stepper-touch-number-size`, `-number-weight` and
 //   `$stepper-touch-glyph-size` enlarge the number and the glyphs (`null`:
 //   as the other sizes').
 // - `$stepper-edge`, `$stepper-ground` and `$stepper-shadow` restyle the
 //   box at rest (`null`: the field's edge and ground, no shadow); hover,
 //   invalid and focus still mark it as on any field.
-// - `.plinth-stepper-button`: a square of the box's height.
+// - `.sockel-stepper-button`: a square of the box's height.
 
 @use "tokens" as base;
 
-.plinth-stepper {
+.sockel-stepper {
     display: inline-flex;
     gap: 0;
     width: fit-content;
@@ -36,7 +36,7 @@
     }
 }
 
-.plinth-stepper-control {
+.sockel-stepper-control {
     flex: none;
     box-sizing: content-box;
     width: calc(var(--stepper-chars) * 1ch);
@@ -46,26 +46,26 @@
     font-weight: base.$stepper-number-weight;
     @include base.numeric;
 
-    &.plinth-zero {
+    &.sockel-zero {
         color: base.$stepper-zero-ink;
         font-weight: base.$stepper-zero-weight;
     }
 }
 
-.plinth-stepper.plinth-touch {
-    .plinth-stepper-control {
+.sockel-stepper.sockel-touch {
+    .sockel-stepper-control {
         font-size: base.$stepper-touch-number-size;
         font-weight: base.$stepper-touch-number-weight;
     }
 
     @if base.$stepper-touch-glyph-size {
-        .plinth-stepper-button {
+        .sockel-stepper-button {
             --glyph-size: #{base.$stepper-touch-glyph-size};
         }
     }
 }
 
-.plinth-stepper-button {
+.sockel-stepper-button {
     display: inline-flex;
     flex: none;
     align-items: center;

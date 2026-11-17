@@ -2,27 +2,27 @@
 // high, as a compact empty state is, and every border a row draws is
 // reserved, so dividing a list, hovering or choosing a row moves nothing.
 //
-// - `.plinth-row-list`: a column of rows. `.plinth-divided` draws a line
+// - `.sockel-row-list`: a column of rows. `.sockel-divided` draws a line
 //   above every row but the first, in the rows' own reserved top borders
-//   (`--row-line`); `.plinth-boxed` gives it a bordered, rounded surface.
-// - `.plinth-row-list-item`: a row. Parts: `-main` (takes the room), `-name`
+//   (`--row-line`); `.sockel-boxed` gives it a bordered, rounded surface.
+// - `.sockel-row-list-item`: a row. Parts: `-main` (takes the room), `-name`
 //   (one line, cut) and `-detail` (under it, muted, cut). What follows the
-//   main part ends the row. `.plinth-top` puts the parts to the top and lets
+//   main part ends the row. `.sockel-top` puts the parts to the top and lets
 //   the name wrap.
-// - `.plinth-pick-row`: a button that is a whole row. Parts: `-mark`,
+// - `.sockel-pick-row`: a button that is a whole row. Parts: `-mark`,
 //   `-name`, `-detail`. `aria-current` marks it by background.
-// - `.plinth-selection-bar`: the picked count (`-count`) and its actions,
+// - `.sockel-selection-bar`: the picked count (`-count`) and its actions,
 //   one height (`$selection-bar-count-wrap` wraps a count that does not
-//   fit instead); `.plinth-idle` hides it while nothing is picked and keeps
-//   its room; `.plinth-inset` levels its sides with the rows;
-//   `.plinth-sticky` keeps it at the bottom of its scroll container.
-// - `.plinth-action-row`: actions that wrap. `.plinth-nowrap` keeps one
-//   line. `.plinth-overlay` lies over the end of a row, taking no room,
+//   fit instead); `.sockel-idle` hides it while nothing is picked and keeps
+//   its room; `.sockel-inset` levels its sides with the rows;
+//   `.sockel-sticky` keeps it at the bottom of its scroll container.
+// - `.sockel-action-row`: actions that wrap. `.sockel-nowrap` keeps one
+//   line. `.sockel-overlay` lies over the end of a row, taking no room,
 //   invisible and inert until the row is hovered or has focus.
 
 @use "tokens" as base;
 
-.plinth-row-list {
+.sockel-row-list {
     --row-line: transparent;
 
     display: flex;
@@ -33,11 +33,11 @@
     @include base.reserved-border;
     list-style: none;
 
-    &.plinth-divided {
+    &.sockel-divided {
         --row-line: var(--border);
     }
 
-    &.plinth-boxed {
+    &.sockel-boxed {
         border-color: var(--border);
         border-radius: var(--radius-lg);
         background: var(--surface);
@@ -45,7 +45,7 @@
     }
 }
 
-.plinth-row-list-item {
+.sockel-row-list-item {
     --overlay-tint: transparent;
     --overlay-opacity: 0;
     --overlay-events: none;
@@ -85,7 +85,7 @@
         background: var(--overlay-tint);
     }
 
-    &.plinth-top {
+    &.sockel-top {
         --row-name-wrap: normal;
         --row-name-break: anywhere;
         --row-main-basis: 14rem;
@@ -95,7 +95,7 @@
     }
 }
 
-.plinth-row-list-main {
+.sockel-row-list-main {
     display: flex;
     flex: 1 1 var(--row-main-basis);
     flex-direction: column;
@@ -103,7 +103,7 @@
     padding-block: var(--space-1);
 }
 
-.plinth-row-list-name {
+.sockel-row-list-name {
     @include base.truncate;
 
     font-weight: 600;
@@ -111,14 +111,14 @@
     white-space: var(--row-name-wrap);
 }
 
-.plinth-row-list-detail {
+.sockel-row-list-detail {
     @include base.truncate;
 
     color: var(--muted);
     font-size: var(--text-sm);
 }
 
-.plinth-pick-row {
+.sockel-pick-row {
     --pick-fill: transparent;
 
     display: flex;
@@ -156,19 +156,19 @@
     }
 }
 
-.plinth-pick-row-mark {
+.sockel-pick-row-mark {
     display: inline-flex;
     flex: none;
     align-items: center;
 }
 
-.plinth-pick-row-name {
+.sockel-pick-row-name {
     @include base.truncate;
 
     flex: 1 1 auto;
 }
 
-.plinth-pick-row-detail {
+.sockel-pick-row-detail {
     @include base.truncate;
 
     // Follows the row's colour, so a chosen row's detail stays readable.
@@ -176,7 +176,7 @@
     font-size: base.$pick-row-detail-text;
 }
 
-.plinth-selection-bar {
+.sockel-selection-bar {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -190,16 +190,16 @@
     background: base.$selection-bar-ground;
     font-size: base.$selection-bar-text;
 
-    &.plinth-inset {
+    &.sockel-inset {
         margin: base.$selection-bar-inset-margin;
         padding-inline: base.$selection-bar-inset-padding;
     }
 
-    &.plinth-idle {
+    &.sockel-idle {
         visibility: hidden;
     }
 
-    &.plinth-sticky {
+    &.sockel-sticky {
         position: sticky;
         bottom: 0;
         z-index: var(--layer-sticky);
@@ -207,7 +207,7 @@
     }
 }
 
-.plinth-selection-bar-count {
+.sockel-selection-bar-count {
     @include base.numeric;
     @include base.truncate;
 
@@ -225,19 +225,19 @@
     }
 }
 
-.plinth-action-row {
+.sockel-action-row {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
     min-width: 0;
 
-    &.plinth-nowrap {
+    &.sockel-nowrap {
         flex: none;
         flex-wrap: nowrap;
     }
 
-    &.plinth-overlay {
+    &.sockel-overlay {
         position: absolute;
         inset-block: 0;
         inset-inline-end: 0;

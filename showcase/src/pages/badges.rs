@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Badge, Cluster, Count, Dot, Pill, StatusLabel, Tone, badge, count, count_text, dot, pill,
     status_label,
 };

@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
+use sockel::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 
 use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, button};
@@ -107,25 +107,25 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         head_testid: testids.then(|| AttrValue::from("head")),
         testid: None,
         class: classes!(
-            compact.then_some(plinth::class::COMPACT),
-            one_row.then_some(plinth::class::ONE_ROW),
-            label.then_some(plinth::class::LABEL),
-            list.then_some(plinth::class::LIST),
-            nested.then_some(plinth::class::NESTED),
+            compact.then_some(sockel::class::COMPACT),
+            one_row.then_some(sockel::class::ONE_ROW),
+            label.then_some(sockel::class::LABEL),
+            list.then_some(sockel::class::LIST),
+            nested.then_some(sockel::class::NESTED),
         ),
         back: back.then(|| {
             html! {
-                <a href="#" class={plinth::class::PAGE_HEAD_BACK}
+                <a href="#" class={sockel::class::PAGE_HEAD_BACK}
                     onclick={Callback::from(|e: MouseEvent| e.prevent_default())}>
                     <span aria-hidden="true">{ "←" }</span>
-                    <span class={classes!(class::LABEL_TEXT, plinth::class::PAGE_HEAD_BACK_LABEL)}>{ "Back" }</span>
+                    <span class={classes!(class::LABEL_TEXT, sockel::class::PAGE_HEAD_BACK_LABEL)}>{ "Back" }</span>
                 </a>
             }
         }),
         back_label: back.then(|| AttrValue::from("Breadcrumb")),
         meta: meta.then(|| {
             html! {
-                <div class={plinth::class::PAGE_HEAD_META}>
+                <div class={sockel::class::PAGE_HEAD_META}>
                     <span class={class::CHIP}>{ "keyword" }</span>
                     <span class={class::CHIP}>{ "another" }</span>
                 </div>
@@ -143,11 +143,11 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         }
     };
     let modifiers: Vec<&str> = [
-        (*compact, "plinth::class::COMPACT"),
-        (*one_row, "plinth::class::ONE_ROW"),
-        (*label, "plinth::class::LABEL"),
-        (*list, "plinth::class::LIST"),
-        (*nested, "plinth::class::NESTED"),
+        (*compact, "sockel::class::COMPACT"),
+        (*one_row, "sockel::class::ONE_ROW"),
+        (*label, "sockel::class::LABEL"),
+        (*list, "sockel::class::LIST"),
+        (*nested, "sockel::class::NESTED"),
     ]
     .into_iter()
     .filter_map(|(on, name)| on.then_some(name))
@@ -197,7 +197,7 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         .expr_if(
             *meta,
             "meta",
-            "html! { <div class={plinth::class::PAGE_HEAD_META}>{ keywords }</div> }",
+            "html! { <div class={sockel::class::PAGE_HEAD_META}>{ keywords }</div> }",
         )
         .line_if(
             *actions > 0,

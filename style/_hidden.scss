@@ -1,7 +1,7 @@
-// `.plinth-hidden`: hidden, its box kept (a badge's dimmed state, the
+// `.sockel-hidden`: hidden, its box kept (a badge's dimmed state, the
 // labels a Select's face or a status label holds for its width). Its own
 // partial, so a component needing it loads nothing else.
 
-.plinth-hidden {
+.sockel-hidden {
     visibility: hidden;
 }

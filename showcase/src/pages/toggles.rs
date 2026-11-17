@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Checkbox, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster, Glyph, Icon, Stack,
     Switch, checkbox, chip_count, choice, switch,
 };

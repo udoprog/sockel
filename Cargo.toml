@@ -1,5 +1,5 @@
 [package]
-name = "plinth"
+name = "sockel"
 version = "0.1.0"
 edition = "2024"
 license = "MIT OR Apache-2.0"
@@ -7,7 +7,7 @@ description = "Opinionated layout primitives and components for Yew apps that ke
 readme = "README.md"
 include = ["/build.rs", "/locales", "/src", "/style", "/README.md"]
 publish = false
-links = "plinth"
+links = "sockel"
 
 [features]
 default = ["full"]
@@ -55,18 +55,18 @@ web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUn
 yew = "0.23.0"
 
 [build-dependencies]
-plinth-build = { version = "0.1.0", path = "plinth-build" }
+sockel-build = { version = "0.1.0", path = "sockel-build" }
 
 [dev-dependencies]
 futures = "0.3"
-plinth-build = { version = "0.1.0", path = "plinth-build" }
+sockel-build = { version = "0.1.0", path = "sockel-build" }
 yew = { version = "0.23.0", features = ["ssr"] }
 
 [workspace]
 resolver = "3"
-members = [".", "plinth-build", "plinth-build/fixture", "showcase"]
+members = [".", "sockel-build", "sockel-build/fixture", "showcase"]
 exclude = [".claude"]
 
 [patch.crates-io]
-plinth = { path = "." }
-plinth-build = { path = "plinth-build" }
+sockel = { path = "." }
+sockel-build = { path = "sockel-build" }

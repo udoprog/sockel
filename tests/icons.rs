@@ -1,6 +1,6 @@
 //! The icon set: the built-in one without a provider, the app's with one.
 
-use plinth::*;
+use sockel::*;
 use yew::LocalServerRenderer;
 use yew::prelude::*;
 

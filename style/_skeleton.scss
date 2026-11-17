@@ -1,19 +1,19 @@
 // Spinner, Skeleton and Loadable (src/spinner.rs, src/skeleton.rs,
 // src/loadable.rs): content that keeps its size while it loads.
 //
-// - `.plinth-spinner`: a spinning glyph in the fixed `--glyph-size` box, the
+// - `.sockel-spinner`: a spinning glyph in the fixed `--glyph-size` box, the
 //   colour of the text around it. Button's busy mark is one.
-// - `.plinth-skeleton`: a placeholder that shimmers (still when the user
-//   prefers reduced motion). The shape is a modifier: `.plinth-line` (one
-//   line of the text around it, `1lh`), `.plinth-block` (one control high),
-//   `.plinth-row` (one `RowListItem` high) and an image's ratio class
-//   (`.plinth-poster`, `.plinth-screenshot`, `.plinth-banner`,
-//   `.plinth-square`, or `.plinth-ratio` with `--ratio` set). `.plinth-short`
+// - `.sockel-skeleton`: a placeholder that shimmers (still when the user
+//   prefers reduced motion). The shape is a modifier: `.sockel-line` (one
+//   line of the text around it, `1lh`), `.sockel-block` (one control high),
+//   `.sockel-row` (one `RowListItem` high) and an image's ratio class
+//   (`.sockel-poster`, `.sockel-screenshot`, `.sockel-banner`,
+//   `.sockel-square`, or `.sockel-ratio` with `--ratio` set). `.sockel-short`
 //   narrows a line, the last of a paragraph. `--skeleton-height` sets a
 //   block's height.
-// - `.plinth-skeleton-group`: several in a column, with the border a
+// - `.sockel-skeleton-group`: several in a column, with the border a
 //   `RowList` reserves, so it replaces one without moving what follows.
-// - `.plinth-loadable`: the box loading, empty, error and ready content
+// - `.sockel-loadable`: the box loading, empty, error and ready content
 //   share. Its least height is `--loadable-rows` rows (set by the
 //   component) and `--loadable-kept` while it loads again, the height it
 //   last had settled.
@@ -21,7 +21,7 @@
 @use "tokens" as base;
 
 @if base.emits("skeleton.spinner") {
-    .plinth-spinner {
+    .sockel-spinner {
         display: inline-flex;
         flex: none;
         color: inherit;
@@ -29,7 +29,7 @@
     }
 }
 
-.plinth-skeleton {
+.sockel-skeleton {
     --skeleton-height: var(--control-height);
     --skeleton-inset: 0px;
 
@@ -50,7 +50,7 @@
     background-clip: padding-box;
     background-repeat: no-repeat;
     background-size: 200% 100%;
-    animation: plinth-skeleton-shine var(--skeleton-duration) ease-in-out infinite;
+    animation: sockel-skeleton-shine var(--skeleton-duration) ease-in-out infinite;
 
     @if base.$skeleton-edge {
         box-shadow: inset 0 0 0 1px base.$skeleton-edge;
@@ -66,7 +66,7 @@
         animation: none;
     }
 
-    &.plinth-line {
+    &.sockel-line {
         --skeleton-height: #{base.$skeleton-line-height};
         @if base.$skeleton-line-inset {
             --skeleton-inset: #{base.$skeleton-line-inset};
@@ -76,44 +76,44 @@
     }
 
     @if base.emits("skeleton.row") {
-        &.plinth-row {
+        &.sockel-row {
             --skeleton-height: var(--control-height);
             --skeleton-inset: var(--space-1);
         }
     }
 
-    &.plinth-poster,
-    &.plinth-screenshot,
-    &.plinth-banner,
-    &.plinth-square,
-    &.plinth-ratio {
+    &.sockel-poster,
+    &.sockel-screenshot,
+    &.sockel-banner,
+    &.sockel-square,
+    &.sockel-ratio {
         --ratio: 1 / 1;
 
         height: auto;
         aspect-ratio: var(--ratio);
     }
 
-    &.plinth-poster {
+    &.sockel-poster {
         --ratio: 2 / 3;
     }
 
-    &.plinth-screenshot {
+    &.sockel-screenshot {
         --ratio: 16 / 9;
     }
 
-    &.plinth-banner {
+    &.sockel-banner {
         --ratio: 21 / 4;
     }
 
     @if base.emits("skeleton.short") {
-        &.plinth-short {
+        &.sockel-short {
             width: 60%;
         }
     }
 }
 
 @if base.emits("skeleton.group") {
-    .plinth-skeleton-group {
+    .sockel-skeleton-group {
         display: flex;
         flex-direction: column;
         box-sizing: border-box;
@@ -123,7 +123,7 @@
 }
 
 @if base.emits("skeleton.loadable") {
-    .plinth-loadable {
+    .sockel-loadable {
         --loadable-rows: 3;
         --loadable-kept: 0px;
 
@@ -141,7 +141,7 @@
     }
 }
 
-@keyframes plinth-skeleton-shine {
+@keyframes sockel-skeleton-shine {
     from {
         background-position: 200% 0;
     }

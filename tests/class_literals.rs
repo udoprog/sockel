@@ -1,4 +1,4 @@
-//! plinth's Rust names classes only through `plinth::class`: no class is
+//! sockel's Rust names classes only through `sockel::class`: no class is
 //! spelt out in a string literal under `src/`.
 
 use std::path::Path;
@@ -144,11 +144,11 @@ fn rust_files(dir: &Path, files: &mut Vec<std::path::PathBuf>) {
 }
 
 fn known_classes() -> Vec<String> {
-    plinth_build::Config::new()
-        .style(env!("PLINTH_STYLE"))
+    sockel_build::Config::new()
+        .style(env!("SOCKEL_STYLE"))
         .build()
-        .expect("plinth's Sass")
-        .plinth_classes
+        .expect("sockel's Sass")
+        .sockel_classes
 }
 
 #[test]
@@ -169,7 +169,7 @@ fn src_spells_no_class() {
     }
     assert!(
         found.is_empty(),
-        "use plinth::class constants:\n{}",
+        "use sockel::class constants:\n{}",
         found.join("\n")
     );
 }
@@ -179,18 +179,18 @@ fn the_scan_finds_class_literals() {
     let classes = known_classes();
     let source = r#"
         html! { <div class="anything" role="toolbar"> }
-        html! { <span class={"plinth-stack"} title_class="x" /> }
+        html! { <span class={"sockel-stack"} title_class="x" /> }
         classes!(class::CARD, flush.then_some("other"));
-        fn gap() -> Option<&'static str> { Some("plinth-tight") }
+        fn gap() -> Option<&'static str> { Some("sockel-tight") }
         let kind = 'x';
         html! { <button type={if submit { "submit" } else { "button" }} aria-label="card" /> }
-        // "plinth-stack" in a comment
-        /* class="plinth-stack" */
+        // "sockel-stack" in a comment
+        /* class="sockel-stack" */
         let tag = "div";
     "#;
     let found = violations(source, &classes);
     assert_eq!(found.len(), 5, "{found:#?}");
-    for text in ["anything", "plinth-stack", "x", "other", "plinth-tight"] {
+    for text in ["anything", "sockel-stack", "x", "other", "sockel-tight"] {
         assert!(
             found.iter().any(|v| v.contains(&format!("\"{text}\""))),
             "{text}"

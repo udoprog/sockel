@@ -157,14 +157,14 @@ pub fn pager_button(edge: bool) -> Classes {
 #[function_component]
 pub fn Pager(props: &PagerProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let nav_label = label(&phrases, &props.label, "plinth-pager-pages");
-    let first_label = label(&phrases, &props.first_label, "plinth-pager-first");
-    let previous_label = label(&phrases, &props.previous_label, "plinth-pager-previous");
-    let next_label = label(&phrases, &props.next_label, "plinth-pager-next");
-    let last_label = label(&phrases, &props.last_label, "plinth-pager-last");
+    let nav_label = label(&phrases, &props.label, "sockel-pager-pages");
+    let first_label = label(&phrases, &props.first_label, "sockel-pager-first");
+    let previous_label = label(&phrases, &props.previous_label, "sockel-pager-previous");
+    let next_label = label(&phrases, &props.next_label, "sockel-pager-next");
+    let last_label = label(&phrases, &props.last_label, "sockel-pager-last");
     let page_label = |n: usize| match &props.page_label {
         Some(given) => format!("{given} {n}"),
-        None => phrases.msg("plinth-pager-page", &args([("page", n)])),
+        None => phrases.msg("sockel-pager-page", &args([("page", n)])),
     };
     if let Some(summary) = &props.summary {
         return summary_pager(props, summary, &nav_label, &previous_label, &next_label);

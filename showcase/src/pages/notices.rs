@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, EmptyState, ErrorBox, Glyph, Icon, Notice, Tone, empty_state, notice,
 };
 

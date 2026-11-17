@@ -1,4 +1,4 @@
-# plinth
+# sockel
 
 Opinionated layout primitives and components for [Yew] apps, built so
 components keep their size and don't jitter as their content changes.
@@ -6,43 +6,46 @@ components keep their size and don't jitter as their content changes.
 Each component comes with its Sass under `style/`, and its variants are
 modifier classes set by props.
 
+sockel was called plinth until 2026-11-17, and its history starts as
+`crates/plinth` in characterize.
+
 ## Getting started
 
-An app depends on `plinth` and builds its one stylesheet, plinth's CSS and
-the app's own Sass, with `plinth-build` in its `build.rs`. No Sass step
-runs anywhere else, and no path leads into plinth's checkout. The blocks
+An app depends on `sockel` and builds its one stylesheet, sockel's CSS and
+the app's own Sass, with `sockel-build` in its `build.rs`. No Sass step
+runs anywhere else, and no path leads into sockel's checkout. The blocks
 below are the files of a complete app (`scripts/check-packaged.sh` builds
-them against plinth's packages).
+them against sockel's packages).
 
 ### Dependencies
 
-In the app's `Cargo.toml`, plinth with the features the app renders (see
+In the app's `Cargo.toml`, sockel with the features the app renders (see
 [Choosing features](#choosing-features); leave out `default-features` and
-`features` for all of them), and `plinth-build` to build and to test:
+`features` for all of them), and `sockel-build` to build and to test:
 
 <!-- check: Cargo.toml -->
 ```toml
 [dependencies]
-plinth = { version = "0.1", default-features = false, features = ["button", "layout"] }
+sockel = { version = "0.1", default-features = false, features = ["button", "layout"] }
 yew = { version = "0.23", features = ["csr"] }
 
 [build-dependencies]
-plinth-build = "0.1"
+sockel-build = "0.1"
 
 [dev-dependencies]
-plinth-build = "0.1"
+sockel-build = "0.1"
 ```
 
 ### Developing against a checkout
 
-plinth is not on a registry yet, so point both crates at a checkout once, in
+sockel is not on a registry yet, so point both crates at a checkout once, in
 the `Cargo.toml` at the workspace root (the app's own, when it is not in a
 workspace):
 
 ```toml
 [patch.crates-io]
-plinth = { path = "../plinth" }
-plinth-build = { path = "../plinth/plinth-build" }
+sockel = { path = "../sockel" }
+sockel-build = { path = "../sockel/sockel-build" }
 ```
 
 The dependency lines stay as above, and dropping the patch later switches to
@@ -51,12 +54,12 @@ the registry. Nothing else names the checkout.
 ### Styles
 
 The app's Sass lives in a directory, say `style/`, with an `_index.scss`
-(or `index.scss`) that `@use`s its partials. It loads plinth's tokens and
-mixins as `"plinth"`:
+(or `index.scss`) that `@use`s its partials. It loads sockel's tokens and
+mixins as `"sockel"`:
 
 <!-- check: style/_index.scss -->
 ```scss
-@use "plinth" as p;
+@use "sockel" as p;
 
 .app-sidebar {
     padding: var(--space-4);
@@ -66,20 +69,20 @@ mixins as `"plinth"`:
     }
 }
 
-// plinth's classes are stable, so the app may refine them.
-.plinth-card.app-sidebar {
+// sockel's classes are stable, so the app may refine them.
+.sockel-card.app-sidebar {
     --radius-lg: 12px;
 }
 ```
 
-`"plinth"` is the `style/` of the plinth package the app builds against.
-It emits no second copy of plinth's CSS: plinth is compiled first in the
-same build. Configure plinth's tokens through the build instead of `@use
-"plinth" with (...)` (see [Configuration](#configuration)).
+`"sockel"` is the `style/` of the sockel package the app builds against.
+It emits no second copy of sockel's CSS: sockel is compiled first in the
+same build. Configure sockel's tokens through the build instead of `@use
+"sockel" with (...)` (see [Configuration](#configuration)).
 
-Every class the app's Sass defines that is not plinth's must start with the
+Every class the app's Sass defines that is not sockel's must start with the
 app's prefix (`app-`); one that does not is a build error, so the app's
-classes never collide with plinth's.
+classes never collide with sockel's.
 Classes a dependency's markup writes (a sign-in form the app styles) are
 the exception: `Config::foreign(["auth-*"])` lets the app style them
 unprefixed (a trailing `*` is a prefix), and they get no constant.
@@ -91,7 +94,7 @@ At the package root:
 <!-- check: build.rs -->
 ```rust
 fn main() {
-    plinth_build::Config::new()
+    sockel_build::Config::new()
         .local("style/")
         .prefix("app-")
         .compile();
@@ -100,13 +103,13 @@ fn main() {
 
 It writes `style.css` and `classes.rs` to `OUT_DIR`, and reruns when
 `build.rs`, anything under `style/` (partials and new files included) or
-plinth's Sass changes.
+sockel's Sass changes.
 
 ### The class constants and the stylesheet
 
 `classes.rs` holds the app's classes, named without the prefix
-(`.app-sidebar` is `class::SIDEBAR`); plinth's stay `plinth::class::...`.
-Every plinth component takes a `class` prop, so pass the constants there,
+(`.app-sidebar` is `class::SIDEBAR`); sockel's stay `sockel::class::...`.
+Every sockel component takes a `class` prop, so pass the constants there,
 and a class the Sass does not define does not compile. The stylesheet is
 mounted once at the root with `Styles`'s `css`:
 
@@ -124,10 +127,10 @@ const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 fn App() -> Html {
     html! {
         <>
-            <plinth::Styles css={STYLESHEET} />
-            <plinth::Stack class={classes!(plinth::class::CARD, class::SIDEBAR)}>
-                <plinth::Button>{ "Save" }</plinth::Button>
-            </plinth::Stack>
+            <sockel::Styles css={STYLESHEET} />
+            <sockel::Stack class={classes!(sockel::class::CARD, class::SIDEBAR)}>
+                <sockel::Button>{ "Save" }</sockel::Button>
+            </sockel::Stack>
         </>
     }
 }
@@ -149,12 +152,12 @@ fn main() {
 ### A guard against dead classes
 
 A class the Sass defines and no Rust writes is dead weight.
-`plinth_build::Usage` finds them in a test, so an app needs no guard of its
+`sockel_build::Usage` finds them in a test, so an app needs no guard of its
 own:
 
 <!-- check: tests/style_classes.rs -->
 ```rust
-use plinth_build::{Config, Usage};
+use sockel_build::{Config, Usage};
 
 #[test]
 fn every_styled_class_is_written() {
@@ -162,14 +165,14 @@ fn every_styled_class_is_written() {
         .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
         .assert_clean(
             &Config::new()
-                .style(env!("PLINTH_STYLE"))
+                .style(env!("SOCKEL_STYLE"))
                 .local("style/")
                 .prefix("app-"),
         );
 }
 ```
 
-`PLINTH_STYLE` is plinth's style directory, which `compile()` hands the
+`SOCKEL_STYLE` is sockel's style directory, which `compile()` hands the
 package's crates. `.dynamic(["app-tone-*"])` allows classes built at runtime
 (a trailing `*` is a prefix) and `.foreign([...])` ones a dependency writes.
 A class counts as written when a source names its constant
@@ -177,68 +180,68 @@ A class counts as written when a source names its constant
 a file's first `#[cfg(test)]` do not count. The test fails on a dead class
 and on an allowed pattern that matches no class, and prints the class,
 single-use and dead counts. `STYLE_INVENTORY=PATH` also writes
-`class<TAB>uses` lines to `PATH`. plinth runs it on itself and on the
+`class<TAB>uses` lines to `PATH`. sockel runs it on itself and on the
 showcase.
 
-### How plinth-build finds plinth
+### How sockel-build finds sockel
 
-plinth's own `build.rs` passes two values to the `build.rs` of every package
-depending on it directly (Cargo's `links` metadata): `DEP_PLINTH_FEATURES`,
-its enabled features, and `DEP_PLINTH_STYLE`, the `style/` directory inside
+sockel's own `build.rs` passes two values to the `build.rs` of every package
+depending on it directly (Cargo's `links` metadata): `DEP_SOCKEL_FEATURES`,
+its enabled features, and `DEP_SOCKEL_STYLE`, the `style/` directory inside
 its package. `Config` builds those features from those sources, so the
-app's stylesheet always matches the plinth it links. A package that reaches
-plinth only through another crate is told neither: it names them with
+app's stylesheet always matches the sockel it links. A package that reaches
+sockel only through another crate is told neither: it names them with
 `Config::features([...])` and `Config::style(dir)`.
 
 ### One stylesheet per app
 
-Both `Styles` fill the same element, `<style id="plinth-styles">`
-(`plinth::STYLE_ID`): with `css` it sets the element's text to the app's
-stylesheet, which holds plinth's; without it, it adds plinth's only when the
+Both `Styles` fill the same element, `<style id="sockel-styles">`
+(`sockel::STYLE_ID`): with `css` it sets the element's text to the app's
+stylesheet, which holds sockel's; without it, it adds sockel's only when the
 element is missing. So whichever mounts first (the app's, or a
-`<plinth::Styles/>` inside a component), the page ends up with the app's
-stylesheet, once. Never link or inject plinth's CSS another way beside it.
+`<sockel::Styles/>` inside a component), the page ends up with the app's
+stylesheet, once. Never link or inject sockel's CSS another way beside it.
 
 An app without Sass of its own needs no `build.rs`: it mounts
-`<plinth::Styles/>` once at its root, which adds `plinth::STYLESHEET`, and
-uses `plinth::class`.
+`<sockel::Styles/>` once at its root, which adds `sockel::STYLESHEET`, and
+uses `sockel::class`.
 
-Every class plinth styles starts with `plinth-`, modifiers included
-(`.plinth-stack.plinth-tight`), so none collides with an app's classes. A
+Every class sockel styles starts with `sockel-`, modifiers included
+(`.sockel-stack.sockel-tight`), so none collides with an app's classes. A
 constant is named after its class without the prefix, as an app's are:
-`.plinth-page-head-title` is `plinth::class::PAGE_HEAD_TITLE`,
-`.plinth-tight` is `plinth::class::TIGHT`.
+`.sockel-page-head-title` is `sockel::class::PAGE_HEAD_TITLE`,
+`.sockel-tight` is `sockel::class::TIGHT`.
 
 The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 
 ## Migrating from trunk's Sass step
 
 An app that compiled its styles with trunk (`<link data-trunk rel="scss">`
-and `@use "../../plinth/style/..."`) moves to the getting-started setup:
+and `@use "../../sockel/style/..."`) moves to the getting-started setup:
 
-1. **Dependencies.** Replace `plinth = { path = ... }` with the lines in
+1. **Dependencies.** Replace `sockel = { path = ... }` with the lines in
    [Dependencies](#dependencies) and the patch in
    [Developing against a checkout](#developing-against-a-checkout).
-2. **`@use` lines.** Delete every `@use` of plinth's checkout (`"../…/plinth/style"`,
-   `"../…/plinth/style/tokens"`, a partial): `plinth-build` compiles plinth's
-   CSS first, with the app's features. A partial that needs plinth's
-   mixins or token functions writes `@use "plinth" as p;` and calls
+2. **`@use` lines.** Delete every `@use` of sockel's checkout (`"../…/sockel/style"`,
+   `"../…/sockel/style/tokens"`, a partial): `sockel-build` compiles sockel's
+   CSS first, with the app's features. A partial that needs sockel's
+   mixins or token functions writes `@use "sockel" as p;` and calls
    `p.below(...)` and the like. A `with (...)` on the old `@use` moves to
    `Config::with` in `build.rs` (see [Configuration](#configuration)).
 3. **The prefix.** Every class the app's Sass defines must start with one
    prefix (`army-`), given to `Config::prefix`. Rename the app's classes in
-   the Sass and the markup together; a rule that refines a plinth class
-   (`.plinth-card.army-sidebar`) keeps plinth's part as it is.
+   the Sass and the markup together; a rule that refines a sockel class
+   (`.sockel-card.army-sidebar`) keeps sockel's part as it is.
 4. **Class literals.** Add the `mod class` above and replace the app's
    class strings in Rust with its constants (`"army-sidebar"` becomes
-   `class::SIDEBAR`, `classes!("plinth-card", "army-sidebar")` becomes
-   `classes!(plinth::class::CARD, class::SIDEBAR)`). A misspelt or removed
+   `class::SIDEBAR`, `classes!("sockel-card", "army-sidebar")` becomes
+   `classes!(sockel::class::CARD, class::SIDEBAR)`). A misspelt or removed
    class then fails to compile, and the dead-class test finds the rest.
 5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
-   `[tools] sass` from `Trunk.toml`, and mount `<plinth::Styles
+   `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
    css={STYLESHEET} />` once at the root.
 
-`plinth-build` compiles with [grass] rather than dart-sass. They differ
+`sockel-build` compiles with [grass] rather than dart-sass. They differ
 where a block has declarations after a nested rule or an `@include` of
 rules: dart-sass emits those declarations in a second block after the
 nested rules, grass moves them into the first. A `padding` written after
@@ -249,31 +252,31 @@ deprecated anyway). They also print `calc()` inside `min()` and `max()`
 differently, to the same effect. A dart-sass feature grass lacks fails in
 `build.rs` with the error and its line.
 
-Including plinth's Sass from a checkout (`@use "../plinth/style"`) does not
-work once plinth comes from a registry, and is not supported for apps.
+Including sockel's Sass from a checkout (`@use "../sockel/style"`) does not
+work once sockel comes from a registry, and is not supported for apps.
 
 ## Choosing features
 
-plinth has a Cargo feature per component, or per family of components that
+sockel has a Cargo feature per component, or per family of components that
 only work together. `full`, the default, is all of them. An app that
 renders a few turns the default off and names those; each feature brings in
 the ones it needs:
 
 ```toml
 [dependencies]
-plinth = { version = "0.1", default-features = false, features = ["field", "input", "layout"] }
+sockel = { version = "0.1", default-features = false, features = ["field", "input", "layout"] }
 ```
 
 A feature gates a component's Rust and its CSS together. `STYLESHEET` and
-`plinth::class` hold only the enabled features' rules and classes, so a
+`sockel::class` hold only the enabled features' rules and classes, so a
 component or class whose feature is off does not compile, rather than
 rendering unstyled. The tokens, hooks, utilities and the menus' shared
 surface are always in, and so is the `:root` tokens' part of a feature
 (`tokens.table`, ...) only while a feature that reads it is on.
 
-An app compiling its own Sass through `plinth-build` gets the same subset
-without asking (see [How plinth-build finds plinth](#how-plinth-build-finds-plinth)).
-A package that reaches plinth only through another
+An app compiling its own Sass through `sockel-build` gets the same subset
+without asking (see [How sockel-build finds sockel](#how-sockel-build-finds-sockel)).
+A package that reaches sockel only through another
 crate is not told, and gets every feature's CSS, the whole stylesheet;
 `Config::features([...])` names its features instead. Cargo builds one set
 of features for everything built together, so a workspace whose other
@@ -324,7 +327,7 @@ feature's rules.
 ## Theming
 
 The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
-`--muted`, `--border`, `--accent` and `--shadow-1`. plinth derives eight more
+`--muted`, `--border`, `--accent` and `--shadow-1`. sockel derives eight more
 from them, each a default the app overrides by name (or with `Config::with`,
 as `$danger` and the rest):
 
@@ -350,10 +353,10 @@ light and a dark background alike. The defaults are computed on `:root`: an
 app that sets its colours on a narrower element (a dark panel) sets these
 there too. An app whose theme defines one of `--danger` to
 `--card-border-width` and `--menu-item-icon-ink` itself sets its variable to
-`false` (`$danger: false`), and plinth leaves its default off `:root`.
+`false` (`$danger: false`), and sockel leaves its default off `:root`.
 `--focus-ring-color` (default `--accent`) colours the focus ring.
 
-plinth's own scales are custom
+sockel's own scales are custom
 properties on `:root` too (`--text-*`, `--space-*`, `--radius-*`,
 `--control-height`, `--page-*` and the rest, listed under Configuration), and
 every rule reads them, so an app retunes the embedded stylesheet by
@@ -389,11 +392,11 @@ Breakpoints and the component settings (`$card-padding`,
 `$dialog-max-height`, `$dialog-scroll-gutter`, `$dialog-sheet-edge`, `$popover-padding`, `$popover-shadow`,
 `$popover-radius`, `$popover-sheet-edge`, `$popover-scroll-gutter`, `$confirm-gap`,
 `$visibility-breakpoint`) are Sass-only: an app built with
-`plinth-build` sets them with `Config::with`.
+`sockel-build` sets them with `Config::with`.
 
 ## Configuration
 
-plinth's values are defaults. Every token is a `!default` variable of
+sockel's values are defaults. Every token is a `!default` variable of
 `style/_tokens.scss`, emitted as its custom property on `:root`. An app sets
 its own in `build.rs`, before `compile()`; only values change, never
 classes:
@@ -401,7 +404,7 @@ classes:
 <!-- check-variant: build.rs -->
 ```rust
 fn main() {
-    plinth_build::Config::new()
+    sockel_build::Config::new()
         .local("style/")
         .prefix("app-")
         .with("text-md", "1.0625rem")
@@ -411,8 +414,8 @@ fn main() {
 ```
 
 The `$` is optional and the value is any Sass expression. Without `.local`,
-the same call configures plinth's own stylesheet. Local Sass cannot `@use
-"plinth" with (...)`, since plinth compiles first. The rules keep reading
+the same call configures sockel's own stylesheet. Local Sass cannot `@use
+"sockel" with (...)`, since sockel compiles first. The rules keep reading
 the custom properties, so a page can still override them at runtime.
 
 | Variable | Default |
@@ -443,12 +446,12 @@ the custom properties, so a page can still override them at runtime.
 | `$card-padding` | `var(--space-4)` |
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
 | `$toolbar-gap` | `var(--space-1)` |
-| `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.plinth-button`'s sides, regular and small) |
+| `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.sockel-button`'s sides, regular and small) |
 | `$button-line-height` | `1` (a button's line height; an app whose labels carry descenders in a clipped label part can use `inherit`) |
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
 | `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
 | `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |
-| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`, each in place of plinth's; a variant falls back on the plain button's |
+| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`, each in place of sockel's; a variant falls back on the plain button's |
 | `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
 | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
@@ -480,7 +483,7 @@ the custom properties, so a page can still override them at runtime.
 | `$menu-radius` | `null` (a menu's corners; `null` keeps `--radius-md`) |
 | `$menu-item-phone-height` | `null` (a menu row's least height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
 | `$menu-item-mark-ink` | `null` (a check's or radio's mark; `null` keeps `--accent`, `currentColor` draws it as the row's text) |
-| `$input-hover-edge` | `var(--accent)` (a text field's edge on hover: `.plinth-input`, `.plinth-textarea`, `.plinth-input-box`) |
+| `$input-hover-edge` | `var(--accent)` (a text field's edge on hover: `.sockel-input`, `.sockel-textarea`, `.sockel-input-box`) |
 | `$input-focus-edge` | `null` (its edge while focused; `null` keeps the edge it has) |
 | `$input-ring-offset` | `null` (its focus ring's offset; `null` keeps `--focus-ring-offset`, a negative one draws the ring over the edge) |
 | `$input-padding-inline` | `var(--space-2)` (its inline padding) |
@@ -497,7 +500,7 @@ the custom properties, so a page can still override them at runtime.
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay `ActionRow`'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
-| `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
+| `$breakpoints` | `()`, merged over sockel's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 | `$omit` | `()` (every part emitted; see [Leaving parts out](#leaving-parts-out)) |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
@@ -505,10 +508,10 @@ the custom properties, so a page can still override them at runtime.
 
 ### Leaving parts out
 
-`$omit` names the optional parts an app never renders, and plinth leaves them
+`$omit` names the optional parts an app never renders, and sockel leaves them
 out of its CSS: a modifier no markup sets, a variant no button takes, the
 tokens of a partial the app does not load. It is empty by default, and every
-part is emitted; a name plinth does not have is an error. It is for the
+part is emitted; a name sockel does not have is an error. It is for the
 finer parts of components an app does render; a component it does not
 render is left out by its feature (see [Choosing features](#choosing-features)),
 which also leaves out the `tokens.*` part only it reads, and Loadable's
@@ -517,7 +520,7 @@ which also leaves out the `tokens.*` part only it reads, and Loadable's
 <!-- check-variant: build.rs -->
 ```rust
 fn main() {
-    plinth_build::Config::new()
+    sockel_build::Config::new()
         .local("style/")
         .prefix("app-")
         .with("omit", r#"("layout.toolbar", "buttons.ghost")"#)
@@ -530,11 +533,11 @@ fn main() {
 | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
 | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
 | fields | `fields.field` (`Field` itself, not a `FormRow`), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
-| heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.plinth-compact`, `.plinth-one-row`), `heads.label`, `heads.list` |
+| heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.sockel-compact`, `.sockel-one-row`), `heads.label`, `heads.list` |
 | buttons | `buttons.bare`, `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point), `menu.marks` (a check or radio item's mark), `menu.disabled` (a disabled item) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
+| inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
 | notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`) |
 | popover | `popover.match-anchor` |
@@ -547,10 +550,10 @@ fn main() {
 `Button` is a `<button>`, or with `href` an `<a>` styled as one. Its label
 is its children; `icon` is the app's icon (`trailing` puts it after the
 label); `chevron` ends it in a chevron after the label, beside a leading
-icon too, as a menu's opener. plinth styles only `.plinth-button`, never a bare `<button>`.
+icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare `<button>`.
 
 - `variant` (`ButtonVariant`): `Secondary` (the plain button, the
-  default), `Primary` (`plinth::class::PRIMARY`), `Ghost` (`GHOST`, no
+  default), `Primary` (`sockel::class::PRIMARY`), `Ghost` (`GHOST`, no
   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
   (`DANGER`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
   padding or height of its own, for an opener whose content is its face,
@@ -599,7 +602,7 @@ Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
 
 `Stack` and `Cluster` (and `Card`) take a `tag` (`div` by default). A list
 tag, `ul` or `ol`, renders with no bullets, margin or padding
-(`plinth::class::PLAIN_LIST` is added for it), so it lays out exactly as a
+(`sockel::class::PLAIN_LIST` is added for it), so it lays out exactly as a
 `div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
 working. `stack(gap)` and `stack_with(gap, flush)` give a stack's
 classes to an element that cannot be the component (a `<form>` with its
@@ -617,17 +620,17 @@ draw it in a box of a fixed size. A `Field` supplies a label, hint and
 error; give the control `label` (an `aria-label`) when the field names it
 and the control has no text of its own. Every component takes `class`.
 
-- `Checkbox` (`.plinth-checkbox`): a native checkbox drawn in a
+- `Checkbox` (`.sockel-checkbox`): a native checkbox drawn in a
   `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
   `checked`, `indeterminate` (set as the input's DOM property, drawn as a
   minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
   children as its text. `checkbox(disabled)` gives its classes.
-- `Switch` (`.plinth-switch`): a `<button role="switch">`, its track
+- `Switch` (`.sockel-switch`): a `<button role="switch">`, its track
   `--switch-width` by `--switch-height` and its thumb moved by transform.
   `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
   `disabled`, `invalid` (`INVALID`), `on_change(bool)`; `switch(on,
   invalid)` gives its classes.
-- `Choice` (`.plinth-choice`): a segmented pick-one `radiogroup` of
+- `Choice` (`.sockel-choice`): a segmented pick-one `radiogroup` of
   `ChoiceOption`s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
   `.disabled(bool)`). `value`, `on_change(value)`, `label` (the group's
   name), `fit` (`ChoiceFit`: `Equal`, `Stretch` to fill the container
@@ -636,7 +639,7 @@ and the control has no text of its own. Every component takes `class`.
   tabindex: the selected option, or the first enabled, is the one tab
   stop; the arrows (with wrap), Home and End select and focus the next
   enabled option.
-- `ChipToggle` (`.plinth-chip`) and `ChipList` (`.plinth-chip-list`):
+- `ChipToggle` (`.sockel-chip`) and `ChipList` (`.sockel-chip-list`):
   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
   label; a list takes `label` and the chips as children.
@@ -660,7 +663,7 @@ The current tab or entry is marked by colour, background or an inset
 shadow, never by weight, through the `current` mixin, so selecting one
 changes no box. Every component takes `class`.
 
-- `Tabs` (`.plinth-tabs`): a `tablist` of `TabItem`s (`new(value, label)`,
+- `Tabs` (`.sockel-tabs`): a `tablist` of `TabItem`s (`new(value, label)`,
   `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
   (the list's name); `tabs(small)` gives its classes. Roving tabindex: the
   selected tab, or the first enabled, is the one tab stop; Left and Right
@@ -672,7 +675,7 @@ changes no box. Every component takes `class`.
   that has hidden tabs faded (the `scroll-fade` mixin, shared with
   `Toolbar`); no tab is hidden or reflowed.
 - `SubTabs`: the same props, at the small control height (`SMALL`).
-- `NavList` (`.plinth-nav-list`): a `nav` of a column of `NavItem`s
+- `NavList` (`.sockel-nav-list`): a `nav` of a column of `NavItem`s
   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
   link with an `href` and a button without. `value` is the current entry
   (`aria-current="page"`; colour and a tint), `on_select(value)`, `label`;
@@ -684,7 +687,7 @@ is a shadow, hover and focus add no border (focus is an inset outline). An
 empty tab list keeps its height. A nav entry is at least the control
 height with a reserved border, so the current one keeps its box. New
 tokens: `--tab-height` and `--tab-underline` (custom properties on
-`.plinth-tabs`); new mixin `scroll-fade`.
+`.sockel-tabs`); new mixin `scroll-fade`.
 
 ## Field and FormRows
 
@@ -692,13 +695,13 @@ tokens: `--tab-height` and `--tab-underline` (custom properties on
 stacked. `id` is the control's `id`, which the label's `for` names; the
 control takes `aria-describedby={field_describedby(&id, has_hint,
 has_error)}`, which names the hint's and the error's ids (`{id}-hint`,
-`{id}-error`). plinth has no input of its own here, so the control is the
+`{id}-error`). sockel has no input of its own here, so the control is the
 app's.
 
 - `label`, `hint`, `error` and `help` are Html (`help` ends the label's
   row); `required` adds a `*` after the label (`aria-hidden`; the control
   sets `required` itself).
-- `disabled` mutes the field (`plinth::class::DISABLED`) and `busy` sets
+- `disabled` mutes the field (`sockel::class::DISABLED`) and `busy` sets
   `aria-busy` with a progress cursor (`BUSY`); neither changes the box.
   `class`, `testid` as elsewhere. `field(disabled, busy)` gives the classes.
 - `group` makes the field a group (`role="group"`) named by its label,
@@ -738,27 +741,27 @@ is the one tone vocabulary, also `Notice`'s: a modifier (`ACCENT`, `SUCCESS`,
 `WARNING`, `DANGER`, `BUSY`, `UNSET`; neutral has none) that only sets
 `--tone`, from `--accent`, `--success`, `--warning` and `--danger`.
 
-- `Pill` (`.plinth-pill`): a tinted label `--mark-height` tall, led by a dot
+- `Pill` (`.sockel-pill`): a tinted label `--mark-height` tall, led by a dot
   of `--dot-size` in its tone. `tone`, `plain` (`PLAIN`, no dot), `on_click`
   (makes it a `<button>`, `PILL_BUTTON`; hover changes its fill only),
   `disabled`, children as the label, cut with an ellipsis in a narrow
   container. `pill(tone, plain, button)` gives its classes.
-- `Badge` (`.plinth-badge`): a bordered short text, `--mark-height` tall and
+- `Badge` (`.sockel-badge`): a bordered short text, `--mark-height` tall and
   at least as wide. `tone`, `solid` (`SOLID`, filled, the accent by
   default), `corner` (`CORNER`, `--corner-size`, over the top end corner of
   its positioned parent by transform, so it takes no room);
   `badge(tone, solid, corner)`.
-- `Dot` (`.plinth-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
+- `Dot` (`.sockel-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
   empty ring in the same box), `label` (its accessible name; without one it
   is decoration); `dot(tone, on)`.
-- `Count` (`.plinth-count`): a figure on a soft fill. `value`, `max` (99:
+- `Count` (`.sockel-count`): a figure on a soft fill. `value`, `max` (99:
   above it the count reads `99+`), `hide_zero` (`HIDDEN`: `visibility`, so
   the box stays; a zero shown is dimmed by `ZERO`). Its `min-width` is the
   digits of `max` and one more for the `+`, in tabular figures, so the
   count holds across `0..=max+1` and a hidden one does not move its
   neighbours. The figure is `value.to_string()`; koine has no number
   formatting. `count(value, hide_zero)` and `count_text(value, max)`.
-- `StatusLabel` (`.plinth-status-label`, `role="status"`): `states` (the
+- `StatusLabel` (`.sockel-status-label`, `role="status"`): `states` (the
   text of every state), `current` (an index, or none), `tone`, `spinner`
   (reserves the slot), `busy` (spins in it), `pill`. Every state's text sits
   in one grid cell and the others are `HIDDEN` (and `aria-hidden`), so the
@@ -779,7 +782,7 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
 `disabled`, `busy` (`aria-busy`, progress cursor) and `testid`. Inside a
 `Field`, pass the field's `id` and `describedby={field_describedby(..)}`.
 
-- `TextInput` (`.plinth-input`): `value` and `on_input` (the new text), `on_change`,
+- `TextInput` (`.sockel-input`): `value` and `on_input` (the new text), `on_change`,
   `on_blur`, `on_keydown`, `kind` (`InputKind`: text, email, url, tel),
   `maxlength`, `list` (a `<datalist>`'s id), `inputmode` and `enterkeyhint`
   (a touch keyboard's kind and enter key),
@@ -788,15 +791,15 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   the input sits in a box (`INPUT_BOX`) with the unit after the text inside
   the field; the box takes the border and the focus ring, so the unit is
   part of the field's box and the text keeps its start.
-- `native_select(size, invalid, fill)` (`.plinth-input.plinth-native-select`):
+- `native_select(size, invalid, fill)` (`.sockel-input.sockel-native-select`):
   a native `<select>` in a text field's look, the browser's arrow replaced
   by a chevron in `--muted` and its options on `--surface`. It is as wide as
   its widest option, cut at its container, and in a row it shrinks to give
   way to the items beside it; `fill` makes it its container's
   width. Set `aria-invalid` with `invalid`, as on a bare input.
-- `Textarea` (`.plinth-textarea`): `rows` (default 3), at least `--input-height`
+- `Textarea` (`.sockel-textarea`): `rows` (default 3), at least `--input-height`
   high, resized vertically by the user only.
-- `SearchField` (`.plinth-input-box`): a search icon, the text and a clear
+- `SearchField` (`.sockel-input-box`): a search icon, the text and a clear
   button. `label` is the placeholder and the accessible name, `clear_label`
   names the button, `busy` swaps the icon for a spinner in the same box.
   Clearing (the button or escape) calls `on_input("")` and returns the focus
@@ -814,7 +817,7 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   text's focus. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
   and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the `IconSet`'s
   search glyph.
-- `InputGroup` (`.plinth-input-group`): controls joined in a row. Give each
+- `InputGroup` (`.sockel-input-group`): controls joined in a row. Give each
   member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,
   `GROUP_MIDDLE` or `GROUP_LAST` square the corners that join (a lone member
   takes none), and `detached[i]` starts a new run after a `--space-2` gap
@@ -833,7 +836,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 
 ## Stepper and SecretInput
 
-- `Stepper` (`.plinth-stepper`, worn with `.plinth-input-box`): a number
+- `Stepper` (`.sockel-stepper`, worn with `.sockel-input-box`): a number
   between a minus and a plus button. `value`, `on_change(i64)`, `min`, `max`,
   `step` (default 1), `label` (the number's accessible name), `less_label`
   and `more_label` (overrides of the catalog's words), `id`, `size` (`InputSize`),
@@ -847,8 +850,8 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   is no number goes back). What is typed outside `min..=max` is marked invalid
   until committed. The buttons are out of the tab order. Helpers: `stepper(size,
   invalid, disabled, busy)`, `step_from`, `key_value`, `parse_number`.
-- `SecretInput` (`.plinth-input-box`): a password field with show or hide,
-  copy and clear slots (`.plinth-input-action`, the `INPUT_CLEAR` button's
+- `SecretInput` (`.sockel-input-box`): a password field with show or hide,
+  copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
   `show_label`, `hide_label`, `copy_label`,
   `clear_label` (each an override of the catalog's word), `commit` (`on_input`
@@ -863,7 +866,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 Size guarantees: the Stepper's number has the room of the longest of `min`
 and `max` in `ch` with `numeric` figures, so its box is the same from the
 least value to the most (and its own width in a flex column or a grid cell,
-not stretched to it), the buttons only disabled at a bound; the number wears `.plinth-zero`
+not stretched to it), the buttons only disabled at a bound; the number wears `.sockel-zero`
 (`ZERO`) at 0, and the settings `$stepper-number-weight`,
 `$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
 text) restyle the number and the zero, and `$stepper-touch-number-size`,
@@ -885,35 +888,35 @@ set per Stepper).
 - `title` is Html; `icon` goes before its text in the heading, `subtitle` is a
   muted line under the row, `crumbs` (a list of links) stack above it, and
   `back` is the inline "back / title" crumb. Each is its own prop.
-- `help` follows the heading as its sibling, in `.plinth-head-heading` with
+- `help` follows the heading as its sibling, in `.sockel-head-heading` with
   the `suffix`, so the heading's text and test id exclude the help button.
   The group stays on one line: a long title wraps inside its own box, with
   the help beside it.
-- `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
+- `SectionHead` takes the modifiers `sockel::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
 - A head is at least `--control-height` high, so actions coming and going
   never move what follows; a `LABEL` head holds none and is its line's
   height. Neither has outer margins, also when its class is on a heading
-  element (`<h3 class="plinth-section-head plinth-label">`).
+  element (`<h3 class="sockel-section-head sockel-label">`).
 - `PageHead` takes `COMPACT` (actions as icons, one row on a phone) and
   `ONE_ROW` (a crumb head that stays one row on a phone, the back link's
   words, `PAGE_HEAD_BACK_LABEL`, hidden) in `class`.
 
 ## Icons
 
-plinth's own chrome (a dialog's close, a select's chevron, a busy spinner)
+sockel's own chrome (a dialog's close, a select's chevron, a busy spinner)
 draws its icons from an `IconSet`, and the app keeps its own icons in the same
-set. The set is opaque, built with a builder, so adding a glyph to plinth never
+set. The set is opaque, built with a builder, so adding a glyph to sockel never
 breaks an adopter. `Glyph` (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`,
 `Check`, `Plus`, `Minus`, `Spinner`, `Grip`, `Ellipsis`, `Search`, `Eye`,
 `EyeOff`, `Copy`) is `#[non_exhaustive]`: a `match` on it needs a wildcard. It is
-the one place plinth uses a context for something other than a runtime setting,
+the one place sockel uses a context for something other than a runtime setting,
 and it carries icons only: classes never go through it.
 
 `IconSet::default()` holds nothing of its own: a glyph the app did not set is
 the built-in inline svg, built when it is first drawn, so an app that
-overrides a glyph does not build the built-in one. Without a provider plinth
+overrides a glyph does not build the built-in one. Without a provider sockel
 uses the default set, so it renders standalone. An app supplies its set once at
 its root:
 
@@ -932,11 +935,11 @@ html! {
 `<Icon glyph={Glyph::Close} class=.../>` renders a glyph and `<Icon
 name="trash"/>` an app icon; `use_icon(glyph)`, `use_icon_named(name)` and
 `use_icons()` (`get`, `get_named`) return icons for a component of your own,
-and `icon(class, glyph)` gives the box's classes (`plinth::class::GLYPH`, plus
+and `icon(class, glyph)` gives the box's classes (`sockel::class::GLYPH`, plus
 `SPIN` for `Spinner`). A name the set lacks renders the same empty box, and a
 debug build warns in the console with the name. Cloning a set shares its icons.
 
-Size guarantees: the glyph sits in a `.plinth-glyph` box of `--glyph-size`
+Size guarantees: the glyph sits in a `.sockel-glyph` box of `--glyph-size`
 (`1em`, so it follows the text) square, `overflow: hidden`, and what fills it
 is stretched to it. A swapped set, whatever its icons' own width and height,
 cannot change a control's size. Icons should draw in `currentColor`. The
@@ -1112,7 +1115,7 @@ html! {
 }
 ```
 
-- Overlays render in a `.plinth-overlay-host` element after its children,
+- Overlays render in a `.sockel-overlay-host` element after its children,
   so they inherit what the element around it sets (colour variables, a
   theme scoped to a sub-element). It adds no box of its own. Place it where
   no ancestor has `transform`, `filter`, `contain` or `will-change`, or
@@ -1127,8 +1130,8 @@ html! {
 - Props: `class` (on the host element) and `testid`. `overlay_host(class)`
   gives the classes.
 
-Without one, nothing changes from before: overlays go to `#plinth-overlay`
-(`plinth::OVERLAY_ID`), made on first use as the last child of `<body>`,
+Without one, nothing changes from before: overlays go to `#sockel-overlay`
+(`sockel::OVERLAY_ID`), made on first use as the last child of `<body>`,
 with one stack per thread. Because it is a body child, it does not inherit
 colours an app sets below `:root`. On the server there is no layer, and
 overlays render in place.
@@ -1172,7 +1175,7 @@ the owner cuts it, and its events still bubble through the owner. Props:
   scrolls there; `Fit::Slide` stays on its side and slides along it, over
   the anchor, to fit the viewport (less its edges), scrolling only when
   taller than that: a long menu at phone height shown whole.
-- `sheet` (on by default, `plinth::class::SHEET`): below `$sheet-breakpoint`
+- `sheet` (on by default, `sockel::class::SHEET`): below `$sheet-breakpoint`
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
   `title` as its heading and a close button (`close_label`, an override of the catalog's word), unless
   `head` is off (on by default).
@@ -1188,10 +1191,10 @@ the owner cuts it, and its events still bubble through the owner. Props:
   that window, not its neighbour. Without a match, the viewport.
 - `trap`: Tab stays inside it, from its last control to its first, as in a
   `Dialog`; for a popover that asks for an answer (`ConfirmPopover` sets it).
-- `flush`: a body without padding (`plinth::class::FLUSH` on
-  `.plinth-popover-body`), for content that lays out its own edges, such as
+- `flush`: a body without padding (`sockel::class::FLUSH` on
+  `.sockel-popover-body`), for content that lays out its own edges, such as
   a list that runs to the surface's; off by default.
-- `match_anchor`: at least as wide as the anchor (`plinth::class::MATCH_ANCHOR`,
+- `match_anchor`: at least as wide as the anchor (`sockel::class::MATCH_ANCHOR`,
   the anchor's width in `--popover-anchor-width`), as a field's list under
   it; off by default. A sheet stays the screen's width.
 - `keep_focus`: a press inside it that is not on a control (a field, button,
@@ -1231,7 +1234,7 @@ in a layer that lays nothing out, and nothing locks the page's scroll, so
 opening it never moves the page, its anchor or the scrollbar. Its width is
 its content's up to `--popover-max-width`, whichever side it lands on, so a
 flip moves it without reflowing it; what is taller than the room scrolls in
-`.plinth-popover-body`, its scrollbar's room kept. It follows the anchor on
+`.sockel-popover-body`, its scrollbar's room kept. It follows the anchor on
 scroll, resize and a change of either's size; once open above or below, it
 keeps that side while the side has 200px or all it needs, so content that
 grows (a list appearing in a menu) scrolls there instead of flipping it
@@ -1292,7 +1295,7 @@ keyboard. `rows` is a `Vec<ReorderRow>` (`ReorderRow::new(key, name)`,
 `on_move((from, to))` reports a move, `to` an index in the list without the
 row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
 (as `RowList`'s), `disabled`, `class`, `testid`. The rows are
-`RowListItem`s (`.plinth-reorder-row`), the handle in their `start` slot
+`RowListItem`s (`.sockel-reorder-row`), the handle in their `start` slot
 (a new `RowListItem` prop: what begins a row).
 
 Children mode, for rows that are the app's own (a row of fields, an
@@ -1300,8 +1303,8 @@ editor): in place of `rows`, give `ReorderItem` children (`id`, stable
 across moves; `name`, for the announcements and the handle's name;
 `class`; `testid`), each holding its content and a `ReorderHandle`
 (`class`, `testid`) wherever the row wants its grip. Each item is the row
-element itself (`.plinth-reorder-row` plus its `class`), a direct child of
-the `.plinth-reorder` element, which `class` lays out; the hint and the
+element itself (`.sockel-reorder-row` plus its `class`), a direct child of
+the `.sockel-reorder` element, which `class` lays out; the hint and the
 status follow the rows there. A `ReorderHandle` outside a `Reorder`
 renders nothing.
 
@@ -1324,7 +1327,7 @@ renders nothing.
   (`Handle`), its hint (`Hint`, its `aria-describedby`) and the
   announcements (`Lifted`, `Moving`, `Dropped`, `Cancelled`, positions from
   1), read from a `role="status"` region. Without it they are the
-  catalog's `plinth-reorder-*` messages ("Moved Alpha to 3 of 5");
+  catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
   `reorder_text` gives their English.
 - `DragHandle` is the grip alone (the `IconSet`'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
@@ -1355,23 +1358,23 @@ included, so a popover or menu opened inside it could not be used). Props:
 - `open`, `on_dismiss: Callback<Dismiss>` (the owner closes it), `title`
   (its heading and accessible name), `icon` (before the title).
 - `size`: `DialogSize::Default` (`--dialog-width`), `Wide`
-  (`plinth::class::WIDE`, `--dialog-width-wide`), `Tall` (`TALL`, fixed at
+  (`sockel::class::WIDE`, `--dialog-width-wide`), `Tall` (`TALL`, fixed at
   `--dialog-height-tall`) or `WideTall` (both).
 - `flush`: a body without padding that does not scroll (`FLUSH` on
-  `.plinth-dialog-body`), for content that lays itself out and scrolls its
+  `.sockel-dialog-body`), for content that lays itself out and scrolls its
   own parts, such as a manual with its contents beside it.
 - `dismiss`: `DialogDismiss::Any` (Escape, the close button, a press on the
   scrim), `NoOutside` (not the scrim) or `Actions` (no close button, Escape
   does nothing). `DialogDismiss::allows(Dismiss)` tells which.
 - `head_actions`: tools in the head, before the close button.
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
-  at its start: a Delete), each an `ActionGroup` in `.plinth-dialog-foot`.
+  at its start: a Delete), each an `ActionGroup` in `.sockel-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
   the bottom, up to `--dialog-sheet-height`. `close_label`,
   `close_size` (`ButtonSize::Small` by default) and `close_testid` (the
   close button's), `class`, `testid`.
 
-`dialog(size, sheet)` gives the classes. Parts: `.plinth-dialog-layer` (the
+`dialog(size, sheet)` gives the classes. Parts: `.sockel-dialog-layer` (the
 scrim), `-head` (a `SectionHead`), `-body` (what scrolls), `-foot`.
 
 Behaviour: opening it moves focus to an `[autofocus]` or `[data-autofocus]`
@@ -1388,7 +1391,7 @@ back to the last control in it that had it, else to the box. On close focus retu
 what had it.
 
 Size guarantees: while a dialog is open the root takes
-`.plinth-scroll-locked` (no scrolling), and `.plinth-gutter-kept` when the
+`.sockel-scroll-locked` (no scrolling), and `.sockel-gutter-kept` when the
 page had a scrollbar, so the scrollbar's room stays and the page neither
 moves nor scrolls; an app whose root already has `scrollbar-gutter: stable`
 keeps it either way. The kept room's width is `--scroll-gutter` on the root
@@ -1476,7 +1479,7 @@ inherit Popover's placement, following and Escape or press-outside dismissal.
 rest), `id`, `class`, `testid`. Keyboard focus (`:focus-visible`) shows it at
 once; a touch pointer never does; a press, Escape, leaving or losing focus
 hides it. The anchor gets `aria-describedby` naming the tip while it has
-text. The tip (`.plinth-tooltip`, `plinth::class::TOOLTIP`; `tooltip(placed)`
+text. The tip (`.sockel-tooltip`, `sockel::class::TOOLTIP`; `tooltip(placed)`
 gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
 `PLACED`, and as wide as its text up to `--tooltip-max-width` (`$tooltip-max-width`,
 24rem), wrapping beyond. `DataTips`, mounted once, gives every element with a
@@ -1484,7 +1487,7 @@ gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
 says, or while its menu is open, `aria-expanded="true"`); it places the tip by
 a fixed stand-in (`TIP_ANCHOR`), and hides on scroll and Escape.
 
-`HoverCard` is a richer card (`.plinth-hover-card` on a `.plinth-popover`,
+`HoverCard` is a richer card (`.sockel-hover-card` on a `.sockel-popover`,
 `hover_card(placed)`): props `anchor`, `side`, `align`, `delay`
 (`HOVER_CARD_DELAY`, 400 ms to open and to close), `title` (its accessible
 name), `class`, `testid` and the card's children. It opens on hover or
@@ -1507,7 +1510,7 @@ spinner and the aria state change, the width does not).
 ## Menu, RowActions, SplitButton and ContextMenu
 
 `Menu` is a `Button` (`aria-haspopup="menu"`, `aria-expanded`) opening a
-list of actions (`role="menu"`, `plinth::class::MENU`) beside it in the
+list of actions (`role="menu"`, `sockel::class::MENU`) beside it in the
 overlay layer, through `use_popover`. Props:
 
 - `text` (the opener's visible content; without it the opener is its icon
@@ -1526,7 +1529,7 @@ overlay layer, through `use_popover`. Props:
   `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
   between rows; `sheet` (`SHEET`, off by default): below `$sheet-breakpoint`
-  a sheet from the bottom over a scrim (`.plinth-menu-scrim`), as a
+  a sheet from the bottom over a scrim (`.sockel-menu-scrim`), as a
   `Popover` is.
 - `side`, `align` (`End` by default), `within` (as `Popover`'s),
   `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
@@ -1588,7 +1591,7 @@ to a `Menu` of its variants (its children; `menu_label`;
 `width`), `Primary` unless `variant` says otherwise, `size`, `disabled`,
 `class`, `testid` (the menu's is it suffixed `-menu`).
 
-`ContextMenu` wraps its children (`.plinth-context-target`,
+`ContextMenu` wraps its children (`.sockel-context-target`,
 `display: contents`, so it lays nothing out) and opens a menu of `items`
 at the pointer on a right-click, or a press held for half a second on a
 touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
@@ -1634,7 +1637,7 @@ the heading's width. `sort_header(numeric)` and `sort_mark(idle)`.
 Every one takes `class` and `testid`. Size guarantees: a row and a heading
 are at least `--control-height` high, every line is a reserved border, and
 hover tints the row without changing a box; the mark and the bulk bar keep
-their room. For markup plinth does not render, the mixins `table-base`
+their room. For markup sockel does not render, the mixins `table-base`
 (`$fixed`), `table-head-cell`, `table-cell` and `table-row-hover` give the
 same rules. New token: `--table-max-height`.
 
@@ -1705,7 +1708,7 @@ only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
 
 `Select<T>` is the WAI-ARIA select-only combobox: a face in the tab order
 (a `<button>`, `role="combobox"`, `aria-haspopup="listbox"`) showing what is
-chosen, opening a listbox (`role="listbox"`, `plinth::class::LISTBOX`) under
+chosen, opening a listbox (`role="listbox"`, `sockel::class::LISTBOX`) under
 it in the overlay layer through `use_popover`, while focus stays on the face
 (`aria-activedescendant` names the active option). Props:
 
@@ -1795,7 +1798,7 @@ line; a description under one wraps, and makes its row taller. New
 tokens: none (the two custom properties are set by the component). New partials: `_listbox.scss`, `_select.scss`. The menu's
 surface, row and mark are the mixins `list`, `item`, `item-active` and
 `mark` of `_menu-surface.scss` (forwarded by `_menu.scss`), which emits no
-rules, so the listbox and the Select load none of the menu's. `.plinth-hidden`
+rules, so the listbox and the Select load none of the menu's. `.sockel-hidden`
 is `_hidden.scss`, which `_badges.scss` and `_select.scss` both load.
 
 ## DropZone
@@ -1831,9 +1834,9 @@ functions. A refusal the zone found itself is said until the next press in
 it or the next drag; a drag that carries no files passes through.
 
 Modifiers, set from `DropState` by `drop_zone(state, disabled)`:
-`.plinth-dragging` (a file is dragged on the page), `.plinth-over`,
-`.plinth-refused`, `.plinth-busy`, `.plinth-error` and `.plinth-disabled`.
-Parts: `.plinth-drop-zone-overlay`, `-label` and `-pick`.
+`.sockel-dragging` (a file is dragged on the page), `.sockel-over`,
+`.sockel-refused`, `.sockel-busy`, `.sockel-error` and `.sockel-disabled`.
+Parts: `.sockel-drop-zone-overlay`, `-label` and `-pick`.
 
 Size guarantees: the zone has a border at all times (`reserved-border`,
 transparent at rest), and every state changes only colours, so its box is the
@@ -1851,11 +1854,11 @@ width, dashed while dragged near), for an app whose outline sits outside
 the zone without moving anything; `$drop-tall-label-offset` (`40vh`: how
 far inside the viewport's top and bottom a tall zone's label stays);
 `$drop-busy-pulse` (`null`; a duration, and the busy label, which carries
-`.plinth-busy`, pulses at it, still under reduced motion).
+`.sockel-busy`, pulses at it, still under reduced motion).
 
 ## ColorSelect
 
-`ColorSelect` picks a colour from a palette the app passes in as data; plinth
+`ColorSelect` picks a colour from a palette the app passes in as data; sockel
 owns no palette. It is the select-only combobox pattern of `Select`: a face
 (a `<button>`, `role="combobox"`) with the chosen colour's swatch and name,
 opening a grid (`role="listbox"`) of swatches in the overlay layer through
@@ -2061,38 +2064,38 @@ box when off. New partial: `_picker.scss`. No new tokens.
 ## ToolBand, Panel, Seam and use_width
 
 **ToolBand** is a `Toolbar` with `band`: its controls wrap onto further
-lines instead of scrolling sideways (`.plinth-toolbar.plinth-band`; no
+lines instead of scrolling sideways (`.sockel-toolbar.sockel-band`; no
 hidden scrollbar or fade). `chrome` sets it on `--band-chrome-ground`
-(`--surface`) with a rule under it (`.plinth-chrome`, an inset shadow, so
+(`--surface`) with a rule under it (`.sockel-chrome`, an inset shadow, so
 no border is added), its controls `--band-chrome-gap` apart; `search` sets
 it in `--band-search-text` (`--text-sm`), as a list's filter
-(`.plinth-search`). `tool_band(chrome, search)` gives a band's classes for
+(`.sockel-search`). `tool_band(chrome, search)` gives a band's classes for
 markup that is not the component.
-Group its controls in `ToolbarPart`s (`.plinth-toolbar-part`, `role=group`):
+Group its controls in `ToolbarPart`s (`.sockel-toolbar-part`, `role=group`):
 a band wraps between parts, and inside a part only when that part alone is
 wider than the band (it never overflows the band).
-`ruled` rules a part off from the one before it (`.plinth-ruled`, a
+`ruled` rules a part off from the one before it (`.sockel-ruled`, a
 `--border` line and `--space-3` in) from the phone breakpoint up, where a
 band has the room. A band's height changes only when it wraps, so give its
 controls fixed widths (a `Button`'s busy and disabled states keep its box);
 `toolbar_part(ruled)` gives a part's classes.
 
 **Panel** is a ground over a list or a view holding its filters or a short
-form (`.plinth-panel-box`): a column `--space-2` apart, on `--panel-ground`
+form (`.sockel-panel-box`): a column `--space-2` apart, on `--panel-ground`
 in a `--panel-border` ring that is always there, in `--panel-text` type,
 `--panel-space-after` above what follows, as wide as what it holds and never wider than its column. `line` lays it out
-as one row that wraps (`.plinth-line`); `ground` is `Sunk`, `Tint` (a
+as one row that wraps (`.sockel-line`); `ground` is `Sunk`, `Tint` (a
 `--panel-tint-radius` `--panel-tint` chip in `--panel-tint-text`,
 `--panel-tint-space-after` above what follows,
-`.plinth-tint`) or `Bare` (only the spacing, `.plinth-bare`); the ring
+`.sockel-tint`) or `Bare` (only the spacing, `.sockel-bare`); the ring
 turns transparent rather than going, so the ground never changes its box.
-`centered` centres it in its column (`.plinth-center`); `small` sets it in
-`--text-sm` (`.plinth-small`). With a `label` it is a named `group`.
+`centered` centres it in its column (`.sockel-center`); `small` sets it in
+`--text-sm` (`.sockel-small`). With a `label` it is a named `group`.
 `panel(ground, line, centered)` gives its classes; add `class::SMALL` for
 `small`.
 
 **Seam** is two panes, `start` and `end`, and the divider dragged between
-them (`.plinth-seam`, `.plinth-seam-pane`, `.plinth-seam-grip`). `at` is the
+them (`.sockel-seam`, `.sockel-seam-pane`, `.sockel-seam-grip`). `at` is the
 first pane's share of the room beside the divider (0 to 1); the owner keeps
 it and sets it from `on_change`, which a drag calls at most once an
 animation frame, with the pointer captured, and `on_settle` once the drag
@@ -2101,9 +2104,9 @@ End to the ends, and a double-click returns it to `reset` (0.5). `min` and
 `max` bound the share, and each pane keeps `--seam-min` (8rem) besides,
 both in what it reports and in the grid, so neither pane collapses and an
 `at` out of range still lays out. The divider is `--seam-grip` wide
-whatever its state: hover, focus and a drag (`.plinth-active` on the seam)
+whatever its state: hover, focus and a drag (`.sockel-active` on the seam)
 light its line only. `axis: SeamAxis::Rows` stacks the panes
-(`.plinth-rows`); give the seam a height. Each pane scrolls what overflows
+(`.sockel-rows`); give the seam a height. Each pane scrolls what overflows
 it, so its content never widens it.
 
 **`use_width(&node)`** is the width of `node`'s element (its border box, in
@@ -2115,44 +2118,44 @@ The observer goes with the component.
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its
-state or content changes. Each is a mixin (`@use "plinth" as p;` then
+state or content changes. Each is a mixin (`@use "sockel" as p;` then
 `@include p.numeric;`) and, where an element needs it directly, a utility
 class. Utilities load after the components, so one wins over a component's
 rule of the same weight; none uses `!important`.
 
-| Mixin | Utility (`plinth::class::`) | What it guarantees |
+| Mixin | Utility (`sockel::class::`) | What it guarantees |
 | --- | --- | --- |
-| `focus-ring` | `.plinth-focus-ring` (`FOCUS_RING`) | A `:focus-visible` outline from the `--focus-ring-*` tokens: never a border, so focus adds nothing to the box. |
+| `focus-ring` | `.sockel-focus-ring` (`FOCUS_RING`) | A `:focus-visible` outline from the `--focus-ring-*` tokens: never a border, so focus adds nothing to the box. |
 | `reserved-border($color: transparent, $width: var(--space-px))` | | The border is always there; a state changes only its colour. |
-| `numeric` | `.plinth-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
-| `scroll-area` | `.plinth-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
-| | `.plinth-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard scroll as before. |
-| `truncate` | `.plinth-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |
-| `clamp($lines)` | `.plinth-clamp-2`, `-3`, `-4` (`CLAMP_2`...) | At most that many lines, the last cut with an ellipsis. |
-| `visually-hidden` | `.plinth-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
-| `phone-only`, `desktop-only` | `.plinth-phone-only`, `.plinth-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
+| `numeric` | `.sockel-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
+| `scroll-area` | `.sockel-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
+| | `.sockel-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard scroll as before. |
+| `truncate` | `.sockel-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |
+| `clamp($lines)` | `.sockel-clamp-2`, `-3`, `-4` (`CLAMP_2`...) | At most that many lines, the last cut with an ellipsis. |
+| `visually-hidden` | `.sockel-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
+| `phone-only`, `desktop-only` | `.sockel-phone-only`, `.sockel-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
 | `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded (`Toolbar`, `Tabs`). |
 
-### Recipes for markup plinth does not render
+### Recipes for markup sockel does not render
 
-A dependency's markup (a sign-in form, a user table) cannot wear plinth's
+A dependency's markup (a sign-in form, a user table) cannot wear sockel's
 classes. The mixins below are the rules of the classes they name, which
 include them, so such markup styled with them looks and behaves as
-plinth's own: `.auth-card { @include p.card; }`.
+sockel's own: `.auth-card { @include p.card; }`.
 
 | Mixin | The rule of |
 | --- | --- |
-| `stack($gap: var(--space-3))` | `.plinth-stack` (a gap of the scale for its modifiers) |
-| `cluster($gap: var(--space-2), $wrap: true)` | `.plinth-cluster` (`$wrap: false` for `.plinth-nowrap`) |
-| `card` | `.plinth-card` |
-| `field`, `field-label` | `.plinth-field`, `.plinth-field-label` |
-| `input`, `input-box` | `.plinth-input`; `input-box` is the box every text field shares (border, fill, sizes) |
-| `button($variant: secondary)` | `.plinth-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
+| `stack($gap: var(--space-3))` | `.sockel-stack` (a gap of the scale for its modifiers) |
+| `cluster($gap: var(--space-2), $wrap: true)` | `.sockel-cluster` (`$wrap: false` for `.sockel-nowrap`) |
+| `card` | `.sockel-card` |
+| `field`, `field-label` | `.sockel-field`, `.sockel-field-label` |
+| `input`, `input-box` | `.sockel-input`; `input-box` is the box every text field shares (border, fill, sizes) |
+| `button($variant: secondary)` | `.sockel-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
 | `table-base`, `table-head-cell`, `table-cell`, `table-row-hover` | a table's (see Table) |
 
-A button styled this way lays out its own content (plinth's puts it in
-`.plinth-button-content`): give the markup a gap of its own if it holds an
+A button styled this way lays out its own content (sockel's puts it in
+`.sockel-button-content`): give the markup a gap of its own if it holds an
 icon and a label.
 
 Layers: `--layer-sticky`, `--layer-overlay`, `--layer-toast` and
@@ -2161,13 +2164,13 @@ Popovers, menus, lists and dialogs all sit at `--layer-overlay`.
 
 ## Translations
 
-plinth has no English in its code. Every word a component shows or announces
+sockel has no English in its code. Every word a component shows or announces
 (button names, `aria-label`s, empty states, reorder announcements) is a
 message in `locales/en-US.ftl` and `locales/sv-SE.ftl`, every id under the
-`plinth-` prefix, exported as `plinth::phrasebookcatalog01::L10N` (a
+`sockel-` prefix, exported as `sockel::phrasebookcatalog01::L10N` (a
 [phrasebook-catalog] 0.1 `Catalog`). Components read the `Phrases` an app
 provides with `ContextProvider<Phrases>` (phrasebook 0.2, `yew023`, the same
-major version as plinth's). With no provider, or one without plinth's
+major version as sockel's). With no provider, or one without sockel's
 catalog, they render the catalog's English and phrasebook warns once.
 
 An app adds the catalog after its own:
@@ -2177,13 +2180,13 @@ let book = Phrasebook::builder()
     .language(Lang::EN_US, "English")
     .language(Lang::new("sv-SE"), "Svenska")
     .catalog(&APP)
-    .catalog(&plinth::phrasebookcatalog01::L10N)
+    .catalog(&sockel::phrasebookcatalog01::L10N)
     .build();
 ```
 
 - Later catalogs fill the ids earlier ones lack, so an app translates or
-  rewords a plinth word by defining the same `plinth-*` id in its own
-  `.ftl`. A language plinth does not ship (and the app does not translate)
+  rewords a sockel word by defining the same `sockel-*` id in its own
+  `.ftl`. A language sockel does not ship (and the app does not translate)
   falls back as phrasebook says.
 - Check the result with `phrasebook::check` (syntax, prefixes, duplicates,
   coverage) as for any catalog of the app's.
@@ -2192,11 +2195,11 @@ let book = Phrasebook::builder()
   in `html!` still compiles; a struct literal or a field read needs
   `Some(..)`/`.as_deref()`. `ConfirmRequest`'s `accept` and `cancel_label`
   are `Option` too, and `ConfirmRequest::new` leaves them `None`.
-- `Reorder`'s announcements are `plinth-reorder-*` messages with the
+- `Reorder`'s announcements are `sockel-reorder-*` messages with the
   position and count as numbers; `text` still overrides them, and
   `reorder_text` returns the catalog's English.
 
-plinth's own rule: no user-visible text as a literal in a component. Every
+sockel's own rule: no user-visible text as a literal in a component. Every
 word comes from the catalog, with numbers passed as numbers so the language
 formats them. `tests/english_literals.rs` fails on a capitalised literal in
 `src/` outside a short list of key names, and the catalog tests check
@@ -2218,10 +2221,10 @@ cd showcase
 trunk serve --port 8095 --open
 ```
 
-Pick a free port. The showcase dogfoods plinth: its page controls and
-its Theme picker are plinth's own `Select`, so every page also exercises
-it. Neither the showcase nor plinth's components render a native
-`<select>`, whose open list the OS draws outside plinth's tokens.
+Pick a free port. The showcase dogfoods sockel: its page controls and
+its Theme picker are sockel's own `Select`, so every page also exercises
+it. Neither the showcase nor sockel's components render a native
+`<select>`, whose open list the OS draws outside sockel's tokens.
 
 A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or

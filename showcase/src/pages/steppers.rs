@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{InputSize, SecretInput, Stepper, stepper};
+use sockel::{InputSize, SecretInput, Stepper, stepper};
 
 use crate::class;
 use crate::code::{El, snippet};

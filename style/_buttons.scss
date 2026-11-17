@@ -1,70 +1,70 @@
 // Buttons (src/button.rs, src/icon_button.rs).
 //
-// - `.plinth-button`: a button or a link that looks like one, one height
+// - `.sockel-button`: a button or a link that looks like one, one height
 //   per size, its label on one line and cut with an ellipsis. Its border is
 //   reserved, so hover, pressed and the variants change colours only; focus
 //   is an outline. Parts: `-content` (icon and label), `-icon`, `-label`,
 //   and `-spinner`, laid over the content while busy.
-// - Variants: plain (secondary), `.plinth-primary`, `.plinth-ghost`,
-//   `.plinth-quiet`, `.plinth-danger`, `.plinth-success`; `.plinth-bare`, no
+// - Variants: plain (secondary), `.sockel-primary`, `.sockel-ghost`,
+//   `.sockel-quiet`, `.sockel-danger`, `.sockel-success`; `.sockel-bare`, no
 //   fill, edge, padding or height of its own: its content is its face (a
 //   swatch), only the focus outline kept.
-// - Sizes: regular, `.plinth-small`, `.plinth-touch`.
-// - `.plinth-icon`: the icon alone, square. `.plinth-fold`: the icon alone
+// - Sizes: regular, `.sockel-small`, `.sockel-touch`.
+// - `.sockel-icon`: the icon alone, square. `.sockel-fold`: the icon alone
 //   below the phone breakpoint, the label kept for a screen reader;
-//   `.plinth-fold-wide` the same from the phone breakpoint up.
+//   `.sockel-fold-wide` the same from the phone breakpoint up.
 // - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
 //   working, its content hidden by visibility so it keeps its room.
 //
-// - `.plinth-iconed` (IconButton, styled by the app): a button with an icon,
+// - `.sockel-iconed` (IconButton, styled by the app): a button with an icon,
 //   the icon centred on the label's line whatever the button's height. A
 //   type selector's weight only, so a component that lays out its own
-//   button keeps its own arrangement. `.plinth-trailing`: the icon follows
-//   the label. `.plinth-icon` with it: an icon alone, as wide as the
+//   button keeps its own arrangement. `.sockel-trailing`: the icon follows
+//   the label. `.sockel-icon` with it: an icon alone, as wide as the
 //   control is high.
 
 @use "tokens" as base;
 
-.plinth-button {
+.sockel-button {
     @include base.button;
 
-    &.plinth-primary {
+    &.sockel-primary {
         @include base.button-variant(primary);
     }
 
     @if base.emits("buttons.ghost") {
-        &.plinth-ghost {
+        &.sockel-ghost {
             @include base.button-variant(ghost);
         }
     }
 
-    &.plinth-quiet {
+    &.sockel-quiet {
         @include base.button-variant(quiet);
     }
 
-    &.plinth-danger {
+    &.sockel-danger {
         @include base.button-variant(danger);
     }
 
-    &.plinth-success {
+    &.sockel-success {
         @include base.button-variant(success);
     }
 
-    &.plinth-small {
+    &.sockel-small {
         height: var(--control-height-small);
         padding-inline: var(--button-pad-x, #{base.$button-padding-small});
         font-size: base.$button-text-small;
     }
 
     @if base.emits("buttons.touch") {
-        &.plinth-touch {
+        &.sockel-touch {
             height: var(--touch-height);
             padding-inline: var(--button-pad-x, var(--space-4));
         }
     }
 
     @if base.emits("buttons.bare") {
-        &.plinth-bare {
+        &.sockel-bare {
             --button-fill: transparent;
             --button-hover-fill: transparent;
             --button-pressed-fill: transparent;
@@ -77,14 +77,14 @@
         }
     }
 
-    &.plinth-icon {
+    &.sockel-icon {
         flex: none;
         aspect-ratio: 1;
         padding-inline: 0;
     }
 
     @if base.emits("buttons.fold") {
-        &.plinth-fold {
+        &.sockel-fold {
             @include base.below("phone") {
                 flex: none;
                 aspect-ratio: 1;
@@ -94,7 +94,7 @@
     }
 
     @if base.emits("buttons.fold-wide") {
-        &.plinth-fold-wide {
+        &.sockel-fold-wide {
             @include base.above("phone") {
                 flex: none;
                 aspect-ratio: 1;
@@ -106,10 +106,10 @@
 
 @if base.$button-phone-height {
     @include base.below("phone") {
-        .plinth-button {
+        .sockel-button {
             height: base.$button-phone-height;
 
-            &.plinth-small {
+            &.sockel-small {
                 height: base.$button-phone-height;
                 @if base.$button-text {
                     font-size: base.$button-text;
@@ -121,33 +121,33 @@
     }
 }
 
-.plinth-button-content {
+.sockel-button-content {
     display: inline-flex;
     align-items: center;
     gap: base.$button-content-gap;
     min-width: 0;
 
     @if base.emits("buttons.busy") {
-        &.plinth-busy {
+        &.sockel-busy {
             visibility: hidden;
         }
     }
 }
 
-.plinth-button-icon {
+.sockel-button-icon {
     display: inline-flex;
     flex: none;
 }
 
 // Beside a label only: an icon alone, or folded to, keeps the centre.
 @if base.$button-icon-offset {
-    .plinth-button:not(.plinth-icon) .plinth-button-icon:first-child:not(:last-child) {
+    .sockel-button:not(.sockel-icon) .sockel-button-icon:first-child:not(:last-child) {
         margin-inline-start: base.$button-icon-offset;
     }
 
     @if base.emits("buttons.fold") {
         @include base.below("phone") {
-            .plinth-button.plinth-fold .plinth-button-icon:first-child:not(:last-child) {
+            .sockel-button.sockel-fold .sockel-button-icon:first-child:not(:last-child) {
                 margin-inline-start: 0;
             }
         }
@@ -155,18 +155,18 @@
 
     @if base.emits("buttons.fold-wide") {
         @include base.above("phone") {
-            .plinth-button.plinth-fold-wide .plinth-button-icon:first-child:not(:last-child) {
+            .sockel-button.sockel-fold-wide .sockel-button-icon:first-child:not(:last-child) {
                 margin-inline-start: 0;
             }
         }
     }
 }
 
-.plinth-button-label {
+.sockel-button-label {
     @include base.truncate;
 
     @if base.emits("buttons.fold") {
-        &.plinth-fold {
+        &.sockel-fold {
             @include base.below("phone") {
                 @include base.visually-hidden;
             }
@@ -174,7 +174,7 @@
     }
 
     @if base.emits("buttons.fold-wide") {
-        &.plinth-fold-wide {
+        &.sockel-fold-wide {
             @include base.above("phone") {
                 @include base.visually-hidden;
             }
@@ -183,7 +183,7 @@
 }
 
 @if base.emits("buttons.busy") {
-    .plinth-button-spinner {
+    .sockel-button-spinner {
         position: absolute;
         inset: 0;
         display: grid;
@@ -191,7 +191,7 @@
     }
 }
 
-button:where(.plinth-iconed:not([hidden])) {
+button:where(.sockel-iconed:not([hidden])) {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -201,7 +201,7 @@ button:where(.plinth-iconed:not([hidden])) {
         vertical-align: 0;
     }
 
-    &:where(.plinth-icon) {
+    &:where(.sockel-icon) {
         min-width: var(--control-height);
         padding-inline: var(--space-2);
         line-height: 1;

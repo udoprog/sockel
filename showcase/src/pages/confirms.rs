@@ -3,7 +3,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Align, Button, ButtonSize, ButtonVariant, Cluster, Confirm, ConfirmButton, ConfirmHost,
     ConfirmInline, ConfirmPopover, ConfirmRequest, Glyph, Icon, Justify, PopoverAlign, Side, Stack,
     ask,

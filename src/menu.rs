@@ -975,7 +975,7 @@ pub struct RowActionsProps {
 #[function_component]
 pub fn RowActions(props: &RowActionsProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let more_label = label(&phrases, &props.more_label, "plinth-row-actions-more");
+    let more_label = label(&phrases, &props.more_label, "sockel-row-actions-more");
     let tips = props.tips;
     let button = |action: &RowAction| {
         let (title, tip) = if tips {
@@ -1056,7 +1056,7 @@ pub fn SplitButton(props: &SplitButtonProps) -> Html {
             <Menu variant={props.variant} size={props.size}
                 opener_class={class::SPLIT_BUTTON_TOGGLE}
                 icon={html! { <Icon glyph={Glyph::ChevronDown} /> }}
-                label={label(&phrases, &props.menu_label, "plinth-split-button-menu")} width={props.width}
+                label={label(&phrases, &props.menu_label, "sockel-split-button-menu")} width={props.width}
                 disabled={props.disabled || props.busy}
                 testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-menu")))}>
                 { props.children.clone() }

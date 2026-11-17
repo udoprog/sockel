@@ -1,7 +1,7 @@
 use std::path::Path;
 
 fn main() {
-    let enabled: Vec<_> = plinth_build::FEATURES
+    let enabled: Vec<_> = sockel_build::FEATURES
         .iter()
         .map(|(name, _)| *name)
         .filter(|name| {
@@ -11,12 +11,12 @@ fn main() {
         .collect();
     let manifest = std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR");
     let style = Path::new(&manifest).join("style");
-    // A dependent's build.rs sees these as DEP_PLINTH_FEATURES and
-    // DEP_PLINTH_STYLE, which plinth-build reads, so its stylesheet has the
+    // A dependent's build.rs sees these as DEP_SOCKEL_FEATURES and
+    // DEP_SOCKEL_STYLE, which sockel-build reads, so its stylesheet has the
     // same subset from the same sources.
     println!("cargo::metadata=features={}", enabled.join(","));
     println!("cargo::metadata=style={}", style.display());
-    plinth_build::Config::new()
+    sockel_build::Config::new()
         .style(style)
         .features(enabled)
         .compile();

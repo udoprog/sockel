@@ -268,7 +268,7 @@ pub struct DropZoneProps {
     #[prop_or_default]
     pub paste: bool,
     /// The zone may be taller than the screen: its label, larger, is kept
-    /// on screen while the zone scrolls (`.plinth-tall` on the overlay and
+    /// on screen while the zone scrolls (`.sockel-tall` on the overlay and
     /// the label).
     #[prop_or_default]
     pub tall: bool,
@@ -316,8 +316,8 @@ enum Over {
 #[function_component]
 pub fn DropZone(props: &DropZoneProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let drop_label = label(&phrases, &props.label, "plinth-drop-zone-drop");
-    let reject = label(&phrases, &props.reject, "plinth-drop-zone-reject");
+    let drop_label = label(&phrases, &props.label, "sockel-drop-zone-drop");
+    let reject = label(&phrases, &props.reject, "sockel-drop-zone-reject");
     let page_drag = use_state_eq(|| false);
     let over = use_state_eq(|| Over::No);
     let refused = use_state_eq(|| None::<Refusal>);
@@ -561,7 +561,7 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
     let problem = props.error.clone().or_else(|| {
         refused.map(|why| match why {
             Refusal::Type => reject.clone(),
-            Refusal::TooLarge => label(&phrases, &props.too_large, "plinth-drop-zone-too-large"),
+            Refusal::TooLarge => label(&phrases, &props.too_large, "sockel-drop-zone-too-large"),
         })
     });
 

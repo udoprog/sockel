@@ -187,7 +187,7 @@ mod tests {
             names(listbox_option(true)),
             [class::LISTBOX_OPTION, class::ACTIVE]
         );
-        assert_eq!(option_id("plinth-select-3", 2), "plinth-select-3-option-2");
+        assert_eq!(option_id("sockel-select-3", 2), "sockel-select-3-option-2");
     }
 
     #[test]
@@ -204,7 +204,7 @@ mod tests {
         assert!(list.take_scroll());
         assert!(!list.take_scroll());
         // Nothing moved since: no scroll, nothing asked of the page.
-        list.scroll_active("plinth-select-1");
+        list.scroll_active("sockel-select-1");
         list.step(&PICKABLE, -1);
         assert_eq!(list.active(), Some(4));
         let mut none = Listbox::default();

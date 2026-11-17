@@ -1,15 +1,15 @@
 // Image and Avatar (src/image.rs): pictures in boxes fixed before they load.
 //
-// - `.plinth-image`: a box of one ratio and the width it is given, its
-//   picture (`.plinth-picture`) laid over a placeholder that shows while it
-//   loads (`.plinth-loading`), fails (`.plinth-error`) or is missing
-//   (`.plinth-empty`). The ratio is `.plinth-poster` (2/3),
-//   `.plinth-screenshot` (16/9), `.plinth-banner` (21/4), `.plinth-square`,
-//   or `.plinth-ratio` with `--ratio` set. None of the states changes the box.
-// - `.plinth-avatar`: a round portrait of one fixed size, its initials
+// - `.sockel-image`: a box of one ratio and the width it is given, its
+//   picture (`.sockel-picture`) laid over a placeholder that shows while it
+//   loads (`.sockel-loading`), fails (`.sockel-error`) or is missing
+//   (`.sockel-empty`). The ratio is `.sockel-poster` (2/3),
+//   `.sockel-screenshot` (16/9), `.sockel-banner` (21/4), `.sockel-square`,
+//   or `.sockel-ratio` with `--ratio` set. None of the states changes the box.
+// - `.sockel-avatar`: a round portrait of one fixed size, its initials
 //   behind the picture; `-small`, `-large` and `-huge` set the other sizes.
 
-.plinth-picture {
+.sockel-picture {
     position: absolute;
     inset: 0;
     width: 100%;
@@ -17,12 +17,12 @@
     object-fit: cover;
     opacity: 0;
 
-    &.plinth-loaded {
+    &.sockel-loaded {
         opacity: 1;
     }
 }
 
-.plinth-image {
+.sockel-image {
     --ratio: 1 / 1;
     position: relative;
     display: block;
@@ -35,28 +35,28 @@
     background: var(--surface);
     color: var(--muted);
 
-    &.plinth-poster {
+    &.sockel-poster {
         --ratio: 2 / 3;
     }
 
-    &.plinth-screenshot {
+    &.sockel-screenshot {
         --ratio: 16 / 9;
     }
 
-    &.plinth-banner {
+    &.sockel-banner {
         --ratio: 21 / 4;
     }
 
-    &.plinth-square {
+    &.sockel-square {
         --ratio: 1 / 1;
     }
 
-    &.plinth-error {
+    &.sockel-error {
         color: var(--danger);
     }
 }
 
-.plinth-placeholder {
+.sockel-placeholder {
     position: absolute;
     inset: 0;
     display: flex;
@@ -65,7 +65,7 @@
     font-size: var(--text-xl);
 }
 
-.plinth-avatar {
+.sockel-avatar {
     --size: var(--avatar-md);
     position: relative;
     display: inline-grid;
@@ -84,19 +84,19 @@
     vertical-align: middle;
     user-select: none;
 
-    &.plinth-avatar-small {
+    &.sockel-avatar-small {
         --size: var(--avatar-sm);
     }
 
-    &.plinth-avatar-large {
+    &.sockel-avatar-large {
         --size: var(--avatar-lg);
     }
 
-    &.plinth-avatar-huge {
+    &.sockel-avatar-huge {
         --size: var(--avatar-xl);
     }
 }
 
-.plinth-avatar-initials {
+.sockel-avatar-initials {
     white-space: nowrap;
 }

@@ -106,18 +106,18 @@ mod tests {
     #[test]
     fn a_panel_reads_its_ring_type_and_tint_from_tokens() {
         let css = crate::STYLESHEET;
-        let from = css.find(".plinth-panel-box {").expect("the rule exists");
+        let from = css.find(".sockel-panel-box {").expect("the rule exists");
         let rule = &css[from..from + css[from..].find('}').expect("the rule ends")];
         assert!(rule.contains("border: var(--space-px) solid var(--panel-border)"));
         assert!(rule.contains("font-size: var(--panel-text)"));
         assert!(rule.contains("margin-block-end: var(--panel-space-after)"));
         let from = css
-            .find(".plinth-panel-box.plinth-tint {")
+            .find(".sockel-panel-box.sockel-tint {")
             .expect("the rule exists");
         let rule = &css[from..from + css[from..].find('}').expect("the rule ends")];
         assert!(rule.contains("border-radius: var(--panel-tint-radius)"));
         assert!(rule.contains("color: var(--panel-tint-text)"));
         assert!(rule.contains("margin-block-end: var(--panel-tint-space-after)"));
-        assert!(css.contains(".plinth-panel-box.plinth-small {"));
+        assert!(css.contains(".sockel-panel-box.sockel-small {"));
     }
 }

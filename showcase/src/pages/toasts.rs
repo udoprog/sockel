@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Button, Glyph, Icon, SaveBar, Toast, ToastHost, Tone, save_bar, toast, toast_host};
+use sockel::{Button, Glyph, Icon, SaveBar, Toast, ToastHost, Tone, save_bar, toast, toast_host};
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};

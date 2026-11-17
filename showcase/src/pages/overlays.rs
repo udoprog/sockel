@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonVariant, Card, Cluster, Dialog, Dismiss, Glyph, Icon, Menu, MenuItem,
     OverlayHost, Overlays, Popover, Stack, Toast, ToastHost, Tooltip, use_overlay,
 };
@@ -109,7 +109,7 @@ fn Scene() -> Html {
                 <Stack>
                     <p class={class::PROSE}>{ "A tooltip over this popover: hover or focus the button." }</p>
                     <Cluster>
-                        <Button node_ref={tip_anchor.clone()} size={plinth::ButtonSize::Small}>{ "Hover me" }</Button>
+                        <Button node_ref={tip_anchor.clone()} size={sockel::ButtonSize::Small}>{ "Hover me" }</Button>
                         <Tooltip anchor={tip_anchor} text="Over the popover" />
                     </Cluster>
                 </Stack>
@@ -208,7 +208,7 @@ pub fn OverlaysPage() -> Html {
                 { if *provider {
                     "With OverlayHost: overlays render inside the frame and take its colours."
                 } else {
-                    "Without one: overlays render in #plinth-overlay at the end of <body> and take the page's colours."
+                    "Without one: overlays render in #sockel-overlay at the end of <body> and take the page's colours."
                 } }
             </span>
         </Demo>

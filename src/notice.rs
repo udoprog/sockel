@@ -64,7 +64,7 @@ pub fn Notice(props: &NoticeProps) -> Html {
                 <span class={class::NOTICE_CLOSE}>
                     <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                         icon={html! { <Icon glyph={Glyph::Close} /> }}
-                        label={label(&phrases, &props.close_label, "plinth-notice-dismiss")} onclick={onclose.clone()} />
+                        label={label(&phrases, &props.close_label, "sockel-notice-dismiss")} onclick={onclose.clone()} />
                 </span>
             }
         </div>

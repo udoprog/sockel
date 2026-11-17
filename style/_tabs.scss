@@ -2,22 +2,22 @@
 // entry is marked by colour, background or an inset shadow, never by
 // weight, so none changes size when it is selected.
 //
-// - `.plinth-tabs`: a `tablist`, one line of `.plinth-tab`s `--space-1`
+// - `.sockel-tabs`: a `tablist`, one line of `.sockel-tab`s `--space-1`
 //   apart over a baseline. It scrolls sideways when it runs out of room,
 //   its scrollbar hidden and the edge with hidden tabs faded; no tab is
-//   hidden or reflowed. `.plinth-small` is the small control height.
-// - `.plinth-tab`: a button of `--tab-height`; the selected one
+//   hidden or reflowed. `.sockel-small` is the small control height.
+// - `.sockel-tab`: a button of `--tab-height`; the selected one
 //   (`aria-selected`) takes the accent colour and an underline of
 //   `--tab-underline` drawn by an inset shadow, so the box is the same.
 //   Parts: `-icon` (hidden below the phone breakpoint), `-label`.
-// - `.plinth-nav-list`: a `nav` of a column of `.plinth-nav-item`s (links
-//   or buttons, in `.plinth-nav-list-items`); the current one
+// - `.sockel-nav-list`: a `nav` of a column of `.sockel-nav-item`s (links
+//   or buttons, in `.sockel-nav-list-items`); the current one
 //   (`aria-current`) takes the accent colour and a tint. Parts: `-icon`,
 //   `-label`.
 
 @use "tokens" as base;
 
-.plinth-tabs {
+.sockel-tabs {
     --tab-height: var(--control-height);
     --tab-underline: var(--focus-ring-width);
 
@@ -30,12 +30,12 @@
     box-shadow: inset 0 calc(-1 * var(--space-px)) 0 var(--border);
     @include base.scroll-fade;
 
-    &.plinth-small {
+    &.sockel-small {
         --tab-height: var(--control-height-small);
     }
 }
 
-.plinth-tab {
+.sockel-tab {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -78,22 +78,22 @@
     }
 }
 
-.plinth-tab-icon {
+.sockel-tab-icon {
     display: inline-flex;
     flex: none;
     @include base.desktop-only;
 }
 
-.plinth-tab-label {
+.sockel-tab-label {
     white-space: nowrap;
 }
 
-.plinth-nav-list {
+.sockel-nav-list {
     display: block;
     min-width: 0;
 }
 
-.plinth-nav-list-items {
+.sockel-nav-list-items {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -102,7 +102,7 @@
     list-style: none;
 }
 
-.plinth-nav-item {
+.sockel-nav-item {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -139,11 +139,11 @@
     }
 }
 
-.plinth-nav-icon {
+.sockel-nav-icon {
     display: inline-flex;
     flex: none;
 }
 
-.plinth-nav-label {
+.sockel-nav-label {
     @include base.truncate;
 }

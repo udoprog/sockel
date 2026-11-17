@@ -1,11 +1,11 @@
 use yew::prelude::*;
 
-/// Plinth's compiled stylesheet: `style/` built with its defaults.
+/// Sockel's compiled stylesheet: `style/` built with its defaults.
 pub const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
 /// The id of the one `<style>` element [`Styles`] fills, whichever
 /// stylesheet it is given.
-pub const STYLE_ID: &str = "plinth-styles";
+pub const STYLE_ID: &str = "sockel-styles";
 
 trait StyleHost {
     fn has_style(&self, id: &str) -> bool;
@@ -33,8 +33,8 @@ impl StyleHost for web_sys::Document {
     }
 }
 
-/// An app's stylesheet (from plinth-build, plinth's CSS first) replaces
-/// whatever is there; plinth's alone is added only when nothing is, so the
+/// An app's stylesheet (from sockel-build, sockel's CSS first) replaces
+/// whatever is there; sockel's alone is added only when nothing is, so the
 /// page has one stylesheet whichever `Styles` mounts first.
 fn ensure_styles(host: &impl StyleHost, css: Option<&str>) {
     match css {
@@ -46,13 +46,13 @@ fn ensure_styles(host: &impl StyleHost, css: Option<&str>) {
 
 #[derive(Properties, PartialEq)]
 pub struct StylesProps {
-    /// The app's own stylesheet from plinth-build, which holds plinth's
+    /// The app's own stylesheet from sockel-build, which holds sockel's
     /// CSS; without it, [`STYLESHEET`].
     #[prop_or_default]
     pub css: Option<&'static str>,
 }
 
-/// Puts the page's one stylesheet in `<head>` (`<style id="plinth-styles">`),
+/// Puts the page's one stylesheet in `<head>` (`<style id="sockel-styles">`),
 /// however many times it is mounted.
 #[function_component]
 pub fn Styles(props: &StylesProps) -> Html {
@@ -96,21 +96,21 @@ mod tests {
     fn the_stylesheet_holds_the_utilities_and_reserves_borders() {
         let compact: String = STYLESHEET.split_whitespace().collect();
         for rule in [
-            ".plinth-focus-ring:focus-visible{outline:var(--focus-ring-width)solidvar(--focus-ring-color);",
-            ".plinth-numeric{font-variant-numeric:tabular-nums;}",
+            ".sockel-focus-ring:focus-visible{outline:var(--focus-ring-width)solidvar(--focus-ring-color);",
+            ".sockel-numeric{font-variant-numeric:tabular-nums;}",
             "scrollbar-gutter:stable;}",
-            ".plinth-truncate{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}",
-            ".plinth-clamp-2{",
-            ".plinth-clamp-4{",
-            ".plinth-visually-hidden{position:absolute;",
-            "@media(width>=40rem){.plinth-phone-only.plinth-phone-only{display:none;}}",
-            "@media(width<40rem){.plinth-desktop-only.plinth-desktop-only{display:none;}}",
-            ".plinth-card.plinth-link:focus-visible{outline:",
+            ".sockel-truncate{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}",
+            ".sockel-clamp-2{",
+            ".sockel-clamp-4{",
+            ".sockel-visually-hidden{position:absolute;",
+            "@media(width>=40rem){.sockel-phone-only.sockel-phone-only{display:none;}}",
+            "@media(width<40rem){.sockel-desktop-only.sockel-desktop-only{display:none;}}",
+            ".sockel-card.sockel-link:focus-visible{outline:",
         ] {
             assert!(compact.contains(rule), "{rule}");
         }
         assert!(compact.contains(
-            ".plinth-card{padding:var(--space-4);border:var(--card-border-width)solidvar(--card-border);"
+            ".sockel-card{padding:var(--space-4);border:var(--card-border-width)solidvar(--card-border);"
         ));
         assert!(!STYLESHEET.contains("!important"));
     }

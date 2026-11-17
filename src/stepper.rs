@@ -109,8 +109,8 @@ pub struct StepperProps {
 #[function_component]
 pub fn Stepper(props: &StepperProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let less_label = label(&phrases, &props.less_label, "plinth-stepper-decrease");
-    let more_label = label(&phrases, &props.more_label, "plinth-stepper-increase");
+    let less_label = label(&phrases, &props.less_label, "sockel-stepper-decrease");
+    let more_label = label(&phrases, &props.more_label, "sockel-stepper-increase");
     let draft = use_state(|| None::<String>);
     let (min, max) = (props.min, props.max.max(props.min));
     let chars = min.to_string().len().max(max.to_string().len());

@@ -3,7 +3,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, KeyboardEvent, KeyboardEventInit};
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
     ReorderRow, ReorderText, drag_handle, drag_target, key_target, landing, move_item, reorder_row,
     slot_at,
@@ -18,17 +18,17 @@ const NAMES: &[&str] = &[
 ];
 
 /// What `reorder_text` says, in the provided language: the text callback
-/// overrides plinth's own words, so the page looks up the same messages.
+/// overrides sockel's own words, so the page looks up the same messages.
 fn say(phrases: &Phrases, text: &ReorderText) -> String {
     let (id, name, place) = match text {
-        ReorderText::Handle { name } => ("plinth-reorder-handle", Some(name), None),
-        ReorderText::Hint => ("plinth-reorder-hint", None, None),
+        ReorderText::Handle { name } => ("sockel-reorder-handle", Some(name), None),
+        ReorderText::Hint => ("sockel-reorder-hint", None, None),
         ReorderText::Lifted {
             name,
             position,
             count,
         } => (
-            "plinth-reorder-lifted",
+            "sockel-reorder-lifted",
             Some(name),
             Some((*position, *count)),
         ),
@@ -37,7 +37,7 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
             position,
             count,
         } => (
-            "plinth-reorder-moving",
+            "sockel-reorder-moving",
             Some(name),
             Some((*position, *count)),
         ),
@@ -46,7 +46,7 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
             position,
             count,
         } => (
-            "plinth-reorder-dropped",
+            "sockel-reorder-dropped",
             Some(name),
             Some((*position, *count)),
         ),
@@ -55,7 +55,7 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
             position,
             count,
         } => (
-            "plinth-reorder-cancelled",
+            "sockel-reorder-cancelled",
             Some(name),
             Some((*position, *count)),
         ),
@@ -96,10 +96,10 @@ fn press(keys: &[&str]) {
     let Some(doc) = web_sys::window().and_then(|w| w.document()) else {
         return;
     };
-    let lists = doc.get_elements_by_class_name(plinth::class::REORDER);
+    let lists = doc.get_elements_by_class_name(sockel::class::REORDER);
     for l in 0..lists.length() {
         let Some(handle) = lists.item(l).and_then(|list| {
-            list.get_elements_by_class_name(plinth::class::DRAG_HANDLE)
+            list.get_elements_by_class_name(sockel::class::DRAG_HANDLE)
                 .item(1)
         }) else {
             continue;
@@ -149,7 +149,7 @@ pub fn ReorderPage() -> Html {
             order.set(next);
         })
     };
-    let phrases = use_phrases_with(&plinth::phrasebookcatalog01::L10N);
+    let phrases = use_phrases_with(&sockel::phrasebookcatalog01::L10N);
     let text_cb = {
         let said = said.clone();
         Callback::from(move |t: ReorderText| {

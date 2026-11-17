@@ -88,7 +88,7 @@ where
     T: PartialEq + Clone + 'static,
 {
     let phrases = use_phrases_with(&L10N);
-    let all = label(&phrases, &props.all, "plinth-filter-picker-all");
+    let all = label(&phrases, &props.all, "sockel-filter-picker-all");
     let id = use_state(|| crate::tooltip::next_id("filter-picker"));
     let overlays = use_overlays();
     let face = use_node_ref();

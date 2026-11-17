@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, Field, InputGroup, InputKind, InputSize, SearchField, TextInput, Textarea,
     field_describedby, group_classes,
 };
@@ -81,7 +81,7 @@ fn TextCase(props: &TextCaseProps) -> Html {
             </Field>
             <Field id={select_id.clone()} label={html! { "Unit" }} error={error.clone()}
                 reserve_error=true disabled={s.disabled} busy={s.busy}>
-                <select id={select_id} class={plinth::native_select(s.size, s.invalid, false)}
+                <select id={select_id} class={sockel::native_select(s.size, s.invalid, false)}
                     disabled={s.disabled} aria-invalid={s.invalid.then_some("true")}
                     aria-describedby={describedby.clone()}>
                     <option>{ "Milliseconds" }</option>
@@ -187,7 +187,7 @@ pub fn TextInputPage() -> Html {
                     .expr(
                         "class",
                         format!(
-                            "plinth::native_select(InputSize::{:?}, {}, false)",
+                            "sockel::native_select(InputSize::{:?}, {}, false)",
                             s.size, s.invalid
                         ),
                     )
@@ -203,10 +203,10 @@ pub fn TextInputPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <TextCase settings={s} value={AttrValue::from((*value).clone())} {on_input} />
-            { shown("input(size, invalid, busy)", &plinth::input(s.size, s.invalid, s.busy)) }
-            { shown("input_box(size, invalid, disabled, busy)", &plinth::input_box(s.size, s.invalid, s.disabled, s.busy)) }
-            { shown("textarea(size, invalid, busy)", &plinth::textarea(s.size, s.invalid, s.busy)) }
-            { shown("native_select(size, invalid, fill)", &plinth::native_select(s.size, s.invalid, false)) }
+            { shown("input(size, invalid, busy)", &sockel::input(s.size, s.invalid, s.busy)) }
+            { shown("input_box(size, invalid, disabled, busy)", &sockel::input_box(s.size, s.invalid, s.disabled, s.busy)) }
+            { shown("textarea(size, invalid, busy)", &sockel::textarea(s.size, s.invalid, s.busy)) }
+            { shown("native_select(size, invalid, fill)", &sockel::native_select(s.size, s.invalid, false)) }
         </Demo>
     }
 }
@@ -310,7 +310,7 @@ pub fn SearchFieldPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <SearchCase settings={s} value={AttrValue::from((*value).clone())} {on_input} />
-            { shown("input_box(size, invalid, disabled, busy)", &plinth::input_box(s.size, s.invalid, s.disabled, s.busy)) }
+            { shown("input_box(size, invalid, disabled, busy)", &sockel::input_box(s.size, s.invalid, s.disabled, s.busy)) }
             <p class={class::CONTROL_LABEL}>{ format!("Searching for {:?}", *value) }</p>
         </Demo>
     }

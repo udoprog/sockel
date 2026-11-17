@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, Cluster, DataTips, HoverCard, PopoverAlign, ReasonButton,
     Side, Stack, Tooltip, button,
 };
@@ -46,7 +46,7 @@ fn TooltipDemo(props: &TooltipDemoProps) -> Html {
             <Cluster>
                 if props.attribute {
                     <button type="button" class={classes} data-tip={text.clone()}>
-                        <span class={plinth::class::BUTTON_LABEL}>{ "Remove" }</span>
+                        <span class={sockel::class::BUTTON_LABEL}>{ "Remove" }</span>
                     </button>
                 } else {
                     <Button node_ref={anchor.clone()}>{ "Remove" }</Button>

@@ -1,9 +1,9 @@
-// The showcase's own styles, built by plinth-build after plinth's: the
-// colours plinth reads (light and dark), the controls an app brings
+// The showcase's own styles, built by sockel-build after sockel's: the
+// colours sockel reads (light and dark), the controls an app brings
 // (buttons, fields, chips, help tips), and the showcase's shell and frames.
 // Every class of its own starts `showcase-`.
 
-@use "plinth" as p;
+@use "sockel" as p;
 
 @mixin light {
     --bg: #f6f6f8;
@@ -207,9 +207,9 @@ body {
     overflow-wrap: anywhere;
 }
 
-// The controls an app brings: one height each, as plinth's tokens say.
-// The button's base has no weight, so plinth's own button rules (an
-// `.plinth-iconed.plinth-icon`'s width, of a type selector's weight) still apply.
+// The controls an app brings: one height each, as sockel's tokens say.
+// The button's base has no weight, so sockel's own button rules (an
+// `.sockel-iconed.sockel-icon`'s width, of a type selector's weight) still apply.
 :where(.showcase-button) {
     display: inline-flex;
     flex: 0 1 auto;

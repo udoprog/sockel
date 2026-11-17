@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, LoadState, Loadable, Ratio, RowList, RowListItem, Skeleton, SkeletonShape, Spinner,
     skeleton,
 };

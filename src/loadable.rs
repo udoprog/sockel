@@ -140,12 +140,12 @@ pub fn Loadable(props: &LoadableProps) -> Html {
         }),
         Phase::Ready => props.children.clone(),
         Phase::Empty => props.empty.clone().unwrap_or_else(|| {
-            html! { <EmptyState title={label(&phrases, &props.empty_title, "plinth-loadable-empty")} /> }
+            html! { <EmptyState title={label(&phrases, &props.empty_title, "sockel-loadable-empty")} /> }
         }),
         Phase::Error => html! {
             <ErrorBox cause={props.error_cause.clone()} onretry={props.onretry.clone()}
                 retrying={props.retrying}>
-                { label(&phrases, &props.error, "plinth-loadable-error") }
+                { label(&phrases, &props.error, "sockel-loadable-error") }
             </ErrorBox>
         },
     };
@@ -154,7 +154,7 @@ pub fn Loadable(props: &LoadableProps) -> Html {
         <div ref={root} class={classes!(class::LOADABLE, props.class.clone())} {style}
             aria-busy={busy.then_some("true")} data-testid={props.testid.clone()}>
             <span class={class::VISUALLY_HIDDEN} role="status">
-                if busy { { label(&phrases, &props.label, "plinth-loadable-loading") } }
+                if busy { { label(&phrases, &props.label, "sockel-loadable-loading") } }
             </span>
             { content }
         </div>

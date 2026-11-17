@@ -10,7 +10,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Card, Cluster, Gap, Inset, Justify, Stack};
+use sockel::{Card, Cluster, Gap, Inset, Justify, Stack};
 
 /// One element of a snippet: a component or tag, its props, its children.
 pub struct El {
@@ -325,7 +325,7 @@ pub fn CodeCard(props: &CodeCardProps) -> Html {
                         </span>
                     </button>
                 </Cluster>
-                <pre class={classes!(class::CODE, plinth::class::SCROLL_AREA)}>
+                <pre class={classes!(class::CODE, sockel::class::SCROLL_AREA)}>
                     <code>{ highlight(&props.code) }</code>
                 </pre>
             </Stack>
@@ -337,7 +337,7 @@ pub fn CodeCard(props: &CodeCardProps) -> Html {
 mod tests {
     use super::{El, Kind, each, snippet, tokens};
 
-    use plinth::Gap;
+    use sockel::Gap;
 
     fn kinds(src: &str) -> Vec<(Option<Kind>, &str)> {
         tokens(src)

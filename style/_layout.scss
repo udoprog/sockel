@@ -2,52 +2,52 @@
 // row, column, bar and surface is one of these with modifiers, never a flex
 // rule of a screen's own.
 //
-// - `.plinth-stack`: a column, its blocks `--space-3` apart.
-// - `.plinth-cluster`: a row that wraps, items centred, `--space-2` apart.
-//   Along the row `.plinth-center`, `.plinth-between`, `.plinth-end`; across it `.plinth-top`, `.plinth-baseline`, `.plinth-bottom`,
-//   `.plinth-stretch`;
-//   `.plinth-nowrap` keeps one line; `.plinth-inline` sets it in the text's flow (an
+// - `.sockel-stack`: a column, its blocks `--space-3` apart.
+// - `.sockel-cluster`: a row that wraps, items centred, `--space-2` apart.
+//   Along the row `.sockel-center`, `.sockel-between`, `.sockel-end`; across it `.sockel-top`, `.sockel-baseline`, `.sockel-bottom`,
+//   `.sockel-stretch`;
+//   `.sockel-nowrap` keeps one line; `.sockel-inline` sets it in the text's flow (an
 //   icon and its label).
-// - `.plinth-stack.plinth-start`: its items at their own width, at the start.
-// - The gap of either, one scale for both: `.plinth-none` (0), `.plinth-hair` (`--space-0`, 2px: a tight
-//   group of buttons), `.plinth-snug` (`--space-1`),
-//   `.plinth-tight` (`--space-2`), `.plinth-medium` (`--space-3`), `.plinth-loose`
-//   (`--space-4`: a page's or section's blocks), `.plinth-wide` (`--space-6`).
-// - `.plinth-cluster.plinth-lines`: wrapped lines `--space-1` apart, closer than the column
-//   gap. `.plinth-stack.plinth-flush` and `.plinth-cluster.plinth-flush` zero the block margins of their
+// - `.sockel-stack.sockel-start`: its items at their own width, at the start.
+// - The gap of either, one scale for both: `.sockel-none` (0), `.sockel-hair` (`--space-0`, 2px: a tight
+//   group of buttons), `.sockel-snug` (`--space-1`),
+//   `.sockel-tight` (`--space-2`), `.sockel-medium` (`--space-3`), `.sockel-loose`
+//   (`--space-4`: a page's or section's blocks), `.sockel-wide` (`--space-6`).
+// - `.sockel-cluster.sockel-lines`: wrapped lines `--space-1` apart, closer than the column
+//   gap. `.sockel-stack.sockel-flush` and `.sockel-cluster.sockel-flush` zero the block margins of their
 //   direct children (a paragraph's default).
-// - `.plinth-toolbar`: one line of controls, `--space-1` apart, scrolling sideways
+// - `.sockel-toolbar`: one line of controls, `--space-1` apart, scrolling sideways
 //   when it runs out of room with its scrollbar hidden and the edge that has hidden controls faded, the gap scale setting another;
-//   `.plinth-toolbar-spacer` pushes what follows to the end. `.plinth-boxed` draws it as
+//   `.sockel-toolbar-spacer` pushes what follows to the end. `.sockel-boxed` draws it as
 //   a bar of its own.
-// - `.plinth-toolbar.plinth-band`: its controls wrap instead of scrolling;
-//   `.plinth-chrome` sets it on `--band-chrome-ground` with a rule under it,
-//   `--band-chrome-gap` apart, `.plinth-search` in a list filter's
+// - `.sockel-toolbar.sockel-band`: its controls wrap instead of scrolling;
+//   `.sockel-chrome` sets it on `--band-chrome-ground` with a rule under it,
+//   `--band-chrome-gap` apart, `.sockel-search` in a list filter's
 //   `--band-search-text`.
-//   `.plinth-toolbar-part` groups controls that it wraps between, never
-//   inside, unless the part alone is wider than the band; `.plinth-ruled` rules a part off from the one before it, from the
+//   `.sockel-toolbar-part` groups controls that it wraps between, never
+//   inside, unless the part alone is wider than the band; `.sockel-ruled` rules a part off from the one before it, from the
 //   phone breakpoint up.
-// - `.plinth-library-toolbar`: a library page's search (`.plinth-library-search`, which
+// - `.sockel-library-toolbar`: a library page's search (`.sockel-library-search`, which
 //   grows from `14rem`) and its filters (`.picker.filter`, one width each),
 //   a row that wraps: on a phone the search has a row to itself.
-// - `.plinth-card`: a surface lifted off the page, `--space-4` in.
-//   `.plinth-compact` (`--space-3`), `.plinth-dense` (a row's), `.plinth-flush` (none, its
-//   content to its rounded edges); `.plinth-inset` a bordered row or panel, the
-//   small radius and no lift; `.plinth-link` for a card that is a link or button: its border lights
+// - `.sockel-card`: a surface lifted off the page, `--space-4` in.
+//   `.sockel-compact` (`--space-3`), `.sockel-dense` (a row's), `.sockel-flush` (none, its
+//   content to its rounded edges); `.sockel-inset` a bordered row or panel, the
+//   small radius and no lift; `.sockel-link` for a card that is a link or button: its border lights
 //   on hover and focus, and it takes the focus ring.
 //
-// - `.plinth-grow` (an item takes the room left; `.plinth-basis-sm`, `.plinth-basis-md` and
-//   `.plinth-basis-lg` set the width it starts from), `.plinth-self-start` (an item in a stack
-//   keeps its own width), `.plinth-push-end` (an item, and what follows it, at the
-//   end of its row), `.plinth-contents` (an element whose children are its
+// - `.sockel-grow` (an item takes the room left; `.sockel-basis-sm`, `.sockel-basis-md` and
+//   `.sockel-basis-lg` set the width it starts from), `.sockel-self-start` (an item in a stack
+//   keeps its own width), `.sockel-push-end` (an item, and what follows it, at the
+//   end of its row), `.sockel-contents` (an element whose children are its
 //   parent's items, as a pager's list in a row of chips).
-// - `.plinth-workspace-page`: a page the width of the workspace (home, characters,
+// - `.sockel-workspace-page`: a page the width of the workspace (home, characters,
 //   a character, games, search, help, a web of relationships).
-// - `.plinth-plain-list`: a `ul`/`ol` with no bullets, margin or padding (with
-//   `.plinth-stack` for a column of rows).
-// - `.plinth-library-page`: the page width of a library or admin index (with
-//   `.plinth-stack.plinth-loose`): xrefs, systems, tables, rolls, widgets, books, trait
-//   sets, sheets, keywords, groups, audit, tools, polls. `.plinth-reading`: its
+// - `.sockel-plain-list`: a `ul`/`ol` with no bullets, margin or padding (with
+//   `.sockel-stack` for a column of rows).
+// - `.sockel-library-page`: the page width of a library or admin index (with
+//   `.sockel-stack.sockel-loose`): xrefs, systems, tables, rolls, widgets, books, trait
+//   sets, sheets, keywords, groups, audit, tools, polls. `.sockel-reading`: its
 //   blocks read narrow (`--page-reading`), as a long entry's text.
 //
 // The space between a page's blocks is its stack's gap, not margins on
@@ -55,32 +55,32 @@
 
 @use "tokens" as base;
 
-.plinth-stack {
+.sockel-stack {
     @include base.stack;
 }
 
 // A stack whose items keep their own width (a message over its button).
-.plinth-stack.plinth-start {
+.sockel-stack.sockel-start {
     align-items: flex-start;
 }
 
 // A flex item that takes the room left in its row, and may shrink. The class
 // twice, so it wins over the item's own flex (a button's, an input's).
 @if base.emits("layout.grow") {
-    .plinth-grow.plinth-grow {
+    .sockel-grow.sockel-grow {
         flex: 1 1 auto;
         min-width: 0;
 
         // Starting widths for a field in a row of controls.
-        &.plinth-basis-sm {
+        &.sockel-basis-sm {
             flex: 1 1 9rem;
         }
 
-        &.plinth-basis-md {
+        &.sockel-basis-md {
             flex: 1 1 14rem;
         }
 
-        &.plinth-basis-lg {
+        &.sockel-basis-lg {
             flex: 2 1 10rem;
         }
     }
@@ -88,25 +88,25 @@
 
 // A block in a stack or a flex column that keeps its own width at the start,
 // while its siblings fill.
-.plinth-self-start {
+.sockel-self-start {
     align-self: flex-start;
 }
 
 // The class twice, so it wins over the item's own margin (a button's).
-.plinth-push-end.plinth-push-end {
+.sockel-push-end.sockel-push-end {
     margin-left: auto;
 }
 
-.plinth-contents {
+.sockel-contents {
     display: contents;
 }
 
 @if base.emits("layout.pages") {
-    .plinth-workspace-page {
+    .sockel-workspace-page {
         @include base.page;
     }
 
-    .plinth-library-page {
+    .sockel-library-page {
         @include base.page;
 
         // The stack's gap spaces the blocks, not their own margins (a paragraph's
@@ -115,56 +115,56 @@
             margin-block: 0;
         }
 
-        &.plinth-reading > * {
+        &.sockel-reading > * {
             max-width: var(--page-reading);
         }
     }
 }
 
 @if base.emits("layout.plain-list") {
-    .plinth-plain-list {
+    .sockel-plain-list {
         margin: 0;
         padding: 0;
         list-style: none;
     }
 }
 
-.plinth-cluster {
+.sockel-cluster {
     @include base.cluster;
 
-    &.plinth-inline {
+    &.sockel-inline {
         display: inline-flex;
     }
 
-    &.plinth-center {
+    &.sockel-center {
         justify-content: center;
     }
 
-    &.plinth-between {
+    &.sockel-between {
         justify-content: space-between;
     }
 
-    &.plinth-end {
+    &.sockel-end {
         justify-content: flex-end;
     }
 
-    &.plinth-top {
+    &.sockel-top {
         align-items: flex-start;
     }
 
-    &.plinth-baseline {
+    &.sockel-baseline {
         align-items: baseline;
     }
 
-    &.plinth-bottom {
+    &.sockel-bottom {
         align-items: flex-end;
     }
 
-    &.plinth-stretch {
+    &.sockel-stretch {
         align-items: stretch;
     }
 
-    &.plinth-nowrap {
+    &.sockel-nowrap {
         flex-wrap: nowrap;
     }
 }
@@ -182,77 +182,77 @@ $-gaps: (
 @mixin -gap-scale {
     @each $name, $gap in $-gaps {
         @if base.emits("layout.gap-#{$name}") {
-            &.plinth-#{$name} {
+            &.sockel-#{$name} {
                 gap: $gap;
             }
         }
     }
 
     @if base.emits("layout.flush") {
-        &.plinth-flush > * {
+        &.sockel-flush > * {
             margin-block: 0;
         }
     }
 }
 
 @if base.emits("layout.toolbar") {
-    .plinth-stack,
-    .plinth-cluster,
-    .plinth-toolbar {
+    .sockel-stack,
+    .sockel-cluster,
+    .sockel-toolbar {
         @include -gap-scale;
     }
 } @else {
-    .plinth-stack,
-    .plinth-cluster {
+    .sockel-stack,
+    .sockel-cluster {
         @include -gap-scale;
     }
 }
 
 @if base.emits("layout.lines") {
-        .plinth-cluster.plinth-lines {
+        .sockel-cluster.sockel-lines {
             row-gap: var(--space-1);
         }
     }
 
     @if base.emits("layout.toolbar") {
-    @property --plinth-fade-start {
+    @property --sockel-fade-start {
         syntax: "<length>";
         inherits: false;
         initial-value: 0;
     }
 
-    @property --plinth-fade-end {
+    @property --sockel-fade-end {
         syntax: "<length>";
         inherits: false;
         initial-value: 0;
     }
 
-    @keyframes plinth-toolbar-fade {
+    @keyframes sockel-toolbar-fade {
         0% {
-            --plinth-fade-start: 0;
-            --plinth-fade-end: var(--space-7);
+            --sockel-fade-start: 0;
+            --sockel-fade-end: var(--space-7);
         }
 
         10%,
         90% {
-            --plinth-fade-start: var(--space-7);
-            --plinth-fade-end: var(--space-7);
+            --sockel-fade-start: var(--space-7);
+            --sockel-fade-end: var(--space-7);
         }
 
         100% {
-            --plinth-fade-start: var(--space-7);
-            --plinth-fade-end: 0;
+            --sockel-fade-start: var(--space-7);
+            --sockel-fade-end: 0;
         }
     }
 
-    .plinth-toolbar {
+    .sockel-toolbar {
         display: flex;
         flex-wrap: nowrap;
         align-items: center;
         gap: base.$toolbar-gap;
         @include base.scroll-fade;
 
-        &.plinth-boxed {
+        &.sockel-boxed {
             @include base.reserved-border(var(--border));
             border-radius: var(--radius-sm);
             background: var(--surface);
@@ -260,28 +260,28 @@ $-gaps: (
         }
 
         // A band: its controls wrap onto further lines rather than scroll.
-        &.plinth-band {
+        &.sockel-band {
             flex-wrap: wrap;
             overflow-x: visible;
             mask-image: none;
             animation: none;
         }
 
-        &.plinth-chrome {
+        &.sockel-chrome {
             gap: var(--band-chrome-gap);
             padding: var(--space-1) var(--space-3);
             background: var(--band-chrome-ground);
             box-shadow: inset 0 calc(var(--space-px) * -1) 0 var(--border);
         }
 
-        &.plinth-search {
+        &.sockel-search {
             font-size: var(--band-search-text);
         }
     }
 
     // A group of a band's controls: the band wraps between parts, and a part
     // wraps inside only when it alone is wider than the band.
-    .plinth-toolbar-part {
+    .sockel-toolbar-part {
         display: flex;
         flex: 0 1 auto;
         flex-wrap: wrap;
@@ -293,58 +293,58 @@ $-gaps: (
 
     // Ruled off from the part before it where the band has room for the rule.
     @include base.above("phone") {
-        .plinth-toolbar-part.plinth-ruled {
+        .sockel-toolbar-part.sockel-ruled {
             padding-inline-start: var(--space-3);
             box-shadow: inset var(--space-px) 0 0 var(--border);
         }
     }
 
-    .plinth-library-toolbar {
+    .sockel-library-toolbar {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
         gap: var(--space-2);
     }
 
-    .plinth-library-search.plinth-input-box {
+    .sockel-library-search.sockel-input-box {
         flex: 1 1 14rem;
         width: auto;
     }
 
-    .plinth-toolbar-spacer {
+    .sockel-toolbar-spacer {
         flex: 1 1 auto;
     }
 }
 
-.plinth-card {
+.sockel-card {
     @include base.card;
 
     @if base.emits("layout.card-compact") {
-        &.plinth-compact {
+        &.sockel-compact {
             padding: var(--space-3);
         }
     }
 
     // A bordered row or panel inside a page: the small radius, no lift.
-    &.plinth-inset {
+    &.sockel-inset {
         border-radius: var(--radius-sm);
         box-shadow: none;
     }
 
     @if base.emits("layout.card-dense") {
         // As tight as a row of controls.
-        &.plinth-dense {
+        &.sockel-dense {
             padding: var(--space-1) var(--space-2);
         }
     }
 
-    &.plinth-flush {
+    &.sockel-flush {
         padding: 0;
         overflow: hidden;
     }
 
     @if base.emits("layout.card-link") {
-        &.plinth-link {
+        &.sockel-link {
             text-decoration: none;
             cursor: pointer;
 
@@ -361,14 +361,14 @@ $-gaps: (
 @if base.emits("layout.card-link") {
     // A link card is a block (a link is inline) at no weight, so a layout
     // primitive or a component's own display on the same element wins.
-    :where(.plinth-card.plinth-link) {
+    :where(.sockel-card.sockel-link) {
         display: block;
     }
 }
 
 @if base.$card-padding-phone {
     @include base.below("phone") {
-        .plinth-card {
+        .sockel-card {
             padding: base.$card-padding-phone;
         }
     }

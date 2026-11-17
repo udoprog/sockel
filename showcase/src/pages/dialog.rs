@@ -4,7 +4,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, Cluster, Dialog, DialogDismiss, DialogSize, Dismiss, Glyph,
     Icon, Popover, Stack, button,
 };
@@ -122,7 +122,7 @@ fn Content(props: &ContentProps) -> Html {
                 <button type="button" ref={more.clone()} aria-expanded={popover.to_string()}
                     class={button(ButtonVariant::Secondary, ButtonSize::Small, false, false)}
                     onclick={open_popover}>
-                    <span class={plinth::class::BUTTON_LABEL}>{ "A popover" }</span>
+                    <span class={sockel::class::BUTTON_LABEL}>{ "A popover" }</span>
                 </button>
                 <Button size={ButtonSize::Small} onclick={open_nested}>{ "Another dialog" }</Button>
             </Cluster>

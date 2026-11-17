@@ -1,0 +1,9 @@
+// The fixture's local styles: a sockel class targeted, a partial, and
+// sockel's tokens and mixins through `@use "sockel"`.
+
+@use "sockel" as p;
+@use "panel";
+
+.sockel-stack.fixture-panel {
+    gap: var(--space-1);
+}

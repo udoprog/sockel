@@ -76,7 +76,7 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
                 <div class={class::ERROR_BOX_ACTIONS}>
                     <Button size={ButtonSize::Small} busy={props.retrying}
                         onclick={onretry.clone()}>
-                        { label(&phrases, &props.retry_label, "plinth-error-box-retry") }
+                        { label(&phrases, &props.retry_label, "sockel-error-box-retry") }
                     </Button>
                 </div>
             }
@@ -96,8 +96,8 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
                     <span class={class::ERROR_BOX_CLOSE}>
                         <Button variant={ButtonVariant::Quiet}
                             icon={html! { <Icon glyph={Glyph::Close} /> }}
-                            label={label(&phrases, &props.dismiss_label, "plinth-error-box-dismiss")}
-                            title={label(&phrases, &props.dismiss_label, "plinth-error-box-dismiss")}
+                            label={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
+                            title={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
                             onclick={ondismiss.clone()} />
                     </span>
                 }

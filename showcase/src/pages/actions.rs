@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{ActionGroup, Cluster, IconButton, action_group, icon_button};
+use sockel::{ActionGroup, Cluster, IconButton, action_group, icon_button};
 
 use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
@@ -44,7 +44,7 @@ pub fn ActionGroupPage() -> Html {
     let buttons: Html = (1..=*count)
         .map(|n| {
             let class = if *quiet {
-                classes!(class::BUTTON, class::GHOST, plinth::class::ICON)
+                classes!(class::BUTTON, class::GHOST, sockel::class::ICON)
             } else {
                 classes!(class::BUTTON, (n == 1).then_some(class::PRIMARY))
             };
@@ -104,7 +104,7 @@ const VARIANTS: &[(&str, &str)] = &[
     ("primary", class::PRIMARY),
     ("ghost", class::GHOST),
     ("danger", class::DANGER),
-    ("icon (icon alone)", plinth::class::ICON),
+    ("icon (icon alone)", sockel::class::ICON),
 ];
 
 const DIALOGS: &[(&str, bool)] = &[("No", false), ("Yes (click to open)", true)];
@@ -145,7 +145,7 @@ pub fn IconButtonPage() -> Html {
         })
     };
 
-    let alone = *variant == plinth::class::ICON;
+    let alone = *variant == sockel::class::ICON;
     let class = classes!(
         class::BUTTON,
         (!variant.is_empty()).then_some(*variant),
@@ -164,7 +164,7 @@ pub fn IconButtonPage() -> Html {
         let small = if *small { ", \"small\"" } else { "" };
         button.expr(
             "class",
-            format!("classes!(\"button\", plinth::class::ICON{small})"),
+            format!("classes!(\"button\", sockel::class::ICON{small})"),
         )
     } else {
         let mut parts = vec!["button"];

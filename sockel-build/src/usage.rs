@@ -44,13 +44,13 @@ impl Usage {
     }
 
     /// Counts how often the sources write each class `config` builds: the
-    /// local ones, or plinth's own without local styles. With
+    /// local ones, or sockel's own without local styles. With
     /// `STYLE_INVENTORY=PATH` set, also writes `class<TAB>uses` lines to `PATH`.
     pub fn report(&self, config: &Config) -> Result<Report, Error> {
         let output = config.build()?;
         let (classes, prefix) = match (&config.local, &config.prefix) {
             (Some(_), Some(prefix)) => (output.local_classes, prefix.as_str()),
-            _ => (output.plinth_classes, "plinth-"),
+            _ => (output.sockel_classes, "sockel-"),
         };
         let mut text = String::new();
         for source in &self.sources {
@@ -113,7 +113,7 @@ impl Usage {
     pub fn assert_clean(&self, config: &Config) {
         let report = self
             .report(config)
-            .unwrap_or_else(|error| panic!("plinth-build: {error}"));
+            .unwrap_or_else(|error| panic!("sockel-build: {error}"));
         println!("{report}");
         assert!(report.is_clean(), "{report}");
     }
@@ -264,7 +264,7 @@ mod tests {
     fn fixture() -> (Config, Usage) {
         let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/usage");
         (
-            crate::plinth().local(dir.join("style")).prefix("usage-"),
+            crate::sockel().local(dir.join("style")).prefix("usage-"),
             Usage::new().source(dir.join("src")),
         )
     }

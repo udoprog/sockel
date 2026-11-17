@@ -821,7 +821,7 @@ pub struct PopoverProps {
     #[prop_or_default]
     pub within: Option<AttrValue>,
     /// A sheet from the bottom below the phone breakpoint, over a scrim
-    /// (`.plinth-sheet`); on by default.
+    /// (`.sockel-sheet`); on by default.
     #[prop_or(true)]
     pub sheet: bool,
     /// The sheet's head, its title and close button; on by default.
@@ -831,11 +831,11 @@ pub struct PopoverProps {
     /// answer, such as a confirm.
     #[prop_or_default]
     pub trap: bool,
-    /// A body without padding (`plinth::class::FLUSH`), for content that
+    /// A body without padding (`sockel::class::FLUSH`), for content that
     /// lays out its own edges, such as a list running to the surface's.
     #[prop_or_default]
     pub flush: bool,
-    /// At least as wide as its anchor (`plinth::class::MATCH_ANCHOR`, the
+    /// At least as wide as its anchor (`sockel::class::MATCH_ANCHOR`, the
     /// anchor's width as `--popover-anchor-width`), as a field's list under
     /// it; off by default. A sheet stays the screen's width.
     #[prop_or_default]
@@ -1001,7 +1001,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
                 <span class={class::POPOVER_TITLE}>{ props.title.clone() }</span>
                 <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                     icon={html! { <Icon glyph={Glyph::Close} /> }}
-                    label={label(&phrases, &props.close_label, "plinth-popover-close")} onclick={close} />
+                    label={label(&phrases, &props.close_label, "sockel-popover-close")} onclick={close} />
             </div>
         }
     });

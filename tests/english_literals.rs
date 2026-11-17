@@ -1,4 +1,4 @@
-//! plinth's components spell no user-visible words: they come from the
+//! sockel's components spell no user-visible words: they come from the
 //! catalog (`locales/`). A capitalised string literal in component code is
 //! taken for one, unless it is a key or a data-transfer type.
 

@@ -1,4 +1,4 @@
-//! The icons of plinth's own chrome (`style/_icons.scss`): an [`IconSet`]
+//! The icons of sockel's own chrome (`style/_icons.scss`): an [`IconSet`]
 //! the app provides once at its root, and a built-in set without one.
 
 use crate::class;
@@ -7,7 +7,7 @@ use std::rc::Rc;
 
 use yew::prelude::*;
 
-/// One of plinth's glyphs.
+/// One of sockel's glyphs.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, Hash)]
 #[non_exhaustive]
 pub enum Glyph {
@@ -46,10 +46,10 @@ impl Glyph {
     ];
 }
 
-/// The icons plinth draws with and the app's own, by [`Glyph`] or by name.
-/// Provide one with a `ContextProvider<IconSet>`; without one, plinth uses
+/// The icons sockel draws with and the app's own, by [`Glyph`] or by name.
+/// Provide one with a `ContextProvider<IconSet>`; without one, sockel uses
 /// [`IconSet::default`]. Each icon should draw in `currentColor` and fill its
-/// box (plinth sizes the box, not the icon). Cloning shares the icons.
+/// box (sockel sizes the box, not the icon). Cloning shares the icons.
 #[derive(Clone, Default)]
 pub struct IconSet {
     inner: Rc<Icons>,
@@ -116,7 +116,7 @@ fn built_in(glyph: Glyph) -> Html {
 }
 
 impl IconSet {
-    /// Replaces one of plinth's glyphs; the others stay built in.
+    /// Replaces one of sockel's glyphs; the others stay built in.
     pub fn with(mut self, glyph: Glyph, icon: Html) -> Self {
         Rc::make_mut(&mut self.inner).glyphs.insert(glyph, icon);
         self
@@ -166,7 +166,7 @@ pub fn use_icon_named(name: &str) -> Html {
 
 fn missing(name: &str) -> Html {
     #[cfg(all(debug_assertions, target_arch = "wasm32"))]
-    web_sys::console::warn_1(&format!("plinth: no icon named {name:?} in the IconSet").into());
+    web_sys::console::warn_1(&format!("sockel: no icon named {name:?} in the IconSet").into());
     #[cfg(not(all(debug_assertions, target_arch = "wasm32")))]
     let _ = name;
     html! {}
@@ -174,7 +174,7 @@ fn missing(name: &str) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct IconProps {
-    /// One of plinth's glyphs; `name` is used when it is not set.
+    /// One of sockel's glyphs; `name` is used when it is not set.
     #[prop_or_default]
     pub glyph: Option<Glyph>,
     /// An app icon added with [`IconSet::with_named`].

@@ -2,33 +2,33 @@
 // short marks whose box is fixed, so a state, a figure or a word changing
 // does not move what is around them.
 //
-// Tone is a modifier of the mark: `.plinth-accent`,
-// `.plinth-success`, `.plinth-warning`, `.plinth-danger`, `.plinth-busy` (the accent, its dot
-// pulsing) and `.plinth-unset` (outlined, no fill); neutral has none. A tone
+// Tone is a modifier of the mark: `.sockel-accent`,
+// `.sockel-success`, `.sockel-warning`, `.sockel-danger`, `.sockel-busy` (the accent, its dot
+// pulsing) and `.sockel-unset` (outlined, no fill); neutral has none. A tone
 // only sets `--tone`. A pill, badge, count and status label are
 // `fit-content` wide, so a stretching parent (a column flex, a grid cell)
 // does not widen them.
 //
-// - `.plinth-pill`: a tinted label of `--mark-height`, led by a dot in its
-//   tone; `.plinth-plain` has no dot, `.plinth-pill-button` is a button (the
+// - `.sockel-pill`: a tinted label of `--mark-height`, led by a dot in its
+//   tone; `.sockel-plain` has no dot, `.sockel-pill-button` is a button (the
 //   hover changes its fill only). `-label` is its text, cut with an
 //   ellipsis.
-// - `.plinth-badge`: a bordered short text at least as wide as tall;
-//   `.plinth-solid` fills it, `.plinth-corner` lays a small one over the
+// - `.sockel-badge`: a bordered short text at least as wide as tall;
+//   `.sockel-solid` fills it, `.sockel-corner` lays a small one over the
 //   top end corner of its positioned parent.
-// - `.plinth-dot`: a `--dot-size` circle, empty ring until `.plinth-on`.
-// - `.plinth-count`: a badge of figures, `--count-digits` wide for the
-//   digits of its largest value and one more for its `+`; `.plinth-zero`
-//   dims it, `.plinth-hidden` hides it, its box kept.
-// - `.plinth-status-label`: every state's text in one grid cell, so its
-//   width is the widest one; the others are `.plinth-hidden`. `-spinner` is
+// - `.sockel-dot`: a `--dot-size` circle, empty ring until `.sockel-on`.
+// - `.sockel-count`: a badge of figures, `--count-digits` wide for the
+//   digits of its largest value and one more for its `+`; `.sockel-zero`
+//   dims it, `.sockel-hidden` hides it, its box kept.
+// - `.sockel-status-label`: every state's text in one grid cell, so its
+//   width is the widest one; the others are `.sockel-hidden`. `-spinner` is
 //   the slot a busy state fills, its box always there; `-text` is one
 //   state.
 
 @use "tokens" as base;
 @use "hidden";
 
-.plinth-pill {
+.sockel-pill {
     --tone: var(--muted);
 
     display: inline-flex;
@@ -63,27 +63,27 @@
         background: currentcolor;
     }
 
-    &.plinth-plain::before {
+    &.sockel-plain::before {
         content: none;
     }
 
     @include base.tones;
 
-    &.plinth-busy::before {
-        animation: plinth-pulse 1.2s ease-in-out infinite;
+    &.sockel-busy::before {
+        animation: sockel-pulse 1.2s ease-in-out infinite;
 
         @media (prefers-reduced-motion: reduce) {
             animation: none;
         }
     }
 
-    &.plinth-unset {
+    &.sockel-unset {
         --tone: var(--muted);
         border-color: color-mix(in srgb, var(--muted) 35%, transparent);
         background: transparent;
     }
 
-    &.plinth-pill-button {
+    &.sockel-pill-button {
         cursor: pointer;
 
         &:hover:not(:disabled) {
@@ -99,17 +99,17 @@
     }
 }
 
-.plinth-pill-label {
+.sockel-pill-label {
     @include base.truncate;
 }
 
-@keyframes plinth-pulse {
+@keyframes sockel-pulse {
     50% {
         opacity: 0.35;
     }
 }
 
-.plinth-badge {
+.sockel-badge {
     --tone: var(--muted);
 
     display: inline-flex;
@@ -133,7 +133,7 @@
     white-space: nowrap;
     @include base.numeric;
 
-    &.plinth-solid {
+    &.sockel-solid {
         --tone: var(--accent);
         border-color: transparent;
         background: var(--tone);
@@ -142,11 +142,11 @@
 
     @include base.tones;
 
-    &.plinth-unset {
+    &.sockel-unset {
         border-style: dashed;
     }
 
-    &.plinth-corner {
+    &.sockel-corner {
         position: absolute;
         inset-block-start: 0;
         inset-inline-end: 0;
@@ -158,7 +158,7 @@
     }
 }
 
-.plinth-dot {
+.sockel-dot {
     --tone: var(--muted);
 
     display: inline-block;
@@ -170,14 +170,14 @@
     border-radius: var(--radius-pill);
     background: transparent;
 
-    &.plinth-on {
+    &.sockel-on {
         background: var(--tone);
     }
 
     @include base.tones;
 
-    &.plinth-busy {
-        animation: plinth-pulse 1.2s ease-in-out infinite;
+    &.sockel-busy {
+        animation: sockel-pulse 1.2s ease-in-out infinite;
 
         @media (prefers-reduced-motion: reduce) {
             animation: none;
@@ -185,7 +185,7 @@
     }
 }
 
-.plinth-count {
+.sockel-count {
     --count-digits: 2;
 
     display: inline-flex;
@@ -207,12 +207,12 @@
     white-space: nowrap;
     @include base.numeric;
 
-    &.plinth-zero {
+    &.sockel-zero {
         opacity: 0.6;
     }
 }
 
-.plinth-status-label {
+.sockel-status-label {
     --tone: var(--muted);
 
     display: inline-flex;
@@ -229,7 +229,7 @@
     @include base.tones;
 }
 
-.plinth-status-spinner {
+.sockel-status-spinner {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -238,12 +238,12 @@
     height: var(--glyph-size);
 }
 
-.plinth-status-labels {
+.sockel-status-labels {
     display: inline-grid;
     min-width: 0;
 }
 
-.plinth-status-text {
+.sockel-status-text {
     grid-area: 1 / 1;
     min-width: 0;
     overflow-wrap: anywhere;

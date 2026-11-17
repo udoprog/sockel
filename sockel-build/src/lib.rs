@@ -1,8 +1,8 @@
 //! Builds an app's one stylesheet and its class constants from a `build.rs`:
-//! plinth's, and a project's own Sass beside it ([`Config::local`]).
+//! sockel's, and a project's own Sass beside it ([`Config::local`]).
 //!
-//! plinth's Sass sources are read from the plinth package a build depends on
-//! ([`STYLE_VAR`]); local Sass loads them as `@use "plinth" as p;`.
+//! sockel's Sass sources are read from the sockel package a build depends on
+//! ([`STYLE_VAR`]); local Sass loads them as `@use "sockel" as p;`.
 //! [`Config::compile`] writes `style.css` and `classes.rs` (a `pub const` per
 //! class) to `OUT_DIR`.
 
@@ -14,12 +14,12 @@ use std::path::{Path, PathBuf};
 #[cfg(test)]
 mod features;
 
-/// plinth's sources in this repository.
+/// sockel's sources in this repository.
 #[cfg(test)]
 const STYLE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../style");
 
 #[cfg(test)]
-fn plinth() -> Config {
+fn sockel() -> Config {
     Config::new().style(STYLE)
 }
 
@@ -35,7 +35,7 @@ mod usage;
 use usage::matches;
 pub use usage::{Report, Usage};
 
-/// plinth's Cargo features and the partials (`style/_<name>.scss`) each
+/// sockel's Cargo features and the partials (`style/_<name>.scss`) each
 /// adds to the stylesheet. Partials no feature names (tokens, hooks, the
 /// utilities and what components share) are always in.
 pub const FEATURES: &[(&str, &[&str])] = &[
@@ -96,28 +96,28 @@ pub const FEATURE_PARTS: &[(&str, &[&str])] = &[
     ("tokens.tooltip", &["tooltip"]),
 ];
 
-/// The features plinth was built with, comma-separated, as a `build.rs` of a
-/// package depending on plinth directly sees them (plinth's `links` metadata).
-pub const FEATURES_VAR: &str = "DEP_PLINTH_FEATURES";
+/// The features sockel was built with, comma-separated, as a `build.rs` of a
+/// package depending on sockel directly sees them (sockel's `links` metadata).
+pub const FEATURES_VAR: &str = "DEP_SOCKEL_FEATURES";
 
-/// The directory of plinth's Sass sources (`style/` in its package), as a
-/// `build.rs` of a package depending on plinth directly sees it.
-pub const STYLE_VAR: &str = "DEP_PLINTH_STYLE";
+/// The directory of sockel's Sass sources (`style/` in its package), as a
+/// `build.rs` of a package depending on sockel directly sees it.
+pub const STYLE_VAR: &str = "DEP_SOCKEL_STYLE";
 
-/// The variable [`Config::compile`] sets to plinth's style directory for
+/// The variable [`Config::compile`] sets to sockel's style directory for
 /// the package's own crates, so its tests can pass it to [`Config::style`].
-pub const TEST_STYLE_VAR: &str = "PLINTH_STYLE";
+pub const TEST_STYLE_VAR: &str = "SOCKEL_STYLE";
 
 /// Styles each hook class of `_hooks.scss`, so its class is found like any other.
 const HOOKS_PROBE: &str =
-    "@use \"plinth/hooks\";\n@each $class in hooks.$classes { .#{$class} { --hook: 0; } }\n";
+    "@use \"sockel/hooks\";\n@each $class in hooks.$classes { .#{$class} { --hook: 0; } }\n";
 
-/// The directory plinth's sources are served under.
-const ROOT: &str = "plinth";
+/// The directory sockel's sources are served under.
+const ROOT: &str = "sockel";
 
-/// plinth's sources at relative paths (`plinth/...`), the disk at absolute
+/// sockel's sources at relative paths (`sockel/...`), the disk at absolute
 /// ones: a project's files are always loaded by absolute path, so nothing
-/// else on disk can stand in for plinth's sources.
+/// else on disk can stand in for sockel's sources.
 #[derive(Debug)]
 struct Sources {
     style: PathBuf,
@@ -133,8 +133,8 @@ impl Sources {
             .collect()
     }
 
-    /// A relative path's file in plinth's style directory.
-    fn plinth(&self, path: &Path) -> Option<PathBuf> {
+    /// A relative path's file in sockel's style directory.
+    fn sockel(&self, path: &Path) -> Option<PathBuf> {
         let path = Self::relative(path);
         let name = path.strip_prefix(ROOT).ok()?;
         Some(self.style.join(name))
@@ -158,7 +158,7 @@ impl grass::Fs for Sources {
         if path.is_absolute() {
             path.is_file()
         } else {
-            self.is_index(path) || self.plinth(path).is_some_and(|file| file.is_file())
+            self.is_index(path) || self.sockel(path).is_some_and(|file| file.is_file())
         }
     }
 
@@ -169,7 +169,7 @@ impl grass::Fs for Sources {
         if let (true, Some(index)) = (self.is_index(path), &self.index) {
             return Ok(index.as_bytes().to_vec());
         }
-        match self.plinth(path) {
+        match self.sockel(path) {
             Some(file) => std::fs::read(file),
             None => Err(io::Error::new(
                 io::ErrorKind::NotFound,
@@ -204,7 +204,7 @@ pub enum Error {
     },
     /// A local directory with no `_index.scss` or `index.scss`.
     NoIndex(PathBuf),
-    /// plinth's CSS did not come out first and unchanged.
+    /// sockel's CSS did not come out first and unchanged.
     NotVerbatim,
     /// A name [`FEATURES`] does not list.
     Feature(String),
@@ -225,17 +225,17 @@ impl fmt::Display for Error {
             ),
             Error::Unprefixed { class, prefix } => write!(
                 f,
-                "local class .{class} is neither plinth's nor prefixed `{prefix}`"
+                "local class .{class} is neither sockel's nor prefixed `{prefix}`"
             ),
             Error::NoIndex(dir) => {
                 write!(f, "{} has no _index.scss or index.scss", dir.display())
             }
-            Error::NotVerbatim => write!(f, "plinth's CSS did not come first and unchanged"),
-            Error::Feature(name) => write!(f, "plinth has no feature `{name}`"),
+            Error::NotVerbatim => write!(f, "sockel's CSS did not come first and unchanged"),
+            Error::Feature(name) => write!(f, "sockel has no feature `{name}`"),
             Error::NoStyle => write!(
                 f,
-                "plinth's style directory is unknown: {STYLE_VAR} is set only in the \
-                 build.rs of a package depending on plinth directly; elsewhere use \
+                "sockel's style directory is unknown: {STYLE_VAR} is set only in the \
+                 build.rs of a package depending on sockel directly; elsewhere use \
                  Config::style"
             ),
         }
@@ -271,10 +271,10 @@ pub struct Config {
 /// A build's results.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Output {
-    /// The app's one stylesheet: plinth's CSS, then the local styles' CSS.
+    /// The app's one stylesheet: sockel's CSS, then the local styles' CSS.
     pub css: String,
-    /// plinth's classes: every class its selectors name and every hook class, sorted.
-    pub plinth_classes: Vec<String>,
+    /// sockel's classes: every class its selectors name and every hook class, sorted.
+    pub sockel_classes: Vec<String>,
     /// The local styles' own classes (each with the prefix), sorted.
     pub local_classes: Vec<String>,
 }
@@ -290,8 +290,8 @@ impl Config {
         self
     }
 
-    /// plinth's Sass sources, instead of [`STYLE_VAR`]'s directory: in a test
-    /// `env!("PLINTH_STYLE")` ([`TEST_STYLE_VAR`]), set by the package's
+    /// sockel's Sass sources, instead of [`STYLE_VAR`]'s directory: in a test
+    /// `env!("SOCKEL_STYLE")` ([`TEST_STYLE_VAR`]), set by the package's
     /// `build.rs`.
     pub fn style(mut self, dir: impl Into<PathBuf>) -> Self {
         self.style = Some(dir.into());
@@ -299,7 +299,7 @@ impl Config {
     }
 
     /// The project's own Sass: `dir/_index.scss` (or `index.scss`), which can
-    /// `@use "plinth" as p;` for plinth's tokens and mixins. A relative
+    /// `@use "sockel" as p;` for sockel's tokens and mixins. A relative
     /// `dir` is taken from the current directory, a `build.rs`'s package root.
     pub fn local(mut self, dir: impl Into<PathBuf>) -> Self {
         self.local = Some(dir.into());
@@ -319,8 +319,8 @@ impl Config {
         self
     }
 
-    /// Sets a plinth token (`"text-md"` or `"$text-md"`) to a Sass value
-    /// (`"1.0625rem"`), as `@use "plinth" with (...)` would. Only values
+    /// Sets a sockel token (`"text-md"` or `"$text-md"`) to a Sass value
+    /// (`"1.0625rem"`), as `@use "sockel" with (...)` would. Only values
     /// change; the classes stay the same.
     pub fn with(mut self, variable: impl AsRef<str>, value: impl Into<String>) -> Self {
         let name = variable.as_ref().trim_start_matches('$').to_owned();
@@ -328,12 +328,12 @@ impl Config {
         self
     }
 
-    /// Builds plinth's CSS from only these [`FEATURES`] (each with the
+    /// Builds sockel's CSS from only these [`FEATURES`] (each with the
     /// features it depends on already in), instead of all of them, and
     /// leaves out the [`FEATURE_PARTS`] none of them reads. Without it, the
     /// features are [`FEATURES_VAR`]'s when it is set (in the `build.rs` of
-    /// a package depending on plinth directly), so the app's stylesheet has
-    /// plinth's subset, and all of them otherwise.
+    /// a package depending on sockel directly), so the app's stylesheet has
+    /// sockel's subset, and all of them otherwise.
     pub fn features<I>(mut self, features: I) -> Self
     where
         I: IntoIterator,
@@ -388,7 +388,7 @@ impl Config {
         Ok(Some(lines.map(|line| format!("{line}\n")).collect()))
     }
 
-    fn plinth_use(&self, enabled: Option<&[String]>) -> String {
+    fn sockel_use(&self, enabled: Option<&[String]>) -> String {
         let on =
             |feature: &&str| enabled.is_none_or(|enabled| enabled.iter().any(|e| e == *feature));
         let folded: Vec<_> = FEATURE_PARTS
@@ -415,14 +415,14 @@ impl Config {
             pairs.push(format!("$omit: {omit}"));
         }
         if pairs.is_empty() {
-            return format!("{head}@use \"plinth\";\n");
+            return format!("{head}@use \"sockel\";\n");
         }
-        format!("{head}@use \"plinth\" with ({});\n", pairs.join(", "))
+        format!("{head}@use \"sockel\" with ({});\n", pairs.join(", "))
     }
 
-    /// Every class of plinth's enabled features, nothing omitted.
+    /// Every class of sockel's enabled features, nothing omitted.
     fn all_classes(options: &grass::Options<'_>) -> Result<Vec<String>, Error> {
-        let mut classes = class_names(&grass::from_string("@use \"plinth\";\n", options)?);
+        let mut classes = class_names(&grass::from_string("@use \"sockel\";\n", options)?);
         classes.sort();
         Ok(classes)
     }
@@ -435,32 +435,32 @@ impl Config {
             style,
         };
         let options = grass::Options::default().fs(&sources).load_path("");
-        let plinth_use = self.plinth_use(enabled.as_deref());
-        let plinth_css = grass::from_string(&plinth_use, &options)?;
+        let sockel_use = self.sockel_use(enabled.as_deref());
+        let sockel_css = grass::from_string(&sockel_use, &options)?;
         let hooks = grass::from_string(HOOKS_PROBE, &options)?;
-        let mut plinth_classes = class_names(&plinth_css);
-        plinth_classes.extend(class_names(&hooks));
-        plinth_classes.sort();
-        plinth_classes.dedup();
+        let mut sockel_classes = class_names(&sockel_css);
+        sockel_classes.extend(class_names(&hooks));
+        sockel_classes.sort();
+        sockel_classes.dedup();
 
         let Some(dir) = &self.local else {
             return Ok(Output {
-                css: plinth_css,
-                plinth_classes,
+                css: sockel_css,
+                sockel_classes,
                 local_classes: Vec::new(),
             });
         };
         let prefix = self.prefix.as_deref().ok_or(Error::NoPrefix)?;
         let index = local_index(dir)?;
-        // One compilation, plinth first, so a local `@use "plinth"` reuses
+        // One compilation, sockel first, so a local `@use "sockel"` reuses
         // the module loaded here and emits nothing again.
-        let entry = format!("{plinth_use}@use \"{}\";\n", sass_string(&index));
+        let entry = format!("{sockel_use}@use \"{}\";\n", sass_string(&index));
         let css = grass::from_string(entry, &options)?;
-        let local_css = css.strip_prefix(&plinth_css).ok_or(Error::NotVerbatim)?;
+        let local_css = css.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
         for class in class_names(local_css) {
-            if plinth_classes.binary_search(&class).is_ok()
+            if sockel_classes.binary_search(&class).is_ok()
                 || self.foreign.iter().any(|pattern| matches(pattern, &class))
             {
                 continue;
@@ -469,8 +469,8 @@ impl Config {
                 local_classes.push(class);
                 continue;
             }
-            // A plinth class `$omit` leaves out, which the app styles itself.
-            if class.starts_with("plinth-") {
+            // A sockel class `$omit` leaves out, which the app styles itself.
+            if class.starts_with("sockel-") {
                 let all = match &mut unconfigured {
                     Some(all) => all,
                     None => unconfigured.insert(Self::all_classes(&options)?),
@@ -486,14 +486,14 @@ impl Config {
         }
         Ok(Output {
             css,
-            plinth_classes,
+            sockel_classes,
             local_classes,
         })
     }
 
     /// Builds and writes `style.css` (the whole stylesheet) and `classes.rs`:
-    /// plinth's constants, or with local styles only the local ones, each
-    /// named without its prefix (`plinth-stack` is `STACK`, `army-sidebar`
+    /// sockel's constants, or with local styles only the local ones, each
+    /// named without its prefix (`sockel-stack` is `STACK`, `army-sidebar`
     /// is `SIDEBAR`).
     pub fn write(&self) -> Result<Output, Error> {
         let output = self.build()?;
@@ -505,7 +505,7 @@ impl Config {
         };
         let classes = match (&self.local, &self.prefix) {
             (Some(_), Some(prefix)) => prefixed_classes_rs(&output.local_classes, prefix)?,
-            _ => prefixed_classes_rs(&output.plinth_classes, "plinth-")?,
+            _ => prefixed_classes_rs(&output.sockel_classes, "sockel-")?,
         };
         std::fs::write(dir.join("style.css"), &output.css)?;
         std::fs::write(dir.join("classes.rs"), classes)?;
@@ -513,10 +513,10 @@ impl Config {
     }
 
     /// [`Config::write`] for a `build.rs`: reruns when `build.rs`, a local
-    /// file or one of plinth's changes, sets [`TEST_STYLE_VAR`] for the
+    /// file or one of sockel's changes, sets [`TEST_STYLE_VAR`] for the
     /// package's crates, and panics with the error.
     pub fn compile(&self) -> Output {
-        let fail = |error: &dyn fmt::Display| -> ! { panic!("plinth-build: {error}") };
+        let fail = |error: &dyn fmt::Display| -> ! { panic!("sockel-build: {error}") };
         println!("cargo:rerun-if-changed=build.rs");
         let style = self.style_dir().unwrap_or_else(|error| fail(&error));
         let dirs = [Some(&style), self.local.as_ref()];
@@ -684,12 +684,12 @@ mod tests {
     use super::*;
 
     #[test]
-    fn compiles_plinth_s_sources() {
-        let output = plinth().build().unwrap();
-        assert!(output.css.contains(".plinth-stack {"));
-        for class in ["plinth-page-head-title", "plinth-crumb", "plinth-trailing"] {
+    fn compiles_sockel_s_sources() {
+        let output = sockel().build().unwrap();
+        assert!(output.css.contains(".sockel-stack {"));
+        for class in ["sockel-page-head-title", "sockel-crumb", "sockel-trailing"] {
             assert!(
-                output.plinth_classes.iter().any(|found| found == class),
+                output.sockel_classes.iter().any(|found| found == class),
                 "{class}"
             );
         }
@@ -701,8 +701,8 @@ mod tests {
 
     #[test]
     fn configures_token_values_not_classes() {
-        let plain = plinth().build().unwrap();
-        let config = plinth()
+        let plain = sockel().build().unwrap();
+        let config = sockel()
             .with("$text-md", "1.0625rem")
             .with("radius-lg", "12px");
         for output in [
@@ -721,7 +721,7 @@ mod tests {
             );
             assert!(output.css.contains("--radius-lg: 12px"));
             assert!(!output.css.contains("--text-md: 0.875rem"));
-            assert_eq!(output.plinth_classes, plain.plinth_classes);
+            assert_eq!(output.sockel_classes, plain.sockel_classes);
         }
     }
 
@@ -762,7 +762,7 @@ mod tests {
     fn compile_probe(probe: &str) -> Result<String, Box<grass::Error>> {
         let sources = test_sources();
         let options = grass::Options::default().fs(&sources).load_path("");
-        grass::from_string(format!("@use \"plinth\" as p;\n{probe}"), &options)
+        grass::from_string(format!("@use \"sockel\" as p;\n{probe}"), &options)
     }
 
     #[test]
@@ -845,24 +845,24 @@ mod tests {
              .x-primary { @include p.button(primary); }\n",
         )
         .unwrap();
-        let (plinth, probe) = css.split_at(css.find(".x-stack").unwrap());
+        let (sockel, probe) = css.split_at(css.find(".x-stack").unwrap());
         for (probe_rule, class) in [
-            (".x-stack", ".plinth-stack"),
-            (".x-cluster", ".plinth-cluster"),
-            (".x-card", ".plinth-card"),
-            (".x-field", ".plinth-field"),
-            (".x-label", ".plinth-field-label"),
-            (".x-button", ".plinth-button"),
-            (".x-input", ".plinth-input"),
-            (".x-button:hover", ".plinth-button:hover"),
+            (".x-stack", ".sockel-stack"),
+            (".x-cluster", ".sockel-cluster"),
+            (".x-card", ".sockel-card"),
+            (".x-field", ".sockel-field"),
+            (".x-label", ".sockel-field-label"),
+            (".x-button", ".sockel-button"),
+            (".x-input", ".sockel-input"),
+            (".x-button:hover", ".sockel-button:hover"),
             (
                 ".x-button:disabled, .x-button[aria-disabled=true]",
-                ".plinth-button:disabled, .plinth-button[aria-disabled=true]",
+                ".sockel-button:disabled, .sockel-button[aria-disabled=true]",
             ),
         ] {
             assert_eq!(
                 declarations(probe, probe_rule),
-                declarations(plinth, class),
+                declarations(sockel, class),
                 "{class}"
             );
         }
@@ -875,7 +875,7 @@ mod tests {
 
     #[test]
     fn the_colour_contract_defaults_and_configures() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         let root = declarations(&plain.css, ":root");
         for token in [
             "--danger: color-mix(in srgb, #d92d20 70%, var(--text))",
@@ -911,60 +911,60 @@ mod tests {
                 "{token}"
             );
         }
-        let tuned = plinth().with("danger", "#c00").build().unwrap();
+        let tuned = sockel().with("danger", "#c00").build().unwrap();
         assert!(declarations(&tuned.css, ":root").contains(&"--danger: #c00".to_owned()));
     }
 
     #[test]
     fn a_button_takes_its_padding_and_primary_weight_from_settings() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         assert!(
-            declarations(&plain.css, ".plinth-button")
+            declarations(&plain.css, ".sockel-button")
                 .contains(&"padding-inline: var(--button-pad-x, var(--space-3))".to_owned())
         );
         assert!(
-            !declarations(&plain.css, ".plinth-button.plinth-primary")
+            !declarations(&plain.css, ".sockel-button.sockel-primary")
                 .iter()
                 .any(|line| line.starts_with("font-weight"))
         );
-        let tuned = plinth()
+        let tuned = sockel()
             .with("button-padding", "var(--space-4)")
             .with("button-padding-small", "var(--space-3)")
             .with("button-primary-weight", "600")
             .build()
             .unwrap();
         assert!(
-            declarations(&tuned.css, ".plinth-button")
+            declarations(&tuned.css, ".sockel-button")
                 .contains(&"padding-inline: var(--button-pad-x, var(--space-4))".to_owned())
         );
         assert!(
-            declarations(&tuned.css, ".plinth-button.plinth-small")
+            declarations(&tuned.css, ".sockel-button.sockel-small")
                 .contains(&"padding-inline: var(--button-pad-x, var(--space-3))".to_owned())
         );
         assert!(
-            declarations(&tuned.css, ".plinth-button.plinth-primary")
+            declarations(&tuned.css, ".sockel-button.sockel-primary")
                 .contains(&"font-weight: 600".to_owned())
         );
     }
 
     #[test]
     fn a_dialog_takes_its_padding_body_gap_and_shadow_from_settings() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         assert!(
-            declarations(&plain.css, ".plinth-dialog")
+            declarations(&plain.css, ".sockel-dialog")
                 .contains(&"--dialog-pad: var(--space-5)".to_owned())
         );
         assert!(
-            declarations(&plain.css, ".plinth-dialog")
+            declarations(&plain.css, ".sockel-dialog")
                 .contains(&"box-shadow: var(--shadow-1)".to_owned())
         );
         let body_gap = |css: &str| {
-            css.match_indices(".plinth-dialog-body {")
-                .flat_map(|(at, _)| declarations(&css[at..], ".plinth-dialog-body"))
+            css.match_indices(".sockel-dialog-body {")
+                .flat_map(|(at, _)| declarations(&css[at..], ".sockel-dialog-body"))
                 .find(|line| line.starts_with("gap"))
         };
         assert_eq!(body_gap(&plain.css), None);
-        let tuned = plinth()
+        let tuned = sockel()
             .with("dialog-padding", "var(--space-6)")
             .with("dialog-padding-phone", "var(--space-4)")
             .with("dialog-body-gap", "var(--space-4)")
@@ -972,24 +972,24 @@ mod tests {
             .build()
             .unwrap();
         assert!(
-            declarations(&tuned.css, ".plinth-dialog")
+            declarations(&tuned.css, ".sockel-dialog")
                 .contains(&"--dialog-pad: var(--space-6)".to_owned())
         );
         assert!(
-            declarations(&tuned.css, ".plinth-dialog.plinth-sheet")
+            declarations(&tuned.css, ".sockel-dialog.sockel-sheet")
                 .contains(&"--dialog-pad: var(--space-4)".to_owned())
         );
         assert_eq!(body_gap(&tuned.css).as_deref(), Some("gap: var(--space-4)"));
         assert!(
-            declarations(&tuned.css, ".plinth-dialog")
+            declarations(&tuned.css, ".sockel-dialog")
                 .contains(&"box-shadow: var(--shadow-2)".to_owned())
         );
     }
 
     #[test]
     fn a_dialog_head_and_body_take_their_padding_rule_and_title_from_settings() {
-        let plain = plinth().build().unwrap();
-        let head = declarations(&plain.css, ".plinth-dialog-head");
+        let plain = sockel().build().unwrap();
+        let head = declarations(&plain.css, ".sockel-dialog-head");
         assert!(
             head.contains(&"padding: var(--space-3) var(--space-3) 0 var(--dialog-pad)".to_owned())
         );
@@ -1001,9 +1001,9 @@ mod tests {
         assert!(
             !plain
                 .css
-                .contains(".plinth-dialog-head > .plinth-head-heading")
+                .contains(".sockel-dialog-head > .sockel-head-heading")
         );
-        let tuned = plinth()
+        let tuned = sockel()
             .with("dialog-head-padding", "var(--space-3) var(--space-4)")
             .with("dialog-head-rule", "1px solid var(--border)")
             .with("dialog-body-padding", "0")
@@ -1011,15 +1011,15 @@ mod tests {
             .with("dialog-title-weight", "500")
             .build()
             .unwrap();
-        let head = declarations(&tuned.css, ".plinth-dialog-head");
+        let head = declarations(&tuned.css, ".sockel-dialog-head");
         assert!(head.contains(&"padding: var(--space-3) var(--space-4)".to_owned()));
         assert!(head.contains(&"border-bottom: 1px solid var(--border)".to_owned()));
         assert!(head.contains(&"--section-title-size: var(--text-sm)".to_owned()));
-        assert!(declarations(&tuned.css, ".plinth-dialog-body").contains(&"padding: 0".to_owned()));
+        assert!(declarations(&tuned.css, ".sockel-dialog-body").contains(&"padding: 0".to_owned()));
         assert!(
             declarations(
                 &tuned.css,
-                ".plinth-dialog-head > .plinth-head-heading > .plinth-section-head-title"
+                ".sockel-dialog-head > .sockel-head-heading > .sockel-section-head-title"
             )
             .contains(&"font-weight: 500".to_owned())
         );
@@ -1027,11 +1027,11 @@ mod tests {
 
     #[test]
     fn a_menu_and_its_rows_take_their_look_from_settings() {
-        let plain = plinth().build().unwrap();
-        let menu = declarations(&plain.css, ".plinth-menu");
+        let plain = sockel().build().unwrap();
+        let menu = declarations(&plain.css, ".sockel-menu");
         assert!(menu.contains(&"background: var(--surface-raised)".to_owned()));
         assert!(!menu.iter().any(|l| l.starts_with("font-size")));
-        let tuned = plinth()
+        let tuned = sockel()
             .with("menu-edge", "var(--edge)")
             .with("menu-ground", "var(--ground)")
             .with("menu-shadow", "var(--lift)")
@@ -1044,7 +1044,7 @@ mod tests {
             .with("menu-item-hover-fill", "var(--hover)")
             .build()
             .unwrap();
-        let menu = declarations(&tuned.css, ".plinth-menu");
+        let menu = declarations(&tuned.css, ".sockel-menu");
         for line in [
             "border-color: var(--edge)",
             "padding: 6px",
@@ -1054,7 +1054,7 @@ mod tests {
         ] {
             assert!(menu.contains(&line.to_owned()), "{line} in {menu:?}");
         }
-        let item = declarations(&tuned.css, ".plinth-menu-item");
+        let item = declarations(&tuned.css, ".sockel-menu-item");
         for line in [
             "gap: 8px",
             "min-height: 28px",
@@ -1068,7 +1068,7 @@ mod tests {
 
     #[test]
     fn a_pager_takes_its_look_from_settings() {
-        let tuned = plinth()
+        let tuned = sockel()
             .with("pager-gap", "2px")
             .with("pager-button-radius", "999px")
             .with("pager-button-ink", "var(--muted)")
@@ -1081,8 +1081,8 @@ mod tests {
             .with("pager-phone-height", "44px")
             .build()
             .unwrap();
-        assert!(declarations(&tuned.css, ".plinth-pager").contains(&"gap: 2px".to_owned()));
-        let button = declarations(&tuned.css, ".plinth-pager-button");
+        assert!(declarations(&tuned.css, ".sockel-pager").contains(&"gap: 2px".to_owned()));
+        let button = declarations(&tuned.css, ".sockel-pager-button");
         for line in [
             "border-radius: 999px",
             "color: var(--muted)",
@@ -1090,26 +1090,26 @@ mod tests {
         ] {
             assert!(button.contains(&line.to_owned()), "{line} in {button:?}");
         }
-        let hover = declarations(&tuned.css, ".plinth-pager-button:hover:not(:disabled)");
+        let hover = declarations(&tuned.css, ".sockel-pager-button:hover:not(:disabled)");
         assert!(
             hover.contains(&"color: var(--text)".to_owned()),
             "{hover:?}"
         );
         assert!(tuned.css.contains("background: var(--chosen)"));
         assert!(tuned.css.contains("--control-height: 44px"));
-        let mark = declarations(&tuned.css, ".plinth-pager-mark");
+        let mark = declarations(&tuned.css, ".sockel-pager-mark");
         assert!(mark.contains(&"color: var(--text)".to_owned()), "{mark:?}");
     }
 
     #[test]
     fn a_skeleton_takes_its_look_from_settings() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         assert!(
-            !declarations(&plain.css, ".plinth-skeleton")
+            !declarations(&plain.css, ".sockel-skeleton")
                 .iter()
                 .any(|l| l.starts_with("box-shadow"))
         );
-        let tuned = plinth()
+        let tuned = sockel()
             .with("skeleton-fill", "var(--glass)")
             .with("skeleton-edge", "var(--soft)")
             .with("skeleton-radius", "0")
@@ -1118,7 +1118,7 @@ mod tests {
             .with("skeleton-phone-height", "44px")
             .build()
             .unwrap();
-        let block = declarations(&tuned.css, ".plinth-skeleton");
+        let block = declarations(&tuned.css, ".sockel-skeleton");
         for line in [
             "border-radius: 0",
             "background-color: var(--glass)",
@@ -1126,7 +1126,7 @@ mod tests {
         ] {
             assert!(block.contains(&line.to_owned()), "{line} in {block:?}");
         }
-        let line = declarations(&tuned.css, ".plinth-skeleton.plinth-line");
+        let line = declarations(&tuned.css, ".sockel-skeleton.sockel-line");
         for decl in ["--skeleton-height: 24px", "--skeleton-inset: 0"] {
             assert!(line.contains(&decl.to_owned()), "{decl} in {line:?}");
         }
@@ -1135,7 +1135,7 @@ mod tests {
 
     #[test]
     fn a_pick_row_takes_its_look_from_settings() {
-        let tuned = plinth()
+        let tuned = sockel()
             .with("pick-row-height", "36px")
             .with("pick-row-padding", "0 6px")
             .with("pick-row-gap", "8px")
@@ -1146,7 +1146,7 @@ mod tests {
             .with("pick-row-detail-text", "11px")
             .build()
             .unwrap();
-        let row = declarations(&tuned.css, ".plinth-pick-row");
+        let row = declarations(&tuned.css, ".sockel-pick-row");
         for line in [
             "gap: 8px",
             "min-height: 36px",
@@ -1157,7 +1157,7 @@ mod tests {
             assert!(row.contains(&line.to_owned()), "{line} in {row:?}");
         }
         assert!(tuned.css.contains("--pick-fill: var(--hover)"));
-        let detail = declarations(&tuned.css, ".plinth-pick-row-detail");
+        let detail = declarations(&tuned.css, ".sockel-pick-row-detail");
         for line in ["color: var(--hint)", "font-size: 11px"] {
             assert!(detail.contains(&line.to_owned()), "{line} in {detail:?}");
         }
@@ -1165,11 +1165,11 @@ mod tests {
 
     #[test]
     fn a_selection_bar_takes_its_look_from_settings() {
-        let plain = plinth().build().unwrap();
-        let bar = declarations(&plain.css, ".plinth-selection-bar");
+        let plain = sockel().build().unwrap();
+        let bar = declarations(&plain.css, ".sockel-selection-bar");
         assert!(bar.contains(&"border-top: var(--space-px) solid var(--border)".to_owned()));
         assert!(!bar.iter().any(|l| l.starts_with("background")));
-        let tuned = plinth()
+        let tuned = sockel()
             .with("selection-bar-ground", "var(--tint)")
             .with("selection-bar-rule", "none")
             .with("selection-bar-padding", "3px")
@@ -1183,7 +1183,7 @@ mod tests {
             .with("selection-bar-count-padding", "10px")
             .build()
             .unwrap();
-        let bar = declarations(&tuned.css, ".plinth-selection-bar");
+        let bar = declarations(&tuned.css, ".sockel-selection-bar");
         for line in [
             "min-height: 0",
             "margin: 0 0 4px",
@@ -1196,7 +1196,7 @@ mod tests {
             assert!(bar.contains(&line.to_owned()), "{line} in {bar:?}");
         }
         assert!(tuned.css.contains("margin: 0 6px 6px"));
-        let count = declarations(&tuned.css, ".plinth-selection-bar-count");
+        let count = declarations(&tuned.css, ".sockel-selection-bar-count");
         for line in [
             "padding-inline-start: 10px",
             "color: var(--ink)",
@@ -1210,16 +1210,16 @@ mod tests {
     fn a_menu_rows_edge_is_a_border_unless_set() {
         // The focus rule of its own, not the one it shares with hover.
         let focus_of = |css: &str| {
-            let at = css.find("\n.plinth-menu-item:focus-visible {").unwrap();
-            declarations(&css[at..], ".plinth-menu-item:focus-visible")
+            let at = css.find("\n.sockel-menu-item:focus-visible {").unwrap();
+            declarations(&css[at..], ".sockel-menu-item:focus-visible")
         };
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         let focus = focus_of(&plain.css);
         assert!(focus.contains(&"outline: none".to_owned()), "{focus:?}");
-        let row = declarations(&plain.css, ".plinth-menu-item");
+        let row = declarations(&plain.css, ".sockel-menu-item");
         assert!(!row.contains(&"border-width: 0".to_owned()));
-        let tuned = plinth().with("menu-item-edge", "outline").build().unwrap();
-        let row = declarations(&tuned.css, ".plinth-menu-item");
+        let tuned = sockel().with("menu-item-edge", "outline").build().unwrap();
+        let row = declarations(&tuned.css, ".sockel-menu-item");
         assert!(row.contains(&"border-width: 0".to_owned()), "{row:?}");
         let focus = focus_of(&tuned.css);
         assert!(
@@ -1230,14 +1230,14 @@ mod tests {
 
     #[test]
     fn a_buttons_line_height_is_a_setting() {
-        let plain = plinth().build().unwrap();
-        let base = declarations(&plain.css, ".plinth-button");
+        let plain = sockel().build().unwrap();
+        let base = declarations(&plain.css, ".sockel-button");
         assert!(base.contains(&"line-height: 1".to_owned()));
-        let tuned = plinth()
+        let tuned = sockel()
             .with("button-line-height", "inherit")
             .build()
             .unwrap();
-        let base = declarations(&tuned.css, ".plinth-button");
+        let base = declarations(&tuned.css, ".sockel-button");
         assert!(
             base.contains(&"line-height: inherit".to_owned()),
             "{base:?}"
@@ -1246,29 +1246,29 @@ mod tests {
 
     #[test]
     fn a_switch_takes_its_fill_thumb_and_inset_from_settings() {
-        let plain = plinth().build().unwrap();
-        let switch = declarations(&plain.css, ".plinth-switch");
+        let plain = sockel().build().unwrap();
+        let switch = declarations(&plain.css, ".sockel-switch");
         assert!(switch.contains(&"--switch-fill: var(--surface)".to_owned()));
-        let track = declarations(&plain.css, ".plinth-switch-track");
+        let track = declarations(&plain.css, ".sockel-switch-track");
         assert!(track.contains(&"padding: var(--space-px)".to_owned()));
-        let tuned = plinth()
+        let tuned = sockel()
             .with("switch-fill", "var(--sunken)")
             .with("switch-on-thumb", "#fff")
             .with("switch-thumb-inset", "3px")
             .build()
             .unwrap();
-        let switch = declarations(&tuned.css, ".plinth-switch");
+        let switch = declarations(&tuned.css, ".sockel-switch");
         assert!(
             switch.contains(&"--switch-fill: var(--sunken)".to_owned()),
             "{switch:?}"
         );
         assert!(tuned.css.contains("--switch-thumb: #fff"));
-        let track = declarations(&tuned.css, ".plinth-switch-track");
+        let track = declarations(&tuned.css, ".sockel-switch-track");
         assert!(
             track.contains(&"padding: calc(3px - var(--space-px))".to_owned()),
             "{track:?}"
         );
-        let thumb = declarations(&tuned.css, ".plinth-switch-thumb");
+        let thumb = declarations(&tuned.css, ".sockel-switch-thumb");
         assert!(
             thumb.contains(&"width: calc(var(--switch-height) - 2 * 3px)".to_owned()),
             "{thumb:?}"
@@ -1277,14 +1277,14 @@ mod tests {
 
     #[test]
     fn a_selection_bar_count_wraps_only_when_set() {
-        let plain = plinth().build().unwrap();
-        let count = declarations(&plain.css, ".plinth-selection-bar-count");
+        let plain = sockel().build().unwrap();
+        let count = declarations(&plain.css, ".sockel-selection-bar-count");
         assert!(count.contains(&"white-space: nowrap".to_owned()));
-        let tuned = plinth()
+        let tuned = sockel()
             .with("selection-bar-count-wrap", "true")
             .build()
             .unwrap();
-        let count = declarations(&tuned.css, ".plinth-selection-bar-count");
+        let count = declarations(&tuned.css, ".sockel-selection-bar-count");
         for line in ["flex: 1 1 0", "white-space: normal", "overflow: visible"] {
             assert!(count.contains(&line.to_owned()), "{line} in {count:?}");
         }
@@ -1292,12 +1292,12 @@ mod tests {
 
     #[test]
     fn a_menu_keeps_its_scrollbar_room_unless_set() {
-        let plain = plinth().build().unwrap();
-        let menu = declarations(&plain.css, ".plinth-menu");
+        let plain = sockel().build().unwrap();
+        let menu = declarations(&plain.css, ".sockel-menu");
         assert!(menu.contains(&"scrollbar-gutter: stable".to_owned()));
         assert!(!menu.contains(&"scrollbar-gutter: auto".to_owned()));
-        let tuned = plinth().with("menu-scroll-gutter", "auto").build().unwrap();
-        let menu = declarations(&tuned.css, ".plinth-menu");
+        let tuned = sockel().with("menu-scroll-gutter", "auto").build().unwrap();
+        let menu = declarations(&tuned.css, ".sockel-menu");
         assert!(
             menu.contains(&"scrollbar-gutter: auto".to_owned()),
             "{menu:?}"
@@ -1306,8 +1306,8 @@ mod tests {
 
     #[test]
     fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
-        let plain = plinth().build().unwrap();
-        let base = declarations(&plain.css, ".plinth-button");
+        let plain = sockel().build().unwrap();
+        let base = declarations(&plain.css, ".sockel-button");
         assert!(base.contains(&"border-radius: var(--radius-inner, var(--radius-sm))".to_owned()));
         assert!(
             !base
@@ -1316,12 +1316,12 @@ mod tests {
         );
         assert!(!plain.css.contains(":where(:active"));
         assert!(
-            !declarations(&plain.css, ".plinth-button.plinth-danger")
+            !declarations(&plain.css, ".sockel-button.sockel-danger")
                 .iter()
                 .any(|line| line.starts_with("--button-fill"))
         );
 
-        let tuned = plinth()
+        let tuned = sockel()
             .with("button-radius", "3px")
             .with("button-gap", "4px")
             .with("button-transition", "background-color 80ms ease")
@@ -1332,7 +1332,7 @@ mod tests {
             )
             .build()
             .unwrap();
-        let base = declarations(&tuned.css, ".plinth-button");
+        let base = declarations(&tuned.css, ".sockel-button");
         for line in [
             "border-radius: 3px",
             "gap: 4px",
@@ -1344,7 +1344,7 @@ mod tests {
             assert!(base.contains(&line.to_owned()), "{line} in {base:?}");
         }
         assert!(
-            declarations(&tuned.css, ".plinth-button.plinth-danger")
+            declarations(&tuned.css, ".sockel-button.sockel-danger")
                 .contains(&"--button-edge: var(--border)".to_owned())
         );
         assert!(
@@ -1354,7 +1354,7 @@ mod tests {
         );
 
         assert!(
-            plinth()
+            sockel()
                 .with("button-colours", "(secondary: (glow: red))")
                 .build()
                 .is_err()
@@ -1362,15 +1362,15 @@ mod tests {
     }
 
     #[test]
-    fn a_button_colour_setting_replaces_plinth_s_in_place() {
-        let tuned = plinth()
+    fn a_button_colour_setting_replaces_sockel_s_in_place() {
+        let tuned = sockel()
             .with(
                 "button-colours",
                 "(danger: (fill: var(--danger-bg), edge: transparent))",
             )
             .build()
             .unwrap();
-        let danger = declarations(&tuned.css, ".plinth-button.plinth-danger");
+        let danger = declarations(&tuned.css, ".sockel-button.sockel-danger");
         assert_eq!(
             danger,
             [
@@ -1384,57 +1384,57 @@ mod tests {
 
     #[test]
     fn omitted_parts_are_left_out() {
-        let plain = plinth().build().unwrap();
-        let lean = plinth()
+        let plain = sockel().build().unwrap();
+        let lean = sockel()
             .with(
                 "omit",
                 r#"("layout.toolbar", "menu.context", "tokens.seam")"#,
             )
             .build()
             .unwrap();
-        for part in [".plinth-toolbar", ".plinth-context-target", "--seam-grip:"] {
+        for part in [".sockel-toolbar", ".sockel-context-target", "--seam-grip:"] {
             assert!(plain.css.contains(part), "{part}");
             assert!(!lean.css.contains(part), "{part}");
         }
         assert!(lean.css.len() < plain.css.len());
-        assert!(plinth().with("omit", r#"("seam")"#).build().is_err());
+        assert!(sockel().with("omit", r#"("seam")"#).build().is_err());
     }
 
     #[test]
     fn a_popover_takes_its_padding_and_shadow_from_settings() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         assert!(
-            declarations(&plain.css, ".plinth-popover-body")
+            declarations(&plain.css, ".sockel-popover-body")
                 .contains(&"padding: var(--space-3)".to_owned())
         );
         assert!(
-            declarations(&plain.css, ".plinth-popover")
+            declarations(&plain.css, ".sockel-popover")
                 .contains(&"box-shadow: var(--shadow-1)".to_owned())
         );
-        let tuned = plinth()
+        let tuned = sockel()
             .with("popover-padding", "var(--space-3) var(--space-4)")
             .with("popover-shadow", "var(--shadow-2)")
             .build()
             .unwrap();
         assert!(
-            declarations(&tuned.css, ".plinth-popover-body")
+            declarations(&tuned.css, ".sockel-popover-body")
                 .contains(&"padding: var(--space-3) var(--space-4)".to_owned())
         );
         assert!(
-            declarations(&tuned.css, ".plinth-popover")
+            declarations(&tuned.css, ".sockel-popover")
                 .contains(&"box-shadow: var(--shadow-2)".to_owned())
         );
     }
 
     #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
-        let plain = plinth().build().unwrap();
+        let plain = sockel().build().unwrap();
         assert!(
-            declarations(&plain.css, ".plinth-dialog-layer")
+            declarations(&plain.css, ".sockel-dialog-layer")
                 .contains(&"z-index: var(--layer-overlay)".to_owned())
         );
         assert!(!plain.css.contains("--layer-dialog"));
-        assert!(plinth().with("layer-dialog", "250").build().is_ok());
+        assert!(sockel().with("layer-dialog", "250").build().is_ok());
     }
 
     fn fixture(name: &str) -> PathBuf {
@@ -1442,16 +1442,16 @@ mod tests {
     }
 
     #[test]
-    fn puts_plinth_first_and_verbatim_then_the_local_styles() {
-        let base = plinth().build().unwrap();
-        let output = plinth()
+    fn puts_sockel_first_and_verbatim_then_the_local_styles() {
+        let base = sockel().build().unwrap();
+        let output = sockel()
             .local(fixture("fixture/style"))
             .prefix("fixture-")
             .build()
             .unwrap();
         let local = output.css.strip_prefix(&base.css).unwrap();
-        assert_eq!(output.plinth_classes, base.plinth_classes);
-        assert_eq!(output.css.matches(".plinth-stack {").count(), 1);
+        assert_eq!(output.sockel_classes, base.sockel_classes);
+        assert_eq!(output.css.matches(".sockel-stack {").count(), 1);
         assert!(local.contains(".fixture-panel {"));
         assert!(local.contains("var(--space-2)"));
         assert!(local.contains("@media (width < 40rem)"));
@@ -1463,9 +1463,9 @@ mod tests {
 
     #[test]
     fn names_local_constants_without_the_prefix() {
-        let dir = std::env::temp_dir().join(format!("plinth-build-{}", std::process::id()));
+        let dir = std::env::temp_dir().join(format!("sockel-build-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        plinth()
+        sockel()
             .local(fixture("fixture/style"))
             .prefix("fixture-")
             .out_dir(&dir)
@@ -1484,7 +1484,7 @@ mod tests {
 
     #[test]
     fn refuses_an_unprefixed_local_class() {
-        let error = plinth()
+        let error = sockel()
             .local(fixture("tests/unprefixed"))
             .prefix("fixture-")
             .build()
@@ -1493,35 +1493,35 @@ mod tests {
             matches!(&error, Error::Unprefixed { class, .. } if class == "panel"),
             "{error}"
         );
-        let error = plinth().local(fixture("fixture/style")).build();
+        let error = sockel().local(fixture("fixture/style")).build();
         assert!(matches!(error, Err(Error::NoPrefix)));
     }
 
     #[test]
-    fn allows_an_omitted_plinth_class() {
-        let output = plinth()
+    fn allows_an_omitted_sockel_class() {
+        let output = sockel()
             .local(fixture("tests/omitted"))
             .prefix("fixture-")
             .with("omit", r#"("heads.label",)"#)
             .build()
             .unwrap();
-        assert!(!output.plinth_classes.contains(&"plinth-label".to_owned()));
+        assert!(!output.sockel_classes.contains(&"sockel-label".to_owned()));
         assert_eq!(output.local_classes, ["fixture-ok"]);
-        let error = plinth()
+        let error = sockel()
             .local(fixture("tests/misspelt"))
             .prefix("fixture-")
             .with("omit", r#"("heads.label",)"#)
             .build()
             .unwrap_err();
         assert!(
-            matches!(&error, Error::Unprefixed { class, .. } if class == "plinth-lable"),
+            matches!(&error, Error::Unprefixed { class, .. } if class == "sockel-lable"),
             "{error}"
         );
     }
 
     #[test]
     fn allows_a_foreign_local_class() {
-        let output = plinth()
+        let output = sockel()
             .local(fixture("tests/unprefixed"))
             .prefix("fixture-")
             .foreign(["pan*"])

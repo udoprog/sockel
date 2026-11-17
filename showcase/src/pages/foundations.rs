@@ -2,26 +2,26 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Card, Cluster, Gap, Inset, Stack};
+use sockel::{Card, Cluster, Gap, Inset, Stack};
 
 use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, samples};
 
 /// How many lines a text keeps: one (`truncate`), a clamp's, or all.
 const LINES: &[(&str, Option<&str>)] = &[
-    ("1 (truncate)", Some(plinth::class::TRUNCATE)),
-    ("2", Some(plinth::class::CLAMP_2)),
-    ("3", Some(plinth::class::CLAMP_3)),
-    ("4", Some(plinth::class::CLAMP_4)),
+    ("1 (truncate)", Some(sockel::class::TRUNCATE)),
+    ("2", Some(sockel::class::CLAMP_2)),
+    ("3", Some(sockel::class::CLAMP_3)),
+    ("4", Some(sockel::class::CLAMP_4)),
     ("All", None),
 ];
 
-/// The name of a class's constant in `plinth::class`.
+/// The name of a class's constant in `sockel::class`.
 fn constant(class: &str) -> String {
     format!(
-        "plinth::class::{}",
+        "sockel::class::{}",
         class
-            .trim_start_matches("plinth-")
+            .trim_start_matches("sockel-")
             .replace('-', "_")
             .to_uppercase()
     )
@@ -55,7 +55,7 @@ const COLOURS: &[&str] = &[
 #[function_component]
 pub fn FoundationsPage() -> Html {
     let text = use_state(|| Text::Long);
-    let lines = use_state(|| Some(plinth::class::TRUNCATE));
+    let lines = use_state(|| Some(sockel::class::TRUNCATE));
     let figure = use_state(|| "1111");
     let numeric = use_state(|| true);
     let count = use_state(|| 3);
@@ -108,12 +108,12 @@ pub fn FoundationsPage() -> Html {
             ))
             .line(format!(
                 "<span{}>{}</span>",
-                class_of(*numeric, plinth::class::NUMERIC),
+                class_of(*numeric, sockel::class::NUMERIC),
                 text_node(*figure)
             ))
             .child(
                 El::new("div")
-                    .expr_if(*scroll_area, "class", constant(plinth::class::SCROLL_AREA))
+                    .expr_if(*scroll_area, "class", constant(sockel::class::SCROLL_AREA))
                     .line_if(*count > 0, each("items", "item", *count, "item")),
             )
             .line(format!(
@@ -126,17 +126,17 @@ pub fn FoundationsPage() -> Html {
             ))
             .line(format!(
                 "<span class={{{}}}>{}</span>",
-                constant(plinth::class::PHONE_ONLY),
+                constant(sockel::class::PHONE_ONLY),
                 text_node("phone-only")
             ))
             .line(format!(
                 "<span class={{{}}}>{}</span>",
-                constant(plinth::class::DESKTOP_ONLY),
+                constant(sockel::class::DESKTOP_ONLY),
                 text_node("desktop-only")
             ))
             .line(format!(
                 "<a href=\"#foundations\" class={{{}}}>{}</a>",
-                constant(plinth::class::FOCUS_RING),
+                constant(sockel::class::FOCUS_RING),
                 text_node("A link with the focus ring: tab to it")
             )),
     );
@@ -145,7 +145,7 @@ pub fn FoundationsPage() -> Html {
         <Stack gap={Gap::Loose}>
             <Demo {controls} {code}>
                 <Stack gap={Gap::Medium}>
-                    <h2 class={plinth::class::VISUALLY_HIDDEN}>{ "Foundations" }</h2>
+                    <h2 class={sockel::class::VISUALLY_HIDDEN}>{ "Foundations" }</h2>
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "Text fitting" }</span>
                         <p class={classes!(class::SAMPLE, class::PROSE, *lines)}>
@@ -154,13 +154,13 @@ pub fn FoundationsPage() -> Html {
                     </Stack>
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "Figures" }</span>
-                        <span class={classes!(class::READOUT, numeric.then_some(plinth::class::NUMERIC))}>
+                        <span class={classes!(class::READOUT, numeric.then_some(sockel::class::NUMERIC))}>
                             { *figure }
                         </span>
                     </Stack>
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "Scroll area" }</span>
-                        <div class={classes!(class::SCROLL_BOX, scroll_area.then_some(plinth::class::SCROLL_AREA))}>
+                        <div class={classes!(class::SCROLL_BOX, scroll_area.then_some(sockel::class::SCROLL_AREA))}>
                             <Stack gap={Gap::Snug}>{ samples("div", *count, Text::Short, false, false) }</Stack>
                         </div>
                     </Stack>
@@ -170,10 +170,10 @@ pub fn FoundationsPage() -> Html {
                     </Stack>
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "By width" }</span>
-                        <span class={classes!(class::SAMPLE, plinth::class::PHONE_ONLY)}>{ "phone-only" }</span>
-                        <span class={classes!(class::SAMPLE, plinth::class::DESKTOP_ONLY)}>{ "desktop-only" }</span>
+                        <span class={classes!(class::SAMPLE, sockel::class::PHONE_ONLY)}>{ "phone-only" }</span>
+                        <span class={classes!(class::SAMPLE, sockel::class::DESKTOP_ONLY)}>{ "desktop-only" }</span>
                     </Stack>
-                    <a href="#foundations" class={classes!(plinth::class::FOCUS_RING, class::PROSE)}>
+                    <a href="#foundations" class={classes!(sockel::class::FOCUS_RING, class::PROSE)}>
                         { "A link with the focus ring: tab to it" }
                     </a>
                 </Stack>
@@ -181,7 +181,7 @@ pub fn FoundationsPage() -> Html {
             <Card inset={Inset::Compact}>
                 <Stack gap={Gap::Snug}>
                     <span class={class::CONTROL_LABEL}>
-                        { "The colours plinth derives from the app's seven; the app sets any of them by name." }
+                        { "The colours sockel derives from the app's seven; the app sets any of them by name." }
                     </span>
                     <Cluster gap={Gap::Tight}>
                         { for COLOURS.iter().map(|name| html! {

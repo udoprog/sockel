@@ -2,7 +2,7 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Field, FieldCheck, FieldInputs, Fieldset, FormRow, FormRows, field, field_describedby,
     field_error, form_row, form_rows,
 };
@@ -60,15 +60,15 @@ fn Case(props: &CaseProps) -> Html {
     let control = if s.group {
         html! {
             <>
-                <input class={plinth::class::INPUT} value="Ada" aria-label="First name"
+                <input class={sockel::class::INPUT} value="Ada" aria-label="First name"
                     required={s.required} disabled={s.disabled} />
-                <input class={plinth::class::INPUT} value="Lovelace" aria-label="Last name"
+                <input class={sockel::class::INPUT} value="Lovelace" aria-label="Last name"
                     required={s.required} disabled={s.disabled} />
             </>
         }
     } else {
         html! {
-            <input id={id.clone()} class={plinth::class::INPUT} value="Ada"
+            <input id={id.clone()} class={sockel::class::INPUT} value="Ada"
                 required={s.required} disabled={s.disabled}
                 aria-invalid={error.is_some().then_some("true")}
                 aria-describedby={describedby} />
@@ -173,19 +173,19 @@ fn field_code(name: &str, s: Settings) -> El {
     if s.group {
         el.child(
             El::new("input")
-                .expr("class", "plinth::class::INPUT")
+                .expr("class", "sockel::class::INPUT")
                 .text("aria-label", "First name"),
         )
         .child(
             El::new("input")
-                .expr("class", "plinth::class::INPUT")
+                .expr("class", "sockel::class::INPUT")
                 .text("aria-label", "Last name"),
         )
     } else {
         el.child(
             El::new("input")
                 .expr("id", "id")
-                .expr("class", "plinth::class::INPUT")
+                .expr("class", "sockel::class::INPUT")
                 .expr(
                     "aria-describedby",
                     format!(

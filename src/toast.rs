@@ -267,7 +267,7 @@ pub fn Toast(props: &ToastProps) -> Html {
             <span class={class::TOAST_CLOSE}>
                 <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                     icon={html! { <Icon glyph={Glyph::Close} /> }}
-                    label={crate::phrasebookcatalog01::label(&phrases, &props.close_label, "plinth-toast-dismiss")}
+                    label={crate::phrasebookcatalog01::label(&phrases, &props.close_label, "sockel-toast-dismiss")}
                     onclick={dismiss.reform(|_: MouseEvent| ())} />
             </span>
         </div>

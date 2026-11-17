@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     ActionRow, Button, ButtonSize, ButtonVariant, Card, CardGrid, Checkbox, EmptyState, ErrorBox,
     Glyph, GridSize, Icon, PickRow, RowList, RowListItem, SelectionBar, action_row, card_grid,
     pick_row, row_list, row_list_item, selection_bar,
@@ -187,7 +187,7 @@ pub fn PickRowPage() -> Html {
     html! {
         <Demo {controls} {code}>
             { shown("pick_row()", &pick_row()) }
-            <Card inset={plinth::Inset::Flush}>{ rows }</Card>
+            <Card inset={sockel::Inset::Flush}>{ rows }</Card>
             <span class={class::CONTROL_LABEL}>{ "Press a row to choose it; the chosen row is marked by its background." }</span>
         </Demo>
     }
@@ -341,7 +341,7 @@ pub fn CardGridPage() -> Html {
             } else {
                 text.of(&format!("Card {n}"))
             };
-            html! { <Card tag="li" inset={plinth::Inset::Compact}>{ body }</Card> }
+            html! { <Card tag="li" inset={sockel::Inset::Compact}>{ body }</Card> }
         })
         .collect();
 

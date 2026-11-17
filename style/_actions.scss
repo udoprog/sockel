@@ -1,27 +1,27 @@
 // The action group (src/action_group.rs).
 //
-// - `.plinth-action-group`: the buttons that end a form, a panel or a section,
-//   `--space-2` apart, wrapping, the primary first. `.plinth-end` puts it at the
-//   end of its row (or line); `.plinth-quiet` sets quiet icon actions
-//   `--space-1` apart; `.plinth-nowrap` keeps one line.
+// - `.sockel-action-group`: the buttons that end a form, a panel or a section,
+//   `--space-2` apart, wrapping, the primary first. `.sockel-end` puts it at the
+//   end of its row (or line); `.sockel-quiet` sets quiet icon actions
+//   `--space-1` apart; `.sockel-nowrap` keeps one line.
 
-.plinth-action-group {
+.sockel-action-group {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
     gap: var(--space-2);
     min-width: 0;
 
-    &.plinth-end {
+    &.sockel-end {
         justify-content: flex-end;
         margin-inline-start: auto;
     }
 
-    &.plinth-quiet {
+    &.sockel-quiet {
         gap: var(--space-1);
     }
 
-    &.plinth-nowrap {
+    &.sockel-nowrap {
         flex-wrap: nowrap;
     }
 }

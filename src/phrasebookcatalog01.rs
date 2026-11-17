@@ -1,4 +1,4 @@
-//! plinth's messages as a [phrasebook-catalog] 0.1 catalog, [`L10N`].
+//! sockel's messages as a [phrasebook-catalog] 0.1 catalog, [`L10N`].
 //!
 //! [phrasebook-catalog]: https://docs.rs/phrasebook-catalog
 
@@ -8,14 +8,14 @@ use yew::AttrValue;
 
 const SV_SE: Lang = Lang::new("sv-SE");
 
-/// plinth's messages, in English and Swedish, with every id under the
-/// `plinth-` prefix.
+/// sockel's messages, in English and Swedish, with every id under the
+/// `sockel-` prefix.
 ///
-/// plinth's components look their words up in the `Phrases` the app provides
+/// sockel's components look their words up in the `Phrases` the app provides
 /// with `ContextProvider<Phrases>`, and fall back to these messages for any
 /// id the app's phrasebook lacks, or when nothing is provided. A label prop
 /// (`close_label`, `save_label`, ...) given on a use wins over both. An app
-/// adds this catalog after its own, so its own `plinth-*` translations win:
+/// adds this catalog after its own, so its own `sockel-*` translations win:
 ///
 /// ```ignore
 /// use phrasebook::{Catalog, Lang, Phrasebook, Source};
@@ -31,17 +31,17 @@ const SV_SE: Lang = Lang::new("sv-SE");
 ///     .language(Lang::EN_US, "English")
 ///     .language(SV_SE, "Svenska")
 ///     .catalog(&APP)
-///     .catalog(&plinth::phrasebookcatalog01::L10N)
+///     .catalog(&sockel::phrasebookcatalog01::L10N)
 ///     .build();
 /// ```
 pub static L10N: Catalog = Catalog::new(
-    "plinth",
+    "sockel",
     &[
         Source::new(Lang::EN_US, include_str!("../locales/en-US.ftl")),
         Source::new(SV_SE, include_str!("../locales/sv-SE.ftl")),
     ],
 )
-.with_prefix("plinth-");
+.with_prefix("sockel-");
 
 /// The label given on a use, else `id`'s message.
 pub(crate) fn label(phrases: &Phrases, given: &Option<AttrValue>, id: &str) -> AttrValue {
@@ -173,7 +173,7 @@ mod tests {
         check::parity(&L10N, SV_SE).unwrap();
     }
 
-    /// Every `plinth-` id the code asks for is in the catalog, and every
+    /// Every `sockel-` id the code asks for is in the catalog, and every
     /// message in it is asked for.
     #[test]
     fn catalog_matches_the_code() {
@@ -186,14 +186,14 @@ mod tests {
                 continue;
             }
             let source = std::fs::read_to_string(&path).unwrap();
-            for (start, _) in source.match_indices("\"plinth-") {
+            for (start, _) in source.match_indices("\"sockel-") {
                 let line = source[..start].rsplit('\n').next().unwrap().trim_start();
                 if line.starts_with("//") || line.contains("assert") {
                     continue;
                 }
                 // Class names share the prefix: a message id is the argument
-                // of a lookup, `text("plinth-..")` or `label(.., "plinth-..")`,
-                // or a match arm's `=> ("plinth-..", ..)`.
+                // of a lookup, `text("sockel-..")` or `label(.., "sockel-..")`,
+                // or a match arm's `=> ("sockel-..", ..)`.
                 let before = source[..start].trim_end();
                 if ["text(", "msg(", ",", "=> ("]
                     .iter()

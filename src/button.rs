@@ -40,7 +40,7 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub size: ButtonSize,
     /// The icon, which the app supplies; with no label, the button is the
-    /// icon alone and square (`.plinth-icon`).
+    /// icon alone and square (`.sockel-icon`).
     #[prop_or_default]
     pub icon: Option<Html>,
     /// The icon comes after the label.
@@ -51,11 +51,11 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub chevron: bool,
     /// The icon alone below the phone breakpoint, the label kept for a
-    /// screen reader (`.plinth-fold`).
+    /// screen reader (`.sockel-fold`).
     #[prop_or_default]
     pub fold: bool,
     /// The icon alone from the phone breakpoint up, the label kept for a
-    /// screen reader (`.plinth-fold-wide`): `fold` the other way round.
+    /// screen reader (`.sockel-fold-wide`): `fold` the other way round.
     #[prop_or_default]
     pub fold_wide: bool,
     /// A toggle and whether it is on (`aria-pressed`).

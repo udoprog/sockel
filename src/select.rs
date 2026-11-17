@@ -118,7 +118,7 @@ pub enum SelectWidth {
     /// Its widest option or placeholder, cut past its container.
     #[default]
     Widest,
-    /// Its container's (`.plinth-fill`).
+    /// Its container's (`.sockel-fill`).
     Fill,
 }
 
@@ -269,7 +269,7 @@ where
     T: PartialEq + Clone + 'static,
 {
     let phrases = use_phrases_with(&L10N);
-    let filter_label = label(&phrases, &props.filter_label, "plinth-select-filter-label");
+    let filter_label = label(&phrases, &props.filter_label, "sockel-select-filter-label");
     let overlays = use_overlays();
     let id = use_state(|| crate::tooltip::next_id("select"));
     let face = use_node_ref();
@@ -690,7 +690,7 @@ where
                 </div>
         });
         let empty = empty.then(|| html! {
-            <p class={class::SELECT_EMPTY}>{ label(&phrases, &props.no_match, "plinth-select-no-match") }</p>
+            <p class={class::SELECT_EMPTY}>{ label(&phrases, &props.no_match, "sockel-select-no-match") }</p>
         });
         if !props.sheet {
             return overlays.portal(html! {
@@ -725,7 +725,7 @@ where
                         <span class={class::SELECT_TITLE}>{ props.label.clone() }</span>
                         <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                             icon={html! { <Icon glyph={Glyph::Close} /> }}
-                            label={label(&phrases, &props.close_label, "plinth-select-close")} onclick={close} />
+                            label={label(&phrases, &props.close_label, "sockel-select-close")} onclick={close} />
                     </div>
                     <div class={class::SELECT_BODY}>
                         { for filter_field }

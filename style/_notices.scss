@@ -1,27 +1,27 @@
 // Notice, ErrorBox and EmptyState (src/notice.rs, src/error_box.rs,
 // src/empty_state.rs).
 //
-// - `.plinth-notice`: an inline message, its tone a modifier (`.plinth-accent`,
-//   `.plinth-success`, `.plinth-warning`, `.plinth-danger`, as everywhere)
+// - `.sockel-notice`: an inline message, its tone a modifier (`.sockel-accent`,
+//   `.sockel-success`, `.sockel-warning`, `.sockel-danger`, as everywhere)
 //   that sets `--tone`. Parts: `-icon`, `-body`, `-action`, `-close`. Its
 //   least height is one small control plus its padding, so a notice of one
 //   line is as high with a close button as without. Closing one removes it
 //   and the space it held: the content below moves up at once, by design.
-// - `.plinth-error-box`: an error with its cause and a retry. Parts:
+// - `.sockel-error-box`: an error with its cause and a retry. Parts:
 //   `-title`, `-message`, `-cause` (at most three lines, cut) and
 //   `-actions`. `-causes` is a list of causes instead, a line each and
 //   never cut.
-// - `.plinth-error-box.plinth-flanked`: an icon (`-icon`) before the text
+// - `.sockel-error-box.sockel-flanked`: an icon (`-icon`) before the text
 //   and a dismiss button (`-close`) after it, the text in `-body`.
-// - `.plinth-empty-state`: what stands where a list or page has nothing.
-//   Parts: `-icon`, `-title`, `-hint`, `-actions`. `.plinth-compact` is one
+// - `.sockel-empty-state`: what stands where a list or page has nothing.
+//   Parts: `-icon`, `-title`, `-hint`, `-actions`. `.sockel-compact` is one
 //   row high (`--control-height`), its title and hint cut to one line, so
 //   it replaces a row without moving what follows.
 
 @use "tokens" as base;
 
 @if base.emits("notices.notice") {
-    .plinth-notice {
+    .sockel-notice {
         --tone: var(--muted);
 
         display: flex;
@@ -39,7 +39,7 @@
         @include base.tones;
     }
 
-    .plinth-notice-icon {
+    .sockel-notice-icon {
         display: inline-flex;
         flex: none;
         align-items: center;
@@ -49,7 +49,7 @@
     }
 
     // The text sits in the middle of the least height, whatever its lines.
-    .plinth-notice-body {
+    .sockel-notice-body {
         flex: 1 1 auto;
         min-width: 0;
         padding-block: calc((var(--control-height-small) - 1lh) / 2);
@@ -57,8 +57,8 @@
         overflow-wrap: anywhere;
     }
 
-    .plinth-notice-action,
-    .plinth-notice-close {
+    .sockel-notice-action,
+    .sockel-notice-close {
         display: inline-flex;
         flex: none;
         align-items: center;
@@ -66,7 +66,7 @@
     }
 }
 
-.plinth-error-box {
+.sockel-error-box {
     --tone: var(--danger);
 
     display: flex;
@@ -82,7 +82,7 @@
     color: var(--text);
 
     @if base.emits("notices.flanked") {
-        &.plinth-flanked {
+        &.sockel-flanked {
             flex-direction: row;
             align-items: flex-start;
         }
@@ -90,7 +90,7 @@
 }
 
 @if base.emits("notices.flanked") {
-    .plinth-error-box-icon {
+    .sockel-error-box-icon {
         display: inline-flex;
         flex: none;
         align-items: center;
@@ -98,7 +98,7 @@
         color: var(--tone);
     }
 
-    .plinth-error-box-body {
+    .sockel-error-box-body {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
@@ -112,13 +112,13 @@
         }
     }
 
-    .plinth-error-box-close {
+    .sockel-error-box-close {
         display: inline-flex;
         flex: none;
     }
 }
 
-.plinth-error-box-title {
+.sockel-error-box-title {
     margin: 0;
     color: var(--tone);
     font-size: var(--text-md);
@@ -126,13 +126,13 @@
     overflow-wrap: anywhere;
 }
 
-.plinth-error-box-message {
+.sockel-error-box-message {
     margin: 0;
     font-weight: base.$error-box-message-weight;
     overflow-wrap: anywhere;
 }
 
-.plinth-error-box-cause {
+.sockel-error-box-cause {
     @include base.clamp(3);
     margin: 0;
     color: var(--muted);
@@ -142,7 +142,7 @@
 }
 
 @if base.emits("notices.causes") {
-    .plinth-error-box-causes {
+    .sockel-error-box-causes {
         display: flex;
         flex-direction: column;
         gap: var(--space-1);
@@ -156,7 +156,7 @@
     }
 }
 
-.plinth-error-box-actions {
+.sockel-error-box-actions {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-2);
@@ -164,7 +164,7 @@
 }
 
 @if base.emits("notices.empty-state") {
-    .plinth-empty-state {
+    .sockel-empty-state {
         --empty-icon-size: var(--text-2xl);
         --empty-nowrap: normal;
         --empty-hint-flex: 0 1 auto;
@@ -180,7 +180,7 @@
         color: var(--muted);
         text-align: center;
 
-        &.plinth-compact {
+        &.sockel-compact {
             --empty-icon-size: inherit;
             --empty-nowrap: nowrap;
             --empty-hint-flex: 1 1 0;
@@ -194,7 +194,7 @@
         }
     }
 
-    .plinth-empty-state-icon {
+    .sockel-empty-state-icon {
         display: inline-flex;
         flex: none;
         align-items: center;
@@ -203,8 +203,8 @@
         line-height: 1;
     }
 
-    .plinth-empty-state-title,
-    .plinth-empty-state-hint {
+    .sockel-empty-state-title,
+    .sockel-empty-state-hint {
         min-width: 0;
         margin: 0;
         overflow: hidden;
@@ -213,18 +213,18 @@
         overflow-wrap: anywhere;
     }
 
-    .plinth-empty-state-title {
+    .sockel-empty-state-title {
         flex: 0 1 auto;
         color: var(--text);
         font-size: var(--text-md);
         font-weight: 600;
     }
 
-    .plinth-empty-state-hint {
+    .sockel-empty-state-hint {
         flex: var(--empty-hint-flex);
     }
 
-    .plinth-empty-state-actions {
+    .sockel-empty-state-actions {
         display: flex;
         flex: none;
         flex-wrap: wrap;

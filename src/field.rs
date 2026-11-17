@@ -388,7 +388,7 @@ mod tests {
             assert!(html.contains("role=\"group\""), "{html}");
             assert!(html.contains("aria-labelledby=\"name-label\""), "{html}");
             assert!(
-                html.contains("<span id=\"name-label\" class=\"plinth-field-label\">Name</span>"),
+                html.contains("<span id=\"name-label\" class=\"sockel-field-label\">Name</span>"),
                 "{html}"
             );
             assert!(!html.contains("<label"), "{html}");
@@ -409,7 +409,7 @@ mod tests {
             ..props()
         });
         assert!(
-            html.contains("<div class=\"plinth-field-inputs plinth-stacked\"><input id=\"name\""),
+            html.contains("<div class=\"sockel-field-inputs sockel-stacked\"><input id=\"name\""),
             "{html}"
         );
         assert!(!render::<FormRow>(props()).contains(class::FIELD_INPUTS));

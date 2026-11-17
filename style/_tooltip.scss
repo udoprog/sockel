@@ -1,16 +1,16 @@
 // Tooltip and HoverCard (src/tooltip.rs).
 //
-// - `.plinth-tooltip`: a short tip in the overlay layer, fixed at the
+// - `.sockel-tooltip`: a short tip in the overlay layer, fixed at the
 //   place popover.rs measured (`--tooltip-left`, `--tooltip-top`), hidden
-//   until `.plinth-placed`. It takes no pointer events and lays nothing
+//   until `.sockel-placed`. It takes no pointer events and lays nothing
 //   out, so showing it never moves the page.
-// - `.plinth-tip-anchor`: the stand-in DataTips places its tip by, fixed
+// - `.sockel-tip-anchor`: the stand-in DataTips places its tip by, fixed
 //   over the element the tip is for (`--tip-left`, `--tip-top`,
 //   `--tip-width`, `--tip-height`); invisible and untouchable.
-// - `.plinth-hover-card`: a popover (`.plinth-popover`) that opens on hover
+// - `.sockel-hover-card`: a popover (`.sockel-popover`) that opens on hover
 //   or focus, in smaller type.
 
-.plinth-tooltip {
+.sockel-tooltip {
     position: fixed;
     top: var(--tooltip-top, 0);
     left: var(--tooltip-left, 0);
@@ -30,9 +30,9 @@
     pointer-events: none;
     visibility: hidden;
 
-    &.plinth-placed {
+    &.sockel-placed {
         visibility: visible;
-        animation: plinth-tooltip-in 120ms ease both;
+        animation: sockel-tooltip-in 120ms ease both;
 
         @media (prefers-reduced-motion: reduce) {
             animation: none;
@@ -40,7 +40,7 @@
     }
 }
 
-.plinth-tip-anchor {
+.sockel-tip-anchor {
     position: fixed;
     top: var(--tip-top, 0);
     left: var(--tip-left, 0);
@@ -50,11 +50,11 @@
     visibility: hidden;
 }
 
-.plinth-hover-card {
+.sockel-hover-card {
     font-size: var(--text-sm);
 }
 
-@keyframes plinth-tooltip-in {
+@keyframes sockel-tooltip-in {
     from {
         opacity: 0;
     }

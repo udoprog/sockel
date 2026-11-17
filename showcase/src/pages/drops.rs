@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{DropState, DropZone, Refusal, accepts, drop_zone, refusal};
+use sockel::{DropState, DropZone, Refusal, accepts, drop_zone, refusal};
 
 use crate::class;
 use crate::code::{El, snippet, text_node};

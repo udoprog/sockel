@@ -129,7 +129,7 @@ pub struct ConfirmProps {
 #[function_component]
 pub fn Confirm(props: &ConfirmProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let cancel_label = label(&phrases, &props.cancel_label, "plinth-confirm-cancel");
+    let cancel_label = label(&phrases, &props.cancel_label, "sockel-confirm-cancel");
     let (cancel_ref, accept_ref) = (use_node_ref(), use_node_ref());
     {
         let (cancel_ref, accept_ref) = (cancel_ref.clone(), accept_ref.clone());
@@ -259,7 +259,7 @@ fn compact(
 #[function_component]
 pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
     let phrases = use_phrases_with(&L10N);
-    let cancel_label = label(&phrases, &props.cancel_label, "plinth-confirm-cancel");
+    let cancel_label = label(&phrases, &props.cancel_label, "sockel-confirm-cancel");
     let (cancel_ref, accept_ref) = (use_node_ref(), use_node_ref());
     let on_dismiss = {
         let (on_cancel, busy) = (props.on_cancel.clone(), props.busy);
@@ -498,14 +498,14 @@ pub fn ConfirmInline(props: &ConfirmInlineProps) -> Html {
             </Button>
             <span ref={ask_ref} class={confirm_inline(class::CONFIRM_ASK, !asking)}
                 role="group"
-                aria-label={label(&phrases, &props.question, "plinth-confirm-inline-question")}>
+                aria-label={label(&phrases, &props.question, "sockel-confirm-inline-question")}>
                 <Button size={props.size} variant={ButtonVariant::Ghost} disabled={props.busy}
                     node_ref={no_ref} onclick={no} testid="confirm-cancel">
-                    { label(&phrases, &props.no_label, "plinth-confirm-inline-no") }
+                    { label(&phrases, &props.no_label, "sockel-confirm-inline-no") }
                 </Button>
                 <Button size={props.size} variant={accept_variant(props.danger)}
                     busy={props.busy} onclick={yes} testid="confirm-accept">
-                    { label(&phrases, &props.yes_label, "plinth-confirm-inline-yes") }
+                    { label(&phrases, &props.yes_label, "sockel-confirm-inline-yes") }
                 </Button>
             </span>
         </span>
@@ -661,7 +661,7 @@ pub fn ConfirmHost() -> Html {
             explanation={request.as_ref().map(|r| r.explanation.clone()).unwrap_or_default()}
             details={request.as_ref().map(|r| r.details.clone()).unwrap_or_default()}
             accept={label(&phrases, &request.as_ref().and_then(|r| r.accept.clone()),
-                "plinth-confirm-accept")}
+                "sockel-confirm-accept")}
             cancel_label={request.as_ref().and_then(|r| r.cancel_label.clone())}
             icon={request.as_ref().and_then(|r| r.icon.clone())}
             danger={request.as_ref().is_none_or(|r| r.danger)}

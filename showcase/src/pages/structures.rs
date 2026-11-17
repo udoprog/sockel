@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Gap, Panel, PanelGround, Seam, SeamAxis, Stack, Toolbar, ToolbarPart, ToolbarSpacer, use_width,
 };
 
@@ -161,7 +161,7 @@ pub fn SeamPage() -> Html {
             <Select<f64> label="at" options={SHARES} value={*at} on_change={bind(&at)} />
             <Toggle label="min 0.25, max 0.75" value={*narrowed} on_change={bind(&narrowed)} />
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
-            <span class={classes!(class::CONTROL_LABEL, plinth::class::NUMERIC)}>
+            <span class={classes!(class::CONTROL_LABEL, sockel::class::NUMERIC)}>
                 { format!("settled at {:.2}", *settled) }
             </span>
         </>
@@ -210,7 +210,7 @@ fn Measured(props: &MeasuredProps) -> Html {
     html! {
         <Stack gap={Gap::Snug}>
             <div ref={node} class={class::SAMPLE}>{ props.text.of("Measured") }</div>
-            <span class={classes!(class::READOUT, plinth::class::NUMERIC)}>
+            <span class={classes!(class::READOUT, sockel::class::NUMERIC)}>
                 { format!("{width:.0}px wide") }
             </span>
         </Stack>

@@ -3,22 +3,22 @@
 // by an overlay laid inside it, so no state or message changes the zone's
 // box. The overlay lets the drag through to what is beneath.
 //
-// - `.plinth-dragging`: a file is dragged somewhere on the page.
-// - `.plinth-over`: it is over the zone and would be taken.
-// - `.plinth-refused`: it is over the zone and would not be taken.
-// - `.plinth-busy`: a file taken is being worked on; the zone takes no more.
-// - `.plinth-error`: the last file was refused or failed; the overlay says why.
-// - `.plinth-disabled`: takes nothing.
+// - `.sockel-dragging`: a file is dragged somewhere on the page.
+// - `.sockel-over`: it is over the zone and would be taken.
+// - `.sockel-refused`: it is over the zone and would not be taken.
+// - `.sockel-busy`: a file taken is being worked on; the zone takes no more.
+// - `.sockel-error`: the last file was refused or failed; the overlay says why.
+// - `.sockel-disabled`: takes nothing.
 //
 // `$drop-overlay-inset` and `$drop-edge-width` lay the overlay past the
 // zone and have it draw the edge, for a zone that has no border of its
-// own. `.plinth-tall` (on the overlay and label, from `tall`) keeps the
+// own. `.sockel-tall` (on the overlay and label, from `tall`) keeps the
 // label on screen over a zone taller than it, and `$drop-busy-pulse`
-// pulses the busy label (`.plinth-busy` on it).
+// pulses the busy label (`.sockel-busy` on it).
 
 @use "tokens" as base;
 
-.plinth-drop-zone {
+.sockel-drop-zone {
     --drop-color: var(--accent);
     --drop-border: transparent;
     --drop-fill: transparent;
@@ -34,7 +34,7 @@
     min-height: var(--drop-min-height);
     border-radius: var(--radius-lg);
 
-    &.plinth-dragging {
+    &.sockel-dragging {
         @if base.$drop-edge-width == null {
             border-style: dashed;
         } @else {
@@ -44,31 +44,31 @@
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint), transparent);
     }
 
-    &.plinth-over {
+    &.sockel-over {
         --drop-border: var(--drop-color);
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
     }
 
-    &.plinth-refused,
-    &.plinth-error {
+    &.sockel-refused,
+    &.sockel-error {
         --drop-color: var(--danger);
         --drop-border: var(--drop-color);
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
     }
 
-    &.plinth-busy {
+    &.sockel-busy {
         --drop-border: var(--border);
         --drop-fill: color-mix(in srgb, var(--surface) 70%, transparent);
         --drop-label-color: var(--text);
         --drop-label-fill: var(--surface-raised);
     }
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         opacity: 0.6;
     }
 }
 
-.plinth-drop-zone-overlay {
+.sockel-drop-zone-overlay {
     position: absolute;
     inset: base.$drop-overlay-inset;
     z-index: var(--layer-sticky);
@@ -87,7 +87,7 @@
     }
 }
 
-.plinth-drop-zone-label {
+.sockel-drop-zone-label {
     @include base.clamp(2);
     max-width: 100%;
     padding: var(--space-1) var(--space-3);
@@ -104,12 +104,12 @@
 @if base.emits("drop.tall") {
     // The overlay clips without being a scroll container, so the label
     // sticks to the viewport.
-    .plinth-drop-zone-overlay.plinth-tall {
+    .sockel-drop-zone-overlay.sockel-tall {
         padding: var(--space-4);
         overflow: clip;
     }
 
-    .plinth-drop-zone-label.plinth-tall {
+    .sockel-drop-zone-label.sockel-tall {
         position: sticky;
         top: base.$drop-tall-label-offset;
         bottom: base.$drop-tall-label-offset;
@@ -119,21 +119,21 @@
 }
 
 @if base.$drop-busy-pulse != null {
-    .plinth-drop-zone-label.plinth-busy {
-        animation: plinth-drop-pulse base.$drop-busy-pulse ease-in-out infinite;
+    .sockel-drop-zone-label.sockel-busy {
+        animation: sockel-drop-pulse base.$drop-busy-pulse ease-in-out infinite;
 
         @media (prefers-reduced-motion: reduce) {
             animation: none;
         }
     }
 
-    @keyframes plinth-drop-pulse {
+    @keyframes sockel-drop-pulse {
         50% {
             opacity: 0.6;
         }
     }
 }
 
-.plinth-drop-zone-pick {
+.sockel-drop-zone-pick {
     margin-top: var(--space-2);
 }

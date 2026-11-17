@@ -132,17 +132,17 @@ mod tests {
 
     #[test]
     fn an_overlay_is_inert_until_its_row_is_hovered_or_focused() {
-        let overlay = rule(".plinth-action-row.plinth-overlay");
+        let overlay = rule(".sockel-action-row.sockel-overlay");
         assert!(overlay.contains("opacity: var(--overlay-opacity, 0)"));
         assert!(overlay.contains("pointer-events: var(--overlay-events, none)"));
         assert!(overlay.contains("position: absolute"));
 
         // Focus reaches its controls (they stay in the tab order) and shows it.
-        let focused = rule(".plinth-action-row.plinth-overlay:focus-within");
+        let focused = rule(".sockel-action-row.sockel-overlay:focus-within");
         assert!(focused.contains("opacity: 1"));
         assert!(focused.contains("pointer-events: auto"));
 
-        let row = rule(".plinth-row-list-item:hover, .plinth-row-list-item:focus-within");
+        let row = rule(".sockel-row-list-item:hover, .sockel-row-list-item:focus-within");
         assert!(row.contains("--overlay-opacity: 1"));
         assert!(row.contains("--overlay-events: auto"));
     }

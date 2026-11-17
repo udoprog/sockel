@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Button, Field, Glyph, Icon, InputGroup, InputSize, Select, SelectOption, SelectWidth, Stack,
     field_describedby, group_classes,
 };

@@ -1,28 +1,28 @@
 // Disclosure (src/disclosure.rs): a summary row that toggles its body.
 //
-// - `.plinth-disclosure`: a rule above the row; `.plinth-open` while the
+// - `.sockel-disclosure`: a rule above the row; `.sockel-open` while the
 //   body shows.
-// - `.plinth-disclosure-head`: the row, one `$disclosure-row-height`
+// - `.sockel-disclosure-head`: the row, one `$disclosure-row-height`
 //   (`--control-height`) high shut or open: the toggle
-//   (`.plinth-disclosure-summary`, a button across the row) and the
-//   actions (`.plinth-disclosure-actions`) at its end.
-// - `.plinth-disclosure-mark`: the chevron in a box of its own; open turns
-//   it (`.plinth-open`) a quarter turn inside the box, which changes nothing around it.
-// - `.plinth-disclosure-title` and `.plinth-disclosure-detail`: the title and
+//   (`.sockel-disclosure-summary`, a button across the row) and the
+//   actions (`.sockel-disclosure-actions`) at its end.
+// - `.sockel-disclosure-mark`: the chevron in a box of its own; open turns
+//   it (`.sockel-open`) a quarter turn inside the box, which changes nothing around it.
+// - `.sockel-disclosure-title` and `.sockel-disclosure-detail`: the title and
 //   the muted summary of what it holds while shut, each cut to one line;
 //   `$disclosure-title-ink` colours the title (`null`: the text's).
-// - `.plinth-disclosure-body`: the content, shown while open.
-// - `.plinth-disclosure-heading`: the heading the toggle sits in when the
-//   section's title is one; `.plinth-disclosure-summary.plinth-heading` sets
+// - `.sockel-disclosure-body`: the content, shown while open.
+// - `.sockel-disclosure-heading`: the heading the toggle sits in when the
+//   section's title is one; `.sockel-disclosure-summary.sockel-heading` sets
 //   its title at a list head's size.
 
 @use "tokens" as base;
 
-.plinth-disclosure {
+.sockel-disclosure {
     border-top: var(--space-px) solid var(--border);
 }
 
-.plinth-disclosure-head {
+.sockel-disclosure-head {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -30,7 +30,7 @@
     height: base.$disclosure-row-height;
 }
 
-.plinth-disclosure-summary {
+.sockel-disclosure-summary {
     display: flex;
     flex: 1;
     align-items: center;
@@ -57,7 +57,7 @@
     }
 }
 
-.plinth-disclosure-heading {
+.sockel-disclosure-heading {
     display: flex;
     flex: 1;
     min-width: 0;
@@ -66,17 +66,17 @@
     font: inherit;
 }
 
-.plinth-disclosure-summary.plinth-heading {
+.sockel-disclosure-summary.sockel-heading {
     font-size: var(--text-base);
 }
 
-.plinth-disclosure-mark {
+.sockel-disclosure-mark {
     display: inline-flex;
     flex: none;
     color: var(--muted);
     transition: transform 0.15s ease;
 
-    &.plinth-open {
+    &.sockel-open {
         transform: rotate(90deg);
     }
 
@@ -85,7 +85,7 @@
     }
 }
 
-.plinth-disclosure-title {
+.sockel-disclosure-title {
     flex: none;
     max-width: 100%;
     @include base.truncate;
@@ -93,20 +93,20 @@
     font-weight: 600;
 }
 
-.plinth-disclosure-detail {
+.sockel-disclosure-detail {
     flex: 1;
     min-width: 0;
     @include base.truncate;
     color: var(--muted);
 }
 
-.plinth-disclosure-actions {
+.sockel-disclosure-actions {
     display: inline-flex;
     flex: none;
     align-items: center;
     gap: var(--space-1);
 }
 
-.plinth-disclosure-body {
+.sockel-disclosure-body {
     padding-block: var(--space-2) var(--space-3);
 }

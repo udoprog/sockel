@@ -1,64 +1,64 @@
 // Single-purpose classes against jitter, each its mixin of `_tokens.scss`
-// on an element plinth's components do not own. Loaded last, so a utility
+// on an element sockel's components do not own. Loaded last, so a utility
 // wins over a component's rule of the same weight.
 //
-// - `.plinth-focus-ring`: the focus ring on keyboard focus.
-// - `.plinth-numeric`: tabular figures (counts, readouts, pagers, clocks).
-// - `.plinth-scroll-area`: scrolls, its scrollbar's room always kept.
-// - `.plinth-truncate`: one line and an ellipsis; `.plinth-clamp-2`,
-//   `.plinth-clamp-3`, `.plinth-clamp-4`: that many lines.
-// - `.plinth-visually-hidden`: for a screen reader only (a hidden h1).
-// - `.plinth-phone-only` and `.plinth-desktop-only`: shown only below the
+// - `.sockel-focus-ring`: the focus ring on keyboard focus.
+// - `.sockel-numeric`: tabular figures (counts, readouts, pagers, clocks).
+// - `.sockel-scroll-area`: scrolls, its scrollbar's room always kept.
+// - `.sockel-truncate`: one line and an ellipsis; `.sockel-clamp-2`,
+//   `.sockel-clamp-3`, `.sockel-clamp-4`: that many lines.
+// - `.sockel-visually-hidden`: for a screen reader only (a hidden h1).
+// - `.sockel-phone-only` and `.sockel-desktop-only`: shown only below the
 //   phone breakpoint, or only from it up.
 
 @use "tokens" as base;
 
 @if base.emits("utilities.focus-ring") {
-    .plinth-focus-ring {
+    .sockel-focus-ring {
         @include base.focus-ring;
     }
 }
 
 @if base.emits("utilities.numeric") {
-    .plinth-numeric {
+    .sockel-numeric {
         @include base.numeric;
     }
 }
 
 @if base.emits("utilities.scroll-area") {
-    .plinth-scroll-area {
+    .sockel-scroll-area {
         @include base.scroll-area;
     }
 }
 
 @if base.emits("utilities.truncate") {
-    .plinth-truncate {
+    .sockel-truncate {
         @include base.truncate;
     }
 }
 
 @if base.emits("utilities.clamp") {
     @each $lines in (2, 3, 4) {
-        .plinth-clamp-#{$lines} {
+        .sockel-clamp-#{$lines} {
             @include base.clamp($lines);
         }
     }
 }
 
-.plinth-visually-hidden {
+.sockel-visually-hidden {
     @include base.visually-hidden;
 }
 
 // The class twice, so it hides a component with a modifier
-// (`.plinth-cluster.plinth-inline`) too, without `!important`.
+// (`.sockel-cluster.sockel-inline`) too, without `!important`.
 @if base.emits("utilities.phone-only") {
-    .plinth-phone-only.plinth-phone-only {
+    .sockel-phone-only.sockel-phone-only {
         @include base.phone-only;
     }
 }
 
 @if base.emits("utilities.desktop-only") {
-    .plinth-desktop-only.plinth-desktop-only {
+    .sockel-desktop-only.sockel-desktop-only {
         @include base.desktop-only;
     }
 }

@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Button, ButtonSize, ButtonVariant, Cluster, Glyph, Icon, button};
+use sockel::{Button, ButtonSize, ButtonVariant, Cluster, Glyph, Icon, button};
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};

@@ -387,7 +387,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
         html! {
             <Button variant={ButtonVariant::Quiet} size={props.close_size}
                 icon={html! { <Icon glyph={Glyph::Close} /> }}
-                label={label(&phrases, &props.close_label, "plinth-dialog-close")} testid={props.close_testid.clone()} {onclick} />
+                label={label(&phrases, &props.close_label, "sockel-dialog-close")} testid={props.close_testid.clone()} {onclick} />
         }
     });
     let foot =

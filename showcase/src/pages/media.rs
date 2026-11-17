@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Avatar, AvatarSize, Cluster, Image, Ratio};
+use sockel::{Avatar, AvatarSize, Cluster, Image, Ratio};
 
 use crate::code::{El, snippet};
 use crate::controls::{Demo, Select, Text, Toggle, bind};

@@ -56,7 +56,7 @@ fn configured_through_index() {
     assert!(css.contains("--radius-lg: 12px;"));
     assert!(css.contains("padding: var(--space-4) var(--space-5);"));
     assert!(
-        css.contains("@media (width < 42rem) {\n  .plinth-card {\n    padding: var(--space-3);")
+        css.contains("@media (width < 42rem) {\n  .sockel-card {\n    padding: var(--space-3);")
     );
     assert!(css.contains("gap: var(--space-2);\n  min-width: 0;\n  overflow-x: auto;"));
     assert!(!css.contains("@media (width < 40rem)"));
@@ -76,7 +76,7 @@ fn dialog_settings() {
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains("--dialog-room: calc(100dvh - var(--dialog-top) - var(--space-4));"));
     let css = compile(&sass, "tests/fixtures/dialog_centred.scss");
-    assert!(css.contains(".plinth-dialog-layer {\n  align-items: center;"));
+    assert!(css.contains(".sockel-dialog-layer {\n  align-items: center;"));
     assert!(css.contains("--dialog-room: min(85vh, 100dvh - 2 * var(--space-4));"));
     assert!(
         css.contains(
@@ -107,7 +107,7 @@ fn popover_and_confirm_settings() {
         css.contains("border-bottom-color: transparent;\n    border-width: var(--space-px) 0 0;")
     );
     assert!(css.contains(
-        ".plinth-confirm-popover.plinth-compact {\n    --popover-max-width: 100vw;\n    width: max-content;"
+        ".sockel-confirm-popover.sockel-compact {\n    --popover-max-width: 100vw;\n    width: max-content;"
     ));
 }
 
@@ -145,7 +145,7 @@ fn a_dialogs_scrim_reaches_over_the_kept_gutter() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains(
-        ".plinth-dialog-layer {\n  position: fixed;\n  inset: 0 calc(-1 * var(--scroll-gutter, 0px)) 0 0;"
+        ".sockel-dialog-layer {\n  position: fixed;\n  inset: 0 calc(-1 * var(--scroll-gutter, 0px)) 0 0;"
     ));
 }
 
@@ -153,10 +153,10 @@ fn a_dialogs_scrim_reaches_over_the_kept_gutter() {
 fn a_dialog_body_gap_spaces_its_paragraphs() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
-    assert!(!defaults.contains(".plinth-dialog-body > p"));
+    assert!(!defaults.contains(".sockel-dialog-body > p"));
     let css = compile(&sass, "tests/fixtures/dialog_body_gap.scss");
     assert!(css.contains("gap: 1rem;"));
-    assert!(css.contains(".plinth-dialog-body > p {\n  margin: 0;\n}"));
+    assert!(css.contains(".sockel-dialog-body > p {\n  margin: 0;\n}"));
 }
 
 #[test]
@@ -164,7 +164,7 @@ fn a_native_select_gives_way_in_a_row() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains(
-        ".plinth-native-select {\n  width: max-content;\n  max-width: 100%;\n  flex-shrink: 1;"
+        ".sockel-native-select {\n  width: max-content;\n  max-width: 100%;\n  flex-shrink: 1;"
     ));
 }
 
@@ -173,7 +173,7 @@ fn a_picker_gives_way_in_a_row() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains(
-        ".plinth-picker {\n  width: var(--menu-width-wide);\n  max-width: 100%;\n  flex-shrink: 1;"
+        ".sockel-picker {\n  width: var(--menu-width-wide);\n  max-width: 100%;\n  flex-shrink: 1;"
     ));
 }
 
@@ -183,7 +183,7 @@ fn input_settings() {
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains("--input-edge: var(--accent);"));
     assert!(!defaults.contains("--input-height: 44px;"));
-    assert!(defaults.contains(".plinth-native-select {\n  width: max-content;"));
+    assert!(defaults.contains(".sockel-native-select {\n  width: max-content;"));
     let css = compile(&sass, "tests/fixtures/input_settings.scss");
     assert!(css.contains("--input-edge: var(--border-strong);"));
     assert!(css.contains(":focus-within {\n  --input-edge: var(--accent);"));
@@ -199,41 +199,41 @@ fn omitted_parts_are_left_out() {
     let defaults = compile(&sass, "style/_index.scss");
     let css = compile(&sass, "tests/fixtures/omit.scss");
     for part in [
-        ".plinth-toolbar",
+        ".sockel-toolbar",
         "--band-chrome-ground",
-        ".plinth-cluster.plinth-wide",
-        ".plinth-button.plinth-fold {",
-        ".plinth-head-trail",
-        ".plinth-split-button",
+        ".sockel-cluster.sockel-wide",
+        ".sockel-button.sockel-fold {",
+        ".sockel-head-trail",
+        ".sockel-split-button",
         "--table-max-height",
         "--danger:",
-        ".plinth-fieldset",
-        ".plinth-field-error",
-        ".plinth-input.plinth-small",
-        ".plinth-input-box.plinth-touch",
-        ".plinth-input.plinth-busy",
-        ".plinth-input[aria-invalid=true]",
-        ".plinth-input-box.plinth-invalid",
-        ".plinth-input-box.plinth-disabled",
-        ".plinth-menu-item[aria-disabled=true]",
-        ".plinth-menu-item-mark",
-        ".plinth-pager.plinth-busy",
+        ".sockel-fieldset",
+        ".sockel-field-error",
+        ".sockel-input.sockel-small",
+        ".sockel-input-box.sockel-touch",
+        ".sockel-input.sockel-busy",
+        ".sockel-input[aria-invalid=true]",
+        ".sockel-input-box.sockel-invalid",
+        ".sockel-input-box.sockel-disabled",
+        ".sockel-menu-item[aria-disabled=true]",
+        ".sockel-menu-item-mark",
+        ".sockel-pager.sockel-busy",
     ] {
         assert!(defaults.contains(part), "{part} in the defaults");
         assert!(!css.contains(part), "{part} left out");
     }
     for kept in [
-        ".plinth-stack.plinth-loose,\n.plinth-cluster.plinth-loose {",
-        ".plinth-button.plinth-fold-wide",
-        ".plinth-head-subtitle {\n  flex: 0 0 100%;",
-        ".plinth-menu-item {",
+        ".sockel-stack.sockel-loose,\n.sockel-cluster.sockel-loose {",
+        ".sockel-button.sockel-fold-wide",
+        ".sockel-head-subtitle {\n  flex: 0 0 100%;",
+        ".sockel-menu-item {",
         "--success:",
-        ".plinth-field-hint {\n  margin: 0;",
-        ".plinth-field-inputs {",
-        ".plinth-input:disabled",
-        ".plinth-input-box:focus-within",
-        ".plinth-menu-item-icon {",
-        ".plinth-pager-button {",
+        ".sockel-field-hint {\n  margin: 0;",
+        ".sockel-field-inputs {",
+        ".sockel-input:disabled",
+        ".sockel-input-box:focus-within",
+        ".sockel-menu-item-icon {",
+        ".sockel-pager-button {",
     ] {
         assert!(css.contains(kept), "{kept} kept");
     }

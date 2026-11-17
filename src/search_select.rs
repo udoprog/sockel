@@ -159,7 +159,7 @@ pub struct SearchSelectProps<T: PartialEq + 'static> {
     pub describedby: Option<AttrValue>,
     #[prop_or_default]
     pub size: InputSize,
-    /// As wide as its container (`.plinth-fill`).
+    /// As wide as its container (`.sockel-fill`).
     #[prop_or_default]
     pub fill: bool,
     #[prop_or_default]
@@ -372,11 +372,11 @@ where
             Listed::Loading => html! {
                 <div class={class::SEARCH_SELECT_NOTE} role="status">
                     <Icon glyph={Glyph::Spinner} />
-                    { label(&phrases, &props.loading_label, "plinth-search-select-loading") }
+                    { label(&phrases, &props.loading_label, "sockel-search-select-loading") }
                 </div>
             },
             Listed::Options(rows) if rows.is_empty() => html! {
-                <div class={class::SEARCH_SELECT_NOTE} role="status">{ label(&phrases, &props.empty_label, "plinth-search-select-empty") }</div>
+                <div class={class::SEARCH_SELECT_NOTE} role="status">{ label(&phrases, &props.empty_label, "sockel-search-select-empty") }</div>
             },
             Listed::Options(rows) => html! {
                 { for groups(options, rows).into_iter().enumerate().map(|(g, (label, members))| {

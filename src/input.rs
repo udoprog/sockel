@@ -451,7 +451,7 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
                 onfocus={props.on_focus.clone()} onblur={props.on_blur.clone()}
                 {oninput} {onkeydown} />
             <button type="button" class={classes!(class::INPUT_CLEAR, empty.then_some(class::EMPTY))}
-                aria-label={label(&phrases, &props.clear_label, "plinth-search-field-clear")} disabled={props.disabled || empty}
+                aria-label={label(&phrases, &props.clear_label, "sockel-search-field-clear")} disabled={props.disabled || empty}
                 aria-hidden={empty.then_some("true")} tabindex={empty.then_some("-1")} {onclick}>
                 <Icon glyph={Glyph::Close} />
             </button>

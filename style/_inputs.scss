@@ -1,49 +1,49 @@
 // Text inputs (src/input.rs).
 //
-// - `.plinth-input`: a bare text input, `--input-height` high (`--control-height`).
+// - `.sockel-input`: a bare text input, `--input-height` high (`--control-height`).
 //   Its border is reserved, so hover, focus and the invalid state change the
 //   border's colour only; the focus ring is an outline.
-// - `.plinth-input-box`: the same look around an input and its marks: the unit
+// - `.sockel-input-box`: the same look around an input and its marks: the unit
 //   of a TextInput, the icon and the clear button of a SearchField. Parts:
 //   `-control` (the bare input inside), `-mark` (an icon or the unit; the unit
-//   is `.plinth-input-unit`), `-clear` and `-action` (a button of a fixed
-//   size, kept in its room when `.plinth-empty` hides it; the SecretInput's
+//   is `.sockel-input-unit`), `-clear` and `-action` (a button of a fixed
+//   size, kept in its room when `.sockel-empty` hides it; the SecretInput's
 //   reveal, copy and clear are actions).
-// - `.plinth-native-select`: a native `<select>`, worn with `.plinth-input`:
+// - `.sockel-native-select`: a native `<select>`, worn with `.sockel-input`:
 //   the browser's arrow replaced by a chevron in `--muted` (two gradients, so
 //   it takes the theme's colour), room kept for it at the end, its options on
 //   `--surface`. As wide as its widest option (`max-content`, cut at its
-//   container, shrinking in a row beside other items); `.plinth-fill`: as
+//   container, shrinking in a row beside other items); `.sockel-fill`: as
 //   wide as its container.
-// - `.plinth-textarea`: lines of text, as high as its rows and at least
+// - `.sockel-textarea`: lines of text, as high as its rows and at least
 //   `--input-height`; the user may resize it vertically.
-// - Sizes: regular, `.plinth-small` (`--control-height-small`) and
-//   `.plinth-touch` (`--touch-height`), by the same modifiers as a button's.
-// - `.plinth-invalid` (and `[aria-invalid="true"]` on the bare input): the
-//   border in `--danger`. `.plinth-disabled` and `.plinth-busy`.
-// - `.plinth-input-group`: joined controls in a row, one border between
-//   neighbours (the members overlap by it). A member takes `.plinth-group-first`,
+// - Sizes: regular, `.sockel-small` (`--control-height-small`) and
+//   `.sockel-touch` (`--touch-height`), by the same modifiers as a button's.
+// - `.sockel-invalid` (and `[aria-invalid="true"]` on the bare input): the
+//   border in `--danger`. `.sockel-disabled` and `.sockel-busy`.
+// - `.sockel-input-group`: joined controls in a row, one border between
+//   neighbours (the members overlap by it). A member takes `.sockel-group-first`,
 //   `-middle` or `-last`, which square the corners that join, and
-//   `.plinth-group-detached` to stand apart after a gap; a lone member needs
+//   `.sockel-group-detached` to stand apart after a gap; a lone member needs
 //   none. `group_classes` gives them, so no rule looks at a sibling.
-// - Parts an app may leave out (`$omit`): `inputs.input` (`.plinth-input`),
+// - Parts an app may leave out (`$omit`): `inputs.input` (`.sockel-input`),
 //   `inputs.textarea`, `inputs.mark` (`-mark` and `-unit`), `inputs.group`
 //   (the group and its members' classes), `inputs.native-select`,
 //   `inputs.small`, `inputs.touch`, `inputs.busy`, `inputs.invalid` (with
-//   `aria-invalid`) and `inputs.disabled` (a box's `.plinth-disabled`; a bare
+//   `aria-invalid`) and `inputs.disabled` (a box's `.sockel-disabled`; a bare
 //   input's `:disabled` is always kept).
 
 @use "tokens" as base;
 
 @if base.emits("inputs.input") {
-    .plinth-input {
+    .sockel-input {
         @include base.input;
     }
 }
 
 @if base.emits("inputs.native-select") {
-    // After `.plinth-input`, so its chevron and room win over the field's.
-    .plinth-native-select {
+    // After `.sockel-input`, so its chevron and room win over the field's.
+    .sockel-native-select {
         width: max-content;
         max-width: 100%;
         // Beside other items in a row it gives way to them, as the bare
@@ -61,7 +61,7 @@
         background-size: 5px 5px;
         background-repeat: no-repeat;
 
-        &.plinth-fill {
+        &.sockel-fill {
             width: 100%;
         }
 
@@ -77,7 +77,7 @@
 }
 
 @if base.emits("inputs.textarea") {
-    .plinth-textarea {
+    .sockel-textarea {
         @include base.input-box;
         display: block;
         width: 100%;
@@ -108,7 +108,7 @@
     }
 }
 
-.plinth-input-box {
+.sockel-input-box {
     @include base.input-box;
     display: flex;
     flex: none;
@@ -122,13 +122,13 @@
     padding-inline: base.$input-padding-inline;
 
     @if base.emits("inputs.invalid") {
-        &.plinth-invalid {
+        &.sockel-invalid {
             --input-edge: var(--danger);
         }
     }
 
     @if base.emits("inputs.disabled") {
-        &.plinth-disabled {
+        &.sockel-disabled {
             opacity: 0.5;
             cursor: not-allowed;
         }
@@ -144,7 +144,7 @@
     }
 }
 
-.plinth-input-control {
+.sockel-input-control {
     flex: 1 1 0;
     min-width: 0;
     height: 100%;
@@ -172,7 +172,7 @@
 }
 
 @if base.emits("inputs.mark") {
-    .plinth-input-mark {
+    .sockel-input-mark {
         display: inline-flex;
         flex: none;
         align-items: center;
@@ -180,14 +180,14 @@
         pointer-events: none;
     }
 
-    .plinth-input-unit {
+    .sockel-input-unit {
         font-size: var(--text-sm);
         @include base.numeric;
     }
 }
 
-.plinth-input-clear,
-.plinth-input-action {
+.sockel-input-clear,
+.sockel-input-action {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -208,7 +208,7 @@
         color: var(--text);
     }
 
-    &.plinth-empty {
+    &.sockel-empty {
         visibility: hidden;
     }
 
@@ -216,20 +216,20 @@
 }
 
 @if base.emits("inputs.group") {
-    .plinth-input-group {
+    .sockel-input-group {
         display: flex;
         align-items: stretch;
         min-width: 0;
 
         // The bare input is the one member that takes the room left.
-        > .plinth-input {
+        > .sockel-input {
             flex: 1 1 0;
         }
     }
 
-    .plinth-group-first,
-    .plinth-group-middle,
-    .plinth-group-last {
+    .sockel-group-first,
+    .sockel-group-middle,
+    .sockel-group-last {
         position: relative;
         min-width: 0;
 
@@ -239,17 +239,17 @@
         }
     }
 
-    .plinth-group-first {
+    .sockel-group-first {
         border-start-end-radius: 0;
         border-end-end-radius: 0;
     }
 
-    .plinth-group-middle {
+    .sockel-group-middle {
         border-radius: 0;
         margin-inline-start: calc(-1 * var(--space-px));
     }
 
-    .plinth-group-last {
+    .sockel-group-last {
         border-start-start-radius: 0;
         border-end-start-radius: 0;
         margin-inline-start: calc(-1 * var(--space-px));
@@ -257,7 +257,7 @@
 
     // After the rules above, so a detached member that starts a run keeps
     // its gap.
-    .plinth-group-detached {
+    .sockel-group-detached {
         margin-inline-start: var(--space-2);
     }
 }

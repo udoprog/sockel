@@ -1,27 +1,27 @@
 // Toast and ToastHost (src/toast.rs), and SaveBar (src/save_bar.rs).
 //
-// - `.plinth-toast-host`: where toasts stand, fixed over the window's bottom
+// - `.sockel-toast-host`: where toasts stand, fixed over the window's bottom
 //   (`--layer-toast`), centred, newest last, in a polite live region. It
 //   lies over the page and takes no room, so a toast coming or going moves
 //   nothing; it lets pointer events through except on a toast itself.
-//   `.plinth-raised` lifts it by `--toast-tray`, the height of a tray or bar
+//   `.sockel-raised` lifts it by `--toast-tray`, the height of a tray or bar
 //   the app keeps at the window's bottom (0 unless the app sets it).
-// - `.plinth-toast`: one message in a tone, a modifier that sets `--tone`
-//   (`.plinth-accent`, `.plinth-success`, `.plinth-warning`,
-//   `.plinth-danger`). Parts: `-icon`, `-body`, `-action`, `-close`. At
+// - `.sockel-toast`: one message in a tone, a modifier that sets `--tone`
+//   (`.sockel-accent`, `.sockel-success`, `.sockel-warning`,
+//   `.sockel-danger`). Parts: `-icon`, `-body`, `-action`, `-close`. At
 //   least one small control plus its padding high, at most
 //   `--toast-max-width` wide and never wider than the window; its text
 //   wraps. It arrives with a fade and no motion when the user prefers none.
-// - `.plinth-save-bar`: the bar of unsaved changes, always in the page's
-//   flow at one height, as SelectionBar is: `.plinth-idle` hides it while
+// - `.sockel-save-bar`: the bar of unsaved changes, always in the page's
+//   flow at one height, as SelectionBar is: `.sockel-idle` hides it while
 //   nothing is unsaved and keeps its room, so the form never moves when
-//   it lights. `.plinth-sticky` keeps it at the bottom of its scroll
+//   it lights. `.sockel-sticky` keeps it at the bottom of its scroll
 //   container, still in the flow. Parts: `-note` (what is unsaved, at
 //   most one line), `-status` (how the last save went) and `-actions`.
 
 @use "tokens" as base;
 
-.plinth-toast-host {
+.sockel-toast-host {
     --toast-raise: 0px;
 
     position: fixed;
@@ -35,12 +35,12 @@
     padding-inline: var(--space-4);
     pointer-events: none;
 
-    &.plinth-raised {
+    &.sockel-raised {
         --toast-raise: var(--toast-tray, 0px);
     }
 }
 
-.plinth-toast {
+.sockel-toast {
     --tone: var(--muted);
 
     display: flex;
@@ -60,17 +60,17 @@
     @include base.tones;
 
     @media (prefers-reduced-motion: no-preference) {
-        animation: plinth-toast-in 0.15s ease-out;
+        animation: sockel-toast-in 0.15s ease-out;
     }
 }
 
-@keyframes plinth-toast-in {
+@keyframes sockel-toast-in {
     from {
         opacity: 0;
     }
 }
 
-.plinth-toast-icon {
+.sockel-toast-icon {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -79,7 +79,7 @@
     color: var(--tone);
 }
 
-.plinth-toast-body {
+.sockel-toast-body {
     flex: 1 1 auto;
     min-width: 0;
     padding-block: calc((var(--control-height-small) - 1lh) / 2);
@@ -87,15 +87,15 @@
     overflow-wrap: anywhere;
 }
 
-.plinth-toast-action,
-.plinth-toast-close {
+.sockel-toast-action,
+.sockel-toast-close {
     display: inline-flex;
     flex: none;
     align-items: center;
     height: var(--control-height-small);
 }
 
-.plinth-save-bar {
+.sockel-save-bar {
     display: flex;
     gap: var(--space-2);
     align-items: center;
@@ -105,11 +105,11 @@
     padding: var(--space-2) 0;
     border-top: var(--space-px) solid var(--border);
 
-    &.plinth-idle {
+    &.sockel-idle {
         visibility: hidden;
     }
 
-    &.plinth-sticky {
+    &.sockel-sticky {
         position: sticky;
         bottom: 0;
         z-index: var(--layer-sticky);
@@ -117,20 +117,20 @@
     }
 }
 
-.plinth-save-bar-note {
+.sockel-save-bar-note {
     @include base.truncate;
 
     flex: 1 1 auto;
     color: var(--muted);
 }
 
-.plinth-save-bar-status {
+.sockel-save-bar-status {
     @include base.truncate;
 
     flex: 0 1 auto;
 }
 
-.plinth-save-bar-actions {
+.sockel-save-bar-actions {
     display: flex;
     flex: none;
     gap: var(--space-2);

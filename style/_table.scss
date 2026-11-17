@@ -2,31 +2,31 @@
 // line is a reserved border and a sort mark has its box always, so data
 // arriving, hovering or sorting moves no column or row.
 //
-// - `.plinth-table-frame`: the bulk bar above and the wrap under it.
-// - `.plinth-table-bulk`: the bulk actions' room, one height whether or not
-//   it holds anything; `.plinth-idle` hides it and keeps the room.
-// - `.plinth-table-wrap`: the scroll area (its scrollbar's room kept).
-//   `.plinth-sticky` caps it at `--table-max-height`, the head held to its top.
-// - `.plinth-table`: the table. `.plinth-fixed` sizes columns by the first
+// - `.sockel-table-frame`: the bulk bar above and the wrap under it.
+// - `.sockel-table-bulk`: the bulk actions' room, one height whether or not
+//   it holds anything; `.sockel-idle` hides it and keeps the room.
+// - `.sockel-table-wrap`: the scroll area (its scrollbar's room kept).
+//   `.sockel-sticky` caps it at `--table-max-height`, the head held to its top.
+// - `.sockel-table`: the table. `.sockel-fixed` sizes columns by the first
 //   row alone, so cells are cut rather than widening a column.
-// - `.plinth-table-row`: a row, tinted on hover. `.plinth-table-head-cell`
-//   and `.plinth-table-cell`, a row high; `.plinth-numeric` on a cell sets
-//   figures of one width, to the end. `.plinth-table-empty` holds the empty
+// - `.sockel-table-row`: a row, tinted on hover. `.sockel-table-head-cell`
+//   and `.sockel-table-cell`, a row high; `.sockel-numeric` on a cell sets
+//   figures of one width, to the end. `.sockel-table-empty` holds the empty
 //   or failed state, one row high.
-// - `.plinth-sort-header`: a heading cell with a button
-//   (`.plinth-sort-header-button`) of its label and a mark
-//   (`.plinth-sort-header-mark`) in a box of the glyph size, kept whether
-//   sorted or not. `.plinth-numeric` sets it to the end.
+// - `.sockel-sort-header`: a heading cell with a button
+//   (`.sockel-sort-header-button`) of its label and a mark
+//   (`.sockel-sort-header-mark`) in a box of the glyph size, kept whether
+//   sorted or not. `.sockel-numeric` sets it to the end.
 
 @use "tokens" as base;
 
-.plinth-table-frame {
+.sockel-table-frame {
     display: flex;
     flex-direction: column;
     min-width: 0;
 }
 
-.plinth-table-bulk {
+.sockel-table-bulk {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -34,69 +34,69 @@
     min-height: calc(var(--control-height) + 2 * var(--space-2));
     padding: var(--space-2) var(--space-3);
 
-    &.plinth-idle {
+    &.sockel-idle {
         visibility: hidden;
     }
 }
 
-.plinth-table-wrap {
+.sockel-table-wrap {
     @include base.scroll-area;
 
     min-width: 0;
 
-    &.plinth-sticky {
+    &.sockel-sticky {
         max-height: var(--table-max-height);
     }
 }
 
-.plinth-table {
+.sockel-table {
     @include base.table-base;
 
-    &.plinth-fixed {
+    &.sockel-fixed {
         table-layout: fixed;
     }
 }
 
-.plinth-table-row {
+.sockel-table-row {
     &:hover,
     &:focus-within {
         @include base.table-row-hover;
     }
 }
 
-.plinth-table-head-cell {
+.sockel-table-head-cell {
     @include base.table-head-cell;
 
-    &.plinth-numeric {
+    &.sockel-numeric {
         text-align: end;
     }
 }
 
-.plinth-table-cell {
+.sockel-table-cell {
     @include base.table-cell;
 
-    &.plinth-numeric {
+    &.sockel-numeric {
         text-align: end;
     }
 }
 
-.plinth-table-empty {
+.sockel-table-empty {
     @include base.table-cell;
 
     padding: 0;
 }
 
-.plinth-sort-header {
+.sockel-sort-header {
     @include base.table-head-cell;
 
     padding: 0;
 
-    &.plinth-numeric {
+    &.sockel-numeric {
         text-align: end;
     }
 }
 
-.plinth-sort-header-button {
+.sockel-sort-header-button {
     display: flex;
     align-items: center;
     gap: var(--space-1);
@@ -125,20 +125,20 @@
         outline-offset: calc(-1 * var(--focus-ring-width));
     }
 
-    &.plinth-numeric {
+    &.sockel-numeric {
         justify-content: flex-end;
     }
 }
 
-.plinth-sort-header-label {
+.sockel-sort-header-label {
     @include base.truncate;
 }
 
-.plinth-sort-header-mark {
+.sockel-sort-header-mark {
     display: inline-flex;
     flex: none;
 
-    &.plinth-idle {
+    &.sockel-idle {
         visibility: hidden;
     }
 }

@@ -32,9 +32,9 @@ pub enum ColorSelectWidth {
     /// `--color-select-width`, the label cut past it.
     #[default]
     Fixed,
-    /// Its container's (`.plinth-fill`).
+    /// Its container's (`.sockel-fill`).
     Fill,
-    /// The swatch alone, a square (`.plinth-swatch-only`).
+    /// The swatch alone, a square (`.sockel-swatch-only`).
     Swatch,
 }
 

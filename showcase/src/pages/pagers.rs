@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{Pager, PagerSummary, page_count, pager, pager_button, pager_slots};
+use sockel::{Pager, PagerSummary, page_count, pager, pager_button, pager_slots};
 
 use crate::class;
 use crate::code::{El, snippet};

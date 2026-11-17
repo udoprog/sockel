@@ -1,28 +1,28 @@
 // Pager (src/pager.rs): page buttons in a fixed number of slots.
 //
-// - `.plinth-pager`: the row. It never wraps, and every button is as wide
+// - `.sockel-pager`: the row. It never wraps, and every button is as wide
 //   as the widest page number (`--pager-chars`, the digits of the page
 //   count, set by the component), so the row keeps its width from the first
 //   page to the last; in a container too narrow for them the buttons shrink
-//   together, the same at every page. `.plinth-disabled` and `.plinth-busy` mute it
+//   together, the same at every page. `.sockel-disabled` and `.sockel-busy` mute it
 //   (the `$omit` part `pager.states`).
-// - `.plinth-pager-button`: a page, or the previous and next page. The
+// - `.sockel-pager-button`: a page, or the previous and next page. The
 //   current page (`aria-current`) is marked by colour and background, never
-//   its weight. `.plinth-pager-edge` (first and last page) is hidden on a
+//   its weight. `.sockel-pager-edge` (first and last page) is hidden on a
 //   phone.
-// - `.plinth-pager-gap`: the ellipsis for pages left out, a button's box.
-// - `.plinth-pager-mark`: the chevrons of a button; `.plinth-pager-flip`
-//   turns them to point back; `.plinth-pager-echo` is the second chevron of
+// - `.sockel-pager-gap`: the ellipsis for pages left out, a button's box.
+// - `.sockel-pager-mark`: the chevrons of a button; `.sockel-pager-flip`
+//   turns them to point back; `.sockel-pager-echo` is the second chevron of
 //   the first and last page's double mark.
-// - `.plinth-pager.plinth-summary`: the summary pager, the counts at the
-//   start (`.plinth-pager-status`: `.plinth-pager-shown` over the muted
-//   `.plinth-pager-position`) and previous and next at the end
-//   (`.plinth-pager-steps`); `$pager-summary-padding` pads it (`null`:
+// - `.sockel-pager.sockel-summary`: the summary pager, the counts at the
+//   start (`.sockel-pager-status`: `.sockel-pager-shown` over the muted
+//   `.sockel-pager-position`) and previous and next at the end
+//   (`.sockel-pager-steps`); `$pager-summary-padding` pads it (`null`:
 //   none).
 
 @use "tokens" as base;
 
-.plinth-pager {
+.sockel-pager {
     --pager-button-width: max(
         var(--control-height),
         calc(var(--pager-chars) * 1ch + 2 * var(--space-2) + 2 * var(--space-px))
@@ -43,18 +43,18 @@
     }
 
     @if base.emits("pager.states") {
-        &.plinth-disabled,
-        &.plinth-busy {
+        &.sockel-disabled,
+        &.sockel-busy {
             opacity: 0.6;
         }
 
-        &.plinth-busy {
+        &.sockel-busy {
             cursor: progress;
         }
     }
 }
 
-.plinth-pager-button {
+.sockel-pager-button {
     display: inline-flex;
     flex: 0 1 var(--pager-button-width);
     min-width: 0;
@@ -93,7 +93,7 @@
     }
 
     @if base.emits("pager.edges") {
-        &.plinth-pager-edge {
+        &.sockel-pager-edge {
             @include base.below(phone) {
                 display: none;
             }
@@ -101,7 +101,7 @@
     }
 }
 
-.plinth-pager-gap {
+.sockel-pager-gap {
     display: inline-flex;
     flex: 0 1 var(--pager-button-width);
     min-width: 0;
@@ -113,50 +113,50 @@
     color: var(--muted);
 }
 
-.plinth-pager-mark {
+.sockel-pager-mark {
     display: inline-flex;
     align-items: center;
     color: base.$pager-step-ink;
 
-    &.plinth-pager-flip {
+    &.sockel-pager-flip {
         transform: rotate(180deg);
     }
 }
 
 // The second chevron of a double mark, overlapping the first.
 @if base.emits("pager.edges") {
-    .plinth-pager-echo {
+    .sockel-pager-echo {
         margin-inline-start: calc(-0.6 * var(--glyph-size));
     }
 }
 
 @if base.emits("pager.summary") {
-    .plinth-pager.plinth-summary {
+    .sockel-pager.sockel-summary {
         justify-content: space-between;
         gap: var(--space-3);
         padding: base.$pager-summary-padding;
     }
 
-    .plinth-pager-status {
+    .sockel-pager-status {
         display: flex;
         flex-direction: column;
         min-width: 0;
         line-height: 1.3;
     }
 
-    .plinth-pager-shown {
+    .sockel-pager-shown {
         @include base.truncate;
         font-size: var(--text-sm);
         font-weight: 600;
     }
 
-    .plinth-pager-position {
+    .sockel-pager-position {
         @include base.truncate;
         color: var(--muted);
         font-size: var(--text-xs);
     }
 
-    .plinth-pager-steps {
+    .sockel-pager-steps {
         display: flex;
         flex: none;
         gap: base.$pager-gap;

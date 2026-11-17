@@ -1,39 +1,39 @@
-// ColorSelect (src/color_select.rs): a field's box (`.plinth-input-box`,
+// ColorSelect (src/color_select.rs): a field's box (`.sockel-input-box`,
 // _inputs.scss) showing the chosen colour, opening a grid of swatches.
 //
-// - `.plinth-color-select`: the face, a button, `--color-select-width` wide
-//   whatever is chosen, its label cut with an ellipsis. `.plinth-fill`: as
-//   wide as its container. `.plinth-swatch-only`: the swatch alone, as wide
-//   as the box is high. Sizes, `.plinth-invalid`, `.plinth-disabled` and
-//   `.plinth-busy` are the input box's. Parts: `-label`, `-placeholder`
+// - `.sockel-color-select`: the face, a button, `--color-select-width` wide
+//   whatever is chosen, its label cut with an ellipsis. `.sockel-fill`: as
+//   wide as its container. `.sockel-swatch-only`: the swatch alone, as wide
+//   as the box is high. Sizes, `.sockel-invalid`, `.sockel-disabled` and
+//   `.sockel-busy` are the input box's. Parts: `-label`, `-placeholder`
 //   (muted), `-chevron`.
-// - `.plinth-color-swatch`: a colour's chip, `--swatch-size`, its colour the
-//   `--swatch` custom property. `.plinth-none`: no colour, struck through.
-// - `.plinth-color-list`: the open popup, the menu's surface (_menu.scss) in
-//   the overlay layer, hidden until `.plinth-placed`. `.plinth-color-grid`:
+// - `.sockel-color-swatch`: a colour's chip, `--swatch-size`, its colour the
+//   `--swatch` custom property. `.sockel-none`: no colour, struck through.
+// - `.sockel-color-list`: the open popup, the menu's surface (_menu.scss) in
+//   the overlay layer, hidden until `.sockel-placed`. `.sockel-color-grid`:
 //   its swatches, `--color-select-columns` to a row.
-// - `.plinth-color-option`: a cell at `--control-height` square, its border
-//   reserved: `.plinth-active` (under the keyboard or pointer) changes its
+// - `.sockel-color-option`: a cell at `--control-height` square, its border
+//   reserved: `.sockel-active` (under the keyboard or pointer) changes its
 //   fill only, `[aria-selected="true"]` its border's colour, and `-mark` (a
-//   check over the swatch, its box kept when off, `.plinth-off`) shows.
-// - `.plinth-color-custom`: the row of the native colour input (`-input`)
+//   check over the swatch, its box kept when off, `.sockel-off`) shows.
+// - `.sockel-color-custom`: the row of the native colour input (`-input`)
 //   under the grid, with its `-label`.
 
 @use "tokens" as base;
 @use "menu-surface" as menu;
 
-.plinth-color-select {
+.sockel-color-select {
     width: var(--color-select-width);
     max-width: 100%;
     text-align: start;
     cursor: pointer;
 
-    &.plinth-fill {
+    &.sockel-fill {
         flex: 1 1 auto;
         width: 100%;
     }
 
-    &.plinth-swatch-only {
+    &.sockel-swatch-only {
         justify-content: center;
         width: var(--input-height);
         padding-inline: 0;
@@ -43,29 +43,29 @@
         --input-edge: var(--accent);
     }
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         cursor: not-allowed;
     }
 }
 
-.plinth-color-select-label {
+.sockel-color-select-label {
     flex: 1 1 auto;
     min-width: 0;
     @include base.truncate;
 }
 
-.plinth-color-select-placeholder {
+.sockel-color-select-placeholder {
     color: var(--muted);
 }
 
-.plinth-color-select-chevron {
+.sockel-color-select-chevron {
     display: inline-flex;
     flex: none;
     align-items: center;
     color: var(--muted);
 }
 
-.plinth-color-swatch {
+.sockel-color-swatch {
     flex: none;
     box-sizing: border-box;
     width: var(--swatch-size);
@@ -74,7 +74,7 @@
     border-radius: var(--radius-xs);
     background: var(--swatch, transparent);
 
-    &.plinth-none {
+    &.sockel-none {
         background: linear-gradient(
             to top right,
             transparent calc(50% - var(--space-px)),
@@ -85,21 +85,21 @@
     }
 }
 
-.plinth-color-list {
+.sockel-color-list {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
     // The grid is as high as its rows and only a very short window makes
     // the list scroll: no scrollbar room kept beside it until it does.
     scrollbar-gutter: auto;
 }
 
-.plinth-color-grid {
+.sockel-color-grid {
     display: grid;
     grid-template-columns: repeat(var(--color-select-columns, 6), var(--control-height));
     gap: var(--space-0);
     padding: var(--space-1);
 }
 
-.plinth-color-option {
+.sockel-color-option {
     position: relative;
     display: flex;
     align-items: center;
@@ -111,7 +111,7 @@
     border-radius: var(--radius-sm);
     cursor: pointer;
 
-    &.plinth-active {
+    &.sockel-active {
         @include menu.item-active;
     }
 
@@ -120,7 +120,7 @@
     }
 }
 
-.plinth-color-option-mark {
+.sockel-color-option-mark {
     position: absolute;
     inset: 0;
     display: flex;
@@ -133,12 +133,12 @@
     background: var(--surface-raised);
     color: var(--text);
 
-    &.plinth-off {
+    &.sockel-off {
         visibility: hidden;
     }
 }
 
-.plinth-color-custom {
+.sockel-color-custom {
     display: flex;
     align-items: center;
     gap: var(--space-2);
@@ -149,13 +149,13 @@
     cursor: pointer;
 }
 
-.plinth-color-custom-label {
+.sockel-color-custom-label {
     flex: 1 1 auto;
     min-width: 0;
     @include base.truncate;
 }
 
-.plinth-color-custom-input {
+.sockel-color-custom-input {
     flex: none;
     box-sizing: border-box;
     width: var(--control-height);

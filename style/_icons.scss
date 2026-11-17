@@ -1,12 +1,12 @@
-// plinth's own icons (src/icons.rs).
+// sockel's own icons (src/icons.rs).
 //
-// - `.plinth-glyph`: the fixed box an icon sits in, `--glyph-size` square, so
+// - `.sockel-glyph`: the fixed box an icon sits in, `--glyph-size` square, so
 //   the icon an app supplies can never change a control's size. What fills it
 //   is cut to the box and sized to it, and takes the text's colour.
-// - `.plinth-spin`: turns the box, for a busy mark; still when the user
+// - `.sockel-spin`: turns the box, for a busy mark; still when the user
 //   prefers reduced motion.
 
-.plinth-glyph {
+.sockel-glyph {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -26,8 +26,8 @@
         height: 100%;
     }
 
-    &.plinth-spin {
-        animation: plinth-spin 0.9s linear infinite;
+    &.sockel-spin {
+        animation: sockel-spin 0.9s linear infinite;
 
         @media (prefers-reduced-motion: reduce) {
             animation-duration: 3.6s;
@@ -35,7 +35,7 @@
     }
 }
 
-@keyframes plinth-spin {
+@keyframes sockel-spin {
     to {
         transform: rotate(1turn);
     }

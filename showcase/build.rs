@@ -1,5 +1,5 @@
 fn main() {
-    plinth_build::Config::new()
+    sockel_build::Config::new()
         .local("style/")
         .prefix("showcase-")
         .compile();

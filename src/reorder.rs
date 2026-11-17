@@ -86,24 +86,24 @@ pub fn reorder_text(text: &ReorderText) -> String {
 
 fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
     let (id, name, place) = match text {
-        ReorderText::Handle { name } => ("plinth-reorder-handle", Some(name), None),
-        ReorderText::Hint => ("plinth-reorder-hint", None, None),
+        ReorderText::Handle { name } => ("sockel-reorder-handle", Some(name), None),
+        ReorderText::Hint => ("sockel-reorder-hint", None, None),
         ReorderText::Lifted {
             name,
             position,
             count,
-        } => ("plinth-reorder-lifted", Some(name), Some((position, count))),
+        } => ("sockel-reorder-lifted", Some(name), Some((position, count))),
         ReorderText::Moving {
             name,
             position,
             count,
-        } => ("plinth-reorder-moving", Some(name), Some((position, count))),
+        } => ("sockel-reorder-moving", Some(name), Some((position, count))),
         ReorderText::Dropped {
             name,
             position,
             count,
         } => (
-            "plinth-reorder-dropped",
+            "sockel-reorder-dropped",
             Some(name),
             Some((position, count)),
         ),
@@ -112,7 +112,7 @@ fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
             position,
             count,
         } => (
-            "plinth-reorder-cancelled",
+            "sockel-reorder-cancelled",
             Some(name),
             Some((position, count)),
         ),

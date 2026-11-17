@@ -1,9 +1,9 @@
-//! [`FEATURES`] against plinth's Cargo.toml and its partials.
+//! [`FEATURES`] against sockel's Cargo.toml and its partials.
 
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use crate::{Config, FEATURE_PARTS, FEATURES, STYLE, class_names, plinth, test_sources};
+use crate::{Config, FEATURE_PARTS, FEATURES, STYLE, class_names, sockel, test_sources};
 
 /// Partials in every build, whatever the features.
 const ALWAYS: &[&str] = &[
@@ -15,7 +15,7 @@ const ALWAYS: &[&str] = &[
     "utilities",
 ];
 
-/// plinth's `[features]`, each with the features it names.
+/// sockel's `[features]`, each with the features it names.
 fn cargo_features() -> BTreeMap<String, Vec<String>> {
     let manifest = Path::new(STYLE).join("../Cargo.toml");
     let manifest = std::fs::read_to_string(manifest).unwrap();
@@ -51,7 +51,7 @@ fn source(partial: &str) -> String {
 fn partial_classes(partial: &str) -> BTreeSet<String> {
     let sources = test_sources();
     let options = grass::Options::default().fs(&sources).load_path("");
-    let css = grass::from_string(format!("@use \"plinth/{partial}\";\n"), &options).unwrap();
+    let css = grass::from_string(format!("@use \"sockel/{partial}\";\n"), &options).unwrap();
     class_names(&css).into_iter().collect()
 }
 
@@ -104,9 +104,9 @@ fn every_partial_has_one_feature_or_is_always_in() {
 #[test]
 fn all_features_build_the_whole_stylesheet() {
     let names = FEATURES.iter().map(|(name, _)| *name);
-    let all = plinth().features(names).build().unwrap();
-    assert_eq!(all, plinth().build().unwrap());
-    assert!(plinth().features(["nope"]).build().is_err());
+    let all = sockel().features(names).build().unwrap();
+    assert_eq!(all, sockel().build().unwrap());
+    assert!(sockel().features(["nope"]).build().is_err());
 }
 
 #[test]
@@ -117,17 +117,17 @@ fn each_feature_s_css_is_its_own() {
         .filter(|partial| **partial != "index")
         .flat_map(|partial| partial_classes(partial))
         .collect();
-    let none = plinth().features([] as [&str; 0]).build().unwrap();
+    let none = sockel().features([] as [&str; 0]).build().unwrap();
     for (feature, _) in FEATURES {
         let enabled = closure(&cargo, feature);
         let mut allowed = always.clone();
-        allowed.extend(none.plinth_classes.iter().cloned());
+        allowed.extend(none.sockel_classes.iter().cloned());
         for (_, partials) in FEATURES.iter().filter(|(name, _)| enabled.contains(*name)) {
             for partial in *partials {
                 allowed.extend(own_classes(partial));
             }
         }
-        let css = plinth().features(&enabled).build().unwrap().css;
+        let css = sockel().features(&enabled).build().unwrap().css;
         let foreign: Vec<_> = class_names(&css)
             .into_iter()
             .filter(|class| !allowed.contains(class))
@@ -171,10 +171,10 @@ fn each_feature_defines_the_tokens_it_reads() {
     let cargo = cargo_features();
     let sources = test_sources();
     let options = grass::Options::default().fs(&sources).load_path("");
-    let tokens = grass::from_string("@use \"plinth/tokens\";\n", &options).unwrap();
+    let tokens = grass::from_string("@use \"sockel/tokens\";\n", &options).unwrap();
     let (full, _) = custom_properties(&tokens);
     for (feature, _) in FEATURES {
-        let css = plinth()
+        let css = sockel()
             .features(closure(&cargo, feature))
             .build()
             .unwrap()
@@ -191,10 +191,10 @@ fn each_feature_defines_the_tokens_it_reads() {
 #[test]
 fn a_subset_leaves_out_its_parts_and_an_apps() {
     let css = |config: Config| config.build().unwrap().css;
-    let layout = css(plinth().features(["layout"]));
+    let layout = css(sockel().features(["layout"]));
     assert!(!layout.contains("--table-max-height:"));
-    assert!(css(plinth()).contains("--table-max-height:"));
-    let omitted = css(plinth()
+    assert!(css(sockel()).contains("--table-max-height:"));
+    let omitted = css(sockel()
         .features(["layout"])
         .with("omit", r#""layout.toolbar""#));
     assert!(!omitted.contains("--table-max-height:"));

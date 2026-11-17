@@ -1,4 +1,4 @@
-// Plinth's tokens and mixins: the size, space and type scales every
+// Sockel's tokens and mixins: the size, space and type scales every
 // primitive reads, the breakpoints, and the recipes for a page's column and
 // for rounded things nested in rounded things.
 //
@@ -9,7 +9,7 @@
 //   `--radius-md` (bars and panels between), `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
 // - `--control-height` and `--control-height-small`: every field, button
 //   and picker button is one of the two, so a row of them never jumps.
-// - `--glyph-size`: the box of one of plinth's own icons, whatever icon fills it.
+// - `--glyph-size`: the box of one of sockel's own icons, whatever icon fills it.
 // - `--swatch-size`: a colour swatch's box; `--color-select-width`: a ColorSelect face's width.
 // - `--skeleton-duration`: the time a skeleton's shimmer takes to cross.
 // - `--table-max-height`: where a table with a sticky head starts to scroll.
@@ -60,7 +60,7 @@
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
 //   `scroll-area`, `truncate`, `clamp($lines)`, `visually-hidden`,
 //   `phone-only`, `desktop-only`, `current($by)`, `scroll-fade`.
-// - Tables, for markup plinth does not render: `table-base`,
+// - Tables, for markup sockel does not render: `table-base`,
 //   `table-head-cell`, `table-cell`, `table-row-hover`.
 // - `tones`: the `--tone` modifiers (accent, busy, success, warning, danger).
 
@@ -125,7 +125,7 @@ $button-radius: var(--radius-inner, var(--radius-sm)) !default;
 $button-gap: null !default;
 $button-press-shade: null !default;
 $button-transition: null !default;
-// A button's colours per variant, over plinth's: a map from `secondary`,
+// A button's colours per variant, over sockel's: a map from `secondary`,
 // `primary`, `ghost`, `quiet`, `danger` or `success` to any of `fill`,
 // `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`,
 // `pressed-ink` and `pressed-edge`. A variant falls back on the plain button's.
@@ -517,7 +517,7 @@ $-parts: (
     --text-title: #{$text-title};
     --text-xl: #{$text-xl};
     --text-2xl: #{$text-2xl};
-    // A section head's title (`.plinth-section-head-title`).
+    // A section head's title (`.sockel-section-head-title`).
     --section-title-size: #{$section-title-size};
 
     --space-0: #{$space-0};
@@ -541,22 +541,22 @@ $-parts: (
     // The one gap between a rounded container and the rounded items in it.
     --nest-inset: #{$nest-inset};
     --control-height: #{$control-height};
-    // A small control (`button.small`, `.plinth-input.small`), for dense places.
+    // A small control (`button.small`, `.sockel-input.small`), for dense places.
     --control-height-small: #{$control-height-small};
     // A mark (an icon or a badge beside text) and a touch target.
     --mark-height: #{$mark-height};
     --touch-height: #{$touch-height};
-    // A status dot (`.plinth-dot`, a pill's lead) and a badge over a corner.
+    // A status dot (`.sockel-dot`, a pill's lead) and a badge over a corner.
     --dot-size: #{$dot-size};
     --corner-size: #{$corner-size};
-    // The box an icon of plinth's own sits in (`.plinth-glyph`).
+    // The box an icon of sockel's own sits in (`.sockel-glyph`).
     --glyph-size: #{$glyph-size};
-    // A colour swatch (`.plinth-color-swatch`) and a ColorSelect face's width.
+    // A colour swatch (`.sockel-color-swatch`) and a ColorSelect face's width.
     @if emits("tokens.color-select") {
         --swatch-size: #{$swatch-size};
         --color-select-width: #{$color-select-width};
     }
-    // The time a skeleton's shimmer takes to cross (`.plinth-skeleton`).
+    // The time a skeleton's shimmer takes to cross (`.sockel-skeleton`).
     --skeleton-duration: #{$skeleton-duration};
     @if emits("tokens.toggles") {
         --check-size: #{$check-size};
@@ -568,17 +568,17 @@ $-parts: (
     @if emits("tokens.filter-picker") {
         --filter-width: #{$filter-width};
     }
-    // How many rows a searching list keeps room for (`.plinth-search-select-list`).
+    // How many rows a searching list keeps room for (`.sockel-search-select-list`).
     @if emits("tokens.picker") {
         --picker-rows: #{$picker-rows};
     }
-    // A field's label column, and its hint and error line (`.plinth-field`).
+    // A field's label column, and its hint and error line (`.sockel-field`).
     @if emits("tokens.fields") {
         --field-label-width: #{$field-label-width};
         --field-message-line: #{$field-message-line};
         --field-error-lines: #{$field-error-lines};
     }
-    // An avatar's sizes (`.plinth-avatar`, its `-small`, `-large`, `-huge`).
+    // An avatar's sizes (`.sockel-avatar`, its `-small`, `-large`, `-huge`).
     @if emits("tokens.media") {
         --avatar-sm: #{$avatar-sm};
         --avatar-md: #{$avatar-md};
@@ -586,7 +586,7 @@ $-parts: (
         --avatar-xl: #{$avatar-xl};
     }
 
-    // The narrowest column of a card grid (`.plinth-card-grid`, its `-wide`,
+    // The narrowest column of a card grid (`.sockel-card-grid`, its `-wide`,
     // `-narrow` and `-narrow` on a phone).
     @if emits("tokens.card-grid") {
         --card-grid-min: #{$card-grid-min};
@@ -595,13 +595,13 @@ $-parts: (
         --card-grid-narrow-phone: #{$card-grid-narrow-phone};
     }
 
-    // How tall a sticky-headed table (`.plinth-table-wrap.plinth-sticky`) grows
+    // How tall a sticky-headed table (`.sockel-table-wrap.sockel-sticky`) grows
     // before it scrolls.
     @if emits("tokens.table") {
         --table-max-height: #{$table-max-height};
     }
 
-    // A drop zone (`.plinth-drop-zone`): its least height, and how strongly
+    // A drop zone (`.sockel-drop-zone`): its least height, and how strongly
     // its overlay tints it while a file is dragged near, and over it.
     @if emits("tokens.drop") {
         --drop-min-height: #{$drop-min-height};
@@ -741,20 +741,20 @@ $-parts: (
 // The tone modifiers every mark and message shares (`Tone` in src/badge.rs):
 // each sets `--tone` and nothing else. Neutral has no class.
 @mixin tones {
-    &.plinth-accent,
-    &.plinth-busy {
+    &.sockel-accent,
+    &.sockel-busy {
         --tone: var(--accent);
     }
 
-    &.plinth-success {
+    &.sockel-success {
         --tone: var(--success);
     }
 
-    &.plinth-warning {
+    &.sockel-warning {
         --tone: var(--warning);
     }
 
-    &.plinth-danger {
+    &.sockel-danger {
         --tone: var(--danger);
     }
 }
@@ -842,11 +842,11 @@ $-parts: (
     mask-image: linear-gradient(
         to right,
         transparent,
-        #000 var(--plinth-fade-start),
-        #000 calc(100% - var(--plinth-fade-end)),
+        #000 var(--sockel-fade-start),
+        #000 calc(100% - var(--sockel-fade-end)),
         transparent
     );
-    animation: plinth-toolbar-fade linear;
+    animation: sockel-toolbar-fade linear;
     animation-timeline: scroll(self inline);
 
     &::-webkit-scrollbar {
@@ -922,11 +922,11 @@ $-parts: (
     background: color-mix(in srgb, var(--text) 4%, transparent);
 }
 
-// The recipes of plinth's own classes, for markup plinth does not render (a
+// The recipes of sockel's own classes, for markup sockel does not render (a
 // dependency's sign-in forms, say), so it looks the same. Each is the rule
 // of the class it names, which includes it.
 
-// `.plinth-stack`: a column, its blocks `$gap` apart.
+// `.sockel-stack`: a column, its blocks `$gap` apart.
 @mixin stack($gap: var(--space-3)) {
     display: flex;
     flex-direction: column;
@@ -934,7 +934,7 @@ $-parts: (
     min-width: 0;
 }
 
-// `.plinth-cluster`: a row, its items centred, `$gap` apart; `$wrap: false`
+// `.sockel-cluster`: a row, its items centred, `$gap` apart; `$wrap: false`
 // keeps it to one line.
 @mixin cluster($gap: var(--space-2), $wrap: true) {
     display: flex;
@@ -948,7 +948,7 @@ $-parts: (
     min-width: 0;
 }
 
-// `.plinth-card`: a surface lifted off the page.
+// `.sockel-card`: a surface lifted off the page.
 @mixin card {
     padding: $card-padding;
     @include reserved-border(var(--card-border), var(--card-border-width));
@@ -958,7 +958,7 @@ $-parts: (
     color: var(--text);
 }
 
-// `.plinth-field`: a label, its control, a hint and an error, stacked.
+// `.sockel-field`: a label, its control, a hint and an error, stacked.
 @mixin field {
     display: flex;
     flex-direction: column;
@@ -966,16 +966,16 @@ $-parts: (
     min-width: 0;
 }
 
-// `.plinth-field-label`.
+// `.sockel-field-label`.
 @mixin field-label {
     min-width: 0;
     font-size: var(--text-sm);
     overflow-wrap: anywhere;
 }
 
-// The colours of a `.plinth-button` variant: `secondary` (the plain
+// The colours of a `.sockel-button` variant: `secondary` (the plain
 // button), `primary`, `ghost`, `quiet`, `danger` or `success`, each with
-// its `$button-colours` in place of plinth's.
+// its `$button-colours` in place of sockel's.
 $-button-variants: (
     secondary: (fill: var(--surface), ink: var(--text), edge: var(--border), hover-edge: var(--accent)),
     primary: (fill: var(--accent), ink: var(--on-accent), edge: var(--accent), hover-edge: var(--text)),
@@ -1008,7 +1008,7 @@ $-button-variants: (
     }
 }
 
-// `.plinth-button`, the plain one; pass a variant for another. Its states
+// `.sockel-button`, the plain one; pass a variant for another. Its states
 // (hover, focus, `aria-pressed`, `aria-busy`, disabled) come with it. A
 // button's content is laid out by the app's markup, as a row with a gap.
 @mixin button($variant: secondary) {
@@ -1083,8 +1083,8 @@ $-button-variants: (
     }
 }
 
-// The box of a text field (`.plinth-input`, `.plinth-textarea`,
-// `.plinth-input-box`): its border, fill and the size modifiers.
+// The box of a text field (`.sockel-input`, `.sockel-textarea`,
+// `.sockel-input-box`): its border, fill and the size modifiers.
 @mixin input-box {
     --input-height: var(--control-height);
     --input-edge: var(--field-border);
@@ -1119,26 +1119,26 @@ $-button-variants: (
     }
 
     @if emits("inputs.small") {
-        &.plinth-small {
+        &.sockel-small {
             --input-height: var(--control-height-small);
             font-size: var(--text-sm);
         }
     }
 
     @if emits("inputs.touch") {
-        &.plinth-touch {
+        &.sockel-touch {
             --input-height: var(--touch-height);
         }
     }
 
     @if emits("inputs.busy") {
-        &.plinth-busy {
+        &.sockel-busy {
             cursor: progress;
         }
     }
 }
 
-// `.plinth-input`: a bare text input.
+// `.sockel-input`: a bare text input.
 @mixin input {
     @include input-box;
     flex: none;

@@ -1,5 +1,5 @@
 #!/usr/bin/env bash
-# Builds and tests a minimal app against plinth and plinth-build as packaged
+# Builds and tests a minimal app against sockel and sockel-build as packaged
 # (`cargo package`), the way an app depending on them from a registry gets
 # them. The app's files are the README's getting-started blocks, each
 # marked `<!-- check: FILE -->`; blocks marked with the same file are joined
@@ -14,10 +14,10 @@ cd "$(dirname "$0")/.."
 root=$PWD
 scratch=$root/target/package-check
 rm -rf "$scratch/crates" "$scratch/app" "$scratch/variants"
-mkdir -p "$scratch/crates/plinth" "$scratch/crates/plinth-build" "$scratch/app"
+mkdir -p "$scratch/crates/sockel" "$scratch/crates/sockel-build" "$scratch/app"
 
-cargo package --offline --no-verify --allow-dirty --exclude-lockfile --quiet -p plinth-build -p plinth
-for name in plinth plinth-build; do
+cargo package --offline --no-verify --allow-dirty --exclude-lockfile --quiet -p sockel-build -p sockel
+for name in sockel sockel-build; do
     version=$(cargo pkgid --offline -p "$name" | sed 's/.*[@#]//')
     # Fresh mtimes, so a changed package rebuilds in the kept target.
     tar -xzmf "target/package/$name-$version.crate" -C "$scratch/crates/$name"
@@ -46,25 +46,25 @@ sed -i "1i [package]\nname = \"packaged-app\"\nedition = \"2024\"\npublish = fal
 cat >> Cargo.toml <<EOF
 
 [patch.crates-io]
-plinth = { path = "$(echo "$scratch"/crates/plinth/plinth-*)" }
-plinth-build = { path = "$(echo "$scratch"/crates/plinth-build/plinth-build-*)" }
+sockel = { path = "$(echo "$scratch"/crates/sockel/sockel-*)" }
+sockel-build = { path = "$(echo "$scratch"/crates/sockel-build/sockel-build-*)" }
 
 [workspace]
 EOF
 cp "$root/Cargo.lock" .
 
-# What the README cannot show: the stylesheet is the packaged plinth's, with
+# What the README cannot show: the stylesheet is the packaged sockel's, with
 # the app's feature subset, then the app's own rules.
 cat > tests/packaged.rs <<'EOF'
 const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
 #[test]
 fn builds_from_the_packages() {
-    assert!(env!("PLINTH_STYLE").contains("/target/package-check/crates/plinth/"));
-    assert!(STYLESHEET.starts_with(plinth::STYLESHEET));
-    assert!(STYLESHEET.contains(".plinth-stack {"));
+    assert!(env!("SOCKEL_STYLE").contains("/target/package-check/crates/sockel/"));
+    assert!(STYLESHEET.starts_with(sockel::STYLESHEET));
+    assert!(STYLESHEET.contains(".sockel-stack {"));
     assert!(STYLESHEET.contains(".app-sidebar {"));
-    assert!(!STYLESHEET.contains(".plinth-table"));
+    assert!(!STYLESHEET.contains(".sockel-table"));
 }
 EOF
 

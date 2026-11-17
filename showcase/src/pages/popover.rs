@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, Cluster, Dismiss, Fit, Popover, PopoverAlign, Side, Stack,
     button,
 };
@@ -80,7 +80,7 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
                 <button type="button" ref={anchor.clone()} class={classes}
                     style={props.match_anchor.then_some("min-width: 20rem")}
                     aria-expanded={open.to_string()} onclick={toggle}>
-                    <span class={plinth::class::BUTTON_LABEL}>{ "Open the popover" }</span>
+                    <span class={sockel::class::BUTTON_LABEL}>{ "Open the popover" }</span>
                 </button>
             </Cluster>
             <p class={class::SAMPLE}>{ "The page under the popover: it does not move as it opens, flips or closes." }</p>

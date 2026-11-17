@@ -1,18 +1,18 @@
-// Select (src/select.rs): a field's box (`.plinth-input-box`, _inputs.scss)
+// Select (src/select.rs): a field's box (`.sockel-input-box`, _inputs.scss)
 // showing what is chosen, opening a listbox (_listbox.scss).
 //
-// - `.plinth-select`: the face, a button. As wide as its widest option or
+// - `.sockel-select`: the face, a button. As wide as its widest option or
 //   placeholder (every label is in `-value`'s one grid cell, the others
-//   `.plinth-hidden`), so a pick never changes its width; cut with an
-//   ellipsis past its container. `.plinth-fill`: as wide as its container
-//   instead. Sizes, `.plinth-invalid`, `.plinth-disabled` and `.plinth-busy`
+//   `.sockel-hidden`), so a pick never changes its width; cut with an
+//   ellipsis past its container. `.sockel-fill`: as wide as its container
+//   instead. Sizes, `.sockel-invalid`, `.sockel-disabled` and `.sockel-busy`
 //   are the input box's.
 // - Parts: `-value` (the labels' cell), `-text` (one label), `-placeholder`
 //   (the placeholder, muted), `-chevron`.
-// - With a filter field, the list (`.plinth-listbox`) is `.plinth-select-popup`:
+// - With a filter field, the list (`.sockel-listbox`) is `.sockel-select-popup`:
 //   `-filter` (the field, staying at its top as the options scroll under
 //   it), `-options` (the `role="listbox"`), `-empty` (no option matches).
-// - With `sheet`, the list is also `.plinth-select-sheet`: below
+// - With `sheet`, the list is also `.sockel-select-sheet`: below
 //   `$sheet-breakpoint` a sheet from the bottom over `-scrim`, its `-head`
 //   (`-title`, the close button) above `-body`, which scrolls; above it the
 //   head and scrim are not shown and the list is as without.
@@ -21,13 +21,13 @@
 @use "tokens" as base;
 @use "hidden";
 
-.plinth-select {
+.sockel-select {
     width: max-content;
     max-width: 100%;
     text-align: start;
     cursor: pointer;
 
-    &.plinth-fill {
+    &.sockel-fill {
         flex: 1 1 auto;
         width: 100%;
     }
@@ -36,30 +36,30 @@
         --input-edge: var(--accent);
     }
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         cursor: not-allowed;
     }
 }
 
-.plinth-select-value {
+.sockel-select-value {
     display: grid;
     flex: 1 1 auto;
     grid-template-columns: minmax(0, 1fr);
     min-width: 0;
 }
 
-.plinth-select-text,
-.plinth-select-placeholder {
+.sockel-select-text,
+.sockel-select-placeholder {
     grid-area: 1 / 1;
     min-width: 0;
     @include base.truncate;
 }
 
-.plinth-select-placeholder {
+.sockel-select-placeholder {
     color: var(--muted);
 }
 
-.plinth-select-chevron {
+.sockel-select-chevron {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -68,11 +68,11 @@
 
 // The field's own inset in place of the surface's, so it does not move as
 // the options scroll under it.
-.plinth-select-popup {
+.sockel-select-popup {
     padding-top: 0;
 }
 
-.plinth-select-filter {
+.sockel-select-filter {
     position: sticky;
     top: 0;
     z-index: 1;
@@ -81,19 +81,19 @@
     padding: var(--nest-inset) 0 var(--space-1);
     background: var(--surface-raised);
 
-    > .plinth-input-box {
+    > .sockel-input-box {
         flex: 1 1 auto;
     }
 }
 
-.plinth-select-options {
+.sockel-select-options {
     display: flex;
     flex: none;
     flex-direction: column;
     gap: var(--space-0);
 }
 
-.plinth-select-empty {
+.sockel-select-empty {
     flex: none;
     margin: 0;
     padding: var(--space-2) var(--space-3);
@@ -101,18 +101,18 @@
     font-size: var(--text-sm);
 }
 
-.plinth-select-head,
-.plinth-select-scrim {
+.sockel-select-head,
+.sockel-select-scrim {
     display: none;
 }
 
-.plinth-select-title {
+.sockel-select-title {
     @include base.truncate;
     font-weight: 600;
 }
 
 @include base.below(base.$sheet-breakpoint) {
-    .plinth-select-sheet {
+    .sockel-select-sheet {
         top: auto;
         right: 0;
         bottom: 0;
@@ -132,7 +132,7 @@
         }
     }
 
-    .plinth-select-head {
+    .sockel-select-head {
         display: flex;
         flex: none;
         align-items: center;
@@ -141,7 +141,7 @@
         padding: 0 0 var(--space-1) var(--space-3);
     }
 
-    .plinth-select-body {
+    .sockel-select-body {
         display: flex;
         flex: 1 1 auto;
         flex-direction: column;
@@ -150,7 +150,7 @@
         overscroll-behavior: contain;
     }
 
-    .plinth-select-scrim {
+    .sockel-select-scrim {
         position: fixed;
         inset: 0;
         z-index: var(--layer-overlay);

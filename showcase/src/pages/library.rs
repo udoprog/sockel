@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::LibraryToolbar;
+use sockel::LibraryToolbar;
 
 use crate::code::{El, each, snippet};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};

@@ -246,7 +246,7 @@ where
     T: PartialEq + Clone + 'static,
 {
     let phrases = use_phrases_with(&L10N);
-    let search_label = label(&phrases, &props.search_label, "plinth-picker-search");
+    let search_label = label(&phrases, &props.search_label, "sockel-picker-search");
     let id = use_state(|| crate::tooltip::next_id("choice-list"));
     let query = use_state_eq(String::new);
     let state = use_mut_ref(Listbox::default);
@@ -515,7 +515,7 @@ where
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
                 onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
                 if shown.is_empty() {
-                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "plinth-picker-empty") }</div>
+                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "sockel-picker-empty") }</div>
                 } else {
                     { for shown.iter().copied().map(option) }
                 }
@@ -632,7 +632,7 @@ pub struct PickerProps<T: PartialEq + 'static> {
     pub placeholder: AttrValue,
     #[prop_or_default]
     pub variant: PickerVariant,
-    /// As wide as its container (`.plinth-fill`).
+    /// As wide as its container (`.sockel-fill`).
     #[prop_or_default]
     pub fill: bool,
     #[prop_or_default]
@@ -660,7 +660,7 @@ pub struct PickerProps<T: PartialEq + 'static> {
     #[prop_or_default]
     pub title: Option<AttrValue>,
     /// The current option's icon alone below the phone breakpoint, its
-    /// label kept for a screen reader (`.plinth-fold` on the text).
+    /// label kept for a screen reader (`.sockel-fold` on the text).
     #[prop_or_default]
     pub fold: bool,
     /// See [`ChoiceListProps::on_search`].
@@ -867,7 +867,7 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     /// choices, such as a filter. ArrowDown and ArrowUp open it.
     #[prop_or_default]
     pub field: bool,
-    /// With `field`, as wide as its container (`.plinth-fill`).
+    /// With `field`, as wide as its container (`.sockel-fill`).
     #[prop_or_default]
     pub fill: bool,
     /// The button's classes, beside the button's own.

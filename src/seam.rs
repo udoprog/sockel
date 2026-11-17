@@ -253,11 +253,11 @@ pub fn Seam(props: &SeamProps) -> Html {
 
     html! {
         <div ref={root} class={classes!(seam(axis, *held), props.class.clone())}
-            style={format!("--plinth-seam-at: {at}")}
+            style={format!("--sockel-seam-at: {at}")}
             data-testid={props.testid.clone()}>
             <div ref={start} class={class::SEAM_PANE}>{ props.start.clone() }</div>
             <div ref={grip} class={class::SEAM_GRIP} role="separator" tabindex="0"
-                aria-orientation={orientation} aria-label={label(&phrases, &props.label, "plinth-seam-resize")}
+                aria-orientation={orientation} aria-label={label(&phrases, &props.label, "sockel-seam-resize")}
                 aria-valuemin="0" aria-valuemax="100"
                 aria-valuenow={format!("{:.0}", at * 100.0)}
                 {onpointerdown} {onpointermove}

@@ -1,11 +1,11 @@
-//! Plinth: the layout primitives and components a Yew app is built from,
+//! Sockel: the layout primitives and components a Yew app is built from,
 //! each a component and its Sass (`style/`), its variants modifier classes
 //! set by props, so the markup and the styles stay in step.
 //!
 //! [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
-//! app with Sass of its own builds it with plinth-build after plinth's, into
-//! one stylesheet, and passes that to [`Styles`] (README: "Adopting plinth").
-//! The colours are the app's: plinth reads `--bg`, `--surface`, `--text`,
+//! app with Sass of its own builds it with sockel-build after sockel's, into
+//! one stylesheet, and passes that to [`Styles`] (README: "Adopting sockel").
+//! The colours are the app's: sockel reads `--bg`, `--surface`, `--text`,
 //! `--muted`, `--border`, `--accent` and `--shadow-1`, and derives
 //! overridable defaults for `--danger`, `--success`, `--warning`,
 //! `--on-accent`, `--surface-raised` and `--scrim` from them.
@@ -13,9 +13,9 @@
 //! Each component (or small family) is a Cargo feature that gates its Rust,
 //! its class constants and its CSS together; `full`, the default, has all.
 //!
-//! The utilities against jitter (`.plinth-numeric`, `.plinth-scroll-area`,
-//! `.plinth-truncate`, `.plinth-clamp-*`, `.plinth-visually-hidden`,
-//! `.plinth-phone-only`, `.plinth-desktop-only`, `.plinth-focus-ring`) are
+//! The utilities against jitter (`.sockel-numeric`, `.sockel-scroll-area`,
+//! `.sockel-truncate`, `.sockel-clamp-*`, `.sockel-visually-hidden`,
+//! `.sockel-phone-only`, `.sockel-desktop-only`, `.sockel-focus-ring`) are
 //! classes only, in [`class`]; their mixins are in README: "Against jitter".
 //!
 //! - [`Stack`] (`.stack`): a column, its blocks a gap apart.
@@ -43,7 +43,7 @@
 //!   password with show, copy and clear slots that keep their room.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
-//! - [`Icon`] (`.glyph` or `.name`), [`IconSet`], [`use_icon`]: plinth's and the app's icons, from
+//! - [`Icon`] (`.glyph` or `.name`), [`IconSet`], [`use_icon`]: sockel's and the app's icons, from
 //!   the set an app provides or a built-in one, in a fixed box.
 //! - [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
 //!   placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
@@ -152,16 +152,16 @@
 // A subset of features leaves some of the shared helpers unused.
 #![cfg_attr(not(feature = "full"), allow(dead_code, unused_imports))]
 
-/// A constant per class of [`STYLESHEET`], generated from plinth's Sass by
-/// plinth-build: without the `plinth-` prefix, upper case, `-` as `_`
-/// (`.plinth-page-head-title` is [`class::PAGE_HEAD_TITLE`]), so a misspelt class does not compile.
+/// A constant per class of [`STYLESHEET`], generated from sockel's Sass by
+/// sockel-build: without the `sockel-` prefix, upper case, `-` as `_`
+/// (`.sockel-page-head-title` is [`class::PAGE_HEAD_TITLE`]), so a misspelt class does not compile.
 ///
 /// ```
-/// assert_eq!(plinth::class::PAGE_HEAD_TITLE, "plinth-page-head-title");
+/// assert_eq!(sockel::class::PAGE_HEAD_TITLE, "sockel-page-head-title");
 /// ```
 ///
 /// ```compile_fail
-/// let _ = plinth::class::STAK;
+/// let _ = sockel::class::STAK;
 /// ```
 pub mod class {
     include!(concat!(env!("OUT_DIR"), "/classes.rs"));

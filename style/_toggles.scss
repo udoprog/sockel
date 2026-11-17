@@ -2,26 +2,26 @@
 // state is marked by colour and background, never by weight, and every
 // box is a fixed size, so a toggle keeps its box across its states.
 //
-// - `.plinth-checkbox`: a label around a native checkbox and its text. The
+// - `.sockel-checkbox`: a label around a native checkbox and its text. The
 //   box (`-mark`, `--check-size` square) holds the input drawn as a box and
 //   the check or minus glyph over it. `-label` is the text.
-// - `.plinth-switch`: a button (`role="switch"`) of a track and thumb
+// - `.sockel-switch`: a button (`role="switch"`) of a track and thumb
 //   (`--switch-width` by `--switch-height`) and an optional label. The thumb
-//   moves by transform; `.plinth-on` is its state, `[aria-busy]` puts a
+//   moves by transform; `.sockel-on` is its state, `[aria-busy]` puts a
 //   spinner in the thumb.
-// - `.plinth-choice`: a segmented pick-one group. Its options share one
-//   width, that of the widest; `.plinth-stretch` fills the container,
-//   `.plinth-fixed` gives each `--choice-width`. `.plinth-small` is the
+// - `.sockel-choice`: a segmented pick-one group. Its options share one
+//   width, that of the widest; `.sockel-stretch` fills the container,
+//   `.sockel-fixed` gives each `--choice-width`. `.sockel-small` is the
 //   small control height. Parts: `-option`, `-icon`, `-label`.
-// - `.plinth-chip`: a filter toggle (`aria-pressed`) of a label and an
-//   optional count (`-count`, two figures wide, `.plinth-zero` dims it).
-//   `.plinth-chip-list` wraps chips and keeps one row's height when empty.
-// - `.plinth-disabled` and `.plinth-invalid` on a checkbox, switch or
+// - `.sockel-chip`: a filter toggle (`aria-pressed`) of a label and an
+//   optional count (`-count`, two figures wide, `.sockel-zero` dims it).
+//   `.sockel-chip-list` wraps chips and keeps one row's height when empty.
+// - `.sockel-disabled` and `.sockel-invalid` on a checkbox, switch or
 //   choice: dimmed, or the border in `--danger`.
 
 @use "tokens" as base;
 
-.plinth-checkbox {
+.sockel-checkbox {
     display: inline-flex;
     align-items: center;
     gap: var(--space-2);
@@ -29,13 +29,13 @@
     min-height: var(--control-height-small);
     cursor: pointer;
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         opacity: 0.5;
         cursor: not-allowed;
     }
 }
 
-.plinth-checkbox-mark {
+.sockel-checkbox-mark {
     display: inline-grid;
     flex: none;
     place-items: center;
@@ -45,7 +45,7 @@
     font-size: var(--text-sm);
 }
 
-.plinth-checkbox-input {
+.sockel-checkbox-input {
     grid-area: 1 / 1;
     box-sizing: border-box;
     width: 100%;
@@ -74,17 +74,17 @@
     @include base.focus-ring;
 }
 
-.plinth-checkbox-glyph {
+.sockel-checkbox-glyph {
     grid-area: 1 / 1;
     pointer-events: none;
 }
 
-.plinth-checkbox-label {
+.sockel-checkbox-label {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
-.plinth-switch {
+.sockel-switch {
     --switch-fill: #{base.$switch-fill};
     --switch-edge: var(--field-border);
     --switch-thumb: var(--muted);
@@ -107,7 +107,7 @@
 
     @include base.focus-ring;
 
-    &.plinth-on {
+    &.sockel-on {
         --switch-fill: var(--accent);
         --switch-edge: var(--accent);
         --switch-thumb: #{base.$switch-on-thumb};
@@ -115,7 +115,7 @@
         --switch-shift: calc(var(--switch-width) - var(--switch-height));
     }
 
-    &.plinth-invalid {
+    &.sockel-invalid {
         --switch-edge: var(--danger);
     }
 
@@ -129,7 +129,7 @@
     }
 }
 
-.plinth-switch-track {
+.sockel-switch-track {
     display: flex;
     flex: none;
     align-items: center;
@@ -146,7 +146,7 @@
     }
 }
 
-.plinth-switch-thumb {
+.sockel-switch-thumb {
     display: grid;
     flex: none;
     place-items: center;
@@ -169,12 +169,12 @@
     }
 }
 
-.plinth-switch-label {
+.sockel-switch-label {
     min-width: 0;
     overflow-wrap: anywhere;
 }
 
-.plinth-choice {
+.sockel-choice {
     --choice-height: var(--control-height);
 
     display: inline-grid;
@@ -188,29 +188,29 @@
     border-radius: var(--radius-md);
     background: var(--surface);
 
-    &.plinth-small {
+    &.sockel-small {
         --choice-height: var(--control-height-small);
     }
 
-    &.plinth-stretch {
+    &.sockel-stretch {
         display: grid;
         width: 100%;
     }
 
-    &.plinth-fixed {
+    &.sockel-fixed {
         grid-auto-columns: var(--choice-width);
     }
 
-    &.plinth-invalid {
+    &.sockel-invalid {
         border-color: var(--danger);
     }
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         opacity: 0.5;
     }
 }
 
-.plinth-choice-option {
+.sockel-choice-option {
     display: inline-flex;
     align-items: center;
     justify-content: center;
@@ -241,16 +241,16 @@
     }
 }
 
-.plinth-choice-icon {
+.sockel-choice-icon {
     display: inline-flex;
     flex: none;
 }
 
-.plinth-choice-label {
+.sockel-choice-label {
     @include base.truncate;
 }
 
-.plinth-chip-list {
+.sockel-chip-list {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -258,7 +258,7 @@
     min-height: var(--control-height-small);
 }
 
-.plinth-chip {
+.sockel-chip {
     display: inline-flex;
     flex: 0 1 auto;
     align-items: center;
@@ -297,17 +297,17 @@
     }
 }
 
-.plinth-chip-label {
+.sockel-chip-label {
     @include base.truncate;
 }
 
-.plinth-chip-count {
+.sockel-chip-count {
     @include base.numeric;
     flex: none;
     min-width: 2ch;
     text-align: center;
 
-    &.plinth-zero {
+    &.sockel-zero {
         opacity: 0.6;
     }
 }

@@ -7,7 +7,7 @@ use yew::prelude::*;
 use crate::class;
 use crate::code::CodeCard;
 
-use plinth::{Card, Cluster, Gap, Stack};
+use sockel::{Card, Cluster, Gap, Stack};
 
 #[derive(Properties, PartialEq)]
 pub struct SelectProps<T: PartialEq + 'static> {
@@ -17,7 +17,7 @@ pub struct SelectProps<T: PartialEq + 'static> {
     pub on_change: Callback<T>,
 }
 
-/// One of a fixed set of values, by name: plinth's own Select.
+/// One of a fixed set of values, by name: sockel's own Select.
 #[function_component]
 pub fn Select<T>(props: &SelectProps<T>) -> Html
 where
@@ -26,14 +26,14 @@ where
     let options: Vec<_> = props
         .options
         .iter()
-        .map(|(name, value)| plinth::SelectOption::new(*value, *name))
+        .map(|(name, value)| sockel::SelectOption::new(*value, *name))
         .collect();
 
     html! {
         <Stack tag="label" gap={Gap::Snug}>
             <span class={class::CONTROL_LABEL}>{ props.label.clone() }</span>
-            <plinth::Select<T> {options} value={Some(props.value)} on_change={props.on_change.clone()}
-                label={props.label.clone()} size={plinth::InputSize::Small} />
+            <sockel::Select<T> {options} value={Some(props.value)} on_change={props.on_change.clone()}
+                label={props.label.clone()} size={sockel::InputSize::Small} />
         </Stack>
     }
 }
@@ -115,8 +115,8 @@ pub struct DemoProps {
 pub fn Demo(props: &DemoProps) -> Html {
     html! {
         <Stack gap={Gap::Loose}>
-            <Card inset={plinth::Inset::Compact}>
-                <Cluster gap={Gap::Loose} align={plinth::Align::Bottom}>
+            <Card inset={sockel::Inset::Compact}>
+                <Cluster gap={Gap::Loose} align={sockel::Align::Bottom}>
                     { props.controls.clone() }
                 </Cluster>
             </Card>

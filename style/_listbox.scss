@@ -1,18 +1,18 @@
 // Listbox (src/listbox.rs): a list of options whose focus stays on what
 // opened it, the active one named by `aria-activedescendant`.
 //
-// - `.plinth-listbox`: the open list, the menu's surface (_menu.scss), fixed
-//   beside its opener in the overlay layer, hidden until `.plinth-placed`.
+// - `.sockel-listbox`: the open list, the menu's surface (_menu.scss), fixed
+//   beside its opener in the overlay layer, hidden until `.sockel-placed`.
 //   At least as wide as its opener (`--listbox-anchor-width`) and never
 //   narrower than it opened (`--listbox-open-width`), both set on open; it
 //   scrolls past `--popover-max-height`, its scrollbar's room kept.
-// - `.plinth-listbox-option`: a row at `--control-height`, its border
-//   reserved. `.plinth-active` (under the keyboard or pointer) changes its
+// - `.sockel-listbox-option`: a row at `--control-height`, its border
+//   reserved. `.sockel-active` (under the keyboard or pointer) changes its
 //   fill only; `[aria-disabled="true"]` mutes it. Parts: `-mark` (the
-//   selected one's check, its box kept when off, `.plinth-off`), `-icon`,
+//   selected one's check, its box kept when off, `.sockel-off`), `-icon`,
 //   `-label` (one line, cut with an ellipsis), and with a description
 //   `-text` holding `-label` and `-description` (muted, under it, wrapping).
-// - `.plinth-listbox-group` (`role="group"`): a run of options under its
+// - `.sockel-listbox-group` (`role="group"`): a run of options under its
 //   `-group-name`, a muted heading.
 // - Settings: `$listbox-max-width` (the list's widest, past which labels
 //   are cut), `$listbox-max-height` (its tallest, below the room the
@@ -23,7 +23,7 @@
 @use "tokens" as base;
 @use "menu-surface" as menu;
 
-.plinth-listbox {
+.sockel-listbox {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
     max-width: min(#{base.$listbox-max-width}, calc(100vw - 2 * var(--space-2)));
     box-shadow: base.$listbox-shadow;
@@ -33,10 +33,10 @@
     }
 }
 
-.plinth-listbox-option {
+.sockel-listbox-option {
     @include menu.item;
 
-    &.plinth-active {
+    &.sockel-active {
         background: base.$listbox-active-fill;
     }
 
@@ -46,11 +46,11 @@
     }
 }
 
-.plinth-listbox-option-mark {
+.sockel-listbox-option-mark {
     @include menu.mark;
 }
 
-.plinth-listbox-option-icon {
+.sockel-listbox-option-icon {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -59,13 +59,13 @@
     height: var(--glyph-size);
 }
 
-.plinth-listbox-option-label {
+.sockel-listbox-option-label {
     @include base.truncate;
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.plinth-listbox-option-text {
+.sockel-listbox-option-text {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -74,20 +74,20 @@
     padding-block: var(--space-1);
 }
 
-.plinth-listbox-option-description {
+.sockel-listbox-option-description {
     color: var(--muted);
     font-size: var(--text-xs);
     overflow-wrap: anywhere;
 }
 
-.plinth-listbox-group {
+.sockel-listbox-group {
     display: flex;
     flex: none;
     flex-direction: column;
     gap: var(--space-0);
 }
 
-.plinth-listbox-group-name {
+.sockel-listbox-group-name {
     @include base.truncate;
     flex: none;
     padding: var(--space-1) var(--space-3) 0;
@@ -99,7 +99,7 @@
 }
 
 @media (forced-colors: active) {
-    .plinth-listbox-option.plinth-active {
+    .sockel-listbox-option.sockel-active {
         outline: var(--focus-ring-width) solid Highlight;
     }
 }

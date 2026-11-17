@@ -1,23 +1,23 @@
-//! An interactive gallery of every plinth component.
+//! An interactive gallery of every sockel component.
 
 mod code;
 mod controls;
 mod pages;
 mod probe;
 
-/// The showcase's own classes (`style/`), from plinth-build.
+/// The showcase's own classes (`style/`), from sockel-build.
 mod class {
     include!(concat!(env!("OUT_DIR"), "/classes.rs"));
 }
 
-/// The showcase's one stylesheet: plinth's CSS, then `style/`'s.
+/// The showcase's one stylesheet: sockel's CSS, then `style/`'s.
 const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
 use phrasebook02::{Lang, Phrasebook, Phrases, browser};
 use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
-use plinth::{Cluster, Gap, OverlayHost, PageHead, SectionHead, Stack};
+use sockel::{Cluster, Gap, OverlayHost, PageHead, SectionHead, Stack};
 
 use controls::Select;
 use pages::{FALLBACK, Group, PAGES, in_group};
@@ -40,13 +40,13 @@ const SV_SE: Lang = Lang::new("sv-SE");
 /// The languages the showcase offers, by their own names.
 const LANGUAGES: &[(&str, Lang)] = &[("English", Lang::EN_US), ("Svenska", SV_SE)];
 
-/// The showcase's phrasebook: it has no messages of its own, only plinth's.
+/// The showcase's phrasebook: it has no messages of its own, only sockel's.
 fn phrasebook() -> Phrasebook {
     let mut builder = Phrasebook::builder();
     for &(name, lang) in LANGUAGES {
         builder = builder.language(lang, name);
     }
-    builder.catalog(&plinth::phrasebookcatalog01::L10N).build()
+    builder.catalog(&sockel::phrasebookcatalog01::L10N).build()
 }
 
 fn apply(theme: Theme) {
@@ -141,14 +141,14 @@ fn App() -> Html {
         <ContextProvider<Phrases> context={(*phrases).clone()}>
         <OverlayHost>
         <div class={class::SHELL}>
-            <plinth::Styles css={STYLESHEET} />
+            <sockel::Styles css={STYLESHEET} />
             <nav class={class::NAV} aria-label="Components">
                 <Stack gap={Gap::Loose}>
-                    <strong class={class::NAME}>{ "plinth" }</strong>
+                    <strong class={class::NAME}>{ "sockel" }</strong>
                     { for Group::ALL.iter().map(|&group| html! {
                         <Stack gap={Gap::Snug}>
-                            <SectionHead title={group.title()} class={plinth::class::LABEL} />
-                            <ul class={classes!(plinth::class::PLAIN_LIST, class::NAV_LIST)}>
+                            <SectionHead title={group.title()} class={sockel::class::LABEL} />
+                            <ul class={classes!(sockel::class::PLAIN_LIST, class::NAV_LIST)}>
                                 { for in_group(group).into_iter().map(link) }
                             </ul>
                         </Stack>
@@ -158,13 +158,13 @@ fn App() -> Html {
                 </Stack>
             </nav>
             <main class={class::MAIN}>
-                <Stack gap={Gap::Loose} class={plinth::class::WORKSPACE_PAGE}>
+                <Stack gap={Gap::Loose} class={sockel::class::WORKSPACE_PAGE}>
                     <PageHead title={page.title} />
                     <p class={classes!(class::PROSE, class::MUTED)}>{ page.about }</p>
                     <Cluster gap={Gap::Snug}>
                         { for page.covers.iter().map(|name| html! { <code class={class::CHIP}>{ *name }</code> }) }
                     </Cluster>
-                    <div key={page.id} class={plinth::class::CONTENTS}>{ (page.render)() }</div>
+                    <div key={page.id} class={sockel::class::CONTENTS}>{ (page.render)() }</div>
                 </Stack>
             </main>
             if !page.holds.is_empty() {

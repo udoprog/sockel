@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, DataTips, Dialog, Glyph, Icon, Menu,
     MenuCheck, MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction,
     RowActions, SplitButton, Stack, TextInput,
@@ -82,7 +82,7 @@ fn SampleItems(props: &ItemsProps) -> Html {
                     detail_html={html! { <>{ " · " }<em>{ "example.org" }</em></> }}>
                     { "Look it up" }
                 </MenuItem>
-                <MenuItem href="data:text/plain,plinth" download=true title="Saves a small text file"
+                <MenuItem href="data:text/plain,sockel" download=true title="Saves a small text file"
                     detail="A link row that downloads">{ "Download" }</MenuItem>
                 <MenuSeparator />
                 <MenuItem danger=true tip="Delete this file" onclick={pick("delete")}>{ "Delete" }</MenuItem>
@@ -175,7 +175,7 @@ fn DialogMenu() -> Html {
     };
     let on_dismiss = {
         let open = open.clone();
-        Callback::from(move |_: plinth::Dismiss| open.set(false))
+        Callback::from(move |_: sockel::Dismiss| open.set(false))
     };
     html! {
         <>
@@ -328,7 +328,7 @@ pub fn RowActionsPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Cluster justify={plinth::Justify::Between}>
+            <Cluster justify={sockel::Justify::Between}>
                 <span class={class::SAMPLE}>{ text.of("A row") }</span>
                 <DataTips />
                 <RowActions {actions} disabled={*disabled} more_disabled={*more_disabled} tips={*tips}

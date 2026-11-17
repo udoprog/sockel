@@ -1,30 +1,30 @@
 // Menu, RowActions, SplitButton and ContextMenu (src/menu.rs).
 //
-// - `.plinth-menu`: the open list, fixed beside its opener in the overlay
-//   layer at the place popover.rs measured, hidden until `.plinth-placed`.
+// - `.sockel-menu`: the open list, fixed beside its opener in the overlay
+//   layer at the place popover.rs measured, hidden until `.sockel-placed`.
 //   At least `--menu-width` wide, and never narrower than it opened
 //   (`--menu-open-width`, set once on open), so it does not follow its
 //   longest item as items change; it scrolls past `--popover-max-height`,
-//   its scrollbar's room kept. Modifiers: `.plinth-wide`
-//   (`--menu-width-wide`), `.plinth-wider` (`--menu-width-wider`),
-//   `.plinth-panel` (`--menu-width-panel`, fixed), `.plinth-tight` (no gap
-//   between rows), `.plinth-sheet` (below `$sheet-breakpoint` a sheet from
-//   the bottom over `.plinth-menu-scrim`). `[hidden]`: closed, its items
+//   its scrollbar's room kept. Modifiers: `.sockel-wide`
+//   (`--menu-width-wide`), `.sockel-wider` (`--menu-width-wider`),
+//   `.sockel-panel` (`--menu-width-panel`, fixed), `.sockel-tight` (no gap
+//   between rows), `.sockel-sheet` (below `$sheet-breakpoint` a sheet from
+//   the bottom over `.sockel-menu-scrim`). `[hidden]`: closed, its items
 //   kept (`keep_mounted`).
-// - `.plinth-menu-item`: a row at `--control-height`, its border reserved,
+// - `.sockel-menu-item`: a row at `--control-height`, its border reserved,
 //   so hover and focus change its fill only. Parts: `-mark` (a check's or
-//   radio's, its box kept when off, `.plinth-off`), `-icon`, `-text`
+//   radio's, its box kept when off, `.sockel-off`), `-icon`, `-text`
 //   (`-label` on one line, `-detail` under it), `-hint` (a shortcut).
-//   `.plinth-danger`: in the danger colour. An `<a>` row (a link) looks the
+//   `.sockel-danger`: in the danger colour. An `<a>` row (a link) looks the
 //   same as a `<button>` one.
-// - `.plinth-menu-separator`, `.plinth-menu-heading`, `.plinth-menu-note`.
-// - `.plinth-row-actions`: a row's icon buttons and its overflow menu, one
-//   size; `.plinth-row-action-danger` is muted until hovered or focused.
-// - `.plinth-split-button`: a main action (`-main`) and its menu's opener
+// - `.sockel-menu-separator`, `.sockel-menu-heading`, `.sockel-menu-note`.
+// - `.sockel-row-actions`: a row's icon buttons and its overflow menu, one
+//   size; `.sockel-row-action-danger` is muted until hovered or focused.
+// - `.sockel-split-button`: a main action (`-main`) and its menu's opener
 //   (`-toggle`), one control sharing a border.
-// - `.plinth-context-target`: what a context menu opens on (and a tool
+// - `.sockel-context-target`: what a context menu opens on (and a tool
 //   opener, whose menu a right-click opens), laid out as if it were not
-//   there; `.plinth-menu-point`, the pointer's place it opens
+//   there; `.sockel-menu-point`, the pointer's place it opens
 //   at (`--menu-x`, `--menu-y`).
 // - Among the parts an app may leave out (`$omit`, all listed in the README):
 //   `menu.marks` (`-mark`, for check and radio items) and `menu.disabled`
@@ -34,7 +34,7 @@
 @use "tokens" as base;
 @use "menu-surface" as *;
 
-.plinth-menu {
+.sockel-menu {
     --menu-least: var(--menu-width);
 
     @include list(var(--menu-least), var(--menu-open-width, 0px));
@@ -47,15 +47,15 @@
     scrollbar-gutter: base.$menu-scroll-gutter;
 
     @if base.emits("menu.widths") {
-        &.plinth-wide {
+        &.sockel-wide {
             --menu-least: var(--menu-width-wide);
         }
 
-        &.plinth-wider {
+        &.sockel-wider {
             --menu-least: var(--menu-width-wider);
         }
 
-        &.plinth-panel {
+        &.sockel-panel {
             --menu-least: var(--menu-width-panel);
 
             width: min(var(--menu-width-panel), calc(100vw - 2 * var(--space-2)));
@@ -64,7 +64,7 @@
     }
 
     @if base.emits("menu.tight") {
-        &.plinth-tight {
+        &.sockel-tight {
             gap: 0;
         }
     }
@@ -75,14 +75,14 @@
     }
 }
 
-.plinth-menu-scrim {
+.sockel-menu-scrim {
     display: none;
 }
 
 // A menu with `sheet`, below the phone breakpoint: a sheet from the bottom
 // over its scrim, as a popover is.
 @include base.below(base.$sheet-breakpoint) {
-    .plinth-menu.plinth-sheet {
+    .sockel-menu.sockel-sheet {
         top: auto;
         right: 0;
         bottom: 0;
@@ -98,7 +98,7 @@
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
     }
 
-    .plinth-menu-scrim {
+    .sockel-menu-scrim {
         position: fixed;
         inset: 0;
         z-index: var(--layer-overlay);
@@ -107,7 +107,7 @@
     }
 }
 
-.plinth-menu-item {
+.sockel-menu-item {
     @include item;
     gap: base.$menu-item-gap;
     min-height: base.$menu-item-height;
@@ -136,7 +136,7 @@
     }
 
     @if base.emits("menu.danger") {
-        &.plinth-danger {
+        &.sockel-danger {
             color: var(--danger);
         }
     }
@@ -146,7 +146,7 @@
         &[aria-current="page"] {
             background: color-mix(in srgb, var(--accent) 14%, transparent);
 
-            .plinth-menu-item-label {
+            .sockel-menu-item-label {
                 color: var(--accent);
                 font-weight: 600;
             }
@@ -167,20 +167,20 @@
 
 @if base.$menu-item-phone-height {
     @include base.below("phone") {
-        .plinth-menu-item {
+        .sockel-menu-item {
             min-height: base.$menu-item-phone-height;
         }
     }
 }
 
 @if base.emits("menu.marks") {
-    .plinth-menu-item-mark {
+    .sockel-menu-item-mark {
         @include mark;
         color: base.$menu-item-mark-ink;
     }
 }
 
-.plinth-menu-item-icon {
+.sockel-menu-item-icon {
     display: inline-flex;
     color: var(--menu-item-icon-ink);
     flex: none;
@@ -190,7 +190,7 @@
     height: var(--glyph-size);
 }
 
-.plinth-menu-item-text {
+.sockel-menu-item-text {
     display: flex;
     flex: 1 1 auto;
     flex-direction: column;
@@ -198,19 +198,19 @@
     min-width: 0;
 }
 
-.plinth-menu-item-label {
+.sockel-menu-item-label {
     @include base.truncate;
 }
 
 @if base.emits("menu.detail") {
-    .plinth-menu-item-detail {
+    .sockel-menu-item-detail {
         color: var(--muted);
         font-size: var(--text-xs);
     }
 }
 
 @if base.emits("menu.detail") {
-    .plinth-menu-item-hint {
+    .sockel-menu-item-hint {
         @include base.numeric;
         flex: none;
         margin-inline-start: var(--space-4);
@@ -220,7 +220,7 @@
 }
 
 @if base.emits("menu.separator") {
-    .plinth-menu-separator {
+    .sockel-menu-separator {
         flex: none;
         height: 0;
         margin: var(--space-1) 0;
@@ -229,7 +229,7 @@
 }
 
 @if base.emits("menu.heading") {
-    .plinth-menu-heading {
+    .sockel-menu-heading {
         @include base.truncate;
         flex: none;
         padding: var(--space-1) var(--space-3) 0;
@@ -240,7 +240,7 @@
 }
 
 @if base.emits("menu.note") {
-    .plinth-menu-note {
+    .sockel-menu-note {
         flex: none;
         margin: 0;
         padding: var(--space-2) var(--space-3);
@@ -250,14 +250,14 @@
 }
 
 @if base.emits("menu.row-actions") {
-    .plinth-row-actions {
+    .sockel-row-actions {
         display: inline-flex;
         flex: none;
         align-items: center;
         gap: var(--space-1);
     }
 
-    .plinth-row-action-danger {
+    .sockel-row-action-danger {
         --button-ink: var(--muted);
 
         &:hover,
@@ -269,36 +269,36 @@
 }
 
 @if base.emits("menu.split-button") {
-    .plinth-split-button {
+    .sockel-split-button {
         display: inline-flex;
         flex: 0 1 auto;
         align-items: stretch;
         min-width: 0;
     }
 
-    .plinth-split-button-main {
+    .sockel-split-button-main {
         border-start-end-radius: 0;
         border-end-end-radius: 0;
     }
 
-    .plinth-split-button-toggle {
+    .sockel-split-button-toggle {
         margin-inline-start: calc(-1 * var(--space-px));
         border-start-start-radius: 0;
         border-end-start-radius: 0;
 
-        &.plinth-primary {
+        &.sockel-primary {
             border-inline-start-color: color-mix(in srgb, var(--on-accent) 25%, var(--accent));
         }
     }
 }
 
 @if base.emits("menu.context") {
-    .plinth-context-target {
+    .sockel-context-target {
         display: contents;
         -webkit-touch-callout: none;
     }
 
-    .plinth-menu-point {
+    .sockel-menu-point {
         position: fixed;
         top: var(--menu-y, 0);
         left: var(--menu-x, 0);

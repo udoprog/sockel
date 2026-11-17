@@ -2,7 +2,7 @@ use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
-use plinth::{
+use sockel::{
     Field, FilterChoice, FilterPicker, InputSize, LibraryToolbar, SearchOption, SearchSelect,
     Stack, field_describedby, search_matches,
 };

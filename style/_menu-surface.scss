@@ -28,7 +28,7 @@
     box-shadow: var(--shadow-1);
     visibility: hidden;
 
-    &.plinth-placed {
+    &.sockel-placed {
         visibility: visible;
     }
 }
@@ -58,7 +58,7 @@
     background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
-// A row's check, its box kept when off (`.plinth-off`).
+// A row's check, its box kept when off (`.sockel-off`).
 @mixin mark {
     display: inline-flex;
     flex: none;
@@ -68,7 +68,7 @@
     height: var(--glyph-size);
     color: var(--accent);
 
-    &.plinth-off {
+    &.sockel-off {
         visibility: hidden;
     }
 }

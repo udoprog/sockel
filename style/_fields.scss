@@ -1,36 +1,36 @@
 // Fields and form rows (src/field.rs).
 //
-// - `.plinth-field`: a label, the control, a hint and an error, one under
+// - `.sockel-field`: a label, the control, a hint and an error, one under
 //   the other. Parts: `-head` (label row), `-label`, `-required`, `-help`,
-//   `-hint`, `-error`. `.plinth-disabled` mutes it; `.plinth-busy` shows a
+//   `-hint`, `-error`. `.sockel-disabled` mutes it; `.sockel-busy` shows a
 //   progress cursor.
-// - `.plinth-field-error.plinth-reserve`: the error line keeps its room
+// - `.sockel-field-error.sockel-reserve`: the error line keeps its room
 //   (`--field-error-lines` lines of `--field-message-line`, longer text
 //   cut), so an error appearing moves nothing below it.
-// - `.plinth-form-rows`: a grid with one label column shared by its rows;
-//   `.plinth-wide-labels` fixes it at `--field-label-width` on a wide
-//   screen. `.plinth-form-row` is a row of it (subgrid), `-label` and
+// - `.sockel-form-rows`: a grid with one label column shared by its rows;
+//   `.sockel-wide-labels` fixes it at `--field-label-width` on a wide
+//   screen. `.sockel-form-row` is a row of it (subgrid), `-label` and
 //   `-control` its cells. Below the phone breakpoint the label sits above.
-// - `.plinth-fieldset`, `.plinth-legend`: a titled group of fields.
-// - `.plinth-field-check`: a checkbox with its label after it.
-// - `.plinth-field-inputs`: a field's controls in a wrapping row, centred on
-//   a control's height; `.plinth-stacked` puts them in a column, each as
+// - `.sockel-fieldset`, `.sockel-legend`: a titled group of fields.
+// - `.sockel-field-check`: a checkbox with its label after it.
+// - `.sockel-field-inputs`: a field's controls in a wrapping row, centred on
+//   a control's height; `.sockel-stacked` puts them in a column, each as
 //   wide as the field.
 
 @use "tokens" as base;
 
 @if base.emits("fields.field") {
-    .plinth-field {
+    .sockel-field {
         @include base.field;
 
         @if base.emits("fields.busy") {
-            &.plinth-busy {
+            &.sockel-busy {
                 cursor: progress;
             }
         }
     }
 
-    .plinth-field-head {
+    .sockel-field-head {
         display: flex;
         align-items: center;
         gap: var(--space-1);
@@ -38,19 +38,19 @@
     }
 }
 
-.plinth-field-label {
+.sockel-field-label {
     @include base.field-label;
 }
 
 @if base.emits("fields.required") {
-    .plinth-field-required {
+    .sockel-field-required {
         color: var(--danger);
         font-size: var(--text-sm);
     }
 }
 
 @if base.emits("fields.help") {
-    .plinth-field-help {
+    .sockel-field-help {
         flex: none;
         font-size: var(--text-sm);
         margin-inline-start: auto;
@@ -65,25 +65,25 @@
 }
 
 @if base.emits("fields.error") {
-    .plinth-field-hint,
-    .plinth-field-error {
+    .sockel-field-hint,
+    .sockel-field-error {
         @include -message;
     }
 } @else {
-    .plinth-field-hint {
+    .sockel-field-hint {
         @include -message;
     }
 }
 
-.plinth-field-hint {
+.sockel-field-hint {
     color: var(--muted);
 }
 
 @if base.emits("fields.error") {
-    .plinth-field-error {
+    .sockel-field-error {
         color: var(--danger);
 
-        &.plinth-reserve {
+        &.sockel-reserve {
             display: -webkit-box;
             -webkit-box-orient: vertical;
             -webkit-line-clamp: var(--field-error-lines);
@@ -94,39 +94,39 @@
 }
 
 @if base.emits("fields.disabled") {
-    .plinth-field.plinth-disabled,
-    .plinth-form-row.plinth-disabled,
-    .plinth-field-check.plinth-disabled {
+    .sockel-field.sockel-disabled,
+    .sockel-form-row.sockel-disabled,
+    .sockel-field-check.sockel-disabled {
         opacity: 0.5;
     }
 }
 
-.plinth-form-rows {
+.sockel-form-rows {
     display: grid;
     grid-template-columns: fit-content(50%) minmax(0, 1fr);
     column-gap: var(--space-4);
     row-gap: var(--space-3);
 
-    &.plinth-wide-labels {
+    &.sockel-wide-labels {
         grid-template-columns: var(--field-label-width) minmax(0, 1fr);
     }
 
     @include base.below("phone") {
         &,
-        &.plinth-wide-labels {
+        &.sockel-wide-labels {
             grid-template-columns: minmax(0, 1fr);
         }
     }
 }
 
-.plinth-form-row {
+.sockel-form-row {
     display: grid;
     grid-column: 1 / -1;
     grid-template-columns: subgrid;
     align-items: start;
 
     @if base.emits("fields.busy") {
-        &.plinth-busy {
+        &.sockel-busy {
             cursor: progress;
         }
     }
@@ -136,7 +136,7 @@
     }
 }
 
-.plinth-form-label {
+.sockel-form-label {
     display: flex;
     align-items: center;
     gap: var(--space-1);
@@ -149,7 +149,7 @@
     }
 }
 
-.plinth-form-control {
+.sockel-form-control {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -157,7 +157,7 @@
 }
 
 @if base.emits("fields.inputs") {
-    .plinth-field-inputs {
+    .sockel-field-inputs {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -165,7 +165,7 @@
         min-width: 0;
         min-height: var(--control-height);
 
-        &.plinth-stacked {
+        &.sockel-stacked {
             flex-direction: column;
             align-items: stretch;
         }
@@ -173,7 +173,7 @@
 }
 
 @if base.emits("fields.fieldset") {
-    .plinth-fieldset {
+    .sockel-fieldset {
         display: flex;
         flex-direction: column;
         gap: var(--space-3);
@@ -183,7 +183,7 @@
         border: 0;
     }
 
-    .plinth-legend {
+    .sockel-legend {
         padding: 0;
         margin-block-end: var(--space-3);
         font-size: var(--text-sm);
@@ -192,7 +192,7 @@
 }
 
 @if base.emits("fields.check") {
-    .plinth-field-check {
+    .sockel-field-check {
         display: flex;
         align-items: center;
         gap: var(--space-2);
@@ -200,7 +200,7 @@
         min-width: 0;
         cursor: pointer;
 
-        &.plinth-disabled {
+        &.sockel-disabled {
             cursor: not-allowed;
         }
     }

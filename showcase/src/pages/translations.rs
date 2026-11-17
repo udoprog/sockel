@@ -3,9 +3,9 @@ use yew::prelude::*;
 use crate::class;
 use crate::code::CodeCard;
 
-use plinth::{Card, Cluster, Gap, Inset, Pager, Stack, Stepper};
+use sockel::{Card, Cluster, Gap, Inset, Pager, Stack, Stepper};
 
-/// The app's setup: a phrasebook with plinth's catalog after its own.
+/// The app's setup: a phrasebook with sockel's catalog after its own.
 const SETUP: &str = r#"use phrasebook::{Catalog, Lang, Phrasebook, Phrases, Source, browser};
 
 const SV_SE: Lang = Lang::new("sv-SE");
@@ -19,7 +19,7 @@ let book = Phrasebook::builder()
     .language(Lang::EN_US, "English")
     .language(SV_SE, "Svenska")
     .catalog(&APP)
-    .catalog(&plinth::phrasebookcatalog01::L10N)
+    .catalog(&sockel::phrasebookcatalog01::L10N)
     .build();
 let phrases = use_state(|| browser::initial(&book));
 
@@ -29,7 +29,7 @@ html! {
     </ContextProvider<Phrases>>
 }"#;
 
-/// How an app gives plinth its language, with components in the language
+/// How an app gives sockel its language, with components in the language
 /// picked in the navigation.
 #[function_component]
 pub fn TranslationsPage() -> Html {
@@ -47,19 +47,19 @@ pub fn TranslationsPage() -> Html {
     html! {
         <Stack gap={Gap::Loose}>
             <p class={class::PROSE}>
-                { "plinth's words (Close, Cancel, the pager's and the stepper's names, the reorder \
-                   announcements) are messages in plinth::phrasebookcatalog01::L10N, a \
-                   phrasebook-catalog 0.1 catalog with en-US and sv-SE, every id under plinth-. \
+                { "sockel's words (Close, Cancel, the pager's and the stepper's names, the reorder \
+                   announcements) are messages in sockel::phrasebookcatalog01::L10N, a \
+                   phrasebook-catalog 0.1 catalog with en-US and sv-SE, every id under sockel-. \
                    Each component looks them up in the Phrases the app provides with \
-                   ContextProvider<Phrases>; with none, or one without plinth's catalog, it shows \
+                   ContextProvider<Phrases>; with none, or one without sockel's catalog, it shows \
                    the catalog's English and phrasebook warns once." }
             </p>
             <p class={class::PROSE}>
-                { "An app adds L10N after its own catalog, so a plinth- id in its own .ftl wins: \
-                   that is how it translates plinth into a language plinth lacks, or rewords one \
+                { "An app adds L10N after its own catalog, so a sockel- id in its own .ftl wins: \
+                   that is how it translates sockel into a language sockel lacks, or rewords one \
                    of its messages, and phrasebook::check::parity_with checks it has them all. \
                    A label prop on one use (less_label, close_label, ...) wins over both. The \
-                   provider must be phrasebook 0.2's Phrases, the version plinth reads." }
+                   provider must be phrasebook 0.2's Phrases, the version sockel reads." }
             </p>
             <p class={class::PROSE}>
                 { "The showcase does this with no messages of its own: pick Svenska under \

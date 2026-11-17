@@ -1,18 +1,18 @@
-// Classes plinth's markup sets, or asks an app to set, that no plinth rule
-// styles: hooks for an app's own rules (`.plinth-page-head.plinth-crumb`,
-// `.plinth-page-head-back`, `.plinth-iconed.plinth-trailing`, an image's
-// `.plinth-loading` and `.plinth-empty`, `.plinth-ratio` for one of its own
-// ratio, a stepper's `.plinth-zero` unless its settings style it), and
-// `#plinth-overlay`, the overlay layer's id. plinth-build makes a constant
+// Classes sockel's markup sets, or asks an app to set, that no sockel rule
+// styles: hooks for an app's own rules (`.sockel-page-head.sockel-crumb`,
+// `.sockel-page-head-back`, `.sockel-iconed.sockel-trailing`, an image's
+// `.sockel-loading` and `.sockel-empty`, `.sockel-ratio` for one of its own
+// ratio, a stepper's `.sockel-zero` unless its settings style it), and
+// `#sockel-overlay`, the overlay layer's id. sockel-build makes a constant
 // of each; they add no CSS.
 
 $classes: (
-    "plinth-crumb",
-    "plinth-page-head-back",
-    "plinth-trailing",
-    "plinth-loading",
-    "plinth-empty",
-    "plinth-ratio",
-    "plinth-overlay",
-    "plinth-zero"
+    "sockel-crumb",
+    "sockel-page-head-back",
+    "sockel-trailing",
+    "sockel-loading",
+    "sockel-empty",
+    "sockel-ratio",
+    "sockel-overlay",
+    "sockel-zero"
 );

@@ -1,0 +1,10 @@
+[package]
+name = "sockel-build-fixture"
+edition = "2024"
+publish = false
+
+[dependencies]
+sockel = { path = "../..", default-features = false, features = ["layout"] }
+
+[build-dependencies]
+sockel-build = { path = ".." }

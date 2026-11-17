@@ -3,4 +3,4 @@ target = "index.html"
 dist = "dist"
 
 [watch]
-watch = [".", "../src", "../style", "../plinth-build/src"]
+watch = [".", "../src", "../style", "../sockel-build/src"]

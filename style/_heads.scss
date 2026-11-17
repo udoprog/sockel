@@ -1,32 +1,32 @@
 // The heads of pages and sections (src/head.rs, PageHead and SectionHead).
 //
-// - `.plinth-page-head`: a page's title (`.plinth-page-head-title`, its h1) with its
-//   help, and its actions (`.plinth-page-head-actions`) at the row's end. The
+// - `.sockel-page-head`: a page's title (`.sockel-page-head-title`, its h1) with its
+//   help, and its actions (`.sockel-page-head-actions`) at the row's end. The
 //   actions are full-size buttons, centred on the title's line, the
 //   primary last; on a narrow screen they wrap under the title.
-// - `.plinth-section-head`: the same for a section in a page, its title
-//   (`.plinth-section-head-title`, an h2) a size smaller.
+// - `.sockel-section-head`: the same for a section in a page, its title
+//   (`.sockel-section-head-title`, an h2) a size smaller.
 //
-// - A head's title is Html, with an `icon` before it (`.plinth-head-icon`, in the
+// - A head's title is Html, with an `icon` before it (`.sockel-head-icon`, in the
 //   accent). Its help follows the heading as its sibling, in the heading's
-//   group (`.plinth-head-heading`: title, help, suffix), so the heading's
-//   text excludes it. A `subtitle` (`.plinth-head-subtitle`) is one muted line
-//   under the row, and `crumbs` a stacked list above it (`.plinth-head-trail`,
+//   group (`.sockel-head-heading`: title, help, suffix), so the heading's
+//   text excludes it. A `subtitle` (`.sockel-head-subtitle`) is one muted line
+//   under the row, and `crumbs` a stacked list above it (`.sockel-head-trail`,
 //   its list and items), each a link with a chevron after it.
-// - `.plinth-section-head.plinth-label`: a small-caps label head, whose
-//   children (a count, pills) sit beside the title; `.plinth-head-end` pushes
-//   one (a see-also link) to the row's end. `.plinth-section-head.plinth-list`: a
-//   list's head, smaller; `.plinth-nested` a step smaller still.
+// - `.sockel-section-head.sockel-label`: a small-caps label head, whose
+//   children (a count, pills) sit beside the title; `.sockel-head-end` pushes
+//   one (a see-also link) to the row's end. `.sockel-section-head.sockel-list`: a
+//   list's head, smaller; `.sockel-nested` a step smaller still.
 // - A title may take a `level`, `title_class` and a `suffix` after its help.
-// - `.plinth-page-head.plinth-crumb`: a head that leads back, `.plinth-page-head-crumbs`: the back
-//   link (`.plinth-page-head-back`), a `/` (`.plinth-page-head-sep`) and the title; its
-//   keywords (`.plinth-page-head-meta`) come before the actions.
-// - `.plinth-page-head.plinth-compact`: the head of a compact page (the game's): the
+// - `.sockel-page-head.sockel-crumb`: a head that leads back, `.sockel-page-head-crumbs`: the back
+//   link (`.sockel-page-head-back`), a `/` (`.sockel-page-head-sep`) and the title; its
+//   keywords (`.sockel-page-head-meta`) come before the actions.
+// - `.sockel-page-head.sockel-compact`: the head of a compact page (the game's): the
 //   actions as icons (their label text hidden), and on a phone one row,
-//   the title on two lines and the back link's words (`.plinth-page-head-back-label`)
+//   the title on two lines and the back link's words (`.sockel-page-head-back-label`)
 //   gone.
-// - `.plinth-page-head.plinth-one-row`: a crumb head that stays one row on a phone,
-//   the back link's words (`.plinth-page-head-back-label`) gone and its icon left.
+// - `.sockel-page-head.sockel-one-row`: a crumb head that stays one row on a phone,
+//   the back link's words (`.sockel-page-head-back-label`) gone and its icon left.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
 // Either is at least `--control-height` high, with or without actions,
@@ -34,8 +34,8 @@
 
 @use "tokens" as base;
 
-.plinth-page-head,
-.plinth-section-head {
+.sockel-page-head,
+.sockel-section-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -49,21 +49,21 @@
     min-height: var(--control-height);
 }
 
-.plinth-page-head-title,
-.plinth-section-head-title {
+.sockel-page-head-title,
+.sockel-section-head-title {
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
 }
 
-.plinth-section-head-title {
+.sockel-section-head-title {
     font-size: var(--section-title-size);
 }
 
 // The title with its help and suffix beside it, one item of the head's row:
 // a title too long for its line wraps inside its own box, so the help stays
 // beside it rather than dropping under it.
-.plinth-head-heading {
+.sockel-head-heading {
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
@@ -71,21 +71,21 @@
     min-width: 0;
 }
 
-.plinth-head-icon {
+.sockel-head-icon {
     margin-right: 0.4em;
     color: var(--accent);
 }
 
 // Whole rows of the head: the trail above the title, the subtitle under it.
 @if base.emits("heads.trail") {
-    .plinth-head-trail,
-    .plinth-head-subtitle {
+    .sockel-head-trail,
+    .sockel-head-subtitle {
         flex: 0 0 100%;
         min-width: 0;
         margin: 0;
     }
 } @else {
-    .plinth-head-subtitle {
+    .sockel-head-subtitle {
         flex: 0 0 100%;
         min-width: 0;
         margin: 0;
@@ -93,7 +93,7 @@
 }
 
 @if base.emits("heads.trail") {
-    .plinth-head-trail-list {
+    .sockel-head-trail-list {
         display: flex;
         flex-wrap: wrap;
         align-items: center;
@@ -103,7 +103,7 @@
         font-size: var(--text-sm);
     }
 
-    .plinth-head-trail-item {
+    .sockel-head-trail-item {
         display: inline-flex;
         align-items: center;
 
@@ -123,17 +123,17 @@
     }
 }
 
-.plinth-head-subtitle {
+.sockel-head-subtitle {
     color: var(--muted);
     font-size: var(--text-sm);
 }
 
-.plinth-head-end {
+.sockel-head-end {
     margin-left: auto;
 }
 
 @if base.emits("heads.label") {
-    .plinth-section-head.plinth-label {
+    .sockel-section-head.sockel-label {
         // A label holds no actions (a count, pills, a link at most): as high as
         // its line, not a control.
         min-height: 0;
@@ -145,7 +145,7 @@
         letter-spacing: 0.06em;
         text-transform: uppercase;
 
-        > .plinth-head-heading > .plinth-section-head-title {
+        > .sockel-head-heading > .sockel-section-head-title {
             font: inherit;
             color: inherit;
         }
@@ -153,19 +153,19 @@
 }
 
 @if base.emits("heads.list") {
-    .plinth-section-head.plinth-list {
-        > .plinth-head-heading > .plinth-section-head-title {
+    .sockel-section-head.sockel-list {
+        > .sockel-head-heading > .sockel-section-head-title {
             font-size: var(--text-base);
         }
 
-        &.plinth-nested > .plinth-head-heading > .plinth-section-head-title {
+        &.sockel-nested > .sockel-head-heading > .sockel-section-head-title {
             font-size: var(--text-sm);
         }
     }
 }
 
-.plinth-page-head-actions,
-.plinth-section-head-actions {
+.sockel-page-head-actions,
+.sockel-section-head-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -180,24 +180,24 @@
 }
 
 @if base.emits("heads.crumbs") {
-    .plinth-page-head-crumbs {
+    .sockel-page-head-crumbs {
         display: flex;
         align-items: baseline;
         gap: var(--space-2);
         min-width: 0;
 
-        > .plinth-page-head-title {
+        > .sockel-page-head-title {
             overflow: hidden;
             text-overflow: ellipsis;
             white-space: nowrap;
         }
     }
 
-    .plinth-page-head-sep {
+    .sockel-page-head-sep {
         color: var(--muted);
     }
 
-    .plinth-page-head-meta {
+    .sockel-page-head-meta {
         display: flex;
         flex-wrap: wrap;
         gap: var(--space-1) var(--space-2);
@@ -205,20 +205,20 @@
 
     // The compact head's actions are icons: their words (the label text) hide,
     // and a phone's buttons are tighter (`base.button`).
-    .plinth-page-head.plinth-compact {
+    .sockel-page-head.sockel-compact {
         --label-display: none;
     }
 
     @include base.below("phone") {
-        .plinth-page-head.plinth-compact {
+        .sockel-page-head.sockel-compact {
             flex-wrap: nowrap;
 
-            > .plinth-page-head-crumbs {
+            > .sockel-page-head-crumbs {
                 flex: 1 1 auto;
 
                 // The title has what the icons leave: on two lines before it
                 // is cut.
-                > .plinth-page-head-title {
+                > .sockel-page-head-title {
                     display: -webkit-box;
                     overflow: hidden;
                     font-size: var(--text-base);
@@ -230,14 +230,14 @@
                 }
             }
 
-            .plinth-page-head-back-label,
-            .plinth-page-head-sep,
-            .plinth-page-head-meta {
+            .sockel-page-head-back-label,
+            .sockel-page-head-sep,
+            .sockel-page-head-meta {
                 display: none;
             }
 
             // The icons keep their row: the title, not the actions, gives way.
-            > .plinth-page-head-actions {
+            > .sockel-page-head-actions {
                 flex-wrap: nowrap;
                 flex-shrink: 0;
                 gap: var(--space-0);
@@ -248,14 +248,14 @@
     }
 
     @include base.below("phone") {
-        .plinth-page-head.plinth-one-row {
+        .sockel-page-head.sockel-one-row {
             flex-wrap: nowrap;
 
-            > .plinth-page-head-crumbs {
+            > .sockel-page-head-crumbs {
                 flex: 1 1 auto;
             }
 
-            .plinth-page-head-back-label {
+            .sockel-page-head-back-label {
                 display: none;
             }
         }

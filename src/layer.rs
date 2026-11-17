@@ -77,7 +77,7 @@ impl Drop for Layer {
 }
 
 /// The page's scroll locked while held: the first lock sets
-/// `.plinth-scroll-locked` on the root, with `.plinth-gutter-kept` when the
+/// `.sockel-scroll-locked` on the root, with `.sockel-gutter-kept` when the
 /// page had a scrollbar, so its room stays and the page does not move; the
 /// width of the room kept (by it or the page's own `scrollbar-gutter`) is
 /// `--scroll-gutter` on the root, for layers reaching over it.

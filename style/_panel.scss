@@ -1,20 +1,20 @@
 // Panel (src/panel.rs): a ground over a list or a view holding its filters
 // or a short form, as wide as what it holds and never wider than its column.
 //
-// - `.plinth-panel-box`: a column, `--space-2` apart, `--space-3` in, on
+// - `.sockel-panel-box`: a column, `--space-2` apart, `--space-3` in, on
 //   `--panel-ground` inside a `--panel-border` ring that is always there, in
 //   `--panel-text` type, `--panel-space-after` above what follows.
-// - `.plinth-line`: one row that wraps, tighter in.
-// - `.plinth-tint`: a `--panel-tint-radius` `--panel-tint` chip in
+// - `.sockel-line`: one row that wraps, tighter in.
+// - `.sockel-tint`: a `--panel-tint-radius` `--panel-tint` chip in
 //   `--panel-tint-text`, no ring, `--panel-tint-space-after` above what
 //   follows (a line of a form).
-// - `.plinth-small`: in `--text-sm` type.
-// - `.plinth-bare`: no ground and no ring, only the spacing.
-// - `.plinth-center`: centred in its column.
+// - `.sockel-small`: in `--text-sm` type.
+// - `.sockel-bare`: no ground and no ring, only the spacing.
+// - `.sockel-center`: centred in its column.
 
 @use "tokens" as base;
 
-.plinth-panel-box {
+.sockel-panel-box {
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
@@ -30,14 +30,14 @@
     color: var(--text);
     font-size: var(--panel-text);
 
-    &.plinth-line {
+    &.sockel-line {
         flex-direction: row;
         flex-wrap: wrap;
         align-items: center;
         padding: var(--space-1) var(--space-2);
     }
 
-    &.plinth-tint {
+    &.sockel-tint {
         border-color: transparent;
         margin-block-end: var(--panel-tint-space-after);
         border-radius: var(--panel-tint-radius);
@@ -45,20 +45,20 @@
         color: var(--panel-tint-text);
     }
 
-    &.plinth-line.plinth-tint {
+    &.sockel-line.sockel-tint {
         padding: var(--space-0) var(--space-0) var(--space-0) var(--space-3);
     }
 
-    &.plinth-bare {
+    &.sockel-bare {
         border-color: transparent;
         background: transparent;
     }
 
-    &.plinth-small {
+    &.sockel-small {
         font-size: var(--text-sm);
     }
 
-    &.plinth-center {
+    &.sockel-center {
         margin-inline: auto;
     }
 }

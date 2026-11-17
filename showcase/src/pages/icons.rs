@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{Cluster, Glyph, Icon, IconButton, IconSet, Stack, icon};
+use sockel::{Cluster, Glyph, Icon, IconButton, IconSet, Stack, icon};
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Toggle, bind};
@@ -148,7 +148,7 @@ fn Glyphs(props: &GlyphsProps) -> Html {
                     { props.pick.icon() }
                     <span class={class::LABEL_TEXT}>{ props.pick.label() }</span>
                 </IconButton>
-                <IconButton class={classes!(class::BUTTON, class::GHOST, plinth::class::ICON)}
+                <IconButton class={classes!(class::BUTTON, class::GHOST, sockel::class::ICON)}
                     disabled={props.disabled} title={props.pick.label()}>
                     { props.pick.icon() }
                 </IconButton>

@@ -152,20 +152,20 @@ pub fn SaveBar(props: &SaveBarProps) -> Html {
     html! {
         <div class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}
             data-testid={props.testid.clone()}>
-            <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "plinth-save-bar-unsaved") }</span>
+            <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "sockel-save-bar-unsaved") }</span>
             <span class={class::SAVE_BAR_STATUS} role="status">{ props.status.clone() }</span>
             <span class={class::SAVE_BAR_ACTIONS}>
                 { props.children.clone() }
                 if let Some(ondiscard) = &props.ondiscard {
                     <Button variant={ButtonVariant::Ghost} disabled={props.busy}
                         onclick={ondiscard.clone()}>
-                        { label(&phrases, &props.discard_label, "plinth-save-bar-discard") }
+                        { label(&phrases, &props.discard_label, "sockel-save-bar-discard") }
                     </Button>
                 }
                 <Button variant={ButtonVariant::Primary} submit={props.submit}
                     busy={props.busy} disabled={props.disabled}
                     onclick={props.onsave.clone()}>
-                    { label(&phrases, &props.save_label, "plinth-save-bar-save") }
+                    { label(&phrases, &props.save_label, "sockel-save-bar-save") }
                 </Button>
             </span>
         </div>

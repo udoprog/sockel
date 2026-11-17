@@ -1,16 +1,16 @@
 // Picker, PickerMenu, ChoiceList and PickerDialog (src/picker.rs).
 //
-// - `.plinth-picker`: a field's box (`.plinth-input-box`, _inputs.scss), a
+// - `.sockel-picker`: a field's box (`.sockel-input-box`, _inputs.scss), a
 //   button showing the current option, `--menu-width-wide` wide (small:
-//   `--menu-width`) whatever it shows, `.plinth-fill` its container's; in a
+//   `--menu-width`) whatever it shows, `.sockel-fill` its container's; in a
 //   row it gives way to the items beside it rather than overflowing. Parts:
 //   `-icon`, `-text` (cut with an ellipsis), `-placeholder` (muted),
-//   `-chevron`; `-text.plinth-fold`, hidden below the phone breakpoint.
-// - `.plinth-picker-popup`: the menu's surface (_menu.scss) below its
+//   `-chevron`; `-text.sockel-fold`, hidden below the phone breakpoint.
+// - `.sockel-picker-popup`: the menu's surface (_menu.scss) below its
 //   opener in the overlay layer, `--menu-width-wide` or the opener's width
-//   if wider (`$picker-popup-width`), hidden until `.plinth-placed`.
-// - `.plinth-choice-list`: a search field (`-search`, an input box) over the
-//   options (`-options`, a listbox of `.plinth-listbox-option` rows,
+//   if wider (`$picker-popup-width`), hidden until `.sockel-placed`.
+// - `.sockel-choice-list`: a search field (`-search`, an input box) over the
+//   options (`-options`, a listbox of `.sockel-listbox-option` rows,
 //   _listbox.scss) `--picker-rows` rows high whatever matches, so filtering
 //   never resizes it; without a search field, its rows' height.
 //   The options scroll, not the popup, so only they keep a scrollbar
@@ -21,18 +21,18 @@
 @use "tokens" as base;
 @use "menu";
 
-.plinth-picker {
+.sockel-picker {
     width: var(--menu-width-wide);
     max-width: 100%;
     flex-shrink: 1;
     text-align: start;
     cursor: pointer;
 
-    &.plinth-small {
+    &.sockel-small {
         width: var(--menu-width);
     }
 
-    &.plinth-fill {
+    &.sockel-fill {
         flex: 1 1 auto;
         width: 100%;
     }
@@ -41,12 +41,12 @@
         --input-edge: var(--accent);
     }
 
-    &.plinth-disabled {
+    &.sockel-disabled {
         cursor: not-allowed;
     }
 }
 
-.plinth-picker-icon {
+.sockel-picker-icon {
     display: inline-flex;
     flex: none;
     align-items: center;
@@ -55,31 +55,31 @@
     height: var(--glyph-size);
 }
 
-.plinth-picker-text,
-.plinth-picker-placeholder {
+.sockel-picker-text,
+.sockel-picker-placeholder {
     @include base.truncate;
     flex: 1 1 auto;
     min-width: 0;
 }
 
-.plinth-picker-placeholder {
+.sockel-picker-placeholder {
     color: var(--muted);
 }
 
-.plinth-picker-text.plinth-fold {
+.sockel-picker-text.sockel-fold {
     @include base.below("phone") {
         @include base.visually-hidden;
     }
 }
 
-.plinth-picker-chevron {
+.sockel-picker-chevron {
     display: inline-flex;
     flex: none;
     align-items: center;
     color: var(--muted);
 }
 
-.plinth-picker-popup {
+.sockel-picker-popup {
     // `--picker-popup-width`, set by the component, overrides the setting.
     @include menu.list(
         var(--listbox-anchor-width, 0px),
@@ -91,7 +91,7 @@
     scrollbar-gutter: auto;
 }
 
-.plinth-choice-list {
+.sockel-choice-list {
     display: flex;
     flex-direction: column;
     gap: var(--space-1);
@@ -99,12 +99,12 @@
     min-height: 0;
 }
 
-.plinth-choice-list-search {
+.sockel-choice-list-search {
     flex: none;
     width: 100%;
 }
 
-.plinth-choice-list-options {
+.sockel-choice-list-options {
     display: flex;
     // Shrinks only in a popup too short for it, scrolling rather than cut.
     flex: 0 1 auto;
@@ -124,7 +124,7 @@
     @include base.focus-ring;
 }
 
-.plinth-choice-list-detail {
+.sockel-choice-list-detail {
     @include base.truncate;
     // Only the room the label leaves: the label is cut only once the
     // detail is gone.
@@ -134,14 +134,14 @@
     font-size: var(--text-sm);
 }
 
-.plinth-choice-list-badge {
+.sockel-choice-list-badge {
     display: inline-flex;
     flex: none;
     align-items: center;
     margin-inline-start: auto;
 }
 
-.plinth-choice-list-note {
+.sockel-choice-list-note {
     display: flex;
     flex: none;
     align-items: center;
@@ -151,7 +151,7 @@
     color: var(--muted);
 }
 
-.plinth-choice-list-pager {
+.sockel-choice-list-pager {
     display: flex;
     flex: none;
     justify-content: center;

@@ -26,7 +26,7 @@ static IDS: AtomicUsize = AtomicUsize::new(0);
 
 pub(crate) fn next_id(kind: &str) -> AttrValue {
     AttrValue::from(format!(
-        "plinth-{kind}-{}",
+        "sockel-{kind}-{}",
         IDS.fetch_add(1, Ordering::Relaxed)
     ))
 }

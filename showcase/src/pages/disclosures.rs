@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{Button, ButtonSize, Disclosure, HeadLevel, disclosure};
+use sockel::{Button, ButtonSize, Disclosure, HeadLevel, disclosure};
 
 use crate::class;
 use crate::code::{El, snippet, text_node};

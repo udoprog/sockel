@@ -37,7 +37,7 @@ mod translations;
 
 use yew::prelude::*;
 
-use plinth::Head;
+use sockel::Head;
 
 use crate::class;
 use crate::probe::{Across, Hold, Size};
@@ -106,7 +106,7 @@ pub struct Page {
     pub group: Group,
     /// What the page is about, under its title.
     pub about: &'static str,
-    /// The names exported from plinth that the page shows (its component,
+    /// The names exported from sockel that the page shows (its component,
     /// props and enums).
     pub covers: &'static [&'static str],
     pub render: fn() -> Html,
@@ -127,7 +127,7 @@ const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
 #[cfg(test)]
 const UNPROBED: &[&str] = &["styles", "translations"];
 
-/// Every page, in the navigation's order. A name plinth exports must be in
+/// Every page, in the navigation's order. A name sockel exports must be in
 /// some page's `covers`, which the test below checks.
 pub const PAGES: &[Page] = &[
     Page {
@@ -138,8 +138,8 @@ pub const PAGES: &[Page] = &[
         covers: &["Stack", "StackProps", "Gap"],
         render: || html! { <layout::StackPage /> },
         holds: &[
-            hold(plinth::class::STACK, Size::Width, Across::All),
-            hold(plinth::class::STACK, Size::Box, Across::Only(&["tag"])),
+            hold(sockel::class::STACK, Size::Width, Across::All),
+            hold(sockel::class::STACK, Size::Box, Across::Only(&["tag"])),
             hold(class::SAMPLE, Size::Box, Across::Only(&["tag"])),
         ],
     },
@@ -152,11 +152,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <layout::ClusterPage /> },
         holds: &[
             hold(
-                plinth::class::CLUSTER,
+                sockel::class::CLUSTER,
                 Size::Width,
                 Across::Except(&["inline"]),
             ),
-            hold(plinth::class::CLUSTER, Size::Box, Across::Only(&["tag"])),
+            hold(sockel::class::CLUSTER, Size::Box, Across::Only(&["tag"])),
             hold(class::SAMPLE, Size::Box, Across::Only(&["tag"])),
         ],
     },
@@ -168,7 +168,7 @@ pub const PAGES: &[Page] = &[
         covers: &["ActionGroup", "ActionGroupProps", "action_group"],
         render: || html! { <actions::ActionGroupPage /> },
         holds: &[hold(
-            plinth::class::ICONED,
+            sockel::class::ICONED,
             Size::Height,
             Across::Except(&["Buttons"]),
         )],
@@ -188,7 +188,7 @@ pub const PAGES: &[Page] = &[
         render: || html! { <buttons::ButtonPage /> },
         holds: &[
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Only(&[
                     "pressed",
@@ -200,7 +200,7 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
@@ -213,7 +213,7 @@ pub const PAGES: &[Page] = &[
         about: "A native checkbox in a box of a fixed size, with an indeterminate state. Click it; tab to it; press space.",
         covers: &["Checkbox", "CheckboxProps", "checkbox"],
         render: || html! { <toggles::CheckboxPage /> },
-        holds: &[hold(plinth::class::CHECKBOX_MARK, Size::Both, Across::All)],
+        holds: &[hold(sockel::class::CHECKBOX_MARK, Size::Both, Across::All)],
     },
     Page {
         id: "switch",
@@ -223,8 +223,8 @@ pub const PAGES: &[Page] = &[
         covers: &["Switch", "SwitchProps", "switch"],
         render: || html! { <toggles::SwitchPage /> },
         holds: &[
-            hold(plinth::class::SWITCH_TRACK, Size::Both, Across::All),
-            hold(plinth::class::SWITCH_THUMB, Size::Both, Across::All),
+            hold(sockel::class::SWITCH_TRACK, Size::Both, Across::All),
+            hold(sockel::class::SWITCH_THUMB, Size::Both, Across::All),
         ],
     },
     Page {
@@ -242,12 +242,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <toggles::ChoicePage /> },
         holds: &[
             hold(
-                plinth::class::CHOICE,
+                sockel::class::CHOICE,
                 Size::Height,
                 Across::Except(&["small"]),
             ),
             hold(
-                plinth::class::CHOICE_OPTION,
+                sockel::class::CHOICE_OPTION,
                 Size::Box,
                 Across::Only(&["Selected", "invalid", "disabled", "focus", "click"]),
             ),
@@ -268,12 +268,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <toggles::ChipPage /> },
         holds: &[
             hold(
-                plinth::class::CHIP_LIST,
+                sockel::class::CHIP_LIST,
                 Size::Height,
                 Across::Only(&["Chips=1", "Chips=0 (empty)"]),
             ),
             hold(
-                plinth::class::CHIP,
+                sockel::class::CHIP,
                 Size::Both,
                 Across::Only(&[
                     "Count=7", "Count=0", "Count=42", "disabled", "focus", "click",
@@ -297,9 +297,9 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <fields::FieldPage /> },
         holds: &[
-            hold(plinth::class::FIELD, Size::Width, Across::All),
+            hold(sockel::class::FIELD, Size::Width, Across::All),
             hold(
-                plinth::class::FIELD,
+                sockel::class::FIELD,
                 Size::Height,
                 Across::Only(&["error", "required", "disabled", "busy", "focus", "click"]),
             ),
@@ -323,14 +323,14 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <fields::FormRowsPage /> },
         holds: &[
-            hold(plinth::class::FORM_ROWS, Size::Width, Across::All),
+            hold(sockel::class::FORM_ROWS, Size::Width, Across::All),
             hold(
-                plinth::class::FORM_CONTROL,
+                sockel::class::FORM_CONTROL,
                 Size::Width,
                 Across::Except(&["wide_labels", "label"]),
             ),
             hold(
-                plinth::class::FORM_ROW,
+                sockel::class::FORM_ROW,
                 Size::Height,
                 Across::Only(&["error", "required", "disabled", "busy", "focus", "click"]),
             ),
@@ -344,9 +344,9 @@ pub const PAGES: &[Page] = &[
         covers: &["Pill", "PillProps", "Tone", "pill"],
         render: || html! { <badges::PillPage /> },
         holds: &[
-            hold(plinth::class::PILL, Size::Height, Across::All),
+            hold(sockel::class::PILL, Size::Height, Across::All),
             hold(
-                plinth::class::PILL,
+                sockel::class::PILL,
                 Size::Both,
                 Across::Only(&["Tone", "on_click (a button)", "disabled", "focus", "click"]),
             ),
@@ -372,22 +372,22 @@ pub const PAGES: &[Page] = &[
         render: || html! { <inputs::TextInputPage /> },
         holds: &[
             hold(
-                plinth::class::INPUT,
+                sockel::class::INPUT,
                 Size::Both,
                 Across::Except(&["Size", "Text"]),
             ),
             hold(
-                plinth::class::INPUT_BOX,
+                sockel::class::INPUT_BOX,
                 Size::Both,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT_CONTROL,
+                sockel::class::INPUT_CONTROL,
                 Size::Box,
                 Across::Except(&["Size", "Unit"]),
             ),
             hold(
-                plinth::class::TEXTAREA,
+                sockel::class::TEXTAREA,
                 Size::Both,
                 Across::Except(&["Size"]),
             ),
@@ -402,16 +402,16 @@ pub const PAGES: &[Page] = &[
         render: || html! { <badges::BadgePage /> },
         holds: &[
             hold(
-                plinth::class::BADGE,
+                sockel::class::BADGE,
                 Size::Height,
                 Across::Except(&["corner"]),
             ),
             hold(
-                plinth::class::BADGE,
+                sockel::class::BADGE,
                 Size::Both,
                 Across::Only(&["Tone", "solid", "focus", "click"]),
             ),
-            hold(plinth::class::DOT, Size::Both, Across::All),
+            hold(sockel::class::DOT, Size::Both, Across::All),
         ],
     },
     Page {
@@ -422,7 +422,7 @@ pub const PAGES: &[Page] = &[
         covers: &["Count", "CountProps", "count", "count_text"],
         render: || html! { <badges::CountPage /> },
         holds: &[hold(
-            plinth::class::COUNT,
+            sockel::class::COUNT,
             Size::Box,
             Across::Except(&["Max"]),
         )],
@@ -436,12 +436,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <badges::StatusLabelPage /> },
         holds: &[
             hold(
-                plinth::class::STATUS_LABEL,
+                sockel::class::STATUS_LABEL,
                 Size::Box,
                 Across::Only(&["State", "focus", "click"]),
             ),
             hold(
-                plinth::class::STATUS_SPINNER,
+                sockel::class::STATUS_SPINNER,
                 Size::Box,
                 Across::Only(&["State", "focus", "click"]),
             ),
@@ -456,17 +456,17 @@ pub const PAGES: &[Page] = &[
         render: || html! { <inputs::SearchFieldPage /> },
         holds: &[
             hold(
-                plinth::class::INPUT_BOX,
+                sockel::class::INPUT_BOX,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT_CONTROL,
+                sockel::class::INPUT_CONTROL,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT_CLEAR,
+                sockel::class::INPUT_CLEAR,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),
@@ -488,17 +488,17 @@ pub const PAGES: &[Page] = &[
         render: || html! { <steppers::StepperPage /> },
         holds: &[
             hold(
-                plinth::class::STEPPER,
+                sockel::class::STEPPER,
                 Size::Both,
                 Across::Except(&["Size", "Max"]),
             ),
             hold(
-                plinth::class::STEPPER_CONTROL,
+                sockel::class::STEPPER_CONTROL,
                 Size::Box,
                 Across::Except(&["Size", "Max"]),
             ),
             hold(
-                plinth::class::STEPPER_BUTTON,
+                sockel::class::STEPPER_BUTTON,
                 Size::Box,
                 Across::Except(&["Size", "Max"]),
             ),
@@ -513,17 +513,17 @@ pub const PAGES: &[Page] = &[
         render: || html! { <steppers::SecretInputPage /> },
         holds: &[
             hold(
-                plinth::class::INPUT_BOX,
+                sockel::class::INPUT_BOX,
                 Size::Both,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT_CONTROL,
+                sockel::class::INPUT_CONTROL,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT_ACTION,
+                sockel::class::INPUT_ACTION,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),
@@ -538,12 +538,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <inputs::InputGroupPage /> },
         holds: &[
             hold(
-                plinth::class::INPUT_GROUP,
+                sockel::class::INPUT_GROUP,
                 Size::Both,
                 Across::Except(&["Size"]),
             ),
             hold(
-                plinth::class::INPUT,
+                sockel::class::INPUT,
                 Size::Height,
                 Across::Except(&["Size"]),
             ),
@@ -571,7 +571,7 @@ pub const PAGES: &[Page] = &[
         render: || html! { <color_select::ColorSelectPage /> },
         holds: &[
             hold(
-                plinth::class::COLOR_SELECT,
+                sockel::class::COLOR_SELECT,
                 Size::Box,
                 Across::Only(&[
                     "value",
@@ -588,12 +588,12 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::COLOR_SELECT,
+                sockel::class::COLOR_SELECT,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
             hold(
-                plinth::class::COLOR_SWATCH,
+                sockel::class::COLOR_SWATCH,
                 Size::Box,
                 Across::Only(&[
                     "value",
@@ -631,7 +631,7 @@ pub const PAGES: &[Page] = &[
         render: || html! { <select::SelectPage /> },
         holds: &[
             hold(
-                plinth::class::SELECT,
+                sockel::class::SELECT,
                 Size::Box,
                 Across::Only(&[
                     "value",
@@ -648,12 +648,12 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::SELECT,
+                sockel::class::SELECT,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
             hold(
-                plinth::class::INPUT_GROUP,
+                sockel::class::INPUT_GROUP,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
@@ -676,7 +676,7 @@ pub const PAGES: &[Page] = &[
         render: || html! { <pickers::SearchSelectPage /> },
         holds: &[
             hold(
-                plinth::class::SEARCH_SELECT,
+                sockel::class::SEARCH_SELECT,
                 Size::Box,
                 Across::Only(&[
                     "options",
@@ -688,7 +688,7 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::SEARCH_SELECT,
+                sockel::class::SEARCH_SELECT,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
@@ -709,8 +709,8 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <pickers::FilterPickerPage /> },
         holds: &[
-            hold(plinth::class::FILTER_PICKER, Size::Box, Across::All),
-            hold(plinth::class::FILTER_PICKER_COUNT, Size::Box, Across::All),
+            hold(sockel::class::FILTER_PICKER, Size::Box, Across::All),
+            hold(sockel::class::FILTER_PICKER_COUNT, Size::Box, Across::All),
         ],
     },
     Page {
@@ -730,7 +730,7 @@ pub const PAGES: &[Page] = &[
         render: || html! { <picker::PickerPage /> },
         holds: &[
             hold(
-                plinth::class::PICKER,
+                sockel::class::PICKER,
                 Size::Box,
                 Across::Only(&[
                     "options",
@@ -744,13 +744,13 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::PICKER,
+                sockel::class::PICKER,
                 Size::Height,
                 Across::Except(&["variant"]),
             ),
             hold(
-                plinth::class::CHOICE_LIST_OPTIONS,
-                Size::Flush(plinth::class::PICKER_POPUP),
+                sockel::class::CHOICE_LIST_OPTIONS,
+                Size::Flush(sockel::class::PICKER_POPUP),
                 Across::Only(&["click"]),
             ),
         ],
@@ -764,18 +764,18 @@ pub const PAGES: &[Page] = &[
         render: || html! { <picker::PickerMenuPage /> },
         holds: &[
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Except(&["Option text", "chevron (PickerMenu, with an icon)"]),
             ),
             hold(
-                plinth::class::CHOICE_LIST_SEARCH,
-                Size::Flush(plinth::class::PICKER_POPUP),
+                sockel::class::CHOICE_LIST_SEARCH,
+                Size::Flush(sockel::class::PICKER_POPUP),
                 Across::Only(&["click"]),
             ),
             hold(
-                plinth::class::CHOICE_LIST_OPTIONS,
-                Size::Flush(plinth::class::PICKER_POPUP),
+                sockel::class::CHOICE_LIST_OPTIONS,
+                Size::Flush(sockel::class::PICKER_POPUP),
                 Across::Only(&["click"]),
             ),
         ],
@@ -787,7 +787,7 @@ pub const PAGES: &[Page] = &[
         about: "A ChoiceList's popup below an opener the app renders itself (here a toggle showing how many are chosen), with a note and a Done button beside the list; Escape, Tab or a press outside closes it.",
         covers: &["ChoicePopup", "ChoicePopupProps"],
         render: || html! { <picker::ChoicePopupPage /> },
-        holds: &[hold(plinth::class::BUTTON, Size::Height, Across::All)],
+        holds: &[hold(sockel::class::BUTTON, Size::Height, Across::All)],
     },
     Page {
         id: "picker-dialog",
@@ -803,11 +803,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <picker::PickerDialogPage /> },
         holds: &[
             hold(
-                plinth::class::CHOICE_LIST_OPTIONS,
+                sockel::class::CHOICE_LIST_OPTIONS,
                 Size::Box,
                 Across::Except(&["always_search"]),
             ),
-            hold(plinth::class::CHOICE_LIST, Size::Width, Across::All),
+            hold(sockel::class::CHOICE_LIST, Size::Width, Across::All),
         ],
     },
     Page {
@@ -819,12 +819,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <actions::IconButtonPage /> },
         holds: &[
             hold(
-                plinth::class::ICONED,
+                sockel::class::ICONED,
                 Size::Box,
                 Across::Only(&["disabled", "dialog", "label (aria-label)", "focus", "click"]),
             ),
             hold(
-                plinth::class::ICONED,
+                sockel::class::ICONED,
                 Size::Height,
                 Across::Except(&["Small"]),
             ),
@@ -834,7 +834,7 @@ pub const PAGES: &[Page] = &[
         id: "icon",
         title: "Icon",
         group: Group::Media,
-        about: "plinth's glyphs and the app's own icons by name, from the app's IconSet or the built-in one, always in the same box. A missing icon is the empty box; swap the set and the sizes do not move.",
+        about: "sockel's glyphs and the app's own icons by name, from the app's IconSet or the built-in one, always in the same box. A missing icon is the empty box; swap the set and the sizes do not move.",
         covers: &[
             "Icon",
             "IconProps",
@@ -848,12 +848,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <icons::IconPage /> },
         holds: &[
             hold(
-                plinth::class::GLYPH,
+                sockel::class::GLYPH,
                 Size::Both,
                 Across::Only(&["Icon set", "icon", "disabled", "focus", "click"]),
             ),
             hold(
-                plinth::class::ICONED,
+                sockel::class::ICONED,
                 Size::Height,
                 Across::Only(&["Icon set", "icon", "disabled", "focus", "click"]),
             ),
@@ -868,12 +868,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <media::ImagePage /> },
         holds: &[
             hold(
-                plinth::class::IMAGE,
+                sockel::class::IMAGE,
                 Size::Width,
                 Across::Except(&["Width"]),
             ),
             hold(
-                plinth::class::IMAGE,
+                sockel::class::IMAGE,
                 Size::Box,
                 Across::Only(&["Source", "alt", "lazy", "focus", "click"]),
             ),
@@ -887,9 +887,9 @@ pub const PAGES: &[Page] = &[
         covers: &["Avatar", "AvatarProps", "AvatarSize", "avatar", "initials"],
         render: || html! { <media::AvatarPage /> },
         holds: &[
-            hold(plinth::class::AVATAR, Size::Both, Across::Except(&["Size"])),
+            hold(sockel::class::AVATAR, Size::Both, Across::Except(&["Size"])),
             hold(
-                plinth::class::AVATAR,
+                sockel::class::AVATAR,
                 Size::Box,
                 Across::Only(&["Source", "Name", "focus", "click"]),
             ),
@@ -904,12 +904,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <notices::NoticePage /> },
         holds: &[
             hold(
-                plinth::class::NOTICE,
+                sockel::class::NOTICE,
                 Size::Width,
                 Across::Except(&["Shown", "click"]),
             ),
             hold(
-                plinth::class::NOTICE,
+                sockel::class::NOTICE,
                 Size::Height,
                 Across::Only(&["tone", "focus"]),
             ),
@@ -923,9 +923,9 @@ pub const PAGES: &[Page] = &[
         covers: &["ErrorBox", "ErrorBoxProps", "error_box"],
         render: || html! { <notices::ErrorBoxPage /> },
         holds: &[
-            hold(plinth::class::ERROR_BOX, Size::Width, Across::All),
+            hold(sockel::class::ERROR_BOX, Size::Width, Across::All),
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Only(&["retrying", "focus", "click"]),
             ),
@@ -939,9 +939,9 @@ pub const PAGES: &[Page] = &[
         covers: &["EmptyState", "EmptyStateProps", "empty_state"],
         render: || html! { <notices::EmptyStatePage /> },
         holds: &[
-            hold(plinth::class::EMPTY_STATE, Size::Width, Across::All),
+            hold(sockel::class::EMPTY_STATE, Size::Width, Across::All),
             hold(
-                plinth::class::EMPTY_STATE,
+                sockel::class::EMPTY_STATE,
                 Size::Height,
                 Across::Except(&["compact"]),
             ),
@@ -954,7 +954,7 @@ pub const PAGES: &[Page] = &[
         about: "A spinning glyph in the icon box, in the colour of the text around it; the busy mark of a Button.",
         covers: &["Spinner", "SpinnerProps"],
         render: || html! { <loading::SpinnerPage /> },
-        holds: &[hold(plinth::class::SPINNER, Size::Both, Across::All)],
+        holds: &[hold(sockel::class::SPINNER, Size::Both, Across::All)],
     },
     Page {
         id: "skeleton",
@@ -964,7 +964,7 @@ pub const PAGES: &[Page] = &[
         covers: &["Skeleton", "SkeletonProps", "SkeletonShape", "skeleton"],
         render: || html! { <loading::SkeletonPage /> },
         holds: &[hold(
-            plinth::class::SKELETON,
+            sockel::class::SKELETON,
             Size::Box,
             Across::Only(&["RowList beside", "focus", "click"]),
         )],
@@ -977,9 +977,9 @@ pub const PAGES: &[Page] = &[
         covers: &["Loadable", "LoadableProps", "LoadState"],
         render: || html! { <loading::LoadablePage /> },
         holds: &[
-            hold(plinth::class::LOADABLE, Size::Width, Across::All),
+            hold(sockel::class::LOADABLE, Size::Width, Across::All),
             hold(
-                plinth::class::LOADABLE,
+                sockel::class::LOADABLE,
                 Size::Height,
                 Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
             ),
@@ -1002,12 +1002,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <toasts::ToastPage /> },
         holds: &[
             hold(
-                plinth::class::TOAST,
+                sockel::class::TOAST,
                 Size::Width,
                 Across::Only(&["Live toast", "raised", "focus", "click"]),
             ),
             hold(
-                plinth::class::TOAST,
+                sockel::class::TOAST,
                 Size::Height,
                 Across::Only(&[
                     "tone",
@@ -1049,11 +1049,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <toasts::SaveBarPage /> },
         holds: &[
             hold(
-                plinth::class::SAVE_BAR,
+                sockel::class::SAVE_BAR,
                 Size::Box,
                 Across::Except(&["status", "label"]),
             ),
-            hold(plinth::class::SAVE_BAR, Size::Width, Across::All),
+            hold(sockel::class::SAVE_BAR, Size::Width, Across::All),
             hold(
                 class::SAMPLE,
                 Size::Box,
@@ -1076,14 +1076,14 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <rows::RowListPage /> },
         holds: &[
-            hold(plinth::class::ROW_LIST, Size::Width, Across::All),
+            hold(sockel::class::ROW_LIST, Size::Width, Across::All),
             hold(
-                plinth::class::ROW_LIST_ITEM,
+                sockel::class::ROW_LIST_ITEM,
                 Size::Box,
                 Across::Only(&["divided", "boxed", "Actions", "overlay", "focus", "click"]),
             ),
             hold(
-                plinth::class::ROW_LIST_ITEM,
+                sockel::class::ROW_LIST_ITEM,
                 Size::Height,
                 Across::Except(&["Detail", "Name", "top", "Rows", "State"]),
             ),
@@ -1097,14 +1097,14 @@ pub const PAGES: &[Page] = &[
         covers: &["PickRow", "PickRowProps", "pick_row"],
         render: || html! { <rows::PickRowPage /> },
         holds: &[
-            hold(plinth::class::PICK_ROW, Size::Width, Across::All),
+            hold(sockel::class::PICK_ROW, Size::Width, Across::All),
             hold(
-                plinth::class::PICK_ROW,
+                sockel::class::PICK_ROW,
                 Size::Height,
                 Across::Except(&["Detail", "Name"]),
             ),
             hold(
-                plinth::class::PICK_ROW,
+                sockel::class::PICK_ROW,
                 Size::Box,
                 Across::Only(&["disabled", "mark", "Trailing", "focus", "click"]),
             ),
@@ -1118,14 +1118,14 @@ pub const PAGES: &[Page] = &[
         covers: &["SelectionBar", "SelectionBarProps", "selection_bar"],
         render: || html! { <rows::SelectionBarPage /> },
         holds: &[
-            hold(plinth::class::SELECTION_BAR, Size::Height, Across::All),
+            hold(sockel::class::SELECTION_BAR, Size::Height, Across::All),
             hold(
-                plinth::class::SELECTION_BAR,
+                sockel::class::SELECTION_BAR,
                 Size::Box,
                 Across::Only(&["picked", "Label", "busy", "disabled", "focus", "click"]),
             ),
             hold(
-                plinth::class::ROW_LIST,
+                sockel::class::ROW_LIST,
                 Size::Box,
                 Across::Only(&["picked", "busy", "sticky", "focus", "click"]),
             ),
@@ -1140,11 +1140,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <rows::ActionRowPage /> },
         holds: &[
             hold(
-                plinth::class::ROW_LIST_ITEM,
+                sockel::class::ROW_LIST_ITEM,
                 Size::Box,
                 Across::Only(&["Buttons", "Labels", "focus", "click"]),
             ),
-            hold(plinth::class::ROW_LIST, Size::Width, Across::All),
+            hold(sockel::class::ROW_LIST, Size::Width, Across::All),
         ],
     },
     Page {
@@ -1155,9 +1155,9 @@ pub const PAGES: &[Page] = &[
         covers: &["CardGrid", "CardGridProps", "GridSize", "card_grid"],
         render: || html! { <rows::CardGridPage /> },
         holds: &[
-            hold(plinth::class::CARD_GRID, Size::Width, Across::All),
+            hold(sockel::class::CARD_GRID, Size::Width, Across::All),
             hold(
-                plinth::class::CARD_GRID,
+                sockel::class::CARD_GRID,
                 Size::Box,
                 Across::Only(&["focus", "click"]),
             ),
@@ -1191,12 +1191,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <reorder::ReorderPage /> },
         holds: &[
             hold(
-                plinth::class::REORDER,
+                sockel::class::REORDER,
                 Size::Width,
                 Across::Except(&["Rows"]),
             ),
             hold(
-                plinth::class::REORDER,
+                sockel::class::REORDER,
                 Size::Box,
                 Across::Only(&[
                     "Keys",
@@ -1210,7 +1210,7 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::REORDER_ROW,
+                sockel::class::REORDER_ROW,
                 Size::Box,
                 Across::Only(&[
                     "Keys",
@@ -1224,7 +1224,7 @@ pub const PAGES: &[Page] = &[
                 ]),
             ),
             hold(
-                plinth::class::DRAG_HANDLE,
+                sockel::class::DRAG_HANDLE,
                 Size::Box,
                 Across::Only(&[
                     "Keys",
@@ -1258,19 +1258,19 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <tables::TablePage /> },
         holds: &[
-            hold(plinth::class::TABLE_FRAME, Size::Width, Across::All),
+            hold(sockel::class::TABLE_FRAME, Size::Width, Across::All),
             hold(
-                plinth::class::SORT_HEADER,
+                sockel::class::SORT_HEADER,
                 Size::Box,
                 Across::Only(&["Sort", "Picked", "disabled", "focus", "click"]),
             ),
             hold(
-                plinth::class::TABLE_BULK,
+                sockel::class::TABLE_BULK,
                 Size::Box,
                 Across::Only(&["Picked", "Sort", "focus", "click"]),
             ),
             hold(
-                plinth::class::TABLE_ROW,
+                sockel::class::TABLE_ROW,
                 Size::Height,
                 Across::Only(&["Sort", "Picked", "fixed", "focus", "click"]),
             ),
@@ -1292,11 +1292,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <tables::SortHeaderPage /> },
         holds: &[
             hold(
-                plinth::class::SORT_HEADER,
+                sockel::class::SORT_HEADER,
                 Size::Box,
                 Across::Only(&["Sort", "disabled", "Descending first", "focus", "click"]),
             ),
-            hold(plinth::class::TABLE_FRAME, Size::Width, Across::All),
+            hold(sockel::class::TABLE_FRAME, Size::Width, Across::All),
         ],
     },
     Page {
@@ -1318,11 +1318,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <pagers::PagerPage /> },
         holds: &[
             hold(
-                plinth::class::PAGER,
+                sockel::class::PAGER,
                 Size::Width,
                 Across::Only(&["disabled", "busy", "focus", "click"]),
             ),
-            hold(plinth::class::PAGER, Size::Height, Across::All),
+            hold(sockel::class::PAGER, Size::Height, Across::All),
         ],
     },
     Page {
@@ -1338,16 +1338,16 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <disclosures::DisclosurePage /> },
         holds: &[
-            hold(plinth::class::DISCLOSURE, Size::Width, Across::All),
+            hold(sockel::class::DISCLOSURE, Size::Width, Across::All),
             hold(
-                plinth::class::DISCLOSURE_HEAD,
+                sockel::class::DISCLOSURE_HEAD,
                 Size::Box,
                 Across::Only(&[
                     "Title", "Summary", "open", "actions", "disabled", "focus", "click",
                 ]),
             ),
             hold(
-                plinth::class::DISCLOSURE_MARK,
+                sockel::class::DISCLOSURE_MARK,
                 Size::Box,
                 Across::Only(&[
                     "Title", "Summary", "open", "actions", "disabled", "focus", "click",
@@ -1372,11 +1372,11 @@ pub const PAGES: &[Page] = &[
         render: || html! { <drops::DropZonePage /> },
         holds: &[
             hold(
-                plinth::class::DROP_ZONE,
+                sockel::class::DROP_ZONE,
                 Size::Box,
                 Across::Except(&["Text", "pick"]),
             ),
-            hold(plinth::class::DROP_ZONE, Size::Width, Across::All),
+            hold(sockel::class::DROP_ZONE, Size::Width, Across::All),
         ],
     },
     Page {
@@ -1392,9 +1392,9 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <layout::ToolbarPage /> },
         holds: &[
-            hold(plinth::class::TOOLBAR, Size::Width, Across::All),
+            hold(sockel::class::TOOLBAR, Size::Width, Across::All),
             hold(
-                plinth::class::TOOLBAR,
+                sockel::class::TOOLBAR,
                 Size::Height,
                 Across::Only(&["Labels", "ToolbarSpacer", "focus", "click"]),
             ),
@@ -1413,14 +1413,14 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <structures::ToolBandPage /> },
         holds: &[
-            hold(plinth::class::TOOLBAR, Size::Width, Across::All),
+            hold(sockel::class::TOOLBAR, Size::Width, Across::All),
             hold(
-                plinth::class::TOOLBAR,
+                sockel::class::TOOLBAR,
                 Size::Height,
                 Across::Only(&["disabled", "focus", "click"]),
             ),
             hold(
-                plinth::class::TOOLBAR_PART,
+                sockel::class::TOOLBAR_PART,
                 Size::Box,
                 Across::Only(&["disabled", "focus", "click"]),
             ),
@@ -1434,7 +1434,7 @@ pub const PAGES: &[Page] = &[
         covers: &["Panel", "PanelProps", "PanelGround", "panel"],
         render: || html! { <structures::PanelPage /> },
         holds: &[hold(
-            plinth::class::PANEL_BOX,
+            sockel::class::PANEL_BOX,
             Size::Box,
             Across::Only(&["ground", "disabled", "focus", "click"]),
         )],
@@ -1447,14 +1447,14 @@ pub const PAGES: &[Page] = &[
         covers: &["Seam", "SeamProps", "SeamAxis", "seam"],
         render: || html! { <structures::SeamPage /> },
         holds: &[
-            hold(plinth::class::SEAM, Size::Box, Across::Except(&["axis"])),
+            hold(sockel::class::SEAM, Size::Box, Across::Except(&["axis"])),
             hold(
-                plinth::class::SEAM_GRIP,
+                sockel::class::SEAM_GRIP,
                 Size::Both,
                 Across::Except(&["axis"]),
             ),
             hold(
-                plinth::class::SEAM_PANE,
+                sockel::class::SEAM_PANE,
                 Size::Width,
                 Across::Only(&["Text", "focus", "click"]),
             ),
@@ -1477,8 +1477,8 @@ pub const PAGES: &[Page] = &[
         covers: &["Card", "CardProps", "Inset"],
         render: || html! { <layout::CardPage /> },
         holds: &[
-            hold(plinth::class::CARD, Size::Width, Across::All),
-            hold(plinth::class::CARD, Size::Box, Across::Only(&["tag"])),
+            hold(sockel::class::CARD, Size::Width, Across::All),
+            hold(sockel::class::CARD, Size::Box, Across::Only(&["tag"])),
         ],
     },
     Page {
@@ -1489,9 +1489,9 @@ pub const PAGES: &[Page] = &[
         covers: &["PageHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Page} /> },
         holds: &[
-            hold(plinth::class::PAGE_HEAD, Size::Width, Across::All),
+            hold(sockel::class::PAGE_HEAD, Size::Width, Across::All),
             hold(
-                plinth::class::PAGE_HEAD,
+                sockel::class::PAGE_HEAD,
                 Size::Height,
                 Across::Only(&[
                     "Actions=0",
@@ -1512,9 +1512,9 @@ pub const PAGES: &[Page] = &[
         covers: &["SectionHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Section} /> },
         holds: &[
-            hold(plinth::class::SECTION_HEAD, Size::Width, Across::All),
+            hold(sockel::class::SECTION_HEAD, Size::Width, Across::All),
             hold(
-                plinth::class::SECTION_HEAD,
+                sockel::class::SECTION_HEAD,
                 Size::Height,
                 Across::Only(&[
                     "Actions=0",
@@ -1535,9 +1535,9 @@ pub const PAGES: &[Page] = &[
         covers: &["LibraryToolbar", "LibraryToolbarProps"],
         render: || html! { <library::LibraryToolbarPage /> },
         holds: &[
-            hold(plinth::class::LIBRARY_TOOLBAR, Size::Width, Across::All),
+            hold(sockel::class::LIBRARY_TOOLBAR, Size::Width, Across::All),
             hold(
-                plinth::class::LIBRARY_SEARCH,
+                sockel::class::LIBRARY_SEARCH,
                 Size::Box,
                 Across::Only(&["icon", "autofocus", "focus", "click"]),
             ),
@@ -1575,7 +1575,7 @@ pub const PAGES: &[Page] = &[
         holds: &[
             // Widened by match_anchor, to show the popover matching it.
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Except(&["match_anchor"]),
             ),
@@ -1596,7 +1596,7 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <dialog::DialogPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1608,7 +1608,7 @@ pub const PAGES: &[Page] = &[
         covers: &["OverlayHost", "use_overlays", "use_overlay"],
         render: || html! { <overlays::OverlaysPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1627,7 +1627,7 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <confirms::ConfirmPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1645,7 +1645,7 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <confirms::ConfirmPopoverPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1657,8 +1657,8 @@ pub const PAGES: &[Page] = &[
         covers: &["ConfirmInline", "ConfirmInlineProps", "confirm_inline"],
         render: || html! { <confirms::ConfirmInlinePage /> },
         holds: &[
-            hold(plinth::class::CONFIRM_INLINE, Size::Box, ASKING),
-            hold(plinth::class::CONFIRM_IDLE, Size::Box, ASKING),
+            hold(sockel::class::CONFIRM_INLINE, Size::Box, ASKING),
+            hold(sockel::class::CONFIRM_IDLE, Size::Box, ASKING),
             hold(class::SAMPLE, Size::Box, ASKING),
         ],
     },
@@ -1676,7 +1676,7 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <tooltips::TooltipPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1693,7 +1693,7 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <tooltips::HoverCardPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(sockel::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
@@ -1706,12 +1706,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <tooltips::ReasonButtonPage /> },
         holds: &[
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Only(&["state", "reason", "focus", "click"]),
             ),
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
@@ -1749,12 +1749,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <menus::MenuPage /> },
         holds: &[
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Box,
                 Across::Except(&["variant", "size", "icon only"]),
             ),
             hold(
-                plinth::class::BUTTON,
+                sockel::class::BUTTON,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
@@ -1769,9 +1769,9 @@ pub const PAGES: &[Page] = &[
         covers: &["RowActions", "RowActionsProps", "RowAction"],
         render: || html! { <menus::RowActionsPage /> },
         holds: &[
-            hold(plinth::class::ROW_ACTIONS, Size::Height, Across::All),
+            hold(sockel::class::ROW_ACTIONS, Size::Height, Across::All),
             hold(
-                plinth::class::ROW_ACTIONS,
+                sockel::class::ROW_ACTIONS,
                 Size::Width,
                 Across::Except(&["more (a menu)"]),
             ),
@@ -1786,12 +1786,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <menus::SplitButtonPage /> },
         holds: &[
             hold(
-                plinth::class::SPLIT_BUTTON,
+                sockel::class::SPLIT_BUTTON,
                 Size::Height,
                 Across::Except(&["size"]),
             ),
             hold(
-                plinth::class::SPLIT_BUTTON,
+                sockel::class::SPLIT_BUTTON,
                 Size::Box,
                 Across::Only(&["busy", "disabled", "variant", "focus", "click"]),
             ),
@@ -1813,13 +1813,13 @@ pub const PAGES: &[Page] = &[
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
         covers: &["stack", "stack_with", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
-        holds: &[hold(plinth::class::STACK, Size::Width, Across::All)],
+        holds: &[hold(sockel::class::STACK, Size::Width, Across::All)],
     },
     Page {
         id: "foundations",
         title: "Foundations",
         group: Group::Foundations,
-        about: "The utilities and mixins against jitter: text fitting, tabular figures, a scroll area, the current item, showing by width, the focus ring; and the colours plinth derives.",
+        about: "The utilities and mixins against jitter: text fitting, tabular figures, a scroll area, the current item, showing by width, the focus ring; and the colours sockel derives.",
         covers: &[],
         render: || html! { <foundations::FoundationsPage /> },
         holds: &[
@@ -1849,12 +1849,12 @@ pub const PAGES: &[Page] = &[
         render: || html! { <tabs::TabsPage /> },
         holds: &[
             hold(
-                plinth::class::TABS,
+                sockel::class::TABS,
                 Size::Height,
                 Across::Except(&["small"]),
             ),
             hold(
-                plinth::class::TAB,
+                sockel::class::TAB,
                 Size::Box,
                 Across::Only(&["Selected", "disabled", "focus", "click"]),
             ),
@@ -1868,7 +1868,7 @@ pub const PAGES: &[Page] = &[
         covers: &["NavList", "NavListProps", "NavItem", "nav_list"],
         render: || html! { <tabs::NavListPage /> },
         holds: &[hold(
-            plinth::class::NAV_ITEM,
+            sockel::class::NAV_ITEM,
             Size::Box,
             Across::Only(&["Current", "disabled", "links", "icons", "focus", "click"]),
         )],
@@ -1877,7 +1877,7 @@ pub const PAGES: &[Page] = &[
         id: "styles",
         title: "Styles",
         group: Group::Foundations,
-        about: "plinth's compiled stylesheet, and the component that adds the page's one stylesheet.",
+        about: "sockel's compiled stylesheet, and the component that adds the page's one stylesheet.",
         covers: &["STYLESHEET", "STYLE_ID", "Styles", "StylesProps"],
         render: || html! { <styles::StylesPage /> },
         holds: &[],
@@ -1886,7 +1886,7 @@ pub const PAGES: &[Page] = &[
         id: "translations",
         title: "Translations",
         group: Group::Foundations,
-        about: "plinth's words come from its phrasebook catalog, in the language the app provides; pick one under Language.",
+        about: "sockel's words come from its phrasebook catalog, in the language the app provides; pick one under Language.",
         covers: &[],
         render: || html! { <translations::TranslationsPage /> },
         holds: &[],
@@ -1952,12 +1952,12 @@ mod tests {
         let missing: Vec<_> = exported.difference(&covered).collect();
         assert!(
             missing.is_empty(),
-            "exported from plinth without a showcase page: {missing:?}"
+            "exported from sockel without a showcase page: {missing:?}"
         );
         let stale: Vec<_> = covered.difference(&exported).collect();
         assert!(
             stale.is_empty(),
-            "showcase pages cover names plinth does not export: {stale:?}"
+            "showcase pages cover names sockel does not export: {stale:?}"
         );
     }
 
@@ -1989,7 +1989,7 @@ mod tests {
         let card = format!(
             "class=\"{} {}\"",
             crate::class::CODE,
-            plinth::class::SCROLL_AREA
+            sockel::class::SCROLL_AREA
         );
         let bare: Vec<_> = (0..PAGES.len())
             .filter(|&index| {

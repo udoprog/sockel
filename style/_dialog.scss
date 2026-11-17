@@ -1,18 +1,18 @@
 // Dialog (src/dialog.rs).
 //
-// - `.plinth-dialog-layer`: fixed over the whole window in the overlay
+// - `.sockel-dialog-layer`: fixed over the whole window in the overlay
 //   layer, its `--scrim` dimming the page and any dialog beneath. The
 //   dialog hangs `--dialog-top` from the window's top, never centred, so
 //   growing content only moves its bottom edge.
-// - `.plinth-dialog`: `--dialog-width` wide (`.plinth-wide`:
+// - `.sockel-dialog`: `--dialog-width` wide (`.sockel-wide`:
 //   `--dialog-width-wide`), from `--dialog-min-height` up to the window's
-//   room; `.plinth-tall` is `--dialog-height-tall` whatever it holds. Parts:
+//   room; `.sockel-tall` is `--dialog-height-tall` whatever it holds. Parts:
 //   `-head` (a section head: icon, title, close), `-body` (what scrolls, its
 //   scrollbar's room kept) and `-foot` (its actions, pinned below the body).
-// - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom,
+// - `.sockel-sheet`: below `$sheet-breakpoint`, a sheet from the bottom,
 //   up to `--dialog-sheet-height`.
-// - `.plinth-scroll-locked` on the root while a dialog is open, with
-//   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays;
+// - `.sockel-scroll-locked` on the root while a dialog is open, with
+//   `.sockel-gutter-kept` when the page had a scrollbar, so its room stays;
 //   the layer's scrim reaches over that room (`--scroll-gutter`, its width).
 // - Settings: `$dialog-padding` (and `$dialog-padding-phone` below
 //   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
@@ -23,20 +23,20 @@
 //   `$dialog-max-height` (its tallest above `$sheet-breakpoint`),
 //   `$dialog-scroll-gutter` (the body's `scrollbar-gutter`) and
 //   `$dialog-sheet-edge` (`top`: a sheet's top edge alone).
-// - `.plinth-dialog-body.plinth-flush`: a body without padding that does not
+// - `.sockel-dialog-body.sockel-flush`: a body without padding that does not
 //   scroll, for content that lays itself out and scrolls its own parts.
 
 @use "tokens" as base;
 
-.plinth-scroll-locked {
+.sockel-scroll-locked {
     overflow: hidden;
 }
 
-.plinth-gutter-kept {
+.sockel-gutter-kept {
     scrollbar-gutter: stable;
 }
 
-.plinth-dialog-layer {
+.sockel-dialog-layer {
     position: fixed;
     inset: 0 calc(-1 * var(--scroll-gutter, 0px)) 0 0;
     z-index: var(--layer-overlay);
@@ -50,13 +50,13 @@
 }
 
 @if base.$dialog-centred {
-    .plinth-dialog-layer {
+    .sockel-dialog-layer {
         align-items: center;
         padding-top: var(--space-4);
     }
 }
 
-.plinth-dialog {
+.sockel-dialog {
     $room: calc(100dvh - var(--dialog-top) - var(--space-4));
     @if base.$dialog-centred {
         $room: calc(100dvh - 2 * var(--space-4));
@@ -80,16 +80,16 @@
     box-shadow: base.$dialog-shadow;
     outline: none;
 
-    &.plinth-wide {
+    &.sockel-wide {
         width: min(var(--dialog-width-wide), 100%);
     }
 
-    &.plinth-tall {
+    &.sockel-tall {
         height: min(var(--dialog-height-tall), var(--dialog-room));
     }
 }
 
-.plinth-dialog-head {
+.sockel-dialog-head {
     flex: none;
     padding: base.$dialog-head-padding;
     @if base.$dialog-head-rule {
@@ -101,12 +101,12 @@
 }
 
 @if base.$dialog-title-weight {
-    .plinth-dialog-head > .plinth-head-heading > .plinth-section-head-title {
+    .sockel-dialog-head > .sockel-head-heading > .sockel-section-head-title {
         font-weight: base.$dialog-title-weight;
     }
 }
 
-.plinth-dialog-body {
+.sockel-dialog-body {
     @include base.scroll-area;
     flex: 1 1 auto;
     padding: base.$dialog-body-padding;
@@ -114,7 +114,7 @@
         scrollbar-gutter: base.$dialog-scroll-gutter;
     }
 
-    &.plinth-flush {
+    &.sockel-flush {
         overflow: hidden;
         padding: 0;
         scrollbar-gutter: auto;
@@ -122,7 +122,7 @@
 }
 
 @if base.$dialog-body-gap {
-    .plinth-dialog-body {
+    .sockel-dialog-body {
         display: flex;
         flex-direction: column;
         gap: base.$dialog-body-gap;
@@ -134,7 +134,7 @@
     }
 }
 
-.plinth-dialog-foot {
+.sockel-dialog-foot {
     display: flex;
     flex: none;
     flex-wrap: wrap;
@@ -145,12 +145,12 @@
 }
 
 @include base.below(base.$sheet-breakpoint) {
-    .plinth-dialog-layer.plinth-sheet {
+    .sockel-dialog-layer.sockel-sheet {
         align-items: flex-end;
         padding: 0;
     }
 
-    .plinth-dialog.plinth-sheet {
+    .sockel-dialog.sockel-sheet {
         --dialog-room: var(--dialog-sheet-height);
         @if base.$dialog-padding-phone {
             --dialog-pad: #{base.$dialog-padding-phone};

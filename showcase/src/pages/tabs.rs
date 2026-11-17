@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use plinth::{Glyph, Icon, NavItem, NavList, SubTabs, TabItem, Tabs, nav_list, tabs};
+use sockel::{Glyph, Icon, NavItem, NavList, SubTabs, TabItem, Tabs, nav_list, tabs};
 
 use crate::class;
 use crate::code::{El, snippet};

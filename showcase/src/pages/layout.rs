@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use plinth::{
+use sockel::{
     Align, Card, Cluster, Gap, Inset, Justify, Stack, Toolbar, ToolbarSpacer, card, cluster, stack,
     stack_with, toolbar,
 };
@@ -317,9 +317,9 @@ pub fn ClassesPage() -> Html {
         <Demo {controls} {code}>
             <Stack gap={Gap::Loose}>
                 { shown(if *flush { "stack_with(gap, flush)" } else { "stack(gap)" }, &stack) }
-                <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
+                <ul class={classes!(stack, sockel::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
                 { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
-                <ul class={classes!(cluster, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, true, false) }</ul>
+                <ul class={classes!(cluster, sockel::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, true, false) }</ul>
                 { shown("toolbar(boxed)", &toolbar) }
                 <nav class={toolbar} aria-label="Toolbar classes">
                     { button("One".into(), false, false) }
