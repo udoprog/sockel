@@ -90,6 +90,7 @@ pub fn IconButtonPage() -> Html {
     let trailing = use_state(|| false);
     let disabled = use_state(|| false);
     let small = use_state(|| false);
+    let named = use_state(|| false);
     let dialog = use_state(|| false);
     let open = use_state(|| false);
     let clicks = use_state(|| 0);
@@ -103,6 +104,7 @@ pub fn IconButtonPage() -> Html {
             <Toggle label="trailing" value={*trailing} on_change={bind(&trailing)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="Small" value={*small} on_change={bind(&small)} />
+            <Toggle label="label (aria-label)" value={*named} on_change={bind(&named)} />
         </>
     };
 
@@ -133,7 +135,8 @@ pub fn IconButtonPage() -> Html {
             { shown("icon_button(class, trailing)", &classes) }
             <Cluster>
                 <IconButton {class} trailing={*trailing} disabled={*disabled}
-                    dialog={dialog.then_some(*open)} title="Add an item" {onclick}>
+                    dialog={dialog.then_some(*open)} title="Add an item"
+                    label={named.then(|| AttrValue::from("Add an item to the list"))} {onclick}>
                     if *trailing { { for label.clone() } { icon() } } else { { icon() } { for label } }
                 </IconButton>
                 <span class="control-label">

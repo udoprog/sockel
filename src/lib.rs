@@ -33,7 +33,7 @@ mod library_toolbar;
 mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
-pub use head::{Head, HeadProps, PageHead, SectionHead};
+pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,

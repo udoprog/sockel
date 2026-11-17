@@ -315,3 +315,10 @@ body {
     background: var(--sample);
     font-size: var(--text-sm);
 }
+
+.stylesheet {
+    max-height: 24rem;
+    margin: 0;
+    overflow: auto;
+    font-size: var(--text-xs);
+}

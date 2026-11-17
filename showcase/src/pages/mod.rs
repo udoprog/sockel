@@ -2,6 +2,7 @@ mod actions;
 mod heads;
 mod layout;
 mod library;
+mod styles;
 
 use yew::prelude::*;
 
@@ -68,14 +69,14 @@ pub const PAGES: &[Page] = &[
         id: "page-head",
         title: "PageHead",
         about: "A page's title with its help, and its actions.",
-        covers: &["PageHead", "HeadProps", "Head"],
+        covers: &["PageHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Page} /> },
     },
     Page {
         id: "section-head",
         title: "SectionHead",
         about: "A section's title with its help, and its actions.",
-        covers: &["SectionHead", "HeadProps", "Head"],
+        covers: &["SectionHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Section} /> },
     },
     Page {
@@ -91,6 +92,13 @@ pub const PAGES: &[Page] = &[
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
         covers: &["stack", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
+    },
+    Page {
+        id: "styles",
+        title: "Styles",
+        about: "plinth's compiled stylesheet, and the component that adds it to the page.",
+        covers: &["STYLESHEET", "Styles"],
+        render: || html! { <styles::StylesPage /> },
     },
 ];
 

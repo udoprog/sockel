@@ -112,6 +112,7 @@ pub fn ClusterPage() -> Html {
 
 #[function_component]
 pub fn ToolbarPage() -> Html {
+    let gap = use_state(|| Gap::Normal);
     let boxed = use_state(|| true);
     let spacer = use_state(|| true);
     let small = use_state(|| false);
@@ -120,6 +121,7 @@ pub fn ToolbarPage() -> Html {
 
     let controls = html! {
         <>
+            <Select<Gap> label="gap" options={GAPS} value={*gap} on_change={bind(&gap)} />
             <Toggle label="boxed" value={*boxed} on_change={bind(&boxed)} />
             <Toggle label="ToolbarSpacer" value={*spacer} on_change={bind(&spacer)} />
             <Toggle label="Small buttons" value={*small} on_change={bind(&small)} />
@@ -137,7 +139,7 @@ pub fn ToolbarPage() -> Html {
 
     html! {
         <Demo {controls}>
-            <Toolbar label="Showcase toolbar" boxed={*boxed}>
+            <Toolbar label="Showcase toolbar" boxed={*boxed} gap={*gap}>
                 { buttons(1..=half) }
                 if *spacer { <ToolbarSpacer /> }
                 { buttons(half + 1..=*count) }
