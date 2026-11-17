@@ -353,7 +353,8 @@ pub struct MenuProps {
     pub tip: Option<AttrValue>,
     /// A click on the opener does this instead of opening the menu, for an
     /// opener that is a tool of its own; a right-click (a long press on a
-    /// touch screen) opens the menu.
+    /// touch screen) opens the menu, as it does for a [`MenuProps::pressed`]
+    /// toggle.
     #[prop_or_default]
     pub on_click: Option<Callback<MouseEvent>>,
     /// The opener is a toggle and whether it is on (`aria-pressed`).
@@ -472,7 +473,8 @@ pub fn Menu(props: &MenuProps) -> Html {
 
     html! {
         <>
-            if props.on_click.is_some() {
+            // Kept while `on_click` comes and goes, so the opener keeps focus.
+            if props.on_click.is_some() || props.pressed.is_some() {
                 <span class={class::CONTEXT_TARGET} {oncontextmenu}>{ button }</span>
             } else {
                 { button }

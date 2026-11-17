@@ -1261,7 +1261,8 @@ overlay layer, through `use_popover`. Props:
   runs `on_click` (closing the menu if open) and a right-click (a long
   press on a touch screen) opens the menu; a second right-click while it
   is open reaches the browser's menu. `pressed: Some(on)` makes the opener
-  a toggle (`aria-pressed`).
+  a toggle (`aria-pressed`), which a right-click opens the same way, so an
+  opener whose `on_click` comes and goes with its state stays one element.
 - `width` (`MenuWidth`): `Regular` (`--menu-width`), `Wide` (`WIDE`,
   `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
