@@ -262,6 +262,7 @@ fn summary_pager(
     html! {
         <nav class={classes!(pager(props.disabled, props.busy), class::SUMMARY, props.class.clone())}
             aria-label={nav_label.clone()} aria-busy={props.busy.then_some("true")}
+            style="--pager-chars: 1"
             ref={props.nav_ref.clone()}
             data-testid={props.testid.clone()}>
             <span class={class::PAGER_STATUS} aria-live="polite">
@@ -453,6 +454,8 @@ mod tests {
         assert!(html.contains(class::SUMMARY), "{html}");
         assert_eq!(html.matches("<button").count(), 2, "{html}");
         assert!(!html.contains(class::PAGER_GAP), "{html}");
+        // Its two buttons are as wide as a page button.
+        assert!(html.contains("--pager-chars: 1"), "{html}");
     }
 
     #[test]
