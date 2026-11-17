@@ -10,6 +10,7 @@ mod library;
 mod media;
 mod notices;
 mod popover;
+mod rows;
 mod styles;
 mod toggles;
 
@@ -431,6 +432,103 @@ pub const PAGES: &[Page] = &[
                 plinth::class::EMPTY_STATE,
                 Size::Height,
                 Across::Except(&["compact"]),
+            ),
+        ],
+    },
+    Page {
+        id: "row-list",
+        title: "RowList",
+        about: "Rows of a name, a detail and what ends them, divided by lines that add no height. Hover or tab to a row.",
+        covers: &[
+            "RowList",
+            "RowListProps",
+            "RowListItem",
+            "RowListItemProps",
+            "row_list",
+            "row_list_item",
+        ],
+        render: || html! { <rows::RowListPage /> },
+        holds: &[
+            hold(plinth::class::ROW_LIST, Size::Width, Across::All),
+            hold(
+                plinth::class::ROW_LIST_ITEM,
+                Size::Box,
+                Across::Only(&["divided", "boxed", "Actions", "overlay", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::ROW_LIST_ITEM,
+                Size::Height,
+                Across::Except(&["Detail", "Name", "top", "Rows", "State"]),
+            ),
+        ],
+    },
+    Page {
+        id: "pick-row",
+        title: "PickRow",
+        about: "A row that is one press, choosing the thing it names: the chosen row is marked by its background alone.",
+        covers: &["PickRow", "PickRowProps", "pick_row"],
+        render: || html! { <rows::PickRowPage /> },
+        holds: &[
+            hold(plinth::class::PICK_ROW, Size::Width, Across::All),
+            hold(
+                plinth::class::PICK_ROW,
+                Size::Height,
+                Across::Except(&["Detail", "Name"]),
+            ),
+            hold(
+                plinth::class::PICK_ROW,
+                Size::Box,
+                Across::Only(&["disabled", "mark", "Trailing", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "selection-bar",
+        title: "SelectionBar",
+        about: "The picked count and its actions under a list. It keeps its room at one height, hidden while nothing is picked, so picking moves nothing.",
+        covers: &["SelectionBar", "SelectionBarProps", "selection_bar"],
+        render: || html! { <rows::SelectionBarPage /> },
+        holds: &[
+            hold(plinth::class::SELECTION_BAR, Size::Height, Across::All),
+            hold(
+                plinth::class::SELECTION_BAR,
+                Size::Box,
+                Across::Only(&["picked", "Label", "busy", "disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::ROW_LIST,
+                Size::Box,
+                Across::Only(&["picked", "busy", "sticky", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "action-row",
+        title: "ActionRow",
+        about: "Actions acting on what stands around them; as an overlay it lies over its row's end, invisible and inert until the row is hovered or focused.",
+        covers: &["ActionRow", "ActionRowProps", "action_row"],
+        render: || html! { <rows::ActionRowPage /> },
+        holds: &[
+            hold(
+                plinth::class::ROW_LIST_ITEM,
+                Size::Box,
+                Across::Only(&["Buttons", "Labels", "focus", "click"]),
+            ),
+            hold(plinth::class::ROW_LIST, Size::Width, Across::All),
+        ],
+    },
+    Page {
+        id: "card-grid",
+        title: "CardGrid",
+        about: "Cards in as many columns as fit, each at least a size's width, sharing the room.",
+        covers: &["CardGrid", "CardGridProps", "GridSize", "card_grid"],
+        render: || html! { <rows::CardGridPage /> },
+        holds: &[
+            hold(plinth::class::CARD_GRID, Size::Width, Across::All),
+            hold(
+                plinth::class::CARD_GRID,
+                Size::Box,
+                Across::Only(&["focus", "click"]),
             ),
         ],
     },

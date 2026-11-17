@@ -617,6 +617,49 @@ its content's up to `--popover-max-width`, whichever side it lands on, so a
 flip moves it without reflowing it; what is taller than the room scrolls in
 `.plinth-popover-body`, its scrollbar's room kept. It follows the anchor on
 scroll, resize and a change of either's size.
+## RowList, PickRow, SelectionBar, ActionRow and CardGrid
+
+`RowList` is a column of rows (`tag`, `ul` by default, with no bullets, margin
+or padding). `divided` (`DIVIDED`) draws a line above every row but the first;
+`boxed` (`BOXED`) gives it a bordered, rounded surface. `RowListItem` is a
+row: `name` (one line, cut), `detail` (under it, muted, cut), and its
+children, which end the row (an `ActionRow`, a `Checkbox`). `top` (`TOP`) is a
+tall row: parts to the top, the name wraps. `row_list(divided, boxed)` and
+`row_list_item(top)` give the classes. Parts: `ROW_LIST_MAIN`,
+`ROW_LIST_NAME`, `ROW_LIST_DETAIL`.
+
+`PickRow` is a button that is a whole row choosing one thing: `name`,
+`detail`, `mark` (before the name), children (after), `current`
+(`aria-current`, marked by background only), `disabled`, `onclick`.
+Parts: `PICK_ROW_MARK`, `PICK_ROW_NAME`, `PICK_ROW_DETAIL`.
+
+`SelectionBar` is the band under a list: `count`, `label` (the count as text,
+in a `role="status"`) and the actions as children. It is always in the flow
+at one height: with `count == 0` it is `IDLE` (`visibility: hidden`), so
+picking never moves the list. `inset` (`INSET`) levels its sides with the
+rows; `sticky` (`STICKY`) keeps it at the bottom of its scroll container.
+Part: `SELECTION_BAR_COUNT`. `selection_bar(idle, inset, sticky)`.
+
+`ActionRow` is actions that wrap; `nowrap` keeps one line and never shrinks.
+`overlay` (`OVERLAY`) lies over the end of its row, taking no room, with
+`opacity: 0` and `pointer-events: none` until the row (a `RowListItem`) is
+hovered or has focus. Its controls stay in the tab order, so focus reveals
+it. It reads `--overlay-opacity`, `--overlay-events` and `--overlay-tint`,
+which a row sets. `action_row(overlay, nowrap)`.
+
+`CardGrid` lays cards in as many columns as fit (`tag`, `ul` by default).
+`size` (`GridSize`): `Normal` (columns of at least `--card-grid-min`), `Wide`
+(`--card-grid-wide`) and `Narrow` (`--card-grid-narrow`, and
+`--card-grid-narrow-phone` with a closer gap on a phone). `card_grid(size)`.
+
+Every one takes `class` and `testid` (the parts' children aside).
+
+Size guarantees: a row is at least `--control-height` high, as a compact
+`EmptyState` is, so one replaces the other without moving what follows. Every
+row reserves its top border, so `divided`, hover, focus and a chosen
+`PickRow` change no box. An overlay `ActionRow` takes no room, so revealing
+it moves nothing. A selection bar keeps its height whether anything is
+picked or not. A card grid's cards are as tall as their row.
 
 ## Against jitter: mixins and utilities
 

@@ -1,0 +1,242 @@
+// Rows (src/rows.rs, src/selection.rs). A row is at least `--control-height`
+// high, as a compact empty state is, and every border a row draws is
+// reserved, so dividing a list, hovering or choosing a row moves nothing.
+//
+// - `.plinth-row-list`: a column of rows. `.plinth-divided` draws a line
+//   above every row but the first, in the rows' own reserved top borders
+//   (`--row-line`); `.plinth-boxed` gives it a bordered, rounded surface.
+// - `.plinth-row-list-item`: a row. Parts: `-main` (takes the room), `-name`
+//   (one line, cut) and `-detail` (under it, muted, cut). What follows the
+//   main part ends the row. `.plinth-top` puts the parts to the top and lets
+//   the name wrap.
+// - `.plinth-pick-row`: a button that is a whole row. Parts: `-mark`,
+//   `-name`, `-detail`. `aria-current` marks it by background.
+// - `.plinth-selection-bar`: the picked count (`-count`) and its actions,
+//   always one height; `.plinth-idle` hides it while nothing is picked and
+//   keeps its room; `.plinth-inset` levels its sides with the rows;
+//   `.plinth-sticky` keeps it at the bottom of its scroll container.
+// - `.plinth-action-row`: actions that wrap. `.plinth-nowrap` keeps one
+//   line. `.plinth-overlay` lies over the end of a row, taking no room,
+//   invisible and inert until the row is hovered or has focus.
+
+@use "tokens" as base;
+
+.plinth-row-list {
+    --row-line: transparent;
+
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    @include base.reserved-border;
+    list-style: none;
+
+    &.plinth-divided {
+        --row-line: var(--border);
+    }
+
+    &.plinth-boxed {
+        border-color: var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow-1);
+    }
+}
+
+.plinth-row-list-item {
+    --overlay-tint: transparent;
+    --overlay-opacity: 0;
+    --overlay-events: none;
+    --row-name-wrap: nowrap;
+    --row-name-break: normal;
+    --row-main-basis: auto;
+
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--control-height);
+    padding: 0 var(--space-3);
+    border-top: var(--space-px) solid var(--row-line);
+
+    // The tint stays inside the box's corners; nothing is clipped.
+    &:first-child {
+        border-top-color: transparent;
+        border-start-start-radius: inherit;
+        border-start-end-radius: inherit;
+    }
+
+    &:last-child {
+        border-end-start-radius: inherit;
+        border-end-end-radius: inherit;
+    }
+
+    &:hover,
+    &:focus-within {
+        --overlay-tint: color-mix(in srgb, var(--text) 4%, transparent);
+        --overlay-opacity: 1;
+        --overlay-events: auto;
+
+        background: var(--overlay-tint);
+    }
+
+    &.plinth-top {
+        --row-name-wrap: normal;
+        --row-name-break: anywhere;
+        --row-main-basis: 14rem;
+
+        align-items: flex-start;
+        flex-wrap: wrap;
+    }
+}
+
+.plinth-row-list-main {
+    display: flex;
+    flex: 1 1 var(--row-main-basis);
+    flex-direction: column;
+    min-width: 0;
+    padding-block: var(--space-1);
+}
+
+.plinth-row-list-name {
+    @include base.truncate;
+
+    font-weight: 600;
+    overflow-wrap: var(--row-name-break);
+    white-space: var(--row-name-wrap);
+}
+
+.plinth-row-list-detail {
+    @include base.truncate;
+
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
+.plinth-pick-row {
+    --pick-fill: transparent;
+
+    display: flex;
+    align-items: center;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--control-height);
+    margin: 0;
+    padding: 0 var(--space-3);
+    @include base.reserved-border;
+    border-radius: var(--radius-sm);
+    background: var(--pick-fill);
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        --pick-fill: color-mix(in srgb, var(--text) 4%, transparent);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include base.current;
+
+    &:focus-visible {
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: calc(-1 * var(--focus-ring-width));
+    }
+}
+
+.plinth-pick-row-mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+}
+
+.plinth-pick-row-name {
+    @include base.truncate;
+
+    flex: 1 1 auto;
+}
+
+.plinth-pick-row-detail {
+    @include base.truncate;
+
+    // Follows the row's colour, so a chosen row's detail stays readable.
+    color: color-mix(in srgb, currentcolor 70%, transparent);
+    font-size: var(--text-sm);
+}
+
+.plinth-selection-bar {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px));
+    padding: var(--space-2) 0;
+    border-top: var(--space-px) solid var(--border);
+
+    &.plinth-inset {
+        padding-inline: var(--space-3);
+    }
+
+    &.plinth-idle {
+        visibility: hidden;
+    }
+
+    &.plinth-sticky {
+        position: sticky;
+        bottom: 0;
+        z-index: var(--layer-sticky);
+        background: var(--surface);
+    }
+}
+
+.plinth-selection-bar-count {
+    @include base.numeric;
+    @include base.truncate;
+
+    flex: 1 1 auto;
+}
+
+.plinth-action-row {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+
+    &.plinth-nowrap {
+        flex: none;
+        flex-wrap: nowrap;
+    }
+
+    &.plinth-overlay {
+        position: absolute;
+        inset-block: 0;
+        inset-inline-end: 0;
+        flex-wrap: nowrap;
+        gap: var(--space-1);
+        padding-inline: var(--space-3) var(--space-2);
+        border-radius: var(--radius-sm);
+        background:
+            linear-gradient(var(--overlay-tint, transparent), var(--overlay-tint, transparent)),
+            var(--surface);
+        opacity: var(--overlay-opacity, 0);
+        pointer-events: var(--overlay-events, none);
+
+        // Keyboard focus reaches the controls in it, so it shows itself.
+        &:focus-within {
+            opacity: 1;
+            pointer-events: auto;
+        }
+    }
+}

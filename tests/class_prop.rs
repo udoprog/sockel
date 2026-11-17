@@ -233,3 +233,54 @@ fn marks_keep_a_passed_class() {
         &own(class::STATUS_LABEL),
     );
 }
+
+#[test]
+fn rows_and_grids_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    let own = |class: &str| format!("{class} {MINE}");
+    keeps(
+        render::<RowList>(yew::props!(RowListProps { class: mine() })),
+        &own(class::ROW_LIST),
+    );
+    keeps(
+        render::<RowListItem>(yew::props!(RowListItemProps {
+            name: html! { "Name" },
+            class: mine()
+        })),
+        &own(class::ROW_LIST_ITEM),
+    );
+    keeps(
+        render::<PickRow>(yew::props!(PickRowProps {
+            name: html! { "Name" },
+            class: mine()
+        })),
+        &own(class::PICK_ROW),
+    );
+    keeps(
+        render::<SelectionBar>(yew::props!(SelectionBarProps {
+            count: 0usize,
+            label: "None",
+            class: mine()
+        })),
+        &format!("{} {} {MINE}", class::SELECTION_BAR, class::IDLE),
+    );
+    keeps(
+        render::<ActionRow>(yew::props!(ActionRowProps { class: mine() })),
+        &own(class::ACTION_ROW),
+    );
+    keeps(
+        render::<CardGrid>(yew::props!(CardGridProps { class: mine() })),
+        &own(class::CARD_GRID),
+    );
+}
+
+#[test]
+fn an_overlay_action_row_renders_its_modifier_and_stays_focusable() {
+    let html = render::<ActionRow>(yew::props!(ActionRowProps {
+        overlay: true,
+        children: html! { <button>{ "Edit" }</button> },
+    }));
+    assert!(html.contains(&format!("{} {}", class::ACTION_ROW, class::OVERLAY)));
+    assert!(!html.contains("tabindex"), "{html}");
+    assert!(!html.contains("inert"), "{html}");
+}

@@ -1,0 +1,32 @@
+// The card grid (src/card_grid.rs).
+//
+// - `.plinth-card-grid`: as many columns as fit, each at least
+//   `--card-grid-min` and sharing the row's room, `--space-5` apart; a card
+//   is as tall as its row. `.plinth-wide` starts columns at `--card-grid-wide`
+//   (cards with a few lines of text); `.plinth-narrow` at `--card-grid-narrow`
+//   (small cards), and on a phone at `--card-grid-narrow-phone`, closer.
+
+@use "tokens" as base;
+
+.plinth-card-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-grid-min)), 1fr));
+    gap: var(--space-5);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+
+    &.plinth-wide {
+        grid-template-columns: repeat(auto-fill, minmax(min(100%, var(--card-grid-wide)), 1fr));
+    }
+
+    &.plinth-narrow {
+        grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-narrow), 1fr));
+
+        @include base.below("phone") {
+            grid-template-columns: repeat(auto-fill, minmax(var(--card-grid-narrow-phone), 1fr));
+            gap: var(--space-3);
+        }
+    }
+}

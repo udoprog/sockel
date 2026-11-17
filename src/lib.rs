@@ -44,6 +44,13 @@
 //! - [`Pill`] (`.pill`), [`Badge`] (`.badge`), [`Dot`] (`.dot`) and [`Count`]
 //!   (`.count`): short marks of a fixed box, in a [`Tone`];
 //!   [`StatusLabel`] (`.status-label`): a status as wide as its widest state.
+//! - [`RowList`] (`.row-list`) with [`RowListItem`]: rows of a name, a detail
+//!   and what ends them, divided by lines that add no height; [`PickRow`]
+//!   (`.pick-row`): a row that is one press; [`SelectionBar`]
+//!   (`.selection-bar`): the picked count and its actions under a list;
+//!   [`ActionRow`] (`.action-row`): actions on what stands around them, over
+//!   a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
+//!   columns as fit.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -76,6 +83,7 @@ pub mod class {
 mod action_group;
 mod badge;
 mod button;
+mod card_grid;
 mod checkbox;
 mod chip;
 mod choice;
@@ -90,6 +98,8 @@ mod layout;
 mod library_toolbar;
 mod notice;
 mod popover;
+mod rows;
+mod selection;
 mod status;
 mod styles;
 
@@ -99,6 +109,7 @@ pub use badge::{
     count_text, dot, pill,
 };
 pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
+pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
@@ -123,6 +134,13 @@ pub use notice::{Notice, NoticeProps, notice};
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
     popover, use_popover,
+};
+pub use rows::{
+    PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
+    row_list, row_list_item,
+};
+pub use selection::{
+    ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
 pub use status::{StatusLabel, StatusLabelProps, status_label};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};

@@ -128,6 +128,10 @@ $filter-width: 10.5rem !default;
 $field-label-width: 12rem !default;
 $field-message-line: 1rem !default;
 $field-error-lines: 1 !default;
+$card-grid-min: 15rem !default;
+$card-grid-wide: 18rem !default;
+$card-grid-narrow: 10.5rem !default;
+$card-grid-narrow-phone: 9rem !default;
 $avatar-sm: 1.75rem !default;
 $avatar-md: 2.5rem !default;
 $avatar-lg: 3.5rem !default;
@@ -218,6 +222,13 @@ $sheet-breakpoint: "phone" !default;
     --avatar-md: #{$avatar-md};
     --avatar-lg: #{$avatar-lg};
     --avatar-xl: #{$avatar-xl};
+
+    // The narrowest column of a card grid (`.plinth-card-grid`, its `-wide`,
+    // `-narrow` and `-narrow` on a phone).
+    --card-grid-min: #{$card-grid-min};
+    --card-grid-wide: #{$card-grid-wide};
+    --card-grid-narrow: #{$card-grid-narrow};
+    --card-grid-narrow-phone: #{$card-grid-narrow-phone};
 
     // The two content columns: the
     // workspace for lists, sheets and the manual, the reading column for
