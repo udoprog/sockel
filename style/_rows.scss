@@ -12,8 +12,9 @@
 // - `.plinth-pick-row`: a button that is a whole row. Parts: `-mark`,
 //   `-name`, `-detail`. `aria-current` marks it by background.
 // - `.plinth-selection-bar`: the picked count (`-count`) and its actions,
-//   always one height; `.plinth-idle` hides it while nothing is picked and
-//   keeps its room; `.plinth-inset` levels its sides with the rows;
+//   one height (`$selection-bar-count-wrap` wraps a count that does not
+//   fit instead); `.plinth-idle` hides it while nothing is picked and keeps
+//   its room; `.plinth-inset` levels its sides with the rows;
 //   `.plinth-sticky` keeps it at the bottom of its scroll container.
 // - `.plinth-action-row`: actions that wrap. `.plinth-nowrap` keeps one
 //   line. `.plinth-overlay` lies over the end of a row, taking no room,
@@ -214,6 +215,14 @@
     padding-inline-start: base.$selection-bar-count-padding;
     color: base.$selection-bar-count-ink;
     font-weight: base.$selection-bar-count-weight;
+
+    // Only the room the actions leave, wrapping in it, so they keep theirs.
+    @if base.$selection-bar-count-wrap {
+        flex: 1 1 0;
+        min-width: min-content;
+        overflow: visible;
+        white-space: normal;
+    }
 }
 
 .plinth-action-row {

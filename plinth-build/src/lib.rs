@@ -956,6 +956,21 @@ mod tests {
     }
 
     #[test]
+    fn a_selection_bar_count_wraps_only_when_set() {
+        let plain = Config::new().build().unwrap();
+        let count = declarations(&plain.css, ".plinth-selection-bar-count");
+        assert!(count.contains(&"white-space: nowrap".to_owned()));
+        let tuned = Config::new()
+            .with("selection-bar-count-wrap", "true")
+            .build()
+            .unwrap();
+        let count = declarations(&tuned.css, ".plinth-selection-bar-count");
+        for line in ["flex: 1 1 0", "white-space: normal", "overflow: visible"] {
+            assert!(count.contains(&line.to_owned()), "{line} in {count:?}");
+        }
+    }
+
+    #[test]
     fn a_menu_keeps_its_scrollbar_room_unless_set() {
         let plain = Config::new().build().unwrap();
         let menu = declarations(&plain.css, ".plinth-menu");

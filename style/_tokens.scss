@@ -218,6 +218,7 @@ $selection-bar-inset-margin: null !default;
 $selection-bar-count-ink: null !default;
 $selection-bar-count-weight: null !default;
 $selection-bar-count-padding: null !default;
+$selection-bar-count-wrap: false !default;
 
 // A pick row's least height, padding, gap, corners, type and hover fill,
 // and its detail's ink and size; `null` leaves the type inherited.

@@ -382,6 +382,7 @@ page can still override them at runtime.
 | `$pick-row-detail-ink`, `$pick-row-detail-text` | 70% of the row's colour, `var(--text-sm)` (its detail's colour and size) |
 | `$selection-bar-inset-padding`, `$selection-bar-inset-margin` | `var(--space-3)`, `null` (an `inset` bar's side padding and margin) |
 | `$selection-bar-count-ink`, `$selection-bar-count-weight`, `$selection-bar-count-padding` | `null` each (its count's colour, weight and start padding) |
+| `$selection-bar-count-wrap` | `false` (the count is cut to one line; `true` wraps a count that does not fit, so the bar grows a line and its actions never shrink) |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay `ActionRow`'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
