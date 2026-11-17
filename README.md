@@ -241,15 +241,11 @@ and `@use "../../sockel/style/..."`) moves to the getting-started setup:
    `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
    css={STYLESHEET} />` once at the root.
 
-`sockel-build` compiles with [grass] rather than dart-sass. They differ
-where a block has declarations after a nested rule or an `@include` of
-rules: dart-sass emits those declarations in a second block after the
-nested rules, grass moves them into the first. A `padding` written after
-`@include p.below("phone") { padding: ... }` then loses to the media query
-under grass, where dart-sass let it win. Write a block's declarations
-before its nested rules (dart-sass warns about the other order as
-deprecated anyway). They also print `calc()` inside `min()` and `max()`
-differently, to the same effect. A dart-sass feature grass lacks fails in
+`sockel-build` compiles with [sasso], a Rust port of dart-sass, and its
+CSS matches dart-sass's. A block's declarations written after a nested
+rule or an `@include` of rules come out in a second block after those
+rules, so a `padding` after `@include p.below("phone") { padding: ... }`
+wins over the media query. A dart-sass feature sasso lacks fails in
 `build.rs` with the error and its line.
 
 Including sockel's Sass from a checkout (`@use "../sockel/style"`) does not
@@ -2275,5 +2271,5 @@ bash scripts/check-packaged.sh
 ```
 
 [Yew]: https://yew.rs
-[grass]: https://crates.io/crates/grass
+[sasso]: https://crates.io/crates/sasso
 [trunk]: https://trunkrs.dev

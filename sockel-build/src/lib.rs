@@ -11,6 +11,8 @@ use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
+use sasso::Importer;
+
 #[cfg(test)]
 mod features;
 
@@ -115,9 +117,9 @@ const HOOKS_PROBE: &str =
 /// The directory sockel's sources are served under.
 const ROOT: &str = "sockel";
 
-/// sockel's sources at relative paths (`sockel/...`), the disk at absolute
-/// ones: a project's files are always loaded by absolute path, so nothing
-/// else on disk can stand in for sockel's sources.
+/// sockel's sources at `sockel` and `sockel/...`, the disk at absolute paths
+/// and relative to a file on disk: a project's files are always loaded by
+/// absolute path, so nothing else on disk can stand in for sockel's sources.
 #[derive(Debug)]
 struct Sources {
     style: PathBuf,
@@ -126,70 +128,74 @@ struct Sources {
 }
 
 impl Sources {
-    /// A relative path without its `.` components.
-    fn relative(path: &Path) -> PathBuf {
-        path.components()
-            .filter(|part| *part != std::path::Component::CurDir)
-            .collect()
+    fn disk(
+        url: &str,
+        ctx: &sasso::CanonicalizeContext<'_>,
+    ) -> Result<Option<sasso::CanonicalUrl>, sasso::ImporterError> {
+        sasso::FsImporter::new(Vec::new()).canonicalize(url, ctx)
     }
 
-    /// A relative path's file in sockel's style directory.
-    fn sockel(&self, path: &Path) -> Option<PathBuf> {
-        let path = Self::relative(path);
-        let name = path.strip_prefix(ROOT).ok()?;
-        Some(self.style.join(name))
+    /// `url`'s file in sockel's style directory.
+    fn sockel(&self, url: &str) -> Result<Option<sasso::CanonicalUrl>, sasso::ImporterError> {
+        let rest = match url.strip_prefix(ROOT) {
+            Some("") => "_index.scss",
+            Some(rest) => match rest.strip_prefix('/') {
+                Some(rest) => rest,
+                None => return Ok(None),
+            },
+            None => return Ok(None),
+        };
+        // Resolves `rest` relative to a file in the style directory.
+        let anchor = sasso::CanonicalUrl::new(self.style.join("_").to_string_lossy());
+        let ctx = sasso::CanonicalizeContext {
+            from_import: false,
+            containing_url: Some(&anchor),
+        };
+        Self::disk(rest, &ctx)
     }
 
-    fn is_index(&self, path: &Path) -> bool {
-        self.index.is_some() && Self::relative(path) == Path::new(ROOT).join("_index.scss")
+    fn is_index(&self, canonical: &sasso::CanonicalUrl) -> bool {
+        let index = self.style.join("_index.scss");
+        let ctx = sasso::CanonicalizeContext {
+            from_import: false,
+            containing_url: None,
+        };
+        matches!(Self::disk(&index.to_string_lossy(), &ctx), Ok(Some(found)) if found == *canonical)
     }
 }
 
-impl grass::Fs for Sources {
-    fn is_dir(&self, path: &Path) -> bool {
-        if path.is_absolute() {
-            path.is_dir()
-        } else {
-            Self::relative(path) == Path::new(ROOT)
+impl Importer for Sources {
+    fn canonicalize(
+        &self,
+        url: &str,
+        ctx: &sasso::CanonicalizeContext<'_>,
+    ) -> Result<Option<sasso::CanonicalUrl>, sasso::ImporterError> {
+        if (Path::new(url).is_absolute() || ctx.containing_url.is_some())
+            && let Some(found) = Self::disk(url, ctx)?
+        {
+            return Ok(Some(found));
         }
+        self.sockel(url)
     }
 
-    fn is_file(&self, path: &Path) -> bool {
-        if path.is_absolute() {
-            path.is_file()
-        } else {
-            self.is_index(path) || self.sockel(path).is_some_and(|file| file.is_file())
-        }
-    }
-
-    fn read(&self, path: &Path) -> io::Result<Vec<u8>> {
-        if path.is_absolute() {
-            return std::fs::read(path);
-        }
-        if let (true, Some(index)) = (self.is_index(path), &self.index) {
-            return Ok(index.as_bytes().to_vec());
-        }
-        match self.sockel(path) {
-            Some(file) => std::fs::read(file),
-            None => Err(io::Error::new(
-                io::ErrorKind::NotFound,
-                path.display().to_string(),
-            )),
-        }
-    }
-
-    fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
-        if path.is_absolute() {
-            std::fs::canonicalize(path)
-        } else {
-            Ok(Self::relative(path))
+    fn load(
+        &self,
+        canonical: &sasso::CanonicalUrl,
+    ) -> Result<Option<sasso::ImporterResult>, sasso::ImporterError> {
+        match &self.index {
+            Some(index) if self.is_index(canonical) => Ok(Some(sasso::ImporterResult {
+                contents: index.clone(),
+                syntax: sasso::Syntax::Scss,
+                source_map_url: None,
+            })),
+            _ => sasso::FsImporter::new(Vec::new()).load(canonical),
         }
     }
 }
 
 #[derive(Debug)]
 pub enum Error {
-    Sass(Box<grass::Error>),
+    Sass(sasso::Error),
     Io(io::Error),
     /// A class whose name makes no Rust identifier.
     Name(String),
@@ -244,8 +250,8 @@ impl fmt::Display for Error {
 
 impl std::error::Error for Error {}
 
-impl From<Box<grass::Error>> for Error {
-    fn from(error: Box<grass::Error>) -> Self {
+impl From<sasso::Error> for Error {
+    fn from(error: sasso::Error) -> Self {
         Error::Sass(error)
     }
 }
@@ -421,8 +427,8 @@ impl Config {
     }
 
     /// Every class of sockel's enabled features, nothing omitted.
-    fn all_classes(options: &grass::Options<'_>) -> Result<Vec<String>, Error> {
-        let mut classes = class_names(&grass::from_string("@use \"sockel\";\n", options)?);
+    fn all_classes(options: &sasso::Options<'_>) -> Result<Vec<String>, Error> {
+        let mut classes = class_names(&sasso::compile("@use \"sockel\";\n", options)?);
         classes.sort();
         Ok(classes)
     }
@@ -434,10 +440,10 @@ impl Config {
             index: Self::index(&style, enabled.as_deref())?,
             style,
         };
-        let options = grass::Options::default().fs(&sources).load_path("");
+        let options = sasso::Options::new().with_importer(&sources);
         let sockel_use = self.sockel_use(enabled.as_deref());
-        let sockel_css = grass::from_string(&sockel_use, &options)?;
-        let hooks = grass::from_string(HOOKS_PROBE, &options)?;
+        let sockel_css = sasso::compile(&sockel_use, &options)?;
+        let hooks = sasso::compile(HOOKS_PROBE, &options)?;
         let mut sockel_classes = class_names(&sockel_css);
         sockel_classes.extend(class_names(&hooks));
         sockel_classes.sort();
@@ -455,7 +461,7 @@ impl Config {
         // One compilation, sockel first, so a local `@use "sockel"` reuses
         // the module loaded here and emits nothing again.
         let entry = format!("{sockel_use}@use \"{}\";\n", sass_string(&index));
-        let css = grass::from_string(entry, &options)?;
+        let css = sasso::compile(&entry, &options)?;
         let local_css = css.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
@@ -695,7 +701,11 @@ mod tests {
         }
         assert!(!output.css.contains("crumb {"));
         let style = Path::new(env!("CARGO_MANIFEST_DIR")).join("../style/_index.scss");
-        let on_disk = grass::from_path(style, &grass::Options::default()).unwrap();
+        let source = std::fs::read_to_string(&style).unwrap();
+        let fs = sasso::FsImporter::new(Vec::new());
+        let url = style.to_string_lossy();
+        let options = sasso::Options::new().with_importer(&fs).with_url(&url);
+        let on_disk = sasso::compile(&source, &options).unwrap();
         assert_eq!(output.css, on_disk);
     }
 
@@ -746,23 +756,32 @@ mod tests {
         );
     }
 
-    /// The declarations of `selector`'s rule in `css`, one per line, trimmed.
+    /// The declarations of `selector`'s rules in `css`, one per line,
+    /// trimmed: those of its first rule, and of the top-level rules after it
+    /// that Sass splits off around nested rules.
     fn declarations(css: &str, selector: &str) -> Vec<String> {
+        let head = format!("{selector} {{");
         let start = css
-            .find(&format!("{selector} {{"))
+            .find(&head)
             .unwrap_or_else(|| panic!("no rule {selector} in {css}"));
-        let body = &css[start + selector.len() + 2..];
-        body[..body.find('}').unwrap()]
-            .split(';')
+        let top = format!("\n{head}\n");
+        let rest = css[start + head.len()..].match_indices(&top);
+        let starts = rest.map(|(at, _)| start + head.len() + at + top.len() - 1);
+        std::iter::once(start + head.len())
+            .chain(starts)
+            .flat_map(|at| {
+                let body = &css[at..];
+                body[..body.find('}').unwrap()].split(';')
+            })
             .map(|line| line.trim().to_owned())
             .filter(|line| !line.is_empty())
             .collect()
     }
 
-    fn compile_probe(probe: &str) -> Result<String, Box<grass::Error>> {
+    fn compile_probe(probe: &str) -> Result<String, sasso::Error> {
         let sources = test_sources();
-        let options = grass::Options::default().fs(&sources).load_path("");
-        grass::from_string(format!("@use \"sockel\" as p;\n{probe}"), &options)
+        let options = sasso::Options::new().with_importer(&sources);
+        sasso::compile(&format!("@use \"sockel\" as p;\n{probe}"), &options)
     }
 
     #[test]

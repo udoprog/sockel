@@ -50,8 +50,8 @@ fn source(partial: &str) -> String {
 
 fn partial_classes(partial: &str) -> BTreeSet<String> {
     let sources = test_sources();
-    let options = grass::Options::default().fs(&sources).load_path("");
-    let css = grass::from_string(format!("@use \"sockel/{partial}\";\n"), &options).unwrap();
+    let options = sasso::Options::new().with_importer(&sources);
+    let css = sasso::compile(&format!("@use \"sockel/{partial}\";\n"), &options).unwrap();
     class_names(&css).into_iter().collect()
 }
 
@@ -170,8 +170,8 @@ fn feature_parts_name_features() {
 fn each_feature_defines_the_tokens_it_reads() {
     let cargo = cargo_features();
     let sources = test_sources();
-    let options = grass::Options::default().fs(&sources).load_path("");
-    let tokens = grass::from_string("@use \"sockel/tokens\";\n", &options).unwrap();
+    let options = sasso::Options::new().with_importer(&sources);
+    let tokens = sasso::compile("@use \"sockel/tokens\";\n", &options).unwrap();
     let (full, _) = custom_properties(&tokens);
     for (feature, _) in FEATURES {
         let css = sockel()
