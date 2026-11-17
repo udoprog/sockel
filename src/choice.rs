@@ -1,8 +1,7 @@
 //! Choice (`style/_toggles.scss`).
 
-use crate::{class, roving};
-use web_sys::wasm_bindgen::JsCast;
-use web_sys::{Element, HtmlElement};
+use crate::class;
+use crate::roving::{self, Arrows};
 use yew::prelude::*;
 
 /// How a [`Choice`]'s options share its width: all of them the width of
@@ -109,10 +108,6 @@ fn roving(options: &[ChoiceOption], value: Option<&AttrValue>) -> Option<usize> 
     roving::stop(&disabled(options), selected)
 }
 
-fn step(options: &[ChoiceOption], from: usize, key: &str) -> Option<usize> {
-    roving::step(&disabled(options), from, key)
-}
-
 /// A segmented pick-one group (`role="radiogroup"`): options of one width
 /// whatever is selected, the selected one marked by its background alone.
 /// One tab stop; arrows, Home and End move the selection and focus.
@@ -125,23 +120,12 @@ pub fn Choice(props: &ChoiceProps) -> Html {
         let on_change = props.on_change.clone();
         let disabled = props.disabled;
         Callback::from(move |e: KeyboardEvent| {
-            let Some(from) = stop else { return };
             if disabled {
                 return;
             }
-            let Some(next) = step(&options, from, &e.key()) else {
-                return;
-            };
-            e.prevent_default();
-            on_change.emit(options[next].value.clone());
-            let focused = e
-                .current_target()
-                .and_then(|t| t.dyn_into::<Element>().ok())
-                .and_then(|group| group.query_selector_all("[role=radio]").ok())
-                .and_then(|list| list.item(next as u32))
-                .and_then(|node| node.dyn_into::<HtmlElement>().ok());
-            if let Some(option) = focused {
-                let _ = option.focus();
+            let off = self::disabled(&options);
+            if let Some(next) = roving::keydown(&e, "radio", &off, stop, Arrows::Both) {
+                on_change.emit(options[next].value.clone());
             }
         })
     };
@@ -184,6 +168,10 @@ pub fn Choice(props: &ChoiceProps) -> Html {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    fn step(options: &[ChoiceOption], from: usize, key: &str) -> Option<usize> {
+        roving::step(&disabled(options), Some(from), key, Arrows::Both)
+    }
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()

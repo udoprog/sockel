@@ -6,7 +6,8 @@ use web_sys::{Element, HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox_option, option_id};
-use crate::select::{printable, scroll_to};
+use crate::roving::printable;
+use crate::select::scroll_to;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Dismiss, Glyph, Icon, InputSize,
     PopoverAlign, Side, class, input_box, use_overlays, use_popover,
@@ -263,7 +264,9 @@ where
             if searchable && matches!(key.as_str(), "Home" | "End" | " ") {
                 return;
             }
-            let taken = state.borrow_mut().key(&key, e.alt_key(), &pickable);
+            let taken = state
+                .borrow_mut()
+                .key(&key, e.alt_key(), &pickable, e.time_stamp());
             match taken {
                 ListKey::Moved => {}
                 ListKey::Pick(i) => pick(i),

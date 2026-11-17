@@ -1,8 +1,7 @@
 //! Tabs and SubTabs (`style/_tabs.scss`).
 
-use crate::{class, roving};
-use web_sys::wasm_bindgen::JsCast;
-use web_sys::{Element, HtmlElement};
+use crate::class;
+use crate::roving::{self, Arrows};
 use yew::prelude::*;
 
 /// One tab of [`Tabs`].
@@ -73,20 +72,9 @@ fn render(props: &TabsProps, small: bool) -> Html {
         let on_change = props.on_change.clone();
         let tabs = props.tabs.clone();
         Callback::from(move |e: KeyboardEvent| {
-            let Some(from) = stop else { return };
-            let Some(next) = roving::step(&disabled(&tabs), from, &e.key()) else {
-                return;
-            };
-            e.prevent_default();
-            on_change.emit(tabs[next].value.clone());
-            let focused = e
-                .current_target()
-                .and_then(|t| t.dyn_into::<Element>().ok())
-                .and_then(|list| list.query_selector_all("[role=tab]").ok())
-                .and_then(|nodes| nodes.item(next as u32))
-                .and_then(|node| node.dyn_into::<HtmlElement>().ok());
-            if let Some(tab) = focused {
-                let _ = tab.focus();
+            let off = disabled(&tabs);
+            if let Some(next) = roving::keydown(&e, "tab", &off, stop, Arrows::Horizontal) {
+                on_change.emit(tabs[next].value.clone());
             }
         })
     };
@@ -122,7 +110,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
 
 /// A row of tabs (`role="tablist"`): the selected one marked by its colour
 /// and an underline drawn inside its box, so none changes size when selected.
-/// One tab stop; arrows, Home and End select and focus a tab. Tabs past the
+/// One tab stop; Left, Right, Home and End select and focus a tab. Tabs past the
 /// width scroll sideways, none is hidden.
 #[function_component]
 pub fn Tabs(props: &TabsProps) -> Html {
@@ -181,24 +169,31 @@ mod tests {
         assert!(!html.contains(class::SMALL), "{html}");
     }
 
+    fn step(off: &[bool], from: usize, key: &str) -> Option<usize> {
+        roving::step(off, Some(from), key, Arrows::Horizontal)
+    }
+
     #[test]
     fn arrows_home_and_end_move_and_wrap() {
         let off = disabled(&items());
-        assert_eq!(roving::step(&off, 0, "ArrowRight"), Some(1));
-        assert_eq!(roving::step(&off, 2, "ArrowRight"), Some(0));
-        assert_eq!(roving::step(&off, 0, "ArrowLeft"), Some(2));
-        assert_eq!(roving::step(&off, 1, "Home"), Some(0));
-        assert_eq!(roving::step(&off, 0, "End"), Some(2));
-        assert_eq!(roving::step(&off, 0, "Tab"), None);
+        assert_eq!(step(&off, 0, "ArrowRight"), Some(1));
+        assert_eq!(step(&off, 2, "ArrowRight"), Some(0));
+        assert_eq!(step(&off, 0, "ArrowLeft"), Some(2));
+        assert_eq!(step(&off, 1, "Home"), Some(0));
+        assert_eq!(step(&off, 0, "End"), Some(2));
+        assert_eq!(step(&off, 0, "Tab"), None);
+        // Up and Down are the page's.
+        assert_eq!(step(&off, 0, "ArrowDown"), None);
+        assert_eq!(step(&off, 1, "ArrowUp"), None);
     }
 
     #[test]
     fn arrows_skip_a_disabled_tab() {
         let mut t = items();
         t[1] = t[1].clone().disabled(true);
-        assert_eq!(roving::step(&disabled(&t), 0, "ArrowRight"), Some(2));
+        assert_eq!(step(&disabled(&t), 0, "ArrowRight"), Some(2));
         t[0] = t[0].clone().disabled(true);
-        assert_eq!(roving::step(&disabled(&t), 2, "Home"), Some(2));
+        assert_eq!(step(&disabled(&t), 2, "Home"), Some(2));
     }
 
     #[test]

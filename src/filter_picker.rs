@@ -6,7 +6,8 @@ use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
 use crate::picker::{ChoiceList, ChoicePopup, PickerOption, SEARCH_FROM};
-use crate::select::{printable, scroll_to};
+use crate::roving::printable;
+use crate::select::scroll_to;
 use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, use_overlays, use_popover};
 
 /// One choice of a [`FilterPicker`].
@@ -195,7 +196,9 @@ where
                 open.set(false);
                 return;
             }
-            let taken = state.borrow_mut().key(&key, e.alt_key(), &pickable);
+            let taken = state
+                .borrow_mut()
+                .key(&key, e.alt_key(), &pickable, e.time_stamp());
             match taken {
                 ListKey::Moved => {}
                 ListKey::Pick(i) => pick(i),

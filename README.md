@@ -397,8 +397,9 @@ changes no box. Every component takes `class`.
 - `Tabs` (`.plinth-tabs`): a `tablist` of `TabItem`s (`new(value, label)`,
   `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
   (the list's name); `tabs(small)` gives its classes. Roving tabindex: the
-  selected tab, or the first enabled, is the one tab stop; the arrows (with
-  wrap), Home and End select and focus the next enabled tab. The selected
+  selected tab, or the first enabled, is the one tab stop; Left and Right
+  (with wrap), Home and End select and focus the next enabled tab, from
+  the focused one. Up and Down are left to the page. The selected
   tab takes the accent colour and an underline of `--tab-underline` drawn
   as an inset shadow. Icons are hidden below the phone breakpoint. Tabs
   past the width scroll sideways with the scrollbar hidden and the edge

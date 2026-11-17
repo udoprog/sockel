@@ -4,8 +4,9 @@
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
-use crate::listbox::{ListKey, Listbox, option_id};
-use crate::select::{printable, scroll_to};
+use crate::listbox::{self, ListKey, Listbox, option_id};
+use crate::roving::printable;
+use crate::select::scroll_to;
 use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
 
 /// One colour of a palette.
@@ -93,24 +94,25 @@ pub fn color_input_value(value: &str) -> String {
     if hex { value } else { "#000000" }.to_owned()
 }
 
-/// Read `key` on an open grid of `columns` over `pickable`: the arrows move
-/// over it, the rest is [`Listbox::key`]'s.
+/// Read `key` at `now` (ms) on an open grid of `columns` over `pickable`:
+/// Left and Right move by one, stopping at the ends; Up and Down by a row,
+/// staying put where there is none. The rest is [`Listbox::key`]'s.
 pub fn color_key(
     list: &mut Listbox,
     key: &str,
     alt: bool,
     columns: usize,
     pickable: &[usize],
+    now: f64,
 ) -> ListKey {
     let columns = isize::try_from(columns.max(1)).unwrap_or(1);
-    let step = match key {
-        "ArrowRight" => 1,
-        "ArrowLeft" => -1,
-        "ArrowDown" if !alt => columns,
-        "ArrowUp" if !alt => -columns,
-        _ => return list.key(key, alt, pickable),
-    };
-    list.step(pickable, step);
+    match key {
+        "ArrowRight" => list.step(pickable, 1),
+        "ArrowLeft" => list.step(pickable, -1),
+        "ArrowDown" if !alt => list.step_within(pickable, columns),
+        "ArrowUp" if !alt => list.step_within(pickable, -columns),
+        _ => return list.key(key, alt, pickable, now),
+    }
     ListKey::Moved
 }
 
@@ -327,6 +329,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                 e.alt_key(),
                 columns,
                 &pickable,
+                e.time_stamp(),
             );
             match taken {
                 ListKey::Moved => {}
@@ -463,10 +466,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
                 aria-activedescendant={open.then(|| active.map(|i| option_id(&id, i))).flatten()}
-                aria-label={props.label.clone().map(|l| match &face_label {
-                    Some(name) => AttrValue::from(format!("{l}: {name}")),
-                    None => l,
-                })}
+                aria-label={listbox::face_label(props.label.as_ref(), face_label.as_deref())}
                 aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
@@ -586,48 +586,55 @@ mod tests {
         let mut list = Listbox::default();
         list.set(Some(0));
         assert_eq!(
-            color_key(&mut list, "ArrowRight", false, 4, &pickable),
+            color_key(&mut list, "ArrowRight", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(1));
         assert_eq!(
-            color_key(&mut list, "ArrowDown", false, 4, &pickable),
+            color_key(&mut list, "ArrowDown", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(5));
         assert_eq!(
-            color_key(&mut list, "ArrowDown", false, 4, &pickable),
+            color_key(&mut list, "ArrowDown", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(9));
         // Stops at the end rather than wrapping.
-        color_key(&mut list, "ArrowDown", false, 4, &pickable);
+        color_key(&mut list, "ArrowDown", false, 4, &pickable, 0.0);
         assert_eq!(list.active(), Some(9));
         assert_eq!(
-            color_key(&mut list, "ArrowUp", false, 4, &pickable),
+            color_key(&mut list, "ArrowUp", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(5));
         assert_eq!(
-            color_key(&mut list, "ArrowLeft", false, 4, &pickable),
+            color_key(&mut list, "ArrowLeft", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(4));
         assert_eq!(
-            color_key(&mut list, "Enter", false, 4, &pickable),
+            color_key(&mut list, "Enter", false, 4, &pickable, 0.0),
             ListKey::Pick(4)
         );
         assert_eq!(
-            color_key(&mut list, "ArrowUp", true, 4, &pickable),
+            color_key(&mut list, "ArrowUp", true, 4, &pickable, 0.0),
             ListKey::Pick(4)
         );
         assert_eq!(
-            color_key(&mut list, "Home", false, 4, &pickable),
+            color_key(&mut list, "Home", false, 4, &pickable, 0.0),
             ListKey::Moved
         );
         assert_eq!(list.active(), Some(0));
+        // Up from the top row stays put, as does Down into the short row's gap.
+        color_key(&mut list, "ArrowRight", false, 4, &pickable, 0.0);
+        color_key(&mut list, "ArrowUp", false, 4, &pickable, 0.0);
+        assert_eq!(list.active(), Some(1));
+        list.set(Some(7));
+        color_key(&mut list, "ArrowDown", false, 4, &pickable, 0.0);
+        assert_eq!(list.active(), Some(7));
         assert_eq!(
-            color_key(&mut list, "x", false, 4, &pickable),
+            color_key(&mut list, "x", false, 4, &pickable, 0.0),
             ListKey::Ignored
         );
     }

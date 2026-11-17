@@ -266,7 +266,7 @@ pub use menu::{
     ContextMenu, ContextMenuProps, Menu, MenuCheck, MenuCheckProps, MenuHeading, MenuItem,
     MenuItemProps, MenuNote, MenuPartProps, MenuProps, MenuRadio, MenuRadioProps, MenuSeparator,
     MenuWidth, RowAction, RowActions, RowActionsProps, SplitButton, SplitButtonProps, menu,
-    menu_item, menu_step, typeahead,
+    menu_item,
 };
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 pub use notice::{Notice, NoticeProps, notice};
@@ -286,6 +286,7 @@ pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,
     key_target, landing, move_item, reorder_row, reorder_text, slot_at,
 };
+pub use roving::{menu_step, typeahead};
 pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
     row_list, row_list_item,

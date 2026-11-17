@@ -7,6 +7,7 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
+use crate::roving::{Typeahead, menu_step, printable, typeahead};
 use crate::timer::Timer;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class,
@@ -19,9 +20,6 @@ const ITEMS: &str = ":is([role=menuitem], [role=menuitemcheckbox], [role=menuite
 /// What closes the menu when picked: an action or a radio, not a check.
 const PICKS: &str =
     ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
-
-/// How long a pause ends a type-ahead search, in milliseconds.
-const TYPEAHEAD_MS: f64 = 700.0;
 
 /// How long a touch is held to open a context menu, in milliseconds.
 const LONG_PRESS_MS: u32 = 500;
@@ -61,45 +59,6 @@ pub fn menu(width: MenuWidth, tight: bool, placed: bool) -> Classes {
     )
 }
 
-/// Where `key` moves focus among `count` items from `at`: down and up
-/// wrap, Home and End go to the ends; `None` for any other key.
-pub fn menu_step(key: &str, at: Option<usize>, count: usize) -> Option<usize> {
-    if count == 0 {
-        return None;
-    }
-    match key {
-        "ArrowDown" => Some(at.map_or(0, |at| (at + 1) % count)),
-        "ArrowUp" => Some(at.map_or(count - 1, |at| (at + count - 1) % count)),
-        "Home" => Some(0),
-        "End" => Some(count - 1),
-        _ => None,
-    }
-}
-
-/// The item whose label starts with `query` (ignoring case), searching on
-/// from the one after `at` and wrapping; a query of one repeated letter
-/// cycles through the items starting with it.
-pub fn typeahead(labels: &[String], at: Option<usize>, query: &str) -> Option<usize> {
-    let query = query.to_lowercase();
-    let mut chars = query.chars();
-    let first = chars.next()?;
-    let query = if chars.all(|c| c == first) {
-        first.to_string()
-    } else {
-        query
-    };
-    // A longer query may still match the current item.
-    let start = match at {
-        Some(at) if query.chars().count() > 1 => at,
-        Some(at) => at + 1,
-        None => 0,
-    };
-    let count = labels.len();
-    (0..count)
-        .map(|i| (start + i) % count)
-        .find(|&i| labels[i].trim().to_lowercase().starts_with(&query))
-}
-
 fn items_of(list: &NodeRef) -> Vec<HtmlElement> {
     let Some(list) = list.cast::<Element>() else {
         return Vec::new();
@@ -133,7 +92,7 @@ fn label_of(item: &HtmlElement) -> String {
 /// Tab closes it. Escape is the popover layer's.
 #[hook]
 fn use_menu_keys(list: NodeRef, close: Callback<()>) -> Callback<KeyboardEvent> {
-    let typed = use_mut_ref(|| (String::new(), 0.0));
+    let typed = use_mut_ref(Typeahead::default);
     Callback::from(move |e: KeyboardEvent| {
         if e.key() == "Tab" {
             e.prevent_default();
@@ -142,26 +101,18 @@ fn use_menu_keys(list: NodeRef, close: Callback<()>) -> Callback<KeyboardEvent> 
         }
         let items = items_of(&list);
         let at = focused(&items);
-        let key = e.key();
-        let next = match menu_step(&key, at, items.len()) {
+        let next = match menu_step(&e.key(), at, items.len()) {
             Some(next) => Some(next),
-            None if key.chars().count() == 1
-                && !key.starts_with(' ')
-                && !e.ctrl_key()
-                && !e.meta_key()
-                && !e.alt_key() =>
-            {
+            None => {
+                let Some(c) = printable(&e) else { return };
                 let mut typed = typed.borrow_mut();
-                let now = e.time_stamp();
-                if now - typed.1 > TYPEAHEAD_MS {
-                    typed.0.clear();
-                }
-                typed.0.push_str(&key);
-                typed.1 = now;
+                // Space activates the item unless a search is under way.
+                let Some(query) = typed.push(c, e.time_stamp()) else {
+                    return;
+                };
                 let labels: Vec<_> = items.iter().map(label_of).collect();
-                typeahead(&labels, at, &typed.0)
+                typeahead(&labels, at, query)
             }
-            None => return,
         };
         e.prevent_default();
         if let Some(item) = next.and_then(|i| items.get(i)) {
@@ -962,33 +913,6 @@ mod tests {
         );
         assert_eq!(names(menu_item(false)), [class::MENU_ITEM]);
         assert_eq!(names(menu_item(true)), [class::MENU_ITEM, class::DANGER]);
-    }
-
-    #[test]
-    fn arrows_wrap_and_home_and_end_go_to_the_ends() {
-        assert_eq!(menu_step("ArrowDown", None, 3), Some(0));
-        assert_eq!(menu_step("ArrowDown", Some(2), 3), Some(0));
-        assert_eq!(menu_step("ArrowUp", None, 3), Some(2));
-        assert_eq!(menu_step("ArrowUp", Some(0), 3), Some(2));
-        assert_eq!(menu_step("Home", Some(2), 3), Some(0));
-        assert_eq!(menu_step("End", Some(0), 3), Some(2));
-        assert_eq!(menu_step("Enter", Some(0), 3), None);
-        assert_eq!(menu_step("ArrowDown", None, 0), None);
-    }
-
-    #[test]
-    fn typeahead_finds_the_next_item_by_its_start() {
-        let labels: Vec<String> = ["Copy", "Cut", "Delete", "Paste", "copy link"]
-            .map(String::from)
-            .to_vec();
-        assert_eq!(typeahead(&labels, None, "d"), Some(2));
-        assert_eq!(typeahead(&labels, Some(0), "c"), Some(1));
-        assert_eq!(typeahead(&labels, Some(1), "cc"), Some(4));
-        assert_eq!(typeahead(&labels, Some(4), "c"), Some(0));
-        assert_eq!(typeahead(&labels, Some(0), "cu"), Some(1));
-        assert_eq!(typeahead(&labels, Some(4), "copy"), Some(4));
-        assert_eq!(typeahead(&labels, None, "x"), None);
-        assert_eq!(typeahead(&labels, None, ""), None);
     }
 
     #[test]

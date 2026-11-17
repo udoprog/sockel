@@ -4,7 +4,8 @@
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
-use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
+use crate::listbox::{ListKey, Listbox, face_label, listbox, listbox_option, option_id};
+use crate::roving::printable;
 use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
 
 /// One option of a [`Select`].
@@ -110,17 +111,6 @@ pub struct SelectProps<T: PartialEq + 'static> {
     /// The face's test id; the list's is it suffixed `-options`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
-}
-
-/// A key that types a character, rather than a command.
-pub(crate) fn printable(e: &KeyboardEvent) -> Option<char> {
-    if e.ctrl_key() || e.meta_key() || e.alt_key() {
-        return None;
-    }
-    let key = e.key();
-    let mut chars = key.chars();
-    let c = chars.next()?;
-    (chars.next().is_none() && c != ' ').then_some(c)
 }
 
 /// The WAI-ARIA select-only combobox: a face in the tab order (a button,
@@ -263,7 +253,9 @@ where
                 open.set(false);
                 return;
             }
-            let taken = state.borrow_mut().key(&key, e.alt_key(), &pickable);
+            let taken = state
+                .borrow_mut()
+                .key(&key, e.alt_key(), &pickable, e.time_stamp());
             match taken {
                 ListKey::Moved => {}
                 ListKey::Pick(i) => pick(i),
@@ -368,7 +360,8 @@ where
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
                 aria-activedescendant={open.then(|| active.map(|i| option_id(&id, i))).flatten()}
-                aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
+                aria-label={face_label(props.label.as_ref(), current.map(|i| options[i].label.as_str()))}
+                aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled} data-testid={props.testid.clone()}

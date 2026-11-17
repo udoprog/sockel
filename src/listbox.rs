@@ -10,13 +10,11 @@
 
 use yew::prelude::*;
 
-use crate::{class, typeahead};
+use crate::class;
+use crate::roving::{self, Typeahead, typeahead};
 
 /// How far PageUp and PageDown move.
 pub const LISTBOX_PAGE: usize = 10;
-
-/// How long a pause ends a type-ahead search, in milliseconds.
-const TYPEAHEAD_MS: f64 = 700.0;
 
 /// The id of option `index` of the list whose ids start with `base`.
 pub fn option_id(base: &str, index: usize) -> String {
@@ -35,6 +33,15 @@ pub fn listbox_option(active: bool) -> Classes {
     classes!(class::LISTBOX_OPTION, active.then_some(class::ACTIVE))
 }
 
+/// A combobox face's accessible name: its `label` and what it shows.
+pub(crate) fn face_label(label: Option<&AttrValue>, value: Option<&str>) -> Option<AttrValue> {
+    let label = label?;
+    Some(match value {
+        Some(value) => format!("{label}: {value}").into(),
+        None => label.clone(),
+    })
+}
+
 /// What a key did to an open list, as [`Listbox::key`] reads it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum ListKey {
@@ -50,8 +57,7 @@ pub enum ListKey {
 #[derive(Clone, Debug, Default, PartialEq)]
 pub struct Listbox {
     active: Option<usize>,
-    typed: String,
-    typed_at: f64,
+    typed: Typeahead,
     scroll: bool,
 }
 
@@ -77,16 +83,15 @@ impl Listbox {
     /// Move `step` places among `pickable`, stopping at either end; from
     /// none, to the first (or the last, stepping back).
     pub fn step(&mut self, pickable: &[usize], step: isize) {
-        let Some(last) = pickable.len().checked_sub(1) else {
-            self.active = None;
-            return;
-        };
-        let next = match self.position(pickable) {
-            None if step < 0 => last,
-            None => 0,
-            Some(at) => at.saturating_add_signed(step).min(last),
-        };
-        self.set(Some(pickable[next]));
+        let next = roving::clamped(self.position(pickable), pickable.len(), step);
+        self.set(next.map(|i| pickable[i]));
+    }
+
+    /// Move `step` places among `pickable` as in a grid: a step past either
+    /// end stays put.
+    pub(crate) fn step_within(&mut self, pickable: &[usize], step: isize) {
+        let next = roving::within(self.position(pickable), pickable.len(), step);
+        self.set(next.map(|i| pickable[i]));
     }
 
     /// Make the first (or `last`) of `pickable` active.
@@ -104,25 +109,26 @@ impl Listbox {
 
     /// Type `c` at `now` (ms) and move to the next of `pickable` whose
     /// label (`labels[i]`, by index in the whole list) starts with what was
-    /// typed, as a [`crate::Menu`]'s type-ahead does.
+    /// typed, as a [`crate::Menu`]'s type-ahead does. A Space only
+    /// continues a search.
     pub fn typeahead(&mut self, pickable: &[usize], labels: &[&str], c: char, now: f64) {
-        if now - self.typed_at > TYPEAHEAD_MS {
-            self.typed.clear();
-        }
-        self.typed_at = now;
-        self.typed.extend(c.to_lowercase());
+        let position = self.position(pickable);
+        let Some(query) = self.typed.push(c, now) else {
+            return;
+        };
         let names: Vec<String> = pickable
             .iter()
             .map(|&i| labels.get(i).copied().unwrap_or_default().to_owned())
             .collect();
-        if let Some(found) = typeahead(&names, self.position(pickable), &self.typed) {
+        if let Some(found) = typeahead(&names, position, query) {
             self.set(Some(pickable[found]));
         }
     }
 
-    /// Read `key` (`alt` held) on an open list. Typing letters is the
-    /// caller's, by [`Listbox::typeahead`] or a filter.
-    pub fn key(&mut self, key: &str, alt: bool, pickable: &[usize]) -> ListKey {
+    /// Read `key` (`alt` held) at `now` (ms) on an open list. Typing is the
+    /// caller's, by [`Listbox::typeahead`] or a filter: Space is
+    /// [`ListKey::Ignored`] while a type-ahead search is under way.
+    pub fn key(&mut self, key: &str, alt: bool, pickable: &[usize], now: f64) -> ListKey {
         let page = LISTBOX_PAGE as isize;
         match key {
             "ArrowDown" => self.step(pickable, 1),
@@ -131,6 +137,7 @@ impl Listbox {
             "PageDown" => self.step(pickable, page),
             "PageUp" => self.step(pickable, -page),
             "Home" | "End" => self.go_to_end(pickable, key == "End"),
+            " " if self.typed.typing(now) => return ListKey::Ignored,
             "Enter" | " " => return self.active.map_or(ListKey::Moved, ListKey::Pick),
             _ => return ListKey::Ignored,
         }
@@ -195,19 +202,22 @@ mod tests {
     #[test]
     fn keys_move_and_pick() {
         let mut list = Listbox::default();
-        assert_eq!(list.key("End", false, &PICKABLE), ListKey::Moved);
+        assert_eq!(list.key("End", false, &PICKABLE, 0.0), ListKey::Moved);
         assert_eq!(list.active(), Some(5));
-        assert_eq!(list.key("Home", false, &PICKABLE), ListKey::Moved);
-        assert_eq!(list.key("ArrowDown", false, &PICKABLE), ListKey::Moved);
-        assert_eq!(list.key("ArrowDown", false, &PICKABLE), ListKey::Moved);
+        assert_eq!(list.key("Home", false, &PICKABLE, 0.0), ListKey::Moved);
+        assert_eq!(list.key("ArrowDown", false, &PICKABLE, 0.0), ListKey::Moved);
+        assert_eq!(list.key("ArrowDown", false, &PICKABLE, 0.0), ListKey::Moved);
         assert_eq!(list.active(), Some(3));
-        assert_eq!(list.key("PageUp", false, &PICKABLE), ListKey::Moved);
+        assert_eq!(list.key("PageUp", false, &PICKABLE, 0.0), ListKey::Moved);
         assert_eq!(list.active(), Some(0));
-        assert_eq!(list.key("Enter", false, &PICKABLE), ListKey::Pick(0));
-        assert_eq!(list.key(" ", false, &PICKABLE), ListKey::Pick(0));
-        assert_eq!(list.key("ArrowUp", true, &PICKABLE), ListKey::Pick(0));
-        assert_eq!(list.key("x", false, &PICKABLE), ListKey::Ignored);
-        assert_eq!(Listbox::default().key("Enter", false, &[]), ListKey::Moved);
+        assert_eq!(list.key("Enter", false, &PICKABLE, 0.0), ListKey::Pick(0));
+        assert_eq!(list.key(" ", false, &PICKABLE, 0.0), ListKey::Pick(0));
+        assert_eq!(list.key("ArrowUp", true, &PICKABLE, 0.0), ListKey::Pick(0));
+        assert_eq!(list.key("x", false, &PICKABLE, 0.0), ListKey::Ignored);
+        assert_eq!(
+            Listbox::default().key("Enter", false, &[], 0.0),
+            ListKey::Moved
+        );
     }
 
     #[test]
@@ -223,6 +233,33 @@ mod tests {
         assert_eq!(list.active(), Some(5));
         list.typeahead(&PICKABLE, &labels, 'z', 3000.0);
         assert_eq!(list.active(), Some(5));
+    }
+
+    #[test]
+    fn space_continues_a_search_and_picks_otherwise() {
+        let labels = ["New Delhi", "Newark", "New York", "Oslo"];
+        let pickable = [0, 1, 2, 3];
+        let mut list = Listbox::default();
+        for (n, c) in "new y".chars().enumerate() {
+            let now = n as f64 * 100.0;
+            if list.key(&c.to_string(), false, &pickable, now) == ListKey::Ignored {
+                list.typeahead(&pickable, &labels, c, now);
+            }
+        }
+        assert_eq!(list.active(), Some(2));
+        assert_eq!(list.key(" ", false, &pickable, 450.0), ListKey::Ignored);
+        assert_eq!(list.key(" ", false, &pickable, 2000.0), ListKey::Pick(2));
+    }
+
+    #[test]
+    fn the_face_is_named_by_its_label_and_value() {
+        let label = AttrValue::Static("City");
+        assert_eq!(face_label(None, Some("Oslo")), None);
+        assert_eq!(face_label(Some(&label), None).as_deref(), Some("City"));
+        assert_eq!(
+            face_label(Some(&label), Some("Oslo")).as_deref(),
+            Some("City: Oslo")
+        );
     }
 
     #[test]

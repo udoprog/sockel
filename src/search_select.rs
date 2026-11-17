@@ -296,7 +296,11 @@ where
                 // Home, End and Space edit the text.
                 "ArrowDown" | "ArrowUp" | "PageDown" | "PageUp" | "Enter" => {
                     e.prevent_default();
-                    if let ListKey::Pick(i) = state.borrow_mut().key(&key, e.alt_key(), &pickable) {
+                    if let ListKey::Pick(i) =
+                        state
+                            .borrow_mut()
+                            .key(&key, e.alt_key(), &pickable, e.time_stamp())
+                    {
                         pick(i);
                     }
                     redraw.force_update();
