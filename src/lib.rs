@@ -45,6 +45,9 @@
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
 //!   page's or a section's title, its help and its actions.
+//! - [`Popover`] (`.popover`): a surface beside its anchor in the overlay
+//!   layer ([`overlay`]), placed before it shows ([`place`], [`use_popover`]),
+//!   dismissed by a press outside or Escape, a sheet on a phone.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -82,6 +85,7 @@ mod image;
 mod layout;
 mod library_toolbar;
 mod notice;
+mod popover;
 mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
@@ -107,4 +111,8 @@ pub use layout::{
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
 pub use notice::{Notice, NoticeProps, NoticeTone, notice};
+pub use popover::{
+    Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
+    popover, use_popover,
+};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};

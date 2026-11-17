@@ -1,0 +1,97 @@
+// The overlay layer and Popover (src/popover.rs).
+//
+// - `.plinth-overlay`: the layer popovers, menus and dialogs open in, the
+//   last child of `<body>`. It lays nothing out, so an open popover never
+//   makes the page taller or changes its scrollbar.
+// - `.plinth-popover`: fixed beside its anchor at the place popover.rs
+//   measured (`--popover-left`, `--popover-top`, `--popover-max-height`),
+//   as wide as its content up to `--popover-max-width`, whatever side it
+//   ends up on. Hidden until `.plinth-placed`, so it never shows at 0,0
+//   first. Parts: `-body` (what scrolls, its scrollbar's room kept), and
+//   on a sheet `-head` (`-title` and the close button) and the
+//   `-scrim` behind it.
+// - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom
+//   over the scrim, with its head.
+
+@use "tokens" as base;
+
+.plinth-overlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 0;
+    height: 0;
+}
+
+.plinth-popover {
+    position: fixed;
+    top: var(--popover-top, 0);
+    left: var(--popover-left, 0);
+    z-index: var(--layer-overlay);
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--space-2)));
+    max-height: var(--popover-max-height, none);
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+    visibility: hidden;
+
+    &.plinth-placed {
+        visibility: visible;
+    }
+}
+
+.plinth-popover-body {
+    @include base.scroll-area;
+    flex: 1 1 auto;
+    padding: var(--space-3);
+}
+
+.plinth-popover-head {
+    display: none;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2);
+    padding: var(--space-2) var(--space-2) 0 var(--space-4);
+}
+
+.plinth-popover-title {
+    @include base.truncate;
+    font-weight: 600;
+}
+
+.plinth-popover-scrim {
+    display: none;
+}
+
+@include base.below(base.$sheet-breakpoint) {
+    .plinth-popover.plinth-sheet {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        max-width: none;
+        max-height: var(--popover-sheet-height);
+        border-bottom-color: transparent;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+
+    .plinth-popover-head {
+        display: flex;
+    }
+
+    .plinth-popover-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: var(--layer-overlay);
+        display: block;
+        background: var(--scrim);
+    }
+}

@@ -537,6 +537,46 @@ accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
 loading, failed, missing or loaded. `initials(name)` is the same function for
 a place of your own.
 
+## Popover
+
+`Popover` is a surface beside its anchor, rendered while `open` in the
+overlay layer: `overlay(html)` portals into `#plinth-overlay`
+(`plinth::OVERLAY_ID`), the last child of `<body>`, so no scrolling or
+clipping box around the owner cuts it, and its events still bubble through
+the owner. Props:
+
+- `anchor` (a `NodeRef` on the element it opens beside, where focus returns),
+  `open`, and `on_dismiss: Callback<Dismiss>`: the owner closes it.
+- `side` (`Side::Below` by default, `Above`, `Start`, `End`) and `align`
+  (`PopoverAlign::Start`, `Center`, `End`).
+- `sheet` (on by default, `plinth::class::SHEET`): below `$sheet-breakpoint`
+  (the phone's) it is a sheet from the bottom over a `--scrim`, with
+  `title` as its heading and a close button (`close_label`, "Close").
+- `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
+
+Dismissal (`Dismiss`): `Outside`, a `pointerdown` outside the anchor and the
+popover, keeps focus where the press put it; `Escape` and `Close` (the
+sheet's button) return focus to the anchor, as does any close that leaves
+focus nowhere (it was inside the popover).
+
+`use_popover(open, anchor, popover, side, align, on_dismiss)` is the hook
+under it, for a component that renders its own surface (a menu, a select):
+it returns `Option<Placed>` and does the measuring, following and
+dismissing. `place(anchor, (width, height), viewport, side, align)` is its
+pure placement: the given side unless the popover does not fit and the
+opposite side has more room, then moved back inside the viewport, its
+height capped (`max_height`) by the room on the side it took.
+`popover(sheet, placed)` gives the classes (`POPOVER`, `SHEET`, `PLACED`).
+
+Size guarantees: it is hidden (`visibility`) until it has been measured and
+placed (`PLACED`), so it never shows at 0,0 first. It is `position: fixed`
+in a layer that lays nothing out, and nothing locks the page's scroll, so
+opening it never moves the page, its anchor or the scrollbar. Its width is
+its content's up to `--popover-max-width`, whichever side it lands on, so a
+flip moves it without reflowing it; what is taller than the room scrolls in
+`.plinth-popover-body`, its scrollbar's room kept. It follows the anchor on
+scroll, resize and a change of either's size.
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

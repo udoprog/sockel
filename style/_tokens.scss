@@ -20,6 +20,9 @@
 // - `--focus-ring-*`: the focus ring's colour, width and offset.
 // - `--layer-*`: the stacking order of what floats (sticky, overlay,
 //   dialog, toast, tooltip).
+// - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
+//   and a sheet's tallest; `$sheet-breakpoint` is where a popover turns
+//   into a sheet.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`): each a
 //   default an app overrides by name.
@@ -137,6 +140,8 @@ $layer-overlay: 100 !default;
 $layer-dialog: 200 !default;
 $layer-toast: 300 !default;
 $layer-tooltip: 400 !default;
+$popover-max-width: 22rem !default;
+$popover-sheet-height: 75dvh !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -147,6 +152,8 @@ $surface-raised: var(--surface) !default;
 $scrim: rgb(0 0 0 / 0.45) !default;
 // The breakpoint `phone-only` and `desktop-only` switch at.
 $visibility-breakpoint: "phone" !default;
+// The breakpoint below which a popover is a sheet from the bottom.
+$sheet-breakpoint: "phone" !default;
 
 :root {
     --text-3xs: #{$text-3xs};
@@ -223,6 +230,9 @@ $visibility-breakpoint: "phone" !default;
     --layer-dialog: #{$layer-dialog};
     --layer-toast: #{$layer-toast};
     --layer-tooltip: #{$layer-tooltip};
+
+    --popover-max-width: #{$popover-max-width};
+    --popover-sheet-height: #{$popover-sheet-height};
 
     // Derived from the app's colours on `:root`: an app that sets those on
     // a narrower element sets these there too.

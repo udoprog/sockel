@@ -8,6 +8,7 @@ mod layout;
 mod library;
 mod media;
 mod notices;
+mod popover;
 mod styles;
 mod toggles;
 
@@ -454,6 +455,30 @@ pub const PAGES: &[Page] = &[
                 Size::Box,
                 Across::Only(&["icon", "autofocus", "focus", "click"]),
             ),
+        ],
+    },
+    Page {
+        id: "popover",
+        title: "Popover",
+        about: "A surface beside its anchor in the overlay layer: placed before it shows, flipped and kept inside the window, following its anchor as the page scrolls; a press outside or Escape closes it, and focus goes back to the anchor. A sheet from the bottom on a phone.",
+        covers: &[
+            "Popover",
+            "PopoverProps",
+            "Side",
+            "PopoverAlign",
+            "Dismiss",
+            "Placed",
+            "Rect",
+            "place",
+            "use_popover",
+            "overlay",
+            "popover",
+            "OVERLAY_ID",
+        ],
+        render: || html! { <popover::PopoverPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },
     Page {
