@@ -57,10 +57,12 @@
     font-size: var(--text-lg);
 }
 
-// The title with its help and suffix beside it, one item of the head's row.
+// The title with its help and suffix beside it, one item of the head's row:
+// a title too long for its line wraps inside its own box, so the help stays
+// beside it rather than dropping under it.
 .plinth-head-heading {
     display: flex;
-    flex-wrap: wrap;
+    flex-wrap: nowrap;
     align-items: center;
     gap: var(--space-1) var(--space-2);
     min-width: 0;

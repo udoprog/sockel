@@ -303,6 +303,17 @@ mod tests {
     }
 
     #[test]
+    fn the_help_stays_beside_a_wrapping_title() {
+        let sass = include_str!("../style/_heads.scss");
+        let rule = sass
+            .split(".plinth-head-heading {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the heading group's rule");
+        assert!(rule.contains("flex-wrap: nowrap;"), "{rule}");
+    }
+
+    #[test]
     fn a_heads_actions_shrink_with_its_column() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass

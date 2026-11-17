@@ -594,6 +594,8 @@ set per Stepper).
   `back` is the inline "back / title" crumb. Each is its own prop.
 - `help` follows the heading as its sibling, in `.plinth-head-heading` with
   the `suffix`, so the heading's text and test id exclude the help button.
+  The group stays on one line: a long title wraps inside its own box, with
+  the help beside it.
 - `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
