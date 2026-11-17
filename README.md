@@ -80,6 +80,9 @@ same build. Configure plinth's tokens through the build instead of `@use
 Every class the app's Sass defines that is not plinth's must start with the
 app's prefix (`app-`); one that does not is a build error, so the app's
 classes never collide with plinth's.
+Classes a dependency's markup writes (a sign-in form the app styles) are
+the exception: `Config::foreign(["auth-*"])` lets the app style them
+unprefixed (a trailing `*` is a prefix), and they get no constant.
 
 ### `build.rs`
 

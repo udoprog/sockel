@@ -157,7 +157,7 @@ impl fmt::Display for Report {
     }
 }
 
-fn matches(pattern: &str, class: &str) -> bool {
+pub(crate) fn matches(pattern: &str, class: &str) -> bool {
     match pattern.strip_suffix('*') {
         Some(prefix) => class.starts_with(prefix),
         None => pattern == class,

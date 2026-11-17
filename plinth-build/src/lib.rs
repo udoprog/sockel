@@ -32,6 +32,7 @@ fn test_sources() -> Sources {
 }
 
 mod usage;
+use usage::matches;
 pub use usage::{Report, Usage};
 
 /// plinth's Cargo features and the partials (`style/_<name>.scss`) each
@@ -264,6 +265,7 @@ pub struct Config {
     prefix: Option<String>,
     with: Vec<(String, String)>,
     features: Option<Vec<String>>,
+    foreign: Vec<String>,
 }
 
 /// A build's results.
@@ -307,6 +309,13 @@ impl Config {
     /// The prefix every local class must start with (`"army-"`).
     pub fn prefix(mut self, prefix: impl Into<String>) -> Self {
         self.prefix = Some(prefix.into());
+        self
+    }
+
+    /// Local classes a dependency's markup writes (`"auth-*"`, a trailing `*`
+    /// is a prefix): styled without the prefix, and given no constant.
+    pub fn foreign<S: Into<String>>(mut self, classes: impl IntoIterator<Item = S>) -> Self {
+        self.foreign.extend(classes.into_iter().map(Into::into));
         self
     }
 
@@ -444,6 +453,7 @@ impl Config {
         let local_classes = class_names(local_css)
             .into_iter()
             .filter(|class| plinth_classes.binary_search(class).is_err())
+            .filter(|class| !self.foreign.iter().any(|pattern| matches(pattern, class)))
             .map(|class| match class.strip_prefix(prefix) {
                 Some(rest) if !rest.is_empty() => Ok(class),
                 _ => Err(Error::Unprefixed {
@@ -1463,6 +1473,18 @@ mod tests {
         );
         let error = plinth().local(fixture("fixture/style")).build();
         assert!(matches!(error, Err(Error::NoPrefix)));
+    }
+
+    #[test]
+    fn allows_a_foreign_local_class() {
+        let output = plinth()
+            .local(fixture("tests/unprefixed"))
+            .prefix("fixture-")
+            .foreign(["pan*"])
+            .build()
+            .unwrap();
+        assert_eq!(output.local_classes, ["fixture-ok"]);
+        assert!(output.css.contains(".panel"));
     }
 
     #[test]
