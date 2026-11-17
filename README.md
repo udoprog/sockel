@@ -595,8 +595,9 @@ the owner. Props:
   `title` as its heading and a close button (`close_label`, "Close").
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 
-Dismissal (`Dismiss`): `Outside`, a `pointerdown` outside the anchor and the
-popover, keeps focus where the press put it; `Escape` and `Close` (the
+Dismissal (`Dismiss`), only while no overlay opened after it is open:
+`Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
+where the press put it; `Escape` and `Close` (the
 sheet's button) return focus to the anchor, as does any close that leaves
 focus nowhere (it was inside the popover).
 
@@ -660,6 +661,49 @@ row reserves its top border, so `divided`, hover, focus and a chosen
 `PickRow` change no box. An overlay `ActionRow` takes no room, so revealing
 it moves nothing. A selection bar keeps its height whether anything is
 picked or not. A card grid's cards are as tall as their row.
+
+## Dialog
+
+`Dialog` is a modal box over a `--scrim`, rendered while `open` in the
+overlay layer (a portal, like `Popover`, not a native `<dialog>`: a modal
+`<dialog>` makes everything outside the top layer inert, the overlay layer
+included, so a popover or menu opened inside it could not be used). Props:
+
+- `open`, `on_dismiss: Callback<Dismiss>` (the owner closes it), `title`
+  (its heading and accessible name), `icon` (before the title).
+- `size`: `DialogSize::Default` (`--dialog-width`), `Wide`
+  (`plinth::class::WIDE`, `--dialog-width-wide`) or `Tall` (`TALL`, fixed at
+  `--dialog-height-tall`).
+- `dismiss`: `DialogDismiss::Any` (Escape, the close button, a press on the
+  scrim), `NoOutside` (not the scrim) or `Actions` (no close button, Escape
+  does nothing). `DialogDismiss::allows(Dismiss)` tells which.
+- `actions` (the foot's end, the primary last) and `actions_start` (apart,
+  at its start: a Delete), each an `ActionGroup` in `.plinth-dialog-foot`.
+- `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
+  the bottom, up to `--dialog-sheet-height`. `close_label`, `class`, `testid`.
+
+`dialog(size, sheet)` gives the classes. Parts: `.plinth-dialog-layer` (the
+scrim), `-head` (a `SectionHead`), `-body` (what scrolls), `-foot`.
+
+Behaviour: opening it moves focus to an `[autofocus]` or `[data-autofocus]`
+element, else the body's first control, else the box; Tab and Shift+Tab
+wrap inside it; the page and the overlays open before it are `inert`. A
+dialog opened from a dialog stacks over it, the one beneath dimmed by its
+scrim and out of reach. Escape and a press outside close only the innermost
+overlay, a popover included: overlays are kept on one stack. On close focus
+returns to what had it.
+
+Size guarantees: while a dialog is open the root takes
+`.plinth-scroll-locked` (no scrolling), and `.plinth-gutter-kept` when the
+page had a scrollbar, so the scrollbar's room stays and the page neither
+moves nor scrolls; an app whose root already has `scrollbar-gutter: stable`
+keeps it either way. The box hangs `--dialog-top` from the window's top,
+never centred, so content that loads or grows moves only its bottom edge;
+it is at least `--dialog-min-height` and at most the window's room, beyond
+which the body scrolls with its scrollbar's room kept and the foot stays
+pinned below it. Its width is fixed by its size, never by its content. A
+`Tall` dialog keeps one height whatever it holds; a sheet grows upward
+from the bottom edge.
 
 ## Against jitter: mixins and utilities
 

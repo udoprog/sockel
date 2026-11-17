@@ -5,7 +5,7 @@ publish = false
 
 [dependencies]
 wasm-bindgen = "0.2.100"
-web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "Document", "DomRect", "Element", "Event", "EventTarget", "FocusOptions", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "KeyboardEvent", "Node", "NodeList", "ResizeObserver", "Window"] }
+web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "Document", "DomRect", "DomTokenList", "Element", "Event", "EventTarget", "FocusOptions", "HtmlCollection", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "KeyboardEvent", "Node", "NodeList", "ResizeObserver", "Window"] }
 yew = "0.23.0"
 
 [build-dependencies]

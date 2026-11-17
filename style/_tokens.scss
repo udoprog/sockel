@@ -24,6 +24,10 @@
 // - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
 //   and a sheet's tallest; `$sheet-breakpoint` is where a popover turns
 //   into a sheet.
+// - `--dialog-width`, `--dialog-width-wide`, `--dialog-min-height`,
+//   `--dialog-height-tall`, `--dialog-top` and `--dialog-sheet-height`: a
+//   dialog's widths, its least and its tall height, its distance from the
+//   window's top, and a dialog sheet's tallest.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`): each a
 //   default an app overrides by name.
@@ -150,6 +154,12 @@ $layer-toast: 300 !default;
 $layer-tooltip: 400 !default;
 $popover-max-width: 22rem !default;
 $popover-sheet-height: 75dvh !default;
+$dialog-width: 32rem !default;
+$dialog-width-wide: 48rem !default;
+$dialog-min-height: 10rem !default;
+$dialog-height-tall: 40rem !default;
+$dialog-top: 8dvh !default;
+$dialog-sheet-height: 85dvh !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -251,6 +261,12 @@ $sheet-breakpoint: "phone" !default;
 
     --popover-max-width: #{$popover-max-width};
     --popover-sheet-height: #{$popover-sheet-height};
+    --dialog-width: #{$dialog-width};
+    --dialog-width-wide: #{$dialog-width-wide};
+    --dialog-min-height: #{$dialog-min-height};
+    --dialog-height-tall: #{$dialog-height-tall};
+    --dialog-top: #{$dialog-top};
+    --dialog-sheet-height: #{$dialog-sheet-height};
 
     // Derived from the app's colours on `:root`: an app that sets those on
     // a narrower element sets these there too.

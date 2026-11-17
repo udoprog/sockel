@@ -58,6 +58,9 @@
 //! - [`Popover`] (`.popover`): a surface beside its anchor in the overlay
 //!   layer ([`overlay`]), placed before it shows ([`place`], [`use_popover`]),
 //!   dismissed by a press outside or Escape, a sheet on a phone.
+//! - [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
+//!   scrolls and pinned actions, in three sizes; a sheet on a phone. The page
+//!   behind holds still; Escape closes the innermost overlay only.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -87,6 +90,7 @@ mod card_grid;
 mod checkbox;
 mod chip;
 mod choice;
+mod dialog;
 mod empty_state;
 mod error_box;
 mod field;
@@ -94,6 +98,7 @@ mod head;
 mod icon_button;
 mod icons;
 mod image;
+mod layer;
 mod layout;
 mod library_toolbar;
 mod notice;
@@ -113,6 +118,7 @@ pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
+pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
 pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use field::{

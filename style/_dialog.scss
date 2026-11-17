@@ -1,0 +1,100 @@
+// Dialog (src/dialog.rs).
+//
+// - `.plinth-dialog-layer`: fixed over the whole window in the overlay
+//   layer, its `--scrim` dimming the page and any dialog beneath. The
+//   dialog hangs `--dialog-top` from the window's top, never centred, so
+//   growing content only moves its bottom edge.
+// - `.plinth-dialog`: `--dialog-width` wide (`.plinth-wide`:
+//   `--dialog-width-wide`), from `--dialog-min-height` up to the window's
+//   room; `.plinth-tall` is `--dialog-height-tall` whatever it holds. Parts:
+//   `-head` (a section head: icon, title, close), `-body` (what scrolls, its
+//   scrollbar's room kept) and `-foot` (its actions, pinned below the body).
+// - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom,
+//   up to `--dialog-sheet-height`.
+// - `.plinth-scroll-locked` on the root while a dialog is open, with
+//   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays.
+
+@use "tokens" as base;
+
+.plinth-scroll-locked {
+    overflow: hidden;
+}
+
+.plinth-gutter-kept {
+    scrollbar-gutter: stable;
+}
+
+.plinth-dialog-layer {
+    position: fixed;
+    inset: 0;
+    z-index: var(--layer-dialog);
+    display: flex;
+    align-items: flex-start;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: var(--dialog-top) var(--space-4) var(--space-4);
+    background: var(--scrim);
+    overscroll-behavior: contain;
+}
+
+.plinth-dialog {
+    --dialog-room: calc(100dvh - var(--dialog-top) - var(--space-4));
+
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    width: min(var(--dialog-width), 100%);
+    min-height: min(var(--dialog-min-height), var(--dialog-room));
+    max-height: var(--dialog-room);
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-lg);
+    background: var(--surface-raised);
+    color: var(--text);
+    box-shadow: var(--shadow-1);
+    outline: none;
+
+    &.plinth-wide {
+        width: min(var(--dialog-width-wide), 100%);
+    }
+
+    &.plinth-tall {
+        height: min(var(--dialog-height-tall), var(--dialog-room));
+    }
+}
+
+.plinth-dialog-head {
+    flex: none;
+    padding: var(--space-3) var(--space-3) 0 var(--space-5);
+}
+
+.plinth-dialog-body {
+    @include base.scroll-area;
+    flex: 1 1 auto;
+    padding: var(--space-3) var(--space-5) var(--space-5);
+}
+
+.plinth-dialog-foot {
+    display: flex;
+    flex: none;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-3) var(--space-5);
+    border-top: var(--space-px) solid var(--border);
+}
+
+@include base.below(base.$sheet-breakpoint) {
+    .plinth-dialog-layer.plinth-sheet {
+        align-items: flex-end;
+        padding: 0;
+    }
+
+    .plinth-dialog.plinth-sheet {
+        --dialog-room: var(--dialog-sheet-height);
+
+        width: 100%;
+        border-bottom-color: transparent;
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        padding-bottom: env(safe-area-inset-bottom);
+    }
+}

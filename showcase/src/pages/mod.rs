@@ -1,6 +1,7 @@
 mod actions;
 mod badges;
 mod buttons;
+mod dialog;
 mod fields;
 mod foundations;
 mod heads;
@@ -641,6 +642,23 @@ pub const PAGES: &[Page] = &[
             "OVERLAY_ID",
         ],
         render: || html! { <popover::PopoverPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "dialog",
+        title: "Dialog",
+        about: "A modal box over a scrim: its head, a body that scrolls and actions pinned below it, in three sizes, a sheet from the bottom on a phone. The page behind does not move or lose its scrollbar's room; Tab stays inside; Escape closes the innermost overlay first (open the popover or the second dialog from it), and focus goes back where it was.",
+        covers: &[
+            "Dialog",
+            "DialogProps",
+            "DialogSize",
+            "DialogDismiss",
+            "dialog",
+        ],
+        render: || html! { <dialog::DialogPage /> },
         holds: &[
             hold(plinth::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),

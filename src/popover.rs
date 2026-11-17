@@ -8,6 +8,7 @@ use wasm_bindgen::closure::Closure;
 use web_sys::{Element, HtmlElement, Node};
 use yew::prelude::*;
 
+use crate::layer::Layer;
 use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class};
 
 /// The id of the overlay layer, the last child of `<body>` (also its class).
@@ -249,7 +250,7 @@ impl Dismiss {
 }
 
 /// A listener added to a target, removed when dropped.
-struct Listener {
+pub(crate) struct Listener {
     target: web_sys::EventTarget,
     kind: &'static str,
     capture: bool,
@@ -257,7 +258,7 @@ struct Listener {
 }
 
 impl Listener {
-    fn new(
+    pub(crate) fn new(
         target: web_sys::EventTarget,
         kind: &'static str,
         capture: bool,
@@ -304,7 +305,7 @@ fn viewport() -> Option<Rect> {
 
 /// Whether focus is nowhere: on `<body>`, where it falls when the element
 /// that had it goes.
-fn focus_lost() -> bool {
+pub(crate) fn focus_lost() -> bool {
     let Some(document) = web_sys::window().and_then(|w| w.document()) else {
         return false;
     };
@@ -319,7 +320,8 @@ fn focus_lost() -> bool {
 
 /// Places `popover` beside `anchor` while `open`, measured before it is
 /// shown, and again on scroll, resize and a change of either's size. A
-/// press outside both, or Escape, asks `on_dismiss` to close it; when it
+/// press outside both, or Escape, asks `on_dismiss` to close it, unless an
+/// overlay opened after it (a dialog from it) is still open; when it
 /// closes, focus left nowhere (it was inside the popover) goes back to the
 /// anchor, unless a press outside closed it. `None` until it is placed.
 #[hook]
@@ -345,6 +347,7 @@ pub fn use_popover(
             let mut observer = None;
 
             if open {
+                let layer = Rc::new(Layer::open());
                 let last = Rc::new(Cell::new(None::<Placed>));
                 let measure = {
                     let (anchor, popover, placed) =
@@ -390,7 +393,11 @@ pub fn use_popover(
                         let pressed = {
                             let (anchor, popover) = (anchor.clone(), popover.clone());
                             let (on_dismiss, refocus) = (on_dismiss.clone(), refocus.clone());
+                            let layer = layer.clone();
                             move |e: web_sys::Event| {
+                                if !layer.is_top() {
+                                    return;
+                                }
                                 if let Some(why) =
                                     Dismiss::for_press(within(&anchor, &e), within(&popover, &e))
                                 {
@@ -407,7 +414,11 @@ pub fn use_popover(
                         ));
                         let keyed = {
                             let (on_dismiss, refocus) = (on_dismiss.clone(), refocus.clone());
+                            let layer = layer.clone();
                             move |e: web_sys::Event| {
+                                if !layer.is_top() {
+                                    return;
+                                }
                                 // Only keydown reaches here; unchecked, as an
                                 // event from another frame fails `instanceof`.
                                 let key = e.unchecked_ref::<web_sys::KeyboardEvent>().key();

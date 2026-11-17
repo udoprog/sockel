@@ -27,6 +27,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_badges.scss",
     "_buttons.scss",
     "_card-grid.scss",
+    "_dialog.scss",
     "_fields.scss",
     "_heads.scss",
     "_hooks.scss",
