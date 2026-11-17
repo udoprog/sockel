@@ -660,6 +660,8 @@ $sheet-breakpoint: "phone" !default;
     box-sizing: border-box;
     max-width: 100%;
     height: var(--control-height);
+    // Its height is its size's, under an app's own button min-height.
+    min-height: 0;
     margin: 0;
     padding-block: 0;
     padding-inline: var(--button-pad-x, var(--space-3));

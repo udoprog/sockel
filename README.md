@@ -367,7 +367,8 @@ label). plinth styles only `.plinth-button`, never a bare `<button>`.
   classes for an element that cannot be the component.
 
 Size guarantees: the height is the size's token, whatever the label (one
-line, cut with an ellipsis; the button never grows past its container).
+line, cut with an ellipsis; the button never grows past its container) and
+whatever `min-height` an app gives its own `button` elements.
 The border is always there (`reserved-border`), so hover, pressed and the
 variants change colours only; focus is an outline. Pressed never changes
 the font weight. Busy hides the icon and label with `visibility`, so the
