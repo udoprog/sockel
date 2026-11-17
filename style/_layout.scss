@@ -63,8 +63,9 @@
     align-items: flex-start;
 }
 
-// A flex item that takes the room left in its row, and may shrink.
-.plinth-grow {
+// A flex item that takes the room left in its row, and may shrink. The class
+// twice, so it wins over the item's own flex (a button's, an input's).
+.plinth-grow.plinth-grow {
     flex: 1 1 auto;
     min-width: 0;
 
@@ -88,7 +89,8 @@
     align-self: flex-start;
 }
 
-.plinth-push-end {
+// The class twice, so it wins over the item's own margin (a button's).
+.plinth-push-end.plinth-push-end {
     margin-left: auto;
 }
 
