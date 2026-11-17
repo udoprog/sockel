@@ -6,43 +6,199 @@ components keep their size and don't jitter as their content changes.
 Each component comes with its Sass under `style/`, and its variants are
 modifier classes set by props.
 
+## Getting started
+
+An app depends on `plinth` and builds its one stylesheet, plinth's CSS and
+the app's own Sass, with `plinth-build` in its `build.rs`. No Sass step
+runs anywhere else, and no path leads into plinth's checkout. The blocks
+below are the files of a complete app (`scripts/check-packaged.sh` builds
+them against plinth's packages).
+
+### Dependencies
+
+In the app's `Cargo.toml`, plinth with the features the app renders (see
+[Choosing features](#choosing-features); leave out `default-features` and
+`features` for all of them), and `plinth-build` to build and to test:
+
+<!-- check: Cargo.toml -->
 ```toml
 [dependencies]
-plinth = { path = "../plinth" }
+plinth = { version = "0.1", default-features = false, features = ["button", "layout"] }
+yew = { version = "0.23", features = ["csr"] }
+
+[build-dependencies]
+plinth-build = "0.1"
+
+[dev-dependencies]
+plinth-build = "0.1"
 ```
 
-Or as a registry-style requirement, pointed at the checkout once in the
-workspace root:
+### Developing against a checkout
+
+plinth is not on a registry yet, so point both crates at a checkout once, in
+the `Cargo.toml` at the workspace root (the app's own, when it is not in a
+workspace):
 
 ```toml
-[dependencies]
-plinth = "0.1"
-
 [patch.crates-io]
 plinth = { path = "../plinth" }
 plinth-build = { path = "../plinth/plinth-build" }
 ```
 
-## Including the styles
+The dependency lines stay as above, and dropping the patch later switches to
+the registry. Nothing else names the checkout.
 
-plinth compiles `style/` with its defaults when the crate builds (with
-[grass], through `plinth-build`), so an app needs no Sass step of its own.
-An app without styles of its own mounts `<plinth::Styles/>` once at its
-root:
+### Styles
 
-```rust
-html! {
-    <>
-        <plinth::Styles/>
-        <App/>
-    </>
+The app's Sass lives in a directory, say `style/`, with an `_index.scss`
+(or `index.scss`) that `@use`s its partials. It loads plinth's tokens and
+mixins as `"plinth"`:
+
+<!-- check: style/_index.scss -->
+```scss
+@use "plinth" as p;
+
+.app-sidebar {
+    padding: var(--space-4);
+
+    @include p.below("phone") {
+        padding: var(--space-2);
+    }
+}
+
+// plinth's classes are stable, so the app may refine them.
+.plinth-card.app-sidebar {
+    --radius-lg: 12px;
 }
 ```
 
-It adds the stylesheet to `<head>` as `<style id="plinth-styles">`, once,
-however many times it is mounted. The CSS is also `plinth::STYLESHEET`, for
-an app that serves or inlines it itself. Its classes are constants in
-`plinth::class`, so a misspelt class does not compile.
+`"plinth"` is the `style/` of the plinth package the app builds against.
+It emits no second copy of plinth's CSS: plinth is compiled first in the
+same build. Configure plinth's tokens through the build instead of `@use
+"plinth" with (...)` (see [Configuration](#configuration)).
+
+Every class the app's Sass defines that is not plinth's must start with the
+app's prefix (`app-`); one that does not is a build error, so the app's
+classes never collide with plinth's.
+
+### `build.rs`
+
+At the package root:
+
+<!-- check: build.rs -->
+```rust
+fn main() {
+    plinth_build::Config::new()
+        .local("style/")
+        .prefix("app-")
+        .compile();
+}
+```
+
+It writes `style.css` and `classes.rs` to `OUT_DIR`, and reruns when
+`build.rs`, anything under `style/` (partials and new files included) or
+plinth's Sass changes.
+
+### The class constants and the stylesheet
+
+`classes.rs` holds the app's classes, named without the prefix
+(`.app-sidebar` is `class::SIDEBAR`); plinth's stay `plinth::class::...`.
+Every plinth component takes a `class` prop, so pass the constants there,
+and a class the Sass does not define does not compile. The stylesheet is
+mounted once at the root with `Styles`'s `css`:
+
+<!-- check: src/main.rs -->
+```rust
+use yew::prelude::*;
+
+mod class {
+    include!(concat!(env!("OUT_DIR"), "/classes.rs"));
+}
+
+const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
+
+#[function_component]
+fn App() -> Html {
+    html! {
+        <>
+            <plinth::Styles css={STYLESHEET} />
+            <plinth::Stack class={classes!(plinth::class::CARD, class::SIDEBAR)}>
+                <plinth::Button>{ "Save" }</plinth::Button>
+            </plinth::Stack>
+        </>
+    }
+}
+
+fn main() {
+    yew::Renderer::<App>::new().render();
+}
+```
+
+### No Sass elsewhere
+
+`index.html` links no stylesheet: no `<link data-trunk rel="scss">`, and no
+`[tools] sass` in `Trunk.toml`.
+
+```html
+<link data-trunk rel="rust" href="Cargo.toml" />
+```
+
+### A guard against dead classes
+
+A class the Sass defines and no Rust writes is dead weight.
+`plinth_build::Usage` finds them in a test, so an app needs no guard of its
+own:
+
+<!-- check: tests/style_classes.rs -->
+```rust
+use plinth_build::{Config, Usage};
+
+#[test]
+fn every_styled_class_is_written() {
+    Usage::new()
+        .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
+        .assert_clean(
+            &Config::new()
+                .style(env!("PLINTH_STYLE"))
+                .local("style/")
+                .prefix("app-"),
+        );
+}
+```
+
+`PLINTH_STYLE` is plinth's style directory, which `compile()` hands the
+package's crates. `.dynamic(["app-tone-*"])` allows classes built at runtime
+(a trailing `*` is a prefix) and `.foreign([...])` ones a dependency writes.
+A class counts as written when a source names its constant
+(`class::SIDEBAR`) or the class in a string literal; comments and code after
+a file's first `#[cfg(test)]` do not count. The test fails on a dead class
+and on an allowed pattern that matches no class, and prints the class,
+single-use and dead counts. `STYLE_INVENTORY=PATH` also writes
+`class<TAB>uses` lines to `PATH`. plinth runs it on itself and on the
+showcase.
+
+### How plinth-build finds plinth
+
+plinth's own `build.rs` passes two values to the `build.rs` of every package
+depending on it directly (Cargo's `links` metadata): `DEP_PLINTH_FEATURES`,
+its enabled features, and `DEP_PLINTH_STYLE`, the `style/` directory inside
+its package. `Config` builds those features from those sources, so the
+app's stylesheet always matches the plinth it links. A package that reaches
+plinth only through another crate is told neither: it names them with
+`Config::features([...])` and `Config::style(dir)`.
+
+### One stylesheet per app
+
+Both `Styles` fill the same element, `<style id="plinth-styles">`
+(`plinth::STYLE_ID`): with `css` it sets the element's text to the app's
+stylesheet, which holds plinth's; without it, it adds plinth's only when the
+element is missing. So whichever mounts first (the app's, or a
+`<plinth::Styles/>` inside a component), the page ends up with the app's
+stylesheet, once. Never link or inject plinth's CSS another way beside it.
+
+An app without Sass of its own needs no `build.rs`: it mounts
+`<plinth::Styles/>` once at its root, which adds `plinth::STYLESHEET`, and
+uses `plinth::class`.
 
 Every class plinth styles starts with `plinth-`, modifiers included
 (`.plinth-stack.plinth-tight`), so none collides with an app's classes. A
@@ -50,187 +206,48 @@ constant is named after its class without the prefix, as an app's are:
 `.plinth-page-head-title` is `plinth::class::PAGE_HEAD_TITLE`,
 `.plinth-tight` is `plinth::class::TIGHT`.
 
-## Adopting plinth with styles of your own
-
-An app with its own Sass builds it with `plinth-build` in its `build.rs`,
-beside plinth's, into **one stylesheet**: plinth's CSS first, unchanged,
-then the app's. The app's classes become constants as plinth's are. Step by
-step:
-
-1. **Dependencies.** In the app's `Cargo.toml`:
-
-   ```toml
-   [dependencies]
-   plinth = { path = "../plinth" }
-
-   [build-dependencies]
-   plinth-build = { path = "../plinth/plinth-build" }
-   ```
-
-2. **Styles.** Put the app's Sass in a directory, say `style/`, with an
-   `_index.scss` (or `index.scss`) that `@use`s its partials. Load plinth's
-   tokens and mixins as `plinth`:
-
-   ```scss
-   @use "plinth" as p;
-
-   .army-sidebar {
-       padding: var(--space-4);
-
-       @include p.below("phone") {
-           padding: var(--space-2);
-       }
-   }
-
-   // plinth's classes are stable, so the app may refine them.
-   .plinth-card.army-sidebar {
-       --radius-lg: 12px;
-   }
-   ```
-
-   `"plinth"` is served from the sources embedded in `plinth-build` (no path
-   into plinth's checkout), so they always match the plinth-build version.
-   It emits no second copy of plinth's CSS: plinth is compiled first in the
-   same build. plinth's Sass cannot be configured from here (`@use "plinth"
-   with (...)` fails); retune it through the custom properties (see
-   [Theming](#theming)).
-
-   Every class the app's Sass defines that is not plinth's must start with
-   the app's prefix (`army-`); one that does not is a build error, so the
-   app's classes never collide with plinth's.
-
-3. **`build.rs`**, at the package root:
-
-   ```rust
-   fn main() {
-       plinth_build::Config::new()
-           .local("style/")
-           .prefix("army-")
-           .compile();
-   }
-   ```
-
-   It writes `style.css` and `classes.rs` to `OUT_DIR`, and reruns when
-   `build.rs` or anything under `style/` changes (partials and new files
-   included).
-
-4. **The class constants.** Somewhere in the crate (`src/main.rs` or
-   `src/lib.rs`):
-
-   ```rust
-   mod class {
-       include!(concat!(env!("OUT_DIR"), "/classes.rs"));
-   }
-   ```
-
-   `classes.rs` holds only the app's classes, named without the prefix:
-   `.army-sidebar` is `class::SIDEBAR`. plinth's stay `plinth::class::...`.
-   Every plinth component takes a `class` prop, so pass the constants there:
-
-   ```rust
-   html! { <Stack class={class::SIDEBAR}>{ children }</Stack> }
-   ```
-
-   A class the Sass does not define, or a misspelt one, does not compile.
-
-5. **The stylesheet.** Include it and mount it once at the root, with
-   `Styles`'s `css`:
-
-   ```rust
-   const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
-
-   html! {
-       <>
-           <plinth::Styles css={STYLESHEET} />
-           <App/>
-       </>
-   }
-   ```
-
-6. **No Sass elsewhere.** Remove the app's own Sass step (trunk's
-   `<link data-trunk rel="scss">` and `[tools] sass`); `index.html` links no
-   stylesheet.
-
-7. **A guard against dead classes.** A class the Sass defines and no Rust
-   writes is dead weight. `plinth_build::Usage` finds them in a test, so an
-   app needs no guard of its own (`tests/style_classes.rs`):
-
-   ```rust
-   use plinth_build::{Config, Usage};
-
-   #[test]
-   fn every_styled_class_is_written() {
-       Usage::new()
-           .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
-           .dynamic(["army-tone-*"]) // built at runtime; a trailing `*` is a prefix
-           .foreign(["army-fc-row"]) // written by a dependency
-           .assert_clean(&Config::new().local("style/").prefix("army-"));
-   }
-   ```
-
-   Add `plinth-build` to `[dev-dependencies]`. A class counts as written when
-   a source names its constant (`class::SIDEBAR`) or the class in a string
-   literal; comments and code after a file's first `#[cfg(test)]` do not
-   count. The test fails on a dead class and on an allowed pattern that
-   matches no class, and prints the class, single-use and dead counts.
-   `STYLE_INVENTORY=PATH` also writes `class<TAB>uses` lines to `PATH`.
-   It is a test, not a build warning: a warning scrolls past in a build
-   log, a test fails where the project already looks. plinth runs it on
-   itself and on the showcase.
-
-**One stylesheet per app.** Both `Styles` fill the same element,
-`<style id="plinth-styles">` (`plinth::STYLE_ID`): with `css` it sets the
-element's text to the app's stylesheet, which holds plinth's; without it, it
-adds plinth's only when the element is missing. So whichever mounts first
-(the app's, or a `<plinth::Styles/>` inside a component), the page ends up
-with the app's stylesheet, once. Never link or inject plinth's CSS another
-way beside it.
-
-**Configuring plinth's defaults.** Local Sass cannot `@use "plinth" with
-(...)`, since plinth compiles first. Pass the values to the build instead,
-before `compile()`; they are plinth's `!default` tokens (see Configuration),
-and only values change, never classes:
-
-```rust
-plinth_build::Config::new()
-    .local("style")
-    .prefix("army-")
-    .with("text-md", "1.0625rem")
-    .with("$radius-lg", "12px")
-    .compile();
-```
-
-The `$` is optional and the value is any Sass expression. Without `.local`,
-the same call configures plinth's own stylesheet.
-
 The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 
-## Adopting plinth with an app's own Sass compiler
+## Migrating from trunk's Sass step
 
-An app that keeps its own Sass step (trunk's `<link data-trunk rel="scss">`
-with dart-sass) and its own unprefixed classes can load plinth's sources
-from the checkout instead, first in its root stylesheet, so its own rules
-come after plinth's and refine them:
+An app that compiled its styles with trunk (`<link data-trunk rel="scss">`
+and `@use "../../plinth/style/..."`) moves to the getting-started setup:
 
-```scss
-@use "../../../plinth/style";
-```
+1. **Dependencies.** Replace `plinth = { path = ... }` with the lines in
+   [Dependencies](#dependencies) and the patch in
+   [Developing against a checkout](#developing-against-a-checkout).
+2. **`@use` lines.** Delete every `@use` of plinth's checkout (`"../…/plinth/style"`,
+   `"../…/plinth/style/tokens"`, a partial): `plinth-build` compiles plinth's
+   CSS first, with the app's features. A partial that needs plinth's
+   mixins or token functions writes `@use "plinth" as p;` and calls
+   `p.below(...)` and the like. A `with (...)` on the old `@use` moves to
+   `Config::with` in `build.rs` (see [Configuration](#configuration)).
+3. **The prefix.** Every class the app's Sass defines must start with one
+   prefix (`army-`), given to `Config::prefix`. Rename the app's classes in
+   the Sass and the markup together; a rule that refines a plinth class
+   (`.plinth-card.army-sidebar`) keeps plinth's part as it is.
+4. **Class literals.** Add the `mod class` above and replace the app's
+   class strings in Rust with its constants (`"army-sidebar"` becomes
+   `class::SIDEBAR`, `classes!("plinth-card", "army-sidebar")` becomes
+   `classes!(plinth::class::CARD, class::SIDEBAR)`). A misspelt or removed
+   class then fails to compile, and the dead-class test finds the rest.
+5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
+   `[tools] sass` from `Trunk.toml`, and mount `<plinth::Styles
+   css={STYLESHEET} />` once at the root.
 
-Each partial `@use`s only `tokens` (and the menu's users `menu`), so an app
-may load just the tokens and the partials of the components it renders, in
-the order of `style/_index.scss`. Its stylesheet then carries none of the
-rest:
+`plinth-build` compiles with [grass] rather than dart-sass. They differ
+where a block has declarations after a nested rule or an `@include` of
+rules: dart-sass emits those declarations in a second block after the
+nested rules, grass moves them into the first. A `padding` written after
+`@include p.below("phone") { padding: ... }` then loses to the media query
+under grass, where dart-sass let it win. Write a block's declarations
+before its nested rules (dart-sass warns about the other order as
+deprecated anyway). They also print `calc()` inside `min()` and `max()`
+differently, to the same effect. A dart-sass feature grass lacks fails in
+`build.rs` with the error and its line.
 
-```scss
-@use "../../../plinth/style/tokens" as plinth-tokens;
-@use "../../../plinth/style/layout" as plinth-layout;
-@use "../../../plinth/style/buttons" as plinth-buttons;
-```
-
-The `as` names keep them clear of an app partial of the same name. A
-component whose rules are missing renders unstyled, so add a partial when
-the app starts rendering one of its components, and the partials of the
-components it renders inside (a dialog's buttons and icons).
+Including plinth's Sass from a checkout (`@use "../plinth/style"`) does not
+work once plinth comes from a registry, and is not supported for apps.
 
 ## Choosing features
 
@@ -241,7 +258,7 @@ the ones it needs:
 
 ```toml
 [dependencies]
-plinth = { path = "../plinth", default-features = false, features = ["field", "input", "layout"] }
+plinth = { version = "0.1", default-features = false, features = ["field", "input", "layout"] }
 ```
 
 A feature gates a component's Rust and its CSS together. `STYLESHEET` and
@@ -252,14 +269,12 @@ surface are always in, and so is the `:root` tokens' part of a feature
 (`tokens.table`, ...) only while a feature that reads it is on.
 
 An app compiling its own Sass through `plinth-build` gets the same subset
-without asking: plinth passes its features on to the `build.rs` of every
-package depending on it directly (as `DEP_PLINTH_FEATURES`), and
-`Config` builds those. A package that reaches plinth only through another
+without asking (see [How plinth-build finds plinth](#how-plinth-build-finds-plinth)).
+A package that reaches plinth only through another
 crate is not told, and gets every feature's CSS, the whole stylesheet;
 `Config::features([...])` names its features instead. Cargo builds one set
 of features for everything built together, so a workspace whose other
-member wants more gets the union. An app with its own Sass compiler loads
-the partials it wants itself (see above).
+member wants more gets the union.
 
 | Feature | Brings in | Gives | CSS alone |
 | --- | --- | --- | --- |
@@ -375,27 +390,27 @@ Breakpoints and the component settings (`$card-padding`,
 
 ## Configuration
 
-An app built with `plinth-build` sets these with `Config::with` (see
-Adopting plinth); an app that compiles plinth's Sass itself uses `with (...)`.
 plinth's values are defaults. Every token is a `!default` variable of
-`style/_tokens.scss`, emitted as its custom property on `:root`, so a project
-sets its own with `with (...)`, either through the index:
+`style/_tokens.scss`, emitted as its custom property on `:root`. An app sets
+its own in `build.rs`, before `compile()`; only values change, never
+classes:
 
-```scss
-@use "../plinth/style" with ($text-md: 1.0625rem, $radius-lg: 12px);
-@use "../plinth/style/tokens";   // tokens and mixins, as configured
+<!-- check-variant: build.rs -->
+```rust
+fn main() {
+    plinth_build::Config::new()
+        .local("style/")
+        .prefix("app-")
+        .with("text-md", "1.0625rem")
+        .with("$radius-lg", "12px")
+        .compile();
+}
 ```
 
-or on the tokens module first, then the rules:
-
-```scss
-@use "../plinth/style/tokens" with ($text-md: 1.0625rem);
-@use "../plinth/style";
-```
-
-Sass configures a module only on its first load, so `with` goes on whichever
-of the two comes first. The rules keep reading the custom properties, so a
-page can still override them at runtime.
+The `$` is optional and the value is any Sass expression. Without `.local`,
+the same call configures plinth's own stylesheet. Local Sass cannot `@use
+"plinth" with (...)`, since plinth compiles first. The rules keep reading
+the custom properties, so a page can still override them at runtime.
 
 | Variable | Default |
 | --- | --- |
@@ -496,8 +511,15 @@ render is left out by its feature (see [Choosing features](#choosing-features)),
 which also leaves out the `tokens.*` part only it reads, and Loadable's
 `skeleton.loadable`.
 
-```scss
-@use "../plinth/style/tokens" with ($omit: ("layout.toolbar", "menu.split-button", "tokens.table"));
+<!-- check-variant: build.rs -->
+```rust
+fn main() {
+    plinth_build::Config::new()
+        .local("style/")
+        .prefix("app-")
+        .with("omit", r#"("layout.toolbar", "buttons.ghost")"#)
+        .compile();
+}
 ```
 
 | Partial | Parts |
@@ -2236,6 +2258,7 @@ cargo clippy --all-targets -- -D warnings
 cargo clippy --target wasm32-unknown-unknown --workspace -- -D warnings
 cargo test --workspace
 bash scripts/check-features.sh
+bash scripts/check-packaged.sh
 (cd showcase && trunk build)
 ```
 

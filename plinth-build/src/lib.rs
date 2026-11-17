@@ -1,9 +1,8 @@
 //! Builds an app's one stylesheet and its class constants from a `build.rs`:
 //! plinth's, and a project's own Sass beside it ([`Config::local`]).
 //!
-//! plinth's Sass sources are embedded in this crate, so a build sees the
-//! sources of the plinth-build version it depends on and no path into
-//! plinth's repository; local Sass loads them as `@use "plinth" as p;`.
+//! plinth's Sass sources are read from the plinth package a build depends on
+//! ([`STYLE_VAR`]); local Sass loads them as `@use "plinth" as p;`.
 //! [`Config::compile`] writes `style.css` and `classes.rs` (a `pub const` per
 //! class) to `OUT_DIR`.
 
@@ -14,59 +13,26 @@ use std::path::{Path, PathBuf};
 
 #[cfg(test)]
 mod features;
-mod usage;
-pub use usage::{Report, Usage};
 
-macro_rules! sources {
-    ($($name:literal),* $(,)?) => {
-        &[$(($name, include_str!(concat!("../../style/", $name)))),*]
-    };
+/// plinth's sources in this repository.
+#[cfg(test)]
+const STYLE: &str = concat!(env!("CARGO_MANIFEST_DIR"), "/../style");
+
+#[cfg(test)]
+fn plinth() -> Config {
+    Config::new().style(STYLE)
 }
 
-/// plinth's Sass sources (`style/`), by file name.
-pub const SOURCES: &[(&str, &str)] = sources!(
-    "_actions.scss",
-    "_badges.scss",
-    "_buttons.scss",
-    "_card-grid.scss",
-    "_color-select.scss",
-    "_confirm.scss",
-    "_dialog.scss",
-    "_disclosure.scss",
-    "_drop.scss",
-    "_fields.scss",
-    "_filter-picker.scss",
-    "_heads.scss",
-    "_hidden.scss",
-    "_hooks.scss",
-    "_icons.scss",
-    "_index.scss",
-    "_inputs.scss",
-    "_layout.scss",
-    "_listbox.scss",
-    "_media.scss",
-    "_menu-surface.scss",
-    "_menu.scss",
-    "_notices.scss",
-    "_pager.scss",
-    "_panel.scss",
-    "_picker.scss",
-    "_popover.scss",
-    "_reorder.scss",
-    "_rows.scss",
-    "_seam.scss",
-    "_search-select.scss",
-    "_select.scss",
-    "_skeleton.scss",
-    "_stepper.scss",
-    "_table.scss",
-    "_tabs.scss",
-    "_toast.scss",
-    "_toggles.scss",
-    "_tokens.scss",
-    "_tooltip.scss",
-    "_utilities.scss",
-);
+#[cfg(test)]
+fn test_sources() -> Sources {
+    Sources {
+        style: STYLE.into(),
+        index: None,
+    }
+}
+
+mod usage;
+pub use usage::{Report, Usage};
 
 /// plinth's Cargo features and the partials (`style/_<name>.scss`) each
 /// adds to the stylesheet. Partials no feature names (tokens, hooks, the
@@ -133,18 +99,27 @@ pub const FEATURE_PARTS: &[(&str, &[&str])] = &[
 /// package depending on plinth directly sees them (plinth's `links` metadata).
 pub const FEATURES_VAR: &str = "DEP_PLINTH_FEATURES";
 
+/// The directory of plinth's Sass sources (`style/` in its package), as a
+/// `build.rs` of a package depending on plinth directly sees it.
+pub const STYLE_VAR: &str = "DEP_PLINTH_STYLE";
+
+/// The variable [`Config::compile`] sets to plinth's style directory for
+/// the package's own crates, so its tests can pass it to [`Config::style`].
+pub const TEST_STYLE_VAR: &str = "PLINTH_STYLE";
+
 /// Styles each hook class of `_hooks.scss`, so its class is found like any other.
 const HOOKS_PROBE: &str =
     "@use \"plinth/hooks\";\n@each $class in hooks.$classes { .#{$class} { --hook: 0; } }\n";
 
-/// The directory the embedded sources are served under.
+/// The directory plinth's sources are served under.
 const ROOT: &str = "plinth";
 
-/// The embedded sources at relative paths (`plinth/...`), the disk at
-/// absolute ones: a project's files are always loaded by absolute path, so
-/// nothing on disk can stand in for plinth's sources.
+/// plinth's sources at relative paths (`plinth/...`), the disk at absolute
+/// ones: a project's files are always loaded by absolute path, so nothing
+/// else on disk can stand in for plinth's sources.
 #[derive(Debug)]
 struct Sources {
+    style: PathBuf,
     /// Stands in for `_index.scss`: the index of a subset of features.
     index: Option<String>,
 }
@@ -157,16 +132,15 @@ impl Sources {
             .collect()
     }
 
-    fn embedded(&self, path: &Path) -> Option<&str> {
+    /// A relative path's file in plinth's style directory.
+    fn plinth(&self, path: &Path) -> Option<PathBuf> {
         let path = Self::relative(path);
-        let name = path.strip_prefix(ROOT).ok()?.to_str()?;
-        if let (Some(index), "_index.scss") = (&self.index, name) {
-            return Some(index);
-        }
-        SOURCES
-            .iter()
-            .find(|(file, _)| *file == name)
-            .map(|(_, source)| *source)
+        let name = path.strip_prefix(ROOT).ok()?;
+        Some(self.style.join(name))
+    }
+
+    fn is_index(&self, path: &Path) -> bool {
+        self.index.is_some() && Self::relative(path) == Path::new(ROOT).join("_index.scss")
     }
 }
 
@@ -183,7 +157,7 @@ impl grass::Fs for Sources {
         if path.is_absolute() {
             path.is_file()
         } else {
-            self.embedded(path).is_some()
+            self.is_index(path) || self.plinth(path).is_some_and(|file| file.is_file())
         }
     }
 
@@ -191,9 +165,16 @@ impl grass::Fs for Sources {
         if path.is_absolute() {
             return std::fs::read(path);
         }
-        self.embedded(path)
-            .map(|source| source.as_bytes().to_vec())
-            .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, path.display().to_string()))
+        if let (true, Some(index)) = (self.is_index(path), &self.index) {
+            return Ok(index.as_bytes().to_vec());
+        }
+        match self.plinth(path) {
+            Some(file) => std::fs::read(file),
+            None => Err(io::Error::new(
+                io::ErrorKind::NotFound,
+                path.display().to_string(),
+            )),
+        }
     }
 
     fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
@@ -226,6 +207,8 @@ pub enum Error {
     NotVerbatim,
     /// A name [`FEATURES`] does not list.
     Feature(String),
+    /// No [`Config::style`] and no [`STYLE_VAR`].
+    NoStyle,
 }
 
 impl fmt::Display for Error {
@@ -248,6 +231,12 @@ impl fmt::Display for Error {
             }
             Error::NotVerbatim => write!(f, "plinth's CSS did not come first and unchanged"),
             Error::Feature(name) => write!(f, "plinth has no feature `{name}`"),
+            Error::NoStyle => write!(
+                f,
+                "plinth's style directory is unknown: {STYLE_VAR} is set only in the \
+                 build.rs of a package depending on plinth directly; elsewhere use \
+                 Config::style"
+            ),
         }
     }
 }
@@ -270,6 +259,7 @@ impl From<io::Error> for Error {
 #[derive(Clone, Debug, Default)]
 pub struct Config {
     out_dir: Option<PathBuf>,
+    style: Option<PathBuf>,
     local: Option<PathBuf>,
     prefix: Option<String>,
     with: Vec<(String, String)>,
@@ -295,6 +285,14 @@ impl Config {
     /// Where [`Config::write`] puts its files, instead of `OUT_DIR`.
     pub fn out_dir(mut self, dir: impl Into<PathBuf>) -> Self {
         self.out_dir = Some(dir.into());
+        self
+    }
+
+    /// plinth's Sass sources, instead of [`STYLE_VAR`]'s directory: in a test
+    /// `env!("PLINTH_STYLE")` ([`TEST_STYLE_VAR`]), set by the package's
+    /// `build.rs`.
+    pub fn style(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.style = Some(dir.into());
         self
     }
 
@@ -345,8 +343,18 @@ impl Config {
         })
     }
 
+    fn style_dir(&self) -> Result<PathBuf, Error> {
+        let dir = match &self.style {
+            Some(dir) => dir.clone(),
+            None => std::env::var_os(STYLE_VAR)
+                .map(PathBuf::from)
+                .ok_or(Error::NoStyle)?,
+        };
+        Ok(std::path::absolute(dir)?)
+    }
+
     /// `_index.scss` without the `@use` of each partial whose feature is off.
-    fn index(enabled: Option<&[String]>) -> Result<Option<String>, Error> {
+    fn index(style: &Path, enabled: Option<&[String]>) -> Result<Option<String>, Error> {
         let Some(enabled) = enabled else {
             return Ok(None);
         };
@@ -361,10 +369,7 @@ impl Config {
                 partials.contains(&partial) && !enabled.iter().any(|name| name == feature)
             })
         };
-        let (_, index) = SOURCES
-            .iter()
-            .find(|(name, _)| *name == "_index.scss")
-            .expect("_index.scss is embedded");
+        let index = std::fs::read_to_string(style.join("_index.scss"))?;
         let lines = index.lines().filter(|line| {
             let partial = line
                 .strip_prefix("@use \"")
@@ -408,8 +413,10 @@ impl Config {
 
     pub fn build(&self) -> Result<Output, Error> {
         let enabled = self.enabled();
+        let style = self.style_dir()?;
         let sources = Sources {
-            index: Self::index(enabled.as_deref())?,
+            index: Self::index(&style, enabled.as_deref())?,
+            style,
         };
         let options = grass::Options::default().fs(&sources).load_path("");
         let plinth_use = self.plinth_use(enabled.as_deref());
@@ -473,17 +480,21 @@ impl Config {
         Ok(output)
     }
 
-    /// [`Config::write`] for a `build.rs`: reruns when `build.rs` or any local
-    /// file changes, and panics with the error.
+    /// [`Config::write`] for a `build.rs`: reruns when `build.rs`, a local
+    /// file or one of plinth's changes, sets [`TEST_STYLE_VAR`] for the
+    /// package's crates, and panics with the error.
     pub fn compile(&self) -> Output {
+        let fail = |error: &dyn fmt::Display| -> ! { panic!("plinth-build: {error}") };
         println!("cargo:rerun-if-changed=build.rs");
-        if let Some(dir) = &self.local {
-            for path in local_files(dir).unwrap_or_else(|error| panic!("plinth-build: {error}")) {
+        let style = self.style_dir().unwrap_or_else(|error| fail(&error));
+        let dirs = [Some(&style), self.local.as_ref()];
+        for dir in dirs.into_iter().flatten() {
+            for path in local_files(dir).unwrap_or_else(|error| fail(&error)) {
                 println!("cargo:rerun-if-changed={}", path.display());
             }
         }
-        self.write()
-            .unwrap_or_else(|error| panic!("plinth-build: {error}"))
+        println!("cargo:rustc-env={TEST_STYLE_VAR}={}", style.display());
+        self.write().unwrap_or_else(|error| fail(&error))
     }
 }
 
@@ -641,23 +652,8 @@ mod tests {
     use super::*;
 
     #[test]
-    fn embeds_every_style_source() {
-        let style = Path::new(env!("CARGO_MANIFEST_DIR")).join("../style");
-        let mut files: Vec<_> = std::fs::read_dir(&style)
-            .unwrap()
-            .map(|entry| entry.unwrap().file_name().into_string().unwrap())
-            .collect();
-        files.sort();
-        let embedded: Vec<_> = SOURCES.iter().map(|(name, _)| *name).collect();
-        assert_eq!(files, embedded);
-        for (name, source) in SOURCES {
-            assert_eq!(std::fs::read_to_string(style.join(name)).unwrap(), *source);
-        }
-    }
-
-    #[test]
-    fn compiles_the_embedded_sources() {
-        let output = Config::new().build().unwrap();
+    fn compiles_plinth_s_sources() {
+        let output = plinth().build().unwrap();
         assert!(output.css.contains(".plinth-stack {"));
         for class in ["plinth-page-head-title", "plinth-crumb", "plinth-trailing"] {
             assert!(
@@ -673,8 +669,8 @@ mod tests {
 
     #[test]
     fn configures_token_values_not_classes() {
-        let plain = Config::new().build().unwrap();
-        let config = Config::new()
+        let plain = plinth().build().unwrap();
+        let config = plinth()
             .with("$text-md", "1.0625rem")
             .with("radius-lg", "12px");
         for output in [
@@ -732,9 +728,8 @@ mod tests {
     }
 
     fn compile_probe(probe: &str) -> Result<String, Box<grass::Error>> {
-        let options = grass::Options::default()
-            .fs(&Sources { index: None })
-            .load_path("");
+        let sources = test_sources();
+        let options = grass::Options::default().fs(&sources).load_path("");
         grass::from_string(format!("@use \"plinth\" as p;\n{probe}"), &options)
     }
 
@@ -848,7 +843,7 @@ mod tests {
 
     #[test]
     fn the_colour_contract_defaults_and_configures() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let root = declarations(&plain.css, ":root");
         for token in [
             "--danger: color-mix(in srgb, #d92d20 70%, var(--text))",
@@ -884,13 +879,13 @@ mod tests {
                 "{token}"
             );
         }
-        let tuned = Config::new().with("danger", "#c00").build().unwrap();
+        let tuned = plinth().with("danger", "#c00").build().unwrap();
         assert!(declarations(&tuned.css, ":root").contains(&"--danger: #c00".to_owned()));
     }
 
     #[test]
     fn a_button_takes_its_padding_and_primary_weight_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         assert!(
             declarations(&plain.css, ".plinth-button")
                 .contains(&"padding-inline: var(--button-pad-x, var(--space-3))".to_owned())
@@ -900,7 +895,7 @@ mod tests {
                 .iter()
                 .any(|line| line.starts_with("font-weight"))
         );
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("button-padding", "var(--space-4)")
             .with("button-padding-small", "var(--space-3)")
             .with("button-primary-weight", "600")
@@ -922,7 +917,7 @@ mod tests {
 
     #[test]
     fn a_dialog_takes_its_padding_body_gap_and_shadow_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         assert!(
             declarations(&plain.css, ".plinth-dialog")
                 .contains(&"--dialog-pad: var(--space-5)".to_owned())
@@ -937,7 +932,7 @@ mod tests {
                 .find(|line| line.starts_with("gap"))
         };
         assert_eq!(body_gap(&plain.css), None);
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("dialog-padding", "var(--space-6)")
             .with("dialog-padding-phone", "var(--space-4)")
             .with("dialog-body-gap", "var(--space-4)")
@@ -961,7 +956,7 @@ mod tests {
 
     #[test]
     fn a_dialog_head_and_body_take_their_padding_rule_and_title_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let head = declarations(&plain.css, ".plinth-dialog-head");
         assert!(
             head.contains(&"padding: var(--space-3) var(--space-3) 0 var(--dialog-pad)".to_owned())
@@ -976,7 +971,7 @@ mod tests {
                 .css
                 .contains(".plinth-dialog-head > .plinth-head-heading")
         );
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("dialog-head-padding", "var(--space-3) var(--space-4)")
             .with("dialog-head-rule", "1px solid var(--border)")
             .with("dialog-body-padding", "0")
@@ -1000,11 +995,11 @@ mod tests {
 
     #[test]
     fn a_menu_and_its_rows_take_their_look_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let menu = declarations(&plain.css, ".plinth-menu");
         assert!(menu.contains(&"background: var(--surface-raised)".to_owned()));
         assert!(!menu.iter().any(|l| l.starts_with("font-size")));
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("menu-edge", "var(--edge)")
             .with("menu-ground", "var(--ground)")
             .with("menu-shadow", "var(--lift)")
@@ -1041,7 +1036,7 @@ mod tests {
 
     #[test]
     fn a_pager_takes_its_look_from_settings() {
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("pager-gap", "2px")
             .with("pager-button-radius", "999px")
             .with("pager-button-ink", "var(--muted)")
@@ -1076,13 +1071,13 @@ mod tests {
 
     #[test]
     fn a_skeleton_takes_its_look_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         assert!(
             !declarations(&plain.css, ".plinth-skeleton")
                 .iter()
                 .any(|l| l.starts_with("box-shadow"))
         );
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("skeleton-fill", "var(--glass)")
             .with("skeleton-edge", "var(--soft)")
             .with("skeleton-radius", "0")
@@ -1108,7 +1103,7 @@ mod tests {
 
     #[test]
     fn a_pick_row_takes_its_look_from_settings() {
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("pick-row-height", "36px")
             .with("pick-row-padding", "0 6px")
             .with("pick-row-gap", "8px")
@@ -1138,11 +1133,11 @@ mod tests {
 
     #[test]
     fn a_selection_bar_takes_its_look_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let bar = declarations(&plain.css, ".plinth-selection-bar");
         assert!(bar.contains(&"border-top: var(--space-px) solid var(--border)".to_owned()));
         assert!(!bar.iter().any(|l| l.starts_with("background")));
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("selection-bar-ground", "var(--tint)")
             .with("selection-bar-rule", "none")
             .with("selection-bar-padding", "3px")
@@ -1186,15 +1181,12 @@ mod tests {
             let at = css.find("\n.plinth-menu-item:focus-visible {").unwrap();
             declarations(&css[at..], ".plinth-menu-item:focus-visible")
         };
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let focus = focus_of(&plain.css);
         assert!(focus.contains(&"outline: none".to_owned()), "{focus:?}");
         let row = declarations(&plain.css, ".plinth-menu-item");
         assert!(!row.contains(&"border-width: 0".to_owned()));
-        let tuned = Config::new()
-            .with("menu-item-edge", "outline")
-            .build()
-            .unwrap();
+        let tuned = plinth().with("menu-item-edge", "outline").build().unwrap();
         let row = declarations(&tuned.css, ".plinth-menu-item");
         assert!(row.contains(&"border-width: 0".to_owned()), "{row:?}");
         let focus = focus_of(&tuned.css);
@@ -1206,10 +1198,10 @@ mod tests {
 
     #[test]
     fn a_buttons_line_height_is_a_setting() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");
         assert!(base.contains(&"line-height: 1".to_owned()));
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("button-line-height", "inherit")
             .build()
             .unwrap();
@@ -1222,12 +1214,12 @@ mod tests {
 
     #[test]
     fn a_switch_takes_its_fill_thumb_and_inset_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let switch = declarations(&plain.css, ".plinth-switch");
         assert!(switch.contains(&"--switch-fill: var(--surface)".to_owned()));
         let track = declarations(&plain.css, ".plinth-switch-track");
         assert!(track.contains(&"padding: var(--space-px)".to_owned()));
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("switch-fill", "var(--sunken)")
             .with("switch-on-thumb", "#fff")
             .with("switch-thumb-inset", "3px")
@@ -1253,10 +1245,10 @@ mod tests {
 
     #[test]
     fn a_selection_bar_count_wraps_only_when_set() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let count = declarations(&plain.css, ".plinth-selection-bar-count");
         assert!(count.contains(&"white-space: nowrap".to_owned()));
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("selection-bar-count-wrap", "true")
             .build()
             .unwrap();
@@ -1268,14 +1260,11 @@ mod tests {
 
     #[test]
     fn a_menu_keeps_its_scrollbar_room_unless_set() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let menu = declarations(&plain.css, ".plinth-menu");
         assert!(menu.contains(&"scrollbar-gutter: stable".to_owned()));
         assert!(!menu.contains(&"scrollbar-gutter: auto".to_owned()));
-        let tuned = Config::new()
-            .with("menu-scroll-gutter", "auto")
-            .build()
-            .unwrap();
+        let tuned = plinth().with("menu-scroll-gutter", "auto").build().unwrap();
         let menu = declarations(&tuned.css, ".plinth-menu");
         assert!(
             menu.contains(&"scrollbar-gutter: auto".to_owned()),
@@ -1285,7 +1274,7 @@ mod tests {
 
     #[test]
     fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");
         assert!(base.contains(&"border-radius: var(--radius-inner, var(--radius-sm))".to_owned()));
         assert!(
@@ -1300,7 +1289,7 @@ mod tests {
                 .any(|line| line.starts_with("--button-fill"))
         );
 
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("button-radius", "3px")
             .with("button-gap", "4px")
             .with("button-transition", "background-color 80ms ease")
@@ -1333,7 +1322,7 @@ mod tests {
         );
 
         assert!(
-            Config::new()
+            plinth()
                 .with("button-colours", "(secondary: (glow: red))")
                 .build()
                 .is_err()
@@ -1342,7 +1331,7 @@ mod tests {
 
     #[test]
     fn a_button_colour_setting_replaces_plinth_s_in_place() {
-        let tuned = Config::new()
+        let tuned = plinth()
             .with(
                 "button-colours",
                 "(danger: (fill: var(--danger-bg), edge: transparent))",
@@ -1363,8 +1352,8 @@ mod tests {
 
     #[test]
     fn omitted_parts_are_left_out() {
-        let plain = Config::new().build().unwrap();
-        let lean = Config::new()
+        let plain = plinth().build().unwrap();
+        let lean = plinth()
             .with(
                 "omit",
                 r#"("layout.toolbar", "menu.context", "tokens.seam")"#,
@@ -1376,12 +1365,12 @@ mod tests {
             assert!(!lean.css.contains(part), "{part}");
         }
         assert!(lean.css.len() < plain.css.len());
-        assert!(Config::new().with("omit", r#"("seam")"#).build().is_err());
+        assert!(plinth().with("omit", r#"("seam")"#).build().is_err());
     }
 
     #[test]
     fn a_popover_takes_its_padding_and_shadow_from_settings() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         assert!(
             declarations(&plain.css, ".plinth-popover-body")
                 .contains(&"padding: var(--space-3)".to_owned())
@@ -1390,7 +1379,7 @@ mod tests {
             declarations(&plain.css, ".plinth-popover")
                 .contains(&"box-shadow: var(--shadow-1)".to_owned())
         );
-        let tuned = Config::new()
+        let tuned = plinth()
             .with("popover-padding", "var(--space-3) var(--space-4)")
             .with("popover-shadow", "var(--shadow-2)")
             .build()
@@ -1407,13 +1396,13 @@ mod tests {
 
     #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
-        let plain = Config::new().build().unwrap();
+        let plain = plinth().build().unwrap();
         assert!(
             declarations(&plain.css, ".plinth-dialog-layer")
                 .contains(&"z-index: var(--layer-overlay)".to_owned())
         );
         assert!(!plain.css.contains("--layer-dialog"));
-        assert!(Config::new().with("layer-dialog", "250").build().is_ok());
+        assert!(plinth().with("layer-dialog", "250").build().is_ok());
     }
 
     fn fixture(name: &str) -> PathBuf {
@@ -1422,14 +1411,14 @@ mod tests {
 
     #[test]
     fn puts_plinth_first_and_verbatim_then_the_local_styles() {
-        let plinth = Config::new().build().unwrap();
-        let output = Config::new()
+        let base = plinth().build().unwrap();
+        let output = plinth()
             .local(fixture("fixture/style"))
             .prefix("fixture-")
             .build()
             .unwrap();
-        let local = output.css.strip_prefix(&plinth.css).unwrap();
-        assert_eq!(output.plinth_classes, plinth.plinth_classes);
+        let local = output.css.strip_prefix(&base.css).unwrap();
+        assert_eq!(output.plinth_classes, base.plinth_classes);
         assert_eq!(output.css.matches(".plinth-stack {").count(), 1);
         assert!(local.contains(".fixture-panel {"));
         assert!(local.contains("var(--space-2)"));
@@ -1444,7 +1433,7 @@ mod tests {
     fn names_local_constants_without_the_prefix() {
         let dir = std::env::temp_dir().join(format!("plinth-build-{}", std::process::id()));
         std::fs::create_dir_all(&dir).unwrap();
-        Config::new()
+        plinth()
             .local(fixture("fixture/style"))
             .prefix("fixture-")
             .out_dir(&dir)
@@ -1463,7 +1452,7 @@ mod tests {
 
     #[test]
     fn refuses_an_unprefixed_local_class() {
-        let error = Config::new()
+        let error = plinth()
             .local(fixture("tests/unprefixed"))
             .prefix("fixture-")
             .build()
@@ -1472,7 +1461,7 @@ mod tests {
             matches!(&error, Error::Unprefixed { class, .. } if class == "panel"),
             "{error}"
         );
-        let error = Config::new().local(fixture("fixture/style")).build();
+        let error = plinth().local(fixture("fixture/style")).build();
         assert!(matches!(error, Err(Error::NoPrefix)));
     }
 

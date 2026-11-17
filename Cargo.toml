@@ -2,6 +2,9 @@
 name = "plinth"
 version = "0.1.0"
 edition = "2024"
+description = "Opinionated layout primitives and components for Yew apps that keep their size as their content changes."
+readme = "README.md"
+include = ["/build.rs", "/locales", "/src", "/style", "/README.md"]
 publish = false
 links = "plinth"
 
@@ -51,14 +54,18 @@ web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUn
 yew = "0.23.0"
 
 [build-dependencies]
-plinth-build = { path = "plinth-build" }
+plinth-build = { version = "0.1.0", path = "plinth-build" }
 
 [dev-dependencies]
 futures = "0.3"
-plinth-build = { path = "plinth-build" }
+plinth-build = { version = "0.1.0", path = "plinth-build" }
 yew = { version = "0.23.0", features = ["ssr"] }
 
 [workspace]
 resolver = "3"
 members = [".", "plinth-build", "plinth-build/fixture", "showcase"]
 exclude = [".claude"]
+
+[patch.crates-io]
+plinth = { path = "." }
+plinth-build = { path = "plinth-build" }

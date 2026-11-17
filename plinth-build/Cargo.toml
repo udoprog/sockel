@@ -2,6 +2,8 @@
 name = "plinth-build"
 version = "0.1.0"
 edition = "2024"
+description = "Builds plinth's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
+include = ["/src"]
 publish = false
 
 [dependencies]

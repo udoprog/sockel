@@ -145,6 +145,7 @@ fn rust_files(dir: &Path, files: &mut Vec<std::path::PathBuf>) {
 
 fn known_classes() -> Vec<String> {
     plinth_build::Config::new()
+        .style(env!("PLINTH_STYLE"))
         .build()
         .expect("plinth's Sass")
         .plinth_classes

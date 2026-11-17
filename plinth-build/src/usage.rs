@@ -264,7 +264,7 @@ mod tests {
     fn fixture() -> (Config, Usage) {
         let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/usage");
         (
-            Config::new().local(dir.join("style")).prefix("usage-"),
+            crate::plinth().local(dir.join("style")).prefix("usage-"),
             Usage::new().source(dir.join("src")),
         )
     }

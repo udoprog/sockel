@@ -8,6 +8,7 @@ fn every_styled_class_is_written() {
         .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
         .assert_clean(
             &Config::new()
+                .style(env!("PLINTH_STYLE"))
                 .local(concat!(env!("CARGO_MANIFEST_DIR"), "/style"))
                 .prefix("showcase-"),
         );
