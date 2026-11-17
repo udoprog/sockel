@@ -72,9 +72,9 @@ mod button;
 mod checkbox;
 mod chip;
 mod choice;
-mod field;
 mod empty_state;
 mod error_box;
+mod field;
 mod head;
 mod icon_button;
 mod icons;
@@ -89,12 +89,12 @@ pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
+pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
+pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use field::{
     Field, FieldCheck, FieldCheckProps, FieldProps, Fieldset, FieldsetProps, FormRow, FormRows,
     FormRowsProps, field, field_describedby, field_error, form_row, form_rows,
 };
-pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
-pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
