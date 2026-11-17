@@ -3,7 +3,7 @@
 use std::collections::{BTreeMap, BTreeSet};
 use std::path::Path;
 
-use crate::{Config, FEATURES, SOURCES, Sources, class_names};
+use crate::{Config, FEATURE_PARTS, FEATURES, SOURCES, Sources, class_names};
 
 /// Partials in every build, whatever the features.
 const ALWAYS: &[&str] = &[
@@ -135,4 +135,71 @@ fn each_feature_s_css_is_its_own() {
             .collect();
         assert!(foreign.is_empty(), "{feature}: {foreign:?}");
     }
+}
+
+/// The custom properties `css` defines (`--x: ...`) and reads (`var(--x`).
+fn custom_properties(css: &str) -> (BTreeSet<String>, BTreeSet<String>) {
+    let (mut defined, mut read) = (BTreeSet::new(), BTreeSet::new());
+    for (at, _) in css.match_indices("--") {
+        let rest = &css[at + 2..];
+        let len = rest
+            .find(|c: char| !(c.is_ascii_alphanumeric() || c == '-' || c == '_'))
+            .unwrap_or(rest.len());
+        let name = rest[..len].to_owned();
+        if rest[len..].starts_with(':') {
+            defined.insert(name);
+        } else if css[..at].ends_with("var(") {
+            read.insert(name);
+        }
+    }
+    (defined, read)
+}
+
+#[test]
+fn feature_parts_name_features() {
+    for (part, features) in FEATURE_PARTS {
+        for feature in *features {
+            assert!(
+                FEATURES.iter().any(|(name, _)| name == feature),
+                "{part}: {feature}"
+            );
+        }
+    }
+}
+
+#[test]
+fn each_feature_defines_the_tokens_it_reads() {
+    let cargo = cargo_features();
+    let options = grass::Options::default()
+        .fs(&Sources { index: None })
+        .load_path("");
+    let tokens = grass::from_string("@use \"plinth/tokens\";\n", &options).unwrap();
+    let (full, _) = custom_properties(&tokens);
+    for (feature, _) in FEATURES {
+        let css = Config::new()
+            .features(&closure(&cargo, feature))
+            .build()
+            .unwrap()
+            .css;
+        let (defined, read) = custom_properties(&css);
+        let missing: Vec<_> = read
+            .iter()
+            .filter(|name| full.contains(*name) && !defined.contains(*name))
+            .collect();
+        assert!(missing.is_empty(), "{feature}: {missing:?}");
+    }
+}
+
+#[test]
+fn a_subset_leaves_out_its_parts_and_an_apps() {
+    let css = |config: Config| config.build().unwrap().css;
+    let layout = css(Config::new().features(["layout"]));
+    assert!(!layout.contains("--table-max-height:"));
+    assert!(css(Config::new()).contains("--table-max-height:"));
+    let omitted = css(Config::new()
+        .features(["layout"])
+        .with("omit", r#""layout.toolbar""#));
+    assert!(!omitted.contains("--table-max-height:"));
+    assert!(!omitted.contains("--band-chrome-gap:"));
+    assert!(layout.contains("--band-chrome-gap:"));
 }

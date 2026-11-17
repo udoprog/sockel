@@ -12,6 +12,14 @@
 //! let _ = plinth_build_fixture::class::PANLE;
 //! ```
 //!
+//! It depends on plinth directly, so plinth-build reads plinth's features
+//! (`DEP_PLINTH_FEATURES`) and its stylesheet starts with plinth's own,
+//! the same subset:
+//!
+//! ```
+//! assert!(plinth_build_fixture::STYLESHEET.starts_with(plinth::STYLESHEET));
+//! ```
+//!
 //! plinth's classes are `plinth::class`'s, not the project's:
 //!
 //! ```compile_fail
@@ -23,3 +31,9 @@ pub mod class {
 }
 
 pub const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
+
+/// A panel's classes: plinth's stack with the fixture's panel, as its
+/// `.plinth-stack.fixture-panel` rule targets them.
+pub fn panel_classes() -> String {
+    format!("{} {}", plinth::class::STACK, class::PANEL)
+}

@@ -108,6 +108,31 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("tooltip", &["tooltip"]),
 ];
 
+/// The `$omit` parts (style/_tokens.scss) that are a feature's, each with
+/// the features that read it: a subset of features leaves a part out when
+/// none of them is on.
+pub const FEATURE_PARTS: &[(&str, &[&str])] = &[
+    ("skeleton.loadable", &["loadable"]),
+    ("tokens.actions", &["rows"]),
+    ("tokens.card-grid", &["card-grid"]),
+    ("tokens.color-select", &["color-select"]),
+    ("tokens.drop", &["drop-zone"]),
+    ("tokens.fields", &["field"]),
+    ("tokens.filter-picker", &["picker"]),
+    ("tokens.media", &["media"]),
+    ("tokens.panel", &["panel"]),
+    ("tokens.picker", &["picker", "search-select"]),
+    ("tokens.seam", &["seam"]),
+    ("tokens.table", &["table"]),
+    ("tokens.toast", &["toast"]),
+    ("tokens.toggles", &["toggles"]),
+    ("tokens.tooltip", &["tooltip"]),
+];
+
+/// The features plinth was built with, comma-separated, as a `build.rs` of a
+/// package depending on plinth directly sees them (plinth's `links` metadata).
+pub const FEATURES_VAR: &str = "DEP_PLINTH_FEATURES";
+
 /// Styles each hook class of `_hooks.scss`, so its class is found like any other.
 const HOOKS_PROBE: &str =
     "@use \"plinth/hooks\";\n@each $class in hooks.$classes { .#{$class} { --hook: 0; } }\n";
@@ -297,7 +322,11 @@ impl Config {
     }
 
     /// Builds plinth's CSS from only these [`FEATURES`] (each with the
-    /// features it depends on already in), instead of all of them.
+    /// features it depends on already in), instead of all of them, and
+    /// leaves out the [`FEATURE_PARTS`] none of them reads. Without it, the
+    /// features are [`FEATURES_VAR`]'s when it is set (in the `build.rs` of
+    /// a package depending on plinth directly), so the app's stylesheet has
+    /// plinth's subset, and all of them otherwise.
     pub fn features<I>(mut self, features: I) -> Self
     where
         I: IntoIterator,
@@ -307,9 +336,18 @@ impl Config {
         self
     }
 
+    /// The features to build, `None` for all of them.
+    fn enabled(&self) -> Option<Vec<String>> {
+        self.features.clone().or_else(|| {
+            let list = std::env::var(FEATURES_VAR).ok()?;
+            let names = list.split(',').filter(|name| !name.is_empty());
+            Some(names.map(str::to_owned).collect())
+        })
+    }
+
     /// `_index.scss` without the `@use` of each partial whose feature is off.
-    fn index(&self) -> Result<Option<String>, Error> {
-        let Some(enabled) = &self.features else {
+    fn index(enabled: Option<&[String]>) -> Result<Option<String>, Error> {
+        let Some(enabled) = enabled else {
             return Ok(None);
         };
         if let Some(unknown) = enabled
@@ -336,24 +374,46 @@ impl Config {
         Ok(Some(lines.map(|line| format!("{line}\n")).collect()))
     }
 
-    fn plinth_use(&self) -> String {
-        if self.with.is_empty() {
-            return "@use \"plinth\";\n".to_owned();
-        }
-        let pairs: Vec<_> = self
+    fn plinth_use(&self, enabled: Option<&[String]>) -> String {
+        let on =
+            |feature: &&str| enabled.is_none_or(|enabled| enabled.iter().any(|e| e == *feature));
+        let folded: Vec<_> = FEATURE_PARTS
+            .iter()
+            .filter(|(_, features)| !features.iter().any(on))
+            .map(|(part, _)| format!("\"{part}\""))
+            .collect();
+        let mut pairs: Vec<_> = self
             .with
             .iter()
+            .filter(|(name, _)| folded.is_empty() || name != "omit")
             .map(|(name, value)| format!("${name}: {value}"))
             .collect();
-        format!("@use \"plinth\" with ({});\n", pairs.join(", "))
+        let mut head = String::new();
+        if !folded.is_empty() {
+            let folded = format!("({},)", folded.join(", "));
+            let omit = match self.with.iter().rfind(|(name, _)| name == "omit") {
+                Some((_, value)) => {
+                    head.push_str("@use \"sass:list\";\n");
+                    format!("list.join({value}, {folded}, comma)")
+                }
+                None => folded,
+            };
+            pairs.push(format!("$omit: {omit}"));
+        }
+        if pairs.is_empty() {
+            return format!("{head}@use \"plinth\";\n");
+        }
+        format!("{head}@use \"plinth\" with ({});\n", pairs.join(", "))
     }
 
     pub fn build(&self) -> Result<Output, Error> {
+        let enabled = self.enabled();
         let sources = Sources {
-            index: self.index()?,
+            index: Self::index(enabled.as_deref())?,
         };
         let options = grass::Options::default().fs(&sources).load_path("");
-        let plinth_css = grass::from_string(self.plinth_use(), &options)?;
+        let plinth_use = self.plinth_use(enabled.as_deref());
+        let plinth_css = grass::from_string(&plinth_use, &options)?;
         let hooks = grass::from_string(HOOKS_PROBE, &options)?;
         let mut plinth_classes = class_names(&plinth_css);
         plinth_classes.extend(class_names(&hooks));
@@ -371,7 +431,7 @@ impl Config {
         let index = local_index(dir)?;
         // One compilation, plinth first, so a local `@use "plinth"` reuses
         // the module loaded here and emits nothing again.
-        let entry = format!("{}@use \"{}\";\n", self.plinth_use(), sass_string(&index));
+        let entry = format!("{plinth_use}@use \"{}\";\n", sass_string(&index));
         let css = grass::from_string(entry, &options)?;
         let local_css = css.strip_prefix(&plinth_css).ok_or(Error::NotVerbatim)?;
         let local_classes = class_names(local_css)

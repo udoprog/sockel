@@ -232,6 +232,77 @@ component whose rules are missing renders unstyled, so add a partial when
 the app starts rendering one of its components, and the partials of the
 components it renders inside (a dialog's buttons and icons).
 
+## Choosing features
+
+plinth has a Cargo feature per component, or per family of components that
+only work together. `full`, the default, is all of them. An app that
+renders a few turns the default off and names those; each feature brings in
+the ones it needs:
+
+```toml
+[dependencies]
+plinth = { path = "../plinth", default-features = false, features = ["field", "input", "layout"] }
+```
+
+A feature gates a component's Rust and its CSS together. `STYLESHEET` and
+`plinth::class` hold only the enabled features' rules and classes, so a
+component or class whose feature is off does not compile, rather than
+rendering unstyled. The tokens, hooks, utilities and the menus' shared
+surface are always in, and so is the `:root` tokens' part of a feature
+(`tokens.table`, ...) only while a feature that reads it is on.
+
+An app compiling its own Sass through `plinth-build` gets the same subset
+without asking: plinth passes its features on to the `build.rs` of every
+package depending on it directly (as `DEP_PLINTH_FEATURES`), and
+`Config` builds those. A package that reaches plinth only through another
+crate is not told, and gets every feature's CSS, the whole stylesheet;
+`Config::features([...])` names its features instead. Cargo builds one set
+of features for everything built together, so a workspace whose other
+member wants more gets the union. An app with its own Sass compiler loads
+the partials it wants itself (see above).
+
+| Feature | Brings in | Gives | CSS alone |
+| --- | --- | --- | --- |
+| `action-group` | | `ActionGroup` | 3.7 KB |
+| `badge` | `icons` | `Pill`, `Badge`, `Dot`, `Count`, `StatusLabel` | 9.6 KB |
+| `button` | `icons`, `skeleton` | `Button`, `IconButton` | 11.9 KB |
+| `card-grid` | | `CardGrid` | 4.1 KB |
+| `color-select` | `select` | `ColorSelect` | 48.1 KB |
+| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | `Confirm`, `ConfirmPopover`, `ConfirmButton`, `ConfirmInline`, `ConfirmHost` | 37.0 KB |
+| `disclosure` | `head`, `icons` | `Disclosure` | 15.2 KB |
+| `drop-zone` | `button` | `DropZone` | 14.3 KB |
+| `field` | | `Field`, `FormRow`, `FormRows`, `Fieldset`, `FieldCheck`, `FieldInputs` | 6.3 KB |
+| `head` | `layout` | `Head`, `PageHead`, `SectionHead` | 12.8 KB |
+| `icons` | | `Icon`, `IconSet`, `Glyph` | 4.0 KB |
+| `input` | `icons` | `TextInput`, `Textarea`, `SearchField`, `InputGroup`, `SecretInput` | 10.2 KB |
+| `layout` | | `Stack`, `Cluster`, `Card`, `Inset`, `Toolbar` | 9.0 KB |
+| `library-toolbar` | `input`, `layout` | `LibraryToolbar` | 15.8 KB |
+| `loadable` | `notice`, `skeleton` | `Loadable` | 22.2 KB |
+| `media` | `icons` | `Image`, `Avatar` | 5.6 KB |
+| `menu` | `button`, `icons`, `overlay` | `Menu`, `RowActions`, `SplitButton`, `ContextMenu` | 31.1 KB |
+| `notice` | `badge`, `button` | `Notice`, `ErrorBox`, `EmptyState` | 21.9 KB |
+| `overlay` | `action-group`, `button`, `head`, `icons` | `OverlayHost`, `Popover`, `Dialog` | 25.7 KB |
+| `pager` | `icons` | `Pager`, `PagerSummary` | 6.5 KB |
+| `panel` | | `Panel` | 4.8 KB |
+| `picker` | `overlay`, `pager`, `select` | `Picker`, `PickerMenu`, `PickerDialog`, `ChoiceList`, `FilterPicker` | 50.9 KB |
+| `reorder` | `icons`, `rows`, `tooltip` | `Reorder`, `DragHandle` | 33.3 KB |
+| `rows` | `button` | `RowList`, `PickRow`, `ActionRow`, `SelectionBar` | 16.9 KB |
+| `search-select` | `select` | `SearchSelect` | 45.1 KB |
+| `seam` | | `Seam` | 5.2 KB |
+| `select` | `input`, `menu`, `tooltip` | `Select`, `Listbox` | 43.9 KB |
+| `skeleton` | `icons`, `media` | `Skeleton`, `Spinner` | 7.4 KB |
+| `stepper` | `input` | `Stepper` | 11.2 KB |
+| `table` | `icons` | `Table`, `SortHeader` | 7.1 KB |
+| `tabs` | | `Tabs`, `SubTabs`, `NavList` | 6.9 KB |
+| `toast` | `badge`, `button`, `overlay` | `ToastHost`, `Toast`, `SaveBar` | 34.1 KB |
+| `toggles` | `icons` | `Checkbox`, `Switch`, `Choice`, `ChipList`, `ChipToggle` | 10.7 KB |
+| `tooltip` | `overlay` | `Tooltip`, `HoverCard`, `ReasonButton` | 26.8 KB |
+
+"CSS alone" is `STYLESHEET` with only that feature and what it brings in;
+with none it is 3.4 KB, and with `full` 103 KB. `scripts/check-features.sh`
+checks that each feature builds alone and that its CSS holds no other
+feature's rules.
+
 ## Theming
 
 The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
@@ -419,7 +490,11 @@ page can still override them at runtime.
 `$omit` names the optional parts an app never renders, and plinth leaves them
 out of its CSS: a modifier no markup sets, a variant no button takes, the
 tokens of a partial the app does not load. It is empty by default, and every
-part is emitted; a name plinth does not have is an error.
+part is emitted; a name plinth does not have is an error. It is for the
+finer parts of components an app does render; a component it does not
+render is left out by its feature (see [Choosing features](#choosing-features)),
+which also leaves out the `tokens.*` part only it reads, and Loadable's
+`skeleton.loadable`.
 
 ```scss
 @use "../plinth/style/tokens" with ($omit: ("layout.toolbar", "menu.split-button", "tokens.table"));
@@ -2131,6 +2206,7 @@ cargo fmt --check
 cargo clippy --all-targets -- -D warnings
 cargo clippy --target wasm32-unknown-unknown --workspace -- -D warnings
 cargo test --workspace
+bash scripts/check-features.sh
 (cd showcase && trunk build)
 ```
 
