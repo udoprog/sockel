@@ -1,6 +1,7 @@
 use yew::prelude::*;
 
 use crate::class;
+use crate::code::{CodeCard, El, snippet};
 
 use plinth::{Card, Gap, Inset, Stack};
 
@@ -29,6 +30,7 @@ pub fn StylesPage() -> Html {
                     </details>
                 </Stack>
             </Card>
+            <CodeCard code={snippet(&[], El::new("Styles"))} />
         </Stack>
     }
 }

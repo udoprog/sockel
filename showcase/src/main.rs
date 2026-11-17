@@ -1,5 +1,6 @@
 //! An interactive gallery of every plinth component.
 
+mod code;
 mod controls;
 mod pages;
 mod probe;

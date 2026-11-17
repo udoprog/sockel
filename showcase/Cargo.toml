@@ -8,11 +8,13 @@ js-sys = "0.3.77"
 plinth = { path = ".." }
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"
-web-sys = { version = "0.3.77", features = ["CssStyleDeclaration", "Document", "DomRect", "DomTokenList", "Element", "Event", "EventInit", "HtmlCollection", "HtmlElement", "HtmlInputElement", "HtmlOptionElement", "HtmlSelectElement", "Location", "NodeList", "Window"] }
+web-sys = { version = "0.3.77", features = ["Clipboard", "CssStyleDeclaration", "Document", "DomRect", "DomTokenList", "Element", "Event", "EventInit", "HtmlCollection", "HtmlElement", "HtmlInputElement", "HtmlOptionElement", "HtmlSelectElement", "Location", "Navigator", "NodeList", "Window"] }
 yew = { version = "0.23.0", features = ["csr"] }
 
 [build-dependencies]
 plinth-build = { path = "../plinth-build" }
 
 [dev-dependencies]
+futures = { version = "0.3", default-features = false, features = ["executor"] }
 plinth-build = { path = "../plinth-build" }
+yew = { version = "0.23.0", features = ["csr", "ssr"] }

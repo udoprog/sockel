@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{ActionGroup, Cluster, IconButton, action_group, icon_button};
 
+use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
 
 /// A small icon, as an app would supply one.
@@ -61,8 +62,30 @@ pub fn ActionGroupPage() -> Html {
         <ActionGroup end={*end} quiet={*quiet} nowrap={*nowrap}>{ buttons }</ActionGroup>
     };
 
+    let group_code = El::new("ActionGroup")
+        .flag("end", *end)
+        .flag("quiet", *quiet)
+        .flag("nowrap", *nowrap)
+        .line_if(
+            *count > 0,
+            each("actions", "action_button", *count, "button"),
+        );
+    let code = snippet(
+        &[],
+        if *in_row {
+            El::new("Cluster")
+                .line(format!(
+                    "<span>{}</span>",
+                    text_node("Saved two minutes ago")
+                ))
+                .child(group_code)
+        } else {
+            group_code
+        },
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             { shown("action_group(end, quiet, wrap)", &action_group(*end, *quiet, !*nowrap)) }
             if *in_row {
                 <Cluster class={class::OUTLINED}>
@@ -132,8 +155,41 @@ pub fn IconButtonPage() -> Html {
     let label = (!alone)
         .then(|| html! { <span class={class::LABEL_TEXT}>{ text.of("Add an item") }</span> });
 
+    let name = VARIANTS
+        .iter()
+        .find(|(_, v)| v == &*variant)
+        .map_or("", |(name, _)| *name);
+    let button = El::new("IconButton");
+    let button = if alone {
+        let small = if *small { ", \"small\"" } else { "" };
+        button.expr(
+            "class",
+            format!("classes!(\"button\", plinth::class::ICON{small})"),
+        )
+    } else {
+        let mut parts = vec!["button"];
+        parts.extend((!variant.is_empty()).then_some(name));
+        parts.extend(small.then_some("small"));
+        button.text("class", &parts.join(" "))
+    };
+    let label_code =
+        (!alone).then(|| format!("<span>{}</span>", text_node(&text.of("Add an item"))));
+    let code = snippet(
+        &[],
+        button
+            .flag("trailing", *trailing)
+            .flag("disabled", *disabled)
+            .expr_if(*dialog, "dialog", "Some(open)")
+            .text("title", "Add an item")
+            .text_if(*named, "label", "Add an item to the list")
+            .expr("onclick", "on_click")
+            .line_if(*trailing && !alone, label_code.clone().unwrap_or_default())
+            .line("{ icon() }")
+            .line_if(!*trailing && !alone, label_code.unwrap_or_default()),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             { shown("icon_button(class, trailing)", &classes) }
             <Cluster>
                 <IconButton {class} trailing={*trailing} disabled={*disabled}

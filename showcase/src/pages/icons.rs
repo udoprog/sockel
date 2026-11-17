@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{Cluster, Glyph, Icon, IconButton, IconSet, Stack, icon};
 
+use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Toggle, bind};
 
 /// A set as an app would supply one: filled shapes, drawn at 48px, to show
@@ -112,8 +113,29 @@ pub fn IconPage() -> Html {
     let body = html! { <Glyphs glyph={*glyph} size={*size} disabled={*disabled} /> };
     let set = sample.then(sample_set);
 
+    let button = El::new("IconButton")
+        .text("class", "button primary")
+        .flag("disabled", *disabled)
+        .child(El::new("Icon").expr("glyph", format!("Glyph::{}", name(*glyph))))
+        .line(format!("<span>{}</span>", text_node(&name(*glyph))));
+    let sized = if size.is_empty() {
+        button
+    } else {
+        El::new("div").text("style", *size).child(button)
+    };
+    let code = snippet(
+        &[],
+        if *sample {
+            El::new("ContextProvider<IconSet>")
+                .expr("context", "icon_set")
+                .child(sized)
+        } else {
+            sized
+        },
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             if let Some(set) = set {
                 <ContextProvider<IconSet> context={set}>{ body }</ContextProvider<IconSet>>
             } else {

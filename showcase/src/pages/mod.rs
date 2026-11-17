@@ -584,6 +584,33 @@ mod tests {
         );
     }
 
+    #[derive(yew::Properties, PartialEq)]
+    struct OneProps {
+        index: usize,
+    }
+
+    #[yew::function_component]
+    fn One(props: &OneProps) -> yew::Html {
+        (PAGES[props.index].render)()
+    }
+
+    #[test]
+    fn every_page_shows_its_code() {
+        let card = format!(
+            "class=\"{} {}\"",
+            crate::class::CODE,
+            plinth::class::SCROLL_AREA
+        );
+        let bare: Vec<_> = (0..PAGES.len())
+            .filter(|&index| {
+                let page = yew::LocalServerRenderer::<One>::with_props(OneProps { index });
+                !futures::executor::block_on(page.render()).contains(&card)
+            })
+            .map(|index| PAGES[index].id)
+            .collect();
+        assert!(bare.is_empty(), "pages without their code: {bare:?}");
+    }
+
     #[test]
     fn page_ids_are_unique() {
         let ids: BTreeSet<_> = PAGES.iter().map(|p| p.id).collect();

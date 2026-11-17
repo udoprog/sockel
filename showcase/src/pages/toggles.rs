@@ -7,6 +7,7 @@ use plinth::{
     Switch, checkbox, chip_count, choice, switch,
 };
 
+use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
@@ -42,8 +43,22 @@ pub fn CheckboxPage() -> Html {
         Callback::from(move |on: bool| mark.set(if on { Mark::On } else { Mark::Off }))
     };
 
+    let words = text.of("Subscribe to the newsletter");
+    let code = snippet(
+        &[],
+        El::new("Checkbox")
+            .flag("checked", *mark == Mark::On)
+            .expr_if(*mark != Mark::On, "checked", "false")
+            .flag("indeterminate", *mark == Mark::Mixed)
+            .flag("disabled", *disabled)
+            .flag("invalid", *invalid)
+            .expr("on_change", "on_change")
+            .text_if(words.is_empty(), "label", "Subscribe")
+            .line_if(!words.is_empty(), text_node(&words)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("checkbox(disabled) → \"{}\"", checkbox(*disabled).to_string()) }
             </code>
@@ -74,8 +89,22 @@ pub fn SwitchPage() -> Html {
         </>
     };
 
+    let words = text.of("Notifications");
+    let code = snippet(
+        &[],
+        El::new("Switch")
+            .flag("on", *on)
+            .expr_if(!*on, "on", "false")
+            .flag("busy", *busy)
+            .flag("disabled", *disabled)
+            .flag("invalid", *invalid)
+            .expr("on_change", "on_change")
+            .text_if(words.is_empty(), "label", "Notifications")
+            .line_if(!words.is_empty(), text_node(&words)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("switch(on, invalid) → \"{}\"", switch(*on, *invalid).to_string()) }
             </code>
@@ -171,8 +200,46 @@ pub fn ChoicePage() -> Html {
         })
     };
 
+    let mut lets = vec!["let options = vec![".to_owned()];
+    lets.extend(
+        options
+            .iter()
+            .zip(["Plus", "Search", "Close"])
+            .enumerate()
+            .map(|(i, (option, glyph))| {
+                let icon = format!("html! {{ <Icon glyph={{Glyph::{glyph}}} /> }}");
+                let then = match *content {
+                    Content::Icons => format!(".icon({icon})"),
+                    Content::IconOnly => format!(".icon_only({icon})"),
+                    Content::Disabled if i == 1 => ".disabled(true)".to_owned(),
+                    _ => String::new(),
+                };
+                format!(
+                    "    ChoiceOption::new({:?}, {:?}){then},",
+                    option.value.as_str(),
+                    option.label.as_str()
+                )
+            }),
+    );
+    lets.push("];".to_owned());
+    let code = snippet(
+        &lets,
+        El::new("Choice")
+            .expr(
+                "value",
+                format!("Some({:?})", options[*selected].value.as_str()),
+            )
+            .expr("options", "options")
+            .text("label", "Range")
+            .variant("fit", *fit)
+            .flag("small", *small)
+            .flag("invalid", *invalid)
+            .flag("disabled", *disabled)
+            .expr("on_change", "on_change"),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("choice(fit, small, invalid, disabled) → \"{}\"",
                     choice(*fit, *small, *invalid, *disabled).to_string()) }
@@ -228,8 +295,29 @@ pub fn ChipPage() -> Html {
         }
     };
 
+    let chip_code = El::new("ChipToggle")
+        .expr("on", "on")
+        .expr_if(
+            count.is_some(),
+            "count",
+            format!("Some({})", count.unwrap_or(0)),
+        )
+        .flag("disabled", *disabled)
+        .expr("on_toggle", "on_toggle")
+        .line(text_node(&text.of("Filter 1")));
+    let list = El::new("ChipList").text("label", "Filters");
+    let list = if *chips > 0 {
+        list.child(chip_code).line_if(
+            *chips > 1,
+            format!("// and {} more ChipToggles", *chips - 1),
+        )
+    } else {
+        list
+    };
+    let code = snippet(&[], list);
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Stack>
                 <code class={class::CLASS_CALL}>
                     { format!("chip_count(count) → \"{}\"", chip_count(count.unwrap_or(0)).to_string()) }

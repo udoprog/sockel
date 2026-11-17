@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 
+use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, button};
 
 const LEVELS: &[(&str, Option<HeadLevel>)] = &[
@@ -130,10 +131,80 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         children,
     };
 
+    let title_code = {
+        let words = text_node(&title.of("The title"));
+        if *title_span {
+            format!("html! {{ <>{words}{{ \" \" }}<span>{{ \"(span)\" }}</span></> }}")
+        } else {
+            format!("html! {{ {:?} }}", title.of("The title"))
+        }
+    };
+    let modifiers: Vec<&str> = [
+        (*compact, "plinth::class::COMPACT"),
+        (*label, "plinth::class::LABEL"),
+        (*list, "plinth::class::LIST"),
+        (*nested, "plinth::class::NESTED"),
+    ]
+    .into_iter()
+    .filter_map(|(on, name)| on.then_some(name))
+    .collect();
+    let crumb_names = ["home", "section", "parent"];
+    let code = snippet(
+        &[],
+        El::new(match props.kind {
+            Head::Page => "PageHead",
+            Head::Section => "SectionHead",
+        })
+        .expr("title", title_code)
+        .expr_if(*icon, "icon", "html! { \"\u{2605}\" }")
+        .expr_if(
+            *subtitle,
+            "subtitle",
+            "html! { \"One muted line of facts under the row\" }",
+        )
+        .expr_if(
+            *crumbs > 0,
+            "crumbs",
+            format!("vec![{}]", crumb_names[..*crumbs].join(", ")),
+        )
+        .text_if(*crumbs > 0, "crumbs_label", "Trail")
+        .expr_if(*help, "help", "html! { <HelpTip /> }")
+        .expr_if(
+            level.is_some(),
+            "level",
+            format!("HeadLevel::{:?}", level.unwrap_or(HeadLevel::H1)),
+        )
+        .expr_if(
+            *suffix,
+            "suffix",
+            "html! { <span class=\"chip\">{ \"12\" }</span> }",
+        )
+        .text_if(*testids, "help_testid", "head-help")
+        .text_if(!title_class.is_empty(), "title_class", "muted")
+        .text_if(*testids, "title_testid", "head-title")
+        .text_if(*testids, "head_testid", "head")
+        .expr_if(
+            !modifiers.is_empty(),
+            "class",
+            format!("classes!({})", modifiers.join(", ")),
+        )
+        .expr_if(*back, "back", "html! { <BackLink /> }")
+        .text_if(*back, "back_label", "Breadcrumb")
+        .expr_if(
+            *meta,
+            "meta",
+            "html! { <div class={plinth::class::PAGE_HEAD_META}>{ keywords }</div> }",
+        )
+        .line_if(
+            *actions > 0,
+            each("actions", "action_button", *actions, "button"),
+        ),
+    );
+
     let shown = match props.kind {
         Head::Page => html! { <PageHead ..head /> },
         Head::Section => html! { <SectionHead ..head /> },
     };
 
-    html! { <Demo {controls}>{ shown }</Demo> }
+    html! { <Demo {controls} {code}>{ shown }</Demo> }
 }

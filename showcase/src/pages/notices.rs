@@ -6,6 +6,7 @@ use plinth::{
     Button, ButtonSize, EmptyState, ErrorBox, Glyph, Icon, Notice, NoticeTone, empty_state, notice,
 };
 
+use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 const TONES: &[(&str, NoticeTone)] = &[
@@ -49,8 +50,23 @@ pub fn NoticePage() -> Html {
         })
     };
 
+    let words = text.of("Your changes were saved");
+    let code = snippet(
+        &[],
+        El::new("Notice")
+            .variant("tone", *tone)
+            .expr_if(*icon, "icon", "html! { <Icon glyph={Glyph::Check} /> }")
+            .expr_if(
+                *action,
+                "action",
+                "html! { <Button size={ButtonSize::Small}>{ \"Undo\" }</Button> }",
+            )
+            .expr_if(*close, "onclose", "on_close")
+            .line_if(!words.is_empty(), text_node(&words)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             { shown("notice(tone)", &notice(*tone)) }
             if *open {
                 <Notice tone={*tone}
@@ -100,8 +116,23 @@ pub fn ErrorBoxPage() -> Html {
     let cause_text = (*cause != Text::Empty)
         .then(|| AttrValue::from(cause.of("TypeError: failed to fetch /api/items")));
 
+    let words = text.of("The list is not available right now");
+    let code = snippet(
+        &[],
+        El::new("ErrorBox")
+            .text_if(*titled, "title", "Could not load the items")
+            .text_if(
+                *cause != Text::Empty,
+                "cause",
+                &cause.of("TypeError: failed to fetch /api/items"),
+            )
+            .expr_if(*retry, "onretry", "on_retry")
+            .flag("retrying", *retrying)
+            .line_if(!words.is_empty(), text_node(&words)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <ErrorBox title={titled.then_some(AttrValue::Static("Could not load the items"))}
                 cause={cause_text} onretry={retry.then_some(onretry)} retrying={*retrying}>
                 { text.of("The list is not available right now") }
@@ -129,8 +160,25 @@ pub fn EmptyStatePage() -> Html {
         </>
     };
 
+    let code = snippet(
+        &[],
+        El::new("EmptyState")
+            .text("title", &title.of("No items yet"))
+            .flag("compact", *compact)
+            .expr_if(*icon, "icon", "html! { <Icon glyph={Glyph::Search} /> }")
+            .expr_if(
+                *hint != Text::Empty,
+                "hint",
+                format!("html! {{ {:?} }}", hint.of("Add one to get started")),
+            )
+            .line_if(
+                *actions,
+                "<Button size={ButtonSize::Small}>{ \"Add item\" }</Button>",
+            ),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             { shown("empty_state(compact)", &empty_state(*compact)) }
             <EmptyState title={title.of("No items yet")} compact={*compact}
                 icon={icon.then(|| html! { <Icon glyph={Glyph::Search} /> })}

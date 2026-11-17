@@ -618,6 +618,14 @@ Pick a free port. A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
 `cargo test --workspace` fails.
 
+Under its frames, a page shows the code that renders its component as
+the controls set it, highlighted, with a Copy button. A page builds it
+with `showcase/src/code.rs` (`El` for each element, its props and
+children, and `snippet` around them), listing only the props that differ
+from their defaults, and passes it to `Demo` as `code`. A page without a
+`Demo` shows a `CodeCard` itself; the test fails for a page that shows
+no code.
+
 ### Stability probe
 
 Each page also declares the boxes that must hold (`holds`, next to its

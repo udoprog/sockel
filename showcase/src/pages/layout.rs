@@ -7,6 +7,7 @@ use plinth::{
     toolbar,
 };
 
+use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, button, samples};
 
 const GAPS: &[(&str, Gap)] = &[
@@ -68,8 +69,17 @@ pub fn StackPage() -> Html {
         </>
     };
 
+    let code = snippet(
+        &[],
+        El::new("Stack")
+            .variant("gap", *gap)
+            .text_if(*tag != "div", "tag", *tag)
+            .flag("flush", *flush)
+            .line_if(*count > 0, items(*tag, *count, *paragraphs)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Stack gap={*gap} tag={*tag} flush={*flush} class={class::OUTLINED}>
                 { samples(*tag, *count, *text, false, *paragraphs) }
             </Stack>
@@ -109,8 +119,22 @@ pub fn ClusterPage() -> Html {
         </>
     };
 
+    let code = snippet(
+        &[],
+        El::new("Cluster")
+            .variant("gap", *gap)
+            .text_if(*tag != "div", "tag", *tag)
+            .variant("justify", *justify)
+            .variant("align", *align)
+            .flag("nowrap", *nowrap)
+            .flag("inline", *inline)
+            .flag("lines", *lines)
+            .flag("flush", *flush)
+            .line_if(*count > 0, items(*tag, *count, *paragraphs)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Cluster gap={*gap} justify={*justify} align={*align} nowrap={*nowrap} inline={*inline}
                 lines={*lines} flush={*flush} tag={*tag} class={class::OUTLINED}>
                 { samples(*tag, *count, *text, *mixed, *paragraphs) }
@@ -146,8 +170,28 @@ pub fn ToolbarPage() -> Html {
             .collect()
     };
 
+    let rest = *count - half;
+    let code = snippet(
+        &[],
+        El::new("Toolbar")
+            .text("label", "Showcase toolbar")
+            .flag("boxed", *boxed)
+            .variant("gap", *gap)
+            .line_if(
+                half > 0,
+                each(
+                    if *spacer { "first" } else { "actions" },
+                    "button",
+                    if *spacer { half } else { *count },
+                    "button",
+                ),
+            )
+            .line_if(*spacer, "<ToolbarSpacer />")
+            .line_if(*spacer && rest > 0, each("rest", "button", rest, "button")),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Toolbar label="Showcase toolbar" boxed={*boxed} gap={*gap}>
                 { buttons(1..=half) }
                 if *spacer { <ToolbarSpacer /> }
@@ -183,9 +227,26 @@ pub fn CardPage() -> Html {
         "ul" | "ol" => html! { <li>{ content }</li> },
         _ => content,
     };
+    let inner = if *list {
+        El::new("Stack")
+            .variant("gap", Gap::Hair)
+            .line(each("items", "item", 4, "item"))
+    } else {
+        El::new("p").line(text_node(&text.of("A card's content")))
+    };
+    let code = snippet(
+        &[],
+        El::new("Card")
+            .variant("inset", *inset)
+            .text_if(*tag != "div", "tag", *tag)
+            .child(match *tag {
+                "ul" | "ol" => El::new("li").child(inner),
+                _ => inner,
+            }),
+    );
 
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Card inset={*inset} tag={*tag}>{ content }</Card>
         </Demo>
     }
@@ -223,8 +284,28 @@ pub fn ClassesPage() -> Html {
         html! { <code class={class::CLASS_CALL}>{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
     };
 
+    let code = snippet(
+        &[
+            format!("let stack = stack(Gap::{:?});", *gap),
+            format!(
+                "let cluster = cluster(Gap::{:?}, Justify::{:?}, Align::{:?}, {}, {});",
+                *gap, *justify, *align, *wrap, *inline
+            ),
+            format!("let toolbar = toolbar({});", *boxed),
+            format!("let card = card(Inset::{:?}, {});", *inset, *link),
+        ],
+        El::new("")
+            .line("<ul class={stack}>{ for items.iter().map(item) }</ul>")
+            .line("<ul class={cluster}>{ for items.iter().map(item) }</ul>")
+            .line("<nav class={toolbar}>{ for actions.iter().map(button) }</nav>")
+            .line(format!(
+                "<a href=\"#classes\" class={{card}}>{}</a>",
+                text_node("A card that is a link: hover or focus it")
+            )),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Stack gap={Gap::Loose}>
                 { shown("stack(gap)", &stack) }
                 <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
@@ -242,4 +323,15 @@ pub fn ClassesPage() -> Html {
             </Stack>
         </Demo>
     }
+}
+
+/// The children line for `count` sample items: paragraphs, or list items
+/// in a list.
+fn items(tag: &str, count: usize, paragraphs: bool) -> String {
+    let thing = match tag {
+        "ul" | "ol" => "list item",
+        _ if paragraphs => "paragraph",
+        _ => "item",
+    };
+    each("items", "item", count, thing)
 }

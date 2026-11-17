@@ -8,6 +8,7 @@ use plinth::{
 };
 
 use crate::class;
+use crate::code::{El, snippet};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 /// A control id of its own for each frame's copy of the field.
@@ -120,6 +121,40 @@ fn settings_controls(s: &UseStateHandle<Settings>, extra: Html) -> Html {
     }
 }
 
+/// A field's or a row's code, as the settings set it.
+fn field_code(name: &str, s: Settings) -> El {
+    let html_of = |text: String| format!("html! {{ {text:?} }}");
+    let hint = s.hint.of("Shown on your profile");
+    let error = s.error.of("Use at least three letters");
+    El::new(name)
+        .expr("id", "id.clone()")
+        .expr("label", html_of(s.label.of("Display name")))
+        .expr_if(!hint.is_empty(), "hint", html_of(hint.clone()))
+        .expr_if(!error.is_empty(), "error", html_of(error.clone()))
+        .expr_if(
+            s.help,
+            "help",
+            "html! { <a href=\"#field\">{ \"Why?\" }</a> }",
+        )
+        .flag("required", s.required)
+        .flag("reserve_error", s.reserve_error)
+        .flag("disabled", s.disabled)
+        .flag("busy", s.busy)
+        .child(
+            El::new("input")
+                .expr("id", "id")
+                .expr("class", "plinth::class::INPUT")
+                .expr(
+                    "aria-describedby",
+                    format!(
+                        "field_describedby(&id, {}, {})",
+                        !hint.is_empty(),
+                        !error.is_empty()
+                    ),
+                ),
+        )
+}
+
 fn initial() -> Settings {
     Settings {
         label: Text::Short,
@@ -140,8 +175,10 @@ pub fn FieldPage() -> Html {
     let classes = field(settings.disabled, settings.busy);
     let error = field_error(settings.reserve_error);
 
+    let code = snippet(&[], field_code("Field", *settings));
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("field(disabled, busy) → \"{}\"; field_error(reserve) → \"{}\"", classes.to_string(), error.to_string()) }
             </code>
@@ -162,8 +199,34 @@ pub fn FormRowsPage() -> Html {
     let classes = form_rows(*wide);
     let row = form_row(settings.disabled, settings.busy);
 
+    let code = snippet(
+        &[],
+        El::new("")
+            .child(
+                El::new("FormRows")
+                    .flag("wide_labels", *wide)
+                    .child(field_code("FormRow", *settings))
+                    .line("// and one more FormRow"),
+            )
+            .child(
+                El::new("Fieldset")
+                    .expr("legend", "html! { \"Notifications\" }")
+                    .expr("hint", "html! { \"Sent to the address on your account\" }")
+                    .child(
+                        El::new("FieldCheck")
+                            .expr("label", "html! { \"Email me when a card lands\" }")
+                            .flag("disabled", settings.disabled)
+                            .child(
+                                El::new("input")
+                                    .text("type", "checkbox")
+                                    .flag("disabled", settings.disabled),
+                            ),
+                    ),
+            ),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("form_rows(wide_labels) → \"{}\"; form_row(disabled, busy) → \"{}\"", classes.to_string(), row.to_string()) }
             </code>

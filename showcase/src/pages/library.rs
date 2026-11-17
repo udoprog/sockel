@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::LibraryToolbar;
 
+use crate::code::{El, each, snippet};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
 
 const PICKS: &[&str] = &["All", "Mine", "A much longer choice than the others"];
@@ -48,8 +49,23 @@ pub fn LibraryToolbarPage() -> Html {
         html! { <span class={class::SEARCH_ICON} aria-hidden="true">{ "⌕" }</span> }
     });
 
+    let code = snippet(
+        &[],
+        El::new("LibraryToolbar")
+            .expr("value", "query.clone()")
+            .text("label", &label.of("Search the library"))
+            .text("testid", "showcase-search")
+            .expr("on_input", "on_input")
+            .flag("autofocus", *autofocus)
+            .expr_if(*icon, "icon", "html! { <SearchIcon /> }")
+            .line_if(
+                *filters > 0,
+                each("filters", "filter_button", *filters, "button"),
+            ),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <LibraryToolbar value={(*value).clone()} label={label.of("Search the library")}
                 testid="showcase-search" on_input={bind(&value)} autofocus={*autofocus}
                 icon={search_icon.unwrap_or_default()}>

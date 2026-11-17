@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{Button, ButtonSize, ButtonVariant, Cluster, Glyph, Icon, button};
 
+use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 const VARIANTS: &[(&str, ButtonVariant)] = &[
@@ -84,8 +85,34 @@ pub fn ButtonPage() -> Html {
     let fold_applies = *fold && *placement != Placement::None && !label.is_empty();
     let classes = button(*variant, *size, icon_only, fold_applies);
 
+    let code = snippet(
+        &[],
+        El::new("Button")
+            .variant("variant", *variant)
+            .variant("size", *size)
+            .expr_if(
+                *placement != Placement::None,
+                "icon",
+                "html! { <Icon glyph={Glyph::Check} /> }",
+            )
+            .flag("trailing", *placement == Placement::Trailing)
+            .flag("fold", *fold)
+            .expr_if(
+                pressed.is_some(),
+                "pressed",
+                format!("Some({})", pressed.unwrap_or_default()),
+            )
+            .flag("busy", *busy)
+            .flag("disabled", *disabled)
+            .text_if(*link, "href", "#button")
+            .text("title", "Save the draft")
+            .text_if(label.is_empty(), "label", "Save the draft")
+            .expr("onclick", "on_click")
+            .line_if(!label.is_empty(), text_node(&label)),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <code class={class::CLASS_CALL}>
                 { format!("button(variant, size, icon_only, fold) → \"{}\"", classes.to_string()) }
             </code>

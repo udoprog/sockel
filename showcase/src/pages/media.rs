@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{Avatar, AvatarSize, Cluster, Image, Ratio};
 
+use crate::code::{El, snippet};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 /// Loads, in a different shape than every box it is shown in.
@@ -19,6 +20,16 @@ const SOURCES: &[(&str, Option<&str>)] = &[
     ("Never answers (loading)", Some(SLOW)),
     ("None (empty)", None),
 ];
+
+/// What a page names a source in its code.
+fn source_name(source: Option<&str>) -> &'static str {
+    match source {
+        Some(PICTURE) => "picture_url",
+        Some(BROKEN) => "broken_url",
+        Some(_) => "slow_url",
+        None => "",
+    }
+}
 
 const RATIOS: &[(&str, Ratio)] = &[
     ("Poster", Ratio::Poster),
@@ -52,8 +63,22 @@ pub fn ImagePage() -> Html {
         </>
     };
 
+    let width_name = WIDTHS
+        .iter()
+        .find(|(_, w)| w == &*width)
+        .map_or("", |(name, _)| *name);
+    let code = snippet(
+        &[],
+        El::new("Image")
+            .expr("ratio", format!("Ratio::{:?}", *ratio))
+            .expr_if(source.is_some(), "src", source_name(*source))
+            .text_if(!alt.of("A picture").is_empty(), "alt", &alt.of("A picture"))
+            .expr_if(!*lazy, "lazy", "false")
+            .text_if(!width.is_empty(), "class", &format!("width-{width_name}")),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Image
                 ratio={*ratio}
                 src={source.map(AttrValue::from)}
@@ -93,8 +118,14 @@ pub fn AvatarPage() -> Html {
         </>
     };
 
+    let avatar = El::new("Avatar")
+        .text("name", *name)
+        .expr_if(source.is_some(), "src", source_name(*source))
+        .variant("size", *size);
+    let code = snippet(&[], avatar);
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <Cluster>
                 <Avatar name={*name} src={source.map(AttrValue::from)} size={*size} />
                 <Avatar name={*name} src={source.map(AttrValue::from)} size={*size} />

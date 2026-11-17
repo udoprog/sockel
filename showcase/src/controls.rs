@@ -5,6 +5,7 @@ use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
 
 use crate::class;
+use crate::code::CodeCard;
 
 use plinth::{Card, Cluster, Gap, Stack};
 
@@ -106,12 +107,15 @@ pub const COUNTS: &[(&str, usize)] = &[("3", 3), ("0 (empty)", 0), ("1", 1), ("8
 pub struct DemoProps {
     /// The controls.
     pub controls: Html,
+    /// The code that renders the component, as the controls set it.
+    pub code: AttrValue,
     /// The component, as the controls set it.
     pub children: Html,
 }
 
 /// A page's controls over its component, shown twice: in a narrow frame
-/// (which can be dragged wider) and in a wide one, side by side.
+/// (which can be dragged wider) and in a wide one, side by side, then the
+/// code that renders it: below the frames, so its length never moves them.
 #[function_component]
 pub fn Demo(props: &DemoProps) -> Html {
     html! {
@@ -131,6 +135,7 @@ pub fn Demo(props: &DemoProps) -> Html {
                     { props.children.clone() }
                 </section>
             </div>
+            <CodeCard code={props.code.clone()} />
         </Stack>
     }
 }

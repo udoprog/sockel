@@ -6,6 +6,7 @@ use plinth::{
     Button, ButtonSize, ButtonVariant, Cluster, Dismiss, Popover, PopoverAlign, Side, Stack, button,
 };
 
+use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 const SIDES: &[(&str, Side)] = &[
@@ -110,8 +111,28 @@ pub fn PopoverPage() -> Html {
         </>
     };
 
+    let words = text.of("Filters for the list");
+    let code = snippet(
+        &[],
+        El::new("Popover")
+            .expr("anchor", "anchor.clone()")
+            .expr("open", "*open")
+            .expr("on_dismiss", "on_dismiss")
+            .variant("side", *side)
+            .variant("align", *align)
+            .expr_if(!*sheet, "sheet", "false")
+            .text_if(*titled, "title", "Filters")
+            .child(
+                El::new("Stack")
+                    .line_if(!words.is_empty(), format!("<p>{}</p>", text_node(&words)))
+                    .line(
+                        "<Button variant={ButtonVariant::Primary} size={ButtonSize::Small} onclick={done}>{ \"Done\" }</Button>",
+                    ),
+            ),
+    );
+
     html! {
-        <Demo {controls}>
+        <Demo {controls} {code}>
             <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} />
         </Demo>
     }

@@ -423,3 +423,73 @@ body {
     font-size: var(--text-xs);
     white-space: pre-wrap;
 }
+
+// The code under a page's frames (code.rs): its colours derive from the
+// app's, so light and dark both read.
+:root {
+    --font-mono: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace;
+    --code-tag: var(--accent);
+    --code-attr: color-mix(in oklab, var(--accent) 45%, var(--text));
+    --code-punct: var(--muted);
+    --code-comment: var(--muted);
+    --code-keyword: color-mix(in oklab, #d9480f 70%, var(--text));
+    --code-string: color-mix(in oklab, #2b8a3e 70%, var(--text));
+    --code-number: color-mix(in oklab, #e67700 70%, var(--text));
+    --code-type: color-mix(in oklab, #1971c2 55%, var(--text));
+}
+
+.showcase-code {
+    margin: 0;
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    font: var(--text-sm) / 1.6 var(--font-mono);
+    white-space: pre;
+}
+
+.showcase-code-tag {
+    color: var(--code-tag);
+}
+
+.showcase-code-attr {
+    color: var(--code-attr);
+}
+
+.showcase-code-punct {
+    color: var(--code-punct);
+}
+
+.showcase-code-comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.showcase-code-keyword {
+    color: var(--code-keyword);
+}
+
+.showcase-code-string {
+    color: var(--code-string);
+}
+
+.showcase-code-number {
+    color: var(--code-number);
+}
+
+.showcase-code-type {
+    color: var(--code-type);
+}
+
+// Labels that take turns in one place, stacked in one cell so the widest
+// sets the width: the one not showing is hidden, not removed.
+.showcase-swap {
+    display: inline-grid;
+}
+
+.showcase-swap-item {
+    grid-area: 1 / 1;
+
+    &.showcase-off {
+        visibility: hidden;
+    }
+}

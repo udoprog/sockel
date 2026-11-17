@@ -4,6 +4,7 @@ use crate::class;
 
 use plinth::{Card, Cluster, Gap, Inset, Stack};
 
+use crate::code::{El, each, snippet, text_node};
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, samples};
 
 /// How many lines a text keeps: one (`truncate`), a clamp's, or all.
@@ -14,6 +15,17 @@ const LINES: &[(&str, Option<&str>)] = &[
     ("4", Some(plinth::class::CLAMP_4)),
     ("All", None),
 ];
+
+/// The name of a class's constant in `plinth::class`.
+fn constant(class: &str) -> String {
+    format!(
+        "plinth::class::{}",
+        class
+            .trim_start_matches("plinth-")
+            .replace('-', "_")
+            .to_uppercase()
+    )
+}
 
 const FIGURES: &[(&str, &str)] = &[
     ("1111", "1111"),
@@ -75,9 +87,63 @@ pub fn FoundationsPage() -> Html {
         }
     });
 
+    let class_of = |on: bool, class: &str| -> String {
+        if on {
+            format!(" class={{{}}}", constant(class))
+        } else {
+            String::new()
+        }
+    };
+    let mark_name = MARKS
+        .iter()
+        .find(|(_, m)| m == &*mark)
+        .map_or("", |(name, _)| *name);
+    let code = snippet(
+        &[],
+        El::new("")
+            .line(format!(
+                "<p{}>{}</p>",
+                class_of(lines.is_some(), lines.unwrap_or_default()),
+                text_node(&text.of("A title"))
+            ))
+            .line(format!(
+                "<span{}>{}</span>",
+                class_of(*numeric, plinth::class::NUMERIC),
+                text_node(*figure)
+            ))
+            .child(
+                El::new("div")
+                    .expr_if(*scroll_area, "class", constant(plinth::class::SCROLL_AREA))
+                    .line_if(*count > 0, each("items", "item", *count, "item")),
+            )
+            .line(format!(
+                "<div role=\"tablist\">{{ for tabs }}</div> // each tab: @include p.current({});",
+                if mark_name == "background" {
+                    ""
+                } else {
+                    mark_name
+                }
+            ))
+            .line(format!(
+                "<span class={{{}}}>{}</span>",
+                constant(plinth::class::PHONE_ONLY),
+                text_node("phone-only")
+            ))
+            .line(format!(
+                "<span class={{{}}}>{}</span>",
+                constant(plinth::class::DESKTOP_ONLY),
+                text_node("desktop-only")
+            ))
+            .line(format!(
+                "<a href=\"#foundations\" class={{{}}}>{}</a>",
+                constant(plinth::class::FOCUS_RING),
+                text_node("A link with the focus ring: tab to it")
+            )),
+    );
+
     html! {
         <Stack gap={Gap::Loose}>
-            <Demo {controls}>
+            <Demo {controls} {code}>
                 <Stack gap={Gap::Medium}>
                     <h2 class={plinth::class::VISUALLY_HIDDEN}>{ "Foundations" }</h2>
                     <Stack gap={Gap::Snug}>
