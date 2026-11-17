@@ -378,6 +378,12 @@ box does not change with it.
 `IconButton` stays as it was, for an app that styles its own buttons (its
 children are the icon and label together); a new button should be a
 `Button`.
+Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
+`testid`, it takes `dialog: Some(open)` (`aria-haspopup="dialog"` and
+`aria-expanded`), `haspopup` (the popup alone), `pressed: Some(on)`
+(`aria-pressed`), `expanded: Some(open)` with `controls` (a disclosure's
+`aria-expanded` and `aria-controls`), `current` (`aria-current`) and
+`node_ref`.
 
 ## Stack, Cluster and Card
 

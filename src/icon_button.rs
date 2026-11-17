@@ -24,6 +24,25 @@ pub struct IconButtonProps {
     /// Opens a dialog: whether it is open now (`aria-haspopup`, `aria-expanded`).
     #[prop_or_default]
     pub dialog: Option<bool>,
+    /// Has a popup dialog it does not track (`aria-haspopup` alone).
+    #[prop_or_default]
+    pub haspopup: bool,
+    /// A toggle: whether it is on now (`aria-pressed`).
+    #[prop_or_default]
+    pub pressed: Option<bool>,
+    /// Discloses what it controls, not a dialog: whether that is open
+    /// (`aria-expanded`).
+    #[prop_or_default]
+    pub expanded: Option<bool>,
+    /// The id of what it discloses (`aria-controls`).
+    #[prop_or_default]
+    pub controls: Option<AttrValue>,
+    /// The current item of a set, as `step` or `page` (`aria-current`).
+    #[prop_or_default]
+    pub current: Option<AttrValue>,
+    /// The `<button>` element, to measure or focus it.
+    #[prop_or_default]
+    pub node_ref: NodeRef,
     #[prop_or_default]
     pub title: Option<AttrValue>,
     /// The accessible name, when the visible text is not the button's full
@@ -51,8 +70,12 @@ pub fn IconButton(props: &IconButtonProps) -> Html {
             {class}
             disabled={props.disabled}
             onclick={props.onclick.clone()}
-            aria-haspopup={props.dialog.map(|_| "dialog")}
-            aria-expanded={props.dialog.map(|open| open.to_string())}
+            ref={props.node_ref.clone()}
+            aria-haspopup={(props.haspopup || props.dialog.is_some()).then_some("dialog")}
+            aria-expanded={props.dialog.or(props.expanded).map(|open| open.to_string())}
+            aria-pressed={props.pressed.map(|on| on.to_string())}
+            aria-controls={props.controls.clone()}
+            aria-current={props.current.clone()}
             title={props.title.clone()}
             aria-label={props.label.clone()}
             data-testid={props.testid.clone()}
@@ -80,5 +103,30 @@ mod tests {
             names(icon_button(Classes::new(), true)),
             [class::ICONED, class::TRAILING]
         );
+    }
+
+    #[test]
+    fn an_icon_button_carries_its_state() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<IconButton>::with_props(yew::props!(IconButtonProps {
+                pressed: Some(true),
+                expanded: Some(false),
+                controls: Some(AttrValue::from("panel")),
+                current: Some(AttrValue::from("step")),
+                haspopup: true,
+                children: html! { "Go" }
+            }))
+            .hydratable(false)
+            .render(),
+        );
+        for attr in [
+            "aria-pressed=\"true\"",
+            "aria-expanded=\"false\"",
+            "aria-controls=\"panel\"",
+            "aria-current=\"step\"",
+            "aria-haspopup=\"dialog\"",
+        ] {
+            assert!(html.contains(attr), "{attr}: {html}");
+        }
     }
 }
