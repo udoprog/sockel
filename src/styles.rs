@@ -110,7 +110,7 @@ mod tests {
             assert!(compact.contains(rule), "{rule}");
         }
         assert!(compact.contains(
-            ".plinth-card{padding:var(--space-4);border:var(--space-px)solidvar(--card-border);"
+            ".plinth-card{padding:var(--space-4);border:var(--card-border-width)solidvar(--card-border);"
         ));
         assert!(!STYLESHEET.contains("!important"));
     }

@@ -250,6 +250,7 @@ as `$danger` and the rest):
 | `--field-border` | `--border` | a field's edge (inputs, select and picker faces) and a checkbox's, switch's and choice's |
 | `--field-bg` | `--surface` | a field's fill |
 | `--card-border` | `--border` | a card's edge (`transparent` for cards without one) |
+| `--card-border-width` | `--space-px` | its width (`0` for a card whose content meets its rounded edge, with no frame) |
 | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 
 The status hues are mixed toward `--text`, so they keep their contrast on a
@@ -336,7 +337,7 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$band-chrome-ground` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground` | see [Theming](#theming) |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |

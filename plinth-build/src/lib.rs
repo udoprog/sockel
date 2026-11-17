@@ -698,6 +698,7 @@ mod tests {
             "--field-border: var(--border)",
             "--field-bg: var(--surface)",
             "--card-border: var(--border)",
+            "--card-border-width: var(--space-px)",
             "--band-chrome-ground: var(--surface)",
             "--band-search-text: var(--text-sm)",
             "--focus-ring-color: var(--accent)",

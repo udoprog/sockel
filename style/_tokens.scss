@@ -45,6 +45,7 @@
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
 //   `--field-border`, `--field-bg`, `--card-border`, `--panel-ground`,
 //   `--panel-tint`, `--band-chrome-ground`): each a default an app overrides by name.
+// - `--card-border-width`: a card's edge's width (`0` for no frame).
 // - `--band-chrome-gap` and `--band-search-text`: a chrome band's gap and a
 //   search band's type.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
@@ -207,6 +208,7 @@ $scrim: rgb(0 0 0 / 0.45) !default;
 $field-border: var(--border) !default;
 $field-bg: var(--surface) !default;
 $card-border: var(--border) !default;
+$card-border-width: var(--space-px) !default;
 $panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
 $panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
 $band-chrome-ground: var(--surface) !default;
@@ -354,8 +356,9 @@ $sheet-breakpoint: "phone" !default;
     // edge of a checkbox, switch and choice.
     --field-border: #{$field-border};
     --field-bg: #{$field-bg};
-    // A card's edge.
+    // A card's edge and its width (`0` for cards without one).
     --card-border: #{$card-border};
+    --card-border-width: #{$card-border-width};
     // A panel's sunken ground, and a tinted panel's.
     --panel-ground: #{$panel-ground};
     --panel-tint: #{$panel-tint};
@@ -596,7 +599,7 @@ $sheet-breakpoint: "phone" !default;
 // `.plinth-card`: a surface lifted off the page.
 @mixin card {
     padding: $card-padding;
-    @include reserved-border(var(--card-border));
+    @include reserved-border(var(--card-border), var(--card-border-width));
     border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-1);
