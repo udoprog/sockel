@@ -179,6 +179,31 @@ mod tests {
     }
 
     #[test]
+    fn a_head_is_as_high_with_or_without_its_actions() {
+        let sass = include_str!("../style/_heads.scss");
+        let rule = sass
+            .split(".page-head,\n.section-head {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the heads' shared rule");
+        assert!(
+            rule.contains("min-height: var(--control-height);"),
+            "{rule}"
+        );
+    }
+
+    #[test]
+    fn a_heads_actions_shrink_with_its_column() {
+        let sass = include_str!("../style/_heads.scss");
+        let rule = sass
+            .split(".page-head-actions,\n.section-head-actions {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the heads' actions rule");
+        assert!(rule.contains("min-width: 0;"), "{rule}");
+    }
+
+    #[test]
     fn heads_name_their_parts_after_themselves() {
         assert_eq!(
             Head::Page.classes(),

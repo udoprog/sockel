@@ -17,6 +17,7 @@
 //   gone.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
+// Either is at least `--control-height` high, with or without actions.
 
 @use "tokens" as base;
 
@@ -28,6 +29,9 @@
     justify-content: space-between;
     gap: var(--space-2) var(--space-3);
     min-width: 0;
+    // As high as its actions whether it has them or not, so a head whose
+    // actions come and go keeps its height.
+    min-height: var(--control-height);
 }
 
 .page-head-title,
@@ -50,6 +54,9 @@
     // at its start.
     justify-content: flex-end;
     gap: var(--space-2);
+    // Narrower than its buttons' labels when the row is, so a long label
+    // is cut in its button rather than pushing the head out of its column.
+    min-width: 0;
     margin-left: auto;
 }
 
