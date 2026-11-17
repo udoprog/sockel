@@ -631,6 +631,10 @@ set per Stepper).
 - `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
+- A head is at least `--control-height` high, so actions coming and going
+  never move what follows; a `LABEL` head holds none and is its line's
+  height. Neither has outer margins, also when its class is on a heading
+  element (`<h3 class="plinth-section-head plinth-label">`).
 - `PageHead` takes `COMPACT` (actions as icons, one row on a phone) and
   `ONE_ROW` (a crumb head that stays one row on a phone, the back link's
   words, `PAGE_HEAD_BACK_LABEL`, hidden) in `class`.

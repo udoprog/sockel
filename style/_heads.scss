@@ -29,7 +29,8 @@
 //   the back link's words (`.plinth-page-head-back-label`) gone and its icon left.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
-// Either is at least `--control-height` high, with or without actions.
+// Either is at least `--control-height` high, with or without actions,
+// except a label head, which is its line's height.
 
 @use "tokens" as base;
 
@@ -41,6 +42,8 @@
     justify-content: space-between;
     gap: var(--space-2) var(--space-3);
     min-width: 0;
+    // No outer margins, also on a heading element wearing the class.
+    margin: 0;
     // As high as its actions whether it has them or not, so a head whose
     // actions come and go keeps its height.
     min-height: var(--control-height);
@@ -120,6 +123,9 @@
 }
 
 .plinth-section-head.plinth-label {
+    // A label holds no actions (a count, pills, a link at most): as high as
+    // its line, not a control.
+    min-height: 0;
     gap: var(--space-1) var(--space-2);
     justify-content: flex-start;
     color: var(--muted);

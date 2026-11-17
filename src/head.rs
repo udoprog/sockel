@@ -303,6 +303,23 @@ mod tests {
     }
 
     #[test]
+    fn a_label_head_is_its_lines_height_and_no_head_has_margins() {
+        let sass = include_str!("../style/_heads.scss");
+        let shared = sass
+            .split(".plinth-page-head,\n.plinth-section-head {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the heads' shared rule");
+        assert!(shared.contains("margin: 0;"), "{shared}");
+        let label = sass
+            .split(".plinth-section-head.plinth-label {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the label head's rule");
+        assert!(label.contains("min-height: 0;"), "{label}");
+    }
+
+    #[test]
     fn a_compact_heads_icons_never_shrink_under_its_title() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
