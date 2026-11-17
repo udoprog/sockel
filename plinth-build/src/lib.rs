@@ -420,6 +420,13 @@ impl Config {
         format!("{head}@use \"plinth\" with ({});\n", pairs.join(", "))
     }
 
+    /// Every class of plinth's enabled features, nothing omitted.
+    fn all_classes(options: &grass::Options<'_>) -> Result<Vec<String>, Error> {
+        let mut classes = class_names(&grass::from_string("@use \"plinth\";\n", options)?);
+        classes.sort();
+        Ok(classes)
+    }
+
     pub fn build(&self) -> Result<Output, Error> {
         let enabled = self.enabled();
         let style = self.style_dir()?;
@@ -450,18 +457,33 @@ impl Config {
         let entry = format!("{plinth_use}@use \"{}\";\n", sass_string(&index));
         let css = grass::from_string(entry, &options)?;
         let local_css = css.strip_prefix(&plinth_css).ok_or(Error::NotVerbatim)?;
-        let local_classes = class_names(local_css)
-            .into_iter()
-            .filter(|class| plinth_classes.binary_search(class).is_err())
-            .filter(|class| !self.foreign.iter().any(|pattern| matches(pattern, class)))
-            .map(|class| match class.strip_prefix(prefix) {
-                Some(rest) if !rest.is_empty() => Ok(class),
-                _ => Err(Error::Unprefixed {
-                    class,
-                    prefix: prefix.to_owned(),
-                }),
-            })
-            .collect::<Result<_, _>>()?;
+        let mut unconfigured = None;
+        let mut local_classes = Vec::new();
+        for class in class_names(local_css) {
+            if plinth_classes.binary_search(&class).is_ok()
+                || self.foreign.iter().any(|pattern| matches(pattern, &class))
+            {
+                continue;
+            }
+            if matches!(class.strip_prefix(prefix), Some(rest) if !rest.is_empty()) {
+                local_classes.push(class);
+                continue;
+            }
+            // A plinth class `$omit` leaves out, which the app styles itself.
+            if class.starts_with("plinth-") {
+                let all = match &mut unconfigured {
+                    Some(all) => all,
+                    None => unconfigured.insert(Self::all_classes(&options)?),
+                };
+                if all.binary_search(&class).is_ok() {
+                    continue;
+                }
+            }
+            return Err(Error::Unprefixed {
+                class,
+                prefix: prefix.to_owned(),
+            });
+        }
         Ok(Output {
             css,
             plinth_classes,
@@ -1473,6 +1495,28 @@ mod tests {
         );
         let error = plinth().local(fixture("fixture/style")).build();
         assert!(matches!(error, Err(Error::NoPrefix)));
+    }
+
+    #[test]
+    fn allows_an_omitted_plinth_class() {
+        let output = plinth()
+            .local(fixture("tests/omitted"))
+            .prefix("fixture-")
+            .with("omit", r#"("heads.label",)"#)
+            .build()
+            .unwrap();
+        assert!(!output.plinth_classes.contains(&"plinth-label".to_owned()));
+        assert_eq!(output.local_classes, ["fixture-ok"]);
+        let error = plinth()
+            .local(fixture("tests/misspelt"))
+            .prefix("fixture-")
+            .with("omit", r#"("heads.label",)"#)
+            .build()
+            .unwrap_err();
+        assert!(
+            matches!(&error, Error::Unprefixed { class, .. } if class == "plinth-lable"),
+            "{error}"
+        );
     }
 
     #[test]
