@@ -9,6 +9,11 @@
 //   is `.plinth-input-unit`), `-clear` and `-action` (a button of a fixed
 //   size, kept in its room when `.plinth-empty` hides it; the SecretInput's
 //   reveal, copy and clear are actions).
+// - `.plinth-native-select`: a native `<select>`, worn with `.plinth-input`:
+//   the browser's arrow replaced by a chevron in `--muted` (two gradients, so
+//   it takes the theme's colour), room kept for it at the end, its options on
+//   `--surface`. As wide as its widest option (`max-content`, cut at its
+//   container); `.plinth-fill`: as wide as its container.
 // - `.plinth-textarea`: lines of text, as high as its rows and at least
 //   `--input-height`; the user may resize it vertically.
 // - Sizes: regular, `.plinth-small` (`--control-height-small`) and
@@ -21,14 +26,46 @@
 //   `.plinth-group-detached` to stand apart after a gap; a lone member needs
 //   none. `group_classes` gives them, so no rule looks at a sibling.
 // - Parts an app may leave out (`$omit`): `inputs.input` (`.plinth-input`),
-//   `inputs.textarea`, `inputs.mark` (`-mark` and `-unit`) and `inputs.group`
-//   (the group and its members' classes).
+//   `inputs.textarea`, `inputs.mark` (`-mark` and `-unit`), `inputs.group`
+//   (the group and its members' classes) and `inputs.native-select`.
 
 @use "tokens" as base;
 
 @if base.emits("inputs.input") {
     .plinth-input {
         @include base.input;
+    }
+}
+
+@if base.emits("inputs.native-select") {
+    // After `.plinth-input`, so its chevron and room win over the field's.
+    .plinth-native-select {
+        width: max-content;
+        max-width: 100%;
+        appearance: none;
+        cursor: pointer;
+        padding-inline-end: 1.75rem;
+        background-image:
+            linear-gradient(45deg, transparent 50%, var(--muted) 50%),
+            linear-gradient(135deg, var(--muted) 50%, transparent 50%);
+        background-position:
+            calc(100% - 1rem) 55%,
+            calc(100% - 0.6875rem) 55%;
+        background-size: 5px 5px;
+        background-repeat: no-repeat;
+
+        &.plinth-fill {
+            width: 100%;
+        }
+
+        &:disabled {
+            cursor: not-allowed;
+        }
+
+        > option {
+            background-color: var(--surface);
+            color: var(--text);
+        }
     }
 }
 

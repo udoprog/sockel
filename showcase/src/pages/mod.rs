@@ -356,7 +356,7 @@ pub const PAGES: &[Page] = &[
         id: "text-input",
         title: "TextInput",
         group: Group::Inputs,
-        about: "A text input at a control's height, bare or with a unit inside the field, and a Textarea. Type a long value; tab to it; set it invalid.",
+        about: "A text input at a control's height, bare or with a unit inside the field, a native select in the field's look, and a Textarea. Type a long value; tab to it; set it invalid.",
         covers: &[
             "TextInput",
             "TextInputProps",
@@ -366,6 +366,7 @@ pub const PAGES: &[Page] = &[
             "InputSize",
             "input",
             "input_box",
+            "native_select",
             "textarea",
         ],
         render: || html! { <inputs::TextInputPage /> },

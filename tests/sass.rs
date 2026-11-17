@@ -128,6 +128,7 @@ fn input_settings() {
     let defaults = compile(&sass, "style/_index.scss");
     assert!(defaults.contains("--input-edge: var(--accent);"));
     assert!(!defaults.contains("--input-height: 44px;"));
+    assert!(defaults.contains(".plinth-native-select {\n  width: max-content;"));
     let css = compile(&sass, "tests/fixtures/input_settings.scss");
     assert!(css.contains("--input-edge: var(--border-strong);"));
     assert!(css.contains(":focus-within {\n  --input-edge: var(--accent);"));

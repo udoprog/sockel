@@ -54,6 +54,7 @@ fn TextCase(props: &TextCaseProps) -> Html {
     let id = use_control_id();
     let unit_id = format!("{id}-unit");
     let area_id = format!("{id}-area");
+    let select_id = format!("{id}-select");
     let error = s
         .invalid
         .then(|| html! { { "Use at least three letters" } });
@@ -77,6 +78,16 @@ fn TextCase(props: &TextCaseProps) -> Html {
                     placeholder={placeholder.clone()}
                     invalid={s.invalid} disabled={s.disabled} readonly={s.readonly} busy={s.busy}
                     describedby={describedby.clone()} />
+            </Field>
+            <Field id={select_id.clone()} label={html! { "Unit" }} error={error.clone()}
+                reserve_error=true disabled={s.disabled} busy={s.busy}>
+                <select id={select_id} class={plinth::native_select(s.size, s.invalid, false)}
+                    disabled={s.disabled} aria-invalid={s.invalid.then_some("true")}
+                    aria-describedby={describedby.clone()}>
+                    <option>{ "Milliseconds" }</option>
+                    <option>{ "Seconds" }</option>
+                    <option>{ "Minutes" }</option>
+                </select>
             </Field>
             <Field id={area_id.clone()} label={html! { "Notes" }} error={error} reserve_error=true
                 disabled={s.disabled} busy={s.busy}>
@@ -171,6 +182,17 @@ pub fn TextInputPage() -> Html {
                     .text("inputmode", "numeric")
                     .expr("maxlength", "Some(6)"),
             ))
+            .child(
+                El::new("select")
+                    .expr(
+                        "class",
+                        format!(
+                            "plinth::native_select(InputSize::{:?}, {}, false)",
+                            s.size, s.invalid
+                        ),
+                    )
+                    .flag("disabled", s.disabled),
+            )
             .child(common(
                 El::new("Textarea")
                     .expr("value", "value.clone()")
@@ -184,6 +206,7 @@ pub fn TextInputPage() -> Html {
             { shown("input(size, invalid, busy)", &plinth::input(s.size, s.invalid, s.busy)) }
             { shown("input_box(size, invalid, disabled, busy)", &plinth::input_box(s.size, s.invalid, s.disabled, s.busy)) }
             { shown("textarea(size, invalid, busy)", &plinth::textarea(s.size, s.invalid, s.busy)) }
+            { shown("native_select(size, invalid, fill)", &plinth::native_select(s.size, s.invalid, false)) }
         </Demo>
     }
 }

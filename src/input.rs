@@ -55,6 +55,17 @@ pub fn input(size: InputSize, invalid: bool, busy: bool) -> Classes {
     )
 }
 
+/// A native `<select>`'s classes: `input` and `native-select`, its size,
+/// `invalid`, and `fill` to take its container's width (otherwise as wide as
+/// its widest option).
+pub fn native_select(size: InputSize, invalid: bool, fill: bool) -> Classes {
+    classes!(
+        input(size, invalid, false),
+        class::NATIVE_SELECT,
+        fill.then_some(class::FILL)
+    )
+}
+
 /// The classes of the box around an input and its marks: `input-box`, its
 /// size, `invalid`, `disabled` and `busy`.
 pub fn input_box(size: InputSize, invalid: bool, disabled: bool, busy: bool) -> Classes {
@@ -525,6 +536,24 @@ mod tests {
         assert_eq!(
             names(input_box(InputSize::Touch, false, false, false)),
             [class::INPUT_BOX, class::TOUCH]
+        );
+    }
+
+    #[test]
+    fn a_native_select_is_an_input() {
+        assert_eq!(
+            names(native_select(InputSize::Regular, false, false)),
+            [class::INPUT, class::NATIVE_SELECT]
+        );
+        assert_eq!(
+            names(native_select(InputSize::Small, true, true)),
+            [
+                class::INPUT,
+                class::SMALL,
+                class::INVALID,
+                class::NATIVE_SELECT,
+                class::FILL
+            ]
         );
     }
 

@@ -33,7 +33,8 @@
 //! - [`TextInput`] (`.input`), [`Textarea`] (`.textarea`), [`SearchField`]
 //!   (`.input-box`) and [`InputGroup`] (`.input-group`): text controls at a
 //!   control's height, a unit or a clear button inside the field, controls
-//!   joined in a row.
+//!   joined in a row; [`native_select`] (`.native-select`) for a native
+//!   `<select>` in a field's look.
 //! - [`Stepper`] (`.stepper`): a number between a minus and a plus button,
 //!   its room that of the longest bound; [`SecretInput`] (`.input-box`): a
 //!   password with show, copy and clear slots that keep their room.
@@ -257,7 +258,8 @@ pub use image::{
 };
 pub use input::{
     InputGroup, InputGroupProps, InputKind, InputSize, SearchField, SearchFieldProps, TextInput,
-    TextInputProps, Textarea, TextareaProps, group_classes, input, input_box, textarea,
+    TextInputProps, Textarea, TextareaProps, group_classes, input, input_box, native_select,
+    textarea,
 };
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,

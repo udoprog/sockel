@@ -434,7 +434,7 @@ part is emitted; a name plinth does not have is an error.
 | buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`) |
+| inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`) |
 | notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
 | popover | `popover.match-anchor` |
@@ -684,6 +684,11 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   the input sits in a box (`INPUT_BOX`) with the unit after the text inside
   the field; the box takes the border and the focus ring, so the unit is
   part of the field's box and the text keeps its start.
+- `native_select(size, invalid, fill)` (`.plinth-input.plinth-native-select`):
+  a native `<select>` in a text field's look, the browser's arrow replaced
+  by a chevron in `--muted` and its options on `--surface`. It is as wide as
+  its widest option, cut at its container; `fill` makes it its container's
+  width. Set `aria-invalid` with `invalid`, as on a bare input.
 - `Textarea` (`.plinth-textarea`): `rows` (default 3), at least `--input-height`
   high, resized vertically by the user only.
 - `SearchField` (`.plinth-input-box`): a search icon, the text and a clear
