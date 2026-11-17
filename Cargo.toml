@@ -9,6 +9,10 @@ include = ["/build.rs", "/locales", "/src", "/style", "/README.md"]
 publish = false
 links = "sockel"
 
+[package.metadata.trug]
+dir = "style"
+entry = "_index.scss"
+
 [features]
 default = ["full"]
 full = ["action-group", "badge", "button", "card-grid", "color-select", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "layout", "library-toolbar", "loadable", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "reorder", "rows", "search-select", "seam", "select", "skeleton", "stepper", "table", "tabs", "toast", "toggles", "tooltip"]
