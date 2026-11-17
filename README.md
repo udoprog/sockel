@@ -506,6 +506,38 @@ is an outline); the SearchField's icon and clear slot are always laid out, the
 button only hidden while empty, so typing moves nothing; a group's members of
 one size are one height. New tokens: none. New partial: `_inputs.scss`.
 
+## Stepper and SecretInput
+
+- `Stepper` (`.plinth-stepper`, worn with `.plinth-input-box`): a number
+  between a minus and a plus button. `value`, `on_change(i64)`, `min`, `max`,
+  `step` (default 1), `label` (the number's accessible name), `less_label`
+  ("Decrease") and `more_label` ("Increase"), `id`, `size` (`InputSize`),
+  `invalid`, `disabled`, `busy`, `class`, `testid`. The buttons step onto
+  multiples of `step` (7 by 5 goes to 10 or 5) and stop at the bounds; the
+  arrow keys do the same, Page Up and Down ten steps, Home and End go to the
+  bounds, Enter or leaving the field commits what is typed (clamped; text that
+  is no number goes back). What is typed outside `min..=max` is marked invalid
+  until committed. The buttons are out of the tab order. Helpers: `stepper(size,
+  invalid, disabled, busy)`, `step_from`, `key_value`, `parse_number`.
+- `SecretInput` (`.plinth-input-box`): a password field with show or hide,
+  copy and clear slots (`.plinth-input-action`, the `INPUT_CLEAR` button's
+  look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
+  `show_label` ("Show"), `hide_label` ("Hide"), `copy_label` ("Copy"),
+  `clear_label` ("Clear"), `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
+  shown secret hides itself, showing again restarts the time; clearing
+  hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
+  `class`, `testid`. The strings are props; an app passes its own words.
+
+Size guarantees: the Stepper's number has the room of the longest of `min`
+and `max` in `ch` with `numeric` figures, so its box is the same from the
+least value to the most, the buttons only disabled at a bound; the
+SecretInput's box is the container's width, dots or text, and its three slots
+are always laid out (hidden, not removed, while empty). New classes:
+`STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs
+`Eye`, `EyeOff` and `Copy`: an app's own `IconSet` literal needs three more
+fields. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
+set per Stepper).
+
 ## Heads
 
 `PageHead` and `SectionHead` take one set of props (`HeadProps`):
@@ -524,7 +556,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 plinth's own chrome (a dialog's close, a select's chevron, a busy spinner)
 draws its icons from an `IconSet`: one `Html` per `Glyph` (`Close`,
 `ChevronDown`, `ChevronUp`, `ChevronRight`, `Check`, `Plus`, `Minus`,
-`Spinner`, `Grip`, `Ellipsis`, `Search`). It is the one place plinth uses a
+`Spinner`, `Grip`, `Ellipsis`, `Search`, `Eye`, `EyeOff`, `Copy`). It is the one place plinth uses a
 context for something other than a runtime setting, and it carries icons
 only: classes never go through it.
 

@@ -34,6 +34,9 @@
 //!   (`.input-box`) and [`InputGroup`] (`.input-group`): text controls at a
 //!   control's height, a unit or a clear button inside the field, controls
 //!   joined in a row.
+//! - [`Stepper`] (`.stepper`): a number between a minus and a plus button,
+//!   its room that of the longest bound; [`SecretInput`] (`.input-box`): a
+//!   password with show, copy and clear slots that keep their room.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
@@ -124,10 +127,12 @@ mod menu;
 mod notice;
 mod popover;
 mod rows;
+mod secret_input;
 mod selection;
 mod skeleton;
 mod spinner;
 mod status;
+mod stepper;
 mod styles;
 mod tooltip;
 
@@ -179,12 +184,14 @@ pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
     row_list, row_list_item,
 };
+pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
 pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
 pub use spinner::{Spinner, SpinnerProps};
 pub use status::{StatusLabel, StatusLabelProps, status_label};
+pub use stepper::{Stepper, StepperProps, key_value, parse_number, step_from, stepper};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
 pub use tooltip::{
     DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,

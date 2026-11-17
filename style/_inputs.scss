@@ -6,8 +6,9 @@
 // - `.plinth-input-box`: the same look around an input and its marks: the unit
 //   of a TextInput, the icon and the clear button of a SearchField. Parts:
 //   `-control` (the bare input inside), `-mark` (an icon or the unit; the unit
-//   is `.plinth-input-unit`), `-clear` (a button of a fixed size, kept in its
-//   room when `.plinth-empty` hides it).
+//   is `.plinth-input-unit`), `-clear` and `-action` (a button of a fixed
+//   size, kept in its room when `.plinth-empty` hides it; the SecretInput's
+//   reveal, copy and clear are actions).
 // - `.plinth-textarea`: lines of text, as high as its rows and at least
 //   `--input-height`; the user may resize it vertically.
 // - Sizes: regular, `.plinth-small` (`--control-height-small`) and
@@ -174,7 +175,8 @@
     @include base.numeric;
 }
 
-.plinth-input-clear {
+.plinth-input-clear,
+.plinth-input-action {
     display: inline-flex;
     flex: none;
     align-items: center;

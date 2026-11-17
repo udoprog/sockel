@@ -15,6 +15,7 @@ mod menus;
 mod notices;
 mod popover;
 mod rows;
+mod steppers;
 mod styles;
 mod toggles;
 mod tooltips;
@@ -369,6 +370,61 @@ pub const PAGES: &[Page] = &[
             ),
             hold(
                 plinth::class::INPUT_CLEAR,
+                Size::Box,
+                Across::Except(&["Size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "stepper",
+        title: "Stepper",
+        about: "A number between a minus and a plus button, its room that of the longest bound. Step it, type past the bounds, use the arrow keys.",
+        covers: &[
+            "Stepper",
+            "StepperProps",
+            "stepper",
+            "step_from",
+            "key_value",
+            "parse_number",
+        ],
+        render: || html! { <steppers::StepperPage /> },
+        holds: &[
+            hold(
+                plinth::class::STEPPER,
+                Size::Both,
+                Across::Except(&["Size", "Max"]),
+            ),
+            hold(
+                plinth::class::STEPPER_CONTROL,
+                Size::Box,
+                Across::Except(&["Size", "Max"]),
+            ),
+            hold(
+                plinth::class::STEPPER_BUTTON,
+                Size::Box,
+                Across::Except(&["Size", "Max"]),
+            ),
+        ],
+    },
+    Page {
+        id: "secret-input",
+        title: "SecretInput",
+        about: "A password field with show, copy and clear slots that keep their room; the secret hides itself after a while. Show it; clear it.",
+        covers: &["SecretInput", "SecretInputProps", "Reveal", "REVEAL_MS"],
+        render: || html! { <steppers::SecretInputPage /> },
+        holds: &[
+            hold(
+                plinth::class::INPUT_BOX,
+                Size::Both,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT_CONTROL,
+                Size::Box,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT_ACTION,
                 Size::Box,
                 Across::Except(&["Size"]),
             ),

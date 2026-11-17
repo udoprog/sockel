@@ -18,6 +18,9 @@ pub enum Glyph {
     Grip,
     Ellipsis,
     Search,
+    Eye,
+    EyeOff,
+    Copy,
 }
 
 impl Glyph {
@@ -33,6 +36,9 @@ impl Glyph {
         Glyph::Grip,
         Glyph::Ellipsis,
         Glyph::Search,
+        Glyph::Eye,
+        Glyph::EyeOff,
+        Glyph::Copy,
     ];
 }
 
@@ -52,6 +58,9 @@ pub struct IconSet {
     pub grip: Html,
     pub ellipsis: Html,
     pub search: Html,
+    pub eye: Html,
+    pub eye_off: Html,
+    pub copy: Html,
 }
 
 fn svg(paths: Html) -> Html {
@@ -88,6 +97,9 @@ impl Default for IconSet {
                 .map(|x| html! { <circle cx={x.to_string()} cy="8" r="1" fill="currentColor" stroke="none" /> })
                 .collect()),
             search: svg(html! { <><circle cx="7" cy="7" r="4.5" /><path d="M10.5 10.5L14 14" /></> }),
+            eye: svg(html! { <><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" /><circle cx="8" cy="8" r="2" /></> }),
+            eye_off: svg(html! { <><path d="M1.5 8S4 3.5 8 3.5 14.5 8 14.5 8 12 12.5 8 12.5 1.5 8 1.5 8z" /><circle cx="8" cy="8" r="2" /><path d="M3 13L13 3" /></> }),
+            copy: svg(html! { <><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" /><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" /></> }),
         }
     }
 }
@@ -107,6 +119,9 @@ impl IconSet {
             Glyph::Grip => &self.grip,
             Glyph::Ellipsis => &self.ellipsis,
             Glyph::Search => &self.search,
+            Glyph::Eye => &self.eye,
+            Glyph::EyeOff => &self.eye_off,
+            Glyph::Copy => &self.copy,
         }
         .clone()
     }

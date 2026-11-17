@@ -1,0 +1,59 @@
+// Stepper (src/stepper.rs): a number between a minus and a plus button.
+//
+// - `.plinth-stepper`: worn with `.plinth-input-box`, which gives it the
+//   border, the sizes (`.plinth-small`, `.plinth-touch`), the states
+//   (`.plinth-invalid`, `.plinth-disabled`, `.plinth-busy`) and the focus
+//   ring; it only drops that box's stretch and padding. Its width is its
+//   buttons and the number's room.
+// - `.plinth-stepper-control`: the number, `--stepper-chars` wide in `ch`
+//   (the digits of the longest of min and max, set by the component), its
+//   figures of one width, so the box holds from min to max.
+// - `.plinth-stepper-button`: a square of the box's height.
+
+@use "tokens" as base;
+
+.plinth-stepper {
+    display: inline-flex;
+    gap: 0;
+    width: auto;
+    max-width: 100%;
+    padding-inline: 0;
+}
+
+.plinth-stepper-control {
+    flex: none;
+    box-sizing: content-box;
+    width: calc(var(--stepper-chars) * 1ch);
+    padding-inline: var(--space-2);
+    text-align: center;
+    @include base.numeric;
+}
+
+.plinth-stepper-button {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--input-height);
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        color: var(--accent);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include base.focus-ring;
+}

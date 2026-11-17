@@ -31,6 +31,9 @@ fn sample_set() -> IconSet {
         search: shape(
             "M10 2a8 8 0 1 0 5 14l6 6 2-2-6-6A8 8 0 0 0 10 2zm0 4a4 4 0 1 1 0 8 4 4 0 0 1 0-8z",
         ),
+        eye: shape("M2 12l5-7h10l5 7-5 7H7zm10-4a4 4 0 1 0 0 8 4 4 0 0 0 0-8z"),
+        eye_off: shape("M2 12l5-7h10l5 7-5 7H7zM4 20L20 4l1 1L5 21z"),
+        copy: shape("M8 3h13v13H8zM3 8h3v13h13v-3H3z"),
     }
 }
 
@@ -54,6 +57,9 @@ const GLYPHS: &[(&str, Glyph)] = &[
     ("Grip", Glyph::Grip),
     ("Ellipsis", Glyph::Ellipsis),
     ("Search", Glyph::Search),
+    ("Eye", Glyph::Eye),
+    ("EyeOff", Glyph::EyeOff),
+    ("Copy", Glyph::Copy),
 ];
 
 fn name(glyph: Glyph) -> String {
