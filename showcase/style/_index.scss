@@ -200,6 +200,9 @@ body {
 }
 
 .showcase-class-call {
+    // Last in its frame, so the line wrapping as the call changes moves
+    // nothing the page holds fixed.
+    order: 1;
     font-size: var(--text-sm);
     overflow-wrap: anywhere;
 }

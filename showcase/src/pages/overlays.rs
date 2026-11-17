@@ -91,6 +91,7 @@ fn Scene() -> Html {
                 </Menu>
                 <Button pressed={Some(*panel)} onclick={toggle_panel.clone()}>{ "A panel of the app's own" }</Button>
             </Cluster>
+            <p class={class::SAMPLE}>{ "The page behind: it does not move as overlays open and close." }</p>
             if *panel {
                 <Card>
                     <Stack>
@@ -104,7 +105,6 @@ fn Scene() -> Html {
                     </Stack>
                 </Card>
             }
-            <p class={class::SAMPLE}>{ "The page behind: it does not move as overlays open and close." }</p>
             <Popover anchor={pop_anchor} open={*popover} on_dismiss={close_popover} title="Popover">
                 <Stack>
                     <p class={class::PROSE}>{ "A tooltip over this popover: hover or focus the button." }</p>
