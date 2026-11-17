@@ -1230,7 +1230,8 @@ the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 `disabled`, `onclick`; with `href` a link row, an `<a>` that loses its
 `href` when disabled, `new_tab` opening it in a new tab (`target="_blank"`,
 `rel="noopener noreferrer"`); `current` marks the page shown,
-`aria-current="page"`, by the accent's ground and ink), `MenuCheck`
+`aria-current="page"`, by the accent's ground and ink; `tip` a styled tip,
+`data-tip`, naming what it acts on), `MenuCheck`
 (`menuitemcheckbox`: `checked`, `on_change`; the menu stays open),
 `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
 `detail` and `hint`, `MenuSeparator`, `MenuHeading` and `MenuNote` (a line

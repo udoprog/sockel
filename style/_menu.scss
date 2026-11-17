@@ -236,6 +236,7 @@
     &:hover,
     &:focus-visible {
         --button-ink: var(--danger);
+        --button-hover-ink: var(--danger);
     }
 }
 

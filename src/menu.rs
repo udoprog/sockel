@@ -506,6 +506,10 @@ pub struct MenuItemProps {
     /// The page shown (`aria-current="page"`), marked, in a menu of links.
     #[prop_or_default]
     pub current: bool,
+    /// A styled tip (`data-tip`, for [`DataTips`](crate::DataTips)) naming
+    /// what it acts on.
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     /// In the danger colour (Delete).
     #[prop_or_default]
     pub danger: bool,
@@ -588,7 +592,7 @@ impl Row<'_> {
                     href={(!p.disabled).then(|| href.clone())}
                     target={p.new_tab.then_some("_blank")}
                     rel={p.new_tab.then_some("noopener noreferrer")}
-                    aria-disabled={disabled} aria-current={current}
+                    aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                     data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </a>
@@ -596,7 +600,7 @@ impl Row<'_> {
             None => html! {
                 <button type="button" role={self.role} tabindex="-1" {class}
                     aria-checked={self.checked.map(|on| on.to_string())}
-                    aria-disabled={disabled} aria-current={current}
+                    aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                     data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </button>
@@ -656,6 +660,7 @@ fn item_props(
         href: None,
         new_tab: false,
         current: false,
+        tip: None,
         danger: false,
         disabled,
         onclick: Callback::noop(),
@@ -1241,6 +1246,16 @@ mod tests {
             testid: Some(AttrValue::Static("none")),
         }));
         assert!(html.contains("data-testid=\"none\""), "{html}");
+    }
+
+    #[test]
+    fn an_item_takes_a_tip() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            tip: Some(AttrValue::Static("Delete Pia")),
+        }));
+        assert!(html.contains("data-tip=\"Delete Pia\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {}));
+        assert!(!html.contains("data-tip"), "{html}");
     }
 
     #[test]

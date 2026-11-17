@@ -83,7 +83,7 @@ fn SampleItems(props: &ItemsProps) -> Html {
                     { "Look it up" }
                 </MenuItem>
                 <MenuSeparator />
-                <MenuItem danger=true onclick={pick("delete")}>{ "Delete" }</MenuItem>
+                <MenuItem danger=true tip="Delete this file" onclick={pick("delete")}>{ "Delete" }</MenuItem>
             </>
         },
         Items::Choices => {
