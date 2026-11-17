@@ -46,7 +46,8 @@
 //   `.plinth-stack` for a column of rows).
 // - `.plinth-library-page`: the page width of a library or admin index (with
 //   `.plinth-stack.plinth-loose`): xrefs, systems, tables, rolls, widgets, books, trait
-//   sets, sheets, keywords, groups, audit, tools, polls.
+//   sets, sheets, keywords, groups, audit, tools, polls. `.plinth-reading`: its
+//   blocks read narrow (`--page-reading`), as a long entry's text.
 //
 // The space between a page's blocks is its stack's gap, not margins on
 // the blocks.
@@ -109,6 +110,10 @@
     // default, a toolbar's).
     > * {
         margin-block: 0;
+    }
+
+    &.plinth-reading > * {
+        max-width: var(--page-reading);
     }
 }
 

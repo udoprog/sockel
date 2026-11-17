@@ -25,6 +25,8 @@
 //   actions as icons (their label text hidden), and on a phone one row,
 //   the title on two lines and the back link's words (`.plinth-page-head-back-label`)
 //   gone.
+// - `.plinth-page-head.plinth-one-row`: a crumb head that stays one row on a phone,
+//   the back link's words (`.plinth-page-head-back-label`) gone and its icon left.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
 // Either is at least `--control-height` high, with or without actions.
@@ -216,6 +218,20 @@
             gap: var(--space-0);
             --button-min-width: 2.25rem;
             --button-pad-x: var(--space-2);
+        }
+    }
+}
+
+@include base.below("phone") {
+    .plinth-page-head.plinth-one-row {
+        flex-wrap: nowrap;
+
+        > .plinth-page-head-crumbs {
+            flex: 1 1 auto;
+        }
+
+        .plinth-page-head-back-label {
+            display: none;
         }
     }
 }

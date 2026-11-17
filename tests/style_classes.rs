@@ -4,7 +4,7 @@
 use plinth_build::{Config, Usage};
 
 /// Utilities and hooks documented in the Sass for an app's own markup.
-const ADOPTER_HOOKS: [&str; 11] = [
+const ADOPTER_HOOKS: [&str; 12] = [
     "plinth-basis-lg",
     "plinth-basis-md",
     "plinth-basis-sm",
@@ -14,6 +14,7 @@ const ADOPTER_HOOKS: [&str; 11] = [
     "plinth-inset",
     "plinth-library-page",
     "plinth-push-end",
+    "plinth-reading",
     "plinth-self-start",
     "plinth-start",
 ];

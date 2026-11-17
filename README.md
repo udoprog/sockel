@@ -356,6 +356,10 @@ tag, `ul` or `ol`, renders with no bullets, margin or padding
 working. `stack_with` and `cluster_with` return the same classes for any
 tag, so a list built from them adds `PLAIN_LIST` itself.
 
+A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
+blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
+to the reading column (`--page-reading`), as a long entry's text.
+
 ## Checkbox, Switch, Choice and chips
 
 All four mark a state by colour and background, never by weight, and
@@ -593,6 +597,9 @@ set per Stepper).
 - `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
+- `PageHead` takes `COMPACT` (actions as icons, one row on a phone) and
+  `ONE_ROW` (a crumb head that stays one row on a phone, the back link's
+  words, `PAGE_HEAD_BACK_LABEL`, hidden) in `class`.
 
 ## Icons
 

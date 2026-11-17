@@ -39,6 +39,7 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
     let back = use_state(|| false);
     let meta = use_state(|| false);
     let compact = use_state(|| false);
+    let one_row = use_state(|| false);
     let actions = use_state(|| 1);
     let labels = use_state(|| Text::Short);
     let level = use_state(|| None);
@@ -68,6 +69,7 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
             <Toggle label="back" value={*back} on_change={bind(&back)} />
             <Toggle label="meta" value={*meta} on_change={bind(&meta)} />
             <Toggle label="class compact" value={*compact} on_change={bind(&compact)} />
+            <Toggle label="class one_row" value={*one_row} on_change={bind(&one_row)} />
         </>
     };
 
@@ -106,6 +108,7 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         testid: None,
         class: classes!(
             compact.then_some(plinth::class::COMPACT),
+            one_row.then_some(plinth::class::ONE_ROW),
             label.then_some(plinth::class::LABEL),
             list.then_some(plinth::class::LIST),
             nested.then_some(plinth::class::NESTED),
@@ -141,6 +144,7 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
     };
     let modifiers: Vec<&str> = [
         (*compact, "plinth::class::COMPACT"),
+        (*one_row, "plinth::class::ONE_ROW"),
         (*label, "plinth::class::LABEL"),
         (*list, "plinth::class::LIST"),
         (*nested, "plinth::class::NESTED"),
