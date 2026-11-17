@@ -283,7 +283,8 @@ selector:
 ```
 
 Breakpoints and the component settings (`$card-padding`,
-`$card-padding-phone`, `$toolbar-gap`, `$visibility-breakpoint`) are Sass-only: an app built with
+`$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
+`$button-primary-weight`, `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
 ## Configuration
@@ -333,6 +334,8 @@ page can still override them at runtime.
 | `$card-padding` | `var(--space-4)` |
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
 | `$toolbar-gap` | `var(--space-1)` |
+| `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.plinth-button`'s sides, regular and small) |
+| `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |

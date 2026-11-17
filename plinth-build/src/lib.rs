@@ -725,6 +725,38 @@ mod tests {
     }
 
     #[test]
+    fn a_button_takes_its_padding_and_primary_weight_from_settings() {
+        let plain = Config::new().build().unwrap();
+        assert!(
+            declarations(&plain.css, ".plinth-button")
+                .contains(&"padding-inline: var(--button-pad-x, var(--space-3))".to_owned())
+        );
+        assert!(
+            !declarations(&plain.css, ".plinth-button.plinth-primary")
+                .iter()
+                .any(|line| line.starts_with("font-weight"))
+        );
+        let tuned = Config::new()
+            .with("button-padding", "var(--space-4)")
+            .with("button-padding-small", "var(--space-3)")
+            .with("button-primary-weight", "600")
+            .build()
+            .unwrap();
+        assert!(
+            declarations(&tuned.css, ".plinth-button")
+                .contains(&"padding-inline: var(--button-pad-x, var(--space-4))".to_owned())
+        );
+        assert!(
+            declarations(&tuned.css, ".plinth-button.plinth-small")
+                .contains(&"padding-inline: var(--button-pad-x, var(--space-3))".to_owned())
+        );
+        assert!(
+            declarations(&tuned.css, ".plinth-button.plinth-primary")
+                .contains(&"font-weight: 600".to_owned())
+        );
+    }
+
+    #[test]
     fn a_dialog_shares_the_overlay_level_and_its_old_variable_still_compiles() {
         let plain = Config::new().build().unwrap();
         assert!(

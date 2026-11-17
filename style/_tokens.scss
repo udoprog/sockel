@@ -105,6 +105,11 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
 $card-padding: var(--space-4) !default;
 $card-padding-phone: null !default;
 $toolbar-gap: var(--space-1) !default;
+// A button's padding at its sides, regular and small, and a primary
+// button's font weight (`null`: the weight it inherits).
+$button-padding: var(--space-3) !default;
+$button-padding-small: var(--space-2) !default;
+$button-primary-weight: null !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
@@ -634,6 +639,7 @@ $sheet-breakpoint: "phone" !default;
         --button-ink: var(--on-accent);
         --button-edge: var(--accent);
         --button-hover-edge: var(--text);
+        font-weight: $button-primary-weight;
     } @else if $variant == ghost {
         --button-fill: transparent;
     } @else if $variant == quiet {
@@ -675,7 +681,7 @@ $sheet-breakpoint: "phone" !default;
     min-height: 0;
     margin: 0;
     padding-block: 0;
-    padding-inline: var(--button-pad-x, var(--space-3));
+    padding-inline: var(--button-pad-x, #{$button-padding});
     @include reserved-border(var(--button-edge));
     border-radius: var(--radius-inner, var(--radius-sm));
     background: var(--button-fill);
