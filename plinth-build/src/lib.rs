@@ -701,6 +701,8 @@ mod tests {
             "--card-border-width: var(--space-px)",
             "--band-chrome-ground: var(--surface)",
             "--band-search-text: var(--text-sm)",
+            "--action-overlay-radius: var(--radius-sm)",
+            "--action-overlay-padding: var(--space-3) var(--space-2)",
             "--panel-border: var(--border)",
             "--panel-tint-text: var(--text)",
             "--menu-item-icon-ink: currentColor",

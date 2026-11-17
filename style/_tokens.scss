@@ -53,6 +53,8 @@
 //   tint panel's), and a tint panel's corners.
 // - `--band-chrome-gap` and `--band-search-text`: a chrome band's gap and a
 //   search band's type.
+// - `--action-overlay-radius` and `--action-overlay-padding`: the corners and
+//   the side padding of an action row laid over the end of a row.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
@@ -265,6 +267,8 @@ $panel-tint-radius: var(--radius-pill) !default;
 $band-chrome-ground: var(--surface) !default;
 $band-chrome-gap: $toolbar-gap !default;
 $band-search-text: var(--text-sm) !default;
+$action-overlay-radius: var(--radius-sm) !default;
+$action-overlay-padding: var(--space-3) var(--space-2) !default;
 // The breakpoint `phone-only` and `desktop-only` switch at.
 $visibility-breakpoint: "phone" !default;
 // The breakpoint below which a popover is a sheet from the bottom.
@@ -423,6 +427,8 @@ $sheet-breakpoint: "phone" !default;
     --band-chrome-ground: #{$band-chrome-ground};
     --band-chrome-gap: #{$band-chrome-gap};
     --band-search-text: #{$band-search-text};
+    --action-overlay-radius: #{$action-overlay-radius};
+    --action-overlay-padding: #{$action-overlay-padding};
 }
 
 // A page's content column: the workspace unless it is given the reading

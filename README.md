@@ -360,6 +360,7 @@ page can still override them at runtime.
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
+| `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay `ActionRow`'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 
@@ -994,7 +995,8 @@ Part: `SELECTION_BAR_COUNT`. `selection_bar(idle, inset, sticky)`.
 `opacity: 0` and `pointer-events: none` until the row (a `RowListItem`) is
 hovered or has focus. Its controls stay in the tab order, so focus reveals
 it. It reads `--overlay-opacity`, `--overlay-events` and `--overlay-tint`,
-which a row sets. `action_row(overlay, nowrap)`.
+which a row sets; its corners and side padding are `--action-overlay-radius`
+and `--action-overlay-padding`. `action_row(overlay, nowrap)`.
 
 `CardGrid` lays cards in as many columns as fit (`tag`, `ul` by default).
 `size` (`GridSize`): `Normal` (columns of at least `--card-grid-min`), `Wide`

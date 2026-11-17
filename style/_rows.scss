@@ -225,8 +225,8 @@
         inset-inline-end: 0;
         flex-wrap: nowrap;
         gap: var(--space-1);
-        padding-inline: var(--space-3) var(--space-2);
-        border-radius: var(--radius-sm);
+        padding-inline: var(--action-overlay-padding);
+        border-radius: var(--action-overlay-radius);
         background:
             linear-gradient(var(--overlay-tint, transparent), var(--overlay-tint, transparent)),
             var(--surface);
