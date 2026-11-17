@@ -324,7 +324,6 @@
     }
 
     &.plinth-link {
-        display: block;
         text-decoration: none;
         cursor: pointer;
 
@@ -335,6 +334,12 @@
 
         @include base.focus-ring;
     }
+}
+
+// A link card is a block (a link is inline) at no weight, so a layout
+// primitive or a component's own display on the same element wins.
+:where(.plinth-card.plinth-link) {
+    display: block;
 }
 
 @if base.$card-padding-phone {
