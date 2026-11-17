@@ -496,7 +496,7 @@
 //! | `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
 //! | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 //! | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
-//! | `$button-disabled-cursor` | `not-allowed` (a disabled button's cursor) |
+//! | `$button-disabled-cursor` | `not-allowed` (a disabled button's or pager button's cursor) |
 //! | `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 //! | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 //! | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap, its paragraphs without margins), `var(--shadow-1)` |

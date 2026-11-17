@@ -89,7 +89,7 @@
 
     &:disabled {
         opacity: 0.5;
-        cursor: not-allowed;
+        cursor: base.$button-disabled-cursor;
     }
 
     @if base.emits("pager.edges") {
