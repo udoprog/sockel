@@ -5,6 +5,7 @@ use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
+use crate::picker::{ChoiceList, ChoicePopup, PickerOption, SEARCH_FROM};
 use crate::select::{printable, scroll_to};
 use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, use_overlays, use_popover};
 
@@ -76,6 +77,8 @@ pub struct FilterPickerProps<T: PartialEq + 'static> {
 /// count of the rest in a reserved slot), so choosing never resizes it.
 /// It opens a multi-select listbox: an option for all, then a checkable
 /// option per choice; a pick leaves it open. Keys as a [`crate::Select`]'s.
+/// Past [`SEARCH_FROM`] choices the pop-up is a searchable [`ChoiceList`]
+/// instead, a fixed height whatever matches.
 #[function_component]
 pub fn FilterPicker<T>(props: &FilterPickerProps<T>) -> Html
 where
@@ -94,13 +97,14 @@ where
         let open = open.clone();
         Callback::from(move |_: Dismiss| open.set(false))
     };
+    let searchable = props.choices.len() > SEARCH_FROM;
     let placed = use_popover(
-        *open,
+        *open && !searchable,
         face.clone(),
         list.clone(),
         Side::Below,
         PopoverAlign::Start,
-        on_dismiss,
+        on_dismiss.clone(),
     );
     {
         let (state, base, is_open) = (state.clone(), (*id).clone(), *open);
@@ -216,7 +220,7 @@ where
         name
     };
 
-    let popup = (*open).then(|| {
+    let popup = (*open && !searchable).then(|| {
         let option = |i: usize| {
             let selected = is_chosen(i);
             let is_active = active == Some(i);
@@ -269,6 +273,28 @@ where
         })
     });
 
+    let search = searchable.then(|| {
+        let options: Vec<PickerOption<usize>> = std::iter::once(props.all.clone())
+            .chain(choices.iter().map(|c| c.label.clone()))
+            .enumerate()
+            .map(|(i, l)| PickerOption::new(i, l))
+            .collect();
+        let chosen: Vec<usize> = if props.chosen.is_empty() {
+            vec![0]
+        } else {
+            (1..=choices.len()).filter(|&i| is_chosen(i)).collect()
+        };
+        let on_pick = Callback::from(move |i: usize| pick(i));
+        html! {
+            <ChoicePopup anchor={face.clone()} open={*open} on_dismiss={on_dismiss.clone()}
+                testid={props.testid.clone()}>
+                <ChoiceList<usize> {options} multi=true {chosen} {on_pick}
+                    label={props.label.clone()} autofocus=true
+                    testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))} />
+            </ChoicePopup>
+        }
+    });
+
     html! {
         <>
             <button ref={face} type="button"
@@ -289,6 +315,7 @@ where
                 </span>
             </button>
             { popup.unwrap_or_default() }
+            { search.unwrap_or_default() }
         </>
     }
 }

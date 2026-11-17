@@ -242,6 +242,8 @@ pub fn SearchSelectPage() -> Html {
 
 const GENRES: [&str; 6] = ["Rock", "Jazz", "Folk", "Classical", "Electronic", "Hip hop"];
 
+const GENRE_COUNTS: &[(&str, usize)] = &[("6", 6), ("40", 40)];
+
 const CHOSEN: &[(&str, Option<&[usize]>)] = &[
     ("none (all)", Some(&[])),
     ("one", Some(&[1])),
@@ -255,16 +257,20 @@ pub fn FilterPickerPage() -> Html {
     let chosen = use_state(|| vec![1usize]);
     let text = use_state(|| Text::Short);
     let disabled = use_state(|| false);
+    let count = use_state(|| 6usize);
     let query = use_state(String::new);
     let preset = CHOSEN
         .iter()
         .find_map(|(_, c)| c.filter(|c| *c == chosen.as_slice()));
 
-    let choices: Vec<FilterChoice<usize>> = GENRES
-        .iter()
-        .enumerate()
-        .map(|(i, g)| {
-            let label = if i == 3 { text.of(g) } else { (*g).to_owned() };
+    let choices: Vec<FilterChoice<usize>> = (0..*count)
+        .map(|i| {
+            let g = GENRES[i % GENRES.len()];
+            let label = match i {
+                3 => text.of(g),
+                _ if i >= GENRES.len() => format!("{g} {}", i / GENRES.len() + 1),
+                _ => g.to_owned(),
+            };
             FilterChoice::new(i, label)
         })
         .collect();
@@ -282,6 +288,7 @@ pub fn FilterPickerPage() -> Html {
                         }
                     })
                 }} />
+            <Control<usize> label="choices" options={GENRE_COUNTS} value={*count} on_change={bind(&count)} />
             <Control<Text> label="Choice text" options={TEXTS} value={*text} on_change={bind(&text)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
         </>
@@ -306,7 +313,7 @@ pub fn FilterPickerPage() -> Html {
                     <FilterPicker<usize> choices={choices} chosen={(*chosen).clone()}
                         {on_change} label="Genre" disabled={*disabled} testid="genre-filter" />
                 </LibraryToolbar>
-                <p class={class::SAMPLE}>{ "Check any number of genres: the button keeps its width, its count's room kept with none. A pick leaves the list open." }</p>
+                <p class={class::SAMPLE}>{ "Check any number of genres: the button keeps its width, its count's room kept with none. A pick leaves the list open; past eight choices it has a search field and a fixed height." }</p>
             </Stack>
         </Demo>
     }

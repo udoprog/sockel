@@ -374,18 +374,18 @@ where
 }
 
 #[derive(Properties, PartialEq)]
-struct PopupProps {
-    anchor: NodeRef,
-    open: bool,
-    on_dismiss: Callback<Dismiss>,
-    testid: Option<AttrValue>,
-    children: Html,
+pub(crate) struct PopupProps {
+    pub anchor: NodeRef,
+    pub open: bool,
+    pub on_dismiss: Callback<Dismiss>,
+    pub testid: Option<AttrValue>,
+    pub children: Html,
 }
 
 /// A [`ChoiceList`]'s surface beside `anchor` in the overlay layer, its
 /// `data-autofocus` element focused once placed; Tab closes it.
 #[function_component]
-fn ChoicePopup(props: &PopupProps) -> Html {
+pub(crate) fn ChoicePopup(props: &PopupProps) -> Html {
     let overlays = use_overlays();
     let popup = use_node_ref();
     let placed = use_popover(

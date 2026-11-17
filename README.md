@@ -1405,7 +1405,10 @@ when chosen. A pick leaves it open. Props: `choices: Vec<FilterChoice<T>>`,
 `chosen: Vec<T>` (in the order chosen), `on_change` (the choices after a
 pick, `toggled(chosen, value)`; empty for all), `label` (the accessible
 name and tooltip before what is chosen), `all` (the app's word, `"All"` by
-default), `disabled`, `class`, `testid`. Keys as a `Select`'s.
+default), `disabled`, `class`, `testid`. Keys as a `Select`'s. Past
+`SEARCH_FROM` (8) choices the pop-up is a `ChoiceList` (`multi`, all as
+its first option) with its search field, prefix matches first and its
+`--picker-rows` height whatever matches; the field takes the focus.
 `filter_summary(all, labels)` gives its words and count. Parts:
 `FILTER_PICKER_TEXT`, `FILTER_PICKER_COUNT` (`OFF` with none),
 `FILTER_PICKER_CHEVRON`, `FILTER_PICKER_LIST`.
