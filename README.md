@@ -357,6 +357,28 @@ Pick a free port. A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
 `cargo test --workspace` fails.
 
+### Stability probe
+
+Each page also declares the boxes that must hold (`holds`, next to its
+`covers`): a part's class, which of its size holds (`Size::Width`,
+`Height`, `Both`, or `Box` for its size and place), and across which
+states (`Across::All`, `Only` or `Except` a list of control labels, a
+single value as `"label=value"`, or the probe's own `focus` and
+`click`). The test fails for a page without one, unless it is listed in
+`UNPROBED`.
+
+The panel in the window's corner (fixed, so it never moves the page)
+runs the probe: it sets each control to each of its values in turn,
+one control at a time, toggles each checkbox, then focuses each control
+in the frames and clicks each button there, measuring every declared
+part in both frames after each state. Its `<pre>` reads `probe: stable`
+when no declared box moved or resized by more than half a pixel, and
+otherwise lists each change by state, frame and part. The panel's
+`data-probe` attribute carries the verdict (`idle`, `running`, `stable`,
+`unstable`), and `?probe` before the page's `#id` runs it on load, so a
+browser check reads the result as text. Hover cannot be scripted, so it
+stays a manual check.
+
 ## Checks
 
 ```sh

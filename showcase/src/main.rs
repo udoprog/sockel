@@ -2,6 +2,7 @@
 
 mod controls;
 mod pages;
+mod probe;
 
 /// The showcase's own classes (`style/`), from plinth-build.
 mod class {
@@ -107,6 +108,9 @@ fn App() -> Html {
                     <div key={page.id} class={plinth::class::CONTENTS}>{ (page.render)() }</div>
                 </Stack>
             </main>
+            if !page.holds.is_empty() {
+                <probe::Probe key={page.id} holds={page.holds} />
+            }
         </div>
     }
 }

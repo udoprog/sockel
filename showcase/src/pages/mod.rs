@@ -10,6 +10,9 @@ use yew::prelude::*;
 
 use plinth::Head;
 
+use crate::class;
+use crate::probe::{Across, Hold, Size};
+
 pub struct Page {
     /// The page's address, after the `#`.
     pub id: &'static str,
@@ -20,7 +23,17 @@ pub struct Page {
     /// props and enums).
     pub covers: &'static [&'static str],
     pub render: fn() -> Html,
+    /// The boxes the stability probe checks hold across the page's states.
+    pub holds: &'static [Hold],
 }
+
+const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
+    Hold { part, size, across }
+}
+
+/// A page with no states for the probe to cycle.
+#[cfg(test)]
+const UNPROBED: &[&str] = &["styles"];
 
 /// Every page, in the navigation's order. A name plinth exports must be in
 /// some page's `covers`, which the test below checks.
@@ -31,6 +44,7 @@ pub const PAGES: &[Page] = &[
         about: "A column, its blocks a gap apart.",
         covers: &["Stack", "StackProps", "Gap"],
         render: || html! { <layout::StackPage /> },
+        holds: &[hold(plinth::class::STACK, Size::Width, Across::All)],
     },
     Page {
         id: "cluster",
@@ -38,6 +52,11 @@ pub const PAGES: &[Page] = &[
         about: "A row that wraps, its items centred.",
         covers: &["Cluster", "ClusterProps", "Justify", "Align"],
         render: || html! { <layout::ClusterPage /> },
+        holds: &[hold(
+            plinth::class::CLUSTER,
+            Size::Width,
+            Across::Except(&["inline"]),
+        )],
     },
     Page {
         id: "action-group",
@@ -45,6 +64,11 @@ pub const PAGES: &[Page] = &[
         about: "The buttons that end a form, a panel or a section, the primary first.",
         covers: &["ActionGroup", "ActionGroupProps", "action_group"],
         render: || html! { <actions::ActionGroupPage /> },
+        holds: &[hold(
+            plinth::class::ICONED,
+            Size::Height,
+            Across::Except(&["Buttons"]),
+        )],
     },
     Page {
         id: "icon-button",
@@ -52,6 +76,18 @@ pub const PAGES: &[Page] = &[
         about: "A button that leads with (or ends in) an icon the app supplies. Click it; tab to it.",
         covers: &["IconButton", "IconButtonProps", "icon_button"],
         render: || html! { <actions::IconButtonPage /> },
+        holds: &[
+            hold(
+                plinth::class::ICONED,
+                Size::Box,
+                Across::Only(&["disabled", "dialog", "label (aria-label)", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::ICONED,
+                Size::Height,
+                Across::Except(&["Small"]),
+            ),
+        ],
     },
     Page {
         id: "icon",
@@ -67,6 +103,18 @@ pub const PAGES: &[Page] = &[
             "use_icons",
         ],
         render: || html! { <icons::IconPage /> },
+        holds: &[
+            hold(
+                plinth::class::GLYPH,
+                Size::Both,
+                Across::Only(&["Icon set", "glyph", "disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::ICONED,
+                Size::Height,
+                Across::Only(&["Icon set", "glyph", "disabled", "focus", "click"]),
+            ),
+        ],
     },
     Page {
         id: "toolbar",
@@ -79,6 +127,14 @@ pub const PAGES: &[Page] = &[
             "ToolbarSpacerProps",
         ],
         render: || html! { <layout::ToolbarPage /> },
+        holds: &[
+            hold(plinth::class::TOOLBAR, Size::Width, Across::All),
+            hold(
+                plinth::class::TOOLBAR,
+                Size::Height,
+                Across::Only(&["Labels", "ToolbarSpacer", "focus", "click"]),
+            ),
+        ],
     },
     Page {
         id: "card",
@@ -86,6 +142,7 @@ pub const PAGES: &[Page] = &[
         about: "A surface lifted off the page.",
         covers: &["Card", "CardProps", "Inset"],
         render: || html! { <layout::CardPage /> },
+        holds: &[hold(plinth::class::CARD, Size::Width, Across::All)],
     },
     Page {
         id: "page-head",
@@ -93,6 +150,21 @@ pub const PAGES: &[Page] = &[
         about: "A page's title with its help, and its actions.",
         covers: &["PageHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Page} /> },
+        holds: &[
+            hold(plinth::class::PAGE_HEAD, Size::Width, Across::All),
+            hold(
+                plinth::class::PAGE_HEAD,
+                Size::Height,
+                Across::Only(&[
+                    "Actions=0",
+                    "title_class",
+                    "help",
+                    "Test ids",
+                    "focus",
+                    "click",
+                ]),
+            ),
+        ],
     },
     Page {
         id: "section-head",
@@ -100,6 +172,21 @@ pub const PAGES: &[Page] = &[
         about: "A section's title with its help, and its actions.",
         covers: &["SectionHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Section} /> },
+        holds: &[
+            hold(plinth::class::SECTION_HEAD, Size::Width, Across::All),
+            hold(
+                plinth::class::SECTION_HEAD,
+                Size::Height,
+                Across::Only(&[
+                    "Actions=0",
+                    "title_class",
+                    "help",
+                    "Test ids",
+                    "focus",
+                    "click",
+                ]),
+            ),
+        ],
     },
     Page {
         id: "library-toolbar",
@@ -107,6 +194,14 @@ pub const PAGES: &[Page] = &[
         about: "A list's search field and its filters: click a filter to change its text, and the field keeps its width.",
         covers: &["LibraryToolbar", "LibraryToolbarProps"],
         render: || html! { <library::LibraryToolbarPage /> },
+        holds: &[
+            hold(plinth::class::LIBRARY_TOOLBAR, Size::Width, Across::All),
+            hold(
+                plinth::class::LIBRARY_SEARCH,
+                Size::Box,
+                Across::Only(&["icon", "autofocus", "focus", "click"]),
+            ),
+        ],
     },
     Page {
         id: "classes",
@@ -114,6 +209,7 @@ pub const PAGES: &[Page] = &[
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
         covers: &["stack", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
+        holds: &[hold(plinth::class::STACK, Size::Width, Across::All)],
     },
     Page {
         id: "foundations",
@@ -121,6 +217,23 @@ pub const PAGES: &[Page] = &[
         about: "The utilities and mixins against jitter: text fitting, tabular figures, a scroll area, the current item, showing by width, the focus ring; and the colours plinth derives.",
         covers: &[],
         render: || html! { <foundations::FoundationsPage /> },
+        holds: &[
+            hold(
+                class::TAB,
+                Size::Both,
+                Across::Only(&["focus", "click", "current by"]),
+            ),
+            hold(
+                class::READOUT,
+                Size::Both,
+                Across::Only(&["Figure=8888", "Figure=1010"]),
+            ),
+            hold(
+                class::SCROLL_BOX,
+                Size::Width,
+                Across::Only(&["Scrolled items", "scroll-area"]),
+            ),
+        ],
     },
     Page {
         id: "styles",
@@ -128,6 +241,7 @@ pub const PAGES: &[Page] = &[
         about: "plinth's compiled stylesheet, and the component that adds the page's one stylesheet.",
         covers: &["STYLESHEET", "STYLE_ID", "Styles", "StylesProps"],
         render: || html! { <styles::StylesPage /> },
+        holds: &[],
     },
 ];
 
@@ -135,7 +249,7 @@ pub const PAGES: &[Page] = &[
 mod tests {
     use std::collections::BTreeSet;
 
-    use super::PAGES;
+    use super::{PAGES, UNPROBED};
 
     /// The names in `src/lib.rs`'s `pub use` items.
     fn exported() -> BTreeSet<&'static str> {
@@ -176,6 +290,19 @@ mod tests {
         assert!(
             stale.is_empty(),
             "showcase pages cover names plinth does not export: {stale:?}"
+        );
+    }
+
+    #[test]
+    fn every_page_declares_the_boxes_it_holds() {
+        let bare: Vec<_> = PAGES
+            .iter()
+            .filter(|p| p.holds.is_empty() != UNPROBED.contains(&p.id))
+            .map(|p| p.id)
+            .collect();
+        assert!(
+            bare.is_empty(),
+            "pages without holds for the probe (or listed in UNPROBED with some): {bare:?}"
         );
     }
 

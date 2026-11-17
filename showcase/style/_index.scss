@@ -53,6 +53,12 @@
     box-sizing: border-box;
 }
 
+// The window's scrollbar keeps its room, so a page that grows past the
+// window does not narrow everything on it.
+html {
+    scrollbar-gutter: stable;
+}
+
 body {
     margin: 0;
     background: var(--bg);
@@ -379,4 +385,32 @@ body {
     border: 1px solid var(--border);
     border-radius: var(--radius-xs);
     background: var(--swatch);
+}
+
+// The stability probe's panel (probe.rs): fixed to the window's corner,
+// so neither it nor its read-out ever moves the page it measures.
+.showcase-probe {
+    position: fixed;
+    right: var(--space-3);
+    bottom: var(--space-3);
+    z-index: var(--layer-overlay);
+    display: flex;
+    flex-direction: column;
+    align-items: flex-start;
+    gap: var(--space-2);
+    width: min(28rem, calc(100vw - 2 * var(--space-3)));
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+}
+
+.showcase-probe-out {
+    width: 100%;
+    max-height: 12rem;
+    margin: 0;
+    overflow: auto;
+    font-size: var(--text-xs);
+    white-space: pre-wrap;
 }
