@@ -14,19 +14,22 @@
 //   `-text` holding `-label` and `-description` (muted, under it, wrapping).
 // - `.plinth-listbox-group` (`role="group"`): a run of options under its
 //   `-group-name`, a muted heading.
+// - Settings: `$listbox-max-width` (the list's widest, past which labels
+//   are cut) and `$listbox-active-fill` (the active row's fill).
 
 @use "tokens" as base;
 @use "menu";
 
 .plinth-listbox {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
+    max-width: min(#{base.$listbox-max-width}, calc(100vw - 2 * var(--space-2)));
 }
 
 .plinth-listbox-option {
     @include menu.item;
 
     &.plinth-active {
-        @include menu.item-active;
+        background: base.$listbox-active-fill;
     }
 
     &[aria-disabled="true"] {

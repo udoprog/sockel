@@ -167,6 +167,9 @@ $dialog-scroll-gutter: stable !default;
 $dialog-sheet-edge: all !default;
 // A popover's body padding and its shadow (a hover card's too).
 $popover-padding: var(--space-3) !default;
+// A listbox's widest (a Select's list), and its active row's fill.
+$listbox-max-width: var(--popover-max-width) !default;
+$listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
 $popover-shadow: var(--shadow-1) !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
