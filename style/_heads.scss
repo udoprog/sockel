@@ -215,8 +215,10 @@
             display: none;
         }
 
+        // The icons keep their row: the title, not the actions, gives way.
         > .plinth-page-head-actions {
             flex-wrap: nowrap;
+            flex-shrink: 0;
             gap: var(--space-0);
             --button-min-width: 2.25rem;
             --button-pad-x: var(--space-2);
