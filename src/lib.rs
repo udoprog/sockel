@@ -58,6 +58,9 @@
 //!   [`ActionRow`] (`.action-row`): actions on what stands around them, over
 //!   a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
 //!   columns as fit.
+//! - [`Reorder`] (`.reorder`) with [`ReorderRow`]: rows moved by a drag on
+//!   their [`DragHandle`] (`.drag-handle`) or by keyboard, nothing reflowing
+//!   until the drop, each step announced.
 //! - [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
 //!   [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
 //!   have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
@@ -154,6 +157,7 @@ mod nav_list;
 mod notice;
 mod pager;
 mod popover;
+mod reorder;
 mod roving;
 mod rows;
 mod save_bar;
@@ -224,6 +228,10 @@ pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_but
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
     popover, use_popover,
+};
+pub use reorder::{
+    DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,
+    key_target, landing, move_item, reorder_row, reorder_text, slot_at,
 };
 pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,

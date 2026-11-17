@@ -1,0 +1,78 @@
+// Reorder and DragHandle (src/reorder.rs). Nothing reflows while a row is
+// dragged: the lifted row follows the pointer by a transform
+// (`--reorder-shift`, set on it during the drag) and keeps its room, and
+// the drop is marked by an inset box shadow, never a border or margin.
+//
+// - `.plinth-reorder`: the list's wrapper, its own stacking context, so a
+//   lifted row floats over its neighbours only.
+// - `.plinth-reorder-row`: a row (worn with `.plinth-row-list-item`).
+//   `.plinth-lifted` is the row being moved; `.plinth-drop-before` and
+//   `.plinth-drop-after` mark the row it lands beside.
+// - `.plinth-drag-handle`: the grip button. `.plinth-lifted` while its row
+//   is.
+
+@use "tokens" as base;
+
+.plinth-reorder {
+    isolation: isolate;
+    min-width: 0;
+}
+
+.plinth-reorder-row {
+    --reorder-shift: 0px;
+    --reorder-mark: var(--space-0);
+
+    &.plinth-lifted {
+        z-index: var(--layer-sticky);
+        background: var(--surface-raised);
+        box-shadow:
+            0 0 0 var(--space-px) var(--accent),
+            var(--shadow-1);
+        transform: translateY(var(--reorder-shift));
+    }
+
+    &.plinth-drop-before {
+        box-shadow: inset 0 var(--reorder-mark) 0 var(--accent);
+    }
+
+    &.plinth-drop-after {
+        box-shadow: inset 0 calc(-1 * var(--reorder-mark)) 0 var(--accent);
+    }
+}
+
+.plinth-drag-handle {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--control-height-small);
+    height: var(--control-height-small);
+    margin: 0;
+    padding: 0;
+    @include base.reserved-border;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: grab;
+    touch-action: none;
+    user-select: none;
+
+    &:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--text) 6%, transparent);
+        color: var(--text);
+    }
+
+    @include base.focus-ring;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.plinth-lifted {
+        color: var(--accent);
+        cursor: grabbing;
+    }
+}

@@ -846,6 +846,44 @@ row reserves its top border, so `divided`, hover, focus and a chosen
 it moves nothing. A selection bar keeps its height whether anything is
 picked or not. A card grid's cards are as tall as their row.
 
+## Reorder and DragHandle
+
+`Reorder` is a list whose rows move by a drag on their `DragHandle` or by
+keyboard. `rows` is a `Vec<ReorderRow>` (`ReorderRow::new(key, name)`,
+`.detail(html)`, `.end(html)`; the key is stable across moves), and
+`on_move((from, to))` reports a move, `to` an index in the list without the
+row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
+(as `RowList`'s), `disabled`, `class`, `testid`. The rows are
+`RowListItem`s (`.plinth-reorder-row`), the handle in their `start` slot
+(a new `RowListItem` prop: what begins a row).
+
+- Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
+  follows the pointer, kept within the list. Release drops it, Escape or a
+  cancelled pointer puts it back.
+- Keyboard, on a focused handle: Space or Enter lifts, the arrows, Home and
+  End aim, Space or Enter drops, Escape or leaving the handle cancels.
+  Alt and an arrow moves the row at once. Focus follows the moved row.
+- The row it lands beside is marked `DROP_BEFORE` or `DROP_AFTER`.
+- `text: Callback<ReorderText, String>` gives the handle's name
+  (`Handle`), its hint (`Hint`, its `aria-describedby`) and the
+  announcements (`Lifted`, `Moving`, `Dropped`, `Cancelled`, positions from
+  1), read from a `role="status"` region: an app passes its phrasebook's
+  words; the default is `reorder_text` ("Moved Alpha to 3 of 5").
+- `DragHandle` is the grip alone (the `IconSet`'s `Grip`): `label`, `lifted`,
+  `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
+  `testid`. Helpers: `reorder_row(index, lift)`, `drag_handle(lifted)`,
+  `landing(from, slot)`, `slot_at(middles, y)`, `key_target(key, to, count)`.
+
+Size guarantees: nothing reflows during a drag. The rows are measured once
+at the press; the lifted row moves by a transform (`--reorder-shift`) and
+keeps its own room, so no gap of another height opens and the list's
+height holds; the drop marks are inset box shadows, never borders or
+margins; the order changes once, on the drop. A keyboard lift moves only
+the marks. The handle is `--control-height-small` square with a reserved
+border; hover, focus and lifted change colours only. New classes:
+`REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
+`DRAG_HANDLE`. New partial: `_reorder.scss`. New tokens: none.
+
 ## Dialog
 
 `Dialog` is a modal box over a `--scrim`, rendered while `open` in the

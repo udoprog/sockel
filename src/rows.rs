@@ -50,6 +50,9 @@ pub struct RowListItemProps {
     /// A line under the name, cut.
     #[prop_or_default]
     pub detail: Option<Html>,
+    /// What begins the row, before the name: a drag handle, a mark.
+    #[prop_or_default]
+    pub start: Option<Html>,
     /// Parts to the top, and the name wraps: a tall row.
     #[prop_or_default]
     pub top: bool,
@@ -76,6 +79,9 @@ pub fn RowListItem(props: &RowListItemProps) -> Html {
     html! {
         <@{props.tag} class={classes!(row_list_item(props.top), props.class.clone())}
             data-testid={props.testid.clone()}>
+            if let Some(start) = &props.start {
+                { start.clone() }
+            }
             <div class={class::ROW_LIST_MAIN}>
                 <span class={class::ROW_LIST_NAME}>{ props.name.clone() }</span>
                 if let Some(detail) = &props.detail {

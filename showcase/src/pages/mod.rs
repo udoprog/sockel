@@ -17,6 +17,7 @@ mod menus;
 mod notices;
 mod pagers;
 mod popover;
+mod reorder;
 mod rows;
 mod select;
 mod steppers;
@@ -838,6 +839,49 @@ pub const PAGES: &[Page] = &[
                 plinth::class::CARD_GRID,
                 Size::Box,
                 Across::Only(&["focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "reorder",
+        title: "Reorder",
+        about: "Rows moved by a drag on their handle or by keyboard (Space lifts, the arrows aim, Space drops, Escape cancels; Alt and an arrow moves at once). Nothing reflows until the drop.",
+        covers: &[
+            "Reorder",
+            "ReorderProps",
+            "ReorderRow",
+            "ReorderText",
+            "DragHandle",
+            "DragHandleProps",
+            "drag_handle",
+            "reorder_row",
+            "reorder_text",
+            "landing",
+            "slot_at",
+            "move_item",
+            "key_target",
+        ],
+        render: || html! { <reorder::ReorderPage /> },
+        holds: &[
+            hold(
+                plinth::class::REORDER,
+                Size::Width,
+                Across::Except(&["Rows"]),
+            ),
+            hold(
+                plinth::class::REORDER,
+                Size::Box,
+                Across::Only(&["Keys", "divided", "end", "disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::REORDER_ROW,
+                Size::Box,
+                Across::Only(&["Keys", "divided", "end", "disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::DRAG_HANDLE,
+                Size::Box,
+                Across::Only(&["Keys", "divided", "end", "disabled", "focus", "click"]),
             ),
         ],
     },
