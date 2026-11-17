@@ -113,14 +113,32 @@ page can still override them at runtime.
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
 
+## Showcase
+
+`showcase/` is an interactive gallery of every component: a page for
+each, with controls for its props and its content, shown in a narrow
+frame (drag its corner to widen it) beside a wide one. Run it with
+[trunk]:
+
+```sh
+cd showcase
+trunk serve --port 8150 --open
+```
+
+Pick a free port. A new component lands with its showcase page: add it to
+`PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
+`cargo test --workspace` fails.
+
 ## Checks
 
 ```sh
 cargo fmt --check
 cargo clippy --all-targets -- -D warnings
-cargo clippy --target wasm32-unknown-unknown -- -D warnings
-cargo test
+cargo clippy --target wasm32-unknown-unknown --workspace -- -D warnings
+cargo test --workspace
+(cd showcase && trunk build)
 ```
 
 [Yew]: https://yew.rs
 [grass]: https://crates.io/crates/grass
+[trunk]: https://trunkrs.dev

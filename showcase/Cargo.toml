@@ -1,0 +1,9 @@
+[package]
+name = "showcase"
+edition = "2024"
+publish = false
+
+[dependencies]
+plinth = { path = ".." }
+web-sys = { version = "0.3.77", features = ["Document", "Element", "HtmlInputElement", "HtmlSelectElement", "Location", "Window"] }
+yew = { version = "0.23.0", features = ["csr"] }

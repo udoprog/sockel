@@ -12,5 +12,5 @@ grass = { version = "=0.13.4", default-features = false }
 
 [workspace]
 resolver = "3"
-members = ["."]
+members = [".", "showcase"]
 exclude = [".claude"]
