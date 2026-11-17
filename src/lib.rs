@@ -19,8 +19,11 @@
 //! - [`Cluster`] (`.cluster`): a row that wraps, its items centred.
 //! - [`ActionGroup`] (`.action-group`): the buttons ending a form, a panel
 //!   or a section.
+//! - [`Button`] (`.button`): a button or a link styled as one, its
+//!   variants and sizes, an icon slot, icon-only and fold, pressed and busy,
+//!   all in the same box.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
-//!   the app supplies.
+//!   the app supplies and styles.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
 //!   the set an app provides or a built-in one, in a fixed box.
 //! - [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
@@ -53,6 +56,7 @@ pub mod class {
 }
 
 mod action_group;
+mod button;
 mod head;
 mod icon_button;
 mod icons;
@@ -62,6 +66,7 @@ mod library_toolbar;
 mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
+pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};

@@ -1,10 +1,165 @@
-// The icon button (src/icon_button.rs).
+// Buttons (src/button.rs, src/icon_button.rs).
 //
-// - `.plinth-iconed`: a button with an icon, the icon centred on the label's
-//   line whatever the button's height. A type selector's weight only, so a
-//   component that lays out its own button keeps its own arrangement.
-//   `.plinth-trailing`: the icon follows the label. `.plinth-icon` with it: an icon
-//   alone, as wide as the control is high.
+// - `.plinth-button`: a button or a link that looks like one, one height
+//   per size, its label on one line and cut with an ellipsis. Its border is
+//   reserved, so hover, pressed and the variants change colours only; focus
+//   is an outline. Parts: `-content` (icon and label), `-icon`, `-label`,
+//   and `-spinner`, laid over the content while busy.
+// - Variants: plain (secondary), `.plinth-primary`, `.plinth-ghost`,
+//   `.plinth-quiet`, `.plinth-danger`, `.plinth-success`.
+// - Sizes: regular, `.plinth-small`, `.plinth-touch`.
+// - `.plinth-icon`: the icon alone, square. `.plinth-fold`: the icon alone
+//   below the phone breakpoint, the label kept for a screen reader.
+// - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
+//   working, its content hidden by visibility so it keeps its room.
+//
+// - `.plinth-iconed` (IconButton, styled by the app): a button with an icon,
+//   the icon centred on the label's line whatever the button's height. A
+//   type selector's weight only, so a component that lays out its own
+//   button keeps its own arrangement. `.plinth-trailing`: the icon follows
+//   the label. `.plinth-icon` with it: an icon alone, as wide as the
+//   control is high.
+
+@use "tokens" as base;
+
+.plinth-button {
+    --button-fill: var(--surface);
+    --button-ink: var(--text);
+    --button-edge: var(--border);
+    --button-hover-edge: var(--accent);
+
+    position: relative;
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    max-width: 100%;
+    height: var(--control-height);
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--button-pad-x, var(--space-3));
+    @include base.reserved-border(var(--button-edge));
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: var(--button-fill);
+    color: var(--button-ink);
+    font: inherit;
+    line-height: 1;
+    text-decoration: none;
+    white-space: nowrap;
+    vertical-align: middle;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--button-hover-edge);
+    }
+
+    @include base.focus-ring;
+
+    &[aria-pressed="true"] {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 16%, var(--button-fill));
+    }
+
+    &[aria-busy="true"] {
+        cursor: progress;
+    }
+
+    &:disabled,
+    &[aria-disabled="true"] {
+        border-color: var(--button-edge);
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.plinth-primary {
+        --button-fill: var(--accent);
+        --button-ink: var(--on-accent);
+        --button-edge: var(--accent);
+        --button-hover-edge: var(--text);
+    }
+
+    &.plinth-ghost {
+        --button-fill: transparent;
+    }
+
+    &.plinth-quiet {
+        --button-fill: transparent;
+        --button-ink: var(--muted);
+        --button-edge: transparent;
+        --button-hover-edge: var(--border);
+    }
+
+    &.plinth-danger {
+        --button-ink: var(--danger);
+        --button-edge: var(--danger);
+        --button-hover-edge: var(--text);
+    }
+
+    &.plinth-success {
+        --button-ink: var(--success);
+        --button-edge: var(--success);
+        --button-hover-edge: var(--text);
+    }
+
+    &.plinth-small {
+        height: var(--control-height-small);
+        padding-inline: var(--button-pad-x, var(--space-2));
+        font-size: var(--text-sm);
+    }
+
+    &.plinth-touch {
+        height: var(--touch-height);
+        padding-inline: var(--button-pad-x, var(--space-4));
+    }
+
+    &.plinth-icon {
+        flex: none;
+        aspect-ratio: 1;
+        padding-inline: 0;
+    }
+
+    &.plinth-fold {
+        @include base.below("phone") {
+            flex: none;
+            aspect-ratio: 1;
+            padding-inline: 0;
+        }
+    }
+}
+
+.plinth-button-content {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+
+    &.plinth-busy {
+        visibility: hidden;
+    }
+}
+
+.plinth-button-icon {
+    display: inline-flex;
+    flex: none;
+}
+
+.plinth-button-label {
+    @include base.truncate;
+
+    &.plinth-fold {
+        @include base.below("phone") {
+            @include base.visually-hidden;
+        }
+    }
+}
+
+.plinth-button-spinner {
+    position: absolute;
+    inset: 0;
+    display: grid;
+    place-items: center;
+}
 
 button:where(.plinth-iconed:not([hidden])) {
     display: inline-flex;

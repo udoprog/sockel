@@ -293,6 +293,42 @@ page can still override them at runtime.
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
 
+## Button
+
+`Button` is a `<button>`, or with `href` an `<a>` styled as one. Its label
+is its children; `icon` is the app's icon (`trailing` puts it after the
+label). plinth styles only `.plinth-button`, never a bare `<button>`.
+
+- `variant` (`ButtonVariant`): `Secondary` (the plain button, the
+  default), `Primary` (`plinth::class::PRIMARY`), `Ghost` (`GHOST`, no
+  fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
+  (`DANGER`), `Success` (`SUCCESS`).
+- `size` (`ButtonSize`): `Regular` (`--control-height`), `Small` (`SMALL`,
+  `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
+- An icon without a label is the icon alone (`ICON`), square, named by
+  `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
+  alone below the phone breakpoint, its label kept for a screen reader.
+- `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and
+  border colour. `busy` sets `aria-busy`, keeps the label in the DOM and
+  lays the IconSet's spinner over it; a busy button ignores clicks.
+  `disabled` disables a button; a disabled link loses its `href` and gets
+  `aria-disabled="true"`.
+- `submit`, `onclick`, `title`, `testid` as on `IconButton`; `class` adds
+  the app's classes. `button(variant, size, icon_only, fold)` gives the
+  classes for an element that cannot be the component.
+
+Size guarantees: the height is the size's token, whatever the label (one
+line, cut with an ellipsis; the button never grows past its container).
+The border is always there (`reserved-border`), so hover, pressed and the
+variants change colours only; focus is an outline. Pressed never changes
+the font weight. Busy hides the icon and label with `visibility`, so the
+box keeps their width. Fold swaps at a fixed breakpoint, and the icon's
+box does not change with it.
+
+`IconButton` stays as it was, for an app that styles its own buttons (its
+children are the icon and label together); a new button should be a
+`Button`.
+
 ## Heads
 
 `PageHead` and `SectionHead` take one set of props (`HeadProps`):

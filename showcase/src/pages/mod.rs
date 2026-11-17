@@ -1,4 +1,5 @@
 mod actions;
+mod buttons;
 mod foundations;
 mod heads;
 mod icons;
@@ -70,6 +71,38 @@ pub const PAGES: &[Page] = &[
             Size::Height,
             Across::Except(&["Buttons"]),
         )],
+    },
+    Page {
+        id: "button",
+        title: "Button",
+        about: "A button or a link styled as one: variants, sizes, an icon, icon-only, fold, pressed and busy, in the same box. Click it; tab to it; hover it.",
+        covers: &[
+            "Button",
+            "ButtonProps",
+            "ButtonVariant",
+            "ButtonSize",
+            "button",
+        ],
+        render: || html! { <buttons::ButtonPage /> },
+        holds: &[
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Only(&[
+                    "pressed",
+                    "busy",
+                    "disabled",
+                    "href (a link)",
+                    "focus",
+                    "click",
+                ]),
+            ),
+            hold(
+                plinth::class::BUTTON,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+        ],
     },
     Page {
         id: "icon-button",
