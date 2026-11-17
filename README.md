@@ -501,8 +501,10 @@ Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
 tag, `ul` or `ol`, renders with no bullets, margin or padding
 (`plinth::class::PLAIN_LIST` is added for it), so it lays out exactly as a
 `div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
-working. `stack_with` and `cluster_with` return the same classes for any
-tag, so a list built from them adds `PLAIN_LIST` itself.
+working. `stack(gap)` and `stack_with(gap, flush)` give a stack's
+classes to an element that cannot be the component (a `<form>` with its
+own handlers); they return the same classes for any tag, so a list built
+from them adds `PLAIN_LIST` itself.
 
 A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
 blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks

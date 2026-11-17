@@ -264,7 +264,7 @@ pub use input::{
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
     ToolbarPart, ToolbarPartProps, ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster,
-    stack, tool_band, toolbar, toolbar_part,
+    stack, stack_with, tool_band, toolbar, toolbar_part,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
 pub use listbox::{LISTBOX_PAGE, ListKey, Listbox, listbox, listbox_option, option_id};

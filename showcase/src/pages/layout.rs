@@ -4,7 +4,7 @@ use crate::class;
 
 use plinth::{
     Align, Card, Cluster, Gap, Inset, Justify, Stack, Toolbar, ToolbarSpacer, card, cluster, stack,
-    toolbar,
+    stack_with, toolbar,
 };
 
 use crate::code::{El, each, snippet, text_node};
@@ -259,6 +259,7 @@ pub fn ClassesPage() -> Html {
     let align = use_state(|| Align::Center);
     let wrap = use_state(|| true);
     let inline = use_state(|| false);
+    let flush = use_state(|| false);
     let boxed = use_state(|| false);
     let inset = use_state(|| Inset::Normal);
     let link = use_state(|| true);
@@ -270,13 +271,21 @@ pub fn ClassesPage() -> Html {
             <Select<Align> label="align" options={ALIGNS} value={*align} on_change={bind(&align)} />
             <Toggle label="wrap" value={*wrap} on_change={bind(&wrap)} />
             <Toggle label="inline" value={*inline} on_change={bind(&inline)} />
+            <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
             <Toggle label="boxed" value={*boxed} on_change={bind(&boxed)} />
             <Select<Inset> label="inset" options={INSETS} value={*inset} on_change={bind(&inset)} />
             <Toggle label="link" value={*link} on_change={bind(&link)} />
         </>
     };
 
-    let stack = stack(*gap);
+    let (stack, stack_call) = if *flush {
+        (
+            stack_with(*gap, true),
+            format!("stack_with(Gap::{:?}, true)", *gap),
+        )
+    } else {
+        (stack(*gap), format!("stack(Gap::{:?})", *gap))
+    };
     let cluster = cluster(*gap, *justify, *align, *wrap, *inline);
     let toolbar = toolbar(*boxed);
     let card = card(*inset, *link);
@@ -286,7 +295,7 @@ pub fn ClassesPage() -> Html {
 
     let code = snippet(
         &[
-            format!("let stack = stack(Gap::{:?});", *gap),
+            format!("let stack = {stack_call};"),
             format!(
                 "let cluster = cluster(Gap::{:?}, Justify::{:?}, Align::{:?}, {}, {});",
                 *gap, *justify, *align, *wrap, *inline
@@ -307,7 +316,7 @@ pub fn ClassesPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <Stack gap={Gap::Loose}>
-                { shown("stack(gap)", &stack) }
+                { shown(if *flush { "stack_with(gap, flush)" } else { "stack(gap)" }, &stack) }
                 <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
                 { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
                 <ul class={classes!(cluster, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, true, false) }</ul>

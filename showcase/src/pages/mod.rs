@@ -1779,7 +1779,7 @@ pub const PAGES: &[Page] = &[
         title: "Class functions",
         group: Group::Foundations,
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
-        covers: &["stack", "cluster", "toolbar", "card"],
+        covers: &["stack", "stack_with", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
         holds: &[hold(plinth::class::STACK, Size::Width, Across::All)],
     },
