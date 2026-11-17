@@ -34,7 +34,7 @@ where
     html! {
         <Stack tag="label" gap={Gap::Snug}>
             <span class={class::CONTROL_LABEL}>{ props.label.clone() }</span>
-            <select class={classes!(plinth::class::INPUT, class::SMALL)} {onchange}>
+            <select class={classes!(plinth::class::INPUT, plinth::class::SMALL)} {onchange}>
                 { for options.iter().map(|(name, value)| html! {
                     <option selected={*value == props.value}>{ *name }</option>
                 }) }

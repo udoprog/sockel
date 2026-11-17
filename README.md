@@ -461,6 +461,48 @@ Sizes: the height is `--mark-height` whatever the tone, hover or text; only
 a pill's, badge's or status label's own text sets its width. A busy dot
 pulses by opacity (still under `prefers-reduced-motion`).
 
+## TextInput, Textarea, SearchField and InputGroup
+
+Text controls at a control's height. All take `class`, `size`
+(`InputSize`: `Regular` is `--control-height`, `Small` (`SMALL`) is
+`--control-height-small`, `Touch` (`TOUCH`) is `--touch-height`; the height
+never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
+`disabled`, `busy` (`aria-busy`, progress cursor) and `testid`. Inside a
+`Field`, pass the field's `id` and `describedby={field_describedby(..)}`.
+
+- `TextInput` (`.plinth-input`): `value` and `on_input` (the new text), `on_change`,
+  `on_blur`, `on_keydown`, `kind` (`InputKind`: text, email, url, tel),
+  `placeholder`, `label` (the accessible name without a `Field`), `readonly`,
+  `required`, `autofocus`, `node_ref`. With a `unit` (Html, `aria-hidden`)
+  the input sits in a box (`INPUT_BOX`) with the unit after the text inside
+  the field; the box takes the border and the focus ring, so the unit is
+  part of the field's box and the text keeps its start.
+- `Textarea` (`.plinth-textarea`): `rows` (default 3), at least `--input-height`
+  high, resized vertically by the user only.
+- `SearchField` (`.plinth-input-box`): a search icon, the text and a clear
+  button. `label` is the placeholder and the accessible name, `clear_label`
+  names the button, `busy` swaps the icon for a spinner in the same box.
+  Clearing (the button or escape) calls `on_input("")` and returns the focus
+  to the text. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
+  and its filters; its `icon` prop is gone, the icon is the `IconSet`'s
+  search glyph.
+- `InputGroup` (`.plinth-input-group`): controls joined in a row. Give each
+  member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,
+  `GROUP_MIDDLE` or `GROUP_LAST` square the corners that join (a lone member
+  takes none), and `detached[i]` starts a new run after a `--space-2` gap
+  (`GROUP_DETACHED`). The members overlap by their one-pixel border, the
+  hovered or focused one on top. No rule uses `:has()`, a sibling selector
+  or `!important`. A `TextInput` in a group takes the room the buttons leave.
+- Bare helpers: `input(size, invalid, busy)`, `input_box(size, invalid,
+  disabled, busy)`, `textarea(size, invalid, busy)`.
+
+Size guarantees: a field's box is the same empty or filled, long text or
+short (the text is cut with an ellipsis, never wrapped or widened); hover,
+focus and invalid change colours only (the border is reserved, the focus ring
+is an outline); the SearchField's icon and clear slot are always laid out, the
+button only hidden while empty, so typing moves nothing; a group's members of
+one size are one height. New tokens: none. New partial: `_inputs.scss`.
+
 ## Heads
 
 `PageHead` and `SectionHead` take one set of props (`HeadProps`):

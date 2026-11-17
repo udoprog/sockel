@@ -1,6 +1,6 @@
 //! LibraryToolbar (`style/_layout.scss`).
 
-use crate::class;
+use crate::{SearchField, class};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -16,9 +16,6 @@ pub struct LibraryToolbarProps {
     /// (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
-    /// The search icon before the field.
-    #[prop_or_default]
-    pub icon: Html,
     /// The filters after the field: filter buttons of class `filter`, one
     /// width each.
     #[prop_or_default]
@@ -27,24 +24,16 @@ pub struct LibraryToolbarProps {
     pub children: Html,
 }
 
-/// A list's search field, which grows, and its filters, which keep
+/// A list's [`SearchField`], which grows, and its filters, which keep
 /// a width of their own: a picked filter never moves the field. On a
 /// phone the field has the row to itself and the filters share the next.
 #[function_component]
 pub fn LibraryToolbar(props: &LibraryToolbarProps) -> Html {
-    let oninput = props.on_input.reform(|e: InputEvent| {
-        e.target_unchecked_into::<web_sys::HtmlInputElement>()
-            .value()
-    });
-
     html! {
         <div class={classes!(class::LIBRARY_TOOLBAR, props.class.clone())}>
-            <label class={class::LIBRARY_SEARCH}>
-                { props.icon.clone() }
-                <input class={class::INPUT} type="search" value={props.value.clone()} data-testid={props.testid.clone()}
-                    placeholder={props.label.clone()} aria-label={props.label.clone()}
-                    data-autofocus={props.autofocus.then_some("")} {oninput} />
-            </label>
+            <SearchField class={class::LIBRARY_SEARCH} value={props.value.clone()}
+                label={props.label.clone()} testid={props.testid.clone()}
+                on_input={props.on_input.clone()} autofocus={props.autofocus} />
             { props.children.clone() }
         </div>
     }

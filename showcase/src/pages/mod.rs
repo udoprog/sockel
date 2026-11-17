@@ -6,6 +6,7 @@ mod fields;
 mod foundations;
 mod heads;
 mod icons;
+mod inputs;
 mod layout;
 mod library;
 mod media;
@@ -257,6 +258,45 @@ pub const PAGES: &[Page] = &[
         ],
     },
     Page {
+        id: "text-input",
+        title: "TextInput",
+        about: "A text input at a control's height, bare or with a unit inside the field, and a Textarea. Type a long value; tab to it; set it invalid.",
+        covers: &[
+            "TextInput",
+            "TextInputProps",
+            "Textarea",
+            "TextareaProps",
+            "InputKind",
+            "InputSize",
+            "input",
+            "input_box",
+            "textarea",
+        ],
+        render: || html! { <inputs::TextInputPage /> },
+        holds: &[
+            hold(
+                plinth::class::INPUT,
+                Size::Both,
+                Across::Except(&["Size", "Text"]),
+            ),
+            hold(
+                plinth::class::INPUT_BOX,
+                Size::Both,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT_CONTROL,
+                Size::Box,
+                Across::Except(&["Size", "Unit"]),
+            ),
+            hold(
+                plinth::class::TEXTAREA,
+                Size::Both,
+                Across::Except(&["Size"]),
+            ),
+        ],
+    },
+    Page {
         id: "badge",
         title: "Badge",
         about: "A short bordered mark, solid or over a corner, and the Dot beside it: filled or a ring, the same box.",
@@ -304,6 +344,49 @@ pub const PAGES: &[Page] = &[
                 plinth::class::STATUS_SPINNER,
                 Size::Box,
                 Across::Only(&["State", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "search-field",
+        title: "SearchField",
+        about: "A search icon, the text and a clear button whose room is always kept: type, then clear it, and the field does not move. Escape clears too.",
+        covers: &["SearchField", "SearchFieldProps"],
+        render: || html! { <inputs::SearchFieldPage /> },
+        holds: &[
+            hold(
+                plinth::class::INPUT_BOX,
+                Size::Box,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT_CONTROL,
+                Size::Box,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT_CLEAR,
+                Size::Box,
+                Across::Except(&["Size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "input-group",
+        title: "InputGroup",
+        about: "Controls joined in a row, the corners that join squared and one border between them; the members keep one height. A detached member stands apart.",
+        covers: &["InputGroup", "InputGroupProps", "group_classes"],
+        render: || html! { <inputs::InputGroupPage /> },
+        holds: &[
+            hold(
+                plinth::class::INPUT_GROUP,
+                Size::Both,
+                Across::Except(&["Size"]),
+            ),
+            hold(
+                plinth::class::INPUT,
+                Size::Height,
+                Across::Except(&["Size"]),
             ),
         ],
     },

@@ -13,7 +13,6 @@ const PICKS: &[&str] = &["All", "Mine", "A much longer choice than the others"];
 pub fn LibraryToolbarPage() -> Html {
     let value = use_state(String::new);
     let label = use_state(|| Text::Short);
-    let icon = use_state(|| true);
     let autofocus = use_state(|| false);
     let filters = use_state(|| 3);
     let picked = use_state(|| vec![0; 20]);
@@ -22,7 +21,6 @@ pub fn LibraryToolbarPage() -> Html {
         <>
             <Select<Text> label="label" options={Text::OPTIONS} value={*label} on_change={bind(&label)} />
             <Select<usize> label="Filters" options={COUNTS} value={*filters} on_change={bind(&filters)} />
-            <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
             <Toggle label="autofocus" value={*autofocus} on_change={bind(&autofocus)} />
         </>
     };
@@ -45,10 +43,6 @@ pub fn LibraryToolbarPage() -> Html {
         }
     };
 
-    let search_icon = icon.then(|| {
-        html! { <span class={class::SEARCH_ICON} aria-hidden="true">{ "⌕" }</span> }
-    });
-
     let code = snippet(
         &[],
         El::new("LibraryToolbar")
@@ -57,7 +51,6 @@ pub fn LibraryToolbarPage() -> Html {
             .text("testid", "showcase-search")
             .expr("on_input", "on_input")
             .flag("autofocus", *autofocus)
-            .expr_if(*icon, "icon", "html! { <SearchIcon /> }")
             .line_if(
                 *filters > 0,
                 each("filters", "filter_button", *filters, "button"),
@@ -67,8 +60,7 @@ pub fn LibraryToolbarPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <LibraryToolbar value={(*value).clone()} label={label.of("Search the library")}
-                testid="showcase-search" on_input={bind(&value)} autofocus={*autofocus}
-                icon={search_icon.unwrap_or_default()}>
+                testid="showcase-search" on_input={bind(&value)} autofocus={*autofocus}>
                 { for (0..*filters).map(filter) }
             </LibraryToolbar>
             <p class={class::CONTROL_LABEL}>{ format!("Searching for {:?}", *value) }</p>

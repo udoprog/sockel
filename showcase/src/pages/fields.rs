@@ -13,7 +13,7 @@ use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 /// A control id of its own for each frame's copy of the field.
 #[hook]
-fn use_control_id() -> AttrValue {
+pub(super) fn use_control_id() -> AttrValue {
     static NEXT: AtomicUsize = AtomicUsize::new(0);
     let id = use_state(|| format!("showcase-field-{}", NEXT.fetch_add(1, Ordering::Relaxed)));
     AttrValue::from((*id).clone())

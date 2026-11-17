@@ -30,6 +30,10 @@
 //! - [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
 //!   [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
 //!   line that can keep its room.
+//! - [`TextInput`] (`.input`), [`Textarea`] (`.textarea`), [`SearchField`]
+//!   (`.input-box`) and [`InputGroup`] (`.input-group`): text controls at a
+//!   control's height, a unit or a clear button inside the field, controls
+//!   joined in a row.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
@@ -98,6 +102,7 @@ mod head;
 mod icon_button;
 mod icons;
 mod image;
+mod input;
 mod layer;
 mod layout;
 mod library_toolbar;
@@ -130,6 +135,10 @@ pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
 pub use image::{
     Avatar, AvatarProps, AvatarSize, Image, ImageProps, Ratio, Status, avatar, image, initials,
+};
+pub use input::{
+    InputGroup, InputGroupProps, InputKind, InputSize, SearchField, SearchFieldProps, TextInput,
+    TextInputProps, Textarea, TextareaProps, group_classes, input, input_box, textarea,
 };
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,

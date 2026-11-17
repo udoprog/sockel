@@ -1,0 +1,248 @@
+// Text inputs (src/input.rs).
+//
+// - `.plinth-input`: a bare text input, `--input-height` high (`--control-height`).
+//   Its border is reserved, so hover, focus and the invalid state change the
+//   border's colour only; the focus ring is an outline.
+// - `.plinth-input-box`: the same look around an input and its marks: the unit
+//   of a TextInput, the icon and the clear button of a SearchField. Parts:
+//   `-control` (the bare input inside), `-mark` (an icon or the unit; the unit
+//   is `.plinth-input-unit`), `-clear` (a button of a fixed size, kept in its
+//   room when `.plinth-empty` hides it).
+// - `.plinth-textarea`: lines of text, as high as its rows and at least
+//   `--input-height`; the user may resize it vertically.
+// - Sizes: regular, `.plinth-small` (`--control-height-small`) and
+//   `.plinth-touch` (`--touch-height`), by the same modifiers as a button's.
+// - `.plinth-invalid` (and `[aria-invalid="true"]` on the bare input): the
+//   border in `--danger`. `.plinth-disabled` and `.plinth-busy`.
+// - `.plinth-input-group`: joined controls in a row, one border between
+//   neighbours (the members overlap by it). A member takes `.plinth-group-first`,
+//   `-middle` or `-last`, which square the corners that join, and
+//   `.plinth-group-detached` to stand apart after a gap; a lone member needs
+//   none. `group_classes` gives them, so no rule looks at a sibling.
+
+@use "tokens" as base;
+
+@mixin box {
+    --input-height: var(--control-height);
+    --input-edge: var(--border);
+
+    box-sizing: border-box;
+    margin: 0;
+    @include base.reserved-border(var(--input-edge));
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+
+    &:hover {
+        --input-edge: var(--accent);
+    }
+
+    &.plinth-small {
+        --input-height: var(--control-height-small);
+        font-size: var(--text-sm);
+    }
+
+    &.plinth-touch {
+        --input-height: var(--touch-height);
+    }
+
+    &.plinth-busy {
+        cursor: progress;
+    }
+}
+
+.plinth-input {
+    @include box;
+    flex: none;
+    width: 100%;
+    min-width: 0;
+    height: var(--input-height);
+    padding-block: 0;
+    padding-inline: var(--space-2);
+    text-overflow: ellipsis;
+
+    &::placeholder {
+        color: var(--muted);
+        opacity: 1;
+    }
+
+    &[aria-invalid="true"] {
+        --input-edge: var(--danger);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include base.focus-ring;
+}
+
+.plinth-textarea {
+    @include box;
+    display: block;
+    width: 100%;
+    min-width: 0;
+    min-height: var(--input-height);
+    padding-block: var(--space-1);
+    padding-inline: var(--space-2);
+    line-height: 1.4;
+    resize: vertical;
+
+    &::placeholder {
+        color: var(--muted);
+        opacity: 1;
+    }
+
+    &[aria-invalid="true"] {
+        --input-edge: var(--danger);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    @include base.focus-ring;
+}
+
+.plinth-input-box {
+    @include box;
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-width: 0;
+    height: var(--input-height);
+    padding-block: 0;
+    padding-inline: var(--space-2);
+
+    &.plinth-invalid {
+        --input-edge: var(--danger);
+    }
+
+    &.plinth-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &:focus-within {
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+.plinth-input-control {
+    flex: 1 1 0;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    border: 0;
+    outline: 0;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    text-overflow: ellipsis;
+
+    &::placeholder {
+        color: var(--muted);
+        opacity: 1;
+    }
+
+    &::-webkit-search-cancel-button {
+        appearance: none;
+    }
+
+    &:disabled {
+        cursor: not-allowed;
+    }
+}
+
+.plinth-input-mark {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.plinth-input-unit {
+    font-size: var(--text-sm);
+    @include base.numeric;
+}
+
+.plinth-input-clear {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--mark-height);
+    height: var(--mark-height);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    border-radius: var(--radius-xs);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--text);
+    }
+
+    &.plinth-empty {
+        visibility: hidden;
+    }
+
+    @include base.focus-ring;
+}
+
+.plinth-input-group {
+    display: flex;
+    align-items: stretch;
+    min-width: 0;
+
+    // The bare input is the one member that takes the room left.
+    > .plinth-input {
+        flex: 1 1 0;
+    }
+}
+
+.plinth-group-first,
+.plinth-group-middle,
+.plinth-group-last {
+    position: relative;
+    min-width: 0;
+
+    &:hover,
+    &:focus-within {
+        z-index: 1;
+    }
+}
+
+.plinth-group-first {
+    border-start-end-radius: 0;
+    border-end-end-radius: 0;
+}
+
+.plinth-group-middle {
+    border-radius: 0;
+    margin-inline-start: calc(-1 * var(--space-px));
+}
+
+.plinth-group-last {
+    border-start-start-radius: 0;
+    border-end-start-radius: 0;
+    margin-inline-start: calc(-1 * var(--space-px));
+}
+
+// After the rules above, so a detached member that starts a run keeps
+// its gap.
+.plinth-group-detached {
+    margin-inline-start: var(--space-2);
+}
