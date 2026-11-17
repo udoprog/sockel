@@ -1,0 +1,42 @@
+// plinth's own icons (src/icons.rs).
+//
+// - `.plinth-glyph`: the fixed box an icon sits in, `--glyph-size` square, so
+//   the icon an app supplies can never change a control's size. What fills it
+//   is cut to the box and sized to it, and takes the text's colour.
+// - `.plinth-spin`: turns the box, for a busy mark; still when the user
+//   prefers reduced motion.
+
+.plinth-glyph {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--glyph-size);
+    height: var(--glyph-size);
+    overflow: hidden;
+    color: inherit;
+    line-height: 1;
+    vertical-align: -0.125em;
+
+    // Whatever the icon set puts in the box (an svg, an img) fills it.
+    > * {
+        flex: none;
+        width: 100%;
+        height: 100%;
+    }
+
+    &.plinth-spin {
+        animation: plinth-spin 0.9s linear infinite;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation-duration: 3.6s;
+        }
+    }
+}
+
+@keyframes plinth-spin {
+    to {
+        transform: rotate(1turn);
+    }
+}

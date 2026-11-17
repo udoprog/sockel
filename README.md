@@ -250,6 +250,7 @@ page can still override them at runtime.
 | `$nest-inset` | `var(--space-1)` |
 | `$control-height`, `$control-height-small` | `2.25rem`, `1.75rem` |
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
+| `$glyph-size` | `1em` |
 | `$filter-width` | `10.5rem` |
 | `$page-workspace`, `$page-reading`, `$page-wide`, `$page-gutter` | `64rem`, `40rem`, `90rem`, `var(--space-8)` |
 | `$card-padding` | `var(--space-4)` |
@@ -276,6 +277,45 @@ page can still override them at runtime.
 - `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
+
+## Icons
+
+plinth's own chrome (a dialog's close, a select's chevron, a busy spinner)
+draws its icons from an `IconSet`: one `Html` per `Glyph` (`Close`,
+`ChevronDown`, `ChevronUp`, `ChevronRight`, `Check`, `Plus`, `Minus`,
+`Spinner`, `Grip`, `Ellipsis`, `Search`). It is the one place plinth uses a
+context for something other than a runtime setting, and it carries icons
+only: classes never go through it.
+
+Without a provider plinth uses `IconSet::default()`, a built-in set of inline
+svg, so it renders standalone. An app supplies its own once at its root,
+mapping its icon component; a set may override only some glyphs:
+
+```rust
+let set = IconSet {
+    close: html! { <MyIcon name="x" /> },
+    chevron_down: html! { <MyIcon name="caret-down" /> },
+    ..IconSet::default()
+};
+
+html! {
+    <ContextProvider<IconSet> context={set}>
+        <App/>
+    </ContextProvider<IconSet>>
+}
+```
+
+`<Icon glyph={Glyph::Close} class=.../>` renders a glyph; `use_icon(glyph)` and
+`use_icons()` return the icon(s) for a component of your own, and `icon(class,
+glyph)` gives the box's classes (`plinth::class::GLYPH`, plus `SPIN` for
+`Spinner`).
+
+Size guarantees: the glyph sits in a `.plinth-glyph` box of `--glyph-size`
+(`1em`, so it follows the text) square, `overflow: hidden`, and what fills it
+is stretched to it. A swapped set, whatever its icons' own width and height,
+cannot change a control's size. Icons should draw in `currentColor`. The
+spinner's box turns (slower under `prefers-reduced-motion`); the set's
+spinner need not animate itself.
 
 ## Against jitter: mixins and utilities
 

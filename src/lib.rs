@@ -21,6 +21,8 @@
 //!   or a section.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies.
+//! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
+//!   the set an app provides or a built-in one, in a fixed box.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -50,6 +52,7 @@ pub mod class {
 mod action_group;
 mod head;
 mod icon_button;
+mod icons;
 mod layout;
 mod library_toolbar;
 mod styles;
@@ -57,6 +60,7 @@ mod styles;
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
+pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,

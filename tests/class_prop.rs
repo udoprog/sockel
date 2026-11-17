@@ -85,3 +85,14 @@ fn components_keep_a_passed_class() {
         &own(class::LIBRARY_TOOLBAR),
     );
 }
+
+#[test]
+fn icon_keeps_a_passed_class() {
+    keeps(
+        render::<Icon>(yew::props!(IconProps {
+            glyph: Glyph::Close,
+            class: classes!(MINE)
+        })),
+        &format!("{MINE} {}", class::GLYPH),
+    );
+}

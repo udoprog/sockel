@@ -1,6 +1,7 @@
 mod actions;
 mod foundations;
 mod heads;
+mod icons;
 mod layout;
 mod library;
 mod styles;
@@ -51,6 +52,21 @@ pub const PAGES: &[Page] = &[
         about: "A button that leads with (or ends in) an icon the app supplies. Click it; tab to it.",
         covers: &["IconButton", "IconButtonProps", "icon_button"],
         render: || html! { <actions::IconButtonPage /> },
+    },
+    Page {
+        id: "icon",
+        title: "Icon",
+        about: "plinth's own glyphs, from the app's IconSet or the built-in one, always in the same box. Swap the set; the sizes do not move.",
+        covers: &[
+            "Icon",
+            "IconProps",
+            "IconSet",
+            "Glyph",
+            "icon",
+            "use_icon",
+            "use_icons",
+        ],
+        render: || html! { <icons::IconPage /> },
     },
     Page {
         id: "toolbar",
