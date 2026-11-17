@@ -4,6 +4,7 @@ mod buttons;
 mod confirms;
 mod dialog;
 mod disclosures;
+mod drops;
 mod fields;
 mod foundations;
 mod heads;
@@ -989,6 +990,29 @@ pub const PAGES: &[Page] = &[
                     "Title", "Summary", "open", "actions", "disabled", "focus", "click",
                 ]),
             ),
+        ],
+    },
+    Page {
+        id: "drop-zone",
+        title: "DropZone",
+        about: "A target for dropped or pasted files, or picked with its button. Over, refused, busy and error are drawn by an overlay inside a border the zone always has, so no state or message changes its size. Drop a file on it to see its states.",
+        covers: &[
+            "DropState",
+            "DropZone",
+            "DropZoneProps",
+            "Refusal",
+            "accepts",
+            "drop_zone",
+            "refusal",
+        ],
+        render: || html! { <drops::DropZonePage /> },
+        holds: &[
+            hold(
+                plinth::class::DROP_ZONE,
+                Size::Box,
+                Across::Except(&["Text", "pick"]),
+            ),
+            hold(plinth::class::DROP_ZONE, Size::Width, Across::All),
         ],
     },
     Page {

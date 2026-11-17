@@ -1216,6 +1216,50 @@ component). New partials: `_listbox.scss`, `_select.scss`. The menu's
 surface, row and mark are now the mixins `list`, `item`, `item-active` and
 `mark` in `_menu.scss`, with the same output.
 
+## DropZone
+
+A target for files dropped on it, pasted, or picked with its button. While a
+file is dragged over the page the zone is outlined, over it tinted; a file of
+a type it does not take is refused. All of that, and the busy and error
+messages, is drawn by an overlay inside the zone, so the zone never changes
+size.
+
+```rust
+html! {
+    <DropZone accept="image/*" max_size={Some(5_000_000)} paste=true
+        pick="Choose a file" {on_files} {on_refused}>
+        <p>{ "Drop images here" }</p>
+    </DropZone>
+}
+```
+
+Props: `accept` (as a file input's: media types, `image/*`, extensions; empty
+takes anything), `max_size` (bytes), `multiple` (otherwise the first file
+only), `label`, `reject` and `too_large` (what the overlay says), `busy`
+(`Some(text)` while a file is worked on; the zone takes nothing then),
+`error` (text, until the app clears it), `disabled`, `paste` (files pasted
+outside a text field go the same way), `pick` (a button with this label
+opens the file picker through a hidden input), `on_files` (the files taken,
+in order, from a drop, paste or pick), `on_refused` (a `Refusal`: `Type` or
+`TooLarge`), `testid`, `class`. `accepts(accept, name, kind)` and
+`refusal(accept, max_size, name, kind, size)` are the same filter as plain
+functions. A refusal the zone found itself is said until the next press in
+it or the next drag; a drag that carries no files passes through.
+
+Modifiers, set from `DropState` by `drop_zone(state, disabled)`:
+`.plinth-dragging` (a file is dragged on the page), `.plinth-over`,
+`.plinth-refused`, `.plinth-busy`, `.plinth-error` and `.plinth-disabled`.
+Parts: `.plinth-drop-zone-overlay`, `-label` and `-pick`.
+
+Size guarantees: the zone has a border at all times (`reserved-border`,
+transparent at rest), and every state changes only colours, so its box is the
+same at rest, dragged over, refused, busy and in error, with a short message
+or a long one (the label is cut at two lines inside the overlay, which
+clips). The overlay is absolutely placed and lets the drag through. The
+zone's least height is `--drop-min-height`.
+
+Tokens: `--drop-min-height`, `--drop-tint` and `--drop-tint-over`.
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

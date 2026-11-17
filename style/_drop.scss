@@ -1,0 +1,90 @@
+// A target for dropped or pasted files (`DropZone`). The zone always has its
+// border (transparent until a file is dragged near) and its states are drawn
+// by an overlay laid inside it, so no state or message changes the zone's
+// box. The overlay lets the drag through to what is beneath.
+//
+// - `.plinth-dragging`: a file is dragged somewhere on the page.
+// - `.plinth-over`: it is over the zone and would be taken.
+// - `.plinth-refused`: it is over the zone and would not be taken.
+// - `.plinth-busy`: a file taken is being worked on; the zone takes no more.
+// - `.plinth-error`: the last file was refused or failed; the overlay says why.
+// - `.plinth-disabled`: takes nothing.
+
+@use "tokens" as base;
+
+.plinth-drop-zone {
+    --drop-color: var(--accent);
+    --drop-border: transparent;
+    --drop-fill: transparent;
+    --drop-label-color: var(--on-accent);
+    --drop-label-fill: var(--drop-color);
+
+    @include base.reserved-border(var(--drop-border));
+
+    position: relative;
+    box-sizing: border-box;
+    min-height: var(--drop-min-height);
+    border-radius: var(--radius-lg);
+
+    &.plinth-dragging {
+        border-style: dashed;
+        --drop-border: var(--drop-color);
+        --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint), transparent);
+    }
+
+    &.plinth-over {
+        --drop-border: var(--drop-color);
+        --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
+    }
+
+    &.plinth-refused,
+    &.plinth-error {
+        --drop-color: var(--danger);
+        --drop-border: var(--drop-color);
+        --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
+    }
+
+    &.plinth-busy {
+        --drop-border: var(--border);
+        --drop-fill: color-mix(in srgb, var(--surface) 70%, transparent);
+        --drop-label-color: var(--text);
+        --drop-label-fill: var(--surface-raised);
+    }
+
+    &.plinth-disabled {
+        opacity: 0.6;
+    }
+}
+
+.plinth-drop-zone-overlay {
+    position: absolute;
+    inset: 0;
+    z-index: var(--layer-sticky);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    padding: var(--space-2);
+    overflow: hidden;
+    border-radius: inherit;
+    background: var(--drop-fill);
+    pointer-events: none;
+}
+
+.plinth-drop-zone-label {
+    @include base.clamp(2);
+    max-width: 100%;
+    padding: var(--space-1) var(--space-3);
+    border-radius: var(--radius-pill);
+    background: var(--drop-label-fill);
+    color: var(--drop-label-color);
+    font-size: var(--text-sm);
+    font-weight: 600;
+    text-align: center;
+    box-shadow: var(--shadow-1);
+    overflow-wrap: anywhere;
+}
+
+.plinth-drop-zone-pick {
+    margin-top: var(--space-2);
+}

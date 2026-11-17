@@ -11,6 +11,8 @@
 // - `--glyph-size`: the box of one of plinth's own icons, whatever icon fills it.
 // - `--skeleton-duration`: the time a skeleton's shimmer takes to cross.
 // - `--table-max-height`: where a table with a sticky head starts to scroll.
+// - `--drop-min-height`, `--drop-tint`, `--drop-tint-over`: a drop zone's least
+//   height and the strength of its overlay.
 // - `--avatar-sm`, `-md`, `-lg`, `-xl`: an avatar's fixed sizes.
 // - `--filter-width`: a list's filter button, one width whatever it says.
 // - `--field-label-width`: the label column of wide-label `FormRows`;
@@ -146,6 +148,9 @@ $card-grid-wide: 18rem !default;
 $card-grid-narrow: 10.5rem !default;
 $card-grid-narrow-phone: 9rem !default;
 $table-max-height: 24rem !default;
+$drop-min-height: var(--touch-height) !default;
+$drop-tint: 12% !default;
+$drop-tint-over: 28% !default;
 $avatar-sm: 1.75rem !default;
 $avatar-md: 2.5rem !default;
 $avatar-lg: 3.5rem !default;
@@ -261,6 +266,12 @@ $sheet-breakpoint: "phone" !default;
     // How tall a sticky-headed table (`.plinth-table-wrap.plinth-sticky`) grows
     // before it scrolls.
     --table-max-height: #{$table-max-height};
+
+    // A drop zone (`.plinth-drop-zone`): its least height, and how strongly
+    // its overlay tints it while a file is dragged near, and over it.
+    --drop-min-height: #{$drop-min-height};
+    --drop-tint: #{$drop-tint};
+    --drop-tint-over: #{$drop-tint-over};
 
     // The two content columns: the
     // workspace for lists, sheets and the manual, the reading column for

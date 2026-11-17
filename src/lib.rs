@@ -48,6 +48,10 @@
 //!   close; [`ErrorBox`] (`.error-box`): an error, its cause and a retry;
 //!   [`EmptyState`] (`.empty-state`): what stands where there is nothing,
 //!   compact for a row.
+//! - [`DropZone`] (`.drop-zone`): a target for dropped or pasted files, or
+//!   picked with its button, with over, refused, busy and error states drawn
+//!   by an overlay, so its box never changes; [`accepts`] and [`refusal`]
+//!   filter by type and size.
 //! - [`Pill`] (`.pill`), [`Badge`] (`.badge`), [`Dot`] (`.dot`) and [`Count`]
 //!   (`.count`): short marks of a fixed box, in a [`Tone`];
 //!   [`StatusLabel`] (`.status-label`): a status as wide as its widest state.
@@ -139,6 +143,7 @@ mod choice;
 mod confirm;
 mod dialog;
 mod disclosure;
+mod drop_zone;
 mod empty_state;
 mod error_box;
 mod field;
@@ -193,6 +198,7 @@ pub use confirm::{
 };
 pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
 pub use disclosure::{Disclosure, DisclosureProps, disclosure};
+pub use drop_zone::{DropState, DropZone, DropZoneProps, Refusal, accepts, drop_zone, refusal};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
 pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use field::{

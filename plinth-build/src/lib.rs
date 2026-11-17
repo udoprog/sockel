@@ -30,6 +30,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_confirm.scss",
     "_dialog.scss",
     "_disclosure.scss",
+    "_drop.scss",
     "_fields.scss",
     "_heads.scss",
     "_hooks.scss",

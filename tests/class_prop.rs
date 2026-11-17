@@ -354,3 +354,14 @@ fn a_select_keeps_a_passed_class() {
         "{html}"
     );
 }
+
+#[test]
+fn drop_zone_keeps_a_passed_class() {
+    keeps(
+        render::<DropZone>(yew::props!(DropZoneProps {
+            class: classes!(MINE),
+            on_files: Callback::noop(),
+        })),
+        &format!("{} {MINE}", class::DROP_ZONE),
+    );
+}
