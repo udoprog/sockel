@@ -201,3 +201,35 @@ fn fields_keep_a_passed_class() {
         &own(class::FIELD_CHECK),
     );
 }
+
+#[test]
+fn marks_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    let own = |class: &str| format!("{class} {MINE}");
+    keeps(
+        render::<Pill>(yew::props!(PillProps { class: mine() })),
+        &own(class::PILL),
+    );
+    keeps(
+        render::<Badge>(yew::props!(BadgeProps { class: mine() })),
+        &own(class::BADGE),
+    );
+    keeps(
+        render::<Dot>(yew::props!(DotProps { class: mine() })),
+        &format!("{} {} {MINE}", class::DOT, class::ON),
+    );
+    keeps(
+        render::<Count>(yew::props!(CountProps {
+            value: 3,
+            class: mine()
+        })),
+        &own(class::COUNT),
+    );
+    keeps(
+        render::<StatusLabel>(yew::props!(StatusLabelProps {
+            states: vec![],
+            class: mine()
+        })),
+        &own(class::STATUS_LABEL),
+    );
+}

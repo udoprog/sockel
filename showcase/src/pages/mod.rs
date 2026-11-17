@@ -1,4 +1,5 @@
 mod actions;
+mod badges;
 mod buttons;
 mod fields;
 mod foundations;
@@ -239,6 +240,72 @@ pub const PAGES: &[Page] = &[
         ],
     },
     Page {
+        id: "pill",
+        title: "Pill",
+        about: "A tinted label of one height, led by a dot in its tone; a button when it has on_click. Change the tone, hover, click.",
+        covers: &["Pill", "PillProps", "Tone", "pill"],
+        render: || html! { <badges::PillPage /> },
+        holds: &[
+            hold(plinth::class::PILL, Size::Height, Across::All),
+            hold(
+                plinth::class::PILL,
+                Size::Both,
+                Across::Only(&["Tone", "on_click (a button)", "disabled", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "badge",
+        title: "Badge",
+        about: "A short bordered mark, solid or over a corner, and the Dot beside it: filled or a ring, the same box.",
+        covers: &["Badge", "BadgeProps", "badge", "Dot", "DotProps", "dot"],
+        render: || html! { <badges::BadgePage /> },
+        holds: &[
+            hold(
+                plinth::class::BADGE,
+                Size::Height,
+                Across::Except(&["corner"]),
+            ),
+            hold(
+                plinth::class::BADGE,
+                Size::Both,
+                Across::Only(&["Tone", "solid", "focus", "click"]),
+            ),
+            hold(plinth::class::DOT, Size::Both, Across::All),
+        ],
+    },
+    Page {
+        id: "count",
+        title: "Count",
+        about: "A figure whose width is reserved for its max digits and a +, hidden at none without losing its box.",
+        covers: &["Count", "CountProps", "count", "count_text"],
+        render: || html! { <badges::CountPage /> },
+        holds: &[hold(
+            plinth::class::COUNT,
+            Size::Box,
+            Across::Except(&["Max"]),
+        )],
+    },
+    Page {
+        id: "status-label",
+        title: "StatusLabel",
+        about: "A status as wide as its widest state, so Loading... to Saved does not resize it; its spinner slot is always reserved.",
+        covers: &["StatusLabel", "StatusLabelProps", "status_label"],
+        render: || html! { <badges::StatusLabelPage /> },
+        holds: &[
+            hold(
+                plinth::class::STATUS_LABEL,
+                Size::Box,
+                Across::Only(&["State", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::STATUS_SPINNER,
+                Size::Box,
+                Across::Only(&["State", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
         id: "icon-button",
         title: "IconButton",
         about: "A button that leads with (or ends in) an icon the app supplies. Click it; tab to it.",
@@ -322,7 +389,7 @@ pub const PAGES: &[Page] = &[
         id: "notice",
         title: "Notice",
         about: "An inline message in a tone, with an optional icon, action and close. Closing one collapses its space, by design.",
-        covers: &["Notice", "NoticeProps", "NoticeTone", "notice"],
+        covers: &["Notice", "NoticeProps", "notice"],
         render: || html! { <notices::NoticePage /> },
         holds: &[
             hold(

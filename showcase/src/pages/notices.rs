@@ -3,17 +3,18 @@ use yew::prelude::*;
 use crate::class;
 
 use plinth::{
-    Button, ButtonSize, EmptyState, ErrorBox, Glyph, Icon, Notice, NoticeTone, empty_state, notice,
+    Button, ButtonSize, EmptyState, ErrorBox, Glyph, Icon, Notice, Tone, empty_state, notice,
 };
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
-const TONES: &[(&str, NoticeTone)] = &[
-    ("Info", NoticeTone::Info),
-    ("Success", NoticeTone::Success),
-    ("Warning", NoticeTone::Warning),
-    ("Error", NoticeTone::Error),
+const TONES: &[(&str, Tone)] = &[
+    ("Neutral", Tone::Neutral),
+    ("Accent", Tone::Accent),
+    ("Success", Tone::Success),
+    ("Warning", Tone::Warning),
+    ("Danger", Tone::Danger),
 ];
 
 fn shown(call: &str, classes: &Classes) -> Html {
@@ -22,7 +23,7 @@ fn shown(call: &str, classes: &Classes) -> Html {
 
 #[function_component]
 pub fn NoticePage() -> Html {
-    let tone = use_state(NoticeTone::default);
+    let tone = use_state(|| Tone::Accent);
     let text = use_state(|| Text::Short);
     let icon = use_state(|| true);
     let action = use_state(|| true);
@@ -32,7 +33,7 @@ pub fn NoticePage() -> Html {
 
     let controls = html! {
         <>
-            <Select<NoticeTone> label="tone" options={TONES} value={*tone} on_change={bind(&tone)} />
+            <Select<Tone> label="tone" options={TONES} value={*tone} on_change={bind(&tone)} />
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
             <Toggle label="action" value={*action} on_change={bind(&action)} />
@@ -54,7 +55,7 @@ pub fn NoticePage() -> Html {
     let code = snippet(
         &[],
         El::new("Notice")
-            .variant("tone", *tone)
+            .expr_if(*tone != Tone::Accent, "tone", format!("Tone::{:?}", *tone))
             .expr_if(*icon, "icon", "html! { <Icon glyph={Glyph::Check} /> }")
             .expr_if(
                 *action,

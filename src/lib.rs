@@ -41,6 +41,9 @@
 //!   close; [`ErrorBox`] (`.error-box`): an error, its cause and a retry;
 //!   [`EmptyState`] (`.empty-state`): what stands where there is nothing,
 //!   compact for a row.
+//! - [`Pill`] (`.pill`), [`Badge`] (`.badge`), [`Dot`] (`.dot`) and [`Count`]
+//!   (`.count`): short marks of a fixed box, in a [`Tone`];
+//!   [`StatusLabel`] (`.status-label`): a status as wide as its widest state.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -71,6 +74,7 @@ pub mod class {
 }
 
 mod action_group;
+mod badge;
 mod button;
 mod checkbox;
 mod chip;
@@ -86,9 +90,14 @@ mod layout;
 mod library_toolbar;
 mod notice;
 mod popover;
+mod status;
 mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
+pub use badge::{
+    Badge, BadgeProps, Count, CountProps, Dot, DotProps, Pill, PillProps, Tone, badge, count,
+    count_text, dot, pill,
+};
 pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
@@ -110,9 +119,10 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
-pub use notice::{Notice, NoticeProps, NoticeTone, notice};
+pub use notice::{Notice, NoticeProps, notice};
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
     popover, use_popover,
 };
+pub use status::{StatusLabel, StatusLabelProps, status_label};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};

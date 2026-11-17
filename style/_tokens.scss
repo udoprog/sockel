@@ -15,6 +15,7 @@
 //   `--field-message-line` and `--field-error-lines`: the line a field's hint and
 //   error are set on, and how many lines its reserved error line holds.
 // - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
+// - `--dot-size` and `--corner-size`: a dot's size and a corner badge's height.
 // - `--page-workspace` and `--page-reading`: the two content columns;
 //   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
 // - `--focus-ring-*`: the focus ring's colour, width and offset.
@@ -31,6 +32,7 @@
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
 //   `scroll-area`, `truncate`, `clamp($lines)`, `visually-hidden`,
 //   `phone-only`, `desktop-only`, `current($by)`.
+// - `tones`: the `--tone` modifiers (accent, busy, success, warning, danger).
 
 @use "sass:map";
 
@@ -115,6 +117,8 @@ $control-height: 2.25rem !default;
 $control-height-small: 1.75rem !default;
 $mark-height: 1.5rem !default;
 $touch-height: 2.75rem !default;
+$dot-size: 0.5rem !default;
+$corner-size: 1.125rem !default;
 $glyph-size: 1em !default;
 $check-size: 1.25rem !default;
 $switch-width: 2.5rem !default;
@@ -194,6 +198,9 @@ $sheet-breakpoint: "phone" !default;
     // A mark (an icon or a badge beside text) and a touch target.
     --mark-height: #{$mark-height};
     --touch-height: #{$touch-height};
+    // A status dot (`.plinth-dot`, a pill's lead) and a badge over a corner.
+    --dot-size: #{$dot-size};
+    --corner-size: #{$corner-size};
     // The box an icon of plinth's own sits in (`.plinth-glyph`).
     --glyph-size: #{$glyph-size};
     --check-size: #{$check-size};
@@ -264,6 +271,27 @@ $sheet-breakpoint: "phone" !default;
 @mixin nests($radius, $border: 1px) {
     padding: var(--nest-inset);
     --radius-inner: calc(#{$radius} - var(--nest-inset) - #{$border});
+}
+
+// The tone modifiers every mark and message shares (`Tone` in src/badge.rs):
+// each sets `--tone` and nothing else. Neutral has no class.
+@mixin tones {
+    &.plinth-accent,
+    &.plinth-busy {
+        --tone: var(--accent);
+    }
+
+    &.plinth-success {
+        --tone: var(--success);
+    }
+
+    &.plinth-warning {
+        --tone: var(--warning);
+    }
+
+    &.plinth-danger {
+        --tone: var(--danger);
+    }
 }
 
 // The focus ring, on keyboard focus only: an outline, never a border, so

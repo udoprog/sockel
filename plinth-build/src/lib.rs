@@ -24,6 +24,7 @@ macro_rules! sources {
 /// plinth's Sass sources (`style/`), by file name.
 pub const SOURCES: &[(&str, &str)] = sources!(
     "_actions.scss",
+    "_badges.scss",
     "_buttons.scss",
     "_fields.scss",
     "_heads.scss",

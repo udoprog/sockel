@@ -1,24 +1,15 @@
 //! Notice (`style/_notices.scss`).
 
-use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class};
+use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class};
 use yew::prelude::*;
-
-/// A notice's tone: `Info` unless set.
-#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
-pub enum NoticeTone {
-    #[default]
-    Info,
-    Success,
-    Warning,
-    Error,
-}
 
 #[derive(Properties, PartialEq)]
 pub struct NoticeProps {
     #[prop_or_default]
     pub class: Classes,
-    #[prop_or_default]
-    pub tone: NoticeTone,
+    /// The accent unless set.
+    #[prop_or(Tone::Accent)]
+    pub tone: Tone,
     /// The icon, which the app supplies, before the text.
     #[prop_or_default]
     pub icon: Option<Html>,
@@ -40,14 +31,8 @@ pub struct NoticeProps {
 }
 
 /// A notice's classes: `notice` and its tone.
-pub fn notice(tone: NoticeTone) -> Classes {
-    let tone = match tone {
-        NoticeTone::Info => None,
-        NoticeTone::Success => Some(class::SUCCESS),
-        NoticeTone::Warning => Some(class::WARNING),
-        NoticeTone::Error => Some(class::ERROR),
-    };
-    classes!(class::NOTICE, tone)
+pub fn notice(tone: Tone) -> Classes {
+    classes!(class::NOTICE, tone.class())
 }
 
 /// An inline message: an optional icon, the text, an optional action and
@@ -57,8 +42,8 @@ pub fn notice(tone: NoticeTone) -> Classes {
 #[function_component]
 pub fn Notice(props: &NoticeProps) -> Html {
     let role = match props.tone {
-        NoticeTone::Warning | NoticeTone::Error => "alert",
-        NoticeTone::Info | NoticeTone::Success => "status",
+        Tone::Warning | Tone::Danger => "alert",
+        _ => "status",
     };
 
     html! {
@@ -92,18 +77,16 @@ mod tests {
 
     #[test]
     fn a_tone_is_a_modifier() {
-        assert_eq!(names(notice(NoticeTone::Info)), [class::NOTICE]);
+        assert_eq!(names(notice(Tone::Neutral)), [class::NOTICE]);
+        assert_eq!(names(notice(Tone::Accent)), [class::NOTICE, class::ACCENT]);
         assert_eq!(
-            names(notice(NoticeTone::Success)),
+            names(notice(Tone::Success)),
             [class::NOTICE, class::SUCCESS]
         );
         assert_eq!(
-            names(notice(NoticeTone::Warning)),
+            names(notice(Tone::Warning)),
             [class::NOTICE, class::WARNING]
         );
-        assert_eq!(
-            names(notice(NoticeTone::Error)),
-            [class::NOTICE, class::ERROR]
-        );
+        assert_eq!(names(notice(Tone::Danger)), [class::NOTICE, class::DANGER]);
     }
 }

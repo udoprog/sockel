@@ -277,6 +277,7 @@ page can still override them at runtime.
 | `$nest-inset` | `var(--space-1)` |
 | `$control-height`, `$control-height-small` | `2.25rem`, `1.75rem` |
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
+| `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
 | `$glyph-size` | `1em` |
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$filter-width` | `10.5rem` |
@@ -419,6 +420,47 @@ required). A form row's label cell is at least `--control-height` high, so
 the label is centred on a one-line control. The hint wraps (long words
 break) and never widens the field.
 
+## Pill, Badge, Dot, Count and StatusLabel
+
+Short marks whose box is fixed, so a state, a figure or a word changing does
+not move what is around them. Every component takes `class` and `testid`.
+`Tone` (`Neutral`, `Accent`, `Success`, `Warning`, `Danger`, `Busy`, `Unset`)
+is the one tone vocabulary, also `Notice`'s: a modifier (`ACCENT`, `SUCCESS`,
+`WARNING`, `DANGER`, `BUSY`, `UNSET`; neutral has none) that only sets
+`--tone`, from `--accent`, `--success`, `--warning` and `--danger`.
+
+- `Pill` (`.plinth-pill`): a tinted label `--mark-height` tall, led by a dot
+  of `--dot-size` in its tone. `tone`, `plain` (`PLAIN`, no dot), `on_click`
+  (makes it a `<button>`, `PILL_BUTTON`; hover changes its fill only),
+  `disabled`, children as the label, cut with an ellipsis in a narrow
+  container. `pill(tone, plain, button)` gives its classes.
+- `Badge` (`.plinth-badge`): a bordered short text, `--mark-height` tall and
+  at least as wide. `tone`, `solid` (`SOLID`, filled, the accent by
+  default), `corner` (`CORNER`, `--corner-size`, over the top end corner of
+  its positioned parent by transform, so it takes no room);
+  `badge(tone, solid, corner)`.
+- `Dot` (`.plinth-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
+  empty ring in the same box), `label` (its accessible name; without one it
+  is decoration); `dot(tone, on)`.
+- `Count` (`.plinth-count`): a figure on a soft fill. `value`, `max` (99:
+  above it the count reads `99+`), `hide_zero` (`HIDDEN`: `visibility`, so
+  the box stays; a zero shown is dimmed by `ZERO`). Its `min-width` is the
+  digits of `max` and one more for the `+`, in tabular figures, so the
+  count holds across `0..=max+1` and a hidden one does not move its
+  neighbours. The figure is `value.to_string()`; koine has no number
+  formatting. `count(value, hide_zero)` and `count_text(value, max)`.
+- `StatusLabel` (`.plinth-status-label`, `role="status"`): `states` (the
+  text of every state), `current` (an index, or none), `tone`, `spinner`
+  (reserves the slot), `busy` (spins in it), `pill`. Every state's text sits
+  in one grid cell and the others are `HIDDEN` (and `aria-hidden`), so the
+  label is as wide as its widest state and "Loading..." to "Saved" does not
+  resize it. The spinner slot is a `--glyph-size` square that is there
+  whether busy or not. `status_label(tone, pill)`.
+
+Sizes: the height is `--mark-height` whatever the tone, hover or text; only
+a pill's, badge's or status label's own text sets its width. A busy dot
+pulses by opacity (still under `prefers-reduced-motion`).
+
 ## Heads
 
 `PageHead` and `SectionHead` take one set of props (`HeadProps`):
@@ -473,17 +515,16 @@ spinner need not animate itself.
 
 ## Notice, ErrorBox and EmptyState
 
-`Notice` is an inline message. `tone` (`NoticeTone`): `Info` (the default,
-the accent), `Success` (`SUCCESS`), `Warning` (`WARNING`), `Error`
-(`ERROR`), each coloured from `--accent`, `--success`, `--warning` or
-`--danger`. `icon` is the app's icon, before the text; `action` is Html
+`Notice` is an inline message. `tone` (`Tone`, the accent by default;
+see above), coloured from `--accent`, `--success`, `--warning` or
+`--danger`; `Neutral` is muted. `icon` is the app's icon, before the text; `action` is Html
 (a link or button) after it; `onclose: Some(callback)` shows a close button
 (`close_label`, "Dismiss", names it). The notice does not remove itself: the
 app stops rendering it, and the space it held collapses at once, which is
-intended. A warning or an error has `role="alert"`, the others
+intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `role="status"`. `notice(tone)` gives the classes.
 
-`ErrorBox` is an error: `title`, the message (its children), `cause` (the
+`ErrorBox` is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
 technical text, cut to three lines, whole in its `title` attribute) and
 `onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
 busy and ignore clicks).

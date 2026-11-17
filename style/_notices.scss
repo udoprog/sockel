@@ -1,9 +1,9 @@
 // Notice, ErrorBox and EmptyState (src/notice.rs, src/error_box.rs,
 // src/empty_state.rs).
 //
-// - `.plinth-notice`: an inline message, its tone a modifier (`.plinth-info`,
-//   `.plinth-success`, `.plinth-warning`, `.plinth-error`) that sets
-//   `--notice-tone`. Parts: `-icon`, `-body`, `-action`, `-close`. Its
+// - `.plinth-notice`: an inline message, its tone a modifier (`.plinth-accent`,
+//   `.plinth-success`, `.plinth-warning`, `.plinth-danger`, as everywhere)
+//   that sets `--tone`. Parts: `-icon`, `-body`, `-action`, `-close`. Its
 //   least height is one small control plus its padding, so a notice of one
 //   line is as high with a close button as without. Closing one removes it
 //   and the space it held: the content below moves up at once, by design.
@@ -18,7 +18,7 @@
 @use "tokens" as base;
 
 .plinth-notice {
-    --notice-tone: var(--accent);
+    --tone: var(--muted);
 
     display: flex;
     gap: var(--space-2);
@@ -27,22 +27,12 @@
     min-width: 0;
     min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px));
     padding: var(--space-2) var(--space-3);
-    @include base.reserved-border(color-mix(in srgb, var(--notice-tone) 45%, var(--border)));
+    @include base.reserved-border(color-mix(in srgb, var(--tone) 45%, var(--border)));
     border-radius: var(--radius-md);
-    background: color-mix(in srgb, var(--notice-tone) 10%, var(--surface));
+    background: color-mix(in srgb, var(--tone) 10%, var(--surface));
     color: var(--text);
 
-    &.plinth-success {
-        --notice-tone: var(--success);
-    }
-
-    &.plinth-warning {
-        --notice-tone: var(--warning);
-    }
-
-    &.plinth-error {
-        --notice-tone: var(--danger);
-    }
+    @include base.tones;
 }
 
 .plinth-notice-icon {
@@ -51,7 +41,7 @@
     align-items: center;
     justify-content: center;
     height: var(--control-height-small);
-    color: var(--notice-tone);
+    color: var(--tone);
 }
 
 // The text sits in the middle of the least height, whatever its lines.
@@ -72,21 +62,23 @@
 }
 
 .plinth-error-box {
+    --tone: var(--danger);
+
     display: flex;
     flex-direction: column;
     gap: var(--space-2);
     box-sizing: border-box;
     min-width: 0;
     padding: var(--space-4);
-    @include base.reserved-border(color-mix(in srgb, var(--danger) 45%, var(--border)));
+    @include base.reserved-border(color-mix(in srgb, var(--tone) 45%, var(--border)));
     border-radius: var(--radius-lg);
-    background: color-mix(in srgb, var(--danger) 8%, var(--surface));
+    background: color-mix(in srgb, var(--tone) 8%, var(--surface));
     color: var(--text);
 }
 
 .plinth-error-box-title {
     margin: 0;
-    color: var(--danger);
+    color: var(--tone);
     font-size: var(--text-md);
     font-weight: 600;
     overflow-wrap: anywhere;
