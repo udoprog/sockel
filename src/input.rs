@@ -336,6 +336,13 @@ pub struct SearchFieldProps {
     /// prevents the default.
     #[prop_or_default]
     pub on_keydown: Option<Callback<KeyboardEvent>>,
+    /// The id of the listbox it filters, making it that list's combobox
+    /// (`role="combobox"`, `aria-controls`).
+    #[prop_or_default]
+    pub controls: Option<AttrValue>,
+    /// With `controls`, the active option's id (`aria-activedescendant`).
+    #[prop_or_default]
+    pub activedescendant: Option<AttrValue>,
 }
 
 /// A search icon, the text and a button that clears it. The icon's and the
@@ -349,6 +356,7 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
     let own = use_node_ref();
     let input = props.input_ref.clone().unwrap_or(own);
     let empty = props.value.is_empty();
+    let combobox = props.controls.is_some();
 
     let oninput = props.on_input.reform(|e: InputEvent| value_of(&e));
     let clear = {
@@ -392,6 +400,12 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
                 aria-label={props.label.clone()} aria-invalid={props.invalid.then_some("true")}
                 disabled={props.disabled} enterkeyhint="search"
                 data-autofocus={props.autofocus.then_some("")}
+                role={combobox.then_some("combobox")}
+                aria-autocomplete={combobox.then_some("list")}
+                aria-expanded={combobox.then_some("true")}
+                aria-controls={props.controls.clone()}
+                aria-activedescendant={props.activedescendant.clone()}
+                autocomplete={combobox.then_some("off")} spellcheck={combobox.then_some("false")}
                 data-testid={props.testid.clone()} ref={input}
                 {oninput} {onkeydown} />
             <button type="button" class={classes!(class::INPUT_CLEAR, empty.then_some(class::EMPTY))}
@@ -435,6 +449,8 @@ mod tests {
             testid: None,
             input_ref: None,
             on_keydown: None,
+            controls: None,
+            activedescendant: None,
         }
     }
 
@@ -555,6 +571,21 @@ mod tests {
         assert!(empty.contains("tabindex=\"-1\""), "{empty}");
         assert!(!filled.contains(class::EMPTY), "{filled}");
         assert!(!filled.contains("tabindex"), "{filled}");
+    }
+
+    #[test]
+    fn a_field_controlling_a_list_is_its_combobox() {
+        let plain = render::<SearchField>(search(""));
+        assert!(!plain.contains("combobox"), "{plain}");
+        let html = render::<SearchField>(SearchFieldProps {
+            controls: Some("list".into()),
+            activedescendant: Some("list-2".into()),
+            ..search("ab")
+        });
+        assert!(html.contains("role=\"combobox\""), "{html}");
+        assert!(html.contains("aria-controls=\"list\""), "{html}");
+        assert!(html.contains("aria-activedescendant=\"list-2\""), "{html}");
+        assert!(html.contains(class::INPUT_CLEAR), "{html}");
     }
 
     #[test]
