@@ -3,7 +3,8 @@ use yew::prelude::*;
 use crate::class;
 
 use plinth::{
-    Button, ButtonSize, ButtonVariant, Cluster, Dismiss, Popover, PopoverAlign, Side, Stack, button,
+    Button, ButtonSize, ButtonVariant, Cluster, Dismiss, Fit, Popover, PopoverAlign, Side, Stack,
+    button,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -22,10 +23,17 @@ const ALIGNS: &[(&str, PopoverAlign)] = &[
     ("End", PopoverAlign::End),
 ];
 
+const FITS: &[(&str, Fit)] = &[("Scroll", Fit::Scroll), ("Slide", Fit::Slide)];
+
+/// Rows enough to be taller than the room on either side of the anchor.
+const TALL: usize = 40;
+
 #[derive(Properties, PartialEq)]
 struct PopoverDemoProps {
     side: Side,
     align: PopoverAlign,
+    fit: Fit,
+    tall: bool,
     text: Text,
     sheet: bool,
     titled: bool,
@@ -83,7 +91,7 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
                 } }
             </span>
             <Popover anchor={anchor} open={*open} {on_dismiss}
-                side={props.side} align={props.align} sheet={props.sheet}
+                side={props.side} align={props.align} fit={props.fit} sheet={props.sheet}
                 within={props.within.then(|| AttrValue::from(format!(".{}", class::FRAME)))}
                 flush={props.flush} focus_first={props.focus_first}
                 match_anchor={props.match_anchor} keep_focus={props.keep_focus}
@@ -91,6 +99,9 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
                 <Stack>
                     if !text.is_empty() {
                         <p class={class::PROSE}>{ text }</p>
+                    }
+                    if props.tall {
+                        { for (1..=TALL).map(|n| html! { <p class={class::PROSE}>{ format!("Row {n}") }</p> }) }
                     }
                     <Cluster>
                         <Button variant={ButtonVariant::Primary} size={ButtonSize::Small} onclick={done}>
@@ -107,6 +118,8 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
 pub fn PopoverPage() -> Html {
     let side = use_state(Side::default);
     let align = use_state(PopoverAlign::default);
+    let fit = use_state(Fit::default);
+    let tall = use_state(|| false);
     let text = use_state(|| Text::Short);
     let sheet = use_state(|| true);
     let titled = use_state(|| true);
@@ -120,6 +133,8 @@ pub fn PopoverPage() -> Html {
         <>
             <Select<Side> label="side" options={SIDES} value={*side} on_change={bind(&side)} />
             <Select<PopoverAlign> label="align" options={ALIGNS} value={*align} on_change={bind(&align)} />
+            <Select<Fit> label="fit" options={FITS} value={*fit} on_change={bind(&fit)} />
+            <Toggle label="tall (taller than either side)" value={*tall} on_change={bind(&tall)} />
             <Select<Text> label="Content" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
             <Toggle label="title" value={*titled} on_change={bind(&titled)} />
@@ -140,6 +155,7 @@ pub fn PopoverPage() -> Html {
             .expr("on_dismiss", "on_dismiss")
             .variant("side", *side)
             .variant("align", *align)
+            .variant("fit", *fit)
             .expr_if(!*sheet, "sheet", "false")
             .text_if(*titled, "title", "Filters")
             .text_if(*within, "within", &format!(".{}", class::FRAME))
@@ -150,6 +166,7 @@ pub fn PopoverPage() -> Html {
             .child(
                 El::new("Stack")
                     .line_if(!words.is_empty(), format!("<p>{}</p>", text_node(&words)))
+                    .line_if(*tall, "{ for rows }")
                     .line(
                         "<Button variant={ButtonVariant::Primary} size={ButtonSize::Small} onclick={done}>{ \"Done\" }</Button>",
                     ),
@@ -158,7 +175,7 @@ pub fn PopoverPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush}
+            <PopoverDemo side={*side} align={*align} fit={*fit} tall={*tall} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush}
                 focus_first={*focus_first} match_anchor={*match_anchor} keep_focus={*keep_focus} />
         </Demo>
     }

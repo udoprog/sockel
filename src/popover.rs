@@ -109,6 +109,17 @@ impl Placed {
     }
 }
 
+/// What a popover too tall for both sides of its anchor does.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum Fit {
+    /// It takes the side with more room and scrolls in it.
+    #[default]
+    Scroll,
+    /// It stays on its side and slides along it, over the anchor, until it
+    /// fits the viewport; it scrolls only when taller than the viewport.
+    Slide,
+}
+
 /// Places a popover of `size` (width, height) beside `anchor`, inside
 /// `viewport`: on `side` unless it does not fit there and the opposite
 /// side has more room, aligned by `align`, and moved back inside the
@@ -121,6 +132,19 @@ pub fn place(
     side: Side,
     align: PopoverAlign,
 ) -> Placed {
+    place_fit(anchor, size, viewport, side, align, Fit::Scroll)
+}
+
+/// [`place`], with `fit` deciding what a popover too tall for both sides
+/// above and below its anchor does.
+pub fn place_fit(
+    anchor: Rect,
+    size: (f64, f64),
+    viewport: Rect,
+    side: Side,
+    align: PopoverAlign,
+    fit: Fit,
+) -> Placed {
     let (width, height) = size;
     let room = |side: Side| match side {
         Side::Below => viewport.bottom() - anchor.bottom() - GAP - EDGE,
@@ -132,7 +156,11 @@ pub fn place(
         Side::Below | Side::Above => height,
         Side::Start | Side::End => width,
     };
-    let side = if need > room(side) && room(side.opposite()) > room(side) {
+    let slides = fit == Fit::Slide
+        && matches!(side, Side::Below | Side::Above)
+        && need > room(side)
+        && need > room(side.opposite());
+    let side = if !slides && need > room(side) && room(side.opposite()) > room(side) {
         side.opposite()
     } else {
         side
@@ -150,12 +178,17 @@ pub fn place(
 
     match side {
         Side::Below | Side::Above => {
-            let max_height = room(side).max(0.0);
-            let shown = height.min(max_height);
-            let top = if side == Side::Below {
-                anchor.bottom() + GAP
+            let max_height = if slides {
+                (viewport.height - 2.0 * EDGE).max(0.0)
             } else {
-                anchor.top - GAP - shown
+                room(side).max(0.0)
+            };
+            let shown = height.min(max_height);
+            let top = match (side, slides) {
+                (Side::Below, false) => anchor.bottom() + GAP,
+                (_, false) => anchor.top - GAP - shown,
+                (Side::Below, true) => viewport.bottom() - EDGE - shown,
+                (_, true) => viewport.top + EDGE,
             };
             let left = along(
                 anchor.left,
@@ -427,7 +460,17 @@ pub fn use_popover(
     align: PopoverAlign,
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
-    use_placement(open, anchor, popover, side, align, None, on_dismiss, false)
+    use_placement(
+        open,
+        anchor,
+        popover,
+        side,
+        align,
+        Fit::Scroll,
+        None,
+        on_dismiss,
+        false,
+    )
 }
 
 /// `use_popover` kept inside `anchor`'s closest ancestor matching the
@@ -444,7 +487,15 @@ pub fn use_popover_within(
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
     use_placement(
-        open, anchor, popover, side, align, within, on_dismiss, false,
+        open,
+        anchor,
+        popover,
+        side,
+        align,
+        Fit::Scroll,
+        within,
+        on_dismiss,
+        false,
     )
 }
 
@@ -459,7 +510,17 @@ pub(crate) fn use_tip_popover(
     align: PopoverAlign,
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
-    use_placement(open, anchor, popover, side, align, None, on_dismiss, true)
+    use_placement(
+        open,
+        anchor,
+        popover,
+        side,
+        align,
+        Fit::Scroll,
+        None,
+        on_dismiss,
+        true,
+    )
 }
 
 #[hook]
@@ -470,6 +531,7 @@ fn use_placement(
     popover: NodeRef,
     side: Side,
     align: PopoverAlign,
+    fit: Fit,
     within: Option<AttrValue>,
     on_dismiss: Callback<Dismiss>,
     tip: bool,
@@ -483,9 +545,9 @@ fn use_placement(
 
     {
         let placed = placed.clone();
-        let deps = (open, side, align, within);
-        use_effect_with(deps, move |(open, side, align, within)| {
-            let (open, side, align) = (*open, *side, *align);
+        let deps = (open, side, align, fit, within);
+        use_effect_with(deps, move |(open, side, align, fit, within)| {
+            let (open, side, align, fit) = (*open, *side, *align, *fit);
             let within = within.clone();
             // Why it was dismissed (whether that returns focus), and
             // whether focus or a press was ever inside it.
@@ -553,7 +615,7 @@ fn use_placement(
                             f64::from(pop.offset_width()),
                             f64::from(pop.scroll_height()),
                         );
-                        let next = place(Rect::of(&at), size, bounds, side, align);
+                        let next = place_fit(Rect::of(&at), size, bounds, side, align, fit);
                         if last.get().is_none_or(|l| !l.near(&next)) {
                             last.set(Some(next));
                             placed.set(Some(next));
@@ -681,6 +743,10 @@ pub struct PopoverProps {
     pub side: Side,
     #[prop_or_default]
     pub align: PopoverAlign,
+    /// Too tall for both sides above and below its anchor: scroll on the
+    /// roomier side (the default) or slide over the anchor to fit.
+    #[prop_or_default]
+    pub fit: Fit,
     /// A selector: keep it inside the anchor's closest ancestor matching
     /// it (a window of the app's), not the viewport alone.
     #[prop_or_default]
@@ -781,14 +847,16 @@ pub fn popover(sheet: bool, placed: bool) -> Classes {
 pub fn Popover(props: &PopoverProps) -> Html {
     let node = use_node_ref();
     let overlays = use_overlays();
-    let placed = use_popover_within(
+    let placed = use_placement(
         props.open,
         props.anchor.clone(),
         node.clone(),
         props.side,
         props.align,
+        props.fit,
         props.within.clone(),
         props.on_dismiss.clone(),
+        false,
     );
     {
         let (focus, first, node) = (props.focus.clone(), props.focus_first, node.clone());
@@ -1004,6 +1072,69 @@ mod tests {
     }
 
     #[test]
+    fn sliding_keeps_its_side_and_fits_over_the_anchor() {
+        let at = |top, height, side, fit| {
+            place_fit(
+                anchor(100.0, top),
+                (200.0, height),
+                VIEWPORT,
+                side,
+                PopoverAlign::Start,
+                fit,
+            )
+        };
+        // Too tall for either side: slid up from below to the bottom edge.
+        let p = at(200.0, 500.0, Side::Below, Fit::Slide);
+        assert_eq!((p.side, p.top), (Side::Below, 600.0 - EDGE - 500.0));
+        assert_eq!(p.max_height, 600.0 - 2.0 * EDGE);
+        // From above, down to the top edge.
+        let p = at(400.0, 500.0, Side::Above, Fit::Slide);
+        assert_eq!((p.side, p.top), (Side::Above, EDGE));
+        // Taller than the viewport: at the edge, capped to it.
+        let p = at(200.0, 900.0, Side::Below, Fit::Slide);
+        assert_eq!((p.top, p.max_height), (EDGE, 600.0 - 2.0 * EDGE));
+        // Fitting a side, it is placed as `place` places it.
+        for (top, side) in [
+            (100.0, Side::Below),
+            (500.0, Side::Below),
+            (300.0, Side::Above),
+        ] {
+            assert_eq!(
+                at(top, 150.0, side, Fit::Slide),
+                at(top, 150.0, side, Fit::Scroll)
+            );
+        }
+        assert_eq!(
+            at(200.0, 500.0, Side::Below, Fit::Scroll),
+            place(
+                anchor(100.0, 200.0),
+                (200.0, 500.0),
+                VIEWPORT,
+                Side::Below,
+                PopoverAlign::Start
+            )
+        );
+        // Sideways, it is never slid over the anchor.
+        assert_eq!(
+            place_fit(
+                anchor(300.0, 100.0),
+                (500.0, 100.0),
+                VIEWPORT,
+                Side::End,
+                PopoverAlign::Start,
+                Fit::Slide
+            ),
+            place(
+                anchor(300.0, 100.0),
+                (500.0, 100.0),
+                VIEWPORT,
+                Side::End,
+                PopoverAlign::Start
+            )
+        );
+    }
+
+    #[test]
     fn a_box_within_bounds_it_to_their_overlap() {
         let window = Rect {
             left: 500.0,
@@ -1136,6 +1267,7 @@ mod tests {
             on_dismiss: Callback::noop(),
             side: Side::Below,
             align: PopoverAlign::Start,
+            fit: Fit::Scroll,
             within: None,
             sheet,
             head,

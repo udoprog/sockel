@@ -967,6 +967,11 @@ the owner cuts it, and its events still bubble through the owner. Props:
   `open`, and `on_dismiss: Callback<Dismiss>`: the owner closes it.
 - `side` (`Side::Below` by default, `Above`, `Start`, `End`) and `align`
   (`PopoverAlign::Start`, `Center`, `End`).
+- `fit`: what a popover too tall for the room both above and below its
+  anchor does. `Fit::Scroll` (the default) takes the roomier side and
+  scrolls there; `Fit::Slide` stays on its side and slides along it, over
+  the anchor, to fit the viewport (less its edges), scrolling only when
+  taller than that: a long menu at phone height shown whole.
 - `sheet` (on by default, `plinth::class::SHEET`): below `$sheet-breakpoint`
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
   `title` as its heading and a close button (`close_label`, "Close"), unless
@@ -1013,6 +1018,7 @@ dismissing. `place(anchor, (width, height), viewport, side, align)` is its
 pure placement: the given side unless the popover does not fit and the
 opposite side has more room, then moved back inside the viewport, its
 height capped (`max_height`) by the room on the side it took.
+`place_fit(.., fit)` is the same with a `Fit` (`place` is `Fit::Scroll`).
 `use_popover_within(.., within, on_dismiss)` takes `within` too, and
 `placement_bounds(anchor, within)` is the box either places inside, for a
 surface placed by its owner with `place` (`Rect::clip` cuts one box to

@@ -99,7 +99,7 @@
 //!   layer, which [`use_overlays`] finds ([`overlay`] without one);
 //!   [`use_overlay`] puts an app's own overlay on its stack.
 //! - [`Popover`] (`.popover`): a surface beside its anchor in the overlay
-//!   layer, placed before it shows ([`place`], [`use_popover`]),
+//!   layer, placed before it shows ([`place`], [`place_fit`], [`use_popover`]),
 //!   dismissed by a press outside or Escape, a sheet on a phone.
 //! - [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
 //!   scrolls and pinned actions, in three sizes; a sheet on a phone. The page
@@ -282,8 +282,8 @@ pub use picker::{
     PickerMenuProps, PickerOption, PickerProps, PickerVariant, SEARCH_FROM, picker, picker_matches,
 };
 pub use popover::{
-    Dismiss, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, placement_bounds,
-    popover, use_popover, use_popover_within,
+    Dismiss, Fit, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, place_fit,
+    placement_bounds, popover, use_popover, use_popover_within,
 };
 pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,
