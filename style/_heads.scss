@@ -1,0 +1,118 @@
+// The heads of pages and sections (src/head.rs, PageHead and SectionHead).
+//
+// - `.page-head`: a page's title (`.page-head-title`, its h1) with its
+//   help, and its actions (`.page-head-actions`) at the row's end. The
+//   actions are full-size buttons, centred on the title's line, the
+//   primary last; on a narrow screen they wrap under the title.
+// - `.section-head`: the same for a section in a page, its title
+//   (`.section-head-title`, an h2) a size smaller.
+//
+// - `.page-head.crumb`: a head that leads back, `.page-head-crumbs`: the back
+//   link (`.page-head-back`), a `/` (`.page-head-sep`) and the title; its
+//   keywords (`.page-head-meta`) come before the actions.
+// - `.page-head.compact`: the head of a compact page (the game's): the
+//   actions as icons (their `.label-text` hidden), and on a phone one row,
+//   the title on two lines and the back link's words (`.page-head-back-label`)
+//   gone.
+//
+// Neither has outer margins: the page's or section's stack spaces it.
+
+@use "tokens" as base;
+
+.page-head,
+.section-head {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    justify-content: space-between;
+    gap: var(--space-2) var(--space-3);
+    min-width: 0;
+}
+
+.page-head-title,
+.section-head-title {
+    min-width: 0;
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.section-head-title {
+    font-size: var(--text-lg);
+}
+
+.page-head-actions,
+.section-head-actions {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    // Wrapped, the buttons stay together at the row's end, not one alone
+    // at its start.
+    justify-content: flex-end;
+    gap: var(--space-2);
+    margin-left: auto;
+}
+
+.page-head-crumbs {
+    display: flex;
+    align-items: baseline;
+    gap: var(--space-2);
+    min-width: 0;
+
+    > .page-head-title {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+}
+
+.page-head-sep {
+    color: var(--muted);
+}
+
+.page-head-meta {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1) var(--space-2);
+}
+
+// The compact head's actions are icons: their words (`.label-text`) hide,
+// and a phone's buttons are tighter (`base.button`).
+.page-head.compact {
+    --label-display: none;
+}
+
+@include base.below("phone") {
+    .page-head.compact {
+        flex-wrap: nowrap;
+
+        > .page-head-crumbs {
+            flex: 1 1 auto;
+
+            // The title has what the icons leave: on two lines before it
+            // is cut.
+            > .page-head-title {
+                display: -webkit-box;
+                overflow: hidden;
+                font-size: var(--text-base);
+                line-height: 1.15;
+                white-space: normal;
+                -webkit-box-orient: vertical;
+                -webkit-line-clamp: 2;
+                line-clamp: 2;
+            }
+        }
+
+        .page-head-back-label,
+        .page-head-sep,
+        .page-head-meta {
+            display: none;
+        }
+
+        > .page-head-actions {
+            flex-wrap: nowrap;
+            gap: var(--space-0);
+            --button-min-width: 2.25rem;
+            --button-pad-x: var(--space-2);
+        }
+    }
+}

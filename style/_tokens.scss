@@ -1,0 +1,115 @@
+// Plinth's tokens and mixins: the size, space and type scales every
+// primitive reads, the breakpoints, and the recipes for a page's column and
+// for rounded things nested in rounded things.
+//
+// - Type `--text-3xs`…`--text-2xl` (base `--text-base`, 15px).
+// - Space `--space-0` (2px), `--space-px`, `--space-1`…`--space-9`.
+// - Radii `--radius-xs` (check boxes), `--radius-sm` (controls),
+//   `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
+// - `--control-height` and `--control-height-small`: every field, button
+//   and picker button is one of the two, so a row of them never jumps.
+// - `--filter-width`: a list's filter button, one width whatever it says.
+// - `--page-workspace` and `--page-reading`: the two content columns.
+// - `below($name)` / `above($name)`: media queries at the breakpoints.
+// - `page($width)`, `nests($radius, $border)`.
+
+@use "sass:map";
+
+// The widths a layout changes at, narrowest first: `below` styles up to
+// one, `above` from it.
+$breakpoints: (
+    "narrow": 30rem,
+    "small": 36rem,
+    "phone": 40rem,
+    "medium": 48rem,
+    "large": 60rem,
+    "tablet": 64rem,
+    "wide": 84rem,
+    "desktop": 100rem,
+);
+
+@function breakpoint($name) {
+    @if not map.has-key($breakpoints, $name) {
+        @error "Unknown breakpoint #{$name}";
+    }
+
+    @return map.get($breakpoints, $name);
+}
+
+// Below a breakpoint and from it up: never both, at the breakpoint's own
+// width.
+@mixin below($name) {
+    @media (width < #{breakpoint($name)}) {
+        @content;
+    }
+}
+
+@mixin above($name) {
+    @media (width >= #{breakpoint($name)}) {
+        @content;
+    }
+}
+
+:root {
+    --text-3xs: 0.625rem;
+    --text-2xs: 0.6875rem;
+    --text-xs: 0.75rem;
+    --text-sm: 0.8125rem;
+    --text-md: 0.875rem;
+    --text-base: 0.9375rem;
+    --text-heading: 1.125rem;
+    --text-lg: 1.25rem;
+    --text-title: 1.4rem;
+    --text-xl: 1.5rem;
+    --text-2xl: 1.75rem;
+
+    --space-0: 0.125rem;
+    --space-px: 1px;
+    --space-1: 0.25rem;
+    --space-2: 0.5rem;
+    --space-3: 0.75rem;
+    --space-4: 1rem;
+    --space-5: 1.25rem;
+    --space-6: 1.5rem;
+    --space-7: 2rem;
+    --space-8: 2.5rem;
+    --space-9: 3rem;
+
+    // Controls take the small radius; cards, panels and dialogs the large.
+    --radius-xs: 4px;
+    --radius-sm: 8px;
+    --radius-lg: 16px;
+    --radius-pill: 999px;
+    // The one gap between a rounded container and the rounded items in it.
+    --nest-inset: var(--space-1);
+    --control-height: 2.25rem;
+    // A small control (`button.small`, `.input.small`), for dense places.
+    --control-height-small: 1.75rem;
+    // A library page's filter button (`.picker.filter`).
+    --filter-width: 10.5rem;
+
+    // The two content columns: the
+    // workspace for lists, sheets and the manual, the reading column for
+    // forms and prose.
+    --page-workspace: 64rem;
+    --page-reading: 40rem;
+}
+
+// A page's content column: the workspace unless it is given the reading
+// column.
+@mixin page($width: var(--page-workspace)) {
+    // The full column whatever it holds: auto margins alone let a page
+    // shrink to its content, so two pages differed in width.
+    width: 100%;
+    max-width: $width;
+    margin-inline: auto;
+}
+
+// A container whose rounded items sit just inside it: the one inset on
+// every side, and its items' corners concentric with its own (its radius
+// less the inset and its border). Buttons, tabs and menu rows take it as
+// `--radius-inner`, falling back to `--radius-sm` outside such a container.
+@mixin nests($radius, $border: 1px) {
+    padding: var(--nest-inset);
+    --radius-inner: calc(#{$radius} - var(--nest-inset) - #{$border});
+}

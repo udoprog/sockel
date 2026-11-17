@@ -1,0 +1,262 @@
+// The layout primitives (src/layout.rs, src/library_toolbar.rs). Every
+// row, column, bar and surface is one of these with modifiers, never a flex
+// rule of a screen's own.
+//
+// - `.stack`: a column, its blocks `--space-3` apart.
+// - `.cluster`: a row that wraps, items centred, `--space-2` apart.
+//   Along the row `.center`, `.between`, `.end`; across it `.top`, `.baseline`, `.bottom`,
+//   `.stretch`;
+//   `.nowrap` keeps one line; `.inline` sets it in the text's flow (an
+//   icon and its label).
+// - `.stack.start`: its items at their own width, at the start.
+// - The gap of either, one scale for both: `.hair` (`--space-0`, 2px: a tight
+//   group of buttons), `.snug` (`--space-1`),
+//   `.tight` (`--space-2`), `.medium` (`--space-3`), `.loose`
+//   (`--space-4`: a page's or section's blocks), `.wide` (`--space-6`).
+// - `.toolbar`: one line of controls, `--space-1` apart, scrolling sideways
+//   when it runs out of room; `.toolbar-spacer` pushes what follows to the
+//   end. `.boxed` draws it as a bar of its own.
+// - `.library-toolbar`: a library page's search (`.library-search`, which
+//   grows from `14rem`) and its filters (`.picker.filter`, one width each),
+//   a row that wraps: on a phone the search has a row to itself.
+// - `.card`: a surface lifted off the page, `--space-4` in.
+//   `.compact` (`--space-3`), `.dense` (a row's), `.flush` (none, its
+//   content to its rounded edges); `.inset` a bordered row or panel, the
+//   small radius and no lift; `.link` for a card that is a link or button: its border lights
+//   on hover.
+//
+// - `.grow` (an item takes the room left; `.basis-sm`, `.basis-md` and
+//   `.basis-lg` set the width it starts from), `.self-start` (an item in a stack
+//   keeps its own width), `.push-end` (an item, and what follows it, at the
+//   end of its row), `.contents` (an element whose children are its
+//   parent's items, as a pager's list in a row of chips).
+// - `.workspace-page`: a page the width of the workspace (home, characters,
+//   a character, games, search, help, a web of relationships).
+// - `.plain-list`: a `ul`/`ol` with no bullets, margin or padding (with
+//   `.stack` for a column of rows).
+// - `.library-page`: the page width of a library or admin index (with
+//   `.stack.loose`): xrefs, systems, tables, rolls, widgets, books, trait
+//   sets, sheets, keywords, groups, audit, tools, polls.
+//
+// The space between a page's blocks is its stack's gap, not margins on
+// the blocks.
+
+@use "tokens" as base;
+
+.stack {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+// A stack whose items keep their own width (a message over its button).
+.stack.start {
+    align-items: flex-start;
+}
+
+// A flex item that takes the room left in its row, and may shrink.
+.grow {
+    flex: 1 1 auto;
+    min-width: 0;
+
+    // Starting widths for a field in a row of controls.
+    &.basis-sm {
+        flex: 1 1 9rem;
+    }
+
+    &.basis-md {
+        flex: 1 1 14rem;
+    }
+
+    &.basis-lg {
+        flex: 2 1 10rem;
+    }
+}
+
+// A block in a stack or a flex column that keeps its own width at the start,
+// while its siblings fill.
+.self-start {
+    align-self: flex-start;
+}
+
+.push-end {
+    margin-left: auto;
+}
+
+.contents {
+    display: contents;
+}
+
+.workspace-page {
+    @include base.page;
+}
+
+.library-page {
+    @include base.page;
+
+    // The stack's gap spaces the blocks, not their own margins (a paragraph's
+    // default, a toolbar's).
+    > * {
+        margin-block: 0;
+    }
+}
+
+.plain-list {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.cluster {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+
+    &.inline {
+        display: inline-flex;
+    }
+
+    &.center {
+        justify-content: center;
+    }
+
+    &.between {
+        justify-content: space-between;
+    }
+
+    &.end {
+        justify-content: flex-end;
+    }
+
+    &.top {
+        align-items: flex-start;
+    }
+
+    &.baseline {
+        align-items: baseline;
+    }
+
+    &.bottom {
+        align-items: flex-end;
+    }
+
+    &.stretch {
+        align-items: stretch;
+    }
+
+    &.nowrap {
+        flex-wrap: nowrap;
+    }
+}
+
+// The gap scale, after both so it wins over their own gaps.
+.stack,
+.cluster {
+    &.hair {
+        gap: var(--space-0);
+    }
+
+    &.snug {
+        gap: var(--space-1);
+    }
+
+    &.tight {
+        gap: var(--space-2);
+    }
+
+    &.medium {
+        gap: var(--space-3);
+    }
+
+    &.loose {
+        gap: var(--space-4);
+    }
+
+    &.wide {
+        gap: var(--space-6);
+    }
+}
+
+.toolbar {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: thin;
+
+    &.boxed {
+        border: 1px solid var(--border);
+        border-radius: var(--radius-sm);
+        background: var(--surface);
+        @include base.nests(var(--radius-sm));
+    }
+}
+
+.library-toolbar {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+}
+
+.library-search {
+    display: flex;
+    flex: 1 1 14rem;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+
+    > .input {
+        flex: 1;
+        min-width: 0;
+    }
+}
+
+.toolbar-spacer {
+    flex: 1 1 auto;
+}
+
+.card {
+    padding: var(--space-4);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-lg);
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+    color: var(--text);
+
+    &.compact {
+        padding: var(--space-3);
+    }
+
+    // A bordered row or panel inside a page: the small radius, no lift.
+    &.inset {
+        border-radius: var(--radius-sm);
+        box-shadow: none;
+    }
+
+    // As tight as a row of controls.
+    &.dense {
+        padding: var(--space-1) var(--space-2);
+    }
+
+    &.flush {
+        padding: 0;
+        overflow: hidden;
+    }
+
+    &.link {
+        display: block;
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover,
+        &:focus-visible {
+            border-color: var(--accent);
+        }
+    }
+}

@@ -1,0 +1,8 @@
+[package]
+name = "plinth"
+edition = "2024"
+publish = false
+
+[dependencies]
+web-sys = { version = "0.3.77", features = ["HtmlInputElement"] }
+yew = "0.23.0"
