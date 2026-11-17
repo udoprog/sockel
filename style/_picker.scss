@@ -11,7 +11,8 @@
 // - `.plinth-choice-list`: a search field (`-search`, an input box) over the
 //   options (`-options`, a listbox of `.plinth-listbox-option` rows,
 //   _listbox.scss) `--picker-rows` rows high whatever matches, so filtering
-//   never resizes it. Option parts beside the listbox's: `-detail` (muted
+//   never resizes it. The options scroll, not the popup, so only they keep
+//   a scrollbar gutter. Option parts beside the listbox's: `-detail` (muted
 //   after the label), `-badge` (at the row's end); `-note`, the no-match
 //   row; `-pager`, a page's worth of matches' Pager under them, over a rule.
 
@@ -78,7 +79,9 @@
 .plinth-picker-popup {
     @include menu.list(var(--listbox-anchor-width, 0px), base.$picker-popup-width);
     width: max(var(--listbox-anchor-width, 0px), #{base.$picker-popup-width});
+    // The popup never scrolls (its options do): no gutter of its own.
     overflow: hidden;
+    scrollbar-gutter: auto;
 }
 
 .plinth-choice-list {

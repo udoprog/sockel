@@ -19,6 +19,9 @@ pub struct Rect {
     pub y: f64,
     pub width: f64,
     pub height: f64,
+    /// For a `Size::Flush` part, the room left between its right edge and
+    /// its container's content edge.
+    pub gap: f64,
 }
 
 /// What of a box must hold.
@@ -29,6 +32,10 @@ pub enum Size {
     Both,
     /// Its size and its place in the frame.
     Box,
+    /// Its right edge reaches the content edge of its closest ancestor of
+    /// this class, so the container reserves no scrollbar room beside it, wherever on the page it is open (measured outside the
+    /// frames, as overlays are).
+    Flush(&'static str),
 }
 
 /// The states a box holds across, by control label, or one of its values
@@ -92,6 +99,24 @@ const TOLERANCE: f64 = 0.5;
 pub fn changes<'a>(hold: &Hold, baseline: &Boxes, states: &'a [State]) -> Vec<Change<'a>> {
     let mut found = Vec::new();
 
+    if let Size::Flush(_) = hold.size {
+        for state in states.iter().filter(|s| hold.across.covers(s)) {
+            for (key, after) in state.boxes.iter().filter(|(k, _)| k.1 == hold.part) {
+                if after.gap.abs() > TOLERANCE {
+                    found.push(Change {
+                        state,
+                        key: *key,
+                        delta: Some(Rect {
+                            gap: after.gap,
+                            ..Rect::default()
+                        }),
+                    });
+                }
+            }
+        }
+        return found;
+    }
+
     for state in states.iter().filter(|s| hold.across.covers(s)) {
         for (key, before) in baseline.iter().filter(|(k, _)| k.1 == hold.part) {
             let Some(after) = state.boxes.get(key) else {
@@ -107,6 +132,7 @@ pub fn changes<'a>(hold: &Hold, baseline: &Boxes, states: &'a [State]) -> Vec<Ch
                 y: after.y - before.y,
                 width: after.width - before.width,
                 height: after.height - before.height,
+                gap: 0.0,
             };
             let moved = |d: f64| d.abs() > TOLERANCE;
             let changed = match hold.size {
@@ -116,6 +142,7 @@ pub fn changes<'a>(hold: &Hold, baseline: &Boxes, states: &'a [State]) -> Vec<Ch
                 Size::Box => {
                     moved(delta.width) || moved(delta.height) || moved(delta.x) || moved(delta.y)
                 }
+                Size::Flush(_) => false,
             };
             if changed {
                 found.push(Change {
@@ -136,7 +163,14 @@ pub fn report(holds: &[Hold], baseline: &Boxes, states: &[State]) -> (bool, Stri
     let mut unstable = 0;
 
     for hold in holds {
-        let measured = baseline.keys().filter(|k| k.1 == hold.part).count();
+        let measured = match hold.size {
+            Size::Flush(_) => states
+                .iter()
+                .flat_map(|s| s.boxes.keys())
+                .filter(|k| k.1 == hold.part)
+                .count(),
+            _ => baseline.keys().filter(|k| k.1 == hold.part).count(),
+        };
         let found = changes(hold, baseline, states);
         let verdict = match (measured, found.is_empty()) {
             (0, _) => "no box found",
@@ -159,6 +193,13 @@ pub fn report(holds: &[Hold], baseline: &Boxes, states: &[State]) -> (bool, Stri
             let state = format!("{}={}", change.state.control, change.state.value);
             let _ = match change.delta {
                 None => writeln!(out, "  {state} {frame}#{index}: gone"),
+                Some(d) if matches!(hold.size, Size::Flush(_)) => {
+                    writeln!(
+                        out,
+                        "  {state} {frame}#{index}: short of the edge by {:.1}",
+                        d.gap
+                    )
+                }
                 Some(d) => writeln!(
                     out,
                     "  {state} {frame}#{index}: dx {:+.1} dy {:+.1} dw {:+.1} dh {:+.1}",
@@ -187,7 +228,7 @@ mod dom {
         KeyboardEventInit,
     };
 
-    use super::{Boxes, Hold, Rect, State, class};
+    use super::{Boxes, Hold, Rect, Size, State, class};
 
     fn list(doc: &Document, selectors: &str) -> Vec<Element> {
         let Ok(nodes) = doc.query_selector_all(selectors) else {
@@ -229,7 +270,7 @@ mod dom {
                 "wide"
             };
             let origin = frame.get_bounding_client_rect();
-            for hold in holds {
+            for hold in holds.iter().filter(|h| !matches!(h.size, Size::Flush(_))) {
                 let parts = frame.get_elements_by_class_name(hold.part);
                 for i in 0..parts.length() {
                     let Some(part) = parts.item(i) else {
@@ -241,6 +282,7 @@ mod dom {
                         y: rect.y() - origin.y(),
                         width: rect.width(),
                         height: rect.height(),
+                        gap: flush_gap(&part, &rect, hold),
                     };
                     if let Some((width, height)) = untransformed(&part) {
                         // A turned box (a spinner) is measured as laid out,
@@ -255,7 +297,57 @@ mod dom {
             }
         }
 
+        // An overlay opens outside the frames, in the page's own layer.
+        for hold in holds.iter().filter(|h| matches!(h.size, Size::Flush(_))) {
+            let parts = doc.get_elements_by_class_name(hold.part);
+            for i in 0..parts.length() {
+                let Some(part) = parts.item(i) else {
+                    continue;
+                };
+                let rect = part.get_bounding_client_rect();
+                boxes.insert(
+                    ("page", hold.part, i as usize),
+                    Rect {
+                        x: rect.x(),
+                        y: rect.y(),
+                        width: rect.width(),
+                        height: rect.height(),
+                        gap: flush_gap(&part, &rect, hold),
+                    },
+                );
+            }
+        }
+
         boxes
+    }
+
+    /// How far a `Size::Flush` part's right edge is from the content edge
+    /// of its container; 0 for any other.
+    fn flush_gap(part: &Element, rect: &web_sys::DomRect, hold: &Hold) -> f64 {
+        let Size::Flush(within) = hold.size else {
+            return 0.0;
+        };
+        let Some(outer) = part.closest(&format!(".{within}")).ok().flatten() else {
+            return 0.0;
+        };
+        let Some(style) =
+            web_sys::window().and_then(|w| w.get_computed_style(&outer).ok().flatten())
+        else {
+            return 0.0;
+        };
+        let px = |name: &str| {
+            style
+                .get_property_value(name)
+                .ok()
+                .and_then(|v| v.trim_end_matches("px").parse::<f64>().ok())
+                .unwrap_or(0.0)
+        };
+        // From the border box, not the client box: a reserved scrollbar
+        // gutter is the room between them.
+        let inner_right = outer.get_bounding_client_rect().right()
+            - px("border-right-width")
+            - px("padding-right");
+        inner_right - rect.right()
     }
 
     /// A transformed element's laid-out size, which its client rect is not.

@@ -744,6 +744,11 @@ pub const PAGES: &[Page] = &[
                 Size::Height,
                 Across::Except(&["variant"]),
             ),
+            hold(
+                plinth::class::CHOICE_LIST_OPTIONS,
+                Size::Flush(plinth::class::PICKER_POPUP),
+                Across::Only(&["click"]),
+            ),
         ],
     },
     Page {
@@ -753,11 +758,23 @@ pub const PAGES: &[Page] = &[
         about: "A button for an action that takes an option, such as adding one, opening the same searchable ChoiceList as a Picker; a pick closes it.",
         covers: &["PickerMenu", "PickerMenuProps"],
         render: || html! { <picker::PickerMenuPage /> },
-        holds: &[hold(
-            plinth::class::BUTTON,
-            Size::Box,
-            Across::Except(&["Option text"]),
-        )],
+        holds: &[
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Except(&["Option text"]),
+            ),
+            hold(
+                plinth::class::CHOICE_LIST_SEARCH,
+                Size::Flush(plinth::class::PICKER_POPUP),
+                Across::Only(&["click"]),
+            ),
+            hold(
+                plinth::class::CHOICE_LIST_OPTIONS,
+                Size::Flush(plinth::class::PICKER_POPUP),
+                Across::Only(&["click"]),
+            ),
+        ],
     },
     Page {
         id: "picker-dialog",

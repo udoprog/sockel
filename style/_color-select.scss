@@ -87,6 +87,9 @@
 
 .plinth-color-list {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
+    // The grid is as high as its rows and only a very short window makes
+    // the list scroll: no scrollbar room kept beside it until it does.
+    scrollbar-gutter: auto;
 }
 
 .plinth-color-grid {
