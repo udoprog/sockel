@@ -142,6 +142,23 @@ adds plinth's only when the element is missing. So whichever mounts first
 with the app's stylesheet, once. Never link or inject plinth's CSS another
 way beside it.
 
+**Configuring plinth's defaults.** Local Sass cannot `@use "plinth" with
+(...)`, since plinth compiles first. Pass the values to the build instead,
+before `compile()`; they are plinth's `!default` tokens (see Configuration),
+and only values change, never classes:
+
+```rust
+plinth_build::Config::new()
+    .local("style")
+    .prefix("army-")
+    .with("text-md", "1.0625rem")
+    .with("$radius-lg", "12px")
+    .compile();
+```
+
+The `$` is optional and the value is any Sass expression. Without `.local`,
+the same call configures plinth's own stylesheet.
+
 The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 
 ## Theming
@@ -173,13 +190,13 @@ selector:
 
 Breakpoints and the component settings (`$card-padding`,
 `$card-padding-phone`, `$toolbar-gap`) are Sass-only: an app built with
-`plinth-build` keeps plinth's defaults, since plinth's CSS is included
-unchanged.
+`plinth-build` sets them with `Config::with`.
 
 ## Configuration
 
-This applies only to an app that compiles plinth's Sass itself, outside
-`plinth-build`. plinth's values are defaults. Every token is a `!default` variable of
+An app built with `plinth-build` sets these with `Config::with` (see
+Adopting plinth); an app that compiles plinth's Sass itself uses `with (...)`.
+plinth's values are defaults. Every token is a `!default` variable of
 `style/_tokens.scss`, emitted as its custom property on `:root`, so a project
 sets its own with `with (...)`, either through the index:
 

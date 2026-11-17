@@ -159,6 +159,7 @@ pub struct Config {
     out_dir: Option<PathBuf>,
     local: Option<PathBuf>,
     prefix: Option<String>,
+    with: Vec<(String, String)>,
 }
 
 /// A build's results.
@@ -197,9 +198,30 @@ impl Config {
         self
     }
 
+    /// Sets a plinth token (`"text-md"` or `"$text-md"`) to a Sass value
+    /// (`"1.0625rem"`), as `@use "plinth" with (...)` would. Only values
+    /// change; the classes stay the same.
+    pub fn with(mut self, variable: impl AsRef<str>, value: impl Into<String>) -> Self {
+        let name = variable.as_ref().trim_start_matches('$').to_owned();
+        self.with.push((name, value.into()));
+        self
+    }
+
+    fn plinth_use(&self) -> String {
+        if self.with.is_empty() {
+            return "@use \"plinth\";\n".to_owned();
+        }
+        let pairs: Vec<_> = self
+            .with
+            .iter()
+            .map(|(name, value)| format!("${name}: {value}"))
+            .collect();
+        format!("@use \"plinth\" with ({});\n", pairs.join(", "))
+    }
+
     pub fn build(&self) -> Result<Output, Error> {
         let options = grass::Options::default().fs(&Sources).load_path("");
-        let plinth_css = grass::from_path(Path::new(ROOT).join("_index.scss"), &options)?;
+        let plinth_css = grass::from_string(self.plinth_use(), &options)?;
         let hooks = grass::from_string(HOOKS_PROBE, &options)?;
         let mut plinth_classes = class_names(&plinth_css);
         plinth_classes.extend(class_names(&hooks));
@@ -217,7 +239,7 @@ impl Config {
         let index = local_index(dir)?;
         // One compilation, plinth first, so a local `@use "plinth"` reuses
         // the module loaded here and emits nothing again.
-        let entry = format!("@use \"plinth\";\n@use \"{}\";\n", sass_string(&index));
+        let entry = format!("{}@use \"{}\";\n", self.plinth_use(), sass_string(&index));
         let css = grass::from_string(entry, &options)?;
         let local_css = css.strip_prefix(&plinth_css).ok_or(Error::NotVerbatim)?;
         let local_classes = class_names(local_css)
@@ -454,6 +476,32 @@ mod tests {
         let style = Path::new(env!("CARGO_MANIFEST_DIR")).join("../style/_index.scss");
         let on_disk = grass::from_path(style, &grass::Options::default()).unwrap();
         assert_eq!(output.css, on_disk);
+    }
+
+    #[test]
+    fn configures_token_values_not_classes() {
+        let plain = Config::new().build().unwrap();
+        let config = Config::new()
+            .with("$text-md", "1.0625rem")
+            .with("radius-lg", "12px");
+        for output in [
+            config.build().unwrap(),
+            config
+                .clone()
+                .local(fixture("fixture/style"))
+                .prefix("fixture-")
+                .build()
+                .unwrap(),
+        ] {
+            assert!(
+                output.css.contains("--text-md: 1.0625rem"),
+                "{}",
+                output.css
+            );
+            assert!(output.css.contains("--radius-lg: 12px"));
+            assert!(!output.css.contains("--text-md: 0.875rem"));
+            assert_eq!(output.plinth_classes, plain.plinth_classes);
+        }
     }
 
     #[test]
