@@ -698,6 +698,8 @@ mod tests {
             "--field-border: var(--border)",
             "--field-bg: var(--surface)",
             "--card-border: var(--border)",
+            "--band-chrome-ground: var(--surface)",
+            "--band-search-text: var(--text-sm)",
             "--focus-ring-color: var(--accent)",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");

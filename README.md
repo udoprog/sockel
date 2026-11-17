@@ -250,6 +250,7 @@ as `$danger` and the rest):
 | `--field-border` | `--border` | a field's edge (inputs, select and picker faces) and a checkbox's, switch's and choice's |
 | `--field-bg` | `--surface` | a field's fill |
 | `--card-border` | `--border` | a card's edge (`transparent` for cards without one) |
+| `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 
 The status hues are mixed toward `--text`, so they keep their contrast on a
 light and a dark background alike. The defaults are computed on `:root`: an
@@ -335,7 +336,8 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$band-chrome-ground` | see [Theming](#theming) |
+| `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 
@@ -1573,9 +1575,12 @@ box when off. New partial: `_picker.scss`. No new tokens.
 
 **ToolBand** is a `Toolbar` with `band`: its controls wrap onto further
 lines instead of scrolling sideways (`.plinth-toolbar.plinth-band`; no
-hidden scrollbar or fade). `chrome` sets it on `--surface` with a rule
-under it (`.plinth-chrome`, an inset shadow, so no border is added);
-`search` sets it in `--text-sm`, as a list's filter (`.plinth-search`).
+hidden scrollbar or fade). `chrome` sets it on `--band-chrome-ground`
+(`--surface`) with a rule under it (`.plinth-chrome`, an inset shadow, so
+no border is added), its controls `--band-chrome-gap` apart; `search` sets
+it in `--band-search-text` (`--text-sm`), as a list's filter
+(`.plinth-search`). `tool_band(chrome, search)` gives a band's classes for
+markup that is not the component.
 Group its controls in `ToolbarPart`s (`.plinth-toolbar-part`, `role=group`):
 a band wraps between parts, and inside a part only when that part alone is
 wider than the band (it never overflows the band).

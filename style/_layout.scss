@@ -21,8 +21,9 @@
 //   `.plinth-toolbar-spacer` pushes what follows to the end. `.plinth-boxed` draws it as
 //   a bar of its own.
 // - `.plinth-toolbar.plinth-band`: its controls wrap instead of scrolling;
-//   `.plinth-chrome` sets it on the surface with a rule under it,
-//   `.plinth-search` in the smaller type of a list's filter.
+//   `.plinth-chrome` sets it on `--band-chrome-ground` with a rule under it,
+//   `--band-chrome-gap` apart, `.plinth-search` in a list filter's
+//   `--band-search-text`.
 //   `.plinth-toolbar-part` groups controls that it wraps between, never
 //   inside, unless the part alone is wider than the band; `.plinth-ruled` rules a part off from the one before it, from the
 //   phone breakpoint up.
@@ -256,13 +257,14 @@
     }
 
     &.plinth-chrome {
+        gap: var(--band-chrome-gap);
         padding: var(--space-1) var(--space-3);
-        background: var(--surface);
+        background: var(--band-chrome-ground);
         box-shadow: inset 0 calc(var(--space-px) * -1) 0 var(--border);
     }
 
     &.plinth-search {
-        font-size: var(--text-sm);
+        font-size: var(--band-search-text);
     }
 }
 

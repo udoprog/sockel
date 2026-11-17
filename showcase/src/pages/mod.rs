@@ -1225,8 +1225,13 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "tool-band",
         title: "ToolBand",
-        about: "A Toolbar with band: its controls wrap onto further lines instead of scrolling, in ToolbarParts that each keep to one line, ruled off from the part before from the phone breakpoint up; chrome sets it on the surface with a rule under it. Its buttons keep one width when disabled, so the band never rewraps. Tab through it.",
-        covers: &["ToolbarPart", "ToolbarPartProps", "toolbar_part"],
+        about: "A Toolbar with band: its controls wrap onto further lines instead of scrolling, in ToolbarParts that each keep to one line, ruled off from the part before from the phone breakpoint up; chrome sets it on --band-chrome-ground with a rule under it, --band-chrome-gap apart; search sets it in --band-search-text. tool_band(chrome, search) gives these classes to markup that is not the component. Its buttons keep one width when disabled, so the band never rewraps. Tab through it.",
+        covers: &[
+            "ToolbarPart",
+            "ToolbarPartProps",
+            "toolbar_part",
+            "tool_band",
+        ],
         render: || html! { <structures::ToolBandPage /> },
         holds: &[
             hold(plinth::class::TOOLBAR, Size::Width, Across::All),

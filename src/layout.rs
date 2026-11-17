@@ -150,6 +150,12 @@ fn toolbar_with(boxed: bool, band: bool, chrome: bool, search: bool) -> Classes 
     )
 }
 
+/// A band's classes, for markup that is not a [`Toolbar`]: its controls
+/// wrap; `chrome` and `search` as on [`Toolbar`].
+pub fn tool_band(chrome: bool, search: bool) -> Classes {
+    toolbar_with(false, true, chrome, search)
+}
+
 /// A toolbar part's classes; `ruled` rules it off from the part before it.
 pub fn toolbar_part(ruled: bool) -> Classes {
     classes!(class::TOOLBAR_PART, ruled.then_some(class::RULED))
@@ -493,6 +499,10 @@ mod tests {
                 class::CHROME,
                 class::SEARCH
             ]
+        );
+        assert_eq!(
+            names(tool_band(true, false)),
+            [class::TOOLBAR, class::BAND, class::CHROME]
         );
         assert_eq!(names(toolbar_part(false)), [class::TOOLBAR_PART]);
         assert_eq!(
