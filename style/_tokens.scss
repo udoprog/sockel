@@ -441,6 +441,17 @@ $visibility-breakpoint: "phone" !default;
 // The breakpoint below which a popover is a sheet from the bottom.
 $sheet-breakpoint: "phone" !default;
 
+// A text field's edge on hover and while focused (`null`: as at rest), its
+// focus ring's offset (`null`: `--focus-ring-offset`; a negative one draws
+// the ring over the edge), its inline padding, its text size (`null`:
+// inherited) and its height below the phone breakpoint (`null`: as above).
+$input-hover-edge: var(--accent) !default;
+$input-focus-edge: null !default;
+$input-ring-offset: null !default;
+$input-padding-inline: var(--space-2) !default;
+$input-text: null !default;
+$input-phone-height: null !default;
+
 // Optional parts an app leaves out of its CSS, by name (README, "Leaving
 // parts out"): the modifiers, variants and tokens of components it never
 // renders. Empty, every part is emitted.
@@ -1076,8 +1087,25 @@ $-button-variants: (
     color: var(--text);
     font: inherit;
 
+    @if $input-text {
+        font-size: $input-text;
+    }
+
     &:hover {
-        --input-edge: var(--accent);
+        --input-edge: #{$input-hover-edge};
+    }
+
+    @if $input-focus-edge {
+        &:focus,
+        &:focus-within {
+            --input-edge: #{$input-focus-edge};
+        }
+    }
+
+    @if $input-phone-height {
+        @include below("phone") {
+            --input-height: #{$input-phone-height};
+        }
     }
 
     &.plinth-small {
@@ -1105,7 +1133,7 @@ $-button-variants: (
     min-height: 0;
     height: var(--input-height);
     padding-block: 0;
-    padding-inline: var(--space-2);
+    padding-inline: $input-padding-inline;
     text-overflow: ellipsis;
 
     &::placeholder {
@@ -1123,4 +1151,10 @@ $-button-variants: (
     }
 
     @include focus-ring;
+
+    @if $input-ring-offset {
+        &:focus-visible {
+            outline-offset: $input-ring-offset;
+        }
+    }
 }

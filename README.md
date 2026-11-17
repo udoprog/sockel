@@ -292,7 +292,9 @@ Breakpoints and the component settings (`$card-padding`,
 `$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
 `$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
 `$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
-`$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
+`$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$input-hover-edge`,
+`$input-focus-edge`, `$input-ring-offset`, `$input-padding-inline`, `$input-text`,
+`$input-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
 `$dialog-body-gap`, `$dialog-shadow`, `$dialog-head-padding`, `$dialog-head-rule`,
 `$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$dialog-centred`,
 `$dialog-max-height`, `$dialog-scroll-gutter`, `$dialog-sheet-edge`, `$popover-padding`, `$popover-shadow`,
@@ -389,6 +391,12 @@ page can still override them at runtime.
 | `$menu-radius` | `null` (a menu's corners; `null` keeps `--radius-md`) |
 | `$menu-item-phone-height` | `null` (a menu row's least height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
 | `$menu-item-mark-ink` | `null` (a check's or radio's mark; `null` keeps `--accent`, `currentColor` draws it as the row's text) |
+| `$input-hover-edge` | `var(--accent)` (a text field's edge on hover: `.plinth-input`, `.plinth-textarea`, `.plinth-input-box`) |
+| `$input-focus-edge` | `null` (its edge while focused; `null` keeps the edge it has) |
+| `$input-ring-offset` | `null` (its focus ring's offset; `null` keeps `--focus-ring-offset`, a negative one draws the ring over the edge) |
+| `$input-padding-inline` | `var(--space-2)` (its inline padding) |
+| `$input-text` | `null` (its text size; `null` inherits it) |
+| `$input-phone-height` | `null` (its height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$selection-bar-ground`, `$selection-bar-rule`, `$selection-bar-padding`, `$selection-bar-min-height`, `$selection-bar-radius`, `$selection-bar-margin`, `$selection-bar-text` | `null`, `var(--space-px) solid var(--border)`, `var(--space-2) 0`, a control's height plus its padding and rule, `null`, `null`, `null` (a selection bar's background, top rule, padding, least height, corners, margin and font size: a tinted chip instead of a ruled band) |
@@ -728,7 +736,10 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   copy and clear slots (`.plinth-input-action`, the `INPUT_CLEAR` button's
   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
   `show_label`, `hide_label`, `copy_label`,
-  `clear_label` (each an override of the catalog's word), `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
+  `clear_label` (each an override of the catalog's word), `commit` (`on_input`
+  only for a finished edit, on leaving the field or Enter, and on clear: for a
+  value saved as it changes), `titles` (each slot's name as its tooltip too),
+  `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
   shown secret hides itself, showing again restarts the time; clearing
   hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
   `class`, `testid`. The strings are props; an app passes its own words.

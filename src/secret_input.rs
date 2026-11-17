@@ -72,8 +72,17 @@ impl Reducible for RevealState {
 #[derive(Properties, PartialEq)]
 pub struct SecretInputProps {
     pub value: AttrValue,
-    /// Each edit, with the new text; `""` when cleared.
+    /// Each edit, with the new text; `""` when cleared. With `commit`, only
+    /// the finished edit.
     pub on_input: Callback<String>,
+    /// Calls `on_input` once an edit is finished (the field loses focus, or
+    /// Enter), not on every keystroke, for a value that is saved as it
+    /// changes. Clearing still calls it at once.
+    #[prop_or_default]
+    pub commit: bool,
+    /// Repeats each slot's accessible name as its tooltip (`title`).
+    #[prop_or_default]
+    pub titles: bool,
     /// The accessible name when there is no label for `id`.
     pub label: AttrValue,
     /// The secret, when the copy button is pressed (the text is on the
@@ -138,9 +147,17 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
         }),
     );
 
-    let oninput = props
-        .on_input
-        .reform(|e: InputEvent| e.target_unchecked_into::<HtmlInputElement>().value());
+    let (oninput, onchange) = if props.commit {
+        let onchange = props
+            .on_input
+            .reform(|e: Event| e.target_unchecked_into::<HtmlInputElement>().value());
+        (None, Some(onchange))
+    } else {
+        let oninput = props
+            .on_input
+            .reform(|e: InputEvent| e.target_unchecked_into::<HtmlInputElement>().value());
+        (Some(oninput), None)
+    };
     let toggle = {
         let dispatcher = state.dispatcher();
         Callback::from(move |_: MouseEvent| dispatcher.dispatch(RevealAction::Toggle))
@@ -167,7 +184,8 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
     let action = |glyph: Glyph, label: &AttrValue, onclick: Callback<MouseEvent>| {
         html! {
             <button type="button" class={classes!(class::INPUT_ACTION, empty.then_some(class::EMPTY))}
-                aria-label={label.clone()} disabled={props.disabled || empty}
+                aria-label={label.clone()} title={props.titles.then(|| label.clone())}
+                disabled={props.disabled || empty}
                 aria-hidden={empty.then_some("true")} tabindex={empty.then_some("-1")} {onclick}>
                 <Icon {glyph} />
             </button>
@@ -190,7 +208,7 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
                 aria-invalid={props.invalid.then_some("true")} disabled={props.disabled}
                 autocomplete="off" spellcheck="false" autocapitalize="off"
                 data-autofocus={props.autofocus.then_some("")}
-                data-testid={props.testid.clone()} {oninput} />
+                data-testid={props.testid.clone()} {oninput} {onchange} />
             { action(glyph, label, toggle) }
             { action(Glyph::Copy, &copy_label, copy) }
             { action(Glyph::Close, &clear_label, clear) }
@@ -214,6 +232,8 @@ mod tests {
         SecretInputProps {
             value: value.to_owned().into(),
             on_input: Callback::noop(),
+            commit: false,
+            titles: false,
             label: "Key".into(),
             on_copy: Callback::noop(),
             show_label: None,
@@ -266,5 +286,17 @@ mod tests {
         assert_eq!(empty.matches(class::EMPTY).count(), 3, "{empty}");
         assert!(!filled.contains(class::EMPTY), "{filled}");
         assert!(filled.contains("aria-label=\"Show\""), "{filled}");
+        assert!(!filled.contains("title="), "{filled}");
+    }
+
+    #[test]
+    fn titles_repeat_the_slots_names() {
+        let html = render(SecretInputProps {
+            titles: true,
+            ..props("s3cret")
+        });
+        assert!(html.contains("title=\"Show\""), "{html}");
+        assert!(html.contains("title=\"Copy\""), "{html}");
+        assert!(html.contains("title=\"Clear\""), "{html}");
     }
 }

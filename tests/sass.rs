@@ -123,6 +123,21 @@ fn error_box_settings() {
 }
 
 #[test]
+fn input_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("--input-edge: var(--accent);"));
+    assert!(!defaults.contains("--input-height: 44px;"));
+    let css = compile(&sass, "tests/fixtures/input_settings.scss");
+    assert!(css.contains("--input-edge: var(--border-strong);"));
+    assert!(css.contains(":focus-within {\n  --input-edge: var(--accent);"));
+    assert!(css.contains("--input-height: 44px;"));
+    assert!(css.contains("padding-inline: 10px;"));
+    assert!(css.contains("font-size: var(--text-sm);"));
+    assert!(css.contains("outline-offset: -1px;"));
+}
+
+#[test]
 fn omitted_parts_are_left_out() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

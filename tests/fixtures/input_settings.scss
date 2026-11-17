@@ -1,0 +1,12 @@
+// A project whose text fields strengthen their edge on hover, turn accent
+// while focused with the ring over the edge, pad wider, take small text and
+// are a touch target high on phones.
+@use "../../style/tokens" with (
+    $input-hover-edge: var(--border-strong),
+    $input-focus-edge: var(--accent),
+    $input-ring-offset: -1px,
+    $input-padding-inline: 10px,
+    $input-text: var(--text-sm),
+    $input-phone-height: 44px
+);
+@use "../../style/inputs";

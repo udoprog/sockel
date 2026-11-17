@@ -67,7 +67,7 @@
     min-height: 0;
     height: var(--input-height);
     padding-block: 0;
-    padding-inline: var(--space-2);
+    padding-inline: base.$input-padding-inline;
 
     &.plinth-invalid {
         --input-edge: var(--danger);
@@ -80,7 +80,11 @@
 
     &:focus-within {
         outline: var(--focus-ring-width) solid var(--focus-ring-color);
-        outline-offset: var(--focus-ring-offset);
+        @if base.$input-ring-offset {
+            outline-offset: base.$input-ring-offset;
+        } @else {
+            outline-offset: var(--focus-ring-offset);
+        }
     }
 }
 

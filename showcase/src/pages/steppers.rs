@@ -77,6 +77,9 @@ pub fn SecretInputPage() -> Html {
     let disabled = use_state(|| false);
     let busy = use_state(|| false);
     let copied = use_state(|| 0usize);
+    let commit = use_state(|| false);
+    let titles = use_state(|| false);
+    let edits = use_state(|| 0usize);
 
     let pick_text = {
         let value = value.clone();
@@ -93,6 +96,8 @@ pub fn SecretInputPage() -> Html {
             <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
+            <Toggle label="commit" value={*commit} on_change={bind(&commit)} />
+            <Toggle label="titles" value={*titles} on_change={bind(&titles)} />
         </>
     };
     let code = snippet(
@@ -104,8 +109,18 @@ pub fn SecretInputPage() -> Html {
             .variant("size", *size)
             .flag("invalid", *invalid)
             .flag("disabled", *disabled)
-            .flag("busy", *busy),
+            .flag("busy", *busy)
+            .flag("commit", *commit)
+            .flag("titles", *titles),
     );
+    let on_input = {
+        let value = value.clone();
+        let edits = edits.clone();
+        Callback::from(move |text: String| {
+            value.set(text);
+            edits.set(*edits + 1);
+        })
+    };
     let on_copy = {
         let copied = copied.clone();
         Callback::from(move |_: String| copied.set(*copied + 1))
@@ -113,10 +128,10 @@ pub fn SecretInputPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <SecretInput value={AttrValue::from((*value).clone())} on_input={bind(&value)}
+            <SecretInput value={AttrValue::from((*value).clone())} {on_input}
                 {on_copy} label="API key" placeholder="Paste a key" size={*size}
-                invalid={*invalid} disabled={*disabled} busy={*busy} />
-            <p class={class::CONTROL_LABEL}>{ format!("Copied {} times", *copied) }</p>
+                invalid={*invalid} disabled={*disabled} busy={*busy} commit={*commit} titles={*titles} />
+            <p class={class::CONTROL_LABEL}>{ format!("Copied {} times, {} edits", *copied, *edits) }</p>
         </Demo>
     }
 }
