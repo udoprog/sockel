@@ -11,6 +11,18 @@ modifier classes set by props.
 plinth = { path = "../plinth" }
 ```
 
+Or as a registry-style requirement, pointed at the checkout once in the
+workspace root:
+
+```toml
+[dependencies]
+plinth = "0.1"
+
+[patch.crates-io]
+plinth = { path = "../plinth" }
+plinth-build = { path = "../plinth/plinth-build" }
+```
+
 ## Including the styles
 
 plinth compiles `style/` with its defaults when the crate builds (with
