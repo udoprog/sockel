@@ -1493,7 +1493,9 @@ what keeps focus (P12's searching pickers): `active`, `hover`, `set`,
 `step`, `go_to_end`, `settle` (after filtering), `typeahead(pickable,
 labels, char, now)`, `key(key, alt, pickable) -> ListKey` (`Moved`,
 `Pick(i)`, `Ignored`) and `take_scroll` (scroll the active option into
-view). `option_id(base, i)`, `listbox(placed)` and `listbox_option(active)`
+view), or `scroll_active(base)` doing that scroll from `rendered`.
+`printable(event)` is the character a key types (none with Ctrl, Meta or
+Alt), for a filter or type-ahead beside the list. `option_id(base, i)`, `listbox(placed)` and `listbox_option(active)`
 (`LISTBOX_OPTION`, `ACTIVE`) give the ids and classes; an option's
 `aria-selected` and `aria-disabled` carry the rest. Its parts are
 `LISTBOX_OPTION_MARK` (the selected one's check, its box kept when off,

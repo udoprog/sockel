@@ -289,7 +289,7 @@ pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,
     key_target, landing, move_item, reorder_row, reorder_text, slot_at,
 };
-pub use roving::{menu_step, typeahead};
+pub use roving::{menu_step, printable, typeahead};
 pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
     row_list, row_list_item,

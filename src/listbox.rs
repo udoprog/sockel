@@ -150,6 +150,17 @@ impl Listbox {
         std::mem::take(&mut self.scroll)
     }
 
+    /// Scrolls the active option of the list whose ids start with `base`
+    /// into view when it moved by keyboard since the last call
+    /// ([`Listbox::take_scroll`]); for a caller's `rendered`.
+    pub fn scroll_active(&mut self, base: &str) {
+        if self.take_scroll()
+            && let Some(active) = self.active
+        {
+            crate::select::scroll_to(&option_id(base, active));
+        }
+    }
+
     fn position(&self, pickable: &[usize]) -> Option<usize> {
         self.active
             .and_then(|active| pickable.iter().position(|&i| i == active))
@@ -192,6 +203,8 @@ mod tests {
         assert_eq!(list.active(), Some(5));
         assert!(list.take_scroll());
         assert!(!list.take_scroll());
+        // Nothing moved since: no scroll, nothing asked of the page.
+        list.scroll_active("plinth-select-1");
         list.step(&PICKABLE, -1);
         assert_eq!(list.active(), Some(4));
         let mut none = Listbox::default();

@@ -164,8 +164,9 @@ impl Typeahead {
     }
 }
 
-/// A key that types a character, Space included, rather than a command.
-pub(crate) fn printable(e: &KeyboardEvent) -> Option<char> {
+/// A key that types a character, Space included, rather than a command
+/// (none with Ctrl, Meta or Alt held): for a filter or type-ahead.
+pub fn printable(e: &KeyboardEvent) -> Option<char> {
     if e.ctrl_key() || e.meta_key() || e.alt_key() {
         return None;
     }
