@@ -69,6 +69,11 @@
 //!   the overlay layer after a pointer's rest or on keyboard focus;
 //!   [`HoverCard`] (`.hover-card`): a richer card on hover or focus;
 //!   [`ReasonButton`]: a [`Button`] that says why it cannot act, in one node.
+//! - [`Menu`] (`.menu`): a button opening a list of actions ([`MenuItem`],
+//!   [`MenuCheck`], [`MenuRadio`], separators, headings, notes), with
+//!   keyboard navigation and type-ahead; [`RowActions`] (`.row-actions`), a
+//!   row's icon buttons and overflow menu; [`SplitButton`]
+//!   (`.split-button`); [`ContextMenu`], opened at the pointer.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -110,6 +115,7 @@ mod input;
 mod layer;
 mod layout;
 mod library_toolbar;
+mod menu;
 mod notice;
 mod popover;
 mod rows;
@@ -150,6 +156,12 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
+pub use menu::{
+    ContextMenu, ContextMenuProps, Menu, MenuCheck, MenuCheckProps, MenuHeading, MenuItem,
+    MenuItemProps, MenuNote, MenuPartProps, MenuProps, MenuRadio, MenuRadioProps, MenuSeparator,
+    MenuWidth, RowAction, RowActions, RowActionsProps, SplitButton, SplitButtonProps, menu,
+    menu_item, menu_step, typeahead,
+};
 pub use notice::{Notice, NoticeProps, notice};
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,

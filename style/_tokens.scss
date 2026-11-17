@@ -29,6 +29,8 @@
 //   `--dialog-height-tall`, `--dialog-top` and `--dialog-sheet-height`: a
 //   dialog's widths, its least and its tall height, its distance from the
 //   window's top, and a dialog sheet's tallest.
+// - `--menu-width`, `--menu-width-wide`, `--menu-width-wider`: a menu's
+//   least widths; `--menu-width-panel`: a panel menu's width.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`): each a
 //   default an app overrides by name.
@@ -162,6 +164,10 @@ $dialog-height-tall: 40rem !default;
 $dialog-top: 8dvh !default;
 $dialog-sheet-height: 85dvh !default;
 $tooltip-max-width: 24rem !default;
+$menu-width: 12rem !default;
+$menu-width-wide: 16rem !default;
+$menu-width-wider: 20rem !default;
+$menu-width-panel: 34rem !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -270,6 +276,10 @@ $sheet-breakpoint: "phone" !default;
     --dialog-top: #{$dialog-top};
     --dialog-sheet-height: #{$dialog-sheet-height};
     --tooltip-max-width: #{$tooltip-max-width};
+    --menu-width: #{$menu-width};
+    --menu-width-wide: #{$menu-width-wide};
+    --menu-width-wider: #{$menu-width-wider};
+    --menu-width-panel: #{$menu-width-panel};
 
     // Derived from the app's colours on `:root`: an app that sets those on
     // a narrower element sets these there too.

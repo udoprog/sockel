@@ -284,3 +284,37 @@ fn an_overlay_action_row_renders_its_modifier_and_stays_focusable() {
     assert!(!html.contains("tabindex"), "{html}");
     assert!(!html.contains("inert"), "{html}");
 }
+
+#[test]
+fn menus_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    let own = |class: &str| format!("{class} {MINE}");
+    keeps(
+        render::<MenuItem>(yew::props!(MenuItemProps { class: mine() })),
+        &own(class::MENU_ITEM),
+    );
+    keeps(
+        render::<MenuSeparator>(yew::props!(MenuPartProps { class: mine() })),
+        &own(class::MENU_SEPARATOR),
+    );
+    keeps(
+        render::<RowActions>(yew::props!(RowActionsProps { class: mine() })),
+        &own(class::ROW_ACTIONS),
+    );
+    keeps(
+        render::<SplitButton>(yew::props!(SplitButtonProps {
+            text: html! { "Save" },
+            onclick: Callback::noop(),
+            class: mine()
+        })),
+        &own(class::SPLIT_BUTTON),
+    );
+    let open = render::<Menu>(yew::props!(MenuProps {
+        open: Some(true),
+        class: mine()
+    }));
+    assert!(
+        open.contains(&format!("{} {MINE}\"", class::MENU)),
+        "{open}"
+    );
+}

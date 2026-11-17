@@ -63,6 +63,12 @@ pub struct ButtonProps {
     /// The button's element, for what anchors beside it.
     #[prop_or_default]
     pub node_ref: NodeRef,
+    /// Whether what it opens is open (`aria-expanded`).
+    #[prop_or_default]
+    pub expanded: Option<bool>,
+    /// What it opens (`aria-haspopup`: `"menu"`, `"listbox"`, `"dialog"`).
+    #[prop_or_default]
+    pub haspopup: Option<AttrValue>,
     /// A link styled as a button (`<a>`); disabled, it loses its `href`.
     #[prop_or_default]
     pub href: Option<AttrValue>,
@@ -164,10 +170,13 @@ pub fn Button(props: &ButtonProps) -> Html {
     let busy = props.busy.then_some("true");
     let unavailable = props.unavailable.then_some("true");
     let pressed = props.pressed.map(|on| on.to_string());
+    let expanded = props.expanded.map(|on| on.to_string());
 
     match &props.href {
         Some(href) => html! {
             <a {class} ref={props.node_ref.clone()}
+                aria-expanded={expanded.clone()}
+                aria-haspopup={props.haspopup.clone()}
                 href={(!props.disabled).then(|| href.clone())}
                 aria-disabled={(props.disabled || props.unavailable).then_some("true")}
                 aria-busy={busy}
@@ -182,6 +191,8 @@ pub fn Button(props: &ButtonProps) -> Html {
         },
         None => html! {
             <button ref={props.node_ref.clone()}
+                aria-expanded={expanded.clone()}
+                aria-haspopup={props.haspopup.clone()}
                 type={if props.submit { "submit" } else { "button" }}
                 {class}
                 disabled={props.disabled}
@@ -228,6 +239,8 @@ mod tests {
             disabled: false,
             unavailable: false,
             node_ref: NodeRef::default(),
+            expanded: None,
+            haspopup: None,
             href: None,
             submit: false,
             onclick: Callback::noop(),
@@ -375,6 +388,18 @@ mod tests {
         });
         assert!(html.contains("aria-disabled=\"true\""), "{html}");
         assert!(!html.contains(" disabled"), "{html}");
+    }
+
+    #[test]
+    fn an_opener_says_what_it_opens_and_whether_it_is_open() {
+        let html = render(ButtonProps {
+            expanded: Some(true),
+            haspopup: Some("menu".into()),
+            ..props()
+        });
+        assert!(html.contains("aria-expanded=\"true\""), "{html}");
+        assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
+        assert!(!render(props()).contains("aria-expanded"));
     }
 
     #[test]

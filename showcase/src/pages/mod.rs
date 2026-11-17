@@ -10,6 +10,7 @@ mod inputs;
 mod layout;
 mod library;
 mod media;
+mod menus;
 mod notices;
 mod popover;
 mod rows;
@@ -804,6 +805,86 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["state", "reason", "focus", "click"]),
             ),
         ],
+    },
+    Page {
+        id: "menu",
+        title: "Menu",
+        about: "A button opening a list of actions in the overlay layer: items with an icon, a detail and a hint, checks and radios, headings, separators and notes. Arrows, Home, End and type-ahead move between items; a pick, Tab, Escape or a press outside closes it, and Escape returns focus to the opener. Its width is set once on open.",
+        covers: &[
+            "Menu",
+            "MenuProps",
+            "MenuWidth",
+            "MenuItem",
+            "MenuItemProps",
+            "MenuCheck",
+            "MenuCheckProps",
+            "MenuRadio",
+            "MenuRadioProps",
+            "MenuSeparator",
+            "MenuHeading",
+            "MenuNote",
+            "MenuPartProps",
+            "menu",
+            "menu_item",
+            "menu_step",
+            "typeahead",
+        ],
+        render: || html! { <menus::MenuPage /> },
+        holds: &[
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Except(&["variant", "size", "icon only"]),
+            ),
+            hold(
+                plinth::class::BUTTON,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+            hold(class::SAMPLE, Size::Box, Across::Except(&["size"])),
+        ],
+    },
+    Page {
+        id: "row-actions",
+        title: "RowActions",
+        about: "A row's actions: small icon buttons of one size, always shown, the danger ones last and muted until pointed at, then the overflow menu behind its ellipsis.",
+        covers: &["RowActions", "RowActionsProps", "RowAction"],
+        render: || html! { <menus::RowActionsPage /> },
+        holds: &[
+            hold(plinth::class::ROW_ACTIONS, Size::Height, Across::All),
+            hold(
+                plinth::class::ROW_ACTIONS,
+                Size::Width,
+                Across::Except(&["more (a menu)"]),
+            ),
+        ],
+    },
+    Page {
+        id: "split-button",
+        title: "SplitButton",
+        about: "A main action joined to a menu of its variants: one control of one height, the two parts sharing a border.",
+        covers: &["SplitButton", "SplitButtonProps"],
+        render: || html! { <menus::SplitButtonPage /> },
+        holds: &[
+            hold(
+                plinth::class::SPLIT_BUTTON,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+            hold(
+                plinth::class::SPLIT_BUTTON,
+                Size::Box,
+                Across::Only(&["busy", "disabled", "variant", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "context-menu",
+        title: "ContextMenu",
+        about: "A menu opened at the pointer by a right-click, or a long press on a touch screen. What it wraps is laid out as if it were not there.",
+        covers: &["ContextMenu", "ContextMenuProps"],
+        render: || html! { <menus::ContextMenuPage /> },
+        holds: &[hold(class::SAMPLE, Size::Box, Across::All)],
     },
     Page {
         id: "classes",

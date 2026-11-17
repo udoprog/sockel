@@ -455,6 +455,8 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         disabled: false,
         unavailable: props.reason.is_some(),
         node_ref: anchor.clone(),
+        expanded: None,
+        haspopup: None,
         href: None,
         submit: props.submit,
         onclick: props.onclick.clone(),

@@ -290,6 +290,7 @@ page can still override them at runtime.
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` |
+| `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim` | see [Theming](#theming) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
@@ -785,6 +786,73 @@ hidden until measured, so showing them never moves the page, the anchor or the
 scrollbar. A `ReasonButton` is one `<button>` whether it is available,
 unavailable or busy: the same node, box and focus across the states (the busy
 spinner and the aria state change, the width does not).
+
+## Menu, RowActions, SplitButton and ContextMenu
+
+`Menu` is a `Button` (`aria-haspopup="menu"`, `aria-expanded`) opening a
+list of actions (`role="menu"`, `plinth::class::MENU`) beside it in the
+overlay layer, through `use_popover`. Props:
+
+- `text` (the opener's visible content; without it the opener is its icon
+  alone), `icon` (the app's; a text opener without one ends in the
+  IconSet's chevron, an icon-only one shows its ellipsis), `label` (the
+  accessible name of the opener and the list), `variant` and `size` (the
+  opener's, `Regular` so it matches the buttons beside it), `opener_class`.
+- `width` (`MenuWidth`): `Regular` (`--menu-width`), `Wide` (`WIDE`,
+  `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
+  (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
+  between rows.
+- `side`, `align` (`End` by default), `disabled`; `open` and `on_toggle`
+  for a menu its owner also opens another way; `class` (the list's),
+  `testid` (the list's; the opener's is it suffixed `-toggle`).
+
+Its children are the items: `MenuItem` (an action; `icon`, `detail` under
+the label, `hint` at the end, `danger`, `disabled`, `onclick`),
+`MenuCheck` (`menuitemcheckbox`: `checked`, `on_change`; the menu stays
+open), `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), `MenuSeparator`,
+`MenuHeading` and `MenuNote` (a line such as "nothing here"). Each takes
+`class`. `menu(width, tight, placed)` and `menu_item(danger)` give the
+classes; `menu_step` and `typeahead` are the keyboard's pure parts.
+
+Keyboard: focus moves to the first item once the list is placed; the
+arrows (wrapping), Home and End move between enabled items, and typing
+moves to the next item starting with what was typed (a pause of 0.7 s
+starts over; one letter repeated cycles). A pick of an item or radio,
+Tab, Escape or a press outside closes it; all but the press return focus
+to the opener. A menu is on the one overlay stack, so Escape and a press
+outside close a menu opened from a popover or a dialog before what it
+opened from.
+
+`RowActions` is a row's actions: `actions: Vec<RowAction>`
+(`RowAction::new(icon, label, onclick)`, `.danger()`, `.pressed(on)`,
+`.disabled(..)`, `.testid(..)`), shown as small quiet icon buttons, the
+danger ones last (`ROW_ACTION_DANGER`, muted until hovered or focused),
+then `children`, then the overflow `Menu` behind its ellipsis when `more`
+holds its items (`more_label`, "More actions"; `more_disabled` keeps the
+opener, disabled, so every row ends the same way). `disabled`, `open`,
+`on_toggle`, `class`, `testid`.
+
+`SplitButton` is a main action (`text`, `onclick`, `icon`, `busy`) joined
+to a `Menu` of its variants (its children; `menu_label`, "More options";
+`width`), `Primary` unless `variant` says otherwise, `size`, `disabled`,
+`class`, `testid` (the menu's is it suffixed `-menu`).
+
+`ContextMenu` wraps its children (`.plinth-context-target`,
+`display: contents`, so it lays nothing out) and opens a menu of `items`
+at the pointer on a right-click, or a press held for half a second on a
+touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
+had it when it opened. `width`, `tight`, `label`, `disabled` (the browser's
+menu instead), `on_toggle`, `class`, `testid`.
+
+Size guarantees: the opener is a `Button`, so open and closed are the same
+box (only `aria-expanded` changes). The list is fixed in a layer that lays
+nothing out, hidden until placed. It is at least its width token wide and
+never narrower than it opened (`--menu-open-width`, measured once on
+open), so it does not follow its longest item as items change; past the
+room on its side it scrolls (`scroll-area`), its scrollbar's room kept. Its
+rows are `--control-height` at least, their border reserved, so hover and
+focus change only the fill and border colour; a check's or radio's mark
+keeps its box when off. Labels are one line, cut with an ellipsis.
 
 ## Against jitter: mixins and utilities
 
