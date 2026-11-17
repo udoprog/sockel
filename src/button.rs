@@ -47,6 +47,10 @@ pub struct ButtonProps {
     /// screen reader (`.plinth-fold`).
     #[prop_or_default]
     pub fold: bool,
+    /// The icon alone from the phone breakpoint up, the label kept for a
+    /// screen reader (`.plinth-fold-wide`): `fold` the other way round.
+    #[prop_or_default]
+    pub fold_wide: bool,
     /// A toggle and whether it is on (`aria-pressed`).
     #[prop_or_default]
     pub pressed: Option<bool>,
@@ -88,6 +92,16 @@ pub struct ButtonProps {
     pub label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// A role other than a button's, such as `menuitemradio` or `switch`.
+    #[prop_or_default]
+    pub role: Option<AttrValue>,
+    /// Whether a `menuitemradio`, `menuitemcheckbox` or `switch` is on
+    /// (`aria-checked`).
+    #[prop_or_default]
+    pub checked: Option<bool>,
+    /// The current item of a set, as `page` or `step` (`aria-current`).
+    #[prop_or_default]
+    pub current: Option<AttrValue>,
     /// The label.
     #[prop_or_default]
     pub children: Html,
@@ -134,8 +148,10 @@ pub fn Button(props: &ButtonProps) -> Html {
     let has_label = !is_empty(&props.children);
     let icon_only = props.icon.is_some() && !has_label;
     let fold = props.fold && props.icon.is_some() && has_label;
+    let fold_wide = props.fold_wide && props.icon.is_some() && has_label;
     let class = classes!(
         button(props.variant, props.size, icon_only, fold),
+        fold_wide.then_some(class::FOLD_WIDE),
         props.class.clone()
     );
 
@@ -145,7 +161,11 @@ pub fn Button(props: &ButtonProps) -> Html {
         .map(|icon| html! { <span class={class::BUTTON_ICON} aria-hidden="true">{ icon }</span> });
     let label = has_label.then(|| {
         html! {
-            <span class={classes!(class::BUTTON_LABEL, fold.then_some(class::FOLD))}>
+            <span class={classes!(
+                class::BUTTON_LABEL,
+                fold.then_some(class::FOLD),
+                fold_wide.then_some(class::FOLD_WIDE)
+            )}>
                 { props.children.clone() }
             </span>
         }
@@ -174,6 +194,7 @@ pub fn Button(props: &ButtonProps) -> Html {
     let unavailable = props.unavailable.then_some("true");
     let pressed = props.pressed.map(|on| on.to_string());
     let expanded = props.expanded.map(|on| on.to_string());
+    let checked = props.checked.map(|on| on.to_string());
 
     match &props.href {
         Some(href) => html! {
@@ -188,6 +209,9 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
+                role={props.role.clone()}
+                aria-checked={checked.clone()}
+                aria-current={props.current.clone()}
                 {onclick}
             >
                 { content }{ for spinner }
@@ -207,6 +231,9 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
+                role={props.role.clone()}
+                aria-checked={checked.clone()}
+                aria-current={props.current.clone()}
                 {onclick}
             >
                 { content }{ for spinner }
@@ -239,6 +266,7 @@ mod tests {
             icon: None,
             trailing: false,
             fold: false,
+            fold_wide: false,
             pressed: None,
             busy: false,
             disabled: false,
@@ -253,6 +281,9 @@ mod tests {
             tip: None,
             label: None,
             testid: None,
+            role: None,
+            checked: None,
+            current: None,
             children: html! { "Save" },
         }
     }
@@ -313,6 +344,45 @@ mod tests {
         });
         assert!(html.contains(class::ICON), "{html}");
         assert!(!html.contains(class::BUTTON_LABEL), "{html}");
+    }
+
+    #[test]
+    fn fold_wide_marks_the_button_and_its_label() {
+        let html = render(ButtonProps {
+            icon: Some(html! { <svg /> }),
+            fold_wide: true,
+            ..props()
+        });
+        assert!(
+            html.contains(&format!("{} {}", class::BUTTON, class::FOLD_WIDE)),
+            "{html}"
+        );
+        assert!(
+            html.contains(&format!("{} {}\"", class::BUTTON_LABEL, class::FOLD_WIDE)),
+            "{html}"
+        );
+        let html = render(ButtonProps {
+            fold_wide: true,
+            ..props()
+        });
+        assert!(!html.contains(class::FOLD_WIDE), "{html}");
+    }
+
+    #[test]
+    fn a_role_says_whether_it_is_checked_and_current() {
+        let html = render(ButtonProps {
+            role: Some(AttrValue::from("menuitemradio")),
+            checked: Some(true),
+            current: Some(AttrValue::from("page")),
+            ..props()
+        });
+        for attr in [
+            "role=\"menuitemradio\"",
+            "aria-checked=\"true\"",
+            "aria-current=\"page\"",
+        ] {
+            assert!(html.contains(attr), "{attr}: {html}");
+        }
     }
 
     #[test]

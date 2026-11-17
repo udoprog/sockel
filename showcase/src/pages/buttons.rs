@@ -48,6 +48,7 @@ pub fn ButtonPage() -> Html {
     let text = use_state(|| Text::Short);
     let placement = use_state(|| Placement::Leading);
     let fold = use_state(|| false);
+    let fold_wide = use_state(|| false);
     let pressed = use_state(|| None);
     let busy = use_state(|| false);
     let disabled = use_state(|| false);
@@ -62,6 +63,7 @@ pub fn ButtonPage() -> Html {
             <Select<Placement> label="icon" options={ICONS} value={*placement} on_change={bind(&placement)} />
             <Select<Option<bool>> label="pressed" options={PRESSED} value={*pressed} on_change={bind(&pressed)} />
             <Toggle label="fold (on a phone)" value={*fold} on_change={bind(&fold)} />
+            <Toggle label="fold_wide (above a phone)" value={*fold_wide} on_change={bind(&fold_wide)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="href (a link)" value={*link} on_change={bind(&link)} />
@@ -97,6 +99,7 @@ pub fn ButtonPage() -> Html {
             )
             .flag("trailing", *placement == Placement::Trailing)
             .flag("fold", *fold)
+            .flag("fold_wide", *fold_wide)
             .expr_if(
                 pressed.is_some(),
                 "pressed",
@@ -120,7 +123,7 @@ pub fn ButtonPage() -> Html {
                 <Button variant={*variant} size={*size}
                     icon={(*placement != Placement::None).then(|| html! { <Icon glyph={Glyph::Check} /> })}
                     trailing={*placement == Placement::Trailing}
-                    fold={*fold} pressed={*pressed} busy={*busy} disabled={*disabled}
+                    fold={*fold} fold_wide={*fold_wide} pressed={*pressed} busy={*busy} disabled={*disabled}
                     href={link.then(|| AttrValue::from("#button"))}
                     title="Save the draft" label={label.is_empty().then(|| AttrValue::from("Save the draft"))}
                     {onclick}>

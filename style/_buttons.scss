@@ -9,7 +9,8 @@
 //   `.plinth-quiet`, `.plinth-danger`, `.plinth-success`.
 // - Sizes: regular, `.plinth-small`, `.plinth-touch`.
 // - `.plinth-icon`: the icon alone, square. `.plinth-fold`: the icon alone
-//   below the phone breakpoint, the label kept for a screen reader.
+//   below the phone breakpoint, the label kept for a screen reader;
+//   `.plinth-fold-wide` the same from the phone breakpoint up.
 // - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
 //   working, its content hidden by visibility so it keeps its room.
 //
@@ -48,7 +49,7 @@
     &.plinth-small {
         height: var(--control-height-small);
         padding-inline: var(--button-pad-x, #{base.$button-padding-small});
-        font-size: var(--text-sm);
+        font-size: base.$button-text-small;
     }
 
     &.plinth-touch {
@@ -69,12 +70,37 @@
             padding-inline: 0;
         }
     }
+
+    &.plinth-fold-wide {
+        @include base.above("phone") {
+            flex: none;
+            aspect-ratio: 1;
+            padding-inline: 0;
+        }
+    }
+}
+
+@if base.$button-phone-height {
+    @include base.below("phone") {
+        .plinth-button {
+            height: base.$button-phone-height;
+
+            &.plinth-small {
+                height: base.$button-phone-height;
+                @if base.$button-text {
+                    font-size: base.$button-text;
+                } @else {
+                    font-size: inherit;
+                }
+            }
+        }
+    }
 }
 
 .plinth-button-content {
     display: inline-flex;
     align-items: center;
-    gap: var(--space-2);
+    gap: base.$button-content-gap;
     min-width: 0;
 
     &.plinth-busy {
@@ -87,11 +113,36 @@
     flex: none;
 }
 
+// Beside a label only: an icon alone, or folded to, keeps the centre.
+@if base.$button-icon-offset {
+    .plinth-button:not(.plinth-icon) .plinth-button-icon:first-child:not(:last-child) {
+        margin-inline-start: base.$button-icon-offset;
+    }
+
+    @include base.below("phone") {
+        .plinth-button.plinth-fold .plinth-button-icon:first-child:not(:last-child) {
+            margin-inline-start: 0;
+        }
+    }
+
+    @include base.above("phone") {
+        .plinth-button.plinth-fold-wide .plinth-button-icon:first-child:not(:last-child) {
+            margin-inline-start: 0;
+        }
+    }
+}
+
 .plinth-button-label {
     @include base.truncate;
 
     &.plinth-fold {
         @include base.below("phone") {
+            @include base.visually-hidden;
+        }
+    }
+
+    &.plinth-fold-wide {
+        @include base.above("phone") {
             @include base.visually-hidden;
         }
     }

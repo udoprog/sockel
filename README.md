@@ -287,7 +287,8 @@ selector:
 Breakpoints and the component settings (`$card-padding`,
 `$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
 `$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
-`$button-transition`, `$button-colours`, `$dialog-padding`, `$dialog-padding-phone`,
+`$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
+`$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
 `$dialog-body-gap`, `$dialog-shadow`, `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
@@ -343,6 +344,10 @@ page can still override them at runtime.
 | `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
 | `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |
 | `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `pressed-fill`, `pressed-ink`, `pressed-edge` over plinth's; a variant falls back on the plain button's |
+| `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
+| `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
+| `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
+| `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap), `var(--shadow-1)` |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
@@ -372,7 +377,9 @@ label). plinth styles only `.plinth-button`, never a bare `<button>`.
   `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
 - An icon without a label is the icon alone (`ICON`), square, named by
   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
-  alone below the phone breakpoint, its label kept for a screen reader.
+  alone below the phone breakpoint, its label kept for a screen reader;
+  `fold_wide` (`FOLD_WIDE`) the other way round, the icon alone from the
+  phone breakpoint up.
 - `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and
   border colour. `busy` sets `aria-busy`, keeps the label in the DOM and
   lays the IconSet's spinner over it; a busy button ignores clicks.
@@ -381,6 +388,8 @@ label). plinth styles only `.plinth-button`, never a bare `<button>`.
 - `submit`, `onclick`, `title`, `testid` as on `IconButton`; `tip` is its
   tooltip for `DataTips` (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
   classes for an element that cannot be the component.
+- `role` gives it another role (`menuitemradio`, `switch`), `checked` its
+  `aria-checked`, and `current` its `aria-current` (`page`, `step`).
 
 Size guarantees: the height is the size's token, whatever the label (one
 line, cut with an ellipsis; the button never grows past its container) and

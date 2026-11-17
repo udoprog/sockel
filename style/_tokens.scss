@@ -127,6 +127,16 @@ $button-transition: null !default;
 // `ink`, `edge`, `hover-edge`, `hover-fill`, `pressed-fill`, `pressed-ink`
 // and `pressed-edge`. A variant falls back on the plain button's.
 $button-colours: () !default;
+// A button's type size (`null`: its parent's) and a small one's, the gap
+// between its icon and label, a leading icon's inline-start margin beside a
+// label (a negative one sets it into the padding; `null`: none), and its
+// height below the phone breakpoint (every size's but touch, a small one
+// there taking the regular type; `null`: its size's).
+$button-text: null !default;
+$button-text-small: var(--text-sm) !default;
+$button-content-gap: var(--space-2) !default;
+$button-icon-offset: null !default;
+$button-phone-height: null !default;
 // A dialog's padding (the head's start, the body's sides and bottom, the
 // foot's sides), that padding below `$sheet-breakpoint` (`null`: the
 // same), the gap between its body's children (`null`: the body is a plain
@@ -733,6 +743,9 @@ $sheet-breakpoint: "phone" !default;
     background: var(--button-fill);
     color: var(--button-ink);
     font: inherit;
+    @if $button-text {
+        font-size: $button-text;
+    }
     line-height: 1;
     text-decoration: none;
     white-space: nowrap;

@@ -438,6 +438,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         icon: props.icon.clone(),
         trailing: false,
         fold: false,
+        fold_wide: false,
         pressed: None,
         busy: props.busy,
         disabled: false,
@@ -452,6 +453,9 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         tip: None,
         label: props.label.clone(),
         testid: props.testid.clone(),
+        role: None,
+        checked: None,
+        current: None,
         children: props.children.clone(),
     };
     html! {
