@@ -12,6 +12,9 @@ use std::fmt;
 use std::io;
 use std::path::{Path, PathBuf};
 
+mod usage;
+pub use usage::{Report, Usage};
+
 macro_rules! sources {
     ($($name:literal),* $(,)?) => {
         &[$(($name, include_str!(concat!("../../style/", $name)))),*]

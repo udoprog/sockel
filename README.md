@@ -139,6 +139,33 @@ step:
    `<link data-trunk rel="scss">` and `[tools] sass`); `index.html` links no
    stylesheet.
 
+7. **A guard against dead classes.** A class the Sass defines and no Rust
+   writes is dead weight. `plinth_build::Usage` finds them in a test, so an
+   app needs no guard of its own (`tests/style_classes.rs`):
+
+   ```rust
+   use plinth_build::{Config, Usage};
+
+   #[test]
+   fn every_styled_class_is_written() {
+       Usage::new()
+           .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
+           .dynamic(["army-tone-*"]) // built at runtime; a trailing `*` is a prefix
+           .foreign(["army-fc-row"]) // written by a dependency
+           .assert_clean(&Config::new().local("style/").prefix("army-"));
+   }
+   ```
+
+   Add `plinth-build` to `[dev-dependencies]`. A class counts as written when
+   a source names its constant (`class::SIDEBAR`) or the class in a string
+   literal; comments and code after a file's first `#[cfg(test)]` do not
+   count. The test fails on a dead class and on an allowed pattern that
+   matches no class, and prints the class, single-use and dead counts.
+   `STYLE_INVENTORY=PATH` also writes `class<TAB>uses` lines to `PATH`.
+   It is a test, not a build warning: a warning scrolls past in a build
+   log, a test fails where the project already looks. plinth runs it on
+   itself and on the showcase.
+
 **One stylesheet per app.** Both `Styles` fill the same element,
 `<style id="plinth-styles">` (`plinth::STYLE_ID`): with `css` it sets the
 element's text to the app's stylesheet, which holds plinth's; without it, it
