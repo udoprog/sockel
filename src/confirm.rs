@@ -164,7 +164,11 @@ pub fn Confirm(props: &ConfirmProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct ConfirmPopoverProps {
     /// What it opens beside, and where focus returns.
+    #[prop_or_default]
     pub anchor: NodeRef,
+    /// As for [`crate::PopoverProps::anchor_element`].
+    #[prop_or_default]
+    pub anchor_element: Option<web_sys::Element>,
     pub open: bool,
     /// Its accessible name, and the sheet's heading on a phone.
     pub title: AttrValue,
@@ -281,7 +285,8 @@ pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
     };
 
     html! {
-        <Popover anchor={props.anchor.clone()} open={props.open} {on_dismiss}
+        <Popover anchor={props.anchor.clone()} anchor_element={props.anchor_element.clone()}
+            open={props.open} {on_dismiss}
             side={props.side} align={props.align} title={props.title.clone()}
             head={!props.compact} trap=true
             focus={if props.danger { cancel_ref.clone() } else { accept_ref.clone() }}
@@ -802,6 +807,7 @@ mod tests {
     fn render_popover(compact: bool) -> String {
         let props = ConfirmPopoverProps {
             anchor: NodeRef::default(),
+            anchor_element: None,
             open: true,
             title: "Remove Notes".into(),
             explanation: "Remove".into(),

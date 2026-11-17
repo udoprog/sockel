@@ -500,7 +500,7 @@ pub fn use_popover(
 ) -> Option<Placed> {
     use_placement(
         open,
-        anchor,
+        Anchor::new(anchor, None),
         popover,
         side,
         align,
@@ -526,7 +526,7 @@ pub fn use_popover_within(
 ) -> Option<Placed> {
     use_placement(
         open,
-        anchor,
+        Anchor::new(anchor, None),
         popover,
         side,
         align,
@@ -550,7 +550,7 @@ pub(crate) fn use_tip_popover(
 ) -> Option<Placed> {
     use_placement(
         open,
-        anchor,
+        Anchor::new(anchor, None),
         popover,
         side,
         align,
@@ -561,11 +561,33 @@ pub(crate) fn use_tip_popover(
     )
 }
 
+/// What a popover stands beside: its owner's node, or an element the owner
+/// did not render (the button just pressed).
+#[derive(Clone, PartialEq)]
+struct Anchor {
+    node: NodeRef,
+    element: Option<Element>,
+}
+
+impl Anchor {
+    fn new(node: NodeRef, element: Option<Element>) -> Self {
+        Self { node, element }
+    }
+
+    fn element(&self) -> Option<Element> {
+        self.element.clone().or_else(|| self.node.cast::<Element>())
+    }
+
+    fn node(&self) -> Option<Node> {
+        self.element().map(Node::from)
+    }
+}
+
 #[hook]
 #[allow(clippy::too_many_arguments)]
 fn use_placement(
     open: bool,
-    anchor: NodeRef,
+    anchor: Anchor,
     popover: NodeRef,
     side: Side,
     align: PopoverAlign,
@@ -583,8 +605,8 @@ fn use_placement(
 
     {
         let placed = placed.clone();
-        let deps = (open, side, align, fit, within);
-        use_effect_with(deps, move |(open, side, align, fit, within)| {
+        let deps = (open, side, align, fit, within, anchor.element.clone());
+        use_effect_with(deps, move |(open, side, align, fit, within, _)| {
             let (open, side, align, fit) = (*open, *side, *align, *fit);
             let within = within.clone();
             // Why it was dismissed (whether that returns focus), and
@@ -601,7 +623,7 @@ fn use_placement(
                 opener = web_sys::window()
                     .and_then(|w| w.document())
                     .and_then(|d| d.active_element())
-                    .filter(|a| anchor.get().is_some_and(|n| n.contains(Some(a))))
+                    .filter(|a| anchor.node().is_some_and(|n| n.contains(Some(a))))
                     .and_then(|a| a.dyn_into::<HtmlElement>().ok());
                 if let Some(element) = popover.cast::<Element>() {
                     for kind in ["focusin", "pointerdown"] {
@@ -620,10 +642,7 @@ fn use_placement(
                     overlays.layer()
                 });
                 let last = Rc::new(Cell::new(None::<Placed>));
-                let clipped = anchor
-                    .cast::<Element>()
-                    .map(|a| clippers(&a))
-                    .unwrap_or_default();
+                let clipped = anchor.element().map(|a| clippers(&a)).unwrap_or_default();
                 let measure = {
                     let (anchor, popover, placed) =
                         (anchor.clone(), popover.clone(), placed.clone());
@@ -632,7 +651,7 @@ fn use_placement(
                     let gone = Rc::new(Cell::new(false));
                     Rc::new(move || {
                         let (Some(at), Some(pop)) =
-                            (anchor.cast::<Element>(), popover.cast::<HtmlElement>())
+                            (anchor.element(), popover.cast::<HtmlElement>())
                         else {
                             return;
                         };
@@ -675,9 +694,9 @@ fn use_placement(
                     }
 
                     if let Some(document) = window.document() {
-                        let within = |node: &NodeRef, event: &web_sys::Event| {
+                        let within = |node: Option<Node>, event: &web_sys::Event| {
                             let target = event.target().and_then(|t| t.dyn_into::<Node>().ok());
-                            node.get().is_some_and(|n| n.contains(target.as_ref()))
+                            node.is_some_and(|n| n.contains(target.as_ref()))
                         };
                         let pressed = {
                             let (anchor, popover) = (anchor.clone(), popover.clone());
@@ -687,9 +706,10 @@ fn use_placement(
                                 if !layer.is_top() {
                                     return;
                                 }
-                                if let Some(why) =
-                                    Dismiss::for_press(within(&anchor, &e), within(&popover, &e))
-                                {
+                                if let Some(why) = Dismiss::for_press(
+                                    within(anchor.node(), &e),
+                                    within(popover.get(), &e),
+                                ) {
                                     refocus.set(Some(why.returns_focus()));
                                     on_dismiss.borrow().emit(why);
                                 }
@@ -728,10 +748,11 @@ fn use_placement(
                     Closure::<dyn Fn()>::new(move || measure())
                 };
                 if let Ok(watch) = web_sys::ResizeObserver::new(resized.as_ref().unchecked_ref()) {
-                    for node in [&anchor, &popover] {
-                        if let Some(element) = node.cast::<Element>() {
-                            watch.observe(&element);
-                        }
+                    for element in [anchor.element(), popover.cast::<Element>()]
+                        .into_iter()
+                        .flatten()
+                    {
+                        watch.observe(&element);
                     }
                     for element in &clipped {
                         watch.observe(element);
@@ -756,9 +777,11 @@ fn use_placement(
                 if open
                     && hands_back(refocus.get(), inside.get())
                     && (holds || focus_lost())
-                    && let Some(target) = opener
-                        .filter(|o| o.is_connected())
-                        .or_else(|| anchor.cast::<HtmlElement>())
+                    && let Some(target) = opener.filter(|o| o.is_connected()).or_else(|| {
+                        anchor
+                            .element()
+                            .and_then(|a| a.dyn_into::<HtmlElement>().ok())
+                    })
                 {
                     // Where the page stands: the anchor may be scrolled
                     // away under a sheet.
@@ -776,7 +799,12 @@ fn use_placement(
 #[derive(Properties, PartialEq)]
 pub struct PopoverProps {
     /// What it opens beside, and where focus returns when it closes.
+    #[prop_or_default]
     pub anchor: NodeRef,
+    /// An element in place of `anchor`'s, for one its owner did not render
+    /// (the button just pressed, a menu's button).
+    #[prop_or_default]
+    pub anchor_element: Option<Element>,
     pub open: bool,
     /// Asked to close it (the owner sets `open` to false).
     pub on_dismiss: Callback<Dismiss>,
@@ -889,9 +917,10 @@ pub fn Popover(props: &PopoverProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let node = use_node_ref();
     let overlays = use_overlays();
+    let anchor = Anchor::new(props.anchor.clone(), props.anchor_element.clone());
     let placed = use_placement(
         props.open,
-        props.anchor.clone(),
+        anchor.clone(),
         node.clone(),
         props.side,
         props.align,
@@ -930,7 +959,9 @@ pub fn Popover(props: &PopoverProps) -> Html {
         )
     });
     if props.match_anchor
-        && let Some(anchor) = props.anchor.cast::<HtmlElement>()
+        && let Some(anchor) = anchor
+            .element()
+            .and_then(|a| a.dyn_into::<HtmlElement>().ok())
     {
         let width = format!("--popover-anchor-width: {}px;", anchor.offset_width());
         style = Some(match style {
@@ -1347,6 +1378,7 @@ mod tests {
     ) -> String {
         let props = PopoverProps {
             anchor: NodeRef::default(),
+            anchor_element: None,
             open,
             on_dismiss: Callback::noop(),
             side: Side::Below,
@@ -1393,6 +1425,19 @@ mod tests {
         assert!(html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains("aria-label=\"Filters\""), "{html}");
         assert!(html.contains("aria-label=\"Close\""), "{html}");
+    }
+
+    #[test]
+    fn it_opens_without_an_anchor_ref() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<Popover>::with_props(yew::props!(PopoverProps {
+                open: true,
+                on_dismiss: Callback::noop(),
+            }))
+            .hydratable(false)
+            .render(),
+        );
+        assert!(html.contains("role=\"dialog\""), "{html}");
     }
 
     #[test]

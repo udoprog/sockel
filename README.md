@@ -1158,6 +1158,10 @@ the owner cuts it, and its events still bubble through the owner. Props:
 
 - `anchor` (a `NodeRef` on the element it opens beside, where focus returns),
   `open`, and `on_dismiss: Callback<Dismiss>`: the owner closes it.
+  `anchor_element` (a `web_sys::Element`) stands in for `anchor` when the
+  owner did not render what it opens beside, such as the button just
+  pressed or the button of the menu an item was picked in (a `NodeRef`
+  cannot be pointed at an element from outside Yew).
 - `side` (`Side::Below` by default, `Above`, `Start`, `End`) and `align`
   (`PopoverAlign::Start`, `Center`, `End`).
 - `fit`: what a popover too tall for the room both above and below its
@@ -1414,8 +1418,8 @@ from any code and `.await` the `Answer`: `true` when accepted, `false` when
 cancelled, when another question replaced it, or when no host is mounted.
 `ConfirmRequest` has the same fields as `Confirm`, public.
 
-`ConfirmPopover` is the same beside an element: `anchor`, `open`, `side` and
-`align` as `Popover`, `title` (its name, and the sheet's heading on a phone),
+`ConfirmPopover` is the same beside an element: `anchor` (or
+`anchor_element`), `open`, `side` and `align` as `Popover`, `title` (its name, and the sheet's heading on a phone),
 the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
 (Cancel, Escape and a press outside; not while busy). The focus goes in once
 it is placed (`Popover`'s `focus` prop), Tab stays inside it (`trap`), and
