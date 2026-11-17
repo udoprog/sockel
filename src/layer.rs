@@ -2,6 +2,7 @@
 //! only the innermost; and the page's scroll lock while a dialog is open.
 
 use std::cell::{Cell, RefCell};
+use std::rc::Rc;
 
 #[derive(Debug, Default)]
 pub(crate) struct Layers {
@@ -25,28 +26,37 @@ impl Layers {
     }
 }
 
+/// One app's stack of open overlays.
+pub(crate) type Stack = Rc<RefCell<Layers>>;
+
 thread_local! {
-    static LAYERS: RefCell<Layers> = RefCell::default();
+    // Per document, not per stack: what it locks is the one root.
     static LOCKS: Cell<usize> = const { Cell::new(0) };
 }
 
-/// An overlay opening: its place on the stack, taken off when dropped.
-pub(crate) struct Layer(u32);
+/// An overlay opening: its place on its stack, taken off when dropped.
+pub(crate) struct Layer {
+    stack: Stack,
+    id: u32,
+}
 
 impl Layer {
-    pub(crate) fn open() -> Self {
-        Self(LAYERS.with_borrow_mut(Layers::push))
+    pub(crate) fn open(stack: &Stack) -> Self {
+        Self {
+            id: stack.borrow_mut().push(),
+            stack: stack.clone(),
+        }
     }
 
-    /// Whether nothing opened after it is still open.
+    /// Whether nothing opened after it on its stack is still open.
     pub(crate) fn is_top(&self) -> bool {
-        LAYERS.with_borrow(|l| l.is_top(self.0))
+        self.stack.borrow().is_top(self.id)
     }
 }
 
 impl Drop for Layer {
     fn drop(&mut self) {
-        LAYERS.with_borrow_mut(|l| l.remove(self.0));
+        self.stack.borrow_mut().remove(self.id);
     }
 }
 
@@ -104,5 +114,18 @@ mod tests {
         assert!(layers.is_top(confirm));
         layers.remove(confirm);
         assert!(!layers.is_top(confirm));
+    }
+
+    #[test]
+    fn a_layer_leaves_its_own_stack_when_dropped() {
+        let (a, b) = (Stack::default(), Stack::default());
+        let outer = Layer::open(&a);
+        let other = Layer::open(&b);
+        assert!(outer.is_top() && other.is_top(), "stacks are apart");
+        let inner = Layer::open(&a);
+        assert!(!outer.is_top() && other.is_top());
+        drop(inner);
+        assert!(outer.is_top());
+        assert!(a.borrow().open.len() == 1 && b.borrow().open.len() == 1);
     }
 }

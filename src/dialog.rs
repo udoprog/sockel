@@ -6,11 +6,11 @@ use wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
-use crate::layer::{Layer, ScrollLock};
+use crate::layer::Layer;
 use crate::popover::{Listener, focus_lost};
 use crate::{
-    ActionGroup, Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, OVERLAY_ID, SectionHead,
-    class, overlay,
+    ActionGroup, Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, SectionHead, class,
+    use_overlays,
 };
 
 /// A dialog's size: its width, and whether its height is fixed.
@@ -116,27 +116,37 @@ fn focus(element: &HtmlElement) {
     _ = element.focus_with_options(&options);
 }
 
+fn has(element: &Element, class: &str) -> bool {
+    element.class_list().contains(class)
+}
+
 /// Everything outside `layer` it puts out of reach that was not already:
-/// the page, and the overlays open before it.
+/// the page around the path from `<body>` to it, the overlays open before
+/// it in its own host, and those open in any other host. Toasts stay live.
 fn outside(layer: &Element) -> Vec<Element> {
-    let Some(body) = layer.owner_document().and_then(|d| d.body()) else {
-        return Vec::new();
-    };
     let mut out = Vec::new();
-    let children = body.children();
-    for element in (0..children.length()).filter_map(|i| children.item(i)) {
-        if element.id() != OVERLAY_ID {
-            out.push(element);
-            continue;
+    let mut on_path = layer.clone();
+    while let Some(parent) = on_path.parent_element() {
+        let own_host = has(&parent, class::OVERLAY_HOST);
+        let children = parent.children();
+        for element in (0..children.length()).filter_map(|i| children.item(i)) {
+            if element.is_same_node(Some(&on_path)) {
+                if own_host {
+                    break;
+                }
+            } else if has(&element, class::OVERLAY_HOST) {
+                let overlays = element.children();
+                out.extend((0..overlays.length()).filter_map(|i| overlays.item(i)));
+            } else {
+                out.push(element);
+            }
         }
-        let overlays = element.children();
-        out.extend(
-            (0..overlays.length())
-                .filter_map(|i| overlays.item(i))
-                .take_while(|o| !o.is_same_node(Some(layer))),
-        );
+        if parent.tag_name() == "BODY" {
+            break;
+        }
+        on_path = parent;
     }
-    out.retain(|e| !e.has_attribute("inert"));
+    out.retain(|e| !e.has_attribute("inert") && !has(e, class::TOAST_HOST));
     out
 }
 
@@ -149,6 +159,7 @@ fn outside(layer: &Element) -> Vec<Element> {
 pub fn Dialog(props: &DialogProps) -> Html {
     let layer_ref = use_node_ref();
     let panel_ref = use_node_ref();
+    let overlays = use_overlays();
     let latest = use_mut_ref(Callback::noop);
     *latest.borrow_mut() = props.on_dismiss.clone();
     let mode = use_mut_ref(DialogDismiss::default);
@@ -159,7 +170,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
 
     {
         let (layer_ref, panel_ref, layer) = (layer_ref.clone(), panel_ref.clone(), layer.clone());
-        let (latest, mode) = (latest.clone(), mode.clone());
+        let (latest, mode, overlays) = (latest.clone(), mode.clone(), overlays.clone());
         use_effect_with(props.open, move |&open| {
             let mut held = None;
             let mut kept = Vec::new();
@@ -167,9 +178,9 @@ pub fn Dialog(props: &DialogProps) -> Html {
             let mut lock = None;
 
             if open {
-                let top = Rc::new(Layer::open());
+                let top = Rc::new(overlays.layer());
                 *layer.borrow_mut() = Some(top.clone());
-                lock = Some(ScrollLock::take());
+                lock = Some(overlays.lock_scroll());
                 let document = web_sys::window().and_then(|w| w.document());
                 before = document
                     .as_ref()
@@ -310,7 +321,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
             }
         });
 
-    overlay(html! {
+    overlays.portal(html! {
         <div ref={layer_ref}
             class={classes!(class::DIALOG_LAYER, props.sheet.then_some(class::SHEET))}
             {onpointerdown} {onclick}>

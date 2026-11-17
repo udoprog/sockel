@@ -11,8 +11,8 @@ use yew::prelude::*;
 
 use crate::popover::Listener;
 use crate::{
-    Button, ButtonProps, ButtonSize, ButtonVariant, Dismiss, Placed, PopoverAlign, Side, class,
-    overlay, use_popover,
+    Button, ButtonProps, ButtonSize, ButtonVariant, Dismiss, Overlays, Placed, PopoverAlign, Side,
+    class, use_overlays, use_popover,
 };
 
 /// How long a pointer rests on the anchor before a tooltip shows, in
@@ -270,6 +270,7 @@ fn position(left: f64, top: f64) -> String {
 /// (`aria-describedby`). It never takes room: the page does not move.
 #[function_component]
 pub fn Tooltip(props: &TooltipProps) -> Html {
+    let overlays = use_overlays();
     let id = use_state(|| props.id.clone().unwrap_or_else(|| next_id("tip")));
     let id = props.id.clone().unwrap_or_else(|| (*id).clone());
     let node = use_node_ref();
@@ -290,6 +291,7 @@ pub fn Tooltip(props: &TooltipProps) -> Html {
         return Html::default();
     }
     tip_view(
+        &overlays,
         node,
         id,
         &props.text,
@@ -300,6 +302,7 @@ pub fn Tooltip(props: &TooltipProps) -> Html {
 }
 
 fn tip_view(
+    overlays: &Overlays,
     node: NodeRef,
     id: AttrValue,
     text: &AttrValue,
@@ -308,7 +311,7 @@ fn tip_view(
     testid: Option<AttrValue>,
 ) -> Html {
     let style = placed.map(|p| position(p.left, p.top));
-    overlay(html! {
+    overlays.portal(html! {
         <div ref={node} {id} role="tooltip" {style}
             class={classes!(tooltip(placed.is_some()), class)}
             data-testid={testid}>
@@ -354,6 +357,7 @@ pub fn hover_card(placed: bool) -> Classes {
 /// reached. Placed and dismissed as a [`Popover`](crate::Popover) is.
 #[function_component]
 pub fn HoverCard(props: &HoverCardProps) -> Html {
+    let overlays = use_overlays();
     let id = use_state(|| next_id("card"));
     let node = use_node_ref();
     let hover = use_hover(props.delay, props.delay);
@@ -378,7 +382,7 @@ pub fn HoverCard(props: &HoverCardProps) -> Html {
         )
     });
     let (enter, leave) = (hover.control.clone(), hover.control.clone());
-    overlay(html! {
+    overlays.portal(html! {
         <div ref={node} id={(*id).clone()} role="group" aria-label={props.title.clone()} {style}
             class={classes!(hover_card(placed.is_some()), props.class.clone())}
             onpointerenter={Callback::from(move |_| enter.pointer(true))}
@@ -495,6 +499,7 @@ struct Tipped {
 /// page scrolls.
 #[function_component]
 pub fn DataTips() -> Html {
+    let overlays = use_overlays();
     let current = use_state_eq(|| None::<Tipped>);
     let id = use_state(|| next_id("tip"));
     let hover = use_hover(TOOLTIP_DELAY, 0);
@@ -628,8 +633,8 @@ pub fn DataTips() -> Html {
     );
     html! {
         <>
-            { overlay(html! { <span ref={stand_in} class={class::TIP_ANCHOR} {style}></span> }) }
-            { tip_view(node, (*id).clone(), &AttrValue::from(text), placed, Classes::new(), None) }
+            { overlays.portal(html! { <span ref={stand_in} class={class::TIP_ANCHOR} {style}></span> }) }
+            { tip_view(&overlays, node, (*id).clone(), &AttrValue::from(text), placed, Classes::new(), None) }
         </>
     }
 }

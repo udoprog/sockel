@@ -1,4 +1,4 @@
-//! The overlay layer and Popover (`style/_popover.scss`).
+//! Popover (`style/_popover.scss`).
 
 use std::cell::Cell;
 use std::rc::Rc;
@@ -8,45 +8,12 @@ use wasm_bindgen::closure::Closure;
 use web_sys::{Element, HtmlElement, Node};
 use yew::prelude::*;
 
-use crate::layer::Layer;
-use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class};
-
-/// The id of the overlay layer, the last child of `<body>` (also its class).
-pub const OVERLAY_ID: &str = class::OVERLAY;
+use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class, use_overlays};
 
 /// Between the anchor and the popover, in pixels.
 const GAP: f64 = 4.0;
 /// Between the popover and the viewport's edges, in pixels.
 const EDGE: f64 = 8.0;
-
-/// The overlay layer, made on first use.
-#[cfg(target_arch = "wasm32")]
-fn host() -> Option<Element> {
-    let document = web_sys::window()?.document()?;
-    if let Some(host) = document.get_element_by_id(OVERLAY_ID) {
-        return Some(host);
-    }
-    let host = document.create_element("div").ok()?;
-    host.set_id(OVERLAY_ID);
-    host.set_class_name(class::OVERLAY);
-    document.body()?.append_child(&host).ok()?;
-    Some(host)
-}
-
-#[cfg(not(target_arch = "wasm32"))]
-fn host() -> Option<Element> {
-    None
-}
-
-/// `content` rendered in the overlay layer, so no scrolling or clipping box
-/// around its owner cuts it; its events still bubble through its owner. In
-/// place where there is no document (server rendering).
-pub fn overlay(content: Html) -> Html {
-    match host() {
-        Some(host) => create_portal(content, host),
-        None => content,
-    }
-}
 
 /// A box in viewport coordinates.
 #[derive(Clone, Copy, Debug, Default, PartialEq)]
@@ -334,6 +301,7 @@ pub fn use_popover(
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
     let placed = use_state_eq(|| None::<Placed>);
+    let overlays = use_overlays();
     // The latest callback, read by listeners made when it opened.
     let latest = use_mut_ref(Callback::noop);
     *latest.borrow_mut() = on_dismiss;
@@ -347,7 +315,7 @@ pub fn use_popover(
             let mut observer = None;
 
             if open {
-                let layer = Rc::new(Layer::open());
+                let layer = Rc::new(overlays.layer());
                 let last = Rc::new(Cell::new(None::<Placed>));
                 let measure = {
                     let (anchor, popover, placed) =
@@ -521,6 +489,7 @@ pub fn popover(sheet: bool, placed: bool) -> Classes {
 #[function_component]
 pub fn Popover(props: &PopoverProps) -> Html {
     let node = use_node_ref();
+    let overlays = use_overlays();
     let placed = use_popover(
         props.open,
         props.anchor.clone(),
@@ -562,7 +531,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
         }
     });
 
-    overlay(html! {
+    overlays.portal(html! {
         <>
             if props.sheet {
                 <div class={class::POPOVER_SCRIM} aria-hidden="true"></div>

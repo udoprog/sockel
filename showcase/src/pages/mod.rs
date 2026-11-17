@@ -1232,6 +1232,11 @@ pub const PAGES: &[Page] = &[
             "overlay",
             "popover",
             "OVERLAY_ID",
+            "OverlayHost",
+            "OverlayHostProps",
+            "Overlays",
+            "overlay_host",
+            "use_overlays",
         ],
         render: || html! { <popover::PopoverPage /> },
         holds: &[

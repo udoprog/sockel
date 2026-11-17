@@ -658,7 +658,8 @@ without moving what follows; the regular one grows with its text.
 
 `ToastHost` is where toasts stand: fixed over the window's bottom
 (`--layer-toast`), centred, newest last, in an always-present polite live
-region. Fixed, it takes no room: a toast coming or going moves nothing.
+region. It renders in the overlay layer (see `OverlayHost`), wherever the
+app places it, so an open dialog never puts it out of reach. Fixed, it takes no room: a toast coming or going moves nothing.
 `raised` lifts it by `--toast-tray`, the height of a tray or bar the app
 keeps at the bottom (0 unless the app sets it on `:root`). `toast_host(raised)`
 gives the classes.
@@ -761,13 +762,58 @@ accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
 loading, failed, missing or loaded. `initials(name)` is the same function for
 a place of your own.
 
+## OverlayHost
+
+Popovers, menus, selects, tooltips, dialogs and toasts render in the overlay
+layer, a portal out of whatever scrolls or clips their owner. Its events
+still bubble through the owner. `OverlayHost` is optional and gives the app
+its own layer:
+
+```rust
+html! {
+    <div class="my-app" data-theme="dark">
+        <OverlayHost>
+            <App/>
+        </OverlayHost>
+    </div>
+}
+```
+
+- Overlays render in a `.plinth-overlay-host` element after its children,
+  so they inherit what the element around it sets (colour variables, a
+  theme scoped to a sub-element). It adds no box of its own. Place it where
+  no ancestor has `transform`, `filter`, `contain` or `will-change`, or
+  fixed overlays are placed against that ancestor.
+- It keeps the app's stack of open overlays, so Escape and a press outside
+  close the innermost first. Two hosts in two separate roots keep separate
+  stacks. A host inside another gets its own layer, for a sub-tree with
+  its own colours, and shares the outer one's stack.
+- Props: `class` (on the host element) and `testid`. `overlay_host(class)`
+  gives the classes.
+
+Without one, nothing changes from before: overlays go to `#plinth-overlay`
+(`plinth::OVERLAY_ID`), made on first use as the last child of `<body>`,
+with one stack per thread. Because it is a body child, it does not inherit
+colours an app sets below `:root`. On the server there is no layer, and
+overlays render in place.
+
+For a component of your own, `use_overlays()` returns the nearest host's
+`Overlays` (or the fallback), and `.portal(html)` renders into it.
+`use_popover` already takes its place on the stack from it. The free
+`overlay(html)` always uses the fallback layer, since a plain function
+cannot see a context. Prefer `use_overlays().portal(html)` in components.
+
+Layer order between kinds is the `--layer-*` scale (overlay, dialog, toast,
+tooltip, lowest first). Within one kind, the one opened later is on top.
+An open dialog puts the page and the overlays opened before it out of
+reach (`inert`), but never the toast region: a toast's Undo over a dialog
+still works, and it is still announced.
+
 ## Popover
 
 `Popover` is a surface beside its anchor, rendered while `open` in the
-overlay layer: `overlay(html)` portals into `#plinth-overlay`
-(`plinth::OVERLAY_ID`), the last child of `<body>`, so no scrolling or
-clipping box around the owner cuts it, and its events still bubble through
-the owner. Props:
+overlay layer (see `OverlayHost`), so no scrolling or clipping box around
+the owner cuts it, and its events still bubble through the owner. Props:
 
 - `anchor` (a `NodeRef` on the element it opens beside, where focus returns),
   `open`, and `on_dismiss: Callback<Dismiss>`: the owner closes it.

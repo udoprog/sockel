@@ -5,7 +5,7 @@ use web_sys::HtmlElement;
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
-use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, overlay};
+use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
 
 /// One option of a [`Select`].
 #[derive(Clone, Debug, PartialEq)]
@@ -134,6 +134,7 @@ pub fn Select<T>(props: &SelectProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let overlays = use_overlays();
     let id = use_state(|| crate::tooltip::next_id("select"));
     let face = use_node_ref();
     let list = use_node_ref();
@@ -347,7 +348,7 @@ where
             }
             style
         });
-        overlay(html! {
+        overlays.portal(html! {
             <div ref={list.clone()} id={list_id.clone()} role="listbox"
                 class={listbox(placed.is_some())} aria-label={props.label.clone()}
                 {style} {onmousedown}

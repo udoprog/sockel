@@ -16,7 +16,7 @@ const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
-use plinth::{Cluster, Gap, PageHead, Stack};
+use plinth::{Cluster, Gap, OverlayHost, PageHead, Stack};
 
 use controls::Select;
 use pages::{PAGES, Page};
@@ -110,6 +110,7 @@ fn App() -> Html {
     let page = &PAGES[*current];
 
     html! {
+        <OverlayHost>
         <div class={class::SHELL}>
             <plinth::Styles css={STYLESHEET} />
             <nav class={class::NAV} aria-label="Components">
@@ -135,6 +136,7 @@ fn App() -> Html {
                 <probe::Probe key={page.id} holds={page.holds} />
             }
         </div>
+        </OverlayHost>
     }
 }
 

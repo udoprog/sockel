@@ -3,7 +3,7 @@
 use std::cell::Cell;
 
 use crate::timer::use_timeout;
-use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class};
+use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class, use_overlays};
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
@@ -31,18 +31,19 @@ pub fn toast_host(raised: bool) -> Classes {
     classes!(class::TOAST_HOST, raised.then_some(class::RAISED))
 }
 
-/// Where toasts stand: fixed over the window's bottom, in a polite live
-/// region that is always there, so a toast arriving is announced. Fixed, it
+/// Where toasts stand: fixed over the window's bottom in the overlay
+/// layer, in a polite live region that is always there, so a toast
+/// arriving is announced, and never put out of reach by a dialog. Fixed, it
 /// takes no room in the page: a toast coming or going moves nothing.
 #[function_component]
 pub fn ToastHost(props: &ToastHostProps) -> Html {
-    html! {
+    use_overlays().portal(html! {
         <div class={classes!(toast_host(props.raised), props.class.clone())}
             role="region" aria-live="polite" aria-relevant="additions"
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </div>
-    }
+    })
 }
 
 #[derive(Properties, PartialEq)]

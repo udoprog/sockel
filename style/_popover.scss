@@ -1,8 +1,10 @@
 // The overlay layer and Popover (src/popover.rs).
 //
-// - `.plinth-overlay`: the layer popovers, menus and dialogs open in, the
-//   last child of `<body>`. It lays nothing out, so an open popover never
-//   makes the page taller or changes its scrollbar.
+// - `.plinth-overlay-host`: the layer popovers, menus, dialogs, tooltips and
+//   toasts open in: an `OverlayHost`'s, after the app's content, or without
+//   one `#plinth-overlay`, the last child of `<body>`. It lays nothing out,
+//   so an open popover never makes the page taller or changes its
+//   scrollbar.
 // - `.plinth-popover`: fixed beside its anchor at the place popover.rs
 //   measured (`--popover-left`, `--popover-top`, `--popover-max-height`),
 //   as wide as its content up to `--popover-max-width`, whatever side it
@@ -15,7 +17,7 @@
 
 @use "tokens" as base;
 
-.plinth-overlay {
+.plinth-overlay-host {
     position: absolute;
     top: 0;
     left: 0;

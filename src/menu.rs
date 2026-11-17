@@ -9,8 +9,8 @@ use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::{
-    Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class, overlay,
-    use_popover,
+    Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class,
+    use_overlays, use_popover,
 };
 
 /// What the arrow keys, Home, End and type-ahead move between.
@@ -215,6 +215,7 @@ struct ListProps {
 /// pick, Tab, Escape or a press outside.
 #[function_component]
 fn MenuList(props: &ListProps) -> Html {
+    let overlays = use_overlays();
     let list = use_node_ref();
     let placed = use_popover(
         props.open,
@@ -251,7 +252,7 @@ fn MenuList(props: &ListProps) -> Html {
         )
     });
 
-    overlay(html! {
+    overlays.portal(html! {
         <div ref={list}
             class={classes!(menu(props.width, props.tight, placed.is_some()), props.class.clone())}
             role="menu" aria-label={props.label.clone()} {style}
@@ -810,6 +811,7 @@ struct Point(i32, i32);
 /// anything but a press outside, it gives focus back to what had it.
 #[function_component]
 pub fn ContextMenu(props: &ContextMenuProps) -> Html {
+    let overlays = use_overlays();
     let at = use_state_eq(|| None::<Point>);
     let point = use_node_ref();
     let press = use_mut_ref(|| None::<(i32, Point)>);
@@ -921,7 +923,7 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
             {onpointermove} onpointerup={onpointerup.clone()} onpointercancel={onpointerup}>
             { props.children.clone() }
             if open {
-                { overlay(html! {
+                { overlays.portal(html! {
                     <span ref={point.clone()} class={class::MENU_POINT} style={point_style} aria-hidden="true"></span>
                 }) }
             }
