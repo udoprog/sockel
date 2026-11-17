@@ -23,6 +23,7 @@ mod steppers;
 mod styles;
 mod tables;
 mod tabs;
+mod toasts;
 mod toggles;
 mod tooltips;
 
@@ -666,6 +667,80 @@ pub const PAGES: &[Page] = &[
                 plinth::class::LOADABLE,
                 Size::Height,
                 Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
+            ),
+        ],
+    },
+    Page {
+        id: "toast",
+        title: "Toast",
+        about: "A short message after an action, with an undo, fixed over the window's bottom so it moves nothing; its clock stops under the pointer or focus. Tick Live toast.",
+        covers: &[
+            "Toast",
+            "ToastProps",
+            "ToastHost",
+            "ToastHostProps",
+            "TOAST_MS",
+            "toast",
+            "toast_host",
+        ],
+        render: || html! { <toasts::ToastPage /> },
+        holds: &[
+            hold(
+                plinth::class::TOAST,
+                Size::Width,
+                Across::Only(&["Live toast", "raised", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::TOAST,
+                Size::Height,
+                Across::Only(&[
+                    "tone",
+                    "icon",
+                    "action",
+                    "shortcut",
+                    "duration",
+                    "raised",
+                    "Live toast",
+                ]),
+            ),
+            hold(
+                class::SAMPLE,
+                Size::Box,
+                Across::Only(&[
+                    "raised",
+                    "duration",
+                    "shortcut",
+                    "Live toast",
+                    "focus",
+                    "click",
+                ]),
+            ),
+        ],
+    },
+    Page {
+        id: "save-bar",
+        title: "SaveBar",
+        about: "A form's unsaved changes: a note, save and discard, always in the flow at one height and only hidden while clean, so the first edit moves nothing.",
+        covers: &[
+            "SaveBar",
+            "SaveBarProps",
+            "UnloadGuard",
+            "save_bar",
+            "unsaved",
+            "use_unload_guard",
+        ],
+        render: || html! { <toasts::SaveBarPage /> },
+        holds: &[
+            hold(
+                plinth::class::SAVE_BAR,
+                Size::Box,
+                Across::Except(&["status", "label"]),
+            ),
+            hold(plinth::class::SAVE_BAR, Size::Width, Across::All),
+            hold(
+                class::SAMPLE,
+                Size::Box,
+                Across::Except(&["status", "label"]),
             ),
         ],
     },

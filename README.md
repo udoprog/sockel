@@ -654,6 +654,47 @@ exactly `--control-height` high whatever it says (title and hint cut to one
 line, its actions kept at the end), so it replaces a row of that height
 without moving what follows; the regular one grows with its text.
 
+## Toast, ToastHost and SaveBar
+
+`ToastHost` is where toasts stand: fixed over the window's bottom
+(`--layer-toast`), centred, newest last, in an always-present polite live
+region. Fixed, it takes no room: a toast coming or going moves nothing.
+`raised` lifts it by `--toast-tray`, the height of a tray or bar the app
+keeps at the bottom (0 unless the app sets it on `:root`). `toast_host(raised)`
+gives the classes.
+
+`Toast` is one message: `tone` (`Tone`, the accent by default), `icon`, the
+text (its children), `action` (a label such as "Undo") with `onaction`,
+`ondismiss` (closed or timed out), `duration` (milliseconds, `TOAST_MS` =
+8000; 0 keeps it until dismissed), `shortcut` (Ctrl or Cmd+Z takes the action
+while it shows, unless typing in a field) and `close_label`. The clock stops
+while the pointer is over the toast or focus is in it and starts afresh
+after; the action and the dismissal happen once between them. Give each
+toast its own `key`. `toast(tone)` gives the classes. The app owns the list:
+it stops rendering a toast when `ondismiss` or `onaction` is called.
+
+`SaveBar` is a form's bar of unsaved changes: `dirty`, `busy` (the save
+button's spinner, clicks ignored), `disabled`, `label` ("Unsaved changes"),
+`status` (how the last save went), `onsave`, `ondiscard` (shows Discard),
+`save_label`, `discard_label`, `submit` (Save submits the form it stands in),
+`sticky`, and children (further actions). While `dirty` it holds an
+`UnloadGuard`, the browser's own prompt on closing or reloading the tab
+(`guard=false` leaves that to the app, which can call `use_unload_guard(active)`
+itself; `unsaved()` says whether any guard is held). `save_bar(idle, sticky)`
+gives the classes.
+
+Every one takes `class` and `testid`. Parts: `TOAST_ICON`, `TOAST_BODY`,
+`TOAST_ACTION`, `TOAST_CLOSE`, `SAVE_BAR_NOTE`, `SAVE_BAR_STATUS`,
+`SAVE_BAR_ACTIONS`. Modifiers: `RAISED`, `IDLE`, `STICKY`, the tones. Token:
+`--toast-max-width` (28rem); `--toast-tray` is the app's to set.
+
+Size guarantees: a toast is at least one small control plus its padding
+high, its text wrapping within `--toast-max-width` and the window. The
+`SaveBar` choice is to keep its room: it is always in the flow at one control
+plus padding high, hidden (`visibility`) while clean and not removed, so the
+form's first edit moves nothing; `sticky` keeps it at the bottom of the scroll
+container, still in the flow. Its save button is busy in its own box.
+
 ## Spinner, Skeleton and Loadable
 
 `Spinner` is a spinning glyph (`Glyph::Spinner` from the icon set) in the

@@ -23,7 +23,8 @@
 // - `--focus-ring-*`: the focus ring's colour, width and offset.
 // - `--layer-*`: the stacking order of what floats (sticky, overlay,
 //   dialog, toast, tooltip).
-// - `--tooltip-max-width`: a tooltip's widest.
+// - `--tooltip-max-width`: a tooltip's widest; `--toast-max-width`: a toast's.
+//   An app with a tray at the window's bottom sets `--toast-tray` to its height.
 // - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
 //   and a sheet's tallest; `$sheet-breakpoint` is where a popover turns
 //   into a sheet.
@@ -170,6 +171,7 @@ $dialog-height-tall: 40rem !default;
 $dialog-top: 8dvh !default;
 $dialog-sheet-height: 85dvh !default;
 $tooltip-max-width: 24rem !default;
+$toast-max-width: 28rem !default;
 $menu-width: 12rem !default;
 $menu-width-wide: 16rem !default;
 $menu-width-wider: 20rem !default;
@@ -288,6 +290,7 @@ $sheet-breakpoint: "phone" !default;
     --dialog-top: #{$dialog-top};
     --dialog-sheet-height: #{$dialog-sheet-height};
     --tooltip-max-width: #{$tooltip-max-width};
+    --toast-max-width: #{$toast-max-width};
     --menu-width: #{$menu-width};
     --menu-width-wide: #{$menu-width-wide};
     --menu-width-wider: #{$menu-width-wider};

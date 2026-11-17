@@ -69,6 +69,11 @@
 //!   previous, numbers with gaps, next and last, so it keeps its width from
 //!   the first page to the last; [`Disclosure`] (`.disclosure`): a summary
 //!   row that toggles its body, one height shut or open.
+//! - [`ToastHost`] (`.toast-host`) and [`Toast`] (`.toast`): short messages
+//!   with an undo, fixed over the window's bottom so they move nothing, their
+//!   clock held under the pointer or focus; [`SaveBar`] (`.save-bar`): a
+//!   form's unsaved changes, save and discard, in the flow at one height,
+//!   with [`UnloadGuard`] for the browser's own prompt.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
 //!   an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
@@ -151,6 +156,7 @@ mod pager;
 mod popover;
 mod roving;
 mod rows;
+mod save_bar;
 mod secret_input;
 mod select;
 mod selection;
@@ -162,6 +168,8 @@ mod stepper;
 mod styles;
 mod table;
 mod tabs;
+mod timer;
+mod toast;
 mod tooltip;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
@@ -221,6 +229,7 @@ pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
     row_list, row_list_item,
 };
+pub use save_bar::{SaveBar, SaveBarProps, UnloadGuard, save_bar, unsaved, use_unload_guard};
 pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};
 pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, select};
 pub use selection::{
@@ -239,6 +248,7 @@ pub use table::{
     table_cell, table_wrap,
 };
 pub use tabs::{SubTabs, TabItem, Tabs, TabsProps, tabs};
+pub use toast::{TOAST_MS, Toast, ToastHost, ToastHostProps, ToastProps, toast, toast_host};
 pub use tooltip::{
     DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,
     TOOLTIP_DELAY, Tooltip, TooltipProps, hover_card, reason_text, tooltip,
