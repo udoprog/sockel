@@ -426,6 +426,7 @@ part is emitted; a name plinth does not have is an error.
 | buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
+| notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
@@ -825,7 +826,13 @@ intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `ErrorBox` is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
 technical text, cut to three lines, whole in its `title` attribute) and
 `onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
-busy and ignore clicks).
+busy and ignore clicks). `icon` (the app's, before the text, in the tone) and
+`ondismiss: Some(callback)` (a quiet close button after it, named and
+tooltipped by `dismiss_label`, "Dismiss"; the box does not remove itself)
+flank the text (`FLANKED`, the text in `ERROR_BOX_BODY`). `error_box(flanked)`
+gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
+`-fill`, `-edge`, `-shadow`, `-message-weight`, `-cause-font` and
+`-cause-text` (README, "Configuration").
 
 `EmptyState` is what stands where there is nothing: `title`, `icon`, `hint`
 and actions (its children). `compact` (`COMPACT`) is one row for a list or a
@@ -833,7 +840,8 @@ table. `empty_state(compact)` gives the classes.
 
 Every one takes `class` and `testid`. Parts: `NOTICE_ICON`, `NOTICE_BODY`,
 `NOTICE_ACTION`, `NOTICE_CLOSE`, `ERROR_BOX_TITLE`, `ERROR_BOX_MESSAGE`,
-`ERROR_BOX_CAUSE`, `ERROR_BOX_ACTIONS`, `EMPTY_STATE_ICON`,
+`ERROR_BOX_CAUSE`, `ERROR_BOX_ACTIONS`, `ERROR_BOX_ICON`, `ERROR_BOX_BODY`,
+`ERROR_BOX_CLOSE`, `EMPTY_STATE_ICON`,
 `EMPTY_STATE_TITLE`, `EMPTY_STATE_HINT`, `EMPTY_STATE_ACTIONS`.
 
 Size guarantees: a notice is at least one small control plus its padding

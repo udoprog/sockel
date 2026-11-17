@@ -11,6 +11,7 @@ plinth-loadable-loading = Laddar
 plinth-loadable-empty = Här finns inget
 plinth-loadable-error = Det gick inte att ladda
 plinth-error-box-retry = Försök igen
+plinth-error-box-dismiss = Stäng
 plinth-save-bar-unsaved = Osparade ändringar
 plinth-save-bar-save = Spara
 plinth-save-bar-discard = Förkasta

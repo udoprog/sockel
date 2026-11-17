@@ -240,7 +240,7 @@ pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
 pub use disclosure::{Disclosure, DisclosureProps, disclosure, disclosure_summary};
 pub use drop_zone::{DropState, DropZone, DropZoneProps, Refusal, accepts, drop_zone, refusal};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
-pub use error_box::{ErrorBox, ErrorBoxProps};
+pub use error_box::{ErrorBox, ErrorBoxProps, error_box};
 pub use field::{
     Field, FieldCheck, FieldCheckProps, FieldInputs, FieldProps, Fieldset, FieldsetProps, FormRow,
     FormRows, FormRowsProps, field, field_describedby, field_error, field_inputs, form_row,

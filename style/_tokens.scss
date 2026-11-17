@@ -290,6 +290,16 @@ $pager-phone-height: null !default;
 // A summary pager's padding (`null`: none), for one that ends a list or
 // table and lines up with its rows.
 $pager-summary-padding: null !default;
+// An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
+// weight, and its cause's font and size (`null`: none, or inherited).
+$error-box-padding: var(--space-4) !default;
+$error-box-gap: var(--space-2) !default;
+$error-box-fill: color-mix(in srgb, var(--tone) 8%, var(--surface)) !default;
+$error-box-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
+$error-box-shadow: null !default;
+$error-box-message-weight: null !default;
+$error-box-cause-font: ui-monospace, monospace !default;
+$error-box-cause-text: var(--text-xs) !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
@@ -433,6 +443,7 @@ $-parts: (
     "layout.pages", "layout.plain-list", "layout.toolbar",
     "menu.context", "menu.current", "menu.danger", "menu.detail", "menu.heading", "menu.note",
     "menu.row-actions", "menu.separator", "menu.split-button", "menu.tight", "menu.widths",
+    "notices.empty-state", "notices.flanked", "notices.notice",
     "pager.edges", "pager.summary",
     "popover.match-anchor",
     "skeleton.group", "skeleton.loadable", "skeleton.row", "skeleton.short", "skeleton.spinner",

@@ -99,6 +99,9 @@ pub fn ErrorBoxPage() -> Html {
     let retry = use_state(|| true);
     let retrying = use_state(|| false);
     let retries = use_state(|| 0);
+    let icon = use_state(|| false);
+    let dismiss = use_state(|| false);
+    let dismissed = use_state(|| 0);
 
     let controls = html! {
         <>
@@ -107,9 +110,15 @@ pub fn ErrorBoxPage() -> Html {
             <Select<Text> label="cause" options={CAUSES} value={*cause} on_change={bind(&cause)} />
             <Toggle label="onretry" value={*retry} on_change={bind(&retry)} />
             <Toggle label="retrying" value={*retrying} on_change={bind(&retrying)} />
+            <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
+            <Toggle label="ondismiss" value={*dismiss} on_change={bind(&dismiss)} />
         </>
     };
 
+    let ondismiss = {
+        let dismissed = dismissed.clone();
+        Callback::from(move |_: MouseEvent| dismissed.set(*dismissed + 1))
+    };
     let onretry = {
         let retries = retries.clone();
         Callback::from(move |_: MouseEvent| retries.set(*retries + 1))
@@ -129,16 +138,20 @@ pub fn ErrorBoxPage() -> Html {
             )
             .expr_if(*retry, "onretry", "on_retry")
             .flag("retrying", *retrying)
+            .expr_if(*icon, "icon", "html! { \"!\" }")
+            .expr_if(*dismiss, "ondismiss", "on_dismiss")
             .line_if(!words.is_empty(), text_node(&words)),
     );
 
     html! {
         <Demo {controls} {code}>
             <ErrorBox title={titled.then_some(AttrValue::Static("Could not load the items"))}
-                cause={cause_text} onretry={retry.then_some(onretry)} retrying={*retrying}>
+                cause={cause_text} onretry={retry.then_some(onretry)} retrying={*retrying}
+                icon={icon.then(|| html! { "!" })}
+                ondismiss={dismiss.then_some(ondismiss)}>
                 { text.of("The list is not available right now") }
             </ErrorBox>
-            <span class={class::CONTROL_LABEL}>{ format!("Retried {} times", *retries) }</span>
+            <span class={class::CONTROL_LABEL}>{ format!("Retried {} times, dismissed {} times", *retries, *dismissed) }</span>
         </Demo>
     }
 }

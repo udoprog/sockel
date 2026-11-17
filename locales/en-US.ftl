@@ -11,6 +11,7 @@ plinth-loadable-loading = Loading
 plinth-loadable-empty = Nothing here
 plinth-loadable-error = Could not load this
 plinth-error-box-retry = Try again
+plinth-error-box-dismiss = Dismiss
 plinth-save-bar-unsaved = Unsaved changes
 plinth-save-bar-save = Save
 plinth-save-bar-discard = Discard

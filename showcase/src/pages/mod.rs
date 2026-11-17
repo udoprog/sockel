@@ -918,7 +918,7 @@ pub const PAGES: &[Page] = &[
         title: "ErrorBox",
         group: Group::Feedback,
         about: "An error with its cause and a retry; a retry in progress keeps the button's box.",
-        covers: &["ErrorBox", "ErrorBoxProps"],
+        covers: &["ErrorBox", "ErrorBoxProps", "error_box"],
         render: || html! { <notices::ErrorBoxPage /> },
         holds: &[
             hold(plinth::class::ERROR_BOX, Size::Width, Across::All),
