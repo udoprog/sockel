@@ -177,7 +177,7 @@ fn each_feature_defines_the_tokens_it_reads() {
     let (full, _) = custom_properties(&tokens);
     for (feature, _) in FEATURES {
         let css = Config::new()
-            .features(&closure(&cargo, feature))
+            .features(closure(&cargo, feature))
             .build()
             .unwrap()
             .css;
