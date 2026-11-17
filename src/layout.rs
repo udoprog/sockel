@@ -10,6 +10,8 @@ pub enum Gap {
     /// The primitive's own: a stack's `--space-3`, a cluster's `--space-2`.
     #[default]
     Normal,
+    /// No gap.
+    None,
     /// `--space-0` (2px): the buttons of a tight group, a board toolbar's.
     Hair,
     /// `--space-1`: an icon and its text, chips in a row.
@@ -28,6 +30,7 @@ impl Gap {
     fn class(self) -> Option<&'static str> {
         match self {
             Gap::Normal => None,
+            Gap::None => Some("none"),
             Gap::Hair => Some("hair"),
             Gap::Snug => Some("snug"),
             Gap::Tight => Some("tight"),
@@ -91,19 +94,41 @@ impl Align {
 
 /// A stack's classes.
 pub fn stack(gap: Gap) -> Classes {
-    classes!("stack", gap.class())
+    stack_with(gap, false)
+}
+
+/// A stack's classes; `flush` zeroes the block margins of its direct children.
+pub fn stack_with(gap: Gap, flush: bool) -> Classes {
+    classes!("stack", gap.class(), flush.then_some("flush"))
 }
 
 /// A cluster's classes; `wrap` false keeps it on one line, `inline` sets
 /// it in the text's flow (an icon and its label).
 pub fn cluster(gap: Gap, justify: Justify, align: Align, wrap: bool, inline: bool) -> Classes {
+    cluster_with(gap, justify, align, wrap, inline, false, false)
+}
+
+/// A cluster's classes with the opt-in modifiers: `lines` draws wrapped lines
+/// closer than the column gap, `flush` zeroes the block margins of its
+/// direct children.
+pub fn cluster_with(
+    gap: Gap,
+    justify: Justify,
+    align: Align,
+    wrap: bool,
+    inline: bool,
+    lines: bool,
+    flush: bool,
+) -> Classes {
     classes!(
         "cluster",
         gap.class(),
         justify.class(),
         align.class(),
         (!wrap).then_some("nowrap"),
-        inline.then_some("inline")
+        inline.then_some("inline"),
+        lines.then_some("lines"),
+        flush.then_some("flush")
     )
 }
 
@@ -138,6 +163,9 @@ pub fn card(inset: Inset, link: bool) -> Classes {
 pub struct StackProps {
     #[prop_or_default]
     pub gap: Gap,
+    /// Zeroes the block margins of the direct children.
+    #[prop_or_default]
+    pub flush: bool,
     #[prop_or("div")]
     pub tag: &'static str,
     /// The screen's own class, for what only it needs.
@@ -152,7 +180,7 @@ pub struct StackProps {
 #[function_component]
 pub fn Stack(props: &StackProps) -> Html {
     html! {
-        <@{props.tag} class={classes!(stack(props.gap), props.class.clone())}
+        <@{props.tag} class={classes!(stack_with(props.gap, props.flush), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </@>
@@ -173,6 +201,12 @@ pub struct ClusterProps {
     /// In the text's flow, as wide as what it holds.
     #[prop_or_default]
     pub inline: bool,
+    /// Wrapped lines sit closer (`--space-1`) than the column gap.
+    #[prop_or_default]
+    pub lines: bool,
+    /// Zeroes the block margins of the direct children.
+    #[prop_or_default]
+    pub flush: bool,
     #[prop_or("div")]
     pub tag: &'static str,
     #[prop_or_default]
@@ -185,12 +219,14 @@ pub struct ClusterProps {
 
 #[function_component]
 pub fn Cluster(props: &ClusterProps) -> Html {
-    let classes = cluster(
+    let classes = cluster_with(
         props.gap,
         props.justify,
         props.align,
         !props.nowrap,
         props.inline,
+        props.lines,
+        props.flush,
     );
 
     html! {
@@ -272,6 +308,7 @@ mod tests {
     #[test]
     fn a_stack_is_its_class_and_its_gap() {
         assert_eq!(names(stack(Gap::Normal)), ["stack"]);
+        assert_eq!(names(stack(Gap::None)), ["stack", "none"]);
         assert_eq!(names(stack(Gap::Hair)), ["stack", "hair"]);
         assert_eq!(names(stack(Gap::Snug)), ["stack", "snug"]);
         assert_eq!(names(stack(Gap::Tight)), ["stack", "tight"]);
@@ -321,6 +358,27 @@ mod tests {
                 false
             )),
             ["cluster", "hair", "stretch"]
+        );
+    }
+
+    #[test]
+    fn a_stack_and_a_cluster_take_the_flush_and_lines_modifiers() {
+        assert_eq!(
+            names(stack_with(Gap::None, true)),
+            ["stack", "none", "flush"]
+        );
+        assert_eq!(names(stack_with(Gap::Normal, false)), ["stack"]);
+        assert_eq!(
+            names(cluster_with(
+                Gap::Normal,
+                Justify::Start,
+                Align::Center,
+                true,
+                false,
+                true,
+                true
+            )),
+            ["cluster", "lines", "flush"]
         );
     }
 

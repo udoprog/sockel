@@ -9,10 +9,13 @@
 //   `.nowrap` keeps one line; `.inline` sets it in the text's flow (an
 //   icon and its label).
 // - `.stack.start`: its items at their own width, at the start.
-// - The gap of either, one scale for both: `.hair` (`--space-0`, 2px: a tight
+// - The gap of either, one scale for both: `.none` (0), `.hair` (`--space-0`, 2px: a tight
 //   group of buttons), `.snug` (`--space-1`),
 //   `.tight` (`--space-2`), `.medium` (`--space-3`), `.loose`
 //   (`--space-4`: a page's or section's blocks), `.wide` (`--space-6`).
+// - `.cluster.lines`: wrapped lines `--space-1` apart, closer than the column
+//   gap. `.stack.flush` and `.cluster.flush` zero the block margins of their
+//   direct children (a paragraph's default).
 // - `.toolbar`: one line of controls, `--space-1` apart, scrolling sideways
 //   when it runs out of room; `.toolbar-spacer` pushes what follows to the
 //   end. `.boxed` draws it as a bar of its own.
@@ -155,6 +158,10 @@
 // The gap scale, after both so it wins over their own gaps.
 .stack,
 .cluster {
+    &.none {
+        gap: 0;
+    }
+
     &.hair {
         gap: var(--space-0);
     }
@@ -178,6 +185,14 @@
     &.wide {
         gap: var(--space-6);
     }
+
+    &.flush > * {
+        margin-block: 0;
+    }
+}
+
+.cluster.lines {
+    row-gap: var(--space-1);
 }
 
 .toolbar {
