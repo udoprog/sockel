@@ -1,0 +1,7 @@
+[package]
+name = "plinth-build"
+edition = "2024"
+publish = false
+
+[dependencies]
+grass = { version = "=0.13.4", default-features = false }

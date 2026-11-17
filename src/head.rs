@@ -1,5 +1,6 @@
 //! PageHead and SectionHead (`style/_heads.scss`).
 
+use crate::class;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -79,12 +80,19 @@ pub enum Head {
 }
 
 impl Head {
-    /// The head's classes, its title's and its actions' (spelled out, so
-    /// the class guard sees them).
+    /// The head's classes, its title's and its actions'.
     pub fn classes(self) -> [&'static str; 3] {
         match self {
-            Head::Page => ["page-head", "page-head-title", "page-head-actions"],
-            Head::Section => ["section-head", "section-head-title", "section-head-actions"],
+            Head::Page => [
+                class::PAGE_HEAD,
+                class::PAGE_HEAD_TITLE,
+                class::PAGE_HEAD_ACTIONS,
+            ],
+            Head::Section => [
+                class::SECTION_HEAD,
+                class::SECTION_HEAD_TITLE,
+                class::SECTION_HEAD_ACTIONS,
+            ],
         }
     }
 
@@ -98,14 +106,14 @@ impl Head {
 
 /// A head's own classes: `crumb` when it leads back.
 fn head_classes(head: &'static str, crumb: bool) -> Classes {
-    classes!(head, crumb.then_some("crumb"))
+    classes!(head, crumb.then_some(class::CRUMB))
 }
 
 fn head(kind: Head, props: &HeadProps) -> Html {
     let [head, title, actions] = kind.classes();
     let help = props.help.clone().map(|help| match &props.help_testid {
         Some(testid) => {
-            html! { <span class="contents" data-testid={testid.clone()}>{ help }</span> }
+            html! { <span class={class::CONTENTS} data-testid={testid.clone()}>{ help }</span> }
         }
         None => help,
     });
@@ -137,9 +145,9 @@ fn head(kind: Head, props: &HeadProps) -> Html {
 
     html! {
         <header class={classes!(head_classes(head, true), props.class.clone())} data-testid={props.head_testid.clone()}>
-            <nav class="page-head-crumbs" aria-label={props.back_label.clone()}>
+            <nav class={class::PAGE_HEAD_CRUMBS} aria-label={props.back_label.clone()}>
                 { back }
-                <span class="page-head-sep" aria-hidden="true">{ "/" }</span>
+                <span class={class::PAGE_HEAD_SEP} aria-hidden="true">{ "/" }</span>
                 { title }
                 { for suffix }
             </nav>
@@ -171,10 +179,13 @@ mod tests {
 
     #[test]
     fn a_head_with_a_back_link_is_a_crumb() {
-        assert_eq!(names(head_classes("page-head", false)), ["page-head"]);
         assert_eq!(
-            names(head_classes("page-head", true)),
-            ["page-head", "crumb"]
+            names(head_classes(class::PAGE_HEAD, false)),
+            [class::PAGE_HEAD]
+        );
+        assert_eq!(
+            names(head_classes(class::PAGE_HEAD, true)),
+            [class::PAGE_HEAD, class::CRUMB]
         );
     }
 
@@ -207,11 +218,19 @@ mod tests {
     fn heads_name_their_parts_after_themselves() {
         assert_eq!(
             Head::Page.classes(),
-            ["page-head", "page-head-title", "page-head-actions"]
+            [
+                class::PAGE_HEAD,
+                class::PAGE_HEAD_TITLE,
+                class::PAGE_HEAD_ACTIONS
+            ]
         );
         assert_eq!(
             Head::Section.classes(),
-            ["section-head", "section-head-title", "section-head-actions"]
+            [
+                class::SECTION_HEAD,
+                class::SECTION_HEAD_TITLE,
+                class::SECTION_HEAD_ACTIONS
+            ]
         );
         assert_eq!((Head::Page.tag(), Head::Section.tag()), ("h1", "h2"));
     }

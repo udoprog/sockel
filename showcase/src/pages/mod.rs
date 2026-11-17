@@ -55,7 +55,12 @@ pub const PAGES: &[Page] = &[
         id: "toolbar",
         title: "Toolbar",
         about: "One line of controls; a ToolbarSpacer pushes the rest to its end. Tab through its buttons.",
-        covers: &["Toolbar", "ToolbarProps", "ToolbarSpacer"],
+        covers: &[
+            "Toolbar",
+            "ToolbarProps",
+            "ToolbarSpacer",
+            "ToolbarSpacerProps",
+        ],
         render: || html! { <layout::ToolbarPage /> },
     },
     Page {

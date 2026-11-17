@@ -25,6 +25,21 @@
 //! the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`]) give
 //! the same classes.
 
+/// A constant per class of [`STYLESHEET`], generated from plinth's Sass by
+/// plinth-build: upper case, `-` as `_` (`.page-head-title` is
+/// [`class::PAGE_HEAD_TITLE`]), so a misspelt class does not compile.
+///
+/// ```
+/// assert_eq!(plinth::class::PAGE_HEAD_TITLE, "page-head-title");
+/// ```
+///
+/// ```compile_fail
+/// let _ = plinth::class::STAK;
+/// ```
+pub mod class {
+    include!(concat!(env!("OUT_DIR"), "/classes.rs"));
+}
+
 mod action_group;
 mod head;
 mod icon_button;
@@ -37,7 +52,7 @@ pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
-    ToolbarProps, ToolbarSpacer, card, cluster, stack, toolbar,
+    ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
 pub use styles::{STYLESHEET, Styles};

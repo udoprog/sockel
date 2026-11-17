@@ -1,5 +1,6 @@
 //! ActionGroup (`style/_actions.scss`).
 
+use crate::class;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -24,10 +25,10 @@ pub struct ActionGroupProps {
 /// icon actions, `wrap` false on one line.
 pub fn action_group(end: bool, quiet: bool, wrap: bool) -> Classes {
     classes!(
-        "action-group",
-        end.then_some("end"),
-        quiet.then_some("quiet"),
-        (!wrap).then_some("nowrap")
+        class::ACTION_GROUP,
+        end.then_some(class::END),
+        quiet.then_some(class::QUIET),
+        (!wrap).then_some(class::NOWRAP)
     )
 }
 
@@ -53,10 +54,13 @@ mod tests {
 
     #[test]
     fn modifiers_follow_the_props() {
-        assert_eq!(names(action_group(false, false, true)), ["action-group"]);
+        assert_eq!(
+            names(action_group(false, false, true)),
+            [class::ACTION_GROUP]
+        );
         assert_eq!(
             names(action_group(true, true, false)),
-            ["action-group", "end", "quiet", "nowrap"]
+            [class::ACTION_GROUP, class::END, class::QUIET, class::NOWRAP]
         );
     }
 }

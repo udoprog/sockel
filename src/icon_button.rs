@@ -1,5 +1,6 @@
 //! IconButton (`style/_buttons.scss`).
 
+use crate::class;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -35,8 +36,8 @@ pub struct IconButtonProps {
 }
 
 /// The button's classes: `iconed` always, `trailing` for an icon after the label.
-pub fn icon_button(class: Classes, trailing: bool) -> Classes {
-    classes!(class, "iconed", trailing.then_some("trailing"))
+pub fn icon_button(classes: Classes, trailing: bool) -> Classes {
+    classes!(classes, class::ICONED, trailing.then_some(class::TRAILING))
 }
 
 /// A button that leads with (or ends in) an icon, which the app supplies as
@@ -72,12 +73,12 @@ mod tests {
     #[test]
     fn an_icon_button_is_iconed_and_trails_on_request() {
         assert_eq!(
-            names(icon_button(classes!("primary"), false)),
-            ["primary", "iconed"]
+            names(icon_button(classes!(class::ICON), false)),
+            [class::ICON, class::ICONED]
         );
         assert_eq!(
             names(icon_button(Classes::new(), true)),
-            ["iconed", "trailing"]
+            [class::ICONED, class::TRAILING]
         );
     }
 }

@@ -1,5 +1,6 @@
 //! Stack, Cluster, Toolbar and Card (`style/_layout.scss`).
 
+use crate::class;
 use yew::prelude::*;
 
 /// The space between a stack's or a cluster's items: one scale for both, a
@@ -30,13 +31,13 @@ impl Gap {
     fn class(self) -> Option<&'static str> {
         match self {
             Gap::Normal => None,
-            Gap::None => Some("none"),
-            Gap::Hair => Some("hair"),
-            Gap::Snug => Some("snug"),
-            Gap::Tight => Some("tight"),
-            Gap::Medium => Some("medium"),
-            Gap::Loose => Some("loose"),
-            Gap::Wide => Some("wide"),
+            Gap::None => Some(class::NONE),
+            Gap::Hair => Some(class::HAIR),
+            Gap::Snug => Some(class::SNUG),
+            Gap::Tight => Some(class::TIGHT),
+            Gap::Medium => Some(class::MEDIUM),
+            Gap::Loose => Some(class::LOOSE),
+            Gap::Wide => Some(class::WIDE),
         }
     }
 }
@@ -58,9 +59,9 @@ impl Justify {
     fn class(self) -> Option<&'static str> {
         match self {
             Justify::Start => None,
-            Justify::Center => Some("center"),
-            Justify::Between => Some("between"),
-            Justify::End => Some("end"),
+            Justify::Center => Some(class::CENTER),
+            Justify::Between => Some(class::BETWEEN),
+            Justify::End => Some(class::END),
         }
     }
 }
@@ -84,10 +85,10 @@ impl Align {
     fn class(self) -> Option<&'static str> {
         match self {
             Align::Center => None,
-            Align::Top => Some("top"),
-            Align::Baseline => Some("baseline"),
-            Align::Bottom => Some("bottom"),
-            Align::Stretch => Some("stretch"),
+            Align::Top => Some(class::TOP),
+            Align::Baseline => Some(class::BASELINE),
+            Align::Bottom => Some(class::BOTTOM),
+            Align::Stretch => Some(class::STRETCH),
         }
     }
 }
@@ -99,7 +100,7 @@ pub fn stack(gap: Gap) -> Classes {
 
 /// A stack's classes; `flush` zeroes the block margins of its direct children.
 pub fn stack_with(gap: Gap, flush: bool) -> Classes {
-    classes!("stack", gap.class(), flush.then_some("flush"))
+    classes!(class::STACK, gap.class(), flush.then_some(class::FLUSH))
 }
 
 /// A cluster's classes; `wrap` false keeps it on one line, `inline` sets
@@ -121,20 +122,20 @@ pub fn cluster_with(
     flush: bool,
 ) -> Classes {
     classes!(
-        "cluster",
+        class::CLUSTER,
         gap.class(),
         justify.class(),
         align.class(),
-        (!wrap).then_some("nowrap"),
-        inline.then_some("inline"),
-        lines.then_some("lines"),
-        flush.then_some("flush")
+        (!wrap).then_some(class::NOWRAP),
+        inline.then_some(class::INLINE),
+        lines.then_some(class::LINES),
+        flush.then_some(class::FLUSH)
     )
 }
 
 /// A toolbar's classes; `boxed` draws it as a bar of its own.
 pub fn toolbar(boxed: bool) -> Classes {
-    classes!("toolbar", boxed.then_some("boxed"))
+    classes!(class::TOOLBAR, boxed.then_some(class::BOXED))
 }
 
 /// How much room a card leaves inside it.
@@ -152,11 +153,11 @@ pub enum Inset {
 pub fn card(inset: Inset, link: bool) -> Classes {
     let inset = match inset {
         Inset::Normal => None,
-        Inset::Compact => Some("compact"),
-        Inset::Flush => Some("flush"),
+        Inset::Compact => Some(class::COMPACT),
+        Inset::Flush => Some(class::FLUSH),
     };
 
-    classes!("card", inset, link.then_some("link"))
+    classes!(class::CARD, inset, link.then_some(class::LINK))
 }
 
 #[derive(Properties, PartialEq)]
@@ -268,10 +269,18 @@ pub fn Toolbar(props: &ToolbarProps) -> Html {
     }
 }
 
+#[derive(Properties, PartialEq)]
+pub struct ToolbarSpacerProps {
+    #[prop_or_default]
+    pub class: Classes,
+}
+
 /// Among a toolbar's controls, pushes those after it to the toolbar's end.
 #[function_component]
-pub fn ToolbarSpacer() -> Html {
-    html! { <span class="toolbar-spacer" aria-hidden="true" /> }
+pub fn ToolbarSpacer(props: &ToolbarSpacerProps) -> Html {
+    html! {
+        <span class={classes!(class::TOOLBAR_SPACER, props.class.clone())} aria-hidden="true" />
+    }
 }
 
 #[derive(Properties, PartialEq)]
@@ -310,14 +319,14 @@ mod tests {
 
     #[test]
     fn a_stack_is_its_class_and_its_gap() {
-        assert_eq!(names(stack(Gap::Normal)), ["stack"]);
-        assert_eq!(names(stack(Gap::None)), ["stack", "none"]);
-        assert_eq!(names(stack(Gap::Hair)), ["stack", "hair"]);
-        assert_eq!(names(stack(Gap::Snug)), ["stack", "snug"]);
-        assert_eq!(names(stack(Gap::Tight)), ["stack", "tight"]);
-        assert_eq!(names(stack(Gap::Medium)), ["stack", "medium"]);
-        assert_eq!(names(stack(Gap::Loose)), ["stack", "loose"]);
-        assert_eq!(names(stack(Gap::Wide)), ["stack", "wide"]);
+        assert_eq!(names(stack(Gap::Normal)), [class::STACK]);
+        assert_eq!(names(stack(Gap::None)), [class::STACK, class::NONE]);
+        assert_eq!(names(stack(Gap::Hair)), [class::STACK, class::HAIR]);
+        assert_eq!(names(stack(Gap::Snug)), [class::STACK, class::SNUG]);
+        assert_eq!(names(stack(Gap::Tight)), [class::STACK, class::TIGHT]);
+        assert_eq!(names(stack(Gap::Medium)), [class::STACK, class::MEDIUM]);
+        assert_eq!(names(stack(Gap::Loose)), [class::STACK, class::LOOSE]);
+        assert_eq!(names(stack(Gap::Wide)), [class::STACK, class::WIDE]);
     }
 
     #[test]
@@ -330,7 +339,7 @@ mod tests {
                 true,
                 false
             )),
-            ["cluster"]
+            [class::CLUSTER]
         );
         assert_eq!(
             names(cluster(
@@ -340,7 +349,13 @@ mod tests {
                 false,
                 false
             )),
-            ["cluster", "tight", "between", "top", "nowrap"]
+            [
+                class::CLUSTER,
+                class::TIGHT,
+                class::BETWEEN,
+                class::TOP,
+                class::NOWRAP
+            ]
         );
         assert_eq!(
             names(cluster(
@@ -350,7 +365,13 @@ mod tests {
                 true,
                 true
             )),
-            ["cluster", "snug", "end", "baseline", "inline"]
+            [
+                class::CLUSTER,
+                class::SNUG,
+                class::END,
+                class::BASELINE,
+                class::INLINE
+            ]
         );
         assert_eq!(
             names(cluster(
@@ -360,7 +381,7 @@ mod tests {
                 true,
                 false
             )),
-            ["cluster", "hair", "stretch"]
+            [class::CLUSTER, class::HAIR, class::STRETCH]
         );
     }
 
@@ -368,9 +389,9 @@ mod tests {
     fn a_stack_and_a_cluster_take_the_flush_and_lines_modifiers() {
         assert_eq!(
             names(stack_with(Gap::None, true)),
-            ["stack", "none", "flush"]
+            [class::STACK, class::NONE, class::FLUSH]
         );
-        assert_eq!(names(stack_with(Gap::Normal, false)), ["stack"]);
+        assert_eq!(names(stack_with(Gap::Normal, false)), [class::STACK]);
         assert_eq!(
             names(cluster_with(
                 Gap::Normal,
@@ -381,27 +402,30 @@ mod tests {
                 true,
                 true
             )),
-            ["cluster", "lines", "flush"]
+            [class::CLUSTER, class::LINES, class::FLUSH]
         );
     }
 
     #[test]
     fn a_toolbar_and_a_card_take_their_modifiers() {
-        assert_eq!(names(toolbar(false)), ["toolbar"]);
-        assert_eq!(names(toolbar(true)), ["toolbar", "boxed"]);
+        assert_eq!(names(toolbar(false)), [class::TOOLBAR]);
+        assert_eq!(names(toolbar(true)), [class::TOOLBAR, class::BOXED]);
         assert_eq!(
             names(classes!(toolbar(false), Gap::Tight.class())),
-            ["toolbar", "tight"]
+            [class::TOOLBAR, class::TIGHT]
         );
         assert_eq!(
             names(classes!(toolbar(false), Gap::Normal.class())),
-            ["toolbar"]
+            [class::TOOLBAR]
         );
-        assert_eq!(names(card(Inset::Normal, false)), ["card"]);
+        assert_eq!(names(card(Inset::Normal, false)), [class::CARD]);
         assert_eq!(
             names(card(Inset::Compact, true)),
-            ["card", "compact", "link"]
+            [class::CARD, class::COMPACT, class::LINK]
         );
-        assert_eq!(names(card(Inset::Flush, false)), ["card", "flush"]);
+        assert_eq!(
+            names(card(Inset::Flush, false)),
+            [class::CARD, class::FLUSH]
+        );
     }
 }

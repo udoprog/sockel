@@ -1,5 +1,6 @@
 //! LibraryToolbar (`style/_layout.scss`).
 
+use crate::class;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -21,6 +22,8 @@ pub struct LibraryToolbarProps {
     /// The filters after the field: filter buttons of class `filter`, one
     /// width each.
     #[prop_or_default]
+    pub class: Classes,
+    #[prop_or_default]
     pub children: Html,
 }
 
@@ -35,10 +38,10 @@ pub fn LibraryToolbar(props: &LibraryToolbarProps) -> Html {
     });
 
     html! {
-        <div class="library-toolbar">
-            <label class="library-search">
+        <div class={classes!(class::LIBRARY_TOOLBAR, props.class.clone())}>
+            <label class={class::LIBRARY_SEARCH}>
                 { props.icon.clone() }
-                <input class="input" type="search" value={props.value.clone()} data-testid={props.testid.clone()}
+                <input class={class::INPUT} type="search" value={props.value.clone()} data-testid={props.testid.clone()}
                     placeholder={props.label.clone()} aria-label={props.label.clone()}
                     data-autofocus={props.autofocus.then_some("")} {oninput} />
             </label>
