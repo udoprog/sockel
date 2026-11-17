@@ -242,8 +242,9 @@ pub use drop_zone::{DropState, DropZone, DropZoneProps, Refusal, accepts, drop_z
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
 pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use field::{
-    Field, FieldCheck, FieldCheckProps, FieldProps, Fieldset, FieldsetProps, FormRow, FormRows,
-    FormRowsProps, field, field_describedby, field_error, form_row, form_rows,
+    Field, FieldCheck, FieldCheckProps, FieldInputs, FieldProps, Fieldset, FieldsetProps, FormRow,
+    FormRows, FormRowsProps, field, field_describedby, field_error, field_inputs, form_row,
+    form_rows,
 };
 pub use filter_picker::{
     FilterChoice, FilterPicker, FilterPickerProps, filter_picker, filter_summary, toggled,

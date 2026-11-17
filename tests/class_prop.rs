@@ -176,6 +176,8 @@ fn fields_keep_a_passed_class() {
         reserve_error: false,
         disabled: false,
         busy: false,
+        group: false,
+        inputs: Default::default(),
         class: mine(),
         testid: None,
         children: Html::default(),

@@ -1,10 +1,12 @@
 // A project that leaves out the parts it never renders, and whose theme
 // defines its own danger colour.
 @use "../../style/tokens" with (
-    $omit: ("layout.toolbar", "layout.gap-wide", "buttons.fold", "heads.trail", "menu.split-button", "tokens.table"),
+    $omit: ("layout.toolbar", "layout.gap-wide", "buttons.fold", "heads.trail", "menu.split-button", "tokens.table",
+        "fields.fieldset", "fields.error"),
     $danger: false
 );
 @use "../../style/layout";
 @use "../../style/heads";
 @use "../../style/buttons";
 @use "../../style/menu";
+@use "../../style/fields";

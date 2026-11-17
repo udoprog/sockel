@@ -291,6 +291,8 @@ pub const PAGES: &[Page] = &[
             "field",
             "field_error",
             "field_describedby",
+            "FieldInputs",
+            "field_inputs",
         ],
         render: || html! { <fields::FieldPage /> },
         holds: &[

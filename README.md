@@ -421,6 +421,7 @@ part is emitted; a name plinth does not have is an error.
 | --- | --- |
 | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
 | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
+| fields | `fields.field` (`Field` itself, not a `FormRow`), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.plinth-compact`, `.plinth-one-row`), `heads.label`, `heads.list` |
 | buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
@@ -585,6 +586,14 @@ app's.
 - `disabled` mutes the field (`plinth::class::DISABLED`) and `busy` sets
   `aria-busy` with a progress cursor (`BUSY`); neither changes the box.
   `class`, `testid` as elsewhere. `field(disabled, busy)` gives the classes.
+- `group` makes the field a group (`role="group"`) named by its label,
+  which is then text with the id `{id}-label` rather than a `<label for>`:
+  for several controls, or one with no `id` (a list, an editor, a value
+  shown as text). `id` is then the field's own.
+- `inputs` wraps the controls: `FieldInputs::Row` (`FIELD_INPUTS`) in a
+  wrapping row centred on `--control-height`, `FieldInputs::Stack`
+  (`STACKED`) in a column, each as wide as the field; `Bare` (the default)
+  leaves them as given. `field_inputs(inputs)` gives the classes.
 - `reserve_error` (`RESERVE`, on `FIELD_ERROR`) keeps the error line's room
   while there is no error. The trade-off: the field is one line taller
   (`--field-message-line`) when it has no error, and an error longer than

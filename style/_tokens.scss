@@ -424,6 +424,8 @@ $omit: () !default;
 $-parts: (
     "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
     "confirm.inline",
+    "fields.busy", "fields.check", "fields.disabled", "fields.error", "fields.field",
+    "fields.fieldset", "fields.help", "fields.inputs", "fields.required",
     "heads.crumbs", "heads.label", "heads.list", "heads.trail",
     "layout.card-compact", "layout.card-dense", "layout.card-link", "layout.flush",
     "layout.gap-hair", "layout.gap-loose", "layout.gap-medium", "layout.gap-none",

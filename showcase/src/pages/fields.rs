@@ -3,8 +3,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use yew::prelude::*;
 
 use plinth::{
-    Field, FieldCheck, Fieldset, FormRow, FormRows, field, field_describedby, field_error,
-    form_row, form_rows,
+    Field, FieldCheck, FieldInputs, Fieldset, FormRow, FormRows, field, field_describedby,
+    field_error, form_row, form_rows,
 };
 
 use crate::class;
@@ -29,7 +29,15 @@ struct Settings {
     disabled: bool,
     busy: bool,
     help: bool,
+    group: bool,
+    inputs: FieldInputs,
 }
+
+const INPUTS_OPTIONS: &[(&str, FieldInputs)] = &[
+    ("Bare", FieldInputs::Bare),
+    ("Row", FieldInputs::Row),
+    ("Stack", FieldInputs::Stack),
+];
 
 #[derive(Properties, PartialEq)]
 struct CaseProps {
@@ -49,12 +57,24 @@ fn Case(props: &CaseProps) -> Html {
         (!error.is_empty()).then_some(error),
     );
     let describedby = field_describedby(&id, hint.is_some(), error.is_some());
-    let control = html! {
-        <input id={id.clone()} class={plinth::class::INPUT} value="Ada"
-            required={s.required} disabled={s.disabled}
-            aria-invalid={error.is_some().then_some("true")}
-            aria-describedby={describedby} />
+    let control = if s.group {
+        html! {
+            <>
+                <input class={plinth::class::INPUT} value="Ada" aria-label="First name"
+                    required={s.required} disabled={s.disabled} />
+                <input class={plinth::class::INPUT} value="Lovelace" aria-label="Last name"
+                    required={s.required} disabled={s.disabled} />
+            </>
+        }
+    } else {
+        html! {
+            <input id={id.clone()} class={plinth::class::INPUT} value="Ada"
+                required={s.required} disabled={s.disabled}
+                aria-invalid={error.is_some().then_some("true")}
+                aria-describedby={describedby} />
+        }
     };
+    let (group, inputs) = (s.group, s.inputs);
     let help = s.help.then(|| html! { <a href="#field">{ "Why?" }</a> });
     let label = html! { { label } };
     let hint = hint.map(|h| html! { { h } });
@@ -63,14 +83,16 @@ fn Case(props: &CaseProps) -> Html {
     if props.row {
         html! {
             <FormRow id={id.clone()} {label} {hint} {error} {help} required={s.required}
-                reserve_error={s.reserve_error} disabled={s.disabled} busy={s.busy}>
+                reserve_error={s.reserve_error} disabled={s.disabled} busy={s.busy}
+                {group} {inputs}>
                 { control }
             </FormRow>
         }
     } else {
         html! {
             <Field id={id.clone()} {label} {hint} {error} {help} required={s.required}
-                reserve_error={s.reserve_error} disabled={s.disabled} busy={s.busy}>
+                reserve_error={s.reserve_error} disabled={s.disabled} busy={s.busy}
+                {group} {inputs}>
                 { control }
             </Field>
         }
@@ -116,6 +138,12 @@ fn settings_controls(s: &UseStateHandle<Settings>, extra: Html) -> Html {
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
             <Toggle label="busy" value={s.busy} on_change={set(|s, on| s.busy = on)} />
             <Toggle label="help" value={s.help} on_change={set(|s, on| s.help = on)} />
+            <Toggle label="group" value={s.group} on_change={set(|s, on| s.group = on)} />
+            <Select<FieldInputs> label="inputs" options={INPUTS_OPTIONS} value={s.inputs}
+                on_change={{
+                    let s = s.clone();
+                    Callback::from(move |inputs| s.set(Settings { inputs, ..*s }))
+                }} />
             { extra }
         </>
     }
@@ -126,7 +154,7 @@ fn field_code(name: &str, s: Settings) -> El {
     let html_of = |text: String| format!("html! {{ {text:?} }}");
     let hint = s.hint.of("Shown on your profile");
     let error = s.error.of("Use at least three letters");
-    El::new(name)
+    let el = El::new(name)
         .expr("id", "id.clone()")
         .expr("label", html_of(s.label.of("Display name")))
         .expr_if(!hint.is_empty(), "hint", html_of(hint.clone()))
@@ -140,7 +168,21 @@ fn field_code(name: &str, s: Settings) -> El {
         .flag("reserve_error", s.reserve_error)
         .flag("disabled", s.disabled)
         .flag("busy", s.busy)
+        .flag("group", s.group)
+        .variant("inputs", s.inputs);
+    if s.group {
+        el.child(
+            El::new("input")
+                .expr("class", "plinth::class::INPUT")
+                .text("aria-label", "First name"),
+        )
         .child(
+            El::new("input")
+                .expr("class", "plinth::class::INPUT")
+                .text("aria-label", "Last name"),
+        )
+    } else {
+        el.child(
             El::new("input")
                 .expr("id", "id")
                 .expr("class", "plinth::class::INPUT")
@@ -153,6 +195,7 @@ fn field_code(name: &str, s: Settings) -> El {
                     ),
                 ),
         )
+    }
 }
 
 fn initial() -> Settings {
@@ -165,6 +208,8 @@ fn initial() -> Settings {
         disabled: false,
         busy: false,
         help: false,
+        group: false,
+        inputs: FieldInputs::Bare,
     }
 }
 

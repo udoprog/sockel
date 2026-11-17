@@ -13,67 +13,92 @@
 //   `-control` its cells. Below the phone breakpoint the label sits above.
 // - `.plinth-fieldset`, `.plinth-legend`: a titled group of fields.
 // - `.plinth-field-check`: a checkbox with its label after it.
+// - `.plinth-field-inputs`: a field's controls in a wrapping row, centred on
+//   a control's height; `.plinth-stacked` puts them in a column, each as
+//   wide as the field.
 
 @use "tokens" as base;
 
-.plinth-field {
-    @include base.field;
+@if base.emits("fields.field") {
+    .plinth-field {
+        @include base.field;
 
-    &.plinth-busy {
-        cursor: progress;
+        @if base.emits("fields.busy") {
+            &.plinth-busy {
+                cursor: progress;
+            }
+        }
     }
-}
 
-.plinth-field-head {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    min-width: 0;
+    .plinth-field-head {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        min-width: 0;
+    }
 }
 
 .plinth-field-label {
     @include base.field-label;
 }
 
-.plinth-field-required {
-    color: var(--danger);
-    font-size: var(--text-sm);
+@if base.emits("fields.required") {
+    .plinth-field-required {
+        color: var(--danger);
+        font-size: var(--text-sm);
+    }
 }
 
-.plinth-field-help {
-    flex: none;
-    font-size: var(--text-sm);
-    margin-inline-start: auto;
+@if base.emits("fields.help") {
+    .plinth-field-help {
+        flex: none;
+        font-size: var(--text-sm);
+        margin-inline-start: auto;
+    }
 }
 
-.plinth-field-hint,
-.plinth-field-error {
+@mixin -message {
     margin: 0;
     font-size: var(--text-xs);
     line-height: var(--field-message-line);
     overflow-wrap: anywhere;
 }
 
+@if base.emits("fields.error") {
+    .plinth-field-hint,
+    .plinth-field-error {
+        @include -message;
+    }
+} @else {
+    .plinth-field-hint {
+        @include -message;
+    }
+}
+
 .plinth-field-hint {
     color: var(--muted);
 }
 
-.plinth-field-error {
-    color: var(--danger);
+@if base.emits("fields.error") {
+    .plinth-field-error {
+        color: var(--danger);
 
-    &.plinth-reserve {
-        display: -webkit-box;
-        -webkit-box-orient: vertical;
-        -webkit-line-clamp: var(--field-error-lines);
-        min-height: calc(var(--field-error-lines) * var(--field-message-line));
-        overflow: hidden;
+        &.plinth-reserve {
+            display: -webkit-box;
+            -webkit-box-orient: vertical;
+            -webkit-line-clamp: var(--field-error-lines);
+            min-height: calc(var(--field-error-lines) * var(--field-message-line));
+            overflow: hidden;
+        }
     }
 }
 
-.plinth-field.plinth-disabled,
-.plinth-form-row.plinth-disabled,
-.plinth-field-check.plinth-disabled {
-    opacity: 0.5;
+@if base.emits("fields.disabled") {
+    .plinth-field.plinth-disabled,
+    .plinth-form-row.plinth-disabled,
+    .plinth-field-check.plinth-disabled {
+        opacity: 0.5;
+    }
 }
 
 .plinth-form-rows {
@@ -100,8 +125,10 @@
     grid-template-columns: subgrid;
     align-items: start;
 
-    &.plinth-busy {
-        cursor: progress;
+    @if base.emits("fields.busy") {
+        &.plinth-busy {
+            cursor: progress;
+        }
     }
 
     @include base.below("phone") {
@@ -129,32 +156,52 @@
     min-width: 0;
 }
 
-.plinth-fieldset {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-3);
-    min-width: 0;
-    margin: 0;
-    padding: 0;
-    border: 0;
+@if base.emits("fields.inputs") {
+    .plinth-field-inputs {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+        min-width: 0;
+        min-height: var(--control-height);
+
+        &.plinth-stacked {
+            flex-direction: column;
+            align-items: stretch;
+        }
+    }
 }
 
-.plinth-legend {
-    padding: 0;
-    margin-block-end: var(--space-3);
-    font-size: var(--text-sm);
-    font-weight: 600;
+@if base.emits("fields.fieldset") {
+    .plinth-fieldset {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-3);
+        min-width: 0;
+        margin: 0;
+        padding: 0;
+        border: 0;
+    }
+
+    .plinth-legend {
+        padding: 0;
+        margin-block-end: var(--space-3);
+        font-size: var(--text-sm);
+        font-weight: 600;
+    }
 }
 
-.plinth-field-check {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    min-height: var(--control-height);
-    min-width: 0;
-    cursor: pointer;
+@if base.emits("fields.check") {
+    .plinth-field-check {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        min-height: var(--control-height);
+        min-width: 0;
+        cursor: pointer;
 
-    &.plinth-disabled {
-        cursor: not-allowed;
+        &.plinth-disabled {
+            cursor: not-allowed;
+        }
     }
 }

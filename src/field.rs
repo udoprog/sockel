@@ -3,10 +3,22 @@
 use crate::class;
 use yew::prelude::*;
 
+/// How a field lays out its controls ([`FieldProps::inputs`]).
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum FieldInputs {
+    /// The control as given.
+    #[default]
+    Bare,
+    /// The controls in a wrapping row, centred on a control's height.
+    Row,
+    /// The controls in a column, each as wide as the field.
+    Stack,
+}
+
 #[derive(Properties, PartialEq)]
 pub struct FieldProps {
     /// The control's `id`, which the label's `for` names; the control in
-    /// `children` takes it.
+    /// `children` takes it. With `group`, the field's own.
     pub id: AttrValue,
     pub label: Html,
     /// Marks the label with `*`; the control sets `required` itself.
@@ -32,6 +44,13 @@ pub struct FieldProps {
     /// Waiting on something (`aria-busy`).
     #[prop_or_default]
     pub busy: bool,
+    /// The field is a group (`role="group"`) named by its label, whose
+    /// id is `{id}-label`, for several controls or one without an `id`.
+    #[prop_or_default]
+    pub group: bool,
+    /// Wraps the controls in a row or a column.
+    #[prop_or_default]
+    pub inputs: FieldInputs,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -69,6 +88,16 @@ pub fn field_error(reserve: bool) -> Classes {
     classes!(class::FIELD_ERROR, reserve.then_some(class::RESERVE))
 }
 
+/// The classes of a field's controls laid out by `inputs`: `field-inputs`,
+/// and `stacked` for a column; none for [`FieldInputs::Bare`].
+pub fn field_inputs(inputs: FieldInputs) -> Classes {
+    match inputs {
+        FieldInputs::Bare => Classes::new(),
+        FieldInputs::Row => classes!(class::FIELD_INPUTS),
+        FieldInputs::Stack => classes!(class::FIELD_INPUTS, class::STACKED),
+    }
+}
+
 /// The `aria-describedby` of a field's control: its hint and error, as the
 /// field names them. Pass whether the field has each.
 pub fn field_describedby(id: &str, hint: bool, error: bool) -> Option<AttrValue> {
@@ -81,9 +110,14 @@ pub fn field_describedby(id: &str, hint: bool, error: bool) -> Option<AttrValue>
 }
 
 fn label_parts(props: &FieldProps, label_class: Classes) -> Html {
+    let label = if props.group {
+        html! { <span class={label_class} id={label_id(props)}>{ props.label.clone() }</span> }
+    } else {
+        html! { <label class={label_class} for={props.id.clone()}>{ props.label.clone() }</label> }
+    };
     html! {
         <>
-            <label class={label_class} for={props.id.clone()}>{ props.label.clone() }</label>
+            { label }
             if props.required {
                 <span class={class::FIELD_REQUIRED} aria-hidden="true">{ "*" }</span>
             }
@@ -91,6 +125,17 @@ fn label_parts(props: &FieldProps, label_class: Classes) -> Html {
                 <span class={class::FIELD_HELP}>{ help.clone() }</span>
             }
         </>
+    }
+}
+
+fn label_id(props: &FieldProps) -> String {
+    format!("{}-label", props.id)
+}
+
+fn controls(props: &FieldProps) -> Html {
+    match props.inputs {
+        FieldInputs::Bare => props.children.clone(),
+        inputs => html! { <div class={field_inputs(inputs)}>{ props.children.clone() }</div> },
     }
 }
 
@@ -117,12 +162,14 @@ fn messages(props: &FieldProps) -> Html {
 pub fn Field(props: &FieldProps) -> Html {
     html! {
         <div class={classes!(field(props.disabled, props.busy), props.class.clone())}
+            role={props.group.then_some("group")}
+            aria-labelledby={props.group.then(|| label_id(props))}
             aria-busy={props.busy.then_some("true")}
             data-testid={props.testid.clone()}>
             <div class={class::FIELD_HEAD}>
                 { label_parts(props, classes!(class::FIELD_LABEL)) }
             </div>
-            { props.children.clone() }
+            { controls(props) }
             { messages(props) }
         </div>
     }
@@ -157,13 +204,15 @@ pub fn FormRows(props: &FormRowsProps) -> Html {
 pub fn FormRow(props: &FieldProps) -> Html {
     html! {
         <div class={classes!(form_row(props.disabled, props.busy), props.class.clone())}
+            role={props.group.then_some("group")}
+            aria-labelledby={props.group.then(|| label_id(props))}
             aria-busy={props.busy.then_some("true")}
             data-testid={props.testid.clone()}>
             <div class={class::FORM_LABEL}>
                 { label_parts(props, classes!(class::FIELD_LABEL)) }
             </div>
             <div class={class::FORM_CONTROL}>
-                { props.children.clone() }
+                { controls(props) }
                 { messages(props) }
             </div>
         </div>
@@ -250,6 +299,8 @@ mod tests {
             reserve_error: false,
             disabled: false,
             busy: false,
+            group: false,
+            inputs: FieldInputs::Bare,
             class: Classes::new(),
             testid: None,
             children: html! { <input id="name" /> },
@@ -324,6 +375,44 @@ mod tests {
         });
         assert!(shown.contains(">Wrong</p>"), "{shown}");
         assert!(!shown.contains(class::RESERVE), "{shown}");
+    }
+
+    #[test]
+    fn a_group_is_named_by_its_label() {
+        let props = || FieldProps {
+            group: true,
+            children: html! { <><input /><input /></> },
+            ..props()
+        };
+        for html in [render::<Field>(props()), render::<FormRow>(props())] {
+            assert!(html.contains("role=\"group\""), "{html}");
+            assert!(html.contains("aria-labelledby=\"name-label\""), "{html}");
+            assert!(
+                html.contains("<span id=\"name-label\" class=\"plinth-field-label\">Name</span>"),
+                "{html}"
+            );
+            assert!(!html.contains("<label"), "{html}");
+        }
+        assert!(!render::<FormRow>(super::tests::props()).contains("role="));
+    }
+
+    #[test]
+    fn inputs_wrap_the_controls() {
+        assert_eq!(names(field_inputs(FieldInputs::Bare)), Vec::<String>::new());
+        assert_eq!(names(field_inputs(FieldInputs::Row)), [class::FIELD_INPUTS]);
+        assert_eq!(
+            names(field_inputs(FieldInputs::Stack)),
+            [class::FIELD_INPUTS, class::STACKED]
+        );
+        let html = render::<FormRow>(FieldProps {
+            inputs: FieldInputs::Stack,
+            ..props()
+        });
+        assert!(
+            html.contains("<div class=\"plinth-field-inputs plinth-stacked\"><input id=\"name\""),
+            "{html}"
+        );
+        assert!(!render::<FormRow>(props()).contains(class::FIELD_INPUTS));
     }
 
     #[test]

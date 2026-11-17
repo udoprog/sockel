@@ -125,6 +125,8 @@ fn omitted_parts_are_left_out() {
         ".plinth-split-button",
         "--table-max-height",
         "--danger:",
+        ".plinth-fieldset",
+        ".plinth-field-error",
     ] {
         assert!(defaults.contains(part), "{part} in the defaults");
         assert!(!css.contains(part), "{part} left out");
@@ -135,6 +137,8 @@ fn omitted_parts_are_left_out() {
         ".plinth-head-subtitle {\n  flex: 0 0 100%;",
         ".plinth-menu-item {",
         "--success:",
+        ".plinth-field-hint {\n  margin: 0;",
+        ".plinth-field-inputs {",
     ] {
         assert!(css.contains(kept), "{kept} kept");
     }
