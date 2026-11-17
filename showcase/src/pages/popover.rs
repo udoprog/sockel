@@ -31,6 +31,7 @@ struct PopoverDemoProps {
     titled: bool,
     within: bool,
     flush: bool,
+    focus_first: bool,
 }
 
 /// One anchor and its popover, with its own open state, so each frame has
@@ -80,7 +81,7 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
             <Popover anchor={anchor} open={*open} {on_dismiss}
                 side={props.side} align={props.align} sheet={props.sheet}
                 within={props.within.then(|| AttrValue::from(format!(".{}", class::FRAME)))}
-                flush={props.flush}
+                flush={props.flush} focus_first={props.focus_first}
                 title={props.titled.then_some(AttrValue::Static("Filters"))}>
                 <Stack>
                     if !text.is_empty() {
@@ -106,6 +107,7 @@ pub fn PopoverPage() -> Html {
     let titled = use_state(|| true);
     let within = use_state(|| false);
     let flush = use_state(|| false);
+    let focus_first = use_state(|| false);
 
     let controls = html! {
         <>
@@ -116,6 +118,7 @@ pub fn PopoverPage() -> Html {
             <Toggle label="title" value={*titled} on_change={bind(&titled)} />
             <Toggle label="within its frame" value={*within} on_change={bind(&within)} />
             <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
+            <Toggle label="focus_first" value={*focus_first} on_change={bind(&focus_first)} />
         </>
     };
 
@@ -132,6 +135,7 @@ pub fn PopoverPage() -> Html {
             .text_if(*titled, "title", "Filters")
             .text_if(*within, "within", &format!(".{}", class::FRAME))
             .expr_if(*flush, "flush", "true")
+            .expr_if(*focus_first, "focus_first", "true")
             .child(
                 El::new("Stack")
                     .line_if(!words.is_empty(), format!("<p>{}</p>", text_node(&words)))
@@ -143,7 +147,7 @@ pub fn PopoverPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush} />
+            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush} focus_first={*focus_first} />
         </Demo>
     }
 }

@@ -51,6 +51,11 @@
     &.plinth-placed {
         visibility: visible;
     }
+
+    // Focused by `focus_first` only when it holds no control.
+    &:focus {
+        outline: none;
+    }
 }
 
 .plinth-popover-body {

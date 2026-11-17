@@ -196,6 +196,7 @@ pub fn MenuPage() -> Html {
     let text = use_state(|| Text::Short);
     let icon_only = use_state(|| false);
     let tight = use_state(|| false);
+    let sheet = use_state(|| false);
     let disabled = use_state(|| false);
     let item_disabled = use_state(|| true);
 
@@ -208,6 +209,7 @@ pub fn MenuPage() -> Html {
             <Select<Text> label="Item text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="icon only" value={*icon_only} on_change={bind(&icon_only)} />
             <Toggle label="tight" value={*tight} on_change={bind(&tight)} />
+            <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="an item disabled" value={*item_disabled} on_change={bind(&item_disabled)} />
         </>
@@ -222,6 +224,7 @@ pub fn MenuPage() -> Html {
             .variant("size", *size)
             .variant("width", *width)
             .flag("tight", *tight)
+            .flag("sheet", *sheet)
             .flag("disabled", *disabled)
             .child(
                 El::new("MenuItem")
@@ -243,7 +246,7 @@ pub fn MenuPage() -> Html {
                 <Cluster>
                     <Menu text={if *icon_only { Html::default() } else { html! { "Actions" } }}
                         label="Actions" variant={*variant} size={*size} width={*width}
-                        tight={*tight} disabled={*disabled}>
+                        tight={*tight} sheet={*sheet} disabled={*disabled}>
                         <SampleItems items={*items} text={*text} disabled={*item_disabled} />
                     </Menu>
                     <button type="button" class={classes!(class::BUTTON)}>{ "Beside it" }</button>

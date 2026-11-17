@@ -710,6 +710,12 @@ pub struct PopoverProps {
     /// safe button of a confirm.
     #[prop_or_default]
     pub focus: Option<NodeRef>,
+    /// Without [`PopoverProps::focus`], focus moves once it is placed to an
+    /// `[autofocus]` or `[data-autofocus]` element, else its first control,
+    /// else the surface, as in a `Dialog`: for a popover of fields or
+    /// choices opened from the keyboard.
+    #[prop_or_default]
+    pub focus_first: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -724,6 +730,24 @@ pub struct PopoverProps {
     pub on_pointer_leave: Option<Callback<PointerEvent>>,
     #[prop_or_default]
     pub children: Html,
+}
+
+/// What `focus_first` focuses in `surface`: an `[autofocus]` or
+/// `[data-autofocus]` element, else the body's first control, else the
+/// surface itself.
+fn first_of(surface: &HtmlElement) -> HtmlElement {
+    surface
+        .query_selector("[autofocus], [data-autofocus]")
+        .ok()
+        .flatten()
+        .and_then(|e| e.dyn_into::<HtmlElement>().ok())
+        .or_else(|| {
+            let body = surface
+                .query_selector(&format!(".{}", class::POPOVER_BODY))
+                .ok()??;
+            crate::dialog::focusable(&body).into_iter().next()
+        })
+        .unwrap_or_else(|| surface.clone())
 }
 
 /// A popover's classes: `popover`, `sheet` when it becomes one on a phone,
@@ -754,9 +778,17 @@ pub fn Popover(props: &PopoverProps) -> Html {
         props.on_dismiss.clone(),
     );
     {
-        let focus = props.focus.clone();
+        let (focus, first, node) = (props.focus.clone(), props.focus_first, node.clone());
         use_effect_with(placed.is_some(), move |&placed| {
-            if placed && let Some(target) = focus.and_then(|f| f.cast::<HtmlElement>()) {
+            if !placed {
+                return;
+            }
+            let target = match focus {
+                Some(focus) => focus.cast::<HtmlElement>(),
+                None if first => node.cast::<HtmlElement>().map(|surface| first_of(&surface)),
+                None => None,
+            };
+            if let Some(target) = target {
                 let options = web_sys::FocusOptions::new();
                 options.set_prevent_scroll(true);
                 _ = target.focus_with_options(&options);
@@ -804,6 +836,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
             <div ref={node}
                 class={classes!(popover(props.sheet, placed.is_some()), props.class.clone())}
                 role="dialog" aria-label={props.title.clone()} {style} {onkeydown}
+                tabindex={props.focus_first.then_some("-1")}
                 onpointerenter={props.on_pointer_enter.clone()}
                 onpointerleave={props.on_pointer_leave.clone()}
                 data-testid={props.testid.clone()}>
@@ -1070,6 +1103,7 @@ mod tests {
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
             focus: None,
+            focus_first: false,
             class: Classes::new(),
             testid: None,
             on_pointer_enter: None,
@@ -1099,6 +1133,22 @@ mod tests {
         assert!(html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains("aria-label=\"Filters\""), "{html}");
+    }
+
+    #[test]
+    fn focus_first_makes_the_surface_focusable() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<Popover>::with_props(yew::props!(PopoverProps {
+                anchor: NodeRef::default(),
+                open: true,
+                on_dismiss: Callback::noop(),
+                focus_first: true,
+            }))
+            .hydratable(false)
+            .render(),
+        );
+        assert!(html.contains("tabindex=\"-1\""), "{html}");
+        assert!(!render(true, true, None).contains("tabindex"));
     }
 
     #[test]

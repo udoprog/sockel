@@ -8,7 +8,8 @@
 //   its scrollbar's room kept. Modifiers: `.plinth-wide`
 //   (`--menu-width-wide`), `.plinth-wider` (`--menu-width-wider`),
 //   `.plinth-panel` (`--menu-width-panel`, fixed), `.plinth-tight` (no gap
-//   between rows).
+//   between rows), `.plinth-sheet` (below `$sheet-breakpoint` a sheet from
+//   the bottom over `.plinth-menu-scrim`).
 // - `.plinth-menu-item`: a row at `--control-height`, its border reserved,
 //   so hover and focus change its fill only. Parts: `-mark` (a check's or
 //   radio's, its box kept when off, `.plinth-off`), `-icon`, `-text`
@@ -38,6 +39,7 @@
     background: base.$menu-ground;
     box-shadow: base.$menu-shadow;
     font-size: base.$menu-text;
+    border-radius: base.$menu-radius;
     scrollbar-gutter: base.$menu-scroll-gutter;
 
     &.plinth-wide {
@@ -57,6 +59,38 @@
 
     &.plinth-tight {
         gap: 0;
+    }
+}
+
+.plinth-menu-scrim {
+    display: none;
+}
+
+// A menu with `sheet`, below the phone breakpoint: a sheet from the bottom
+// over its scrim, as a popover is.
+@include base.below(base.$sheet-breakpoint) {
+    .plinth-menu.plinth-sheet {
+        top: auto;
+        right: 0;
+        bottom: 0;
+        left: 0;
+        width: auto;
+        min-width: 0;
+        max-width: none;
+        max-height: var(--popover-sheet-height);
+        border-bottom-color: transparent;
+        @if base.$popover-sheet-edge == top {
+            border-width: var(--space-px) 0 0;
+        }
+        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+    }
+
+    .plinth-menu-scrim {
+        position: fixed;
+        inset: 0;
+        z-index: var(--layer-overlay);
+        display: block;
+        background: var(--scrim);
     }
 }
 
@@ -104,8 +138,17 @@
     }
 }
 
+@if base.$menu-item-phone-height {
+    @include base.below("phone") {
+        .plinth-menu-item {
+            min-height: base.$menu-item-phone-height;
+        }
+    }
+}
+
 .plinth-menu-item-mark {
     @include mark;
+    color: base.$menu-item-mark-ink;
 }
 
 .plinth-menu-item-icon {

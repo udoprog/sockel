@@ -376,6 +376,9 @@ page can still override them at runtime.
 | `$menu-edge`, `$menu-ground`, `$menu-shadow`, `$menu-padding`, `$menu-text` | `null` each (a menu's border colour, background, shadow, padding and font size; `null` keeps the list's: `--border`, `--surface-raised`, `--shadow-1`, `--nest-inset`, inherited) |
 | `$menu-scroll-gutter` | `null` (a menu's `scrollbar-gutter`; `null` keeps the list's `stable`, `auto` gives the room to the rows until the menu scrolls) |
 | `$menu-item-height`, `$menu-item-padding`, `$menu-item-gap`, `$menu-item-radius`, `$menu-item-hover-fill` | `null` each (a menu row's least height, padding, gap, corners and hover/focus fill; `null` keeps the row's: `--control-height`, `var(--space-1) var(--space-3)`, `var(--space-2)`, the nested radius, 7% of `--text`) |
+| `$menu-radius` | `null` (a menu's corners; `null` keeps `--radius-md`) |
+| `$menu-item-phone-height` | `null` (a menu row's least height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
+| `$menu-item-mark-ink` | `null` (a check's or radio's mark; `null` keeps `--accent`, `currentColor` draws it as the row's text) |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$selection-bar-ground`, `$selection-bar-rule`, `$selection-bar-padding`, `$selection-bar-min-height`, `$selection-bar-radius`, `$selection-bar-margin`, `$selection-bar-text` | `null`, `var(--space-px) solid var(--border)`, `var(--space-2) 0`, a control's height plus its padding and rule, `null`, `null`, `null` (a selection bar's background, top rule, padding, least height, corners, margin and font size: a tinted chip instead of a ruled band) |
@@ -964,6 +967,10 @@ the owner cuts it, and its events still bubble through the owner. Props:
   `head` is off (on by default).
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
+- `focus_first`: without `focus`, focus moves once it is placed to an
+  `[autofocus]` or `[data-autofocus]` element, else its body's first
+  control, else the surface (then `tabindex="-1"`), as in a `Dialog`: for a
+  popover of fields or choices opened from the keyboard.
 - `within` (a selector): placed and kept inside the anchor's closest
   ancestor matching it, cut to the viewport, rather than the viewport
   alone: a popover raised in one of an app's docked windows stays over
@@ -1256,7 +1263,7 @@ overlay layer, through `use_popover`. Props:
   IconSet's chevron, an icon-only one shows its ellipsis), `label` (the
   accessible name of the opener and the list), `variant` and `size` (the
   opener's, `Regular` so it matches the buttons beside it), `opener_class`,
-  `tip` (the opener's `data-tip`).
+  `tip` (the opener's `data-tip`), `title` (the opener's native tooltip).
 - `on_click` and `pressed`: an opener that is a tool of its own. A click
   runs `on_click` (closing the menu if open) and a right-click (a long
   press on a touch screen) opens the menu; a second right-click while it
@@ -1266,7 +1273,9 @@ overlay layer, through `use_popover`. Props:
 - `width` (`MenuWidth`): `Regular` (`--menu-width`), `Wide` (`WIDE`,
   `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
-  between rows.
+  between rows; `sheet` (`SHEET`, off by default): below `$sheet-breakpoint`
+  a sheet from the bottom over a scrim (`.plinth-menu-scrim`), as a
+  `Popover` is.
 - `side`, `align` (`End` by default), `within` (as `Popover`'s),
   `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
   `testid` (the list's; the opener's is it suffixed `-toggle`).

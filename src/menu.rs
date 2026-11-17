@@ -245,6 +245,7 @@ struct ListProps {
     within: Option<AttrValue>,
     width: MenuWidth,
     tight: bool,
+    sheet: bool,
     label: Option<AttrValue>,
     class: Classes,
     testid: Option<AttrValue>,
@@ -302,12 +303,18 @@ fn MenuList(props: &ListProps) -> Html {
     });
 
     overlays.portal(html! {
-        <div ref={list}
-            class={classes!(menu(props.width, props.tight, placed.is_some()), props.class.clone())}
-            role="menu" aria-label={props.label.clone()} {style}
-            data-testid={props.testid.clone()} {onclick} {onkeydown}>
-            { props.children.clone() }
-        </div>
+        <>
+            if props.sheet {
+                <div class={class::MENU_SCRIM} aria-hidden="true"></div>
+            }
+            <div ref={list}
+                class={classes!(menu(props.width, props.tight, placed.is_some()),
+                    props.sheet.then_some(class::SHEET), props.class.clone())}
+                role="menu" aria-label={props.label.clone()} {style}
+                data-testid={props.testid.clone()} {onclick} {onkeydown}>
+                { props.children.clone() }
+            </div>
+        </>
     })
 }
 
@@ -351,6 +358,9 @@ pub struct MenuProps {
     /// The opener's tooltip (`data-tip`, for [`DataTips`](crate::DataTips)).
     #[prop_or_default]
     pub tip: Option<AttrValue>,
+    /// The opener's native tooltip (`title`).
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
     /// A click on the opener does this instead of opening the menu, for an
     /// opener that is a tool of its own; a right-click (a long press on a
     /// touch screen) opens the menu, as it does for a [`MenuProps::pressed`]
@@ -365,6 +375,10 @@ pub struct MenuProps {
     /// No gap between rows.
     #[prop_or_default]
     pub tight: bool,
+    /// Below the phone breakpoint, a sheet from the bottom over a scrim
+    /// (`SHEET`), as a popover is; off by default.
+    #[prop_or_default]
+    pub sheet: bool,
     #[prop_or_default]
     pub side: Side,
     /// `End` by default, so it opens toward the page from an opener at a
@@ -462,7 +476,8 @@ pub fn Menu(props: &MenuProps) -> Html {
     let button = html! {
         <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
             class={props.opener_class.clone()} {icon} {trailing}
-            label={props.label.clone()} tip={props.tip.clone()} disabled={props.disabled}
+            label={props.label.clone()} tip={props.tip.clone()} title={props.title.clone()}
+            disabled={props.disabled}
             pressed={props.pressed}
             expanded={Some(is_open)} haspopup={AttrValue::Static("menu")}
             testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))}
@@ -481,7 +496,7 @@ pub fn Menu(props: &MenuProps) -> Html {
             }
             <MenuList anchor={opener} open={is_open} {on_dismiss} {back}
                 side={props.side} align={props.align} within={props.within.clone()}
-                width={props.width} tight={props.tight}
+                width={props.width} tight={props.tight} sheet={props.sheet}
                 label={props.label.clone()} class={props.class.clone()}
                 testid={props.testid.clone()}>
                 { props.children.clone() }
@@ -1123,7 +1138,7 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
             }
             <MenuList anchor={point} {open} {on_dismiss} {back}
                 side={Side::Below} align={PopoverAlign::Start} within={props.within.clone()}
-                width={props.width} tight={props.tight}
+                width={props.width} tight={props.tight} sheet=false
                 label={props.label.clone()} class={props.class.clone()}
                 testid={props.testid.clone()}>
                 { props.items.clone() }
@@ -1210,6 +1225,26 @@ mod tests {
             html.contains(&format!("{} {}", class::MENU_ITEM, class::DANGER)),
             "{html}"
         );
+    }
+
+    #[test]
+    fn a_sheet_menu_has_its_scrim() {
+        let open = |sheet| {
+            render::<Menu>(yew::props!(MenuProps {
+                open: Some(true),
+                sheet,
+                children: html! { <MenuItem>{ "Copy" }</MenuItem> },
+            }))
+        };
+        let html = open(true);
+        assert!(html.contains(class::MENU_SCRIM), "{html}");
+        assert!(
+            html.contains(&format!("{} {}", class::MENU, class::SHEET)),
+            "{html}"
+        );
+        let html = open(false);
+        assert!(!html.contains(class::MENU_SCRIM), "{html}");
+        assert!(!html.contains(class::SHEET), "{html}");
     }
 
     #[test]

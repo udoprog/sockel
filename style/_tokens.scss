@@ -195,6 +195,12 @@ $menu-item-padding: null !default;
 $menu-item-gap: null !default;
 $menu-item-radius: null !default;
 $menu-item-hover-fill: null !default;
+// A menu's corners (`null`: `--radius-md`), its rows' height below the
+// phone breakpoint (`null`: as above it; as `$button-phone-height`) and the
+// ink of a check's or radio's mark (`null`: `--accent`).
+$menu-radius: null !default;
+$menu-item-phone-height: null !default;
+$menu-item-mark-ink: null !default;
 // A popover's corners, the edges its sheet keeps and its body's
 // `scrollbar-gutter` (as the dialog's).
 $popover-radius: var(--radius-md) !default;

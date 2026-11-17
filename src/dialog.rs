@@ -117,7 +117,7 @@ const FOCUSABLE: &str = "button:not(:disabled):not([tabindex='-1']), \
          a[href]:not([tabindex='-1']), [tabindex]:not([tabindex='-1'])";
 
 /// The enabled controls in `root` that Tab reaches, in order.
-fn focusable(root: &Element) -> Vec<HtmlElement> {
+pub(crate) fn focusable(root: &Element) -> Vec<HtmlElement> {
     let Ok(list) = root.query_selector_all(FOCUSABLE) else {
         return Vec::new();
     };
