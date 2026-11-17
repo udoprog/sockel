@@ -1,0 +1,3 @@
+// A project configuring the tokens module first, then loading the rules.
+@use "../../style/tokens" with ($text-md: 1.0625rem, $radius-lg: 12px);
+@use "../../style";

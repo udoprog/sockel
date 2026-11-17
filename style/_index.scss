@@ -1,7 +1,7 @@
 // Every plinth primitive's rules, in the order they cascade: layout
 // first, so a component's own rules refine it.
 
-@use "tokens";
+@forward "tokens";
 @use "layout";
 @use "heads";
 @use "actions";

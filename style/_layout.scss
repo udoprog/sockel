@@ -201,7 +201,7 @@
     display: flex;
     flex-wrap: nowrap;
     align-items: center;
-    gap: var(--space-1);
+    gap: base.$toolbar-gap;
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: thin;
@@ -239,7 +239,7 @@
 }
 
 .card {
-    padding: var(--space-4);
+    padding: base.$card-padding;
     border: 1px solid var(--border);
     border-radius: var(--radius-lg);
     background: var(--surface);
@@ -274,6 +274,14 @@
         &:hover,
         &:focus-visible {
             border-color: var(--accent);
+        }
+    }
+}
+
+@if base.$card-padding-phone {
+    @include base.below("phone") {
+        .card {
+            padding: base.$card-padding-phone;
         }
     }
 }

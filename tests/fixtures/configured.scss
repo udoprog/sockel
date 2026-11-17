@@ -1,0 +1,9 @@
+// A project configuring plinth through its index, as army would.
+@use "../../style" with (
+    $text-md: 1.0625rem,
+    $radius-lg: 12px,
+    $card-padding: var(--space-4) var(--space-5),
+    $card-padding-phone: var(--space-3),
+    $toolbar-gap: var(--space-2),
+    $breakpoints: ("phone": 42rem),
+);

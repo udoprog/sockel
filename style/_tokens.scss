@@ -17,9 +17,10 @@
 
 @use "sass:map";
 
-// The widths a layout changes at, narrowest first: `below` styles up to
-// one, `above` from it.
-$breakpoints: (
+// The widths a layout changes at: `below` styles up to one, `above` from
+// it. A project's `$breakpoints` is merged over these, so it can move or add
+// one without restating the rest.
+$-default-breakpoints: (
     "narrow": 30rem,
     "small": 36rem,
     "phone": 40rem,
@@ -32,6 +33,8 @@ $breakpoints: (
     "broad": 90rem,
     "desktop": 100rem,
 );
+$breakpoints: () !default;
+$breakpoints: map.merge($-default-breakpoints, $breakpoints);
 
 @function breakpoint($name) {
     @if not map.has-key($breakpoints, $name) {
@@ -55,56 +58,102 @@ $breakpoints: (
     }
 }
 
-:root {
-    --text-3xs: 0.625rem;
-    --text-2xs: 0.6875rem;
-    --text-xs: 0.75rem;
-    --text-sm: 0.8125rem;
-    --text-md: 0.875rem;
-    --text-base: 0.9375rem;
-    --text-heading: 1.125rem;
-    --text-lg: 1.25rem;
-    --text-title: 1.4rem;
-    --text-xl: 1.5rem;
-    --text-2xl: 1.75rem;
+// Component settings the rules read directly: a card's padding, its padding
+// below the phone breakpoint (none by default), and a toolbar's gap.
+$card-padding: var(--space-4) !default;
+$card-padding-phone: null !default;
+$toolbar-gap: var(--space-1) !default;
 
-    --space-0: 0.125rem;
-    --space-px: 1px;
-    --space-1: 0.25rem;
-    --space-2: 0.5rem;
-    --space-3: 0.75rem;
-    --space-4: 1rem;
-    --space-5: 1.25rem;
-    --space-6: 1.5rem;
-    --space-7: 2rem;
-    --space-8: 2.5rem;
-    --space-9: 3rem;
+// Every token, configurable with `@use ... with (...)`; `:root` emits
+// each as its custom property.
+$text-3xs: 0.625rem !default;
+$text-2xs: 0.6875rem !default;
+$text-xs: 0.75rem !default;
+$text-sm: 0.8125rem !default;
+$text-md: 0.875rem !default;
+$text-base: 0.9375rem !default;
+$text-heading: 1.125rem !default;
+$text-lg: 1.25rem !default;
+$text-title: 1.4rem !default;
+$text-xl: 1.5rem !default;
+$text-2xl: 1.75rem !default;
+$space-0: 0.125rem !default;
+$space-px: 1px !default;
+$space-1: 0.25rem !default;
+$space-2: 0.5rem !default;
+$space-3: 0.75rem !default;
+$space-4: 1rem !default;
+$space-5: 1.25rem !default;
+$space-6: 1.5rem !default;
+$space-7: 2rem !default;
+$space-8: 2.5rem !default;
+$space-9: 3rem !default;
+$radius-xs: 4px !default;
+$radius-sm: 8px !default;
+$radius-md: 10px !default;
+$radius-lg: 16px !default;
+$radius-pill: 999px !default;
+$nest-inset: var(--space-1) !default;
+$control-height: 2.25rem !default;
+$control-height-small: 1.75rem !default;
+$mark-height: 1.5rem !default;
+$touch-height: 2.75rem !default;
+$filter-width: 10.5rem !default;
+$page-workspace: 64rem !default;
+$page-reading: 40rem !default;
+$page-wide: 90rem !default;
+$page-gutter: var(--space-8) !default;
+
+:root {
+    --text-3xs: #{$text-3xs};
+    --text-2xs: #{$text-2xs};
+    --text-xs: #{$text-xs};
+    --text-sm: #{$text-sm};
+    --text-md: #{$text-md};
+    --text-base: #{$text-base};
+    --text-heading: #{$text-heading};
+    --text-lg: #{$text-lg};
+    --text-title: #{$text-title};
+    --text-xl: #{$text-xl};
+    --text-2xl: #{$text-2xl};
+
+    --space-0: #{$space-0};
+    --space-px: #{$space-px};
+    --space-1: #{$space-1};
+    --space-2: #{$space-2};
+    --space-3: #{$space-3};
+    --space-4: #{$space-4};
+    --space-5: #{$space-5};
+    --space-6: #{$space-6};
+    --space-7: #{$space-7};
+    --space-8: #{$space-8};
+    --space-9: #{$space-9};
 
     // Controls take the small radius; cards, panels and dialogs the large.
-    --radius-xs: 4px;
-    --radius-sm: 8px;
-    --radius-md: 10px;
-    --radius-lg: 16px;
-    --radius-pill: 999px;
+    --radius-xs: #{$radius-xs};
+    --radius-sm: #{$radius-sm};
+    --radius-md: #{$radius-md};
+    --radius-lg: #{$radius-lg};
+    --radius-pill: #{$radius-pill};
     // The one gap between a rounded container and the rounded items in it.
-    --nest-inset: var(--space-1);
-    --control-height: 2.25rem;
+    --nest-inset: #{$nest-inset};
+    --control-height: #{$control-height};
     // A small control (`button.small`, `.input.small`), for dense places.
-    --control-height-small: 1.75rem;
+    --control-height-small: #{$control-height-small};
     // A mark (an icon or a badge beside text) and a touch target.
-    --mark-height: 1.5rem;
-    --touch-height: 2.75rem;
+    --mark-height: #{$mark-height};
+    --touch-height: #{$touch-height};
     // A library page's filter button (`.picker.filter`).
-    --filter-width: 10.5rem;
+    --filter-width: #{$filter-width};
 
     // The two content columns: the
     // workspace for lists, sheets and the manual, the reading column for
     // forms and prose.
-    --page-workspace: 64rem;
-    --page-reading: 40rem;
+    --page-workspace: #{$page-workspace};
+    --page-reading: #{$page-reading};
     // The widest column, and the gutter at a page's sides.
-    --page-wide: 90rem;
-    --page-gutter: var(--space-8);
+    --page-wide: #{$page-wide};
+    --page-gutter: #{$page-gutter};
 }
 
 // A page's content column: the workspace unless it is given the reading
