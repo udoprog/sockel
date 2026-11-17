@@ -5,11 +5,11 @@ use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
 
 use wasm_bindgen::JsCast;
-use wasm_bindgen::closure::Closure;
 use web_sys::Element;
 use yew::prelude::*;
 
 use crate::popover::Listener;
+use crate::timer::Timer;
 use crate::{
     Button, ButtonProps, ButtonSize, ButtonVariant, Dismiss, Overlays, Placed, PopoverAlign, Side,
     class, popover::use_tip_popover, use_overlays,
@@ -78,8 +78,6 @@ fn use_describes(anchor: NodeRef, id: AttrValue, active: bool) {
     });
 }
 
-type Timer = (i32, Closure<dyn FnMut()>);
-
 /// The shown state of a tip or card and its timer.
 struct Control {
     open: UseStateHandle<bool>,
@@ -91,11 +89,7 @@ struct Control {
 
 impl Control {
     fn cancel(&self) {
-        if let Some((id, _)) = self.timer.borrow_mut().take()
-            && let Some(window) = web_sys::window()
-        {
-            window.clear_timeout_with_handle(id);
-        }
+        self.timer.take();
     }
 
     fn now(&self, open: bool) {
@@ -115,20 +109,10 @@ impl Control {
             Some(0) => self.now(entering),
             Some(ms) => {
                 let this = self.clone();
-                let fire = Closure::<dyn FnMut()>::new(move || {
+                *self.timer.borrow_mut() = Timer::start(ms, move || {
                     this.flag.set(entering);
                     this.open.set(entering);
                 });
-                let id = web_sys::window().and_then(|w| {
-                    w.set_timeout_with_callback_and_timeout_and_arguments_0(
-                        fire.as_ref().unchecked_ref(),
-                        i32::try_from(ms).unwrap_or(i32::MAX),
-                    )
-                    .ok()
-                });
-                if let Some(id) = id {
-                    *self.timer.borrow_mut() = Some((id, fire));
-                }
             }
             None => {}
         }

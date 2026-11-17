@@ -1,9 +1,9 @@
 //! Loadable (`style/_skeleton.scss`).
 
-use wasm_bindgen::{JsCast, closure::Closure};
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
+use crate::timer::Timer;
 use crate::{EmptyState, ErrorBox, Skeleton, SkeletonShape, class};
 
 /// What a [`Loadable`]'s data is doing.
@@ -55,42 +55,6 @@ fn use_waited(active: bool, ms: u32) -> bool {
         });
     }
     active && (ms == 0 || *waited)
-}
-
-/// A timeout that is cleared when dropped.
-struct Timer {
-    id: i32,
-    _callback: Closure<dyn FnMut()>,
-}
-
-impl Timer {
-    fn start(ms: u32, f: impl FnOnce() + 'static) -> Option<Self> {
-        let window = web_sys::window()?;
-        let mut f = Some(f);
-        let callback = Closure::<dyn FnMut()>::new(move || {
-            if let Some(f) = f.take() {
-                f();
-            }
-        });
-        let id = window
-            .set_timeout_with_callback_and_timeout_and_arguments_0(
-                callback.as_ref().unchecked_ref(),
-                i32::try_from(ms).unwrap_or(i32::MAX),
-            )
-            .ok()?;
-        Some(Self {
-            id,
-            _callback: callback,
-        })
-    }
-}
-
-impl Drop for Timer {
-    fn drop(&mut self) {
-        if let Some(window) = web_sys::window() {
-            window.clear_timeout_with_handle(self.id);
-        }
-    }
 }
 
 #[derive(Properties, PartialEq)]

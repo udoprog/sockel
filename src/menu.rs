@@ -4,10 +4,10 @@
 use std::rc::Rc;
 
 use wasm_bindgen::JsCast;
-use wasm_bindgen::closure::Closure;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
+use crate::timer::Timer;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class,
     use_overlays, use_popover,
@@ -24,7 +24,7 @@ const PICKS: &str =
 const TYPEAHEAD_MS: f64 = 700.0;
 
 /// How long a touch is held to open a context menu, in milliseconds.
-const LONG_PRESS_MS: i32 = 500;
+const LONG_PRESS_MS: u32 = 500;
 
 /// How far a touch may move and still be a long press, in pixels.
 const LONG_PRESS_SLOP: i32 = 10;
@@ -815,7 +815,7 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
     let overlays = use_overlays();
     let at = use_state_eq(|| None::<Point>);
     let point = use_node_ref();
-    let press = use_mut_ref(|| None::<(i32, Point)>);
+    let press = use_mut_ref(|| None::<(Timer, Point)>);
     // What had focus when it opened, and whether its close gives it back.
     let before = use_mut_ref(|| None::<HtmlElement>);
     let restore = use_mut_ref(|| false);
@@ -842,14 +842,14 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
             }
         })
     };
+    {
+        let press = press.clone();
+        use_effect_with((), move |()| move || drop(press.borrow_mut().take()));
+    }
     let cancel = {
         let press = press.clone();
         Rc::new(move || {
-            if let Some((timer, _)) = press.borrow_mut().take()
-                && let Some(window) = web_sys::window()
-            {
-                window.clear_timeout_with_handle(timer);
-            }
+            press.borrow_mut().take();
         })
     };
     let onpointerdown = {
@@ -861,29 +861,17 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
                 return;
             }
             let p = Point(e.client_x(), e.client_y());
-            let fire = {
-                let (show, press) = (show.clone(), press.clone());
-                Closure::once_into_js(move || {
-                    press.borrow_mut().take();
-                    show.emit(Some(p));
-                })
-            };
-            let timer = web_sys::window().and_then(|w| {
-                w.set_timeout_with_callback_and_timeout_and_arguments_0(
-                    fire.unchecked_ref(),
-                    LONG_PRESS_MS,
-                )
-                .ok()
-            });
+            let show = show.clone();
+            let timer = Timer::start(LONG_PRESS_MS, move || show.emit(Some(p)));
             *press.borrow_mut() = timer.map(|t| (t, p));
         })
     };
     let onpointermove = {
         let (press, cancel) = (press.clone(), cancel.clone());
         Callback::from(move |e: PointerEvent| {
-            let moved = press.borrow().is_some_and(|(_, Point(x, y))| {
-                (e.client_x() - x).abs() > LONG_PRESS_SLOP
-                    || (e.client_y() - y).abs() > LONG_PRESS_SLOP
+            let moved = press.borrow().as_ref().is_some_and(|(_, Point(x, y))| {
+                (e.client_x() - *x).abs() > LONG_PRESS_SLOP
+                    || (e.client_y() - *y).abs() > LONG_PRESS_SLOP
             });
             if moved {
                 cancel();
