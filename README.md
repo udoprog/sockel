@@ -2018,7 +2018,8 @@ focuses once placed. Tab closes it and moves on from the opener.
 
 Size guarantees: the Picker's field is `--menu-width-wide` wide (small:
 `--menu-width`; its container's with `Fill`) and the input box's height,
-whatever is chosen; its label is cut with an ellipsis. The popup is
+whatever is chosen; its label is cut with an ellipsis. In a row without
+room for it, it gives way to the items beside it rather than overflowing. The popup is
 `$picker-popup-width` (`--menu-width-wide`) or the field's width if wider,
 never measured from its text. A ChoiceList's options are `--picker-rows`
 rows high whatever matches, none included, so typing never resizes the

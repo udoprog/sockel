@@ -160,6 +160,15 @@ fn a_native_select_gives_way_in_a_row() {
 }
 
 #[test]
+fn a_picker_gives_way_in_a_row() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains(
+        ".plinth-picker {\n  width: var(--menu-width-wide);\n  max-width: 100%;\n  flex-shrink: 1;"
+    ));
+}
+
+#[test]
 fn input_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

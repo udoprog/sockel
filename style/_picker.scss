@@ -2,7 +2,8 @@
 //
 // - `.plinth-picker`: a field's box (`.plinth-input-box`, _inputs.scss), a
 //   button showing the current option, `--menu-width-wide` wide (small:
-//   `--menu-width`) whatever it shows, `.plinth-fill` its container's. Parts:
+//   `--menu-width`) whatever it shows, `.plinth-fill` its container's; in a
+//   row it gives way to the items beside it rather than overflowing. Parts:
 //   `-icon`, `-text` (cut with an ellipsis), `-placeholder` (muted),
 //   `-chevron`; `-text.plinth-fold`, hidden below the phone breakpoint.
 // - `.plinth-picker-popup`: the menu's surface (_menu.scss) below its
@@ -23,6 +24,7 @@
 .plinth-picker {
     width: var(--menu-width-wide);
     max-width: 100%;
+    flex-shrink: 1;
     text-align: start;
     cursor: pointer;
 
