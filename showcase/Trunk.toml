@@ -4,3 +4,8 @@ dist = "dist"
 
 [watch]
 watch = [".", "../src", "../style", "../sockel-build/src"]
+
+[[hooks]]
+stage = "post_build"
+command = "sh"
+command_arguments = ["scripts/trug-css.sh"]

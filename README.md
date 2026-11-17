@@ -2245,6 +2245,12 @@ its Theme picker are sockel's own `Select`, so every page also exercises
 it. Neither the showcase nor sockel's components render a native
 `<select>`, whose open list the OS draws outside sockel's tokens.
 
+The showcase's stylesheet is also built with [trug] (`cargo install trug`,
+or point `TRUG` at a binary) by a trunk `post_build` hook,
+`showcase/scripts/trug-css.sh`, which builds the CSS with trug and
+fails if it differs from the CSS `showcase/build.rs` wrote to
+`target/showcase-css/`. Without trug on `PATH` the hook skips the check.
+
 A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
 `cargo test --workspace` fails.
@@ -2296,3 +2302,4 @@ bash scripts/check-packaged.sh
 [Yew]: https://yew.rs
 [sasso]: https://crates.io/crates/sasso
 [trunk]: https://trunkrs.dev
+[trug]: https://crates.io/crates/trug
