@@ -755,6 +755,7 @@ gives the classes.
 
 `Toast` is one message: `tone` (`Tone`, the accent by default), `icon`, the
 text (its children), `action` (a label such as "Undo") with `onaction`,
+`action_icon` and `action_testid` (both none by default),
 `ondismiss` (closed or timed out), `duration` (milliseconds, `TOAST_MS` =
 8000; 0 keeps it until dismissed), `shortcut` (Ctrl or Cmd+Z takes the action
 while it shows, unless typing in a field) and `close_label`. The clock stops

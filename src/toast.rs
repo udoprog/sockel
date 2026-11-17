@@ -62,6 +62,13 @@ pub struct ToastProps {
     /// The action was taken. Neither this nor `ondismiss` is called twice.
     #[prop_or_default]
     pub onaction: Callback<()>,
+    /// The action's icon, which the app supplies, before its label (none by
+    /// default).
+    #[prop_or_default]
+    pub action_icon: Option<Html>,
+    /// The action button's `data-testid` (none by default).
+    #[prop_or_default]
+    pub action_testid: Option<AttrValue>,
     /// The toast went: closed or timed out. Not called after the action.
     #[prop_or_default]
     pub ondismiss: Callback<()>,
@@ -248,6 +255,7 @@ pub fn Toast(props: &ToastProps) -> Html {
             if let Some(label) = &props.action {
                 <span class={class::TOAST_ACTION}>
                     <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                        icon={props.action_icon.clone()} testid={props.action_testid.clone()}
                         onclick={act.reform(|_: MouseEvent| ())}>
                         { label.clone() }
                     </Button>
@@ -315,5 +323,41 @@ mod tests {
         assert!(!is_undo("z", true, false, false, true, false));
         assert!(!is_undo("z", true, false, false, false, true), "typing");
         assert!(!is_undo("y", true, false, false, false, false));
+    }
+
+    fn render(action_icon: Option<Html>, action_testid: Option<AttrValue>) -> String {
+        let props = ToastProps {
+            class: Classes::new(),
+            tone: Tone::Accent,
+            icon: None,
+            action: Some("Undo".into()),
+            onaction: Callback::noop(),
+            action_icon,
+            action_testid,
+            ondismiss: Callback::noop(),
+            duration: TOAST_MS,
+            shortcut: false,
+            close_label: "Dismiss".into(),
+            testid: None,
+            children: html! { "Removed" },
+        };
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<Toast>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn the_action_takes_an_icon_and_a_testid_only_when_given() {
+        let plain = render(None, None);
+        assert!(plain.contains("Undo"), "{plain}");
+        assert!(!plain.contains("data-testid"), "{plain}");
+        let given = render(
+            Some(html! { <svg data-mark="undo" /> }),
+            Some("undo".into()),
+        );
+        assert!(given.contains("data-mark=\"undo\""), "{given}");
+        assert!(given.contains("data-testid=\"undo\""), "{given}");
     }
 }
