@@ -525,6 +525,8 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
 
 - `TextInput` (`.plinth-input`): `value` and `on_input` (the new text), `on_change`,
   `on_blur`, `on_keydown`, `kind` (`InputKind`: text, email, url, tel),
+  `maxlength`, `list` (a `<datalist>`'s id), `inputmode` and `enterkeyhint`
+  (a touch keyboard's kind and enter key),
   `placeholder`, `label` (the accessible name without a `Field`), `readonly`,
   `required`, `autofocus`, `node_ref`. With a `unit` (Html, `aria-hidden`)
   the input sits in a box (`INPUT_BOX`) with the unit after the text inside

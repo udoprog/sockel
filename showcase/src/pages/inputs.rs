@@ -73,7 +73,8 @@ fn TextCase(props: &TextCaseProps) -> Html {
             <Field id={unit_id.clone()} label={html! { "Delay" }} error={error.clone()}
                 reserve_error=true disabled={s.disabled} busy={s.busy}>
                 <TextInput id={unit_id} value={props.value.clone()} on_input={props.on_input.clone()}
-                    size={s.size} unit={html! { { unit } }} placeholder={placeholder.clone()}
+                    size={s.size} unit={html! { { unit } }} inputmode="numeric" maxlength={Some(6)}
+                    placeholder={placeholder.clone()}
                     invalid={s.invalid} disabled={s.disabled} readonly={s.readonly} busy={s.busy}
                     describedby={describedby.clone()} />
             </Field>
@@ -166,7 +167,9 @@ pub fn TextInputPage() -> Html {
                 El::new("TextInput")
                     .expr("value", "value.clone()")
                     .expr("on_input", "on_input.clone()")
-                    .expr("unit", format!("html! {{ {:?} }}", s.unit.of("ms"))),
+                    .expr("unit", format!("html! {{ {:?} }}", s.unit.of("ms")))
+                    .text("inputmode", "numeric")
+                    .expr("maxlength", "Some(6)"),
             ))
             .child(common(
                 El::new("Textarea")

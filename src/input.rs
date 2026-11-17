@@ -134,6 +134,18 @@ pub struct TextInputProps {
     pub id: Option<AttrValue>,
     #[prop_or_default]
     pub name: Option<AttrValue>,
+    /// The most characters it takes.
+    #[prop_or_default]
+    pub maxlength: Option<u32>,
+    /// The id of a `<datalist>` of suggestions.
+    #[prop_or_default]
+    pub list: Option<AttrValue>,
+    /// The keyboard a touch screen shows (`decimal`, `numeric`, ...).
+    #[prop_or_default]
+    pub inputmode: Option<AttrValue>,
+    /// The label of a touch keyboard's enter key (`go`, `search`, ...).
+    #[prop_or_default]
+    pub enterkeyhint: Option<AttrValue>,
     #[prop_or_default]
     pub kind: InputKind,
     #[prop_or_default]
@@ -193,6 +205,8 @@ pub fn TextInput(props: &TextInputProps) -> Html {
             html! {
                 <input class={$class} id={props.id.clone()} name={props.name.clone()}
                     type={props.kind.attr()} value={props.value.clone()}
+                    maxlength={props.maxlength.map(|n| n.to_string())} list={props.list.clone()}
+                    inputmode={props.inputmode.clone()} enterkeyhint={props.enterkeyhint.clone()}
                     placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
                     aria-describedby={props.describedby.clone()}
                     aria-invalid={aria_invalid} aria-busy={aria_busy}
@@ -422,6 +436,26 @@ mod tests {
     }
 
     #[test]
+    fn a_text_input_passes_its_keyboard_and_limits() {
+        let html = render::<TextInput>(yew::props!(TextInputProps {
+            value: AttrValue::from("59.3"),
+            on_input: Callback::noop(),
+            maxlength: Some(12),
+            list: Some(AttrValue::from("places")),
+            inputmode: Some(AttrValue::from("decimal")),
+            enterkeyhint: Some(AttrValue::from("go")),
+        }));
+        for attr in [
+            "maxlength=\"12\"",
+            "list=\"places\"",
+            "inputmode=\"decimal\"",
+            "enterkeyhint=\"go\"",
+        ] {
+            assert!(html.contains(attr), "{attr} in {html}");
+        }
+    }
+
+    #[test]
     fn each_size_is_its_modifier() {
         let of = |s| names(input(s, false, false));
         assert_eq!(of(InputSize::Regular), [class::INPUT]);
@@ -543,6 +577,10 @@ mod tests {
             on_keydown: Callback::noop(),
             id: Some("n".into()),
             name: None,
+            maxlength: None,
+            list: None,
+            inputmode: None,
+            enterkeyhint: None,
             kind: InputKind::Text,
             size: InputSize::Regular,
             placeholder: None,
