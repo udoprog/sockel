@@ -2,8 +2,8 @@
 name = "sockel-build"
 version = "0.1.0"
 edition = "2024"
-license = "MIT OR Apache-2.0"
 description = "Builds sockel's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
+license = "MIT OR Apache-2.0"
 include = ["/src"]
 publish = false
 
