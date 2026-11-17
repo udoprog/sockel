@@ -19,10 +19,9 @@ use crate::{
 /// What the arrow keys, Home, End and type-ahead move between.
 const ITEMS: &str = ":is([role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
 
-/// What closes the menu when picked: an action or a radio, not a check,
-/// nor an item marked `data-stay`.
-const PICKS: &str =
-    ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true], [data-stay])";
+/// What closes the menu when picked: an action, a radio or a single-select
+/// listbox's option, not a check, nor an item marked `data-stay`.
+const PICKS: &str = ":is([role=menuitem], [role=menuitemradio], [role=listbox]:not([aria-multiselectable=true]) [role=option]):not(:disabled, [aria-disabled=true], [data-stay])";
 
 /// What Tab moves between in a menu that holds fields.
 const TABBABLE: &str = "input:not(:disabled), textarea:not(:disabled), select:not(:disabled), button:not(:disabled), a[href], [tabindex]:not([tabindex='-1'])";
@@ -92,6 +91,27 @@ fn label_of(item: &HtmlElement) -> String {
         .and_then(|label| label.text_content())
         .or_else(|| item.text_content())
         .unwrap_or_default()
+}
+
+/// The item Left or Right goes to among the focused item's `[role=group]`,
+/// wrapping: a row of items, such as radios.
+fn across(key: &str) -> Option<HtmlElement> {
+    let active = web_sys::window()?.document()?.active_element()?;
+    let group = active.closest("[role=group]").ok()??;
+    let found = group.query_selector_all(ITEMS).ok()?;
+    let items: Vec<HtmlElement> = (0..found.length())
+        .filter_map(|i| found.item(i)?.dyn_into::<HtmlElement>().ok())
+        .collect();
+    let at = items
+        .iter()
+        .position(|item| AsRef::<Element>::as_ref(item) == &active)?;
+    let n = items.len();
+    let to = if key == "ArrowLeft" {
+        (at + n - 1) % n
+    } else {
+        (at + 1) % n
+    };
+    (to != at).then(|| items[to].clone())
 }
 
 /// Focuses `element` where the page stands.
@@ -165,6 +185,18 @@ fn use_menu_keys(
             return;
         }
         if e.target_dyn_into::<Element>().is_some_and(|t| is_field(&t)) {
+            return;
+        }
+        if matches!(e.key().as_str(), "ArrowLeft" | "ArrowRight") {
+            if let Some(item) = across(&e.key()) {
+                e.prevent_default();
+                _ = item.focus();
+                if item.has_attribute("data-stay")
+                    && item.get_attribute("role").as_deref() == Some("menuitemradio")
+                {
+                    item.click();
+                }
+            }
             return;
         }
         let items = items_of(&list);

@@ -78,8 +78,12 @@
 }
 
 .plinth-picker-popup {
-    @include menu.list(var(--listbox-anchor-width, 0px), base.$picker-popup-width);
-    width: max(var(--listbox-anchor-width, 0px), #{base.$picker-popup-width});
+    // `--picker-popup-width`, set by the component, overrides the setting.
+    @include menu.list(
+        var(--listbox-anchor-width, 0px),
+        var(--picker-popup-width, #{base.$picker-popup-width})
+    );
+    width: max(var(--listbox-anchor-width, 0px), var(--picker-popup-width, #{base.$picker-popup-width}));
     // The popup never scrolls (its options do): no gutter of its own.
     overflow: hidden;
     scrollbar-gutter: auto;

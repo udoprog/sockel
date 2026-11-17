@@ -221,6 +221,10 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     /// leaving: for a list adding one thing after another.
     #[prop_or_default]
     pub tab_cycles: bool,
+    /// Under a search field, the list's height in rows (`--picker-rows`):
+    /// for a list whose every option fits.
+    #[prop_or_default]
+    pub rows: Option<usize>,
     #[prop_or_default]
     pub class: Classes,
     /// Its test id; the search field's is it suffixed `-search`, each
@@ -342,13 +346,23 @@ where
             }
         }
     };
+    // A keyboard pick is the option's click, so a container that hears
+    // clicks (a menu that closes on one) hears it too.
+    let press = {
+        let (pick, base) = (pick.clone(), (*id).clone());
+        move |i: usize| {
+            let option = web_sys::window()
+                .and_then(|w| w.document()?.get_element_by_id(&option_id(&base, i)))
+                .and_then(|e| wasm_bindgen::JsCast::dyn_into::<HtmlElement>(e).ok());
+            match option {
+                Some(option) => option.click(),
+                None => pick(i),
+            }
+        }
+    };
     let onkeydown = {
-        let (state, redraw, pick, pickable) = (
-            state.clone(),
-            redraw.clone(),
-            pick.clone(),
-            pickable.clone(),
-        );
+        let (state, redraw, pick, pickable) =
+            (state.clone(), redraw.clone(), press, pickable.clone());
         let labels: Vec<String> = options.iter().map(|o| o.label.to_string()).collect();
         let tab_cycles = props.tab_cycles;
         Callback::from(move |e: KeyboardEvent| {
@@ -493,7 +507,11 @@ where
                 aria-multiselectable={props.multi.then_some("true")}
                 tabindex={(!searchable).then_some("0")}
                 aria-activedescendant={(!searchable).then_some(active_id).flatten()}
-                style={(!searchable).then_some("--choice-list-height: auto;")}
+                style={match (searchable, props.rows) {
+                    (false, _) => Some(AttrValue::Static("--choice-list-height: auto;")),
+                    (true, Some(rows)) => Some(AttrValue::from(format!("--picker-rows: {rows};"))),
+                    (true, None) => None,
+                }}
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
                 onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
                 if shown.is_empty() {
@@ -521,6 +539,10 @@ pub struct ChoicePopupProps {
     pub on_dismiss: Callback<Dismiss>,
     #[prop_or_default]
     pub align: PopoverAlign,
+    /// Its least width in place of `$picker-popup-width`, a length such as
+    /// `var(--menu-width-wide)`.
+    #[prop_or_default]
+    pub width: Option<AttrValue>,
     /// Suffixed `-popup`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
@@ -572,6 +594,7 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
         })
     };
     let anchor_width = props.anchor.cast::<HtmlElement>().map(|a| a.offset_width());
+    let width = props.width.clone();
     let style = placed.map(|p| {
         let mut style = format!(
             "--popover-left: {}px; --popover-top: {}px; --popover-max-height: {}px;",
@@ -579,6 +602,9 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
         );
         if let Some(w) = anchor_width {
             style.push_str(&format!(" --listbox-anchor-width: {w}px;"));
+        }
+        if let Some(width) = &width {
+            style.push_str(&format!(" --picker-popup-width: {width};"));
         }
         style
     });
@@ -827,6 +853,12 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     /// See [`ChoiceListProps::tab_cycles`].
     #[prop_or_default]
     pub tab_cycles: bool,
+    /// See [`ChoiceListProps::rows`].
+    #[prop_or_default]
+    pub rows: Option<usize>,
+    /// See [`ChoicePopupProps::width`].
+    #[prop_or_default]
+    pub width: Option<AttrValue>,
     /// See [`crate::ButtonProps::fold`].
     #[prop_or_default]
     pub fold: bool,
@@ -933,7 +965,7 @@ where
         <>
             { opener_html }
             <ChoicePopup anchor={opener} open={is_open} {on_dismiss} align={props.align}
-                testid={props.testid.clone()}>
+                width={props.width.clone()} testid={props.testid.clone()}>
                 { props.head.clone() }
                 <ChoiceList<T> options={props.options.clone()} {on_pick}
                     value={props.value.clone()} multi={props.multi} chosen={props.chosen.clone()}
@@ -941,7 +973,7 @@ where
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
                     autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
                     tab_cycles={props.tab_cycles} clear_label={props.clear_label.clone()}
-                    detail_below={props.detail_below}
+                    detail_below={props.detail_below} rows={props.rows}
                     testid={list_testid(&props.testid, &props.list_testid)} />
                 { props.children.clone() }
             </ChoicePopup>
@@ -1115,6 +1147,17 @@ mod tests {
         }));
         assert_eq!(html.matches("aria-selected=\"true\"").count(), 2, "{html}");
         assert!(html.contains("data-value=\"lang-4\""), "{html}");
+    }
+
+    #[test]
+    fn rows_set_a_searching_lists_height() {
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options: languages(),
+            always_search: true,
+            rows: Some(7),
+            label: AttrValue::Static("Languages"),
+        }));
+        assert!(html.contains("--picker-rows: 7;"), "{html}");
     }
 
     #[test]

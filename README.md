@@ -1127,7 +1127,10 @@ opening it never moves the page, its anchor or the scrollbar. Its width is
 its content's up to `--popover-max-width`, whichever side it lands on, so a
 flip moves it without reflowing it; what is taller than the room scrolls in
 `.plinth-popover-body`, its scrollbar's room kept. It follows the anchor on
-scroll, resize and a change of either's size, and closes (as a press
+scroll, resize and a change of either's size; once open above or below, it
+keeps that side while the side has 200px or all it needs, so content that
+grows (a list appearing in a menu) scrolls there instead of flipping it
+across the anchor. It closes (as a press
 outside, focus left where it is) once the anchor is out of sight: no
 longer laid out, or scrolled or clipped wholly out of a box around it
 whose overflow clips. Menus, selects, pickers and tips share this placement.
@@ -1416,13 +1419,17 @@ such as "nothing here"). Each takes `class` and `testid`. `menu(width, tight, pl
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
 Keyboard: focus moves to the checked radio once the list is placed, else
-to the first item, else (a menu of fields alone) to its first control; the
-arrows (wrapping), Home and End move between enabled items, and typing
+to the first item, else (a menu of fields alone) to its first control; Up
+and Down (wrapping), Home and End move between enabled items, Left and
+Right between the items of a focused item's `role="group"` (a row of
+radios; a `stay` radio is picked as it is reached, as a radio group's
+arrows pick), and typing
 moves to the next item starting with what was typed (a pause of 0.7 s
 starts over; one letter repeated cycles). In a menu that holds fields (a
 small form), Tab and Shift+Tab move between its own fields and buttons and
 close it only past either end, and a focused field keeps its arrows and
-letters. A pick of an item or radio, Tab, Escape or a press outside closes
+letters. A pick of an item or radio (or of an option of a single-select
+`ChoiceList` the menu holds), Tab, Escape or a press outside closes
 it; all but the press return focus
 to the opener. A pick gives it back before the menu goes, so a dialog the
 pick opens returns focus to the opener when it closes; Tab gives it back
@@ -1852,7 +1859,10 @@ lists that many matches at a time with a `Pager` under them
 (`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
 a new query goes back to the first. `tab_cycles` makes Tab and Shift+Tab
 move the active option, wrapping, instead of leaving (a list adding one
-thing after another).
+thing after another). `rows` sets a searching list's height in rows
+(`--picker-rows`), for a list whose every option should show. A keyboard
+pick is the option's click, so a `Menu` holding a single-select list
+closes on it as on a mouse pick.
 
 `PickerOption::new(value, label)` with `.detail(..)` (muted after the
 label, searched), `.icon(html)` (a slot kept on every row once any option
@@ -1887,7 +1897,7 @@ for an action that takes an option (Add a language): `text`, `icon`,
 `field` (the opener is a `Picker`'s field showing `icon` and `text`, not a
 button: a field of several choices, such as a filter; ArrowDown and ArrowUp
 open it) with `fill`, and the list's
-`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles` and `list_testid`; `align`
+`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles`, `rows` and `list_testid`; `width` (the popup's, as `ChoicePopup`'s); `align`
 (`Start` by default), `open` and `on_toggle` for a list its owner also closes, `head` (above the list, a note) and
 its children (below it, a Done button). `PickerDialog<T>` is the
 searchable shell for a large set (languages, countries): a `Dialog`
@@ -1897,7 +1907,9 @@ closes it on a pick) or `multi`. `ChoicePopup` is the list's popup on its own, f
 opener the app renders (a `Button` with `node_ref`, a chip, a face): props
 `anchor` (the opener's ref), `open`, `on_dismiss` (Escape, Tab or a press
 outside; a pick is the owner's to close on), `align` (`PopoverAlign`,
-default `Start`), `testid` (suffixed `-popup`) and its children, a
+default `Start`), `width` (its least width in place of
+`$picker-popup-width`, a length such as `var(--menu-width-wide)`; the
+`--picker-popup-width` custom property), `testid` (suffixed `-popup`) and its children, a
 `ChoiceList` with `autofocus` and any note or action beside it, which it
 focuses once placed. Tab closes it and moves on from the opener.
 

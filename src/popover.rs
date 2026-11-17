@@ -234,6 +234,42 @@ pub fn place_fit(
     }
 }
 
+/// The room an open popover keeps its side with: content that grows past
+/// its side's room scrolls there rather than flipping the popover across
+/// its anchor, while the side has at least this much (or all it needs).
+const KEEP_ROOM: f64 = 200.0;
+
+/// [`place_fit`] for a popover already open on `kept`: it stays on that
+/// side (above or below) while the side has `KEEP_ROOM` or all it needs,
+/// capped to the room there, so growing content never makes it jump.
+fn place_kept(
+    anchor: Rect,
+    size: (f64, f64),
+    viewport: Rect,
+    side: Side,
+    align: PopoverAlign,
+    fit: Fit,
+    kept: Option<Side>,
+) -> Placed {
+    let (width, height) = size;
+    let room = match kept {
+        Some(Side::Below) => Some(viewport.bottom() - anchor.bottom() - GAP - EDGE),
+        Some(Side::Above) => Some(anchor.top - viewport.top - GAP - EDGE),
+        _ => None,
+    };
+    match (kept, room) {
+        (Some(kept), Some(room)) if room >= height.min(KEEP_ROOM) => place_fit(
+            anchor,
+            (width, height.min(room)),
+            viewport,
+            kept,
+            align,
+            fit,
+        ),
+        _ => place_fit(anchor, size, viewport, side, align, fit),
+    }
+}
+
 /// Why a popover asks its owner to close it.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum Dismiss {
@@ -617,7 +653,8 @@ fn use_placement(
                             f64::from(pop.offset_width()),
                             f64::from(pop.scroll_height()),
                         );
-                        let next = place_fit(Rect::of(&at), size, bounds, side, align, fit);
+                        let kept = last.get().map(|l| l.side);
+                        let next = place_kept(Rect::of(&at), size, bounds, side, align, fit, kept);
                         if last.get().is_none_or(|l| !l.near(&next)) {
                             last.set(Some(next));
                             placed.set(Some(next));
@@ -1037,6 +1074,48 @@ mod tests {
             PopoverAlign::Center,
         );
         assert_eq!(center.left, 250.0);
+    }
+
+    #[test]
+    fn an_open_popover_keeps_its_side_as_it_grows() {
+        // Opened below with room for it; grown past the room below, it
+        // stays there, capped, rather than flipping above.
+        let at = anchor(100.0, 300.0);
+        let room = 600.0 - 330.0 - GAP - EDGE;
+        let p = place_kept(
+            at,
+            (200.0, 280.0),
+            VIEWPORT,
+            Side::Below,
+            PopoverAlign::Start,
+            Fit::Scroll,
+            Some(Side::Below),
+        );
+        assert_eq!(p.side, Side::Below);
+        assert_eq!(p.max_height, room);
+        assert_eq!(p.top, 330.0 + GAP);
+
+        // Unopened, the same size flips.
+        let p = place(
+            at,
+            (200.0, 280.0),
+            VIEWPORT,
+            Side::Below,
+            PopoverAlign::Start,
+        );
+        assert_eq!(p.side, Side::Above);
+
+        // Too little room left on its side (scrolled near the edge): flips.
+        let p = place_kept(
+            anchor(100.0, 500.0),
+            (200.0, 280.0),
+            VIEWPORT,
+            Side::Below,
+            PopoverAlign::Start,
+            Fit::Scroll,
+            Some(Side::Below),
+        );
+        assert_eq!(p.side, Side::Above);
     }
 
     #[test]
