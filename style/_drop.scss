@@ -9,6 +9,12 @@
 // - `.plinth-busy`: a file taken is being worked on; the zone takes no more.
 // - `.plinth-error`: the last file was refused or failed; the overlay says why.
 // - `.plinth-disabled`: takes nothing.
+//
+// `$drop-overlay-inset` and `$drop-edge-width` lay the overlay past the
+// zone and have it draw the edge, for a zone that has no border of its
+// own. `.plinth-tall` (on the overlay and label, from `tall`) keeps the
+// label on screen over a zone taller than it, and `$drop-busy-pulse`
+// pulses the busy label (`.plinth-busy` on it).
 
 @use "tokens" as base;
 
@@ -19,7 +25,9 @@
     --drop-label-color: var(--on-accent);
     --drop-label-fill: var(--drop-color);
 
-    @include base.reserved-border(var(--drop-border));
+    @if base.$drop-edge-width == null {
+        @include base.reserved-border(var(--drop-border));
+    }
 
     position: relative;
     box-sizing: border-box;
@@ -27,7 +35,11 @@
     border-radius: var(--radius-lg);
 
     &.plinth-dragging {
-        border-style: dashed;
+        @if base.$drop-edge-width == null {
+            border-style: dashed;
+        } @else {
+            --drop-edge-style: dashed;
+        }
         --drop-border: var(--drop-color);
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint), transparent);
     }
@@ -58,7 +70,7 @@
 
 .plinth-drop-zone-overlay {
     position: absolute;
-    inset: 0;
+    inset: base.$drop-overlay-inset;
     z-index: var(--layer-sticky);
     display: flex;
     align-items: center;
@@ -69,6 +81,10 @@
     border-radius: inherit;
     background: var(--drop-fill);
     pointer-events: none;
+
+    @if base.$drop-edge-width != null {
+        border: base.$drop-edge-width var(--drop-edge-style, solid) var(--drop-border);
+    }
 }
 
 .plinth-drop-zone-label {
@@ -83,6 +99,39 @@
     text-align: center;
     box-shadow: var(--shadow-1);
     overflow-wrap: anywhere;
+}
+
+@if base.emits("drop.tall") {
+    // The overlay clips without being a scroll container, so the label
+    // sticks to the viewport.
+    .plinth-drop-zone-overlay.plinth-tall {
+        padding: var(--space-4);
+        overflow: clip;
+    }
+
+    .plinth-drop-zone-label.plinth-tall {
+        position: sticky;
+        top: base.$drop-tall-label-offset;
+        bottom: base.$drop-tall-label-offset;
+        padding: var(--space-2) var(--space-4);
+        font-size: var(--text-base);
+    }
+}
+
+@if base.$drop-busy-pulse != null {
+    .plinth-drop-zone-label.plinth-busy {
+        animation: plinth-drop-pulse base.$drop-busy-pulse ease-in-out infinite;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+
+    @keyframes plinth-drop-pulse {
+        50% {
+            opacity: 0.6;
+        }
+    }
 }
 
 .plinth-drop-zone-pick {

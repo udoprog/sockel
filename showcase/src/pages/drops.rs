@@ -25,6 +25,7 @@ pub fn DropZonePage() -> Html {
     let multiple = use_state(|| false);
     let pick = use_state(|| true);
     let paste = use_state(|| false);
+    let tall = use_state(|| false);
     let busy = use_state(|| false);
     let error = use_state(|| false);
     let disabled = use_state(|| false);
@@ -39,6 +40,7 @@ pub fn DropZonePage() -> Html {
             <Toggle label="multiple" value={*multiple} on_change={bind(&multiple)} />
             <Toggle label="pick" value={*pick} on_change={bind(&pick)} />
             <Toggle label="paste" value={*paste} on_change={bind(&paste)} />
+            <Toggle label="tall" value={*tall} on_change={bind(&tall)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="error" value={*error} on_change={bind(&error)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
@@ -53,6 +55,7 @@ pub fn DropZonePage() -> Html {
             .expr_if(max_size.is_some(), "max_size", "Some(1024)")
             .flag("multiple", *multiple)
             .flag("paste", *paste)
+            .flag("tall", *tall)
             .expr_if(*pick, "pick", "\"Choose a file\"")
             .expr_if(*busy, "busy", "Some(\"Uploading\".into())")
             .expr_if(*error, "error", "Some(\"Upload failed\".into())")
@@ -90,7 +93,7 @@ pub fn DropZonePage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <DropZone accept={*accept} max_size={*max_size} multiple={*multiple} paste={*paste}
+            <DropZone accept={*accept} max_size={*max_size} multiple={*multiple} paste={*paste} tall={*tall}
                 pick={pick.then_some(AttrValue::Static("Choose a file"))}
                 busy={busy.then_some(AttrValue::Static("Uploading"))}
                 error={error.then_some(AttrValue::Static("Upload failed"))}

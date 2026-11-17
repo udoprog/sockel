@@ -430,6 +430,7 @@ part is emitted; a name plinth does not have is an error.
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
+| drop | `drop.tall` |
 | utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
 
 ## Button
@@ -1645,7 +1646,9 @@ takes anything), `max_size` (bytes), `multiple` (otherwise the first file
 only), `label`, `reject` and `too_large` (what the overlay says), `busy`
 (`Some(text)` while a file is worked on; the zone takes nothing then),
 `error` (text, until the app clears it), `disabled`, `paste` (files pasted
-outside a text field go the same way), `pick` (a button with this label
+outside a text field go the same way), `tall` (a zone that may be taller
+than the screen: its label, larger, stays on screen while the zone
+scrolls; omittable part `drop.tall`), `pick` (a button with this label
 opens the file picker through a hidden input), `on_files` (the files taken,
 in order, from a drop, paste or pick), `on_refused` (a `Refusal`: `Type` or
 `TooLarge`), `testid`, `class`. `accepts(accept, name, kind)` and
@@ -1666,6 +1669,15 @@ clips). The overlay is absolutely placed and lets the drag through. The
 zone's least height is `--drop-min-height`.
 
 Tokens: `--drop-min-height`, `--drop-tint` and `--drop-tint-over`.
+
+Settings: `$drop-overlay-inset` (`0`; a negative one lays the overlay past
+the zone's edge) and `$drop-edge-width` (`null`: the zone's own one-pixel
+border; set, the zone has no border and the overlay draws the edge at this
+width, dashed while dragged near), for an app whose outline sits outside
+the zone without moving anything; `$drop-tall-label-offset` (`40vh`: how
+far inside the viewport's top and bottom a tall zone's label stays);
+`$drop-busy-pulse` (`null`; a duration, and the busy label, which carries
+`.plinth-busy`, pulses at it, still under reduced motion).
 
 ## ColorSelect
 

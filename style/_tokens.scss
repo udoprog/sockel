@@ -363,6 +363,17 @@ $table-max-height: 24rem !default;
 $drop-min-height: var(--touch-height) !default;
 $drop-tint: 12% !default;
 $drop-tint-over: 28% !default;
+// A drop zone's overlay: how far it reaches past the zone's edge (a
+// negative inset draws it outside); `$drop-edge-width`, when set, has the
+// overlay draw the zone's edge at that width in place of the zone's own
+// one-pixel border, so the zone takes no border at all.
+$drop-overlay-inset: 0 !default;
+$drop-edge-width: null !default;
+// A tall zone's (`tall`) label: kept this far inside the viewport's top
+// and bottom while the zone is taller than the screen.
+$drop-tall-label-offset: 40vh !default;
+// A duration: the busy label pulses at it (`null`: it holds still).
+$drop-busy-pulse: null !default;
 $avatar-sm: 1.75rem !default;
 $avatar-md: 2.5rem !default;
 $avatar-lg: 3.5rem !default;
@@ -434,6 +445,7 @@ $omit: () !default;
 $-parts: (
     "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
     "confirm.inline",
+    "drop.tall",
     "fields.busy", "fields.check", "fields.disabled", "fields.error", "fields.field",
     "fields.fieldset", "fields.help", "fields.inputs", "fields.required",
     "heads.crumbs", "heads.label", "heads.list", "heads.trail",

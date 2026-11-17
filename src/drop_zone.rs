@@ -267,6 +267,11 @@ pub struct DropZoneProps {
     /// Takes files pasted outside a text field as if dropped.
     #[prop_or_default]
     pub paste: bool,
+    /// The zone may be taller than the screen: its label, larger, is kept
+    /// on screen while the zone scrolls (`.plinth-tall` on the overlay and
+    /// the label).
+    #[prop_or_default]
+    pub tall: bool,
     /// Shows a button with this label, which opens the file picker.
     #[prop_or_default]
     pub pick: Option<AttrValue>,
@@ -575,6 +580,7 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
         }
     };
     let alert = matches!(state, DropState::Error);
+    let tall = props.tall.then_some(class::TALL);
 
     html! {
         <div ref={zone} class={classes!(drop_zone(state, props.disabled), props.class.clone())}
@@ -592,10 +598,11 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
                     multiple={props.multiple} {onchange} ref={input} />
             }
             if let Some(text) = text {
-                <div class={class::DROP_ZONE_OVERLAY}
+                <div class={classes!(class::DROP_ZONE_OVERLAY, tall)}
                     role={if alert { "alert" } else { "status" }}
                     aria-hidden={(!alert && state != DropState::Busy).then_some("true")}>
-                    <span class={class::DROP_ZONE_LABEL}>{ text }</span>
+                    <span class={classes!(class::DROP_ZONE_LABEL, tall,
+                        (state == DropState::Busy).then_some(class::BUSY))}>{ text }</span>
                 </div>
             }
         </div>
@@ -751,5 +758,33 @@ mod tests {
             names(drop_zone(DropState::Idle, true)),
             [class::DROP_ZONE, class::DISABLED]
         );
+    }
+
+    fn render(props: DropZoneProps) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<DropZone>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn tall_and_busy_mark_the_overlay_and_label() {
+        let busy = || Some(AttrValue::Static("Saving"));
+        let html = render(yew::props!(DropZoneProps {
+            tall: true,
+            busy: busy(),
+            on_files: Callback::noop(),
+        }));
+        let overlay = format!("{} {}", class::DROP_ZONE_OVERLAY, class::TALL);
+        let label = format!("{} {} {}", class::DROP_ZONE_LABEL, class::TALL, class::BUSY);
+        assert!(html.contains(&overlay), "{html}");
+        assert!(html.contains(&label), "{html}");
+
+        let html = render(yew::props!(DropZoneProps {
+            busy: busy(),
+            on_files: Callback::noop(),
+        }));
+        assert!(!html.contains(class::TALL), "{html}");
     }
 }
