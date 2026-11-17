@@ -524,3 +524,20 @@ body {
         color-scheme: dark;
     }
 }
+
+// Reorder's children mode: the page's own rows, laid out by the page.
+.showcase-reorder-items {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.showcase-reorder-item {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-1);
+    border: var(--space-px) solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+}

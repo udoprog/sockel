@@ -139,6 +139,20 @@ pub fn slot_at(middles: &[f64], y: f64) -> usize {
     middles.iter().filter(|m| **m < y).count()
 }
 
+/// Where a row lifted from `from` lands while its edges are at `top` and
+/// `bottom`, among the rows' middles measured at the press: above every row
+/// whose middle its top has passed, or below every one its bottom has, so a
+/// drag kept within the list reaches either end whatever the rows'
+/// heights. An index in the list without the row, as [`landing`] gives.
+pub fn drag_target(middles: &[f64], from: usize, top: f64, bottom: f64) -> usize {
+    if from >= middles.len() {
+        return from;
+    }
+    let up = middles[..from].iter().filter(|m| **m > top).count();
+    let down = middles[from + 1..].iter().filter(|m| **m < bottom).count();
+    from - up + down
+}
+
 /// Moves `list[from]` to `to`, as [`Reorder`]'s `on_move` reports it.
 pub fn move_item<T>(list: &mut Vec<T>, from: usize, to: usize) {
     if from < list.len() {
@@ -193,6 +207,9 @@ pub struct DragHandleProps {
     pub disabled: bool,
     #[prop_or_default]
     pub describedby: Option<AttrValue>,
+    /// A tooltip, for apps whose buttons all carry one.
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
     #[prop_or_default]
     pub onpointerdown: Callback<PointerEvent>,
     #[prop_or_default]
@@ -219,7 +236,7 @@ pub fn DragHandle(props: &DragHandleProps) -> Html {
     html! {
         <button type="button" class={classes!(drag_handle(props.lifted), props.class.clone())}
             aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-            disabled={props.disabled} data-testid={props.testid.clone()}
+            title={props.title.clone()} disabled={props.disabled} data-testid={props.testid.clone()}
             onpointerdown={props.onpointerdown.clone()} onpointermove={props.onpointermove.clone()}
             onpointerup={props.onpointerup.clone()} onpointercancel={props.onpointercancel.clone()}
             onkeydown={props.onkeydown.clone()} onblur={props.onblur.clone()}>
@@ -228,9 +245,61 @@ pub fn DragHandle(props: &DragHandleProps) -> Html {
     }
 }
 
+/// One row of a [`Reorder`] in its children mode: the row's own element,
+/// holding whatever the app renders, a [`ReorderHandle`] somewhere in it.
+#[derive(Clone, Properties, PartialEq)]
+pub struct ReorderItemProps {
+    /// Stable across moves, so the row keeps its element (and focus).
+    pub id: AttrValue,
+    /// What the announcements and the handle's name call the row.
+    pub name: AttrValue,
+    #[prop_or_default]
+    pub class: Classes,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub children: Html,
+}
+
+/// A row of a [`Reorder`]'s children. Outside a `Reorder` it is a plain
+/// `<div>` of its children.
+#[function_component]
+pub fn ReorderItem(props: &ReorderItemProps) -> Html {
+    html! {
+        <div class={props.class.clone()} data-testid={props.testid.clone()}>
+            { props.children.clone() }
+        </div>
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct ReorderHandleProps {
+    #[prop_or_default]
+    pub class: Classes,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+}
+
+/// The [`DragHandle`] of the [`ReorderItem`] it is in, wired to its
+/// [`Reorder`]; nothing outside one.
+#[function_component]
+pub fn ReorderHandle(props: &ReorderHandleProps) -> Html {
+    match use_context::<Grip>() {
+        Some(grip) => grip.handle(props.class.clone(), props.testid.clone()),
+        None => Html::default(),
+    }
+}
+
 #[derive(Properties, PartialEq)]
 pub struct ReorderProps {
+    /// The rows, each a [`RowListItem`] with its handle at the start.
+    #[prop_or_default]
     pub rows: Vec<ReorderRow>,
+    /// The children mode, in place of `rows`: the rows are the app's own,
+    /// each a [`ReorderItem`] with a [`ReorderHandle`] in it, laid out
+    /// by `class`.
+    #[prop_or_default]
+    pub children: ChildrenWithProps<ReorderItem>,
     /// A row moved from `from` to `to`, an index in the list without it:
     /// apply it with [`move_item`].
     pub on_move: Callback<(usize, usize)>,
@@ -243,6 +312,13 @@ pub struct ReorderProps {
     pub boxed: bool,
     #[prop_or_default]
     pub disabled: bool,
+    /// The arrows move a focused handle's row at once, as Alt and an arrow
+    /// do; Space and Enter still lift it.
+    #[prop_or_default]
+    pub quick_keys: bool,
+    /// Each handle's name is its tooltip too.
+    #[prop_or_default]
+    pub titles: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -261,6 +337,8 @@ struct Drag {
     from: usize,
     start: f64,
     middles: Vec<f64>,
+    /// Half the lifted row's height.
+    half: f64,
     least: f64,
     most: f64,
     active: bool,
@@ -300,7 +378,12 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     let redraw = use_force_update();
     let list = use_node_ref();
     let hint_id = use_state(|| next_id("reorder-hint"));
-    let count = props.rows.len();
+    let items = !props.children.is_empty();
+    let count = if items {
+        props.children.len()
+    } else {
+        props.rows.len()
+    };
     let phrases = use_phrases_with(&L10N);
     let say: Rc<dyn Fn(ReorderText) -> String> = match &props.text {
         Some(text) => {
@@ -309,11 +392,16 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         }
         None => Rc::new(move |t| phrase(&phrases, &t)),
     };
+    let keys: Vec<AttrValue> = if items {
+        props.children.iter().map(|c| c.props.id.clone()).collect()
+    } else {
+        props.rows.iter().map(|r| r.key.clone()).collect()
+    };
 
     {
         let live = live.clone();
         let list = list.clone();
-        let keys: Vec<AttrValue> = props.rows.iter().map(|r| r.key.clone()).collect();
+        let keys = keys.clone();
         use_effect(move || {
             let pending = live.borrow().focus.clone();
             if let Some((key, to)) = pending
@@ -335,35 +423,71 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         live.borrow_mut().lift = None;
     }
     let lift = live.borrow().lift;
+    let grip = |index: usize, name: AttrValue| Grip {
+        ctx: Ctx {
+            live: live.clone(),
+            redraw: redraw.clone(),
+            list: list.clone(),
+            on_move: props.on_move.clone(),
+            say: say.clone(),
+            index,
+            count,
+            name,
+            key: keys[index].clone(),
+            quick: props.quick_keys,
+        },
+        lifted: lift.is_some_and(|l| l.from == index),
+        disabled: props.disabled,
+        hint: (*hint_id).clone(),
+        titles: props.titles,
+    };
+    let marks = |index: usize| reorder_row(index, lift.map(|l| (l.from, l.to)));
+    let status = html! {
+        <>
+            <span id={(*hint_id).clone()} class={class::VISUALLY_HIDDEN}>{ say(ReorderText::Hint) }</span>
+            <span class={class::VISUALLY_HIDDEN} role="status" aria-live="assertive">
+                { live.borrow().status.clone() }
+            </span>
+        </>
+    };
+
+    if items {
+        let rows: Html = props
+            .children
+            .iter()
+            .enumerate()
+            .map(|(index, item)| {
+                let item = &item.props;
+                html! {
+                    <ContextProvider<Grip> key={item.id.to_string()} context={grip(index, item.name.clone())}>
+                        <div class={classes!(marks(index), item.class.clone())} data-testid={item.testid.clone()}>
+                            { item.children.clone() }
+                        </div>
+                    </ContextProvider<Grip>>
+                }
+            })
+            .collect();
+
+        // The rows are the list's first children, the hint and the status
+        // after them.
+        return html! {
+            <div ref={list.clone()} class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}>
+                { rows }
+                { status }
+            </div>
+        };
+    }
+
     let rows: Html = props
         .rows
         .iter()
         .enumerate()
         .map(|(index, row)| {
-            let name = row.name.clone();
-            let ctx = Ctx {
-                live: live.clone(),
-                redraw: redraw.clone(),
-                list: list.clone(),
-                on_move: props.on_move.clone(),
-                say: say.clone(),
-                index,
-                count,
-                name: name.clone(),
-                key: row.key.clone(),
-            };
-            let handle = html! {
-                <DragHandle label={say(ReorderText::Handle { name: name.clone() })}
-                    lifted={lift.is_some_and(|l| l.from == index)} disabled={props.disabled}
-                    describedby={(*hint_id).clone()}
-                    onpointerdown={ctx.clone().pointer_down()} onpointermove={ctx.clone().pointer_move()}
-                    onpointerup={ctx.clone().pointer_up()} onpointercancel={ctx.clone().pointer_cancel()}
-                    onkeydown={ctx.clone().key_down()} onblur={ctx.blur()} />
-            };
+            let handle = grip(index, row.name.clone()).handle(Classes::new(), None);
             html! {
-                <RowListItem key={row.key.to_string()} name={html! { { name } }}
+                <RowListItem key={row.key.to_string()} name={html! { { row.name.clone() } }}
                     detail={row.detail.clone()} start={handle}
-                    class={reorder_row(index, lift.map(|l| (l.from, l.to)))}>
+                    class={marks(index)}>
                     { row.end.clone() }
                 </RowListItem>
             }
@@ -373,11 +497,51 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     html! {
         <div class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}>
             <ul ref={list.clone()} class={row_list(props.divided, props.boxed)}>{ rows }</ul>
-            <span id={(*hint_id).clone()} class={class::VISUALLY_HIDDEN}>{ say(ReorderText::Hint) }</span>
-            <span class={class::VISUALLY_HIDDEN} role="status" aria-live="assertive">
-                { live.borrow().status.clone() }
-            </span>
+            { status }
         </div>
+    }
+}
+
+/// A row's handle, as its [`Reorder`] renders it: also the context a
+/// [`ReorderHandle`] in a [`ReorderItem`] reads.
+#[derive(Clone)]
+struct Grip {
+    ctx: Ctx,
+    lifted: bool,
+    disabled: bool,
+    hint: AttrValue,
+    titles: bool,
+}
+
+impl PartialEq for Grip {
+    fn eq(&self, other: &Self) -> bool {
+        let (a, b) = (&self.ctx, &other.ctx);
+        Rc::ptr_eq(&a.live, &b.live)
+            && Rc::ptr_eq(&a.say, &b.say)
+            && a.on_move == b.on_move
+            && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
+            && (&a.name, &a.key) == (&b.name, &b.key)
+            && (self.lifted, self.disabled, self.titles)
+                == (other.lifted, other.disabled, other.titles)
+            && self.hint == other.hint
+    }
+}
+
+impl Grip {
+    fn handle(&self, class: Classes, testid: Option<AttrValue>) -> Html {
+        let ctx = &self.ctx;
+        let label: AttrValue = (ctx.say)(ReorderText::Handle {
+            name: ctx.name.clone(),
+        })
+        .into();
+        html! {
+            <DragHandle label={label.clone()} title={self.titles.then_some(label)}
+                lifted={self.lifted} disabled={self.disabled}
+                describedby={self.hint.clone()} {class} {testid}
+                onpointerdown={ctx.clone().pointer_down()} onpointermove={ctx.clone().pointer_move()}
+                onpointerup={ctx.clone().pointer_up()} onpointercancel={ctx.clone().pointer_cancel()}
+                onkeydown={ctx.clone().key_down()} onblur={ctx.clone().blur()} />
+        }
     }
 }
 
@@ -393,6 +557,8 @@ struct Ctx {
     count: usize,
     name: AttrValue,
     key: AttrValue,
+    /// The arrows move at once (`quick_keys`).
+    quick: bool,
 }
 
 impl Ctx {
@@ -454,8 +620,17 @@ impl Ctx {
             if e.button() != 0 || self.live.borrow().lift.is_some() {
                 return;
             }
+            // The handle the press is on: yew delegates events, so the
+            // current target is the root, and capturing the pointer there
+            // would keep every later move from the handle's listeners.
             let Some(handle) = e
-                .current_target()
+                .target()
+                .and_then(|t| t.dyn_into::<Element>().ok())
+                .and_then(|t| {
+                    t.closest(&format!(".{}", class::DRAG_HANDLE))
+                        .ok()
+                        .flatten()
+                })
                 .and_then(|t| t.dyn_into::<HtmlElement>().ok())
             else {
                 return;
@@ -472,7 +647,7 @@ impl Ctx {
             let scroll = web_sys::window()
                 .and_then(|w| w.scroll_y().ok())
                 .unwrap_or_default();
-            let rects: Vec<_> = (0..rows.length())
+            let rects: Vec<_> = (0..self.count as u32)
                 .filter_map(|i| rows.item(i))
                 .map(|r| r.get_bounding_client_rect())
                 .collect();
@@ -488,6 +663,7 @@ impl Ctx {
                     .iter()
                     .map(|r| r.top() + r.height() / 2.0 + scroll)
                     .collect(),
+                half: own.height() / 2.0,
                 least: first.top() - own.top(),
                 most: last.bottom() - own.bottom(),
                 active: false,
@@ -511,9 +687,12 @@ impl Ctx {
             let _ = drag
                 .row
                 .set_attribute("style", &format!("--reorder-shift: {dy}px"));
-            let to = landing(
+            let middle = drag.middles[drag.from] + dy;
+            let to = drag_target(
+                &drag.middles,
                 drag.from,
-                slot_at(&drag.middles, drag.middles[drag.from] + dy),
+                middle - drag.half,
+                middle + drag.half,
             );
             let from = drag.from;
             let started = !drag.active;
@@ -591,7 +770,7 @@ impl Ctx {
                     self.announce(self.lifted(self.index));
                     self.redraw.force_update();
                 }
-                None if e.alt_key() && (key == "ArrowUp" || key == "ArrowDown") => {
+                None if (e.alt_key() || self.quick) && (key == "ArrowUp" || key == "ArrowDown") => {
                     e.prevent_default();
                     if let Some(to) = key_target(&key, self.index, self.count) {
                         self.drop_at(to);
@@ -667,6 +846,31 @@ mod tests {
             move_item(&mut list, from, to);
             assert_eq!(list, order, "{from} to {to}");
         }
+    }
+
+    #[test]
+    fn a_drag_kept_within_the_list_reaches_either_end() {
+        // Rows 32 high, 48 apart.
+        let middles = [16.0, 64.0, 112.0];
+        let at = |from: usize, dy: f64| {
+            let middle = middles[from] + dy;
+            drag_target(&middles, from, middle - 16.0, middle + 16.0)
+        };
+        assert_eq!(at(0, 0.0), 0);
+        assert_eq!(at(0, 31.0), 0);
+        assert_eq!(at(0, 33.0), 1);
+        // Clamped to the last row's place.
+        assert_eq!(at(0, 96.0), 2);
+        assert_eq!(at(2, -96.0), 0);
+        assert_eq!(at(2, -31.0), 2);
+        assert_eq!(at(1, 0.0), 1);
+        assert_eq!(at(1, -48.0), 0);
+        // A tall row (100 high) under a short one (20 high), clamped to the
+        // first row's top, still passes it.
+        let middles = [10.0, 74.0];
+        assert_eq!(drag_target(&middles, 1, 0.0, 100.0), 0);
+        assert_eq!(drag_target(&middles, 0, 104.0, 124.0), 1);
+        assert_eq!(drag_target(&middles, 5, 0.0, 1.0), 5);
     }
 
     #[test]

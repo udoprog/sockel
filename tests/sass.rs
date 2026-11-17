@@ -123,6 +123,24 @@ fn error_box_settings() {
 }
 
 #[test]
+fn drag_handle_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(
+        defaults.contains(
+            "width: var(--control-height-small);\n  height: var(--control-height-small);"
+        )
+    );
+    assert!(defaults.contains("border-radius: var(--radius-xs);"));
+    let css = compile(&sass, "tests/fixtures/drag_handle_settings.scss");
+    assert!(css.contains("width: 32px;\n  height: 32px;"));
+    assert!(css.contains("border-radius: 6px;"));
+    assert!(css.contains("background: rgba(1, 2, 3, 0.08);"));
+    assert!(css.contains("width: 44px;\n    height: 44px;"));
+    assert!(!css.contains("width: var(--control-height-small)"));
+}
+
+#[test]
 fn a_native_select_gives_way_in_a_row() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

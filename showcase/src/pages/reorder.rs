@@ -4,12 +4,13 @@ use web_sys::{Element, KeyboardEvent, KeyboardEventInit};
 use yew::prelude::*;
 
 use plinth::{
-    Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderRow, ReorderText,
-    drag_handle, key_target, landing, move_item, reorder_row, slot_at,
+    Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
+    ReorderRow, ReorderText, drag_handle, drag_target, key_target, landing, move_item, reorder_row,
+    slot_at,
 };
 
 use crate::class;
-use crate::code::{El, snippet};
+use crate::code::{El, each, snippet};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
 
 const NAMES: &[&str] = &[
@@ -128,6 +129,9 @@ pub fn ReorderPage() -> Html {
     let divided = use_state(|| true);
     let boxed = use_state(|| true);
     let disabled = use_state(|| false);
+    let children = use_state(|| false);
+    let quick_keys = use_state(|| false);
+    let titles = use_state(|| false);
     let keys = use_state(|| 0usize);
     let order = use_state(|| (0..NAMES.len()).collect::<Vec<_>>());
     let said = use_state(String::new);
@@ -188,26 +192,54 @@ pub fn ReorderPage() -> Html {
             <Toggle label="divided" value={*divided} on_change={bind(&divided)} />
             <Toggle label="boxed" value={*boxed} on_change={bind(&boxed)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
+            <Toggle label="children" value={*children} on_change={bind(&children)} />
+            <Toggle label="quick_keys" value={*quick_keys} on_change={bind(&quick_keys)} />
+            <Toggle label="titles" value={*titles} on_change={bind(&titles)} />
         </>
     };
-    let code = snippet(
-        &[],
-        El::new("Reorder")
-            .expr("rows", "rows.clone()")
-            .expr("on_move", "on_move.clone()")
-            .flag("divided", *divided)
-            .flag("boxed", *boxed)
-            .flag("disabled", *disabled),
-    );
+    let reorder = El::new("Reorder")
+        .expr_if(!*children, "rows", "rows.clone()")
+        .expr("on_move", "on_move.clone()")
+        .flag("divided", *divided && !*children)
+        .flag("boxed", *boxed && !*children)
+        .flag("disabled", *disabled)
+        .flag("quick_keys", *quick_keys)
+        .flag("titles", *titles);
+    let reorder = if *children {
+        reorder.text("class", class::REORDER_ITEMS).line(each(
+            "steps",
+            "step_item",
+            rows.len(),
+            "ReorderItem",
+        ))
+    } else {
+        reorder
+    };
+    let code = snippet(&[], reorder);
     let lifted = (1, 3);
 
     html! {
         <Demo {controls} {code}>
             if rows.is_empty() {
                 <EmptyState compact={true} title="Nothing to order" />
+            } else if *children {
+                // The app's own rows, its handle placed in them.
+                <Reorder {on_move} text={text_cb} disabled={*disabled} quick_keys={*quick_keys}
+                    titles={*titles} class={class::REORDER_ITEMS}>
+                    { for rows.iter().map(|row| html_nested! {
+                        <ReorderItem id={row.key.clone()} name={row.name.clone()} class={class::REORDER_ITEM}>
+                            <ReorderHandle />
+                            <strong>{ row.name.clone() }</strong>
+                            if let Some(detail) = &row.detail {
+                                <span>{ detail.clone() }</span>
+                            }
+                            { row.end.clone() }
+                        </ReorderItem>
+                    }) }
+                </Reorder>
             } else {
                 <Reorder {rows} {on_move} text={text_cb} divided={*divided} boxed={*boxed}
-                    disabled={*disabled} />
+                    disabled={*disabled} quick_keys={*quick_keys} titles={*titles} />
             }
             <p class={class::CONTROL_LABEL}>{ format!("Said: {}", *said) }</p>
             { shown("reorder_row(3, Some((1, 3)))", &reorder_row(3, Some(lifted))) }
@@ -217,6 +249,12 @@ pub fn ReorderPage() -> Html {
                     "landing(1, slot_at(middles, y)) = {}; key_target(\"End\", 1, 5) = {:?}",
                     landing(1, slot_at(&[10.0, 30.0, 50.0], 45.0)),
                     key_target("End", 1, 5),
+                ) }
+            </p>
+            <p class={class::CONTROL_LABEL}>
+                { format!(
+                    "drag_target(middles, 0, top, bottom) = {}",
+                    drag_target(&[10.0, 30.0, 50.0], 0, 34.0, 52.0),
                 ) }
             </p>
             <DragHandle label="Move (a handle alone)" />

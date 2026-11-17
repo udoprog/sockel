@@ -1266,9 +1266,27 @@ row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
 `RowListItem`s (`.plinth-reorder-row`), the handle in their `start` slot
 (a new `RowListItem` prop: what begins a row).
 
+Children mode, for rows that are the app's own (a row of fields, an
+editor): in place of `rows`, give `ReorderItem` children (`id`, stable
+across moves; `name`, for the announcements and the handle's name;
+`class`; `testid`), each holding its content and a `ReorderHandle`
+(`class`, `testid`) wherever the row wants its grip. Each item is the row
+element itself (`.plinth-reorder-row` plus its `class`), a direct child of
+the `.plinth-reorder` element, which `class` lays out; the hint and the
+status follow the rows there. A `ReorderHandle` outside a `Reorder`
+renders nothing.
+
+- `quick_keys`: the arrows move a focused handle's row at once, as Alt and
+  an arrow do, for apps whose handles did so; Space and Enter still lift.
+- `titles`: each handle's name is its tooltip too (`DragHandle`'s new
+  `title`).
+
 - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
-  follows the pointer, kept within the list. Release drops it, Escape or a
-  cancelled pointer puts it back.
+  follows the pointer, kept within the list. It passes a row once its top
+  (going up) or its bottom (going down) crosses that row's middle, so it
+  reaches either end whatever the rows' heights (`drag_target(middles,
+  from, top, bottom)`). Release drops it, Escape or a cancelled pointer
+  puts it back.
 - Keyboard, on a focused handle: Space or Enter lifts, the arrows, Home and
   End aim, Space or Enter drops, Escape or leaving the handle cancels.
   Alt and an arrow moves the row at once. Focus follows the moved row.
@@ -1281,7 +1299,8 @@ row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
   `reorder_text` gives their English.
 - `DragHandle` is the grip alone (the `IconSet`'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
-  `testid`. Helpers: `reorder_row(index, lift)`, `drag_handle(lifted)`,
+  `testid`, `title`. Helpers: `reorder_row(index, lift)`,
+  `drag_handle(lifted)`, `drag_target(middles, from, top, bottom)`,
   `landing(from, slot)`, `slot_at(middles, y)`, `key_target(key, to, count)`.
 
 Size guarantees: nothing reflows during a drag. The rows are measured once
@@ -1290,7 +1309,10 @@ keeps its own room, so no gap of another height opens and the list's
 height holds; the drop marks are inset box shadows, never borders or
 margins; the order changes once, on the drop. A keyboard lift moves only
 the marks. The handle is `--control-height-small` square with a reserved
-border; hover, focus and lifted change colours only. New classes:
+border; hover, focus and lifted change colours only. Settings:
+`$drag-handle-size`, `$drag-handle-phone-size` (`null`: as above the
+phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`. New
+classes:
 `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
 `DRAG_HANDLE`. New partial: `_reorder.scss`. New tokens: none.
 

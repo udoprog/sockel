@@ -66,7 +66,8 @@
 //!   [`ActionRow`] (`.action-row`): actions on what stands around them, over
 //!   a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
 //!   columns as fit.
-//! - [`Reorder`] (`.reorder`) with [`ReorderRow`]: rows moved by a drag on
+//! - [`Reorder`] (`.reorder`) with [`ReorderRow`]s or [`ReorderItem`] children
+//!   (their grip a [`ReorderHandle`]): rows moved by a drag on
 //!   their [`DragHandle`] (`.drag-handle`) or by keyboard, nothing reflowing
 //!   until the drop, each step announced.
 //! - [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
@@ -386,8 +387,9 @@ pub use popover::{
 };
 #[cfg(feature = "reorder")]
 pub use reorder::{
-    DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,
-    key_target, landing, move_item, reorder_row, reorder_text, slot_at,
+    DragHandle, DragHandleProps, Reorder, ReorderHandle, ReorderHandleProps, ReorderItem,
+    ReorderItemProps, ReorderProps, ReorderRow, ReorderText, drag_handle, drag_target, key_target,
+    landing, move_item, reorder_row, reorder_text, slot_at,
 };
 pub use roving::{menu_step, printable, typeahead};
 #[cfg(feature = "rows")]

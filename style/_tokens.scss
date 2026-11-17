@@ -290,6 +290,13 @@ $pager-phone-height: null !default;
 // A summary pager's padding (`null`: none), for one that ends a list or
 // table and lines up with its rows.
 $pager-summary-padding: null !default;
+
+// A drag handle's square side, its side below the phone breakpoint
+// (`null`: as above it), its corners and its hover fill.
+$drag-handle-size: var(--control-height-small) !default;
+$drag-handle-phone-size: null !default;
+$drag-handle-radius: var(--radius-xs) !default;
+$drag-handle-hover-fill: color-mix(in srgb, var(--text) 6%, transparent) !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
 // weight, and its cause's font and size (`null`: none, or inherited).
 $error-box-padding: var(--space-4) !default;
