@@ -7,9 +7,11 @@ use std::pin::Pin;
 use std::rc::Rc;
 use std::task::{Context, Poll, Waker};
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::popover::focus_lost;
 use crate::{
     ActionGroup, Button, ButtonSize, ButtonVariant, Dialog, DialogDismiss, Dismiss, Glyph, Icon,
@@ -95,8 +97,9 @@ pub struct ConfirmProps {
     pub details: Html,
     /// The accepting button's label.
     pub accept: AttrValue,
-    #[prop_or(AttrValue::Static("Cancel"))]
-    pub cancel_label: AttrValue,
+    /// The cancelling button's label, else the catalog's.
+    #[prop_or_default]
+    pub cancel_label: Option<AttrValue>,
     /// The accepting button's icon.
     #[prop_or_default]
     pub icon: Option<Html>,
@@ -125,6 +128,8 @@ pub struct ConfirmProps {
 /// it is busy; the owner sets `open` to false.
 #[function_component]
 pub fn Confirm(props: &ConfirmProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let cancel_label = label(&phrases, &props.cancel_label, "plinth-confirm-cancel");
     let (cancel_ref, accept_ref) = (use_node_ref(), use_node_ref());
     {
         let (cancel_ref, accept_ref) = (cancel_ref.clone(), accept_ref.clone());
@@ -136,7 +141,7 @@ pub fn Confirm(props: &ConfirmProps) -> Html {
     }
     let on_dismiss = props.on_cancel.reform(|_: Dismiss| ());
     let actions = buttons(
-        &props.cancel_label,
+        &cancel_label,
         &props.accept,
         &props.icon,
         props.danger,
@@ -167,8 +172,8 @@ pub struct ConfirmPopoverProps {
     #[prop_or_default]
     pub details: Html,
     pub accept: AttrValue,
-    #[prop_or(AttrValue::Static("Cancel"))]
-    pub cancel_label: AttrValue,
+    #[prop_or_default]
+    pub cancel_label: Option<AttrValue>,
     #[prop_or_default]
     pub icon: Option<Html>,
     /// As for [`Confirm`].
@@ -207,7 +212,12 @@ pub fn confirm_popover(compact: bool) -> Classes {
 
 /// A compact confirm: one line, then Cancel (`Glyph::Close`) and the
 /// accepting button (`icon`, else `Glyph::Check`) joined, icons alone.
-fn compact(props: &ConfirmPopoverProps, cancel_ref: &NodeRef, accept_ref: &NodeRef) -> Html {
+fn compact(
+    props: &ConfirmPopoverProps,
+    cancel_label: &AttrValue,
+    cancel_ref: &NodeRef,
+    accept_ref: &NodeRef,
+) -> Html {
     let accept_icon = props
         .icon
         .clone()
@@ -225,7 +235,7 @@ fn compact(props: &ConfirmPopoverProps, cancel_ref: &NodeRef, accept_ref: &NodeR
             }
             <div class={class::CONFIRM_PAIR} role="group">
                 <Button icon={html! { <Icon glyph={Glyph::Close} /> }} disabled={props.busy}
-                    label={props.cancel_label.clone()} title={props.cancel_label.clone()}
+                    label={cancel_label.clone()} title={cancel_label.clone()}
                     node_ref={cancel_ref.clone()} class={class::CONFIRM_NO}
                     onclick={props.on_cancel.reform(|_: MouseEvent| ())} testid="confirm-cancel" />
                 <Button variant={accept_variant(props.danger)} busy={props.busy}
@@ -244,6 +254,8 @@ fn compact(props: &ConfirmPopoverProps, cancel_ref: &NodeRef, accept_ref: &NodeR
 /// to the anchor. A sheet on a phone.
 #[function_component]
 pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
+    let cancel_label = label(&phrases, &props.cancel_label, "plinth-confirm-cancel");
     let (cancel_ref, accept_ref) = (use_node_ref(), use_node_ref());
     let on_dismiss = {
         let (on_cancel, busy) = (props.on_cancel.clone(), props.busy);
@@ -255,13 +267,13 @@ pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
     };
 
     let content = if props.compact {
-        compact(props, &cancel_ref, &accept_ref)
+        compact(props, &cancel_label, &cancel_ref, &accept_ref)
     } else {
         html! {
             <>
                 { body(&props.explanation, &props.details, props.error.as_ref()) }
                 <ActionGroup end=true>
-                    { buttons(&props.cancel_label, &props.accept, &props.icon, props.danger,
+                    { buttons(&cancel_label, &props.accept, &props.icon, props.danger,
                         props.busy, &props.on_cancel, &props.on_accept, &cancel_ref, &accept_ref) }
                 </ActionGroup>
             </>
@@ -298,8 +310,8 @@ pub struct ConfirmButtonProps {
     #[prop_or_default]
     pub details: Html,
     pub accept: AttrValue,
-    #[prop_or(AttrValue::Static("Cancel"))]
-    pub cancel_label: AttrValue,
+    #[prop_or_default]
+    pub cancel_label: Option<AttrValue>,
     #[prop_or_default]
     pub accept_icon: Option<Html>,
     #[prop_or(true)]
@@ -378,13 +390,13 @@ pub struct ConfirmInlineProps {
     /// Asked to start or stop asking.
     #[prop_or_default]
     pub on_ask: Callback<bool>,
-    /// The group's accessible name while asking.
-    #[prop_or(AttrValue::Static("Are you sure?"))]
-    pub question: AttrValue,
-    #[prop_or(AttrValue::Static("No"))]
-    pub no_label: AttrValue,
-    #[prop_or(AttrValue::Static("Yes"))]
-    pub yes_label: AttrValue,
+    /// The group's accessible name while asking, else the catalog's.
+    #[prop_or_default]
+    pub question: Option<AttrValue>,
+    #[prop_or_default]
+    pub no_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub yes_label: Option<AttrValue>,
     /// Yes is the danger button; otherwise primary.
     #[prop_or(true)]
     pub danger: bool,
@@ -411,6 +423,7 @@ pub fn confirm_inline(part: &'static str, away: bool) -> Classes {
 /// returns to the button.
 #[function_component]
 pub fn ConfirmInline(props: &ConfirmInlineProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let own = use_state(|| false);
     let asking = props.asking.unwrap_or(*own);
     let set = {
@@ -469,7 +482,6 @@ pub fn ConfirmInline(props: &ConfirmInlineProps) -> Html {
             accepted.emit(());
         })
     };
-    let no_label = props.no_label.clone();
 
     html! {
         <span class={classes!(class::CONFIRM_INLINE, props.class.clone())} {onkeydown}
@@ -480,14 +492,15 @@ pub fn ConfirmInline(props: &ConfirmInlineProps) -> Html {
                 { props.children.clone() }
             </Button>
             <span ref={ask_ref} class={confirm_inline(class::CONFIRM_ASK, !asking)}
-                role="group" aria-label={props.question.clone()}>
+                role="group"
+                aria-label={label(&phrases, &props.question, "plinth-confirm-inline-question")}>
                 <Button size={props.size} variant={ButtonVariant::Ghost} disabled={props.busy}
                     node_ref={no_ref} onclick={no} testid="confirm-cancel">
-                    { no_label }
+                    { label(&phrases, &props.no_label, "plinth-confirm-inline-no") }
                 </Button>
                 <Button size={props.size} variant={accept_variant(props.danger)}
                     busy={props.busy} onclick={yes} testid="confirm-accept">
-                    { props.yes_label.clone() }
+                    { label(&phrases, &props.yes_label, "plinth-confirm-inline-yes") }
                 </Button>
             </span>
         </span>
@@ -500,21 +513,23 @@ pub struct ConfirmRequest {
     pub title: AttrValue,
     pub explanation: AttrValue,
     pub details: Html,
-    pub accept: AttrValue,
-    pub cancel_label: AttrValue,
+    /// The accepting button's label, else the catalog's ("Confirm").
+    pub accept: Option<AttrValue>,
+    /// The cancelling button's label, else the catalog's.
+    pub cancel_label: Option<AttrValue>,
     pub icon: Option<Html>,
     pub danger: bool,
 }
 
 impl ConfirmRequest {
-    /// A destructive question, accepted with "Confirm".
+    /// A destructive question, with the catalog's labels.
     pub fn new(title: impl Into<AttrValue>, explanation: impl Into<AttrValue>) -> Self {
         Self {
             title: title.into(),
             explanation: explanation.into(),
             details: Html::default(),
-            accept: AttrValue::Static("Confirm"),
-            cancel_label: AttrValue::Static("Cancel"),
+            accept: None,
+            cancel_label: None,
             icon: None,
             danger: true,
         }
@@ -605,6 +620,7 @@ pub fn ask(request: ConfirmRequest) -> Answer {
 /// replaces it, the first answered `false`.
 #[function_component]
 pub fn ConfirmHost() -> Html {
+    let phrases = use_phrases_with(&L10N);
     let shown = use_state(|| None::<ConfirmRequest>);
     let showing = use_mut_ref(Showing::default);
 
@@ -639,8 +655,9 @@ pub fn ConfirmHost() -> Html {
             title={request.as_ref().map(|r| r.title.clone()).unwrap_or_default()}
             explanation={request.as_ref().map(|r| r.explanation.clone()).unwrap_or_default()}
             details={request.as_ref().map(|r| r.details.clone()).unwrap_or_default()}
-            accept={request.as_ref().map(|r| r.accept.clone()).unwrap_or_default()}
-            cancel_label={request.as_ref().map_or(AttrValue::Static("Cancel"), |r| r.cancel_label.clone())}
+            accept={label(&phrases, &request.as_ref().and_then(|r| r.accept.clone()),
+                "plinth-confirm-accept")}
+            cancel_label={request.as_ref().and_then(|r| r.cancel_label.clone())}
             icon={request.as_ref().and_then(|r| r.icon.clone())}
             danger={request.as_ref().is_none_or(|r| r.danger)}
             on_accept={answer(true)} on_cancel={answer(false)} testid="confirm-dialog" />
@@ -736,7 +753,7 @@ mod tests {
             explanation: "It cannot be undone.".into(),
             details: Html::default(),
             accept: "Delete".into(),
-            cancel_label: "Cancel".into(),
+            cancel_label: None,
             icon: None,
             danger,
             busy: false,
@@ -762,6 +779,7 @@ mod tests {
             class::CONFIRM_TEXT,
             class::DANGER,
             "It failed.",
+            ">Cancel<",
         ] {
             assert!(html.contains(part), "{part}: {html}");
         }
@@ -789,7 +807,7 @@ mod tests {
             explanation: "Remove".into(),
             details: html! { <strong>{ "Notes" }</strong> },
             accept: "Yes".into(),
-            cancel_label: "No".into(),
+            cancel_label: Some("No".into()),
             icon: None,
             danger: true,
             busy: false,

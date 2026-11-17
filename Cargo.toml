@@ -5,6 +5,8 @@ edition = "2024"
 publish = false
 
 [dependencies]
+phrasebook02 = { package = "phrasebook", version = "0.2.0", features = ["yew023"] }
+phrasebookcatalog01 = { package = "phrasebook-catalog", version = "0.1.0" }
 wasm-bindgen = "0.2.100"
 web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUnloadEvent", "Blob", "console", "Clipboard", "ClipboardEvent", "CssStyleDeclaration", "DataTransfer", "DataTransferItem", "DataTransferItemList", "Document", "DomRect", "DomRectList", "DomTokenList", "DragEvent", "Element", "Event", "EventTarget", "File", "FileList", "FocusOptions", "HtmlCollection", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "HtmlTextAreaElement", "KeyboardEvent", "Navigator", "Node", "NodeList", "PointerEvent", "ResizeObserver", "ResizeObserverEntry", "ResizeObserverSize", "ScrollIntoViewOptions", "ScrollLogicalPosition", "Window"] }
 yew = "0.23.0"

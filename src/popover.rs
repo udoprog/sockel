@@ -3,11 +3,13 @@
 use std::cell::Cell;
 use std::rc::Rc;
 
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use web_sys::{Element, HtmlElement, Node};
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class, use_overlays};
 
 /// Between the anchor and the popover, in pixels.
@@ -779,9 +781,9 @@ pub struct PopoverProps {
     /// Its accessible name, and the sheet's heading.
     #[prop_or_default]
     pub title: Option<AttrValue>,
-    /// The sheet's close button's accessible name.
-    #[prop_or(AttrValue::Static("Close"))]
-    pub close_label: AttrValue,
+    /// The sheet's close button's accessible name, else the catalog's.
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     /// Takes focus once it is placed (it is hidden until then), such as the
     /// safe button of a confirm.
     #[prop_or_default]
@@ -845,6 +847,7 @@ pub fn popover(sheet: bool, placed: bool) -> Classes {
 /// anchor; dismissed by a press outside or Escape; a sheet on a phone.
 #[function_component]
 pub fn Popover(props: &PopoverProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let node = use_node_ref();
     let overlays = use_overlays();
     let placed = use_placement(
@@ -928,7 +931,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
                 <span class={class::POPOVER_TITLE}>{ props.title.clone() }</span>
                 <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                     icon={html! { <Icon glyph={Glyph::Close} /> }}
-                    label={props.close_label.clone()} onclick={close} />
+                    label={label(&phrases, &props.close_label, "plinth-popover-close")} onclick={close} />
             </div>
         }
     });
@@ -1276,7 +1279,7 @@ mod tests {
             match_anchor: false,
             keep_focus: false,
             title: title.map(AttrValue::Static),
-            close_label: "Close".into(),
+            close_label: None,
             focus: None,
             focus_first: false,
             class: Classes::new(),
@@ -1308,6 +1311,7 @@ mod tests {
         assert!(html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains("aria-label=\"Filters\""), "{html}");
+        assert!(html.contains("aria-label=\"Close\""), "{html}");
     }
 
     #[test]

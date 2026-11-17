@@ -192,7 +192,7 @@ fn ConfirmDemo(props: &FrameProps) -> Html {
         let (setup, answer) = (props.setup.clone(), answer.clone());
         Callback::from(move |_: MouseEvent| {
             let mut request = ConfirmRequest::new(setup.title(), setup.explanation());
-            request.accept = "Delete".into();
+            request.accept = Some("Delete".into());
             request.danger = setup.danger;
             request.details = setup.details();
             request.icon = setup.icon();

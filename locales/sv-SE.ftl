@@ -1,0 +1,16 @@
+plinth-confirm-cancel = Avbryt
+plinth-confirm-accept = Bekräfta
+plinth-confirm-inline-question = Är du säker?
+plinth-confirm-inline-no = Nej
+plinth-confirm-inline-yes = Ja
+plinth-dialog-close = Stäng
+plinth-popover-close = Stäng
+plinth-notice-dismiss = Stäng
+plinth-toast-dismiss = Stäng
+plinth-loadable-loading = Laddar
+plinth-loadable-empty = Här finns inget
+plinth-loadable-error = Det gick inte att ladda
+plinth-error-box-retry = Försök igen
+plinth-save-bar-unsaved = Osparade ändringar
+plinth-save-bar-save = Spara
+plinth-save-bar-discard = Förkasta

@@ -2,10 +2,13 @@
 
 use std::cell::Cell;
 
-use crate::{Button, ButtonVariant, class};
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
+
+use crate::phrasebookcatalog01::{L10N, label};
+use crate::{Button, ButtonVariant, class};
 
 thread_local! {
     static HELD: Cell<usize> = const { Cell::new(0) };
@@ -94,13 +97,13 @@ pub struct SaveBarProps {
     /// Saving cannot be done now, besides there being nothing to save.
     #[prop_or_default]
     pub disabled: bool,
-    /// The note ("Unsaved changes").
-    #[prop_or(AttrValue::Static("Unsaved changes"))]
-    pub label: AttrValue,
-    #[prop_or(AttrValue::Static("Save"))]
-    pub save_label: AttrValue,
-    #[prop_or(AttrValue::Static("Discard"))]
-    pub discard_label: AttrValue,
+    /// The note, else the catalog's ("Unsaved changes").
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
+    #[prop_or_default]
+    pub save_label: Option<AttrValue>,
+    #[prop_or_default]
+    pub discard_label: Option<AttrValue>,
     /// How the last save went (an error, say), before the actions.
     #[prop_or_default]
     pub status: Html,
@@ -144,24 +147,25 @@ pub fn save_bar(idle: bool, sticky: bool) -> Classes {
 #[function_component]
 pub fn SaveBar(props: &SaveBarProps) -> Html {
     use_unload_guard(props.guard && props.dirty);
+    let phrases = use_phrases_with(&L10N);
 
     html! {
         <div class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}
             data-testid={props.testid.clone()}>
-            <span class={class::SAVE_BAR_NOTE} role="status">{ props.label.clone() }</span>
+            <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "plinth-save-bar-unsaved") }</span>
             <span class={class::SAVE_BAR_STATUS} role="status">{ props.status.clone() }</span>
             <span class={class::SAVE_BAR_ACTIONS}>
                 { props.children.clone() }
                 if let Some(ondiscard) = &props.ondiscard {
                     <Button variant={ButtonVariant::Ghost} disabled={props.busy}
                         onclick={ondiscard.clone()}>
-                        { props.discard_label.clone() }
+                        { label(&phrases, &props.discard_label, "plinth-save-bar-discard") }
                     </Button>
                 }
                 <Button variant={ButtonVariant::Primary} submit={props.submit}
                     busy={props.busy} disabled={props.disabled}
                     onclick={props.onsave.clone()}>
-                    { props.save_label.clone() }
+                    { label(&phrases, &props.save_label, "plinth-save-bar-save") }
                 </Button>
             </span>
         </div>

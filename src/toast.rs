@@ -2,8 +2,10 @@
 
 use std::cell::Cell;
 
+use crate::phrasebookcatalog01::L10N;
 use crate::timer::use_timeout;
 use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class, use_overlays};
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
@@ -81,9 +83,9 @@ pub struct ToastProps {
     /// in a field, whose own undo is left alone.
     #[prop_or_default]
     pub shortcut: bool,
-    /// The close button's accessible name.
-    #[prop_or(AttrValue::Static("Dismiss"))]
-    pub close_label: AttrValue,
+    /// The close button's accessible name, else the catalog's.
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
     /// The text.
@@ -188,6 +190,7 @@ impl Drop for UndoKey {
 /// maximum width.
 #[function_component]
 pub fn Toast(props: &ToastProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let holds = use_state(Holds::default);
     let once = use_memo((), |()| Once::default());
 
@@ -264,7 +267,7 @@ pub fn Toast(props: &ToastProps) -> Html {
             <span class={class::TOAST_CLOSE}>
                 <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                     icon={html! { <Icon glyph={Glyph::Close} /> }}
-                    label={props.close_label.clone()}
+                    label={crate::phrasebookcatalog01::label(&phrases, &props.close_label, "plinth-toast-dismiss")}
                     onclick={dismiss.reform(|_: MouseEvent| ())} />
             </span>
         </div>
@@ -337,7 +340,7 @@ mod tests {
             ondismiss: Callback::noop(),
             duration: TOAST_MS,
             shortcut: false,
-            close_label: "Dismiss".into(),
+            close_label: None,
             testid: None,
             children: html! { "Removed" },
         };

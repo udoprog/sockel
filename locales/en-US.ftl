@@ -1,0 +1,16 @@
+plinth-confirm-cancel = Cancel
+plinth-confirm-accept = Confirm
+plinth-confirm-inline-question = Are you sure?
+plinth-confirm-inline-no = No
+plinth-confirm-inline-yes = Yes
+plinth-dialog-close = Close
+plinth-popover-close = Close
+plinth-notice-dismiss = Dismiss
+plinth-toast-dismiss = Dismiss
+plinth-loadable-loading = Loading
+plinth-loadable-empty = Nothing here
+plinth-loadable-error = Could not load this
+plinth-error-box-retry = Try again
+plinth-save-bar-unsaved = Unsaved changes
+plinth-save-bar-save = Save
+plinth-save-bar-discard = Discard

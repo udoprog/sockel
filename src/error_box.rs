@@ -1,7 +1,10 @@
 //! ErrorBox (`style/_notices.scss`).
 
-use crate::{Button, ButtonSize, class};
+use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
+
+use crate::phrasebookcatalog01::{L10N, label};
+use crate::{Button, ButtonSize, class};
 
 #[derive(Properties, PartialEq)]
 pub struct ErrorBoxProps {
@@ -16,8 +19,9 @@ pub struct ErrorBoxProps {
     /// Shows a retry button, which calls this.
     #[prop_or_default]
     pub onretry: Option<Callback<MouseEvent>>,
-    #[prop_or(AttrValue::Static("Try again"))]
-    pub retry_label: AttrValue,
+    /// The retry button's label, else the catalog's.
+    #[prop_or_default]
+    pub retry_label: Option<AttrValue>,
     /// The retry is running: its button is busy and ignores clicks.
     #[prop_or_default]
     pub retrying: bool,
@@ -32,6 +36,7 @@ pub struct ErrorBoxProps {
 /// alert; a retry in progress keeps the button's box.
 #[function_component]
 pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     html! {
         <div class={classes!(class::ERROR_BOX, props.class.clone())} role="alert"
             data-testid={props.testid.clone()}>
@@ -46,7 +51,7 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
                 <div class={class::ERROR_BOX_ACTIONS}>
                     <Button size={ButtonSize::Small} busy={props.retrying}
                         onclick={onretry.clone()}>
-                        { props.retry_label.clone() }
+                        { label(&phrases, &props.retry_label, "plinth-error-box-retry") }
                     </Button>
                 </div>
             }

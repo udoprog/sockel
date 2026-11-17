@@ -1,8 +1,10 @@
 //! Loadable (`style/_skeleton.scss`).
 
+use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::timer::Timer;
 use crate::{EmptyState, ErrorBox, Skeleton, SkeletonShape, class};
 
@@ -70,21 +72,21 @@ pub struct LoadableProps {
     /// Replaces the placeholder (rows of [`Skeleton`]).
     #[prop_or_default]
     pub placeholder: Option<Html>,
-    /// What a screen reader hears while it loads.
-    #[prop_or(AttrValue::Static("Loading"))]
-    pub label: AttrValue,
+    /// What a screen reader hears while it loads, else the catalog's.
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
     /// Replaces the default empty state.
     #[prop_or_default]
     pub empty: Option<Html>,
-    /// The default empty state's title.
-    #[prop_or(AttrValue::Static("Nothing here"))]
-    pub empty_title: AttrValue,
+    /// The default empty state's title, else the catalog's.
+    #[prop_or_default]
+    pub empty_title: Option<AttrValue>,
     /// Milliseconds the empty state waits, so it never flashes before data.
     #[prop_or(250)]
     pub empty_delay: u32,
-    /// The error's message.
-    #[prop_or(AttrValue::Static("Could not load this"))]
-    pub error: AttrValue,
+    /// The error's message, else the catalog's.
+    #[prop_or_default]
+    pub error: Option<AttrValue>,
     #[prop_or_default]
     pub error_cause: Option<AttrValue>,
     /// Shows the error's retry button.
@@ -110,6 +112,7 @@ pub fn Loadable(props: &LoadableProps) -> Html {
     let phase = phase(props.state, waited);
     let root = use_node_ref();
     let kept = use_mut_ref(|| 0.0_f64);
+    let phrases = use_phrases_with(&L10N);
 
     {
         let root = root.clone();
@@ -137,12 +140,12 @@ pub fn Loadable(props: &LoadableProps) -> Html {
         }),
         Phase::Ready => props.children.clone(),
         Phase::Empty => props.empty.clone().unwrap_or_else(|| {
-            html! { <EmptyState title={props.empty_title.clone()} /> }
+            html! { <EmptyState title={label(&phrases, &props.empty_title, "plinth-loadable-empty")} /> }
         }),
         Phase::Error => html! {
             <ErrorBox cause={props.error_cause.clone()} onretry={props.onretry.clone()}
                 retrying={props.retrying}>
-                { props.error.clone() }
+                { label(&phrases, &props.error, "plinth-loadable-error") }
             </ErrorBox>
         },
     };
@@ -151,7 +154,7 @@ pub fn Loadable(props: &LoadableProps) -> Html {
         <div ref={root} class={classes!(class::LOADABLE, props.class.clone())} {style}
             aria-busy={busy.then_some("true")} data-testid={props.testid.clone()}>
             <span class={class::VISUALLY_HIDDEN} role="status">
-                if busy { { props.label.clone() } }
+                if busy { { label(&phrases, &props.label, "plinth-loadable-loading") } }
             </span>
             { content }
         </div>

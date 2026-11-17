@@ -158,6 +158,8 @@ pub mod class {
     include!(concat!(env!("OUT_DIR"), "/classes.rs"));
 }
 
+pub mod phrasebookcatalog01;
+
 mod action_group;
 mod badge;
 mod button;

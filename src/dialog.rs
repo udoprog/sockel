@@ -2,11 +2,13 @@
 
 use std::rc::Rc;
 
+use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::layer::Layer;
+use crate::phrasebookcatalog01::{L10N, label};
 use crate::popover::{Listener, focus_lost};
 use crate::{
     ActionGroup, Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, SectionHead, class,
@@ -72,8 +74,9 @@ pub struct DialogProps {
     /// A sheet from the bottom below the phone breakpoint; on by default.
     #[prop_or(true)]
     pub sheet: bool,
-    #[prop_or(AttrValue::Static("Close"))]
-    pub close_label: AttrValue,
+    /// The close button's accessible name, else the catalog's.
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     /// The close button's size; small by default.
     #[prop_or(ButtonSize::Small)]
     pub close_size: ButtonSize,
@@ -194,6 +197,7 @@ fn outside(layer: &Element) -> Vec<Element> {
 /// overlay only, as `dismiss` allows; focus returns where it was.
 #[function_component]
 pub fn Dialog(props: &DialogProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let layer_ref = use_node_ref();
     let panel_ref = use_node_ref();
     let overlays = use_overlays();
@@ -324,7 +328,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
         html! {
             <Button variant={ButtonVariant::Quiet} size={props.close_size}
                 icon={html! { <Icon glyph={Glyph::Close} /> }}
-                label={props.close_label.clone()} testid={props.close_testid.clone()} {onclick} />
+                label={label(&phrases, &props.close_label, "plinth-dialog-close")} testid={props.close_testid.clone()} {onclick} />
         }
     });
     let foot =
@@ -420,7 +424,7 @@ mod tests {
             dismiss,
             flush,
             sheet: true,
-            close_label: "Close".into(),
+            close_label: None,
             close_size: if flush {
                 ButtonSize::Regular
             } else {

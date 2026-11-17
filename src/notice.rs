@@ -1,7 +1,10 @@
 //! Notice (`style/_notices.scss`).
 
-use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class};
+use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
+
+use crate::phrasebookcatalog01::{L10N, label};
+use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, Tone, class};
 
 #[derive(Properties, PartialEq)]
 pub struct NoticeProps {
@@ -17,9 +20,9 @@ pub struct NoticeProps {
     /// itself: the app stops rendering it.
     #[prop_or_default]
     pub onclose: Option<Callback<MouseEvent>>,
-    /// The close button's accessible name.
-    #[prop_or(AttrValue::Static("Dismiss"))]
-    pub close_label: AttrValue,
+    /// The close button's accessible name, else the catalog's.
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     /// An action (a link or a button) after the text.
     #[prop_or_default]
     pub action: Option<Html>,
@@ -41,6 +44,7 @@ pub fn notice(tone: Tone) -> Classes {
 /// A warning or an error is announced as an alert, the others as a status.
 #[function_component]
 pub fn Notice(props: &NoticeProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let role = match props.tone {
         Tone::Warning | Tone::Danger => "alert",
         _ => "status",
@@ -60,7 +64,7 @@ pub fn Notice(props: &NoticeProps) -> Html {
                 <span class={class::NOTICE_CLOSE}>
                     <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                         icon={html! { <Icon glyph={Glyph::Close} /> }}
-                        label={props.close_label.clone()} onclick={onclose.clone()} />
+                        label={label(&phrases, &props.close_label, "plinth-notice-dismiss")} onclick={onclose.clone()} />
                 </span>
             }
         </div>
