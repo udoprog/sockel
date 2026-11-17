@@ -231,7 +231,7 @@ pub use color_select::{
 pub use confirm::{
     Answer, Confirm, ConfirmButton, ConfirmButtonProps, ConfirmHost, ConfirmInline,
     ConfirmInlineProps, ConfirmPopover, ConfirmPopoverProps, ConfirmProps, ConfirmRequest, ask,
-    confirm_inline,
+    confirm_inline, confirm_popover,
 };
 pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
 pub use disclosure::{Disclosure, DisclosureProps, disclosure, disclosure_summary};
