@@ -205,6 +205,33 @@ the same call configures plinth's own stylesheet.
 
 The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 
+## Adopting plinth with an app's own Sass compiler
+
+An app that keeps its own Sass step (trunk's `<link data-trunk rel="scss">`
+with dart-sass) and its own unprefixed classes can load plinth's sources
+from the checkout instead, first in its root stylesheet, so its own rules
+come after plinth's and refine them:
+
+```scss
+@use "../../../plinth/style";
+```
+
+Each partial `@use`s only `tokens` (and the menu's users `menu`), so an app
+may load just the tokens and the partials of the components it renders, in
+the order of `style/_index.scss`. Its stylesheet then carries none of the
+rest:
+
+```scss
+@use "../../../plinth/style/tokens" as plinth-tokens;
+@use "../../../plinth/style/layout" as plinth-layout;
+@use "../../../plinth/style/buttons" as plinth-buttons;
+```
+
+The `as` names keep them clear of an app partial of the same name. A
+component whose rules are missing renders unstyled, so add a partial when
+the app starts rendering one of its components, and the partials of the
+components it renders inside (a dialog's buttons and icons).
+
 ## Theming
 
 The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
