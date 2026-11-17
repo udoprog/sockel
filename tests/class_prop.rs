@@ -318,3 +318,27 @@ fn menus_keep_a_passed_class() {
         "{open}"
     );
 }
+
+#[test]
+fn loading_components_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    keeps(
+        render::<Spinner>(yew::props!(SpinnerProps { class: mine() })),
+        &format!("{} {MINE}", class::SPINNER),
+    );
+    keeps(
+        render::<Skeleton>(yew::props!(SkeletonProps { class: mine() })),
+        &format!("{} {MINE}", class::SKELETON),
+    );
+    keeps(
+        render::<Skeleton>(yew::props!(SkeletonProps {
+            count: 2,
+            class: mine()
+        })),
+        &format!("{} {MINE}", class::SKELETON_GROUP),
+    );
+    keeps(
+        render::<Loadable>(yew::props!(LoadableProps { class: mine() })),
+        &format!("{} {MINE}", class::LOADABLE),
+    );
+}

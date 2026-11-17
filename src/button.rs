@@ -1,6 +1,6 @@
 //! Button (`style/_buttons.scss`).
 
-use crate::{Glyph, Icon, class};
+use crate::{Spinner, class};
 use yew::prelude::*;
 
 /// A button's colour: `Secondary` (the plain button) unless set.
@@ -153,7 +153,7 @@ pub fn Button(props: &ButtonProps) -> Html {
         </span>
     };
     let spinner = props.busy.then(|| {
-        html! { <span class={class::BUTTON_SPINNER}><Icon glyph={Glyph::Spinner} /></span> }
+        html! { <span class={class::BUTTON_SPINNER}><Spinner /></span> }
     });
 
     let onclick = {

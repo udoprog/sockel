@@ -9,6 +9,7 @@ mod icons;
 mod inputs;
 mod layout;
 mod library;
+mod loading;
 mod media;
 mod menus;
 mod notices;
@@ -518,6 +519,41 @@ pub const PAGES: &[Page] = &[
                 plinth::class::EMPTY_STATE,
                 Size::Height,
                 Across::Except(&["compact"]),
+            ),
+        ],
+    },
+    Page {
+        id: "spinner",
+        title: "Spinner",
+        about: "A spinning glyph in the icon box, in the colour of the text around it; the busy mark of a Button.",
+        covers: &["Spinner", "SpinnerProps"],
+        render: || html! { <loading::SpinnerPage /> },
+        holds: &[hold(plinth::class::SPINNER, Size::Both, Across::All)],
+    },
+    Page {
+        id: "skeleton",
+        title: "Skeleton",
+        about: "A placeholder of the box its content will have: a line, a block, a row as high as a RowList row, or a picture of an Image's ratio.",
+        covers: &["Skeleton", "SkeletonProps", "SkeletonShape", "skeleton"],
+        render: || html! { <loading::SkeletonPage /> },
+        holds: &[hold(
+            plinth::class::SKELETON,
+            Size::Box,
+            Across::Only(&["RowList beside", "focus", "click"]),
+        )],
+    },
+    Page {
+        id: "loadable",
+        title: "Loadable",
+        about: "Loading, empty, error and ready content in one box: it keeps the height it last had while it loads again, and the empty state waits a moment so it never flashes before data.",
+        covers: &["Loadable", "LoadableProps", "LoadState"],
+        render: || html! { <loading::LoadablePage /> },
+        holds: &[
+            hold(plinth::class::LOADABLE, Size::Width, Across::All),
+            hold(
+                plinth::class::LOADABLE,
+                Size::Height,
+                Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
             ),
         ],
     },

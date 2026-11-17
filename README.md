@@ -279,6 +279,7 @@ page can still override them at runtime.
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
 | `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
 | `$glyph-size` | `1em` |
+| `$skeleton-duration` | `1.4s` |
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$filter-width` | `10.5rem` |
 | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
@@ -589,6 +590,40 @@ keeps its retry button's box while retrying. A compact empty state is
 exactly `--control-height` high whatever it says (title and hint cut to one
 line, its actions kept at the end), so it replaces a row of that height
 without moving what follows; the regular one grows with its text.
+
+## Spinner, Skeleton and Loadable
+
+`Spinner` is a spinning glyph (`Glyph::Spinner` from the icon set) in the
+icon box: inline, `1em`, in the colour of the text around it. `label` makes
+it a `role="status"` with that name; without one it is decoration. `Button`'s
+busy mark is a `Spinner`.
+
+`Skeleton` is a placeholder of the box its content will have. `shape`
+(`SkeletonShape`): `Line` (`LINE`, one line of the text around it, `1lh`),
+`Block` (the default, `--control-height`, or `--skeleton-height`), `Row`
+(`ROW`, one `RowListItem` high) or `Image(Ratio)` (an `Image`'s ratio
+classes, `POSTER` and the rest). `count` stacks several in a column
+(`SKELETON_GROUP`); the last of several lines is `SHORT`. A group reserves
+the 1px border a `RowList` does, so `count` skeleton rows are exactly as high
+as `count` one-line rows. It is `aria-hidden` and shimmers, still under
+`prefers-reduced-motion` (`--skeleton-duration`). `skeleton(shape, short)`
+gives the classes.
+
+`Loadable` is one box for content that loads. `state` (`LoadState`):
+`Loading` shows the placeholder (`placeholder`, or `rows` skeleton rows),
+`Ready` the children, `Empty` an `EmptyState` (`empty` replaces it,
+`empty_title` names it) and `Error` an `ErrorBox` (`error`, `error_cause`,
+`onretry`, `retrying`). The empty state waits `empty_delay` (250 ms) before
+it shows, the placeholder standing in, so it never flashes before data.
+While it loads it is `aria-busy` and a visually hidden `role="status"` reads
+`label` ("Loading"). Every one takes `class` and `testid`.
+
+Size guarantees: while loading, a `Loadable` is at least `rows` rows high the
+first time and at least the height it last had settled (ready, empty or
+error) afterwards, so loading to ready and ready to loading again move
+nothing when the placeholder has the content's rows. Once settled it is as
+high as its content, so a shorter list shrinks. An empty state or an error
+taller than the box grows it; use `EmptyState` `compact` to stay inside.
 
 ## Image and Avatar
 

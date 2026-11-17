@@ -22,7 +22,7 @@ pub enum Ratio {
 }
 
 impl Ratio {
-    fn class(self) -> &'static str {
+    pub(crate) fn class(self) -> &'static str {
         match self {
             Ratio::Poster => class::POSTER,
             Ratio::Screenshot => class::SCREENSHOT,

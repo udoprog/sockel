@@ -55,6 +55,10 @@
 //!   [`ActionRow`] (`.action-row`): actions on what stands around them, over
 //!   a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
 //!   columns as fit.
+//! - [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
+//!   [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
+//!   have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
+//!   one box that keeps its height.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -115,11 +119,14 @@ mod input;
 mod layer;
 mod layout;
 mod library_toolbar;
+mod loadable;
 mod menu;
 mod notice;
 mod popover;
 mod rows;
 mod selection;
+mod skeleton;
+mod spinner;
 mod status;
 mod styles;
 mod tooltip;
@@ -156,6 +163,7 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
+pub use loadable::{LoadState, Loadable, LoadableProps};
 pub use menu::{
     ContextMenu, ContextMenuProps, Menu, MenuCheck, MenuCheckProps, MenuHeading, MenuItem,
     MenuItemProps, MenuNote, MenuPartProps, MenuProps, MenuRadio, MenuRadioProps, MenuSeparator,
@@ -174,6 +182,8 @@ pub use rows::{
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
+pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
+pub use spinner::{Spinner, SpinnerProps};
 pub use status::{StatusLabel, StatusLabelProps, status_label};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
 pub use tooltip::{
