@@ -10,6 +10,10 @@
 //!
 //! - [`Stack`] (`.stack`): a column, its blocks a gap apart.
 //! - [`Cluster`] (`.cluster`): a row that wraps, its items centred.
+//! - [`ActionGroup`] (`.action-group`): the buttons ending a form, a panel
+//!   or a section.
+//! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
+//!   the app supplies.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -21,11 +25,15 @@
 //! the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`]) give
 //! the same classes.
 
+mod action_group;
 mod head;
+mod icon_button;
 mod layout;
 mod library_toolbar;
 
+pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use head::{Head, HeadProps, PageHead, SectionHead};
+pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
     ToolbarProps, ToolbarSpacer, card, cluster, stack, toolbar,

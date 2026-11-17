@@ -1,0 +1,24 @@
+// The icon button (src/icon_button.rs).
+//
+// - `.iconed`: a button with an icon, the icon centred on the label's
+//   line whatever the button's height. A type selector's weight only, so a
+//   component that lays out its own button keeps its own arrangement.
+//   `.trailing`: the icon follows the label. `.icon` with it: an icon
+//   alone, as wide as the control is high.
+
+button:where(.iconed:not([hidden])) {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: 0.4em;
+
+    > icon {
+        vertical-align: 0;
+    }
+
+    &:where(.icon) {
+        min-width: var(--control-height);
+        padding-inline: var(--space-2);
+        line-height: 1;
+    }
+}
