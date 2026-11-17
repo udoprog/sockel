@@ -378,6 +378,8 @@ page can still override them at runtime.
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$selection-bar-ground`, `$selection-bar-rule`, `$selection-bar-padding`, `$selection-bar-min-height`, `$selection-bar-radius`, `$selection-bar-margin`, `$selection-bar-text` | `null`, `var(--space-px) solid var(--border)`, `var(--space-2) 0`, a control's height plus its padding and rule, `null`, `null`, `null` (a selection bar's background, top rule, padding, least height, corners, margin and font size: a tinted chip instead of a ruled band) |
+| `$pick-row-height`, `$pick-row-padding`, `$pick-row-gap`, `$pick-row-radius`, `$pick-row-text`, `$pick-row-hover-fill` | `var(--control-height)`, `0 var(--space-3)`, `var(--space-3)`, `var(--radius-sm)`, `null` (inherited), 4% of `--text` (a pick row's least height, padding, gap, corners, font size and hover fill) |
+| `$pick-row-detail-ink`, `$pick-row-detail-text` | 70% of the row's colour, `var(--text-sm)` (its detail's colour and size) |
 | `$selection-bar-inset-padding`, `$selection-bar-inset-margin` | `var(--space-3)`, `null` (an `inset` bar's side padding and margin) |
 | `$selection-bar-count-ink`, `$selection-bar-count-weight`, `$selection-bar-count-padding` | `null` each (its count's colour, weight and start padding) |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |

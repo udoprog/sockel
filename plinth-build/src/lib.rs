@@ -883,6 +883,36 @@ mod tests {
     }
 
     #[test]
+    fn a_pick_row_takes_its_look_from_settings() {
+        let tuned = Config::new()
+            .with("pick-row-height", "36px")
+            .with("pick-row-padding", "0 6px")
+            .with("pick-row-gap", "8px")
+            .with("pick-row-radius", "8px")
+            .with("pick-row-text", "13px")
+            .with("pick-row-hover-fill", "var(--hover)")
+            .with("pick-row-detail-ink", "var(--hint)")
+            .with("pick-row-detail-text", "11px")
+            .build()
+            .unwrap();
+        let row = declarations(&tuned.css, ".plinth-pick-row");
+        for line in [
+            "gap: 8px",
+            "min-height: 36px",
+            "padding: 0 6px",
+            "border-radius: 8px",
+            "font-size: 13px",
+        ] {
+            assert!(row.contains(&line.to_owned()), "{line} in {row:?}");
+        }
+        assert!(tuned.css.contains("--pick-fill: var(--hover)"));
+        let detail = declarations(&tuned.css, ".plinth-pick-row-detail");
+        for line in ["color: var(--hint)", "font-size: 11px"] {
+            assert!(detail.contains(&line.to_owned()), "{line} in {detail:?}");
+        }
+    }
+
+    #[test]
     fn a_selection_bar_takes_its_look_from_settings() {
         let plain = Config::new().build().unwrap();
         let bar = declarations(&plain.css, ".plinth-selection-bar");

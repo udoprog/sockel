@@ -122,23 +122,24 @@
 
     display: flex;
     align-items: center;
-    gap: var(--space-3);
+    gap: base.$pick-row-gap;
     box-sizing: border-box;
     width: 100%;
     min-width: 0;
-    min-height: var(--control-height);
+    min-height: base.$pick-row-height;
     margin: 0;
-    padding: 0 var(--space-3);
+    padding: base.$pick-row-padding;
     @include base.reserved-border;
-    border-radius: var(--radius-sm);
+    border-radius: base.$pick-row-radius;
     background: var(--pick-fill);
     color: inherit;
     font: inherit;
+    font-size: base.$pick-row-text;
     text-align: start;
     cursor: pointer;
 
     &:hover:not(:disabled) {
-        --pick-fill: color-mix(in srgb, var(--text) 4%, transparent);
+        --pick-fill: #{base.$pick-row-hover-fill};
     }
 
     &:disabled {
@@ -170,8 +171,8 @@
     @include base.truncate;
 
     // Follows the row's colour, so a chosen row's detail stays readable.
-    color: color-mix(in srgb, currentcolor 70%, transparent);
-    font-size: var(--text-sm);
+    color: base.$pick-row-detail-ink;
+    font-size: base.$pick-row-detail-text;
 }
 
 .plinth-selection-bar {

@@ -219,6 +219,17 @@ $selection-bar-count-ink: null !default;
 $selection-bar-count-weight: null !default;
 $selection-bar-count-padding: null !default;
 
+// A pick row's least height, padding, gap, corners, type and hover fill,
+// and its detail's ink and size; `null` leaves the type inherited.
+$pick-row-height: var(--control-height) !default;
+$pick-row-padding: 0 var(--space-3) !default;
+$pick-row-gap: var(--space-3) !default;
+$pick-row-radius: var(--radius-sm) !default;
+$pick-row-text: null !default;
+$pick-row-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
+$pick-row-detail-ink: color-mix(in srgb, currentcolor 70%, transparent) !default;
+$pick-row-detail-text: var(--text-sm) !default;
+
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
 $text-3xs: 0.625rem !default;
