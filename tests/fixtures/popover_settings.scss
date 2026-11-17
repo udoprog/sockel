@@ -1,0 +1,11 @@
+// A project whose popovers are rounder, give their scrollbar's room to
+// the content, whose sheets keep only their top edge, and whose confirms
+// are spaced wider.
+@use "../../style/tokens" with (
+    $popover-radius: 12px,
+    $popover-sheet-edge: top,
+    $popover-scroll-gutter: auto,
+    $confirm-gap: 1rem
+);
+@use "../../style/popover";
+@use "../../style/confirm";

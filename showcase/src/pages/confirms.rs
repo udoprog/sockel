@@ -257,7 +257,21 @@ struct PopoverDemoProps {
     open: bool,
     on_open: Callback<bool>,
     button: bool,
+    compact: bool,
 }
+
+/// A compact confirm's line: the name it asks about, in bold, one item
+/// with its question mark.
+fn subject(details: bool) -> Html {
+    if details {
+        html! { <span><strong>{ "Quarterly report" }</strong>{ "?" }</span> }
+    } else {
+        Html::default()
+    }
+}
+
+const SUBJECT_CODE: &str =
+    "html! { <span><strong>{ \"Quarterly report\" }</strong>{ \"?\" }</span> }";
 
 #[function_component]
 fn PopoverDemo(props: &PopoverDemoProps) -> Html {
@@ -287,6 +301,14 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
                         align={props.align} on_accept={close.clone()} busy={s.busy}>
                         { "Delete" }
                     </ConfirmButton>
+                } else if props.compact {
+                    <Button node_ref={anchor.clone()} variant={ButtonVariant::Danger}
+                        expanded={Some(open)} haspopup="dialog" onclick={ask}>{ "Delete" }</Button>
+                    <ConfirmPopover {anchor} {open} compact=true title={s.title()}
+                        explanation="Delete" details={subject(s.details)}
+                        explanation_icon={s.icon()} accept="Yes" cancel_label="No"
+                        danger={s.danger} busy={s.busy} error={s.error()} side={props.side}
+                        align={props.align} on_accept={close.clone()} on_cancel={close} />
                 } else {
                     <Button node_ref={anchor.clone()} variant={ButtonVariant::Danger}
                         expanded={Some(open)} haspopup="dialog" onclick={ask}>{ "Delete" }</Button>
@@ -307,6 +329,7 @@ pub fn ConfirmPopoverPage() -> Html {
     let side = use_state(Side::default);
     let align = use_state(PopoverAlign::default);
     let button = use_state(|| false);
+    let compact = use_state(|| false);
     let open = use_state(|| false);
     let setup = common.setup();
 
@@ -316,6 +339,7 @@ pub fn ConfirmPopoverPage() -> Html {
             <Select<Side> label="side" options={SIDES} value={*side} on_change={bind(&side)} />
             <Select<PopoverAlign> label="align" options={ALIGNS} value={*align} on_change={bind(&align)} />
             <Toggle label="ConfirmButton" value={*button} on_change={bind(&button)} />
+            <Toggle label="compact" value={*compact} on_change={bind(&compact)} />
             <Toggle label="open" value={*open} on_change={bind(&open)} />
         </>
     };
@@ -329,6 +353,27 @@ pub fn ConfirmPopoverPage() -> Html {
                 .variant("align", *align)
                 .expr("on_accept", "on_accept")
                 .line("{ \"Delete\" }"),
+        )
+    } else if *compact {
+        snippet(
+            &["let anchor = use_node_ref();".to_owned()],
+            El::new("ConfirmPopover")
+                .expr("anchor", "anchor")
+                .expr("open", "*open")
+                .flag("compact", true)
+                .text("title", &setup.title())
+                .text("explanation", "Delete")
+                .expr_if(setup.details, "details", SUBJECT_CODE)
+                .expr_if(setup.icon, "explanation_icon", ICON_CODE)
+                .text("accept", "Yes")
+                .text("cancel_label", "No")
+                .expr_if(!setup.danger, "danger", "false")
+                .flag("busy", setup.busy)
+                .expr_if(setup.error, "error", "Some(\"Could not delete.\".into())")
+                .variant("side", *side)
+                .variant("align", *align)
+                .expr("on_accept", "on_accept")
+                .expr("on_cancel", "on_cancel"),
         )
     } else {
         snippet(
@@ -347,7 +392,7 @@ pub fn ConfirmPopoverPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <PopoverDemo {setup} side={*side} align={*align} open={*open}
-                on_open={bind(&open)} button={*button} />
+                on_open={bind(&open)} button={*button} compact={*compact} />
         </Demo>
     }
 }

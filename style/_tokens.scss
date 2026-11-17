@@ -194,6 +194,13 @@ $menu-item-padding: null !default;
 $menu-item-gap: null !default;
 $menu-item-radius: null !default;
 $menu-item-hover-fill: null !default;
+// A popover's corners, the edges its sheet keeps and its body's
+// `scrollbar-gutter` (as the dialog's).
+$popover-radius: var(--radius-md) !default;
+$popover-sheet-edge: all !default;
+$popover-scroll-gutter: stable !default;
+// The room between what a confirm says and its buttons.
+$confirm-gap: var(--space-3) !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.

@@ -14,7 +14,9 @@
 //   `-scrim` behind it.
 // - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom
 //   over the scrim, with its head.
-// - Settings: `$popover-padding` (the body's) and `$popover-shadow`.
+// - Settings: `$popover-padding` (the body's), `$popover-shadow`,
+//   `$popover-radius`, `$popover-sheet-edge` (`top`: a sheet's top edge
+//   alone) and `$popover-scroll-gutter` (the body's `scrollbar-gutter`).
 
 @use "tokens" as base;
 
@@ -38,7 +40,7 @@
     max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--space-2)));
     max-height: var(--popover-max-height, none);
     @include base.reserved-border(var(--border));
-    border-radius: var(--radius-md);
+    border-radius: base.$popover-radius;
     background: var(--surface-raised);
     color: var(--text);
     box-shadow: base.$popover-shadow;
@@ -51,6 +53,9 @@
 
 .plinth-popover-body {
     @include base.scroll-area;
+    @if base.$popover-scroll-gutter != stable {
+        scrollbar-gutter: base.$popover-scroll-gutter;
+    }
     flex: 1 1 auto;
     padding: base.$popover-padding;
 }
@@ -82,6 +87,9 @@
         max-width: none;
         max-height: var(--popover-sheet-height);
         border-bottom-color: transparent;
+        @if base.$popover-sheet-edge == top {
+            border-width: var(--space-px) 0 0;
+        }
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         padding-bottom: env(safe-area-inset-bottom);
     }

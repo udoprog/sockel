@@ -1443,10 +1443,11 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "confirm-popover",
         title: "ConfirmPopover",
-        about: "A confirm beside the button that asked, in a popover of a fixed width: the focus on Cancel when accepting destroys, Escape and a press outside cancel and focus returns to the button. ConfirmButton is a Button that opens it. A sheet on a phone.",
+        about: "A confirm beside the button that asked, in a popover of a fixed width: the focus on Cancel when accepting destroys, Escape and a press outside cancel and focus returns to the button. Compact asks on one line with two named icons, as wide as it says. ConfirmButton is a Button that opens it. A sheet on a phone.",
         covers: &[
             "ConfirmPopover",
             "ConfirmPopoverProps",
+            "confirm_popover",
             "ConfirmButton",
             "ConfirmButtonProps",
         ],

@@ -78,3 +78,24 @@ fn dialog_settings() {
     );
     assert!(!defaults.contains("border-width: var(--space-px) 0 0;"));
 }
+
+#[test]
+fn popover_and_confirm_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(
+        defaults.contains("border-radius: var(--radius-md);\n  background: var(--surface-raised);")
+    );
+    assert!(defaults.contains("flex-direction: column;\n  gap: var(--space-3);\n  min-width: 0;"));
+    let css = compile(&sass, "tests/fixtures/popover_settings.scss");
+    assert!(css.contains("border-radius: 12px;\n  background: var(--surface-raised);"));
+    assert!(css.contains("gap: 1rem;"));
+    assert!(css.contains("scrollbar-gutter: stable;\n  scrollbar-gutter: auto;"));
+    assert!(!defaults.contains("scrollbar-gutter: auto;\n  flex: 1 1 auto;"));
+    assert!(
+        css.contains("border-bottom-color: transparent;\n    border-width: var(--space-px) 0 0;")
+    );
+    assert!(css.contains(
+        ".plinth-confirm-popover.plinth-compact {\n    --popover-max-width: 100vw;\n    width: max-content;"
+    ));
+}

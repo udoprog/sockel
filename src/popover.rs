@@ -689,6 +689,9 @@ pub struct PopoverProps {
     /// (`.plinth-sheet`); on by default.
     #[prop_or(true)]
     pub sheet: bool,
+    /// The sheet's head, its title and close button; on by default.
+    #[prop_or(true)]
+    pub head: bool,
     /// Its accessible name, and the sheet's heading.
     #[prop_or_default]
     pub title: Option<AttrValue>,
@@ -763,7 +766,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
             p.left, p.top, p.max_height
         )
     });
-    let head = (props.sheet && props.title.is_some()).then(|| {
+    let head = (props.sheet && props.head && props.title.is_some()).then(|| {
         let close = props.on_dismiss.reform(|_: MouseEvent| Dismiss::Close);
         html! {
             <div class={class::POPOVER_HEAD}>
@@ -1022,7 +1025,7 @@ mod tests {
         assert_eq!(names(popover(false, true)), [class::POPOVER, class::PLACED]);
     }
 
-    fn render(open: bool, sheet: bool, title: Option<&'static str>) -> String {
+    fn render_with(open: bool, sheet: bool, head: bool, title: Option<&'static str>) -> String {
         let props = PopoverProps {
             anchor: NodeRef::default(),
             open,
@@ -1031,6 +1034,7 @@ mod tests {
             align: PopoverAlign::Start,
             within: None,
             sheet,
+            head,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
             focus: None,
@@ -1045,6 +1049,10 @@ mod tests {
                 .hydratable(false)
                 .render(),
         )
+    }
+
+    fn render(open: bool, sheet: bool, title: Option<&'static str>) -> String {
+        render_with(open, sheet, true, title)
     }
 
     #[test]
@@ -1067,5 +1075,13 @@ mod tests {
         assert!(!html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(!html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains(">Body</div>"), "{html}");
+    }
+
+    #[test]
+    fn a_sheet_without_its_head_keeps_its_scrim_and_name() {
+        let html = render_with(true, true, false, Some("Filters"));
+        assert!(!html.contains(class::POPOVER_HEAD), "{html}");
+        assert!(html.contains(class::POPOVER_SCRIM), "{html}");
+        assert!(html.contains("aria-label=\"Filters\""), "{html}");
     }
 }

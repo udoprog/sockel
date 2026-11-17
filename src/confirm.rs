@@ -12,8 +12,8 @@ use yew::prelude::*;
 
 use crate::popover::focus_lost;
 use crate::{
-    ActionGroup, Button, ButtonSize, ButtonVariant, Dialog, DialogDismiss, Dismiss, Notice,
-    Popover, PopoverAlign, Side, Tone, class,
+    ActionGroup, Button, ButtonSize, ButtonVariant, Dialog, DialogDismiss, Dismiss, Glyph, Icon,
+    Notice, Popover, PopoverAlign, Side, Tone, class,
 };
 
 fn accept_variant(danger: bool) -> ButtonVariant {
@@ -182,6 +182,15 @@ pub struct ConfirmPopoverProps {
     pub side: Side,
     #[prop_or_default]
     pub align: PopoverAlign,
+    /// What it says on one line (`explanation`, then `details`, such as a
+    /// name in bold) above Cancel and the accepting button joined as their
+    /// icons alone, named by `cancel_label` and `accept`. As wide as what it
+    /// says, up to the viewport; on a phone a sheet without a head.
+    #[prop_or_default]
+    pub compact: bool,
+    /// An icon before what a compact confirm says.
+    #[prop_or_default]
+    pub explanation_icon: Option<Html>,
     pub on_accept: Callback<()>,
     /// Cancel, Escape and a press outside; not while busy.
     pub on_cancel: Callback<()>,
@@ -191,10 +200,48 @@ pub struct ConfirmPopoverProps {
     pub testid: Option<AttrValue>,
 }
 
+/// A confirm popover's classes: `compact` for one as wide as what it says.
+pub fn confirm_popover(compact: bool) -> Classes {
+    classes!(class::CONFIRM_POPOVER, compact.then_some(class::COMPACT))
+}
+
+/// A compact confirm: one line, then Cancel (`Glyph::Close`) and the
+/// accepting button (`icon`, else `Glyph::Check`) joined, icons alone.
+fn compact(props: &ConfirmPopoverProps, cancel_ref: &NodeRef, accept_ref: &NodeRef) -> Html {
+    let accept_icon = props
+        .icon
+        .clone()
+        .unwrap_or_else(|| html! { <Icon glyph={Glyph::Check} /> });
+
+    html! {
+        <div class={class::CONFIRM}>
+            <p class={classes!(class::CONFIRM_TEXT, class::CONFIRM_LINE)}>
+                { props.explanation_icon.clone().unwrap_or_default() }
+                <span>{ props.explanation.clone() }</span>
+                { props.details.clone() }
+            </p>
+            if let Some(error) = &props.error {
+                <Notice tone={Tone::Danger}>{ error.clone() }</Notice>
+            }
+            <div class={class::CONFIRM_PAIR} role="group">
+                <Button icon={html! { <Icon glyph={Glyph::Close} /> }} disabled={props.busy}
+                    label={props.cancel_label.clone()} title={props.cancel_label.clone()}
+                    node_ref={cancel_ref.clone()} class={class::CONFIRM_NO}
+                    onclick={props.on_cancel.reform(|_: MouseEvent| ())} testid="confirm-cancel" />
+                <Button variant={accept_variant(props.danger)} busy={props.busy}
+                    icon={accept_icon} label={props.accept.clone()} title={props.accept.clone()}
+                    node_ref={accept_ref.clone()} class={class::CONFIRM_YES}
+                    onclick={props.on_accept.reform(|_: MouseEvent| ())} testid="confirm-accept" />
+            </div>
+        </div>
+    }
+}
+
 /// A confirm beside the element that asked, in a [`Popover`] a fixed width
-/// wide: the explanation, then Cancel and the accepting button. Focus goes
-/// to Cancel when accepting destroys something; Escape and a press outside
-/// cancel, and focus returns to the anchor. A sheet on a phone.
+/// wide: the explanation, then Cancel and the accepting button, or with
+/// `compact` one line and two icons. Focus goes to Cancel when accepting
+/// destroys something; Escape and a press outside cancel, and focus returns
+/// to the anchor. A sheet on a phone.
 #[function_component]
 pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
     let (cancel_ref, accept_ref) = (use_node_ref(), use_node_ref());
@@ -207,17 +254,28 @@ pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
         })
     };
 
+    let content = if props.compact {
+        compact(props, &cancel_ref, &accept_ref)
+    } else {
+        html! {
+            <>
+                { body(&props.explanation, &props.details, props.error.as_ref()) }
+                <ActionGroup end=true>
+                    { buttons(&props.cancel_label, &props.accept, &props.icon, props.danger,
+                        props.busy, &props.on_cancel, &props.on_accept, &cancel_ref, &accept_ref) }
+                </ActionGroup>
+            </>
+        }
+    };
+
     html! {
         <Popover anchor={props.anchor.clone()} open={props.open} {on_dismiss}
             side={props.side} align={props.align} title={props.title.clone()}
+            head={!props.compact}
             focus={if props.danger { cancel_ref.clone() } else { accept_ref.clone() }}
-            class={classes!(class::CONFIRM_POPOVER, props.class.clone())}
+            class={classes!(confirm_popover(props.compact), props.class.clone())}
             testid={props.testid.clone()}>
-            { body(&props.explanation, &props.details, props.error.as_ref()) }
-            <ActionGroup end=true>
-                { buttons(&props.cancel_label, &props.accept, &props.icon, props.danger,
-                    props.busy, &props.on_cancel, &props.on_accept, &cancel_ref, &accept_ref) }
-            </ActionGroup>
+            { content }
         </Popover>
     }
 }
@@ -712,5 +770,64 @@ mod tests {
             "{html}"
         );
         assert!(!render_confirm(true, false, false).contains(class::DANGER));
+    }
+
+    #[test]
+    fn compact_is_a_modifier() {
+        assert_eq!(names(confirm_popover(false)), [class::CONFIRM_POPOVER]);
+        assert_eq!(
+            names(confirm_popover(true)),
+            [class::CONFIRM_POPOVER, class::COMPACT]
+        );
+    }
+
+    fn render_popover(compact: bool) -> String {
+        let props = ConfirmPopoverProps {
+            anchor: NodeRef::default(),
+            open: true,
+            title: "Remove Notes".into(),
+            explanation: "Remove".into(),
+            details: html! { <strong>{ "Notes" }</strong> },
+            accept: "Yes".into(),
+            cancel_label: "No".into(),
+            icon: None,
+            danger: true,
+            busy: false,
+            error: None,
+            side: Side::Below,
+            align: PopoverAlign::Start,
+            compact,
+            explanation_icon: None,
+            on_accept: Callback::noop(),
+            on_cancel: Callback::noop(),
+            class: Classes::new(),
+            testid: None,
+        };
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<ConfirmPopover>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn compact_asks_on_one_line_with_two_named_icons() {
+        let html = render_popover(true);
+        for part in [
+            class::CONFIRM_LINE,
+            class::CONFIRM_PAIR,
+            class::CONFIRM_NO,
+            class::CONFIRM_YES,
+            "aria-label=\"No\"",
+            "title=\"Yes\"",
+            "<strong>Notes</strong>",
+        ] {
+            assert!(html.contains(part), "{part}: {html}");
+        }
+        assert!(!html.contains(class::POPOVER_HEAD), "{html}");
+        assert!(!html.contains(">No<"), "{html}");
+        let full = render_popover(false);
+        assert!(full.contains(class::POPOVER_HEAD), "{full}");
+        assert!(!full.contains(class::CONFIRM_PAIR), "{full}");
     }
 }

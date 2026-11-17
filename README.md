@@ -293,6 +293,7 @@ Breakpoints and the component settings (`$card-padding`,
 `$dialog-body-gap`, `$dialog-shadow`, `$dialog-head-padding`, `$dialog-head-rule`,
 `$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$dialog-centred`,
 `$dialog-max-height`, `$dialog-scroll-gutter`, `$dialog-sheet-edge`, `$popover-padding`, `$popover-shadow`,
+`$popover-radius`, `$popover-sheet-edge`, `$popover-scroll-gutter`, `$confirm-gap`,
 `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
@@ -361,6 +362,9 @@ page can still override them at runtime.
 | `$dialog-scroll-gutter` | `stable` (the body keeps its scrollbar's room; `auto` gives it to the content until it scrolls) |
 | `$dialog-sheet-edge` | `all` (a sheet keeps its side edges, its bottom transparent; `top`: only its top edge) |
 | `$popover-padding`, `$popover-shadow` | `var(--space-3)`, `var(--shadow-1)` (a popover's body padding and its shadow, a hover card's included) |
+| `$popover-radius`, `$popover-sheet-edge` | `var(--radius-md)`, `all` (a popover's corners; the edges its sheet keeps, as `$dialog-sheet-edge`) |
+| `$popover-scroll-gutter` | `stable` (the body keeps its scrollbar's room, so a popover is as wide scrolling or not; `auto` gives it to the content until it scrolls) |
+| `$confirm-gap` | `var(--space-3)` (between what a confirm says and its buttons) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$listbox-max-width`, `$listbox-active-fill` | `var(--popover-max-width)`, `color-mix(in srgb, var(--text) 7%, transparent)` (a listbox's widest, a Select's list included, and its active row's fill: the menu's) |
@@ -948,7 +952,8 @@ the owner cuts it, and its events still bubble through the owner. Props:
   (`PopoverAlign::Start`, `Center`, `End`).
 - `sheet` (on by default, `plinth::class::SHEET`): below `$sheet-breakpoint`
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
-  `title` as its heading and a close button (`close_label`, "Close").
+  `title` as its heading and a close button (`close_label`, "Close"), unless
+  `head` is off (on by default).
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
 - `within` (a selector): placed and kept inside the anchor's closest
@@ -1149,6 +1154,15 @@ cancelled, when another question replaced it, or when no host is mounted.
 the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
 (Cancel, Escape and a press outside; not while busy). The focus goes in once
 it is placed (`Popover`'s `focus` prop) and returns to the anchor.
+With `compact`, it asks on one line, for a row's or a toolbar's own
+"Remove Notes?": `explanation_icon` (an icon before it), `explanation`, then
+`details` on the same line (such as the name in bold), above Cancel and the
+accepting button joined at the end as their icons alone, `Glyph::Close` and
+`icon` (else `Glyph::Check`), named (`aria-label` and `title`) by
+`cancel_label` and `accept`, so an app passes its own words for both. It is
+as wide as what it says, up to the viewport's width (not
+`--popover-max-width`, so the line is not cut short), and a full-width sheet on a phone
+without the head; the two are joined as an `InputGroup`'s members are.
 `ConfirmButton` is a `Button` (`variant`, `size`, `icon`, `busy`, `disabled`)
 that opens one beside itself and calls `on_accept` once accepted.
 
@@ -1162,15 +1176,18 @@ returns to the button; a click does not bubble to a clickable row.
 
 Every one takes `class`, and `testid` (`confirm-cancel` and `confirm-accept`
 name the buttons). Classes: `CONFIRM` and `CONFIRM_TEXT` (the body),
-`CONFIRM_POPOVER`, `CONFIRM_INLINE` with its parts `CONFIRM_IDLE` (the button)
-and `CONFIRM_ASK` (No and Yes), and `AWAY` on the part not shown;
-`confirm_inline(part, away)` gives them. No new tokens.
+`CONFIRM_POPOVER` with `COMPACT` (`confirm_popover(compact)` gives them) and
+the compact parts `CONFIRM_LINE`, `CONFIRM_PAIR`, `CONFIRM_NO` and
+`CONFIRM_YES`, `CONFIRM_INLINE` with
+its parts `CONFIRM_IDLE` (the button) and `CONFIRM_ASK` (No and Yes), and
+`AWAY` on the part not shown; `confirm_inline(part, away)` gives them.
+Setting: `$confirm-gap` (between what it says and its buttons).
 
 Size guarantees: `ConfirmInline` lays the button and the No and Yes in one
 grid cell and hides (`visibility`) the one not shown, so its box is the same
 asking or not: as wide as the wider of the two, as high as the button, and a
 row it ends never moves. `ConfirmPopover` is `--popover-max-width` wide
-whatever it says, and a flip moves it without reflowing; the page behind a
+whatever it says (a compact one is as wide as its line, fixed while open), and a flip moves it without reflowing; the page behind a
 `Confirm` holds still, and the dialog hangs from the top, so an error line
 only grows its bottom edge. A `ConfirmButton` keeps the button's box open or
 closed.
