@@ -692,6 +692,10 @@ pub struct PopoverProps {
     /// The sheet's head, its title and close button; on by default.
     #[prop_or(true)]
     pub head: bool,
+    /// Tab stays inside it, as in a dialog: for one that asks for an
+    /// answer, such as a confirm.
+    #[prop_or_default]
+    pub trap: bool,
     /// Its accessible name, and the sheet's heading.
     #[prop_or_default]
     pub title: Option<AttrValue>,
@@ -766,6 +770,16 @@ pub fn Popover(props: &PopoverProps) -> Html {
             p.left, p.top, p.max_height
         )
     });
+    let onkeydown = props.trap.then(|| {
+        let node = node.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            if e.key() == "Tab"
+                && let Some(root) = node.cast::<Element>()
+            {
+                crate::dialog::wrap_tab(&root, &e);
+            }
+        })
+    });
     let head = (props.sheet && props.head && props.title.is_some()).then(|| {
         let close = props.on_dismiss.reform(|_: MouseEvent| Dismiss::Close);
         html! {
@@ -785,7 +799,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
             }
             <div ref={node}
                 class={classes!(popover(props.sheet, placed.is_some()), props.class.clone())}
-                role="dialog" aria-label={props.title.clone()} {style}
+                role="dialog" aria-label={props.title.clone()} {style} {onkeydown}
                 onpointerenter={props.on_pointer_enter.clone()}
                 onpointerleave={props.on_pointer_leave.clone()}
                 data-testid={props.testid.clone()}>
@@ -1035,6 +1049,7 @@ mod tests {
             within: None,
             sheet,
             head,
+            trap: false,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
             focus: None,

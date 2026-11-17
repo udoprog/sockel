@@ -271,7 +271,7 @@ pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
     html! {
         <Popover anchor={props.anchor.clone()} open={props.open} {on_dismiss}
             side={props.side} align={props.align} title={props.title.clone()}
-            head={!props.compact}
+            head={!props.compact} trap=true
             focus={if props.danger { cancel_ref.clone() } else { accept_ref.clone() }}
             class={classes!(confirm_popover(props.compact), props.class.clone())}
             testid={props.testid.clone()}>

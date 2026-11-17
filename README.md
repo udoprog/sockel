@@ -960,6 +960,8 @@ the owner cuts it, and its events still bubble through the owner. Props:
   ancestor matching it, cut to the viewport, rather than the viewport
   alone: a popover raised in one of an app's docked windows stays over
   that window, not its neighbour. Without a match, the viewport.
+- `trap`: Tab stays inside it, from its last control to its first, as in a
+  `Dialog`; for a popover that asks for an answer (`ConfirmPopover` sets it).
 - `on_pointer_enter` and `on_pointer_leave` (`Option<Callback<PointerEvent>>`):
   the pointer over the surface, for an owner that keeps it open while the
   pointer is there (it is in the overlay layer, so the owner's own
@@ -1153,7 +1155,8 @@ cancelled, when another question replaced it, or when no host is mounted.
 `align` as `Popover`, `title` (its name, and the sheet's heading on a phone),
 the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
 (Cancel, Escape and a press outside; not while busy). The focus goes in once
-it is placed (`Popover`'s `focus` prop) and returns to the anchor.
+it is placed (`Popover`'s `focus` prop), Tab stays inside it (`trap`), and
+focus returns to the anchor.
 With `compact`, it asks on one line, for a row's or a toolbar's own
 "Remove Notes?": `explanation_icon` (an icon before it), `explanation`, then
 `details` on the same line (such as the name in bold), above Cancel and the

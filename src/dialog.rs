@@ -127,6 +127,26 @@ fn focusable(root: &Element) -> Vec<HtmlElement> {
         .collect()
 }
 
+/// Keeps Tab inside `root`: from its last control to its first, and Shift+Tab
+/// the other way; from outside it, into it.
+pub(crate) fn wrap_tab(root: &Element, e: &web_sys::KeyboardEvent) {
+    let all = focusable(root);
+    let (Some(first), Some(last)) = (all.first(), all.last()) else {
+        e.prevent_default();
+        return;
+    };
+    let active = root.owner_document().and_then(|d| d.active_element());
+    let at = |el: &HtmlElement| active.as_ref().is_some_and(|a| el.is_same_node(Some(a)));
+    let inside = active.as_ref().is_some_and(|a| root.contains(Some(a)));
+    if e.shift_key() && (at(first) || !inside) {
+        e.prevent_default();
+        focus(last);
+    } else if !e.shift_key() && (at(last) || !inside) {
+        e.prevent_default();
+        focus(first);
+    }
+}
+
 fn focus(element: &HtmlElement) {
     let options = web_sys::FocusOptions::new();
     options.set_prevent_scroll(true);
@@ -239,27 +259,8 @@ pub fn Dialog(props: &DialogProps) -> Html {
                                 }
                             }
                             "Tab" => {
-                                let Some(panel) = panel_ref.cast::<Element>() else {
-                                    return;
-                                };
-                                let all = focusable(&panel);
-                                let (Some(first), Some(last)) = (all.first(), all.last()) else {
-                                    e.prevent_default();
-                                    return;
-                                };
-                                let active =
-                                    panel.owner_document().and_then(|d| d.active_element());
-                                let at = |el: &HtmlElement| {
-                                    active.as_ref().is_some_and(|a| el.is_same_node(Some(a)))
-                                };
-                                let inside =
-                                    active.as_ref().is_some_and(|a| panel.contains(Some(a)));
-                                if e.shift_key() && (at(first) || !inside) {
-                                    e.prevent_default();
-                                    focus(last);
-                                } else if !e.shift_key() && (at(last) || !inside) {
-                                    e.prevent_default();
-                                    focus(first);
+                                if let Some(panel) = panel_ref.cast::<Element>() {
+                                    wrap_tab(&panel, e);
                                 }
                             }
                             _ => {}
