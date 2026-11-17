@@ -94,7 +94,7 @@ fn Scene() -> Html {
                 actions={html! { <Button variant={ButtonVariant::Primary} onclick={done}>{ "Done" }</Button> }}>
                 <Stack>
                     <p class={class::PROSE}>
-                        { "Escape closes the innermost first. The toast's Undo works over the dialog. A menu opened here opens under the dialog, a known fault (card c4e229ed)." }
+                        { "Escape closes the innermost first. The toast's Undo works over the dialog." }
                     </p>
                     <Cluster>
                         <Menu text={html! { "A menu" }} label="A menu in the dialog">
