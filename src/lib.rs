@@ -114,6 +114,12 @@
 //! - [`ColorSelect`] (`.color-select`): a swatch face of one width showing the
 //!   chosen colour, opening a grid of the app's palette (data) and an optional
 //!   custom colour, on the select pattern.
+//! - [`SearchSelect`] (`.search-select`): a text field filtering a
+//!   [`Listbox`] of options in groups, loaded here or elsewhere, the list
+//!   one width and `--picker-rows` high, loading or not.
+//! - [`FilterPicker`] (`.filter-picker`): a list's filter button,
+//!   `--filter-width` wide, the first choice and a reserved count of the
+//!   rest, opening a multi-select listbox.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -151,6 +157,7 @@ mod drop_zone;
 mod empty_state;
 mod error_box;
 mod field;
+mod filter_picker;
 mod head;
 mod icon_button;
 mod icons;
@@ -170,6 +177,7 @@ mod reorder;
 mod roving;
 mod rows;
 mod save_bar;
+mod search_select;
 mod secret_input;
 mod select;
 mod selection;
@@ -213,6 +221,9 @@ pub use field::{
     Field, FieldCheck, FieldCheckProps, FieldProps, Fieldset, FieldsetProps, FormRow, FormRows,
     FormRowsProps, field, field_describedby, field_error, form_row, form_rows,
 };
+pub use filter_picker::{
+    FilterChoice, FilterPicker, FilterPickerProps, filter_picker, filter_summary, toggled,
+};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
@@ -252,6 +263,9 @@ pub use rows::{
     row_list, row_list_item,
 };
 pub use save_bar::{SaveBar, SaveBarProps, UnloadGuard, save_bar, unsaved, use_unload_guard};
+pub use search_select::{
+    Listed, SearchOption, SearchSelect, SearchSelectProps, listed, search_matches, search_select,
+};
 pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};
 pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, select};
 pub use selection::{

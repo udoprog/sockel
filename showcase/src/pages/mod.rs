@@ -18,6 +18,7 @@ mod media;
 mod menus;
 mod notices;
 mod pagers;
+mod pickers;
 mod popover;
 mod reorder;
 mod rows;
@@ -563,6 +564,58 @@ pub const PAGES: &[Page] = &[
                 Size::Height,
                 Across::Except(&["size"]),
             ),
+        ],
+    },
+    Page {
+        id: "search-select",
+        title: "SearchSelect",
+        about: "A text field filtering a listbox of options under it, in groups, with details: filtered here, or loaded elsewhere with results for an older query ignored (a loading row stands in). The list is one width and --picker-rows rows high, loading, loaded or empty.",
+        covers: &[
+            "SearchSelect",
+            "SearchSelectProps",
+            "SearchOption",
+            "Listed",
+            "listed",
+            "search_matches",
+            "search_select",
+        ],
+        render: || html! { <pickers::SearchSelectPage /> },
+        holds: &[
+            hold(
+                plinth::class::SEARCH_SELECT,
+                Size::Box,
+                Across::Only(&[
+                    "options",
+                    "Option text",
+                    "invalid",
+                    "disabled",
+                    "focus",
+                    "click",
+                ]),
+            ),
+            hold(
+                plinth::class::SEARCH_SELECT,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "filter-picker",
+        title: "FilterPicker",
+        about: "A list's filter button, --filter-width wide: all, or the first choice and a count of the rest in a slot kept with none. It opens a multi-select listbox, an option for all first; a pick leaves it open.",
+        covers: &[
+            "FilterPicker",
+            "FilterPickerProps",
+            "FilterChoice",
+            "filter_picker",
+            "filter_summary",
+            "toggled",
+        ],
+        render: || html! { <pickers::FilterPickerPage /> },
+        holds: &[
+            hold(plinth::class::FILTER_PICKER, Size::Box, Across::All),
+            hold(plinth::class::FILTER_PICKER_COUNT, Size::Box, Across::All),
         ],
     },
     Page {

@@ -16,6 +16,7 @@
 //   height and the strength of its overlay.
 // - `--avatar-sm`, `-md`, `-lg`, `-xl`: an avatar's fixed sizes.
 // - `--filter-width`: a list's filter button, one width whatever it says.
+// - `--picker-rows`: the rows a searching list's height holds, loading or loaded.
 // - `--field-label-width`: the label column of wide-label `FormRows`;
 //   `--field-message-line` and `--field-error-lines`: the line a field's hint and
 //   error are set on, and how many lines its reserved error line holds.
@@ -143,6 +144,7 @@ $switch-width: 2.5rem !default;
 $switch-height: 1.5rem !default;
 $choice-width: 6rem !default;
 $filter-width: 10.5rem !default;
+$picker-rows: 6 !default;
 $field-label-width: 12rem !default;
 $field-message-line: 1rem !default;
 $field-error-lines: 1 !default;
@@ -252,6 +254,8 @@ $sheet-breakpoint: "phone" !default;
     --choice-width: #{$choice-width};
     // A library page's filter button (`.picker.filter`).
     --filter-width: #{$filter-width};
+    // How many rows a searching list keeps room for (`.plinth-search-select-list`).
+    --picker-rows: #{$picker-rows};
     // A field's label column, and its hint and error line (`.plinth-field`).
     --field-label-width: #{$field-label-width};
     --field-message-line: #{$field-message-line};

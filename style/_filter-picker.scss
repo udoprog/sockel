@@ -1,0 +1,50 @@
+// FilterPicker (src/filter_picker.rs): a list's filter, a button
+// (`.plinth-button`, _buttons.scss) opening a listbox (_listbox.scss).
+//
+// - `.plinth-filter-picker`: `--filter-width` wide whatever it says.
+//   `.plinth-on` while anything is chosen: its border in `--accent`. Parts:
+//   `-text` (the first choice or all, cut with an ellipsis), `-count` (`+N`
+//   more, its room kept when there are none, `.plinth-off`), `-chevron`.
+// - `.plinth-filter-picker-list`: the open list, at least `--filter-width`.
+
+@use "tokens" as base;
+
+.plinth-filter-picker {
+    justify-content: flex-start;
+    width: var(--filter-width);
+    max-width: 100%;
+
+    &.plinth-on {
+        border-color: var(--accent);
+    }
+}
+
+.plinth-filter-picker-text {
+    @include base.truncate;
+    flex: 1 1 auto;
+    min-width: 0;
+    text-align: start;
+}
+
+.plinth-filter-picker-count {
+    @include base.numeric;
+    flex: none;
+    min-width: 3ch;
+    color: var(--muted);
+    text-align: end;
+
+    &.plinth-off {
+        visibility: hidden;
+    }
+}
+
+.plinth-filter-picker-chevron {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    color: var(--muted);
+}
+
+.plinth-filter-picker-list {
+    min-width: max(var(--listbox-anchor-width, 0px), var(--filter-width));
+}

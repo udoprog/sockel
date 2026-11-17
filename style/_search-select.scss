@@ -1,0 +1,64 @@
+// SearchSelect (src/search_select.rs): a field's box (`.plinth-input-box`,
+// _inputs.scss) whose text filters a listbox (_listbox.scss) under it.
+//
+// - `.plinth-search-select`: the field, as wide as `--menu-width-wide`, or
+//   its container's with `.plinth-fill`. Sizes, `.plinth-invalid`,
+//   `.plinth-disabled` and `.plinth-busy` are the input box's.
+// - `.plinth-search-select-list`: the open list, `--menu-width-wide` or the
+//   field's width if wider, and `--picker-rows` rows high (or what
+//   `--popover-max-height` leaves), so neither its text nor results
+//   arriving resize it. Parts: `-group` (a run of options under a
+//   `-heading`), `-detail` (muted after an option's label), `-note` (the
+//   loading or no-match row, a row's height).
+
+@use "tokens" as base;
+
+.plinth-search-select {
+    width: var(--menu-width-wide);
+    max-width: 100%;
+
+    &.plinth-fill {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+}
+
+.plinth-search-select-list {
+    width: max(var(--listbox-anchor-width, 0px), var(--menu-width-wide));
+    height: calc(var(--picker-rows) * (var(--control-height) + var(--space-0)) + 2 * var(--nest-inset));
+}
+
+.plinth-search-select-group {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: var(--space-0);
+}
+
+.plinth-search-select-heading {
+    @include base.truncate;
+    flex: none;
+    padding: var(--space-1) var(--space-3) 0;
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+}
+
+.plinth-search-select-detail {
+    @include base.truncate;
+    flex: 0 1 auto;
+    min-width: 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
+.plinth-search-select-note {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-height: var(--control-height);
+    padding: var(--space-1) var(--space-3);
+    color: var(--muted);
+}

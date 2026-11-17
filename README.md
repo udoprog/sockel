@@ -1314,6 +1314,62 @@ menu's surface in a layer that lays nothing out, hidden until placed.
 New tokens: `--swatch-size`, `--color-select-width`. New partial:
 `_color-select.scss`; new classes as above (`SWATCH_ONLY` is new; `NONE`,
 `FILL`, `PLACED`, `ACTIVE` and `OFF` are shared).
+## SearchSelect and FilterPicker
+
+`SearchSelect<T>` is the WAI-ARIA editable combobox with list
+autocomplete: a field (the input box, `SEARCH_SELECT`) whose text filters a
+listbox under it in the overlay layer, focus staying in the field. Props:
+
+- `options: Vec<SearchOption<T>>` (`SearchOption::new(value, label)`,
+  `.detail(..)` muted after the label and searched too, `.icon(html)`,
+  `.group(..)` the heading it is listed under, adjacent options sharing
+  one, `.disabled(..)`), `value: Option<T>` (shown in the field while it is
+  not being edited), `on_change`.
+- `filter` (on by default: `search_matches(options, query)`, label or
+  detail containing the query, ignoring case), `on_search` (each edit, for
+  options loaded elsewhere; turn `filter` off), `answers` (the query the
+  options answer: until it is the one typed they are stale, and a loading
+  row stands in their place, so a late answer to an older query is never
+  shown), `busy` (a spinner in the field, `aria-busy`, and the loading row
+  while there are no options).
+- `label` (the placeholder and accessible name), `loading_label` and
+  `empty_label` (the app's words), `id`, `describedby`, `size`, `fill`
+  (`FILL`), `invalid`, `disabled`, `autofocus`, `class`, `testid` (the
+  list's is it suffixed `-options`).
+
+`listed(options, query, answers, busy, filter)` says what an open list shows
+(`Listed::Loading` or `Listed::Options(indices)`), `search_select(size,
+fill, invalid, disabled, busy)` gives the field's classes. Keyboard:
+ArrowDown and ArrowUp open it; open, the arrows, PageUp and PageDown move
+over the enabled options (Home, End and Space edit the text), Enter picks,
+Escape, Tab or a press outside close it and give the field back what is
+chosen. Typing makes the first match active. Parts:
+`SEARCH_SELECT_LIST`, `SEARCH_SELECT_GROUP` with `SEARCH_SELECT_HEADING`,
+`SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row).
+
+`FilterPicker<T>` is a list's filter, for a `LibraryToolbar`: a button
+(`BUTTON`, `FILTER_PICKER`, `ON` while anything is chosen) saying `all`, or
+the first choice and `+N` more, opening a multi-select listbox
+(`aria-multiselectable`): an option for all, then one per choice, checked
+when chosen. A pick leaves it open. Props: `choices: Vec<FilterChoice<T>>`,
+`chosen: Vec<T>` (in the order chosen), `on_change` (the choices after a
+pick, `toggled(chosen, value)`; empty for all), `label` (the accessible
+name and tooltip before what is chosen), `all` (the app's word, `"All"` by
+default), `disabled`, `class`, `testid`. Keys as a `Select`'s.
+`filter_summary(all, labels)` gives its words and count. Parts:
+`FILTER_PICKER_TEXT`, `FILTER_PICKER_COUNT` (`OFF` with none),
+`FILTER_PICKER_CHEVRON`, `FILTER_PICKER_LIST`.
+
+Size guarantees: SearchSelect's field is `--menu-width-wide` (or its
+container's, `Fill`) and the input box's height, whatever is typed or
+chosen. Its list is `--menu-width-wide` or the field's width if wider,
+never measured from its text, and `--picker-rows` rows high (or what fits
+below the field), so typing, results arriving, loading and no matches
+never resize it; past that it scrolls. FilterPicker is `--filter-width`
+wide from no choice to all of them: its words are cut with an ellipsis and
+its count's room (`3ch`) is kept, hidden, with none. New token:
+`--picker-rows` (`$picker-rows: 6`). New partials: `_search-select.scss`,
+`_filter-picker.scss`.
 
 ## Against jitter: mixins and utilities
 
