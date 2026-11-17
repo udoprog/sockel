@@ -1,0 +1,125 @@
+// Picker, PickerMenu, ChoiceList and PickerDialog (src/picker.rs).
+//
+// - `.plinth-picker`: a field's box (`.plinth-input-box`, _inputs.scss), a
+//   button showing the current option, `--menu-width-wide` wide (small:
+//   `--menu-width`) whatever it shows, `.plinth-fill` its container's. Parts:
+//   `-icon`, `-text` (cut with an ellipsis), `-placeholder` (muted),
+//   `-chevron`.
+// - `.plinth-picker-popup`: the menu's surface (_menu.scss) below its
+//   opener in the overlay layer, `--menu-width-wide` or the opener's width
+//   if wider, hidden until `.plinth-placed`.
+// - `.plinth-choice-list`: a search field (`-search`, an input box) over the
+//   options (`-options`, a listbox of `.plinth-listbox-option` rows,
+//   _listbox.scss) `--picker-rows` rows high whatever matches, so filtering
+//   never resizes it. Option parts beside the listbox's: `-detail` (muted
+//   after the label), `-badge` (at the row's end); `-note`, the no-match
+//   row.
+
+@use "tokens" as base;
+@use "menu";
+
+.plinth-picker {
+    width: var(--menu-width-wide);
+    max-width: 100%;
+    text-align: start;
+    cursor: pointer;
+
+    &.plinth-small {
+        width: var(--menu-width);
+    }
+
+    &.plinth-fill {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    &[aria-expanded="true"] {
+        --input-edge: var(--accent);
+    }
+
+    &.plinth-disabled {
+        cursor: not-allowed;
+    }
+}
+
+.plinth-picker-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    width: var(--glyph-size);
+    height: var(--glyph-size);
+}
+
+.plinth-picker-text,
+.plinth-picker-placeholder {
+    @include base.truncate;
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.plinth-picker-placeholder {
+    color: var(--muted);
+}
+
+.plinth-picker-chevron {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    color: var(--muted);
+}
+
+.plinth-picker-popup {
+    @include menu.list(var(--listbox-anchor-width, 0px), var(--menu-width-wide));
+    width: max(var(--listbox-anchor-width, 0px), var(--menu-width-wide));
+    overflow: hidden;
+}
+
+.plinth-choice-list {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.plinth-choice-list-search {
+    flex: none;
+    width: 100%;
+}
+
+.plinth-choice-list-options {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: var(--space-0);
+    box-sizing: border-box;
+    height: calc(var(--picker-rows) * (var(--control-height) + var(--space-0)));
+    @include base.scroll-area;
+    border-radius: var(--radius-inner, var(--radius-sm));
+    @include base.focus-ring;
+}
+
+.plinth-choice-list-detail {
+    @include base.truncate;
+    flex: 0 1 auto;
+    min-width: 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
+.plinth-choice-list-badge {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    margin-inline-start: auto;
+}
+
+.plinth-choice-list-note {
+    display: flex;
+    flex: none;
+    align-items: center;
+    box-sizing: border-box;
+    min-height: var(--control-height);
+    padding: var(--space-1) var(--space-3);
+    color: var(--muted);
+}

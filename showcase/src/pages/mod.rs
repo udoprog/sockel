@@ -18,6 +18,7 @@ mod media;
 mod menus;
 mod notices;
 mod pagers;
+mod picker;
 mod pickers;
 mod popover;
 mod reorder;
@@ -616,6 +617,74 @@ pub const PAGES: &[Page] = &[
         holds: &[
             hold(plinth::class::FILTER_PICKER, Size::Box, Across::All),
             hold(plinth::class::FILTER_PICKER_COUNT, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "picker",
+        title: "Picker",
+        about: "A field of one width showing the current option, its icon and label, opening a ChoiceList below it: options with icon, mark, detail and badge slots, a search field over them past eight (ranked: labels starting with the text first), --picker-rows rows high however many match.",
+        covers: &[
+            "Picker",
+            "PickerProps",
+            "PickerOption",
+            "PickerVariant",
+            "SEARCH_FROM",
+            "picker",
+            "picker_matches",
+        ],
+        render: || html! { <picker::PickerPage /> },
+        holds: &[
+            hold(
+                plinth::class::PICKER,
+                Size::Box,
+                Across::Only(&[
+                    "options",
+                    "Option text",
+                    "icons",
+                    "always_search",
+                    "invalid",
+                    "disabled",
+                    "focus",
+                    "click",
+                ]),
+            ),
+            hold(
+                plinth::class::PICKER,
+                Size::Height,
+                Across::Except(&["variant"]),
+            ),
+        ],
+    },
+    Page {
+        id: "picker-menu",
+        title: "PickerMenu",
+        about: "A button for an action that takes an option, such as adding one, opening the same searchable ChoiceList as a Picker; a pick closes it.",
+        covers: &["PickerMenu", "PickerMenuProps"],
+        render: || html! { <picker::PickerMenuPage /> },
+        holds: &[hold(
+            plinth::class::BUTTON,
+            Size::Box,
+            Across::Except(&["Option text"]),
+        )],
+    },
+    Page {
+        id: "picker-dialog",
+        title: "PickerDialog",
+        about: "The searchable picker shell for a large set (languages, countries): a dialog holding a ChoiceList, single or multi-select, its search field focused. Shown inline too: filtering, no matches and multi never change its box.",
+        covers: &[
+            "PickerDialog",
+            "PickerDialogProps",
+            "ChoiceList",
+            "ChoiceListProps",
+        ],
+        render: || html! { <picker::PickerDialogPage /> },
+        holds: &[
+            hold(
+                plinth::class::CHOICE_LIST_OPTIONS,
+                Size::Box,
+                Across::Except(&["always_search"]),
+            ),
+            hold(plinth::class::CHOICE_LIST, Size::Width, Across::All),
         ],
     },
     Page {

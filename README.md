@@ -1417,6 +1417,59 @@ its count's room (`3ch`) is kept, hidden, with none. New token:
 `--picker-rows` (`$picker-rows: 6`). New partials: `_search-select.scss`,
 `_filter-picker.scss`.
 
+## Picker, PickerMenu, ChoiceList and PickerDialog
+
+`ChoiceList<T>` is the list every picker opens: a listbox (`CHOICE_LIST`,
+`CHOICE_LIST_OPTIONS`) of `PickerOption<T>`s under a search field
+(`CHOICE_LIST_SEARCH`, an input box) once there are more than
+`SEARCH_FROM` (8) options, or with `always_search`. Focus stays in the
+field (or on the list, without one), naming the active option with
+`aria-activedescendant`: the arrows, PageUp and PageDown move over the
+enabled options and Enter picks; without a field, Home, End, Space and
+type-ahead too. Props: `options`, `value` (checked), `multi`
+(`aria-multiselectable`, `chosen` checked, the owner toggles a pick with
+`toggled`), `on_pick`, `label` (the list's name), `always_search`,
+`search_label` and `empty_label` (the app's words), `autofocus`, `class`,
+`testid` (the field's is it suffixed `-search`, each option's `-option`).
+
+`PickerOption::new(value, label)` with `.detail(..)` (muted after the
+label, searched), `.icon(html)` (a slot kept on every row once any option
+has one), `.badge(html)` (at the row's end), `.keywords(..)` (searched, not
+shown) and `.disabled(..)`. Rows are the listbox's (`LISTBOX_OPTION` with
+its `-mark`, `-icon`, `-label`), plus `CHOICE_LIST_DETAIL`,
+`CHOICE_LIST_BADGE`, and `CHOICE_LIST_NOTE` for no matches.
+`picker_matches(options, query)` finds every word in the label, detail or
+keywords, ignoring case, labels starting with the text first, then labels
+with a word starting with it, then the rest.
+
+`Picker<T>` is a field (the input box, `PICKER`) showing the current
+option's icon and label (`PICKER_ICON`, `PICKER_TEXT`), or the placeholder
+(`PICKER_PLACEHOLDER`), and a chevron (`PICKER_CHEVRON`), opening a
+`ChoiceList` below it in the overlay layer (`PICKER_POPUP`, the menu's
+surface). A pick, Escape, Tab or a press outside closes it; ArrowDown or
+ArrowUp opens it. Props: `options`, `value`, `on_change`, `label` (the
+accessible name, followed by the current option's label), `placeholder`,
+`variant` (`PickerVariant::Field` or `Small`, `SMALL`), `fill` (`FILL`),
+`invalid`, `disabled`, `always_search`, `search_label`, `empty_label`,
+`id`, `describedby`, `class`, `testid` (the popup's is it suffixed
+`-popup`, the list's `-list`). `picker(variant, fill, invalid, disabled)`
+gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
+for an action that takes an option (Add a language): `text`, `icon`,
+`label`, `variant`, `size`, `disabled`, `on_pick`. `PickerDialog<T>` is the
+searchable shell for a large set (languages, countries): a `Dialog`
+(`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
+`ChoiceList` that always searches, its field focused, single (the owner
+closes it on a pick) or `multi`.
+
+Size guarantees: the Picker's field is `--menu-width-wide` wide (small:
+`--menu-width`; its container's with `Fill`) and the input box's height,
+whatever is chosen; its label is cut with an ellipsis. The popup is
+`--menu-width-wide` or the field's width if wider, never measured from its
+text. A ChoiceList's options are `--picker-rows` rows high whatever
+matches, none included, so typing never resizes the list, its popup or its
+dialog; past that it scrolls, its scrollbar's room kept. Marks keep their
+box when off. New partial: `_picker.scss`. No new tokens.
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

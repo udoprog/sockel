@@ -122,6 +122,12 @@
 //! - [`FilterPicker`] (`.filter-picker`): a list's filter button,
 //!   `--filter-width` wide, the first choice and a reserved count of the
 //!   rest, opening a multi-select listbox.
+//! - [`Picker`] (`.picker`): a field of one width showing the current
+//!   option, opening a [`ChoiceList`] (`.choice-list`), options with icon,
+//!   mark, detail and badge slots under a search field, `--picker-rows`
+//!   high; [`PickerMenu`], the same from an action's button;
+//!   [`PickerDialog`], the searchable shell for a large
+//!   set, single or multi-select, in a [`Dialog`].
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -175,6 +181,7 @@ mod nav_list;
 mod notice;
 mod overlay;
 mod pager;
+mod picker;
 mod popover;
 mod reorder;
 mod roving;
@@ -256,6 +263,10 @@ pub use overlay::{
     OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlays,
 };
 pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_button, pager_slots};
+pub use picker::{
+    ChoiceList, ChoiceListProps, Picker, PickerDialog, PickerDialogProps, PickerMenu,
+    PickerMenuProps, PickerOption, PickerProps, PickerVariant, SEARCH_FROM, picker, picker_matches,
+};
 pub use popover::{
     Dismiss, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, popover, use_popover,
 };

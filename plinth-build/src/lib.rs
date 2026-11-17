@@ -45,6 +45,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_menu.scss",
     "_notices.scss",
     "_pager.scss",
+    "_picker.scss",
     "_popover.scss",
     "_reorder.scss",
     "_rows.scss",
