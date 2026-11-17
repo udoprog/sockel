@@ -224,6 +224,9 @@ const HOOKS_PROBE: &str =
 /// The directory sockel's sources are served under.
 const ROOT: &str = "sockel";
 
+/// What sasso starts a stylesheet with when it holds non-ASCII text.
+const CHARSET: &str = "@charset \"UTF-8\";\n";
+
 /// sockel's sources at `sockel` and `sockel/...`, the disk at absolute paths
 /// and relative to a file on disk: a project's files are always loaded by
 /// absolute path, so nothing else on disk can stand in for sockel's sources.
@@ -566,7 +569,11 @@ impl Config {
     /// sockel's CSS as it starts the stylesheet: in its layer, after the
     /// layer order.
     fn layered(&self, sockel_css: &str) -> String {
-        let mut css = String::new();
+        // `@charset` only counts as the stylesheet's first rule.
+        let (mut css, sockel_css) = match sockel_css.strip_prefix(CHARSET) {
+            Some(rest) => (CHARSET.to_owned(), rest),
+            None => (String::new(), sockel_css),
+        };
         if !self.layer_order.is_empty() {
             css.push_str(&format!("@layer {};\n", self.layer_order.join(", ")));
         }
@@ -1632,6 +1639,18 @@ mod tests {
     }
 
     #[test]
+    fn keeps_the_charset_first_when_layered() {
+        let css = sockel()
+            .layer("sockel")
+            .layer_order(["a", "sockel"])
+            .layered("@charset \"UTF-8\";\n.x { content: \"é\"; }\n");
+        assert_eq!(
+            css,
+            "@charset \"UTF-8\";\n@layer a, sockel;\n@layer sockel {\n.x { content: \"é\"; }\n}\n"
+        );
+    }
+
+    #[test]
     fn puts_sockel_in_a_layer_after_the_layer_order() {
         let base = sockel().build().unwrap();
         let output = sockel()
@@ -1641,7 +1660,11 @@ mod tests {
             .layer_order(["reset", "sockel", "app"])
             .build()
             .unwrap();
-        let wrapped = format!("@layer reset, sockel, app;\n@layer sockel {{\n{}", base.css);
+        let (charset, body) = match base.css.strip_prefix(CHARSET) {
+            Some(body) => (CHARSET, body),
+            None => ("", base.css.as_str()),
+        };
+        let wrapped = format!("{charset}@layer reset, sockel, app;\n@layer sockel {{\n{body}");
         let rest = output.css.strip_prefix(&wrapped).unwrap();
         assert!(rest.trim_start().starts_with('}'));
         assert!(rest.contains(".fixture-panel {"));
@@ -1652,7 +1675,7 @@ mod tests {
         );
         assert_eq!(
             sockel().layer_order(["a"]).build().unwrap().css,
-            format!("@layer a;\n{}", base.css)
+            format!("{charset}@layer a;\n{body}")
         );
     }
 
