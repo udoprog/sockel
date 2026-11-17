@@ -1827,7 +1827,13 @@ for an action that takes an option (Add a language): `text`, `icon`,
 searchable shell for a large set (languages, countries): a `Dialog`
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
 `ChoiceList` that always searches, its field focused, single (the owner
-closes it on a pick) or `multi`.
+closes it on a pick) or `multi`. `ChoicePopup` is the list's popup on its own, for an
+opener the app renders (a `Button` with `node_ref`, a chip, a face): props
+`anchor` (the opener's ref), `open`, `on_dismiss` (Escape, Tab or a press
+outside; a pick is the owner's to close on), `align` (`PopoverAlign`,
+default `Start`), `testid` (suffixed `-popup`) and its children, a
+`ChoiceList` with `autofocus` and any note or action beside it, which it
+focuses once placed. Tab closes it and moves on from the opener.
 
 Size guarantees: the Picker's field is `--menu-width-wide` wide (small:
 `--menu-width`; its container's with `Fill`) and the input box's height,

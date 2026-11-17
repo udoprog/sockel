@@ -762,7 +762,7 @@ pub const PAGES: &[Page] = &[
             hold(
                 plinth::class::BUTTON,
                 Size::Box,
-                Across::Except(&["Option text"]),
+                Across::Except(&["Option text", "chevron (PickerMenu, with an icon)"]),
             ),
             hold(
                 plinth::class::CHOICE_LIST_SEARCH,
@@ -775,6 +775,15 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["click"]),
             ),
         ],
+    },
+    Page {
+        id: "choice-popup",
+        title: "ChoicePopup",
+        group: Group::Pickers,
+        about: "A ChoiceList's popup below an opener the app renders itself (here a toggle showing how many are chosen), with a note and a Done button beside the list; Escape, Tab or a press outside closes it.",
+        covers: &["ChoicePopup", "ChoicePopupProps"],
+        render: || html! { <picker::ChoicePopupPage /> },
+        holds: &[hold(plinth::class::BUTTON, Size::Height, Across::All)],
     },
     Page {
         id: "picker-dialog",

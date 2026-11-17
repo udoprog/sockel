@@ -1,8 +1,8 @@
 use yew::prelude::*;
 
 use plinth::{
-    Badge, Button, ButtonVariant, ChoiceList, Cluster, Field, Glyph, Icon, PickerDialog,
-    PickerMenu, PickerOption, PickerVariant, Stack, field_describedby, toggled,
+    Badge, Button, ButtonVariant, ChoiceList, ChoicePopup, Cluster, Dismiss, Field, Glyph, Icon,
+    PickerDialog, PickerMenu, PickerOption, PickerVariant, Stack, field_describedby, toggled,
 };
 
 use super::fields::use_control_id;
@@ -342,6 +342,60 @@ pub fn PickerDialogPage() -> Html {
                     {options} value={*value} multi={*multi} chosen={(*chosen).clone()} {on_pick}
                     actions={actions.unwrap_or_default()} testid="picker-dialog" />
             </Stack>
+        </Demo>
+    }
+}
+
+#[function_component]
+pub fn ChoicePopupPage() -> Html {
+    let opener = use_node_ref();
+    let open = use_state_eq(|| false);
+    let chosen = use_state(Vec::<usize>::new);
+    let options = languages(12, Text::Short, false, true, false);
+    let close = {
+        let open = open.clone();
+        Callback::from(move |_: Dismiss| open.set(false))
+    };
+    let on_pick = {
+        let chosen = chosen.clone();
+        Callback::from(move |v: usize| chosen.set(toggled(&chosen, &v)))
+    };
+    let onclick = {
+        let open = open.clone();
+        Callback::from(move |_: MouseEvent| open.set(!*open))
+    };
+    let done = close.reform(|_: MouseEvent| Dismiss::Outside);
+    let code = snippet(
+        &["let opener = use_node_ref();".to_owned()],
+        El::new("ChoicePopup")
+            .expr("anchor", "opener")
+            .expr("open", "*open")
+            .expr("on_dismiss", "close")
+            .expr(
+                "children",
+                "html! { <ChoiceList<Lang> multi=true autofocus=true .. /> }",
+            ),
+    );
+    html! {
+        <Demo controls={Html::default()} {code}>
+            <Cluster>
+                <Button node_ref={opener.clone()} variant={ButtonVariant::Ghost}
+                    icon={html! { <Icon glyph={Glyph::Plus} /> }} chevron=true
+                    expanded={Some(*open)} haspopup={AttrValue::Static("listbox")} {onclick}
+                    testid="choice-popup-opener">
+                    { format!("Readers: {}", chosen.len()) }
+                </Button>
+                <ChoicePopup anchor={opener} open={*open} on_dismiss={close} testid="choice-popup">
+                    <Stack>
+                        <p class={class::SAMPLE}>{ "Who reads it" }</p>
+                        <ChoiceList<usize> {options} multi=true chosen={(*chosen).clone()} {on_pick}
+                            label="Readers" autofocus=true />
+                        <Cluster>
+                            <Button variant={ButtonVariant::Primary} onclick={done}>{ "Done" }</Button>
+                        </Cluster>
+                    </Stack>
+                </ChoicePopup>
+            </Cluster>
         </Demo>
     }
 }

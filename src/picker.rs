@@ -513,19 +513,26 @@ where
 }
 
 #[derive(Properties, PartialEq)]
-pub(crate) struct PopupProps {
+pub struct ChoicePopupProps {
+    /// The opener it sits below, which the app renders.
     pub anchor: NodeRef,
     pub open: bool,
+    /// Escape, Tab or a press outside; a pick is the owner's to close on.
     pub on_dismiss: Callback<Dismiss>,
+    #[prop_or_default]
+    pub align: PopoverAlign,
+    /// Suffixed `-popup`.
+    #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// A [`ChoiceList`] (with `autofocus`), and any note or action beside it.
     pub children: Html,
 }
 
-/// A [`ChoiceList`]'s surface beside `anchor` in the overlay layer, its
-/// `data-autofocus` element focused once placed; Tab closes it and moves on
-/// from `anchor`.
+/// A [`ChoiceList`]'s surface below `anchor` in the overlay layer, as a
+/// [`Picker`] opens it, for any opener: its `data-autofocus` element is
+/// focused once placed, and Tab closes it and moves on from `anchor`.
 #[function_component]
-pub(crate) fn ChoicePopup(props: &PopupProps) -> Html {
+pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
     let overlays = use_overlays();
     let popup = use_node_ref();
     let placed = use_popover(
@@ -533,7 +540,7 @@ pub(crate) fn ChoicePopup(props: &PopupProps) -> Html {
         props.anchor.clone(),
         popup.clone(),
         Side::Below,
-        PopoverAlign::Start,
+        props.align,
         props.on_dismiss.clone(),
     );
     {
@@ -1082,6 +1089,21 @@ mod tests {
             label: AttrValue::Static("Options"),
         }));
         assert!(html.contains(&active), "{html}");
+    }
+
+    #[test]
+    fn a_closed_choice_popup_renders_nothing() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<ChoicePopup>::with_props(yew::props!(ChoicePopupProps {
+                anchor: NodeRef::default(),
+                open: false,
+                on_dismiss: Callback::noop(),
+                children: html! { <p>{ "list" }</p> },
+            }))
+            .hydratable(false)
+            .render(),
+        );
+        assert!(!html.contains("list"), "{html}");
     }
 
     #[test]

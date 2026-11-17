@@ -135,7 +135,8 @@
 //!   mark, detail and badge slots under a search field, `--picker-rows`
 //!   high; [`PickerMenu`], the same from an action's button;
 //!   [`PickerDialog`], the searchable shell for a large
-//!   set, single or multi-select, in a [`Dialog`].
+//!   set, single or multi-select, in a [`Dialog`]; [`ChoicePopup`], the
+//!   list's popup below any opener the app renders.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -282,8 +283,9 @@ pub use pager::{
 };
 pub use panel::{Panel, PanelGround, PanelProps, panel};
 pub use picker::{
-    ChoiceList, ChoiceListProps, Picker, PickerDialog, PickerDialogProps, PickerMenu,
-    PickerMenuProps, PickerOption, PickerProps, PickerVariant, SEARCH_FROM, picker, picker_matches,
+    ChoiceList, ChoiceListProps, ChoicePopup, ChoicePopupProps, Picker, PickerDialog,
+    PickerDialogProps, PickerMenu, PickerMenuProps, PickerOption, PickerProps, PickerVariant,
+    SEARCH_FROM, picker, picker_matches,
 };
 pub use popover::{
     Dismiss, Fit, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, place_fit,
