@@ -40,6 +40,14 @@ fn live_value(live: bool, text: &str, value: i64, min: i64, max: i64) -> Option<
     parse_number(text).filter(|n| live && *n != value && (min..=max).contains(n))
 }
 
+/// What a step starts from: the number typed and not yet committed
+/// (within the bounds), else `value`.
+fn step_base(draft: Option<&str>, value: i64, min: i64, max: i64) -> i64 {
+    draft
+        .and_then(parse_number)
+        .map_or(value, |n| n.clamp(min, max))
+}
+
 /// The value a key moves a stepper to, if it is one of its keys: the arrows
 /// step, Page Up and Down ten steps, Home and End go to the bounds.
 pub fn key_value(key: &str, value: i64, step: i64, min: i64, max: i64) -> Option<i64> {
@@ -146,10 +154,11 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let onfocus = Callback::from(|e: FocusEvent| {
         e.target_unchecked_into::<HtmlInputElement>().select();
     });
+    let base = step_base(draft.as_deref(), props.value, min, max);
     let onkeydown = {
         let set = set.clone();
         let commit = commit.clone();
-        let (value, step) = (props.value, props.step);
+        let (value, step) = (base, props.step);
         Callback::from(move |e: KeyboardEvent| {
             if e.key() == "Enter" {
                 commit.emit(());
@@ -161,7 +170,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
     };
     let button = |dir: i64, glyph: Glyph, label: &AttrValue, at_bound: bool| {
         let set = set.clone();
-        let (value, step) = (props.value, props.step);
+        let (value, step) = (base, props.step);
         let onclick = Callback::from(move |_: MouseEvent| {
             set.emit(step_from(value, dir, 1, step, min, max));
         });
@@ -281,6 +290,14 @@ mod tests {
         assert_eq!(live_value(true, "150", 7, 0, 100), None);
         assert_eq!(live_value(true, "", 7, 0, 100), None);
         assert_eq!(live_value(false, "12", 7, 0, 100), None);
+    }
+
+    #[test]
+    fn a_step_starts_from_what_is_typed() {
+        assert_eq!(step_base(Some("3"), 0, 0, 100), 3);
+        assert_eq!(step_base(Some("150"), 0, 0, 100), 100);
+        assert_eq!(step_base(Some("x"), 7, 0, 100), 7);
+        assert_eq!(step_base(None, 7, 0, 100), 7);
     }
 
     #[test]

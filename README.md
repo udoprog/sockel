@@ -671,7 +671,8 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   `invalid`, `disabled`, `busy`, `live` (report each number typed within the
   bounds at once, not only when committed; off by default), `class`,
   `testid`. The buttons step onto
-  multiples of `step` (7 by 5 goes to 10 or 5) and stop at the bounds; the
+  multiples of `step` (7 by 5 goes to 10 or 5), from the number typed if it
+  is not yet committed, and stop at the bounds; the
   arrow keys do the same, Page Up and Down ten steps, Home and End go to the
   bounds, Enter or leaving the field commits what is typed (clamped; text that
   is no number goes back). What is typed outside `min..=max` is marked invalid
