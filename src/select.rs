@@ -18,6 +18,12 @@ pub struct SelectOption<T> {
     pub icon: Option<Html>,
     /// Shown, but cannot be picked.
     pub disabled: bool,
+    /// A line under its label in the list, such as why it cannot be picked
+    /// (the app's, so it may carry its own class or test id).
+    pub description: Option<Html>,
+    /// The heading it is listed under. A group's options are given
+    /// together; options of no group are listed by themselves.
+    pub group: Option<AttrValue>,
 }
 
 impl<T> SelectOption<T> {
@@ -27,6 +33,8 @@ impl<T> SelectOption<T> {
             label: label.into(),
             icon: None,
             disabled: false,
+            description: None,
+            group: None,
         }
     }
 
@@ -40,6 +48,32 @@ impl<T> SelectOption<T> {
     pub fn disabled(self, disabled: bool) -> Self {
         Self { disabled, ..self }
     }
+
+    pub fn description(self, description: Html) -> Self {
+        Self {
+            description: Some(description),
+            ..self
+        }
+    }
+
+    pub fn group(self, group: impl Into<AttrValue>) -> Self {
+        Self {
+            group: Some(group.into()),
+            ..self
+        }
+    }
+}
+
+/// `options` in runs of one group (`None`: those of no group), in order.
+fn group_runs<T>(options: &[SelectOption<T>]) -> Vec<(Option<&AttrValue>, Vec<usize>)> {
+    let mut runs: Vec<(Option<&AttrValue>, Vec<usize>)> = Vec::new();
+    for (i, option) in options.iter().enumerate() {
+        match runs.last_mut() {
+            Some((group, run)) if *group == option.group.as_ref() => run.push(i),
+            _ => runs.push((option.group.as_ref(), vec![i])),
+        }
+    }
+    runs
 }
 
 /// How wide a [`Select`]'s face is, whatever is chosen.
@@ -320,10 +354,34 @@ where
                     if let Some(icon) = &o.icon {
                         <span class={class::LISTBOX_OPTION_ICON} aria-hidden="true">{ icon.clone() }</span>
                     }
-                    <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                    if let Some(description) = &o.description {
+                        <span class={class::LISTBOX_OPTION_TEXT}>
+                            <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                            <span class={class::LISTBOX_OPTION_DESCRIPTION}>{ description.clone() }</span>
+                        </span>
+                    } else {
+                        <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                    }
                 </div>
             }
         };
+        let rows = group_runs(options).into_iter().enumerate().map(|(n, (group, run))| {
+            let run = run.into_iter().map(|i| option((i, &options[i])));
+            match group {
+                None => html! { <>{ for run }</> },
+                Some(group) => {
+                    let heading = format!("{}-group-{n}", *id);
+                    html! {
+                        <div class={class::LISTBOX_GROUP} role="group" aria-labelledby={heading.clone()}>
+                            <div id={heading} class={class::LISTBOX_GROUP_NAME} role="presentation">
+                                { group.clone() }
+                            </div>
+                            { for run }
+                        </div>
+                    }
+                }
+            }
+        });
         // Focus stays on the face.
         let onmousedown = Callback::from(|e: MouseEvent| e.prevent_default());
         let anchor_width = face.cast::<HtmlElement>().map(|f| f.offset_width());
@@ -345,7 +403,7 @@ where
                 class={listbox(placed.is_some())} aria-label={props.label.clone()}
                 {style} {onmousedown}
                 data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
-                { for options.iter().enumerate().map(option) }
+                { for rows }
             </div>
         })
     });
@@ -477,6 +535,31 @@ mod tests {
         let shown = format!("<span class=\"{}\">Pick a size", class::SELECT_PLACEHOLDER);
         assert!(html.contains(&shown), "{html}");
         assert_eq!(html.matches(class::HIDDEN).count(), 3, "{html}");
+    }
+
+    #[test]
+    fn groups_are_runs_and_ungrouped_options_stand_alone() {
+        let options = vec![
+            SelectOption::new(1, "A"),
+            SelectOption::new(2, "B").group("X"),
+            SelectOption::new(3, "C").group("X"),
+            SelectOption::new(4, "D"),
+            SelectOption::new(5, "E").group("Y"),
+        ];
+        let runs: Vec<(Option<&str>, Vec<usize>)> = group_runs(&options)
+            .into_iter()
+            .map(|(g, run)| (g.map(|g| g.as_str()), run))
+            .collect();
+        assert_eq!(
+            runs,
+            [
+                (None, vec![0]),
+                (Some("X"), vec![1, 2]),
+                (None, vec![3]),
+                (Some("Y"), vec![4])
+            ]
+        );
+        assert!(group_runs::<u32>(&[]).is_empty());
     }
 
     #[test]

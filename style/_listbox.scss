@@ -10,7 +10,10 @@
 //   reserved. `.plinth-active` (under the keyboard or pointer) changes its
 //   fill only; `[aria-disabled="true"]` mutes it. Parts: `-mark` (the
 //   selected one's check, its box kept when off, `.plinth-off`), `-icon`,
-//   `-label` (one line, cut with an ellipsis).
+//   `-label` (one line, cut with an ellipsis), and with a description
+//   `-text` holding `-label` and `-description` (muted, under it, wrapping).
+// - `.plinth-listbox-group` (`role="group"`): a run of options under its
+//   `-group-name`, a muted heading.
 
 @use "tokens" as base;
 @use "menu";
@@ -49,6 +52,37 @@
     @include base.truncate;
     flex: 1 1 auto;
     min-width: 0;
+}
+
+.plinth-listbox-option-text {
+    display: flex;
+    flex: 1 1 auto;
+    flex-direction: column;
+    gap: var(--space-0);
+    min-width: 0;
+    padding-block: var(--space-1);
+}
+
+.plinth-listbox-option-description {
+    color: var(--muted);
+    font-size: var(--text-xs);
+    overflow-wrap: anywhere;
+}
+
+.plinth-listbox-group {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: var(--space-0);
+}
+
+.plinth-listbox-group-name {
+    @include base.truncate;
+    flex: none;
+    padding: var(--space-1) var(--space-3) 0;
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
 }
 
 @media (forced-colors: active) {

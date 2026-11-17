@@ -553,6 +553,8 @@ pub const PAGES: &[Page] = &[
                     "disabled",
                     "busy",
                     "an option disabled",
+                    "descriptions",
+                    "groups",
                     "focus",
                     "click",
                 ]),

@@ -1356,7 +1356,11 @@ it in the overlay layer through `use_popover`, while focus stays on the face
 (`aria-activedescendant` names the active option). Props:
 
 - `options: Vec<SelectOption<T>>` (`SelectOption::new(value, label)`,
-  `.icon(html)` before its label in the list, `.disabled(..)`), `value:
+  `.icon(html)` before its label in the list, `.disabled(..)`,
+  `.description(html)` a muted line under its label, such as why it cannot
+  be picked, `.group(name)` the heading it is listed under: a group's
+  options are given together, under a `role="group"` named by its
+  heading), `value:
   Option<T>`, `on_change` (told a pick that is not the one chosen),
   `placeholder` (muted, while nothing listed is chosen).
 - `width` (`SelectWidth`): `Widest` (the widest option or placeholder) or
@@ -1390,7 +1394,10 @@ view). `option_id(base, i)`, `listbox(placed)` and `listbox_option(active)`
 (`LISTBOX_OPTION`, `ACTIVE`) give the ids and classes; an option's
 `aria-selected` and `aria-disabled` carry the rest. Its parts are
 `LISTBOX_OPTION_MARK` (the selected one's check, its box kept when off,
-`OFF`), `LISTBOX_OPTION_ICON` and `LISTBOX_OPTION_LABEL`.
+`OFF`), `LISTBOX_OPTION_ICON` and `LISTBOX_OPTION_LABEL`, and with a
+description `LISTBOX_OPTION_TEXT` holding the label and
+`LISTBOX_OPTION_DESCRIPTION`; a group is `LISTBOX_GROUP` with its
+`LISTBOX_GROUP_NAME`.
 
 Size guarantees: the face is one width whatever is chosen. Every option's
 label and the placeholder are in one grid cell, all but the shown one
@@ -1403,8 +1410,8 @@ out, hidden until placed), at least as wide as the face
 (`--listbox-anchor-width`) and never narrower than it opened
 (`--listbox-open-width`). Its rows are `--control-height` at least, their
 border reserved, and the active row changes only its fill. Labels are one
-line. New tokens: none (the two custom properties are set by the
-component). New partials: `_listbox.scss`, `_select.scss`. The menu's
+line; a description under one wraps, and makes its row taller. New
+tokens: none (the two custom properties are set by the component). New partials: `_listbox.scss`, `_select.scss`. The menu's
 surface, row and mark are now the mixins `list`, `item`, `item-active` and
 `mark` in `_menu.scss`, with the same output.
 

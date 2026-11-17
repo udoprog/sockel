@@ -42,6 +42,8 @@ struct Settings {
     disabled: bool,
     busy: bool,
     option_disabled: bool,
+    descriptions: bool,
+    groups: bool,
 }
 
 #[derive(Properties, PartialEq)]
@@ -57,12 +59,27 @@ struct SampleProps {
 fn Sample(props: &SampleProps) -> Html {
     let s = props.settings;
     let id = use_control_id();
-    let options = vec![
+    let mut options = vec![
         SelectOption::new(0, "Small"),
         SelectOption::new(1, "Medium").icon(html! { <Icon glyph={Glyph::Plus} /> }),
         SelectOption::new(2, "Large").disabled(s.option_disabled),
         SelectOption::new(3, s.text.of("Extra large")),
     ];
+    if s.descriptions {
+        options[2] = options[2]
+            .clone()
+            .description(html! { "Out of stock until spring" });
+        options[3] = options[3]
+            .clone()
+            .description(html! { s.text.of("Made to order: two weeks") });
+    }
+    if s.groups {
+        for (i, option) in options.iter_mut().enumerate() {
+            *option = option
+                .clone()
+                .group(if i < 2 { "Everyday" } else { "Special" });
+        }
+    }
     let placeholder = s.placeholder.then_some(AttrValue::Static("Pick a size"));
     let error = s.invalid.then(|| html! { "Pick a size that is in stock." });
     let joined = group_classes(&[false, false]);
@@ -98,6 +115,8 @@ pub fn SelectPage() -> Html {
         disabled: false,
         busy: false,
         option_disabled: true,
+        descriptions: false,
+        groups: false,
     });
     let value = use_state(|| Some(1usize));
     let s = *settings;
@@ -134,6 +153,8 @@ pub fn SelectPage() -> Html {
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
             <Toggle label="busy" value={s.busy} on_change={set(|s, on| s.busy = on)} />
             <Toggle label="an option disabled" value={s.option_disabled} on_change={set(|s, on| s.option_disabled = on)} />
+            <Toggle label="descriptions" value={s.descriptions} on_change={set(|s, on| s.descriptions = on)} />
+            <Toggle label="groups" value={s.groups} on_change={set(|s, on| s.groups = on)} />
         </>
     };
 
@@ -143,8 +164,18 @@ pub fn SelectPage() -> Html {
             "    SelectOption::new(Size::Small, \"Small\"),".to_owned(),
             "    SelectOption::new(Size::Medium, \"Medium\"),".to_owned(),
             format!(
-                "    SelectOption::new(Size::Large, \"Large\").disabled({}),",
-                s.option_disabled
+                "    SelectOption::new(Size::Large, \"Large\").disabled({}){}{},",
+                s.option_disabled,
+                if s.descriptions {
+                    "\n        .description(html! { \"Out of stock until spring\" })"
+                } else {
+                    ""
+                },
+                if s.groups {
+                    "\n        .group(\"Special\")"
+                } else {
+                    ""
+                },
             ),
             "];".to_owned(),
         ],
