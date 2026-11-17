@@ -428,6 +428,7 @@ the custom properties, so a page can still override them at runtime.
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
 | `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
 | `$glyph-size` | `1em` |
+| `$glyph-phone-size` | `null` (`--glyph-size` below the phone breakpoint; `null` keeps `$glyph-size`) |
 | `$skeleton-duration` | `1.4s` |
 | `$pager-gap`, `$pager-button-radius`, `$pager-button-ink`, `$pager-button-text` | `var(--space-1)`, `var(--radius-sm)`, `var(--text)`, `null` (inherited) (a pager's gap and its buttons' corners, ink and size) |
 | `$pager-button-hover-fill`, `$pager-button-hover-ink`, `$pager-current-fill`, `$pager-current-ink`, `$pager-step-ink`, `$pager-phone-height` | 12% of `--accent`, `null` (as at rest), `var(--accent)`, `var(--on-accent)`, `null` (the button's), `null` (a button's hover, the current page's fill and ink, the chevrons' ink, and the controls' height below the phone breakpoint) |
@@ -451,6 +452,7 @@ the custom properties, so a page can still override them at runtime.
 | `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
 | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
+| `$button-disabled-cursor` | `not-allowed` (a disabled button's cursor) |
 | `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap, its paragraphs without margins), `var(--shadow-1)` |

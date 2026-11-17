@@ -9,7 +9,8 @@
 //   `--radius-md` (bars and panels between), `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
 // - `--control-height` and `--control-height-small`: every field, button
 //   and picker button is one of the two, so a row of them never jumps.
-// - `--glyph-size`: the box of one of sockel's own icons, whatever icon fills it.
+// - `--glyph-size`: the box of one of sockel's own icons, whatever icon fills it
+//   (`$glyph-phone-size` below the phone breakpoint, when set).
 // - `--swatch-size`: a colour swatch's box; `--color-select-width`: a ColorSelect face's width.
 // - `--skeleton-duration`: the time a skeleton's shimmer takes to cross.
 // - `--table-max-height`: where a table with a sticky head starts to scroll.
@@ -141,6 +142,8 @@ $button-text-small: var(--text-sm) !default;
 $button-content-gap: var(--space-2) !default;
 $button-icon-offset: null !default;
 $button-phone-height: null !default;
+// A disabled button's cursor.
+$button-disabled-cursor: not-allowed !default;
 // A dialog's padding (the head's start, the body's sides and bottom, the
 // foot's sides), that padding below `$sheet-breakpoint` (`null`: the
 // same), the gap between its body's children (`null`: the body is a plain
@@ -349,6 +352,8 @@ $touch-height: 2.75rem !default;
 $dot-size: 0.5rem !default;
 $corner-size: 1.125rem !default;
 $glyph-size: 1em !default;
+// The glyph box below the phone breakpoint (`null`: as above it).
+$glyph-phone-size: null !default;
 $swatch-size: 1.25rem !default;
 $color-select-width: 10rem !default;
 $skeleton-duration: 1.4s !default;
@@ -719,6 +724,14 @@ $-parts: (
     }
 }
 
+@if $glyph-phone-size {
+    @include below("phone") {
+        :root {
+            --glyph-size: #{$glyph-phone-size};
+        }
+    }
+}
+
 // A page's content column: the workspace unless it is given the reading
 // column.
 @mixin page($width: var(--page-workspace)) {
@@ -1079,7 +1092,7 @@ $-button-variants: (
     &[aria-disabled="true"] {
         border-color: var(--button-edge);
         opacity: 0.5;
-        cursor: not-allowed;
+        cursor: $button-disabled-cursor;
     }
 }
 
