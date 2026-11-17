@@ -1,6 +1,6 @@
 //! Button (`style/_buttons.scss`).
 
-use crate::{Spinner, class};
+use crate::{Glyph, Icon, Spinner, class};
 use yew::prelude::*;
 
 /// A button's colour: `Secondary` (the plain button) unless set.
@@ -43,6 +43,10 @@ pub struct ButtonProps {
     /// The icon comes after the label.
     #[prop_or_default]
     pub trailing: bool,
+    /// Ends in a chevron after the label, as a menu's opener does, beside
+    /// a leading icon too.
+    #[prop_or_default]
+    pub chevron: bool,
     /// The icon alone below the phone breakpoint, the label kept for a
     /// screen reader (`.plinth-fold`).
     #[prop_or_default]
@@ -172,9 +176,15 @@ pub fn Button(props: &ButtonProps) -> Html {
             </span>
         }
     });
+    let chevron = props.chevron.then(|| {
+        html! {
+            <span class={class::BUTTON_ICON} aria-hidden="true"><Icon glyph={Glyph::ChevronDown} /></span>
+        }
+    });
     let content = html! {
         <span class={classes!(class::BUTTON_CONTENT, props.busy.then_some(class::BUSY))}>
             if props.trailing { { for label } { for icon } } else { { for icon } { for label } }
+            { for chevron }
         </span>
     };
     let spinner = props.busy.then(|| {
@@ -269,6 +279,7 @@ mod tests {
             size: ButtonSize::default(),
             icon: None,
             trailing: false,
+            chevron: false,
             fold: false,
             fold_wide: false,
             pressed: None,
@@ -324,6 +335,19 @@ mod tests {
             names(button(v, s, false, true)),
             [class::BUTTON, class::FOLD]
         );
+    }
+
+    #[test]
+    fn a_chevron_ends_it_after_the_icon_and_label() {
+        let html = render(ButtonProps {
+            icon: Some(html! { <svg /> }),
+            chevron: true,
+            children: html! { "Presets" },
+            ..props()
+        });
+        let icon = format!("class=\"{}\"", class::BUTTON_ICON);
+        assert_eq!(html.matches(&icon).count(), 2, "{html}");
+        assert!(html.find("Presets") < html.rfind(&icon), "{html}");
     }
 
     #[test]

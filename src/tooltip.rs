@@ -437,6 +437,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         size: props.size,
         icon: props.icon.clone(),
         trailing: false,
+        chevron: false,
         fold: false,
         fold_wide: false,
         pressed: None,
