@@ -4,7 +4,8 @@
 //   as the widest page number (`--pager-chars`, the digits of the page
 //   count, set by the component), so the row keeps its width from the first
 //   page to the last; in a container too narrow for them the buttons shrink
-//   together, the same at every page. `.plinth-disabled` and `.plinth-busy` mute it.
+//   together, the same at every page. `.plinth-disabled` and `.plinth-busy` mute it
+//   (the `$omit` part `pager.states`).
 // - `.plinth-pager-button`: a page, or the previous and next page. The
 //   current page (`aria-current`) is marked by colour and background, never
 //   its weight. `.plinth-pager-edge` (first and last page) is hidden on a
@@ -41,13 +42,15 @@
         }
     }
 
-    &.plinth-disabled,
-    &.plinth-busy {
-        opacity: 0.6;
-    }
+    @if base.emits("pager.states") {
+        &.plinth-disabled,
+        &.plinth-busy {
+            opacity: 0.6;
+        }
 
-    &.plinth-busy {
-        cursor: progress;
+        &.plinth-busy {
+            cursor: progress;
+        }
     }
 }
 

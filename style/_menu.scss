@@ -26,6 +26,9 @@
 //   opener, whose menu a right-click opens), laid out as if it were not
 //   there; `.plinth-menu-point`, the pointer's place it opens
 //   at (`--menu-x`, `--menu-y`).
+// - Among the parts an app may leave out (`$omit`, all listed in the README):
+//   `menu.marks` (`-mark`, for check and radio items) and `menu.disabled`
+//   (an `aria-disabled` row).
 
 @forward "menu-surface";
 @use "tokens" as base;
@@ -150,12 +153,14 @@
         }
     }
 
-    &[aria-disabled="true"] {
-        color: var(--muted);
-        cursor: default;
+    @if base.emits("menu.disabled") {
+        &[aria-disabled="true"] {
+            color: var(--muted);
+            cursor: default;
 
-        &:hover {
-            background: none;
+            &:hover {
+                background: none;
+            }
         }
     }
 }
@@ -168,9 +173,11 @@
     }
 }
 
-.plinth-menu-item-mark {
-    @include mark;
-    color: base.$menu-item-mark-ink;
+@if base.emits("menu.marks") {
+    .plinth-menu-item-mark {
+        @include mark;
+        color: base.$menu-item-mark-ink;
+    }
 }
 
 .plinth-menu-item-icon {

@@ -154,6 +154,15 @@ fn omitted_parts_are_left_out() {
         "--danger:",
         ".plinth-fieldset",
         ".plinth-field-error",
+        ".plinth-input.plinth-small",
+        ".plinth-input-box.plinth-touch",
+        ".plinth-input.plinth-busy",
+        ".plinth-input[aria-invalid=true]",
+        ".plinth-input-box.plinth-invalid",
+        ".plinth-input-box.plinth-disabled",
+        ".plinth-menu-item[aria-disabled=true]",
+        ".plinth-menu-item-mark",
+        ".plinth-pager.plinth-busy",
     ] {
         assert!(defaults.contains(part), "{part} in the defaults");
         assert!(!css.contains(part), "{part} left out");
@@ -166,6 +175,10 @@ fn omitted_parts_are_left_out() {
         "--success:",
         ".plinth-field-hint {\n  margin: 0;",
         ".plinth-field-inputs {",
+        ".plinth-input:disabled",
+        ".plinth-input-box:focus-within",
+        ".plinth-menu-item-icon {",
+        ".plinth-pager-button {",
     ] {
         assert!(css.contains(kept), "{kept} kept");
     }

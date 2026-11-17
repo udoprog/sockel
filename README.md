@@ -432,11 +432,11 @@ part is emitted; a name plinth does not have is an error.
 | fields | `fields.field` (`Field` itself, not a `FormRow`), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.plinth-compact`, `.plinth-one-row`), `heads.label`, `heads.list` |
 | buttons | `buttons.bare`, `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
-| menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
+| menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point), `menu.marks` (a check or radio item's mark), `menu.disabled` (a disabled item) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`) |
+| inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
 | notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
-| pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
+| pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
 | drop | `drop.tall` |

@@ -27,7 +27,10 @@
 //   none. `group_classes` gives them, so no rule looks at a sibling.
 // - Parts an app may leave out (`$omit`): `inputs.input` (`.plinth-input`),
 //   `inputs.textarea`, `inputs.mark` (`-mark` and `-unit`), `inputs.group`
-//   (the group and its members' classes) and `inputs.native-select`.
+//   (the group and its members' classes), `inputs.native-select`,
+//   `inputs.small`, `inputs.touch`, `inputs.busy`, `inputs.invalid` (with
+//   `aria-invalid`) and `inputs.disabled` (a box's `.plinth-disabled`; a bare
+//   input's `:disabled` is always kept).
 
 @use "tokens" as base;
 
@@ -86,8 +89,10 @@
             opacity: 1;
         }
 
-        &[aria-invalid="true"] {
-            --input-edge: var(--danger);
+        @if base.emits("inputs.invalid") {
+            &[aria-invalid="true"] {
+                --input-edge: var(--danger);
+            }
         }
 
         &:disabled {
@@ -112,13 +117,17 @@
     padding-block: 0;
     padding-inline: base.$input-padding-inline;
 
-    &.plinth-invalid {
-        --input-edge: var(--danger);
+    @if base.emits("inputs.invalid") {
+        &.plinth-invalid {
+            --input-edge: var(--danger);
+        }
     }
 
-    &.plinth-disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    @if base.emits("inputs.disabled") {
+        &.plinth-disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     }
 
     &:focus-within {
