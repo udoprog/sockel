@@ -300,6 +300,34 @@ pub fn use_popover(
     align: PopoverAlign,
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
+    use_placement(open, anchor, popover, side, align, on_dismiss, false)
+}
+
+/// `use_popover` for a tip: it never keeps the overlay beneath it from
+/// being dismissed.
+#[hook]
+pub(crate) fn use_tip_popover(
+    open: bool,
+    anchor: NodeRef,
+    popover: NodeRef,
+    side: Side,
+    align: PopoverAlign,
+    on_dismiss: Callback<Dismiss>,
+) -> Option<Placed> {
+    use_placement(open, anchor, popover, side, align, on_dismiss, true)
+}
+
+#[hook]
+#[allow(clippy::too_many_arguments)]
+fn use_placement(
+    open: bool,
+    anchor: NodeRef,
+    popover: NodeRef,
+    side: Side,
+    align: PopoverAlign,
+    on_dismiss: Callback<Dismiss>,
+    tip: bool,
+) -> Option<Placed> {
     let placed = use_state_eq(|| None::<Placed>);
     let overlays = use_overlays();
     // The latest callback, read by listeners made when it opened.
@@ -315,7 +343,11 @@ pub fn use_popover(
             let mut observer = None;
 
             if open {
-                let layer = Rc::new(overlays.layer());
+                let layer = Rc::new(if tip {
+                    overlays.tip_layer()
+                } else {
+                    overlays.layer()
+                });
                 let last = Rc::new(Cell::new(None::<Placed>));
                 let measure = {
                     let (anchor, popover, placed) =

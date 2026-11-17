@@ -17,7 +17,8 @@ use crate::{
 const ITEMS: &str = ":is([role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
 
 /// What closes the menu when picked: an action or a radio, not a check.
-const PICKS: &str = ":is([role=menuitem], [role=menuitemradio]):not(:disabled)";
+const PICKS: &str =
+    ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
 
 /// How long a pause ends a type-ahead search, in milliseconds.
 const TYPEAHEAD_MS: f64 = 700.0;
@@ -952,6 +953,12 @@ mod tests {
                 .hydratable(false)
                 .render(),
         )
+    }
+
+    #[test]
+    fn a_disabled_row_neither_moves_nor_closes() {
+        assert!(ITEMS.contains("[aria-disabled=true]"));
+        assert!(PICKS.contains("[aria-disabled=true]"));
     }
 
     #[test]

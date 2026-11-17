@@ -12,7 +12,7 @@ use yew::prelude::*;
 use crate::popover::Listener;
 use crate::{
     Button, ButtonProps, ButtonSize, ButtonVariant, Dismiss, Overlays, Placed, PopoverAlign, Side,
-    class, use_overlays, use_popover,
+    class, popover::use_tip_popover, use_overlays,
 };
 
 /// How long a pointer rests on the anchor before a tooltip shows, in
@@ -277,7 +277,7 @@ pub fn Tooltip(props: &TooltipProps) -> Html {
     let hover = use_hover(props.delay, 0);
     use_anchor_events(props.anchor.clone(), &hover);
     let has_text = !props.text.trim().is_empty();
-    let placed = use_popover(
+    let placed = use_tip_popover(
         hover.open && has_text,
         props.anchor.clone(),
         node.clone(),
@@ -362,7 +362,7 @@ pub fn HoverCard(props: &HoverCardProps) -> Html {
     let node = use_node_ref();
     let hover = use_hover(props.delay, props.delay);
     use_anchor_events(props.anchor.clone(), &hover);
-    let placed = use_popover(
+    let placed = use_tip_popover(
         hover.open,
         props.anchor.clone(),
         node.clone(),
@@ -589,7 +589,7 @@ pub fn DataTips() -> Html {
         .and_then(|t| data_tip(&t.element))
         .unwrap_or_default();
     let open = hover.open && !text.is_empty();
-    let placed = use_popover(
+    let placed = use_tip_popover(
         open,
         stand_in.clone(),
         node.clone(),

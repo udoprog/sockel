@@ -7,22 +7,33 @@ use std::rc::Rc;
 #[derive(Debug, Default)]
 pub(crate) struct Layers {
     next: u32,
-    open: Vec<u32>,
+    open: Vec<(u32, bool)>,
 }
 
 impl Layers {
-    pub(crate) fn push(&mut self) -> u32 {
+    /// A transient layer (a tip) is topmost only while nothing else opened
+    /// after it, and never keeps the layers below it from being topmost.
+    pub(crate) fn push(&mut self, transient: bool) -> u32 {
         self.next += 1;
-        self.open.push(self.next);
+        self.open.push((self.next, transient));
         self.next
     }
 
     pub(crate) fn remove(&mut self, id: u32) {
-        self.open.retain(|&o| o != id);
+        self.open.retain(|&(o, _)| o != id);
     }
 
     pub(crate) fn is_top(&self, id: u32) -> bool {
-        self.open.last() == Some(&id)
+        match self.open.iter().find(|&&(o, _)| o == id) {
+            Some(&(_, true)) => self.open.last().is_some_and(|&(o, _)| o == id),
+            Some(_) => self
+                .open
+                .iter()
+                .rev()
+                .find(|&&(_, transient)| !transient)
+                .is_some_and(|&(o, _)| o == id),
+            None => false,
+        }
     }
 }
 
@@ -41,9 +52,9 @@ pub(crate) struct Layer {
 }
 
 impl Layer {
-    pub(crate) fn open(stack: &Stack) -> Self {
+    pub(crate) fn open(stack: &Stack, transient: bool) -> Self {
         Self {
-            id: stack.borrow_mut().push(),
+            id: stack.borrow_mut().push(transient),
             stack: stack.clone(),
         }
     }
@@ -105,11 +116,11 @@ mod tests {
     #[test]
     fn the_innermost_is_the_last_opened_still_open() {
         let mut layers = Layers::default();
-        let (dialog, popover) = (layers.push(), layers.push());
+        let (dialog, popover) = (layers.push(false), layers.push(false));
         assert!(layers.is_top(popover) && !layers.is_top(dialog));
         layers.remove(popover);
         assert!(layers.is_top(dialog));
-        let confirm = layers.push();
+        let confirm = layers.push(false);
         layers.remove(dialog);
         assert!(layers.is_top(confirm));
         layers.remove(confirm);
@@ -117,12 +128,25 @@ mod tests {
     }
 
     #[test]
+    fn a_tip_does_not_take_the_top_from_what_it_covers() {
+        let mut layers = Layers::default();
+        let dialog = layers.push(false);
+        let tip = layers.push(true);
+        assert!(layers.is_top(dialog) && layers.is_top(tip));
+        let menu = layers.push(false);
+        assert!(layers.is_top(menu) && !layers.is_top(dialog) && !layers.is_top(tip));
+        layers.remove(menu);
+        layers.remove(tip);
+        assert!(layers.is_top(dialog));
+    }
+
+    #[test]
     fn a_layer_leaves_its_own_stack_when_dropped() {
         let (a, b) = (Stack::default(), Stack::default());
-        let outer = Layer::open(&a);
-        let other = Layer::open(&b);
+        let outer = Layer::open(&a, false);
+        let other = Layer::open(&b, false);
         assert!(outer.is_top() && other.is_top(), "stacks are apart");
-        let inner = Layer::open(&a);
+        let inner = Layer::open(&a, false);
         assert!(!outer.is_top() && other.is_top());
         drop(inner);
         assert!(outer.is_top());

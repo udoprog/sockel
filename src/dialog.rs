@@ -96,12 +96,15 @@ pub fn dialog(size: DialogSize, sheet: bool) -> Classes {
     )
 }
 
+/// What Tab reaches: not disabled, and not a roving option held at `-1`.
+const FOCUSABLE: &str = "button:not(:disabled):not([tabindex='-1']), \
+         input:not(:disabled):not([type=hidden]):not([tabindex='-1']), \
+         select:not(:disabled):not([tabindex='-1']), textarea:not(:disabled):not([tabindex='-1']), \
+         a[href]:not([tabindex='-1']), [tabindex]:not([tabindex='-1'])";
+
 /// The enabled controls in `root` that Tab reaches, in order.
 fn focusable(root: &Element) -> Vec<HtmlElement> {
-    let Ok(list) = root.query_selector_all(
-        "button:not(:disabled), input:not(:disabled):not([type=hidden]), select:not(:disabled), \
-         textarea:not(:disabled), a[href], [tabindex]:not([tabindex='-1'])",
-    ) else {
+    let Ok(list) = root.query_selector_all(FOCUSABLE) else {
         return Vec::new();
     };
     (0..list.length())
@@ -346,6 +349,14 @@ mod tests {
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()
+    }
+
+    #[test]
+    fn every_focusable_clause_skips_a_roving_tabindex() {
+        assert!(
+            FOCUSABLE.split(", ").all(|c| c.contains("[tabindex='-1']")),
+            "{FOCUSABLE}"
+        );
     }
 
     #[test]

@@ -62,7 +62,11 @@ impl Overlays {
     }
 
     pub(crate) fn layer(&self) -> Layer {
-        Layer::open(&self.stack)
+        Layer::open(&self.stack, false)
+    }
+
+    pub(crate) fn tip_layer(&self) -> Layer {
+        Layer::open(&self.stack, true)
     }
 
     pub(crate) fn lock_scroll(&self) -> ScrollLock {
