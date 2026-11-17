@@ -668,7 +668,9 @@ fn use_placement(
                             let (on_dismiss, refocus) = (on_dismiss.clone(), refocus.clone());
                             let layer = layer.clone();
                             move |e: web_sys::Event| {
-                                if !layer.is_top() {
+                                // Not when what has the focus took the key
+                                // (a search field clearing its text).
+                                if !layer.is_top() || e.default_prevented() {
                                     return;
                                 }
                                 // Only keydown reaches here; unchecked, as an
