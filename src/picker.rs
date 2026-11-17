@@ -760,8 +760,35 @@ where
 #[derive(Properties, PartialEq)]
 pub struct PickerMenuProps<T: PartialEq + 'static> {
     pub options: Vec<PickerOption<T>>,
+    /// The current option, checked.
+    #[prop_or_default]
+    pub value: Option<T>,
+    /// Several at once: `chosen` are checked, and a pick toggles one and
+    /// leaves the list open.
+    #[prop_or_default]
+    pub multi: bool,
+    #[prop_or_default]
+    pub chosen: Vec<T>,
     #[prop_or_default]
     pub on_pick: Callback<T>,
+    /// Whether it is open, for a list its owner also closes (a Done
+    /// button); its own state when none.
+    #[prop_or_default]
+    pub open: Option<bool>,
+    /// Told whenever it would open or close.
+    #[prop_or_default]
+    pub on_toggle: Callback<bool>,
+    #[prop_or_default]
+    pub align: PopoverAlign,
+    /// The button's styled tip (`data-tip`).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
+    /// Above the list in the popup, such as a note.
+    #[prop_or_default]
+    pub head: Html,
+    /// Below the list in the popup, such as a Done button.
+    #[prop_or_default]
+    pub children: Html,
     /// The button's visible text: the action, such as Add a key.
     #[prop_or_default]
     pub text: Html,
@@ -815,28 +842,38 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
 }
 
 /// A [`Button`] for an action that takes an option (adding one), opening a
-/// [`ChoiceList`] as a [`Picker`] does; a pick closes it.
+/// [`ChoiceList`] as a [`Picker`] does; a pick closes it, unless `multi`.
 #[function_component]
 pub fn PickerMenu<T>(props: &PickerMenuProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
     let opener = use_node_ref();
-    let open = use_state_eq(|| false);
+    let own = use_state_eq(|| false);
+    let is_open = props.open.unwrap_or(*own);
+    let set = {
+        let (own, on_toggle) = (own.clone(), props.on_toggle.clone());
+        Callback::from(move |to: bool| {
+            own.set(to);
+            on_toggle.emit(to);
+        })
+    };
     let on_dismiss = {
-        let open = open.clone();
-        Callback::from(move |_: Dismiss| open.set(false))
+        let set = set.clone();
+        Callback::from(move |_: Dismiss| set.emit(false))
     };
     let on_pick = {
-        let (open, on_pick) = (open.clone(), props.on_pick.clone());
+        let (set, on_pick, multi) = (set.clone(), props.on_pick.clone(), props.multi);
         Callback::from(move |v: T| {
-            open.set(false);
+            if !multi {
+                set.emit(false);
+            }
             on_pick.emit(v);
         })
     };
     let onclick = {
-        let open = open.clone();
-        Callback::from(move |_: MouseEvent| open.set(!*open))
+        let set = set.clone();
+        Callback::from(move |_: MouseEvent| set.emit(!is_open))
     };
     let (icon, trailing) = match &props.icon {
         Some(icon) => (Some(icon.clone()), false),
@@ -848,19 +885,23 @@ where
             <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
                 class={props.class.clone()} {icon} {trailing} fold={props.fold}
                 chevron={props.chevron && !trailing}
-                label={Some(props.label.clone())} disabled={props.disabled}
-                expanded={Some(*open)} haspopup={AttrValue::Static("listbox")}
+                label={Some(props.label.clone())} disabled={props.disabled} tip={props.tip.clone()}
+                expanded={Some(is_open)} haspopup={AttrValue::Static("listbox")}
                 testid={props.testid.clone()} {onclick}>
                 { props.text.clone() }
             </Button>
-            <ChoicePopup anchor={opener} open={*open} {on_dismiss} testid={props.testid.clone()}>
+            <ChoicePopup anchor={opener} open={is_open} {on_dismiss} align={props.align}
+                testid={props.testid.clone()}>
+                { props.head.clone() }
                 <ChoiceList<T> options={props.options.clone()} {on_pick}
+                    value={props.value.clone()} multi={props.multi} chosen={props.chosen.clone()}
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
                     autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
                     tab_cycles={props.tab_cycles} clear_label={props.clear_label.clone()}
                     detail_below={props.detail_below}
                     testid={list_testid(&props.testid, &props.list_testid)} />
+                { props.children.clone() }
             </ChoicePopup>
         </>
     }
@@ -1104,6 +1145,30 @@ mod tests {
             .render(),
         );
         assert!(!html.contains("list"), "{html}");
+    }
+
+    #[test]
+    fn a_picker_menu_can_be_opened_by_its_owner() {
+        let render = |open: Option<bool>| {
+            futures::executor::block_on(
+                yew::LocalServerRenderer::<PickerMenu<u32>>::with_props(yew::props!(
+                    PickerMenuProps<u32> {
+                        options: languages(),
+                        label: AttrValue::Static("Languages"),
+                        tip: Some(AttrValue::Static("Pick languages")),
+                        multi: true,
+                        open,
+                    }
+                ))
+                .hydratable(false)
+                .render(),
+            )
+        };
+        let closed = render(None);
+        assert!(closed.contains("aria-expanded=\"false\""), "{closed}");
+        assert!(closed.contains("data-tip=\"Pick languages\""), "{closed}");
+        let open = render(Some(true));
+        assert!(open.contains("aria-expanded=\"true\""), "{open}");
     }
 
     #[test]

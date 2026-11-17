@@ -1853,8 +1853,10 @@ breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's 
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
 gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
 for an action that takes an option (Add a language): `text`, `icon`,
-`chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `disabled`, `on_pick`, and the list's
-`on_search`, `page_size`, `tab_cycles` and `list_testid`. `PickerDialog<T>` is the
+`chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `tip`, `disabled`, `on_pick`, and the list's
+`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles` and `list_testid`; `align`
+(`Start` by default), `open` and `on_toggle` for a list its owner also closes, `head` (above the list, a note) and
+its children (below it, a Done button). `PickerDialog<T>` is the
 searchable shell for a large set (languages, countries): a `Dialog`
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
 `ChoiceList` that always searches, its field focused, single (the owner

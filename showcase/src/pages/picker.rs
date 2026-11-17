@@ -1,8 +1,9 @@
 use yew::prelude::*;
 
 use plinth::{
-    Badge, Button, ButtonVariant, ChoiceList, ChoicePopup, Cluster, Dismiss, Field, Glyph, Icon,
-    PickerDialog, PickerMenu, PickerOption, PickerVariant, Stack, field_describedby, toggled,
+    Badge, Button, ButtonSize, ButtonVariant, ChoiceList, ChoicePopup, Cluster, Dismiss, Field,
+    Glyph, Icon, PickerDialog, PickerMenu, PickerOption, PickerVariant, Stack, field_describedby,
+    toggled,
 };
 
 use super::fields::use_control_id;
@@ -226,15 +227,27 @@ pub fn PickerPage() -> Html {
 pub fn PickerMenuPage() -> Html {
     let settings = use_state(initial);
     let added = use_state(Vec::<usize>::new);
+    let multi = use_state(|| false);
+    let open = use_state(|| false);
     let s = *settings;
     let options = s.options();
     let on_pick = {
-        let added = added.clone();
+        let (added, multi) = (added.clone(), *multi);
         Callback::from(move |v: usize| {
-            if !added.contains(&v) {
+            if multi {
+                added.set(toggled(&added, &v));
+            } else if !added.contains(&v) {
                 added.set(added.iter().copied().chain([v]).collect());
             }
         })
+    };
+    let on_toggle = {
+        let open = open.clone();
+        Callback::from(move |to: bool| open.set(to))
+    };
+    let done = {
+        let open = open.clone();
+        Callback::from(move |_: MouseEvent| open.set(false))
     };
     let names: Vec<String> = added
         .iter()
@@ -256,17 +269,34 @@ pub fn PickerMenuPage() -> Html {
             .flag("always_search", s.always_search)
             .expr_if(s.paged, "page_size", "Some(10)")
             .flag("detail_below", s.detail_below)
+            .flag("multi", *multi)
+            .expr_if(*multi, "chosen", "chosen")
+            .expr_if(*multi, "open", "Some(*open)")
+            .expr_if(*multi, "on_toggle", "set_open")
             .flag("disabled", s.disabled),
     );
+    let controls = html! {
+        <>
+            { settings_controls(&settings) }
+            <Toggle label="multi, with Done" value={*multi} on_change={bind(&multi)} />
+        </>
+    };
     html! {
-        <Demo controls={settings_controls(&settings)} {code}>
+        <Demo {controls} {code}>
             <Stack>
                 <Cluster>
                     <PickerMenu<usize> {options} {on_pick} text={html! { "Add a language" }}
                         label="Add a language" always_search={s.always_search} page_size={s.page_size()}
                         icon={s.chevron.then(|| html! { <Icon glyph={Glyph::Plus} /> })} chevron={s.chevron}
-                        detail_below={s.detail_below}
-                        disabled={s.disabled} testid="picker-menu" />
+                        detail_below={s.detail_below} multi={*multi} chosen={(*added).clone()}
+                        open={multi.then_some(*open)} {on_toggle}
+                        disabled={s.disabled} testid="picker-menu">
+                        if *multi {
+                            <Button variant={ButtonVariant::Primary} size={ButtonSize::Small} onclick={done}>
+                                { "Done" }
+                            </Button>
+                        }
+                    </PickerMenu<usize>>
                 </Cluster>
                 <p class={class::SAMPLE}>{ format!("Added: {}", if names.is_empty() { "none".to_owned() } else { names.join(", ") }) }</p>
             </Stack>
