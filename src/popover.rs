@@ -33,6 +33,18 @@ impl Rect {
         self.top + self.height
     }
 
+    /// The part of this box inside `other` (empty when they do not meet).
+    pub fn clip(&self, other: Rect) -> Rect {
+        let left = self.left.max(other.left);
+        let top = self.top.max(other.top);
+        Rect {
+            left,
+            top,
+            width: (self.right().min(other.right()) - left).max(0.0),
+            height: (self.bottom().min(other.bottom()) - top).max(0.0),
+        }
+    }
+
     fn of(element: &Element) -> Self {
         let r = element.get_bounding_client_rect();
         Self {
@@ -351,6 +363,19 @@ fn out_of_sight(anchor: &Element, clippers: &[Element]) -> bool {
     })
 }
 
+/// The box a popover beside `anchor` is placed and kept inside: the
+/// viewport, cut to `anchor`'s closest ancestor matching the selector
+/// `within` when it has one.
+pub fn placement_bounds(anchor: &Element, within: Option<&str>) -> Option<Rect> {
+    let viewport = viewport()?;
+    Some(
+        match within.and_then(|w| anchor.closest(w).ok().flatten()) {
+            Some(boxed) => viewport.clip(Rect::of(&boxed)),
+            None => viewport,
+        },
+    )
+}
+
 fn viewport() -> Option<Rect> {
     let root = web_sys::window()?.document()?.document_element()?;
     Some(Rect {
@@ -402,7 +427,25 @@ pub fn use_popover(
     align: PopoverAlign,
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
-    use_placement(open, anchor, popover, side, align, on_dismiss, false)
+    use_placement(open, anchor, popover, side, align, None, on_dismiss, false)
+}
+
+/// `use_popover` kept inside `anchor`'s closest ancestor matching the
+/// selector `within` (see [`placement_bounds`]), not the viewport alone.
+#[hook]
+#[allow(clippy::too_many_arguments)]
+pub fn use_popover_within(
+    open: bool,
+    anchor: NodeRef,
+    popover: NodeRef,
+    side: Side,
+    align: PopoverAlign,
+    within: Option<AttrValue>,
+    on_dismiss: Callback<Dismiss>,
+) -> Option<Placed> {
+    use_placement(
+        open, anchor, popover, side, align, within, on_dismiss, false,
+    )
 }
 
 /// `use_popover` for a tip: it never keeps the overlay beneath it from
@@ -416,7 +459,7 @@ pub(crate) fn use_tip_popover(
     align: PopoverAlign,
     on_dismiss: Callback<Dismiss>,
 ) -> Option<Placed> {
-    use_placement(open, anchor, popover, side, align, on_dismiss, true)
+    use_placement(open, anchor, popover, side, align, None, on_dismiss, true)
 }
 
 #[hook]
@@ -427,6 +470,7 @@ fn use_placement(
     popover: NodeRef,
     side: Side,
     align: PopoverAlign,
+    within: Option<AttrValue>,
     on_dismiss: Callback<Dismiss>,
     tip: bool,
 ) -> Option<Placed> {
@@ -439,7 +483,10 @@ fn use_placement(
 
     {
         let placed = placed.clone();
-        use_effect_with((open, side, align), move |&(open, side, align)| {
+        let deps = (open, side, align, within);
+        use_effect_with(deps, move |(open, side, align, within)| {
+            let (open, side, align) = (*open, *side, *align);
+            let within = within.clone();
             // Why it was dismissed (whether that returns focus), and
             // whether focus or a press was ever inside it.
             let refocus = Rc::new(Cell::new(None::<bool>));
@@ -476,11 +523,12 @@ fn use_placement(
                     let clipped = clipped.clone();
                     let gone = Rc::new(Cell::new(false));
                     Rc::new(move || {
-                        let (Some(at), Some(pop), Some(viewport)) = (
-                            anchor.cast::<Element>(),
-                            popover.cast::<HtmlElement>(),
-                            viewport(),
-                        ) else {
+                        let (Some(at), Some(pop)) =
+                            (anchor.cast::<Element>(), popover.cast::<HtmlElement>())
+                        else {
+                            return;
+                        };
+                        let Some(bounds) = placement_bounds(&at, within.as_deref()) else {
                             return;
                         };
                         // Its anchor scrolled away or hidden: nothing to
@@ -497,7 +545,7 @@ fn use_placement(
                             f64::from(pop.offset_width()),
                             f64::from(pop.scroll_height()),
                         );
-                        let next = place(Rect::of(&at), size, viewport, side, align);
+                        let next = place(Rect::of(&at), size, bounds, side, align);
                         if last.get().is_none_or(|l| !l.near(&next)) {
                             last.set(Some(next));
                             placed.set(Some(next));
@@ -617,6 +665,10 @@ pub struct PopoverProps {
     pub side: Side,
     #[prop_or_default]
     pub align: PopoverAlign,
+    /// A selector: keep it inside the anchor's closest ancestor matching
+    /// it (a window of the app's), not the viewport alone.
+    #[prop_or_default]
+    pub within: Option<AttrValue>,
     /// A sheet from the bottom below the phone breakpoint, over a scrim
     /// (`.plinth-sheet`); on by default.
     #[prop_or(true)]
@@ -665,12 +717,13 @@ pub fn popover(sheet: bool, placed: bool) -> Classes {
 pub fn Popover(props: &PopoverProps) -> Html {
     let node = use_node_ref();
     let overlays = use_overlays();
-    let placed = use_popover(
+    let placed = use_popover_within(
         props.open,
         props.anchor.clone(),
         node.clone(),
         props.side,
         props.align,
+        props.within.clone(),
         props.on_dismiss.clone(),
     );
     {
@@ -838,6 +891,39 @@ mod tests {
     }
 
     #[test]
+    fn a_box_within_bounds_it_to_their_overlap() {
+        let window = Rect {
+            left: 500.0,
+            top: -50.0,
+            width: 400.0,
+            height: 300.0,
+        };
+        assert_eq!(
+            VIEWPORT.clip(window),
+            Rect {
+                left: 500.0,
+                top: 0.0,
+                width: 300.0,
+                height: 250.0
+            }
+        );
+        let apart = Rect {
+            left: 900.0,
+            ..window
+        };
+        assert_eq!(VIEWPORT.clip(apart).width, 0.0);
+        // Placed inside the window, not over the page to its left.
+        let p = place(
+            anchor(520.0, 100.0),
+            (200.0, 100.0),
+            VIEWPORT.clip(window),
+            Side::Below,
+            PopoverAlign::End,
+        );
+        assert_eq!(p.left, 500.0 + EDGE);
+    }
+
+    #[test]
     fn it_is_clipped_to_the_viewport() {
         // Off the right edge: moved back in.
         let p = place(
@@ -927,6 +1013,7 @@ mod tests {
             on_dismiss: Callback::noop(),
             side: Side::Below,
             align: PopoverAlign::Start,
+            within: None,
             sheet,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),

@@ -1377,6 +1377,8 @@ pub const PAGES: &[Page] = &[
             "Rect",
             "place",
             "use_popover",
+            "use_popover_within",
+            "placement_bounds",
             "overlay",
             "popover",
             "OVERLAY_ID",

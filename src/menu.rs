@@ -11,7 +11,7 @@ use crate::roving::{Typeahead, menu_step, printable, typeahead};
 use crate::timer::Timer;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class,
-    use_overlays, use_popover,
+    use_overlays, use_popover_within,
 };
 
 /// What the arrow keys, Home, End and type-ahead move between.
@@ -242,6 +242,7 @@ struct ListProps {
     back: Callback<()>,
     side: Side,
     align: PopoverAlign,
+    within: Option<AttrValue>,
     width: MenuWidth,
     tight: bool,
     label: Option<AttrValue>,
@@ -257,12 +258,13 @@ struct ListProps {
 fn MenuList(props: &ListProps) -> Html {
     let overlays = use_overlays();
     let list = use_node_ref();
-    let placed = use_popover(
+    let placed = use_popover_within(
         props.open,
         props.anchor.clone(),
         list.clone(),
         props.side,
         props.align,
+        props.within.clone(),
         props.on_dismiss.clone(),
     );
     use_focus_first(list.clone(), placed.is_some());
@@ -368,6 +370,10 @@ pub struct MenuProps {
     /// row's end.
     #[prop_or(PopoverAlign::End)]
     pub align: PopoverAlign,
+    /// A selector: keep it inside the anchor's closest ancestor matching
+    /// it (a window of the app's), not the viewport alone.
+    #[prop_or_default]
+    pub within: Option<AttrValue>,
     #[prop_or_default]
     pub disabled: bool,
     /// Open, for a menu its owner also opens another way (a right-click on
@@ -472,7 +478,8 @@ pub fn Menu(props: &MenuProps) -> Html {
                 { button }
             }
             <MenuList anchor={opener} open={is_open} {on_dismiss} {back}
-                side={props.side} align={props.align} width={props.width} tight={props.tight}
+                side={props.side} align={props.align} within={props.within.clone()}
+                width={props.width} tight={props.tight}
                 label={props.label.clone()} class={props.class.clone()}
                 testid={props.testid.clone()}>
                 { props.children.clone() }
@@ -968,6 +975,10 @@ pub struct ContextMenuProps {
     pub width: MenuWidth,
     #[prop_or_default]
     pub tight: bool,
+    /// A selector: keep it inside the anchor's closest ancestor matching
+    /// it (a window of the app's), not the viewport alone.
+    #[prop_or_default]
+    pub within: Option<AttrValue>,
     /// The menu's accessible name.
     #[prop_or_default]
     pub label: Option<AttrValue>,
@@ -1109,7 +1120,7 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
                 }) }
             }
             <MenuList anchor={point} {open} {on_dismiss} {back}
-                side={Side::Below} align={PopoverAlign::Start}
+                side={Side::Below} align={PopoverAlign::Start} within={props.within.clone()}
                 width={props.width} tight={props.tight}
                 label={props.label.clone()} class={props.class.clone()}
                 testid={props.testid.clone()}>

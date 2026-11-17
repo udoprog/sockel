@@ -29,6 +29,7 @@ struct PopoverDemoProps {
     text: Text,
     sheet: bool,
     titled: bool,
+    within: bool,
 }
 
 /// One anchor and its popover, with its own open state, so each frame has
@@ -77,6 +78,7 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
             </span>
             <Popover anchor={anchor} open={*open} {on_dismiss}
                 side={props.side} align={props.align} sheet={props.sheet}
+                within={props.within.then(|| AttrValue::from(format!(".{}", class::FRAME)))}
                 title={props.titled.then_some(AttrValue::Static("Filters"))}>
                 <Stack>
                     if !text.is_empty() {
@@ -100,6 +102,7 @@ pub fn PopoverPage() -> Html {
     let text = use_state(|| Text::Short);
     let sheet = use_state(|| true);
     let titled = use_state(|| true);
+    let within = use_state(|| false);
 
     let controls = html! {
         <>
@@ -108,6 +111,7 @@ pub fn PopoverPage() -> Html {
             <Select<Text> label="Content" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
             <Toggle label="title" value={*titled} on_change={bind(&titled)} />
+            <Toggle label="within its frame" value={*within} on_change={bind(&within)} />
         </>
     };
 
@@ -122,6 +126,7 @@ pub fn PopoverPage() -> Html {
             .variant("align", *align)
             .expr_if(!*sheet, "sheet", "false")
             .text_if(*titled, "title", "Filters")
+            .text_if(*within, "within", &format!(".{}", class::FRAME))
             .child(
                 El::new("Stack")
                     .line_if(!words.is_empty(), format!("<p>{}</p>", text_node(&words)))
@@ -133,7 +138,7 @@ pub fn PopoverPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} />
+            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} />
         </Demo>
     }
 }

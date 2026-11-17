@@ -282,7 +282,8 @@ pub use picker::{
     PickerMenuProps, PickerOption, PickerProps, PickerVariant, SEARCH_FROM, picker, picker_matches,
 };
 pub use popover::{
-    Dismiss, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, popover, use_popover,
+    Dismiss, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, place, placement_bounds,
+    popover, use_popover, use_popover_within,
 };
 pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderProps, ReorderRow, ReorderText, drag_handle,

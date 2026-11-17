@@ -947,6 +947,10 @@ the owner cuts it, and its events still bubble through the owner. Props:
   `title` as its heading and a close button (`close_label`, "Close").
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
+- `within` (a selector): placed and kept inside the anchor's closest
+  ancestor matching it, cut to the viewport, rather than the viewport
+  alone: a popover raised in one of an app's docked windows stays over
+  that window, not its neighbour. Without a match, the viewport.
 - `on_pointer_enter` and `on_pointer_leave` (`Option<Callback<PointerEvent>>`):
   the pointer over the surface, for an owner that keeps it open while the
   pointer is there (it is in the overlay layer, so the owner's own
@@ -966,7 +970,10 @@ dismissing. `place(anchor, (width, height), viewport, side, align)` is its
 pure placement: the given side unless the popover does not fit and the
 opposite side has more room, then moved back inside the viewport, its
 height capped (`max_height`) by the room on the side it took.
-`popover(sheet, placed)` gives the classes (`POPOVER`, `SHEET`, `PLACED`).
+`use_popover_within(.., within, on_dismiss)` takes `within` too, and
+`placement_bounds(anchor, within)` is the box either places inside, for a
+surface placed by its owner with `place` (`Rect::clip` cuts one box to
+another). `popover(sheet, placed)` gives the classes (`POPOVER`, `SHEET`, `PLACED`).
 
 Size guarantees: it is hidden (`visibility`) until it has been measured and
 placed (`PLACED`), so it never shows at 0,0 first. It is `position: fixed`
@@ -1222,8 +1229,8 @@ overlay layer, through `use_popover`. Props:
   `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
   between rows.
-- `side`, `align` (`End` by default), `disabled`; `open` and `on_toggle`
-  for a menu its owner also opens another way; `class` (the list's),
+- `side`, `align` (`End` by default), `within` (as `Popover`'s),
+  `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
   `testid` (the list's; the opener's is it suffixed `-toggle`).
 
 Its children are the items: `MenuItem` (an action; `icon`, `detail` under
@@ -1275,7 +1282,7 @@ to a `Menu` of its variants (its children; `menu_label`, "More options";
 `display: contents`, so it lays nothing out) and opens a menu of `items`
 at the pointer on a right-click, or a press held for half a second on a
 touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
-had it when it opened (Tab then moves on from there). `width`, `tight`, `label`, `disabled` (the browser's
+had it when it opened (Tab then moves on from there). `width`, `tight`, `within`, `label`, `disabled` (the browser's
 menu instead), `on_toggle`, `class`, `testid`.
 
 Size guarantees: the opener is a `Button`, so open and closed are the same
