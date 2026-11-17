@@ -27,6 +27,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_index.scss",
     "_layout.scss",
     "_tokens.scss",
+    "_utilities.scss",
 );
 
 /// Styles each hook class of `_hooks.scss`, so its class is found like any other.
@@ -524,6 +525,116 @@ mod tests {
             classes_rs(&["stack".to_owned()]).unwrap(),
             "/// `.stack`\npub const STACK: &str = \"stack\";\n"
         );
+    }
+
+    /// The declarations of `selector`'s rule in `css`, one per line, trimmed.
+    fn declarations(css: &str, selector: &str) -> Vec<String> {
+        let start = css
+            .find(&format!("{selector} {{"))
+            .unwrap_or_else(|| panic!("no rule {selector} in {css}"));
+        let body = &css[start + selector.len() + 2..];
+        body[..body.find('}').unwrap()]
+            .split(';')
+            .map(|line| line.trim().to_owned())
+            .filter(|line| !line.is_empty())
+            .collect()
+    }
+
+    fn compile_probe(probe: &str) -> Result<String, Box<grass::Error>> {
+        let options = grass::Options::default().fs(&Sources).load_path("");
+        grass::from_string(format!("@use \"plinth\" as p;\n{probe}"), &options)
+    }
+
+    #[test]
+    fn the_jitter_mixins_emit_their_rules() {
+        let css = compile_probe(
+            ".x-ring { @include p.focus-ring; }\n\
+             .x-border { @include p.reserved-border; }\n\
+             .x-numeric { @include p.numeric; }\n\
+             .x-scroll { @include p.scroll-area; }\n\
+             .x-truncate { @include p.truncate; }\n\
+             .x-clamp { @include p.clamp(3); }\n\
+             .x-hidden { @include p.visually-hidden; }\n\
+             .x-phone { @include p.phone-only; }\n\
+             .x-desktop { @include p.desktop-only; }\n\
+             .x-bg { @include p.current; }\n\
+             .x-color { @include p.current(color); }\n\
+             .x-line { @include p.current(underline); }\n",
+        )
+        .unwrap();
+        let probe = &css[css.find(".x-ring").unwrap()..];
+
+        assert_eq!(
+            declarations(probe, ".x-ring:focus-visible"),
+            [
+                "outline: var(--focus-ring-width) solid var(--focus-ring-color)",
+                "outline-offset: var(--focus-ring-offset)"
+            ]
+        );
+        assert_eq!(
+            declarations(probe, ".x-border"),
+            ["border: var(--space-px) solid transparent"]
+        );
+        assert_eq!(
+            declarations(probe, ".x-numeric"),
+            ["font-variant-numeric: tabular-nums"]
+        );
+        assert!(declarations(probe, ".x-scroll").contains(&"scrollbar-gutter: stable".to_owned()));
+        assert!(declarations(probe, ".x-scroll").contains(&"overflow: auto".to_owned()));
+        assert!(declarations(probe, ".x-truncate").contains(&"text-overflow: ellipsis".to_owned()));
+        assert!(declarations(probe, ".x-clamp").contains(&"-webkit-line-clamp: 3".to_owned()));
+        assert!(declarations(probe, ".x-hidden").contains(&"clip-path: inset(50%)".to_owned()));
+        assert!(probe.contains("@media (width >= 40rem) {\n  .x-phone {\n    display: none;"));
+        assert!(probe.contains("@media (width < 40rem) {\n  .x-desktop {\n    display: none;"));
+        let current = "[aria-current]:not([aria-current=false]), ";
+        assert_eq!(
+            declarations(probe, &format!(".x-bg{current}.x-bg[aria-selected=true]")),
+            ["background: var(--accent)", "color: var(--on-accent)"]
+        );
+        assert_eq!(
+            declarations(
+                probe,
+                &format!(".x-color{current}.x-color[aria-selected=true]")
+            ),
+            ["color: var(--accent)"]
+        );
+        assert!(
+            !probe.contains("font-weight"),
+            "a current item keeps its weight"
+        );
+        assert!(compile_probe(".x { @include p.current(bold); }").is_err());
+    }
+
+    #[test]
+    fn the_colour_contract_defaults_and_configures() {
+        let plain = Config::new().build().unwrap();
+        let root = declarations(&plain.css, ":root");
+        for token in [
+            "--danger: color-mix(in srgb, #d92d20 70%, var(--text))",
+            "--on-accent: var(--bg)",
+            "--surface-raised: var(--surface)",
+            "--focus-ring-color: var(--accent)",
+            "--layer-dialog: 200",
+        ] {
+            assert!(root.iter().any(|line| line == token), "{token} in {root:?}");
+        }
+        for token in [
+            "--success",
+            "--warning",
+            "--scrim",
+            "--layer-sticky",
+            "--layer-overlay",
+            "--layer-toast",
+            "--layer-tooltip",
+        ] {
+            assert!(
+                root.iter()
+                    .any(|line| line.starts_with(&format!("{token}: "))),
+                "{token}"
+            );
+        }
+        let tuned = Config::new().with("danger", "#c00").build().unwrap();
+        assert!(declarations(&tuned.css, ":root").contains(&"--danger: #c00".to_owned()));
     }
 
     fn fixture(name: &str) -> PathBuf {

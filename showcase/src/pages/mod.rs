@@ -1,4 +1,5 @@
 mod actions;
+mod foundations;
 mod heads;
 mod layout;
 mod library;
@@ -97,6 +98,13 @@ pub const PAGES: &[Page] = &[
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
         covers: &["stack", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
+    },
+    Page {
+        id: "foundations",
+        title: "Foundations",
+        about: "The utilities and mixins against jitter: text fitting, tabular figures, a scroll area, the current item, showing by width, the focus ring; and the colours plinth derives.",
+        covers: &[],
+        render: || html! { <foundations::FoundationsPage /> },
     },
     Page {
         id: "styles",

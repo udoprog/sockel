@@ -1,0 +1,50 @@
+// Single-purpose classes against jitter, each its mixin of `_tokens.scss`
+// on an element plinth's components do not own. Loaded last, so a utility
+// wins over a component's rule of the same weight.
+//
+// - `.plinth-focus-ring`: the focus ring on keyboard focus.
+// - `.plinth-numeric`: tabular figures (counts, readouts, pagers, clocks).
+// - `.plinth-scroll-area`: scrolls, its scrollbar's room always kept.
+// - `.plinth-truncate`: one line and an ellipsis; `.plinth-clamp-2`,
+//   `.plinth-clamp-3`, `.plinth-clamp-4`: that many lines.
+// - `.plinth-visually-hidden`: for a screen reader only (a hidden h1).
+// - `.plinth-phone-only` and `.plinth-desktop-only`: shown only below the
+//   phone breakpoint, or only from it up.
+
+@use "tokens" as base;
+
+.plinth-focus-ring {
+    @include base.focus-ring;
+}
+
+.plinth-numeric {
+    @include base.numeric;
+}
+
+.plinth-scroll-area {
+    @include base.scroll-area;
+}
+
+.plinth-truncate {
+    @include base.truncate;
+}
+
+@each $lines in (2, 3, 4) {
+    .plinth-clamp-#{$lines} {
+        @include base.clamp($lines);
+    }
+}
+
+.plinth-visually-hidden {
+    @include base.visually-hidden;
+}
+
+// The class twice, so it hides a component with a modifier
+// (`.plinth-cluster.plinth-inline`) too, without `!important`.
+.plinth-phone-only.plinth-phone-only {
+    @include base.phone-only;
+}
+
+.plinth-desktop-only.plinth-desktop-only {
+    @include base.desktop-only;
+}

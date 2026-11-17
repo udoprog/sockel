@@ -12,8 +12,17 @@
 // - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
 // - `--page-workspace` and `--page-reading`: the two content columns;
 //   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
+// - `--focus-ring-*`: the focus ring's colour, width and offset.
+// - `--layer-*`: the stacking order of what floats (sticky, overlay,
+//   dialog, toast, tooltip).
+// - Colours derived from the app's seven (`--danger`, `--success`,
+//   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`): each a
+//   default an app overrides by name.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
+// - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
+//   `scroll-area`, `truncate`, `clamp($lines)`, `visually-hidden`,
+//   `phone-only`, `desktop-only`, `current($by)`.
 
 @use "sass:map";
 
@@ -103,6 +112,24 @@ $page-workspace: 64rem !default;
 $page-reading: 40rem !default;
 $page-wide: 90rem !default;
 $page-gutter: var(--space-8) !default;
+$focus-ring-color: var(--accent) !default;
+$focus-ring-width: 2px !default;
+$focus-ring-offset: 2px !default;
+$layer-sticky: 10 !default;
+$layer-overlay: 100 !default;
+$layer-dialog: 200 !default;
+$layer-toast: 300 !default;
+$layer-tooltip: 400 !default;
+// The status hues are mixed toward the app's text, so they keep their
+// contrast on its background in a light and a dark scheme alike.
+$danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
+$success: color-mix(in srgb, #12a150 65%, var(--text)) !default;
+$warning: color-mix(in srgb, #dc8a00 70%, var(--text)) !default;
+$on-accent: var(--bg) !default;
+$surface-raised: var(--surface) !default;
+$scrim: rgb(0 0 0 / 0.45) !default;
+// The breakpoint `phone-only` and `desktop-only` switch at.
+$visibility-breakpoint: "phone" !default;
 
 :root {
     --text-3xs: #{$text-3xs};
@@ -154,6 +181,28 @@ $page-gutter: var(--space-8) !default;
     // The widest column, and the gutter at a page's sides.
     --page-wide: #{$page-wide};
     --page-gutter: #{$page-gutter};
+
+    --focus-ring-color: #{$focus-ring-color};
+    --focus-ring-width: #{$focus-ring-width};
+    --focus-ring-offset: #{$focus-ring-offset};
+
+    --layer-sticky: #{$layer-sticky};
+    --layer-overlay: #{$layer-overlay};
+    --layer-dialog: #{$layer-dialog};
+    --layer-toast: #{$layer-toast};
+    --layer-tooltip: #{$layer-tooltip};
+
+    // Derived from the app's colours on `:root`: an app that sets those on
+    // a narrower element sets these there too.
+    --danger: #{$danger};
+    --success: #{$success};
+    --warning: #{$warning};
+    // Text and icons on an accent background.
+    --on-accent: #{$on-accent};
+    // A menu's, popover's or dialog's surface.
+    --surface-raised: #{$surface-raised};
+    // What dims the page behind a dialog.
+    --scrim: #{$scrim};
 }
 
 // A page's content column: the workspace unless it is given the reading
@@ -173,4 +222,97 @@ $page-gutter: var(--space-8) !default;
 @mixin nests($radius, $border: 1px) {
     padding: var(--nest-inset);
     --radius-inner: calc(#{$radius} - var(--nest-inset) - #{$border});
+}
+
+// The focus ring, on keyboard focus only: an outline, never a border, so
+// it adds nothing to the box.
+@mixin focus-ring {
+    &:focus-visible {
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: var(--focus-ring-offset);
+    }
+}
+
+// A border that is always there, transparent unless given a colour: a state
+// changes its `border-color` only, so the box never grows a pixel.
+@mixin reserved-border($color: transparent, $width: var(--space-px)) {
+    border: $width solid $color;
+}
+
+// Figures of one width each, so a count or a clock does not move as it
+// changes.
+@mixin numeric {
+    font-variant-numeric: tabular-nums;
+}
+
+// A scrolling container whose scrollbar's room is kept whether it scrolls
+// or not, so its content does not jump when it starts to.
+@mixin scroll-area {
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+    scrollbar-gutter: stable;
+}
+
+// One line, cut with an ellipsis.
+@mixin truncate {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+// At most `$lines` lines, the last cut with an ellipsis.
+@mixin clamp($lines) {
+    display: -webkit-box;
+    min-width: 0;
+    overflow: hidden;
+    -webkit-box-orient: vertical;
+    -webkit-line-clamp: $lines;
+    line-clamp: $lines;
+}
+
+// Read by a screen reader, not shown.
+@mixin visually-hidden {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    margin: -1px;
+    padding: 0;
+    border: 0;
+    overflow: hidden;
+    clip-path: inset(50%);
+    white-space: nowrap;
+}
+
+@mixin phone-only {
+    @include above($visibility-breakpoint) {
+        display: none;
+    }
+}
+
+@mixin desktop-only {
+    @include below($visibility-breakpoint) {
+        display: none;
+    }
+}
+
+// The current or selected item (`aria-current`, `aria-selected="true"`),
+// marked by its colour, background or underline, never its weight, so it
+// keeps its width. `$by` is `background`, `color` or `underline`.
+@mixin current($by: background) {
+    &[aria-current]:not([aria-current="false"]),
+    &[aria-selected="true"] {
+        @if $by == background {
+            background: var(--accent);
+            color: var(--on-accent);
+        } @else if $by == color {
+            color: var(--accent);
+        } @else if $by == underline {
+            text-decoration: underline var(--focus-ring-width);
+            text-underline-offset: var(--space-1);
+        } @else {
+            @error "current($by): background, color or underline, not #{$by}";
+        }
+    }
 }

@@ -93,6 +93,29 @@ mod tests {
     }
 
     #[test]
+    fn the_stylesheet_holds_the_utilities_and_reserves_borders() {
+        let compact: String = STYLESHEET.split_whitespace().collect();
+        for rule in [
+            ".plinth-focus-ring:focus-visible{outline:var(--focus-ring-width)solidvar(--focus-ring-color);",
+            ".plinth-numeric{font-variant-numeric:tabular-nums;}",
+            "scrollbar-gutter:stable;}",
+            ".plinth-truncate{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}",
+            ".plinth-clamp-2{",
+            ".plinth-clamp-4{",
+            ".plinth-visually-hidden{position:absolute;",
+            "@media(width>=40rem){.plinth-phone-only.plinth-phone-only{display:none;}}",
+            "@media(width<40rem){.plinth-desktop-only.plinth-desktop-only{display:none;}}",
+            ".plinth-card.plinth-link:focus-visible{outline:",
+        ] {
+            assert!(compact.contains(rule), "{rule}");
+        }
+        assert!(compact.contains(
+            ".plinth-card{padding:var(--space-4);border:var(--space-px)solidvar(--border);"
+        ));
+        assert!(!STYLESHEET.contains("!important"));
+    }
+
+    #[test]
     fn injects_once() {
         let head = Head::default();
         ensure_styles(&head, None);

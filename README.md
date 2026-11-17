@@ -168,8 +168,26 @@ The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 
 ## Theming
 
-The app supplies the colour tokens: `--bg`, `--surface`, `--text`, `--muted`,
-`--border`, `--accent` and `--shadow-1`. plinth's own scales are custom
+The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
+`--muted`, `--border`, `--accent` and `--shadow-1`. plinth derives six more
+from them, each a default the app overrides by name (or with `Config::with`,
+as `$danger` and the rest):
+
+| Token | Default | For |
+| --- | --- | --- |
+| `--danger` | `#d92d20` mixed 70% with `--text` | errors, destructive actions |
+| `--success` | `#12a150` mixed 65% with `--text` | confirmations |
+| `--warning` | `#dc8a00` mixed 70% with `--text` | cautions |
+| `--on-accent` | `--bg` | text and icons on an accent background |
+| `--surface-raised` | `--surface` | menus, popovers, dialogs |
+| `--scrim` | `rgb(0 0 0 / 0.45)` | what dims the page behind a dialog |
+
+The status hues are mixed toward `--text`, so they keep their contrast on a
+light and a dark background alike. The defaults are computed on `:root`: an
+app that sets its colours on a narrower element (a dark panel) sets these
+there too. `--focus-ring-color` (default `--accent`) colours the focus ring.
+
+plinth's own scales are custom
 properties on `:root` too (`--text-*`, `--space-*`, `--radius-*`,
 `--control-height`, `--page-*` and the rest, listed under Configuration), and
 every rule reads them, so an app retunes the embedded stylesheet by
@@ -194,7 +212,7 @@ selector:
 ```
 
 Breakpoints and the component settings (`$card-padding`,
-`$card-padding-phone`, `$toolbar-gap`) are Sass-only: an app built with
+`$card-padding-phone`, `$toolbar-gap`, `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
 ## Configuration
@@ -237,6 +255,10 @@ page can still override them at runtime.
 | `$card-padding` | `var(--space-4)` |
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
 | `$toolbar-gap` | `var(--space-1)` |
+| `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
+| `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim` | see [Theming](#theming) |
+| `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
@@ -254,6 +276,30 @@ page can still override them at runtime.
 - `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
   child to the row's end.
+
+## Against jitter: mixins and utilities
+
+The shared rules every component builds on, so nothing changes size as its
+state or content changes. Each is a mixin (`@use "plinth" as p;` then
+`@include p.numeric;`) and, where an element needs it directly, a utility
+class. Utilities load after the components, so one wins over a component's
+rule of the same weight; none uses `!important`.
+
+| Mixin | Utility (`plinth::class::`) | What it guarantees |
+| --- | --- | --- |
+| `focus-ring` | `.plinth-focus-ring` (`FOCUS_RING`) | A `:focus-visible` outline from the `--focus-ring-*` tokens: never a border, so focus adds nothing to the box. |
+| `reserved-border($color: transparent, $width: var(--space-px))` | | The border is always there; a state changes only its colour. |
+| `numeric` | `.plinth-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
+| `scroll-area` | `.plinth-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
+| `truncate` | `.plinth-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |
+| `clamp($lines)` | `.plinth-clamp-2`, `-3`, `-4` (`CLAMP_2`...) | At most that many lines, the last cut with an ellipsis. |
+| `visually-hidden` | `.plinth-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
+| `phone-only`, `desktop-only` | `.plinth-phone-only`, `.plinth-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
+| `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
+
+Layers: `--layer-sticky`, `--layer-overlay`, `--layer-dialog`,
+`--layer-toast` and `--layer-tooltip` are the one `z-index` scale for what
+floats, lowest first.
 
 ## Showcase
 

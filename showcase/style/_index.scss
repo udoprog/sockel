@@ -12,7 +12,7 @@
     --muted: #62626e;
     --border: #d9d9e0;
     --accent: #6d3fc0;
-    --accent-text: #ffffff;
+    --on-accent: #ffffff;
     --sample: #ece6f7;
     --danger: #b42318;
     --shadow-1: 0 1px 2px rgb(20 20 30 / 0.08), 0 1px 3px rgb(20 20 30 / 0.06);
@@ -26,7 +26,7 @@
     --muted: #a0a0ad;
     --border: #34343f;
     --accent: #a98bea;
-    --accent-text: #131318;
+    --on-accent: #131318;
     --sample: #2c2540;
     --danger: #f97066;
     --shadow-1: 0 1px 2px rgb(0 0 0 / 0.5);
@@ -108,10 +108,7 @@ body {
         background: var(--bg);
     }
 
-    &[aria-current="page"] {
-        background: var(--accent);
-        color: var(--accent-text);
-    }
+    @include p.current;
 }
 
 .showcase-main {
@@ -217,10 +214,7 @@ body {
         border-color: var(--accent);
     }
 
-    &:focus-visible {
-        outline: 2px solid var(--accent);
-        outline-offset: 1px;
-    }
+    @include p.focus-ring;
 
     &:disabled {
         opacity: 0.5;
@@ -232,7 +226,7 @@ body {
     &.showcase-primary {
         border-color: var(--accent);
         background: var(--accent);
-        color: var(--accent-text);
+        color: var(--on-accent);
     }
 
     &.showcase-ghost {
@@ -321,4 +315,68 @@ body {
     margin: 0;
     overflow: auto;
     font-size: var(--text-xs);
+}
+
+// The foundations page's samples (pages/foundations.rs).
+.showcase-readout {
+    display: inline-block;
+    align-self: flex-start;
+    padding: var(--space-1) var(--space-2);
+    border-radius: var(--radius-xs);
+    background: var(--sample);
+    font-size: var(--text-xl);
+}
+
+.showcase-scroll-box {
+    max-height: 8rem;
+    padding: var(--space-2);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-sm);
+    overflow: auto;
+}
+
+// A tab row whose selected tab is marked by `p.current`, never its weight;
+// its border is reserved, so focus and hover only colour it.
+.showcase-tabs {
+    display: flex;
+    gap: var(--space-1);
+    overflow-x: auto;
+}
+
+.showcase-tab {
+    flex: none;
+    height: var(--control-height);
+    padding-inline: var(--space-3);
+    @include p.reserved-border;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    cursor: pointer;
+
+    &:hover {
+        border-color: var(--border);
+    }
+
+    @include p.focus-ring;
+
+    &.showcase-by-background {
+        @include p.current;
+    }
+
+    &.showcase-by-color {
+        @include p.current(color);
+    }
+
+    &.showcase-by-underline {
+        @include p.current(underline);
+    }
+}
+
+.showcase-swatch {
+    width: var(--mark-height);
+    height: var(--mark-height);
+    border: 1px solid var(--border);
+    border-radius: var(--radius-xs);
+    background: var(--swatch);
 }

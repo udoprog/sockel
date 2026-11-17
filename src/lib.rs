@@ -6,7 +6,14 @@
 //! app with Sass of its own builds it with plinth-build after plinth's, into
 //! one stylesheet, and passes that to [`Styles`] (README: "Adopting plinth").
 //! The colours are the app's: plinth reads `--bg`, `--surface`, `--text`,
-//! `--muted`, `--border`, `--accent` and `--shadow-1`.
+//! `--muted`, `--border`, `--accent` and `--shadow-1`, and derives
+//! overridable defaults for `--danger`, `--success`, `--warning`,
+//! `--on-accent`, `--surface-raised` and `--scrim` from them.
+//!
+//! The utilities against jitter (`.plinth-numeric`, `.plinth-scroll-area`,
+//! `.plinth-truncate`, `.plinth-clamp-*`, `.plinth-visually-hidden`,
+//! `.plinth-phone-only`, `.plinth-desktop-only`, `.plinth-focus-ring`) are
+//! classes only, in [`class`]; their mixins are in README: "Against jitter".
 //!
 //! - [`Stack`] (`.stack`): a column, its blocks a gap apart.
 //! - [`Cluster`] (`.cluster`): a row that wraps, its items centred.

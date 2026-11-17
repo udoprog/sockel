@@ -1,8 +1,10 @@
 // Every plinth primitive's rules, in the order they cascade: layout
-// first, so a component's own rules refine it.
+// first, so a component's own rules refine it, and the utilities
+// last, so they win over a component's rule of the same weight.
 
 @forward "tokens";
 @use "layout";
 @use "heads";
 @use "actions";
 @use "buttons";
+@use "utilities";

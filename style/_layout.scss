@@ -27,7 +27,7 @@
 //   `.plinth-compact` (`--space-3`), `.plinth-dense` (a row's), `.plinth-flush` (none, its
 //   content to its rounded edges); `.plinth-inset` a bordered row or panel, the
 //   small radius and no lift; `.plinth-link` for a card that is a link or button: its border lights
-//   on hover.
+//   on hover and focus, and it takes the focus ring.
 //
 // - `.plinth-grow` (an item takes the room left; `.plinth-basis-sm`, `.plinth-basis-md` and
 //   `.plinth-basis-lg` set the width it starts from), `.plinth-self-start` (an item in a stack
@@ -207,7 +207,7 @@
     scrollbar-width: thin;
 
     &.plinth-boxed {
-        border: 1px solid var(--border);
+        @include base.reserved-border(var(--border));
         border-radius: var(--radius-sm);
         background: var(--surface);
         @include base.nests(var(--radius-sm));
@@ -240,7 +240,7 @@
 
 .plinth-card {
     padding: base.$card-padding;
-    border: 1px solid var(--border);
+    @include base.reserved-border(var(--border));
     border-radius: var(--radius-lg);
     background: var(--surface);
     box-shadow: var(--shadow-1);
@@ -275,6 +275,8 @@
         &:focus-visible {
             border-color: var(--accent);
         }
+
+        @include base.focus-ring;
     }
 }
 
