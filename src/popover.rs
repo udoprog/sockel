@@ -285,25 +285,55 @@ fn clippers(element: &Element) -> Vec<Element> {
     let Some(window) = web_sys::window() else {
         return Vec::new();
     };
-    let mut found = Vec::new();
-    let mut at = element.parent_element();
+    let style = |e: &Element, property: &str| {
+        window
+            .get_computed_style(e)
+            .ok()
+            .flatten()
+            .and_then(|s| s.get_property_value(property).ok())
+            .unwrap_or_default()
+    };
+    let mut chain = Vec::new();
+    let mut at = Some(element.clone());
     while let Some(e) = at {
         if e.tag_name() == "BODY" || e.tag_name() == "HTML" {
             break;
         }
-        let clips = window
-            .get_computed_style(&e)
-            .ok()
-            .flatten()
-            .is_some_and(|style| {
-                ["overflow-x", "overflow-y"]
-                    .iter()
-                    .any(|p| style.get_property_value(p).is_ok_and(|v| v != "visible"))
-            });
-        if clips {
-            found.push(e.clone());
-        }
+        let clips = ["overflow-x", "overflow-y"]
+            .iter()
+            .any(|p| !matches!(style(&e, p).as_str(), "" | "visible"));
+        let fixed = style(&e, "position") == "fixed";
         at = e.parent_element();
+        chain.push((e, Clip { clips, fixed }));
+    }
+    let keep = clipping(&chain.iter().map(|(_, c)| *c).collect::<Vec<_>>());
+    chain
+        .into_iter()
+        .enumerate()
+        .filter(|(i, _)| keep.contains(i))
+        .map(|(_, (e, _))| e)
+        .collect()
+}
+
+/// One box from an element up through its ancestors.
+#[derive(Clone, Copy)]
+struct Clip {
+    clips: bool,
+    fixed: bool,
+}
+
+/// Which of `chain` (the element first, then its ancestors) clip the
+/// element: those with overflow below the first fixed box, which leaves
+/// the ones above it behind.
+fn clipping(chain: &[Clip]) -> Vec<usize> {
+    let mut found = Vec::new();
+    for (i, c) in chain.iter().enumerate() {
+        if i > 0 && c.clips {
+            found.push(i);
+        }
+        if c.fixed {
+            break;
+        }
     }
     found
 }
@@ -716,6 +746,28 @@ mod tests {
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()
+    }
+
+    #[test]
+    fn a_fixed_box_escapes_the_scrollers_around_it() {
+        let c = |clips, fixed| Clip { clips, fixed };
+        let plain = [
+            c(false, false),
+            c(true, false),
+            c(false, false),
+            c(true, false),
+        ];
+        assert_eq!(clipping(&plain), [1, 3]);
+        let anchor_fixed = [c(false, true), c(true, false), c(true, false)];
+        assert!(clipping(&anchor_fixed).is_empty());
+        let fixed_between = [
+            c(false, false),
+            c(true, false),
+            c(false, true),
+            c(true, false),
+        ];
+        assert_eq!(clipping(&fixed_between), [1]);
+        assert!(clipping(&[c(true, false)]).is_empty());
     }
 
     #[test]
