@@ -134,7 +134,16 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
     let clear_label = label(&phrases, &props.clear_label, "plinth-secret-input-clear");
     let state = use_reducer(RevealState::default);
     let reveal = state.0;
-    let empty = props.value.is_empty();
+    // With `commit`, what is typed and not yet committed: the field shows
+    // it (a render puts the field's value back) and the slots follow it.
+    let draft = use_state(|| None::<AttrValue>);
+    {
+        // A new value from the owner replaces the draft.
+        let draft = draft.clone();
+        use_effect_with(props.value.clone(), move |_| draft.set(None));
+    }
+    let value = (*draft).clone().unwrap_or_else(|| props.value.clone());
+    let empty = value.is_empty();
     let shown = reveal.shown && !empty;
 
     use_timeout(
@@ -148,10 +157,19 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
     );
 
     let (oninput, onchange) = if props.commit {
+        let oninput = {
+            let draft = draft.clone();
+            Callback::from(move |e: InputEvent| {
+                let text = e.target_unchecked_into::<HtmlInputElement>().value();
+                draft.set(Some(text.into()));
+            })
+        };
+        // The draft stays until the owner's value changes, so the field
+        // keeps what was typed meanwhile.
         let onchange = props
             .on_input
             .reform(|e: Event| e.target_unchecked_into::<HtmlInputElement>().value());
-        (None, Some(onchange))
+        (Some(oninput), Some(onchange))
     } else {
         let oninput = props
             .on_input
@@ -163,7 +181,7 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
         Callback::from(move |_: MouseEvent| dispatcher.dispatch(RevealAction::Toggle))
     };
     let copy = {
-        let value = props.value.clone();
+        let value = value.clone();
         let on_copy = props.on_copy.clone();
         Callback::from(move |_: MouseEvent| {
             if let Some(window) = web_sys::window() {
@@ -175,8 +193,13 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
     let clear = {
         let on_input = props.on_input.clone();
         let dispatcher = state.dispatcher();
+        let draft = draft.clone();
+        let commit = props.commit;
         Callback::from(move |_: MouseEvent| {
             dispatcher.dispatch(RevealAction::Hide);
+            if commit {
+                draft.set(Some(AttrValue::Static("")));
+            }
             on_input.emit(String::new());
         })
     };
@@ -203,7 +226,7 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
             props.class.clone()
         )} aria-busy={props.busy.then_some("true")}>
             <input class={class::INPUT_CONTROL} type={if shown { "text" } else { "password" }}
-                id={props.id.clone()} value={props.value.clone()}
+                id={props.id.clone()} value={value.clone()}
                 placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
                 aria-invalid={props.invalid.then_some("true")} disabled={props.disabled}
                 autocomplete="off" spellcheck="false" autocapitalize="off"

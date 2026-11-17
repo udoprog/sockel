@@ -739,7 +739,8 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   `show_label`, `hide_label`, `copy_label`,
   `clear_label` (each an override of the catalog's word), `commit` (`on_input`
   only for a finished edit, on leaving the field or Enter, and on clear: for a
-  value saved as it changes), `titles` (each slot's name as its tooltip too),
+  value saved as it changes; the field and the slots follow what is typed
+  meanwhile), `titles` (each slot's name as its tooltip too),
   `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
   shown secret hides itself, showing again restarts the time; clearing
   hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
