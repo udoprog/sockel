@@ -7,7 +7,8 @@ use yew::prelude::*;
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
 use crate::select::scroll_to;
 use crate::{
-    Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, overlay, use_popover,
+    Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays,
+    use_popover,
 };
 
 /// One option of a [`SearchSelect`].
@@ -183,6 +184,7 @@ where
     T: PartialEq + Clone + 'static,
 {
     let id = use_state(|| crate::tooltip::next_id("search-select"));
+    let overlays = use_overlays();
     let field = use_node_ref();
     let list = use_node_ref();
     let open = use_state_eq(|| false);
@@ -403,7 +405,7 @@ where
             }
             style
         });
-        overlay(html! {
+        overlays.portal(html! {
             <div ref={list.clone()} id={list_id.clone()} role="listbox"
                 class={classes!(listbox(placed.is_some()), class::SEARCH_SELECT_LIST)}
                 aria-label={props.label.clone()} aria-busy={(shown == Listed::Loading).then_some("true")}

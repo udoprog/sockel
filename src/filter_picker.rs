@@ -6,7 +6,7 @@ use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
 use crate::select::{printable, scroll_to};
-use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, overlay, use_popover};
+use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, use_overlays, use_popover};
 
 /// One choice of a [`FilterPicker`].
 #[derive(Clone, Debug, PartialEq)]
@@ -82,6 +82,7 @@ where
     T: PartialEq + Clone + 'static,
 {
     let id = use_state(|| crate::tooltip::next_id("filter-picker"));
+    let overlays = use_overlays();
     let face = use_node_ref();
     let list = use_node_ref();
     let open = use_state_eq(|| false);
@@ -258,7 +259,7 @@ where
             }
             style
         });
-        overlay(html! {
+        overlays.portal(html! {
             <div ref={list.clone()} id={list_id.clone()} role="listbox" aria-multiselectable="true"
                 class={classes!(listbox(placed.is_some()), class::FILTER_PICKER_LIST)}
                 aria-label={props.label.clone()} {style} {onmousedown}

@@ -6,7 +6,7 @@ use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, option_id};
 use crate::select::{printable, scroll_to};
-use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, overlay};
+use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
 
 /// One colour of a palette.
 #[derive(Clone, Debug, PartialEq)]
@@ -175,6 +175,7 @@ fn swatch(value: &str, none: bool) -> Html {
 #[function_component]
 pub fn ColorSelect(props: &ColorSelectProps) -> Html {
     let id = use_state(|| crate::tooltip::next_id("color-select"));
+    let overlays = use_overlays();
     let face = use_node_ref();
     let list = use_node_ref();
     let custom_input = use_node_ref();
@@ -422,7 +423,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                 </label>
             }
         });
-        overlay(html! {
+        overlays.portal(html! {
             <div ref={list.clone()} class={color_list(placed.is_some())} {style} {onkeydown}>
                 <div id={list_id.clone()} role="listbox" class={class::COLOR_GRID}
                     aria-label={props.label.clone()} onmousedown={hold_focus}
