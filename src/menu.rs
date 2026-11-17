@@ -428,6 +428,23 @@ pub fn Menu(props: &MenuProps) -> Html {
             }
         })
     };
+    // Focus left on the opener (a panel of text alone): its keys close it.
+    let onkeydown = {
+        let set_open = set_open.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            if !is_open {
+                return;
+            }
+            match e.key().as_str() {
+                "Escape" => {
+                    e.stop_propagation();
+                    set_open.emit(false);
+                }
+                "Tab" => set_open.emit(false),
+                _ => {}
+            }
+        })
+    };
     let has_text = !crate::button::is_empty(&props.text);
     let (icon, trailing) = match &props.icon {
         Some(icon) => (Some(icon.clone()), false),
@@ -442,7 +459,7 @@ pub fn Menu(props: &MenuProps) -> Html {
             pressed={props.pressed}
             expanded={Some(is_open)} haspopup={AttrValue::Static("menu")}
             testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))}
-            {onclick}>
+            {onclick} {onkeydown}>
             { props.text.clone() }
         </Button>
     };

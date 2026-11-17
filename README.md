@@ -393,7 +393,7 @@ label). plinth styles only `.plinth-button`, never a bare `<button>`.
   lays the IconSet's spinner over it; a busy button ignores clicks.
   `disabled` disables a button; a disabled link loses its `href` and gets
   `aria-disabled="true"`.
-- `submit`, `onclick`, `title`, `testid` as on `IconButton`; `tip` is its
+- `submit`, `onclick`, `onkeydown`, `title`, `testid` as on `IconButton`; `tip` is its
   tooltip for `DataTips` (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
   classes for an element that cannot be the component.
 - `role` gives it another role (`menuitemradio`, `switch`), `checked` its
@@ -1240,7 +1240,8 @@ to the opener. A pick gives it back before the menu goes, so a dialog the
 pick opens returns focus to the opener when it closes; Tab gives it back
 and moves on from there (Shift+Tab to what comes before it). A menu is on the one overlay stack, so Escape and a press
 outside close a menu opened from a popover or a dialog before what it
-opened from.
+opened from. Where focus stays on the opener (a panel of text alone),
+Escape and Tab there close it too, and Escape goes no further.
 
 `RowActions` is a row's actions: `actions: Vec<RowAction>`
 (`RowAction::new(icon, label, onclick)`, `.danger()`, `.pressed(on)`,

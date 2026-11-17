@@ -449,6 +449,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         href: None,
         submit: props.submit,
         onclick: props.onclick.clone(),
+        onkeydown: Callback::noop(),
         title: None,
         tip: None,
         label: props.label.clone(),

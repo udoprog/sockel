@@ -82,6 +82,8 @@ pub struct ButtonProps {
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
+    pub onkeydown: Callback<KeyboardEvent>,
+    #[prop_or_default]
     pub title: Option<AttrValue>,
     /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
     #[prop_or_default]
@@ -213,6 +215,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
                 {onclick}
+                onkeydown={props.onkeydown.clone()}
             >
                 { content }{ for spinner }
             </a>
@@ -235,6 +238,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
                 {onclick}
+                onkeydown={props.onkeydown.clone()}
             >
                 { content }{ for spinner }
             </button>
@@ -277,6 +281,7 @@ mod tests {
             href: None,
             submit: false,
             onclick: Callback::noop(),
+            onkeydown: Callback::noop(),
             title: None,
             tip: None,
             label: None,
