@@ -701,6 +701,8 @@ mod tests {
             "--card-border-width: var(--space-px)",
             "--band-chrome-ground: var(--surface)",
             "--band-search-text: var(--text-sm)",
+            "--panel-border: var(--border)",
+            "--panel-tint-text: var(--text)",
             "--focus-ring-color: var(--accent)",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");

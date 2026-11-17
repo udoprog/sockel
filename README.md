@@ -251,6 +251,8 @@ as `$danger` and the rest):
 | `--field-bg` | `--surface` | a field's fill |
 | `--card-border` | `--border` | a card's edge (`transparent` for cards without one) |
 | `--card-border-width` | `--space-px` | its width (`0` for a card whose content meets its rounded edge, with no frame) |
+| `--panel-border` | `--border` | a `Panel`'s ring |
+| `--panel-tint-text` | `--text` | a tint `Panel`'s text |
 | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 
 The status hues are mixed toward `--text`, so they keep their contrast on a
@@ -340,7 +342,8 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text` | see [Theming](#theming) |
+| `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
@@ -1600,13 +1603,17 @@ controls fixed widths (a `Button`'s busy and disabled states keep its box);
 
 **Panel** is a ground over a list or a view holding its filters or a short
 form (`.plinth-panel-box`): a column `--space-2` apart, on `--panel-ground`
-in a `--border` ring that is always there, as wide as what it holds and
-never wider than its column. `line` lays it out as one row that wraps
-(`.plinth-line`); `ground` is `Sunk`, `Tint` (a rounded `--panel-tint`
-chip, `.plinth-tint`) or `Bare` (only the spacing, `.plinth-bare`); the
-ring turns transparent rather than going, so the ground never changes its
-box. `centered` centres it in its column (`.plinth-center`). With a `label`
-it is a named `group`. `panel(ground, line, centered)` gives its classes.
+in a `--panel-border` ring that is always there, in `--panel-text` type,
+`--panel-space-after` above what follows, as wide as what it holds and never wider than its column. `line` lays it out
+as one row that wraps (`.plinth-line`); `ground` is `Sunk`, `Tint` (a
+`--panel-tint-radius` `--panel-tint` chip in `--panel-tint-text`,
+`--panel-tint-space-after` above what follows,
+`.plinth-tint`) or `Bare` (only the spacing, `.plinth-bare`); the ring
+turns transparent rather than going, so the ground never changes its box.
+`centered` centres it in its column (`.plinth-center`); `small` sets it in
+`--text-sm` (`.plinth-small`). With a `label` it is a named `group`.
+`panel(ground, line, centered)` gives its classes; add `class::SMALL` for
+`small`.
 
 **Seam** is two panes, `start` and `end`, and the divider dragged between
 them (`.plinth-seam`, `.plinth-seam-pane`, `.plinth-seam-grip`). `at` is the

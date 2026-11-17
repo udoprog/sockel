@@ -1250,7 +1250,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "panel",
         title: "Panel",
-        about: "A ringed ground over a list or a view holding its filters or a short form: a column, or a line that wraps; tinted or bare. As wide as what it holds, never wider than its column; its ring is always there, so the ground changes nothing of its box.",
+        about: "A ringed ground over a list or a view holding its filters or a short form: a column, or a line that wraps; tinted or bare; small sets it in --text-sm. Its ring, type and tint text come from --panel-border, --panel-text and --panel-tint-text, the room under it from --panel-space-after. As wide as what it holds, never wider than its column; its ring is always there, so the ground changes nothing of its box.",
         covers: &["Panel", "PanelProps", "PanelGround", "panel"],
         render: || html! { <structures::PanelPage /> },
         holds: &[hold(

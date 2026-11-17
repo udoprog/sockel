@@ -43,6 +43,9 @@ pub struct PanelProps {
     /// Centred in its column.
     #[prop_or_default]
     pub centered: bool,
+    /// In `--text-sm` type (`class::SMALL`).
+    #[prop_or_default]
+    pub small: bool,
     /// What the panel holds, for assistive technology (a `group`'s name).
     #[prop_or_default]
     pub label: Option<AttrValue>,
@@ -61,7 +64,11 @@ pub fn Panel(props: &PanelProps) -> Html {
 
     html! {
         <div {role} aria-label={props.label.clone()}
-            class={classes!(panel(props.ground, props.line, props.centered), props.class.clone())}
+            class={classes!(
+                panel(props.ground, props.line, props.centered),
+                props.small.then_some(class::SMALL),
+                props.class.clone()
+            )}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </div>
@@ -94,5 +101,23 @@ mod tests {
             names(panel(PanelGround::Bare, false, true)),
             [class::PANEL_BOX, class::BARE, class::CENTER]
         );
+    }
+
+    #[test]
+    fn a_panel_reads_its_ring_type_and_tint_from_tokens() {
+        let css = crate::STYLESHEET;
+        let from = css.find(".plinth-panel-box {").expect("the rule exists");
+        let rule = &css[from..from + css[from..].find('}').expect("the rule ends")];
+        assert!(rule.contains("border: var(--space-px) solid var(--panel-border)"));
+        assert!(rule.contains("font-size: var(--panel-text)"));
+        assert!(rule.contains("margin-block-end: var(--panel-space-after)"));
+        let from = css
+            .find(".plinth-panel-box.plinth-tint {")
+            .expect("the rule exists");
+        let rule = &css[from..from + css[from..].find('}').expect("the rule ends")];
+        assert!(rule.contains("border-radius: var(--panel-tint-radius)"));
+        assert!(rule.contains("color: var(--panel-tint-text)"));
+        assert!(rule.contains("margin-block-end: var(--panel-tint-space-after)"));
+        assert!(css.contains(".plinth-panel-box.plinth-small {"));
     }
 }

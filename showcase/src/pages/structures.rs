@@ -105,6 +105,7 @@ pub fn PanelPage() -> Html {
     let ground = use_state(|| PanelGround::Sunk);
     let line = use_state(|| false);
     let centered = use_state(|| false);
+    let small = use_state(|| false);
     let disabled = use_state(|| false);
     let count = use_state(|| 3);
     let text = use_state(|| Text::Short);
@@ -114,6 +115,7 @@ pub fn PanelPage() -> Html {
             <Select<PanelGround> label="ground" options={GROUNDS} value={*ground} on_change={bind(&ground)} />
             <Toggle label="line" value={*line} on_change={bind(&line)} />
             <Toggle label="centered" value={*centered} on_change={bind(&centered)} />
+            <Toggle label="small" value={*small} on_change={bind(&small)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Select<usize> label="Fields" options={COUNTS} value={*count} on_change={bind(&count)} />
             <Select<Text> label="Labels" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
@@ -127,12 +129,13 @@ pub fn PanelPage() -> Html {
             .variant("ground", *ground)
             .flag("line", *line)
             .flag("centered", *centered)
+            .flag("small", *small)
             .line_if(*count > 0, each("filters", "filter", *count, "field")),
     );
 
     html! {
         <Demo {controls} {code}>
-            <Panel label="Filters" ground={*ground} line={*line} centered={*centered}>
+            <Panel label="Filters" ground={*ground} line={*line} centered={*centered} small={*small}>
                 { for (1..=*count).map(|n| html! {
                     <label class={class::CONTROL_LABEL}>
                         <input type="checkbox" disabled={*disabled} />
