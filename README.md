@@ -1367,6 +1367,17 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   `Fill` (`FILL`, its container's width).
 - `size` (`InputSize`, as a `TextInput`'s), `invalid`, `disabled`, `busy`
   (`aria-busy`; it still opens on what it has).
+- `filter_from: Option<usize>`: from how many options the list has a
+  filter field above it (`None`, the default: never). It takes focus on
+  opening, typing on the face goes into it, and it narrows the list to the
+  options whose label or group holds its text, ignoring case
+  (`filter_matches`); the arrows, PageUp, PageDown, Enter and Alt+ArrowUp
+  still move and pick, Home, End and Space are the text's, and Tab closes
+  it from the face. `filter_label` (its placeholder and name, "Filter") and
+  `no_match` ("No matches") are its words. The list is then
+  `SELECT_POPUP`: the field (`SELECT_FILTER`, staying at the top as the
+  options scroll), the `role="listbox"` (`SELECT_OPTIONS`) and
+  `SELECT_EMPTY`; the field's test id is the face's suffixed `-filter`.
 - `id` and `describedby` inside a `Field` (its label names and opens it),
   `label` (the accessible name without one), `class` (the face's), `testid`
   (the face's; the list's is it suffixed `-options`).

@@ -44,6 +44,7 @@ struct Settings {
     option_disabled: bool,
     descriptions: bool,
     groups: bool,
+    filter: bool,
 }
 
 #[derive(Properties, PartialEq)]
@@ -83,6 +84,7 @@ fn Sample(props: &SampleProps) -> Html {
     let placeholder = s.placeholder.then_some(AttrValue::Static("Pick a size"));
     let error = s.invalid.then(|| html! { "Pick a size that is in stock." });
     let joined = group_classes(&[false, false]);
+    let filter_from = s.filter.then_some(4);
 
     html! {
         <Stack>
@@ -91,15 +93,15 @@ fn Sample(props: &SampleProps) -> Html {
                 <Select<usize> id={id.clone()} options={options.clone()} value={props.value}
                     on_change={props.on_change.clone()} placeholder={placeholder.clone()}
                     width={s.width} size={s.size} invalid={s.invalid} disabled={s.disabled}
-                    busy={s.busy} describedby={field_describedby(&id, false, s.invalid)} />
+                    busy={s.busy} {filter_from} describedby={field_describedby(&id, false, s.invalid)} />
             </Field>
             <InputGroup>
                 <Select<usize> class={joined[0].clone()} label="Size" {options} value={props.value}
                     on_change={props.on_change.clone()} {placeholder} width={s.width} size={s.size}
-                    invalid={s.invalid} disabled={s.disabled} busy={s.busy} />
+                    invalid={s.invalid} disabled={s.disabled} busy={s.busy} {filter_from} />
                 <Button class={joined[1].clone()}>{ "Apply" }</Button>
             </InputGroup>
-            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes." }</p>
+            <p class={class::SAMPLE}>{ "Pick any option or none: the face keeps its width. Arrows, Home, End, PageUp, PageDown and typing move; Enter or Space picks; Escape closes. With the filter, typing narrows the list (by label or group) and Home, End and Space stay the field's." }</p>
         </Stack>
     }
 }
@@ -117,6 +119,7 @@ pub fn SelectPage() -> Html {
         option_disabled: true,
         descriptions: false,
         groups: false,
+        filter: false,
     });
     let value = use_state(|| Some(1usize));
     let s = *settings;
@@ -155,6 +158,7 @@ pub fn SelectPage() -> Html {
             <Toggle label="an option disabled" value={s.option_disabled} on_change={set(|s, on| s.option_disabled = on)} />
             <Toggle label="descriptions" value={s.descriptions} on_change={set(|s, on| s.descriptions = on)} />
             <Toggle label="groups" value={s.groups} on_change={set(|s, on| s.groups = on)} />
+            <Toggle label="filter" value={s.filter} on_change={set(|s, on| s.filter = on)} />
         </>
     };
 
@@ -189,7 +193,8 @@ pub fn SelectPage() -> Html {
             .variant("size", s.size)
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled)
-            .flag("busy", s.busy),
+            .flag("busy", s.busy)
+            .expr_if(s.filter, "filter_from", "Some(4)"),
     );
 
     html! {

@@ -9,6 +9,9 @@
 //   are the input box's.
 // - Parts: `-value` (the labels' cell), `-text` (one label), `-placeholder`
 //   (the placeholder, muted), `-chevron`.
+// - With a filter field, the list (`.plinth-listbox`) is `.plinth-select-popup`:
+//   `-filter` (the field, staying at its top as the options scroll under
+//   it), `-options` (the `role="listbox"`), `-empty` (no option matches).
 
 @use "tokens" as base;
 
@@ -55,4 +58,39 @@
     flex: none;
     align-items: center;
     color: var(--muted);
+}
+
+// The field's own inset in place of the surface's, so it does not move as
+// the options scroll under it.
+.plinth-select-popup {
+    padding-top: 0;
+}
+
+.plinth-select-filter {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    flex: none;
+    padding: var(--nest-inset) 0 var(--space-1);
+    background: var(--surface-raised);
+
+    > .plinth-input-box {
+        flex: 1 1 auto;
+    }
+}
+
+.plinth-select-options {
+    display: flex;
+    flex: none;
+    flex-direction: column;
+    gap: var(--space-0);
+}
+
+.plinth-select-empty {
+    flex: none;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    color: var(--muted);
+    font-size: var(--text-sm);
 }

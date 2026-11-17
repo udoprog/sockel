@@ -1,6 +1,7 @@
 //! Select: a field's box showing what is chosen, opening a [`Listbox`] of
 //! its options (`style/_select.scss`).
 
+use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
 use yew::prelude::*;
 
@@ -102,6 +103,20 @@ pub fn select(
     )
 }
 
+/// Whether `option` is listed with `filter` typed: its label or its
+/// group's holds it, ignoring case.
+pub fn filter_matches<T>(option: &SelectOption<T>, filter: &str) -> bool {
+    if filter.is_empty() {
+        return true;
+    }
+    let filter = filter.to_lowercase();
+    option.label.to_lowercase().contains(&filter)
+        || option
+            .group
+            .as_ref()
+            .is_some_and(|g| g.to_lowercase().contains(&filter))
+}
+
 /// The index of the option holding `value`.
 pub fn chosen<T: PartialEq>(options: &[SelectOption<T>], value: Option<&T>) -> Option<usize> {
     let value = value?;
@@ -145,6 +160,16 @@ pub struct SelectProps<T: PartialEq + 'static> {
     /// The face's test id; the list's is it suffixed `-options`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// From how many options the list has a filter field above it, which
+    /// takes focus on opening; `None` (the default), never.
+    #[prop_or_default]
+    pub filter_from: Option<usize>,
+    /// The filter field's placeholder and accessible name.
+    #[prop_or(AttrValue::Static("Filter"))]
+    pub filter_label: AttrValue,
+    /// Shown when the filter matches no option.
+    #[prop_or(AttrValue::Static("No matches"))]
+    pub no_match: AttrValue,
 }
 
 /// The WAI-ARIA select-only combobox: a face in the tab order (a button,
@@ -168,6 +193,9 @@ where
     // Enter or Space opened or picked: the browser's click that follows
     // would toggle it again.
     let swallow = use_mut_ref(|| false);
+    // What the filter field holds, and the field.
+    let filter = use_state(String::new);
+    let input = use_node_ref();
 
     let on_dismiss = {
         let open = open.clone();
@@ -182,6 +210,21 @@ where
         on_dismiss,
     );
     let held = crate::menu::use_held_width(list.clone(), placed.is_some());
+    let filtering = props
+        .filter_from
+        .is_some_and(|from| props.options.len() >= from);
+    {
+        let input = input.clone();
+        use_effect_with(placed.is_some() && filtering, move |&focus| {
+            if focus && let Some(input) = input.cast::<web_sys::HtmlInputElement>() {
+                let options = web_sys::FocusOptions::new();
+                options.set_prevent_scroll(true);
+                _ = input.focus_with_options(&options);
+                let end = input.value().encode_utf16().count() as u32;
+                _ = input.set_selection_range(end, end);
+            }
+        });
+    }
     {
         let open = open.clone();
         use_effect_with(props.disabled, move |&disabled| {
@@ -205,18 +248,32 @@ where
 
     let options = &props.options;
     let current = chosen(options, props.value.as_ref());
-    let pickable: Vec<usize> = (0..options.len())
+    let shown: Vec<usize> = (0..options.len())
+        .filter(|&i| !filtering || filter_matches(&options[i], &filter))
+        .collect();
+    let pickable: Vec<usize> = shown
+        .iter()
+        .copied()
         .filter(|&i| !options[i].disabled)
         .collect();
+    if *open && filtering {
+        // What the filter leaves: the active option one of them.
+        state.borrow_mut().settle(&pickable);
+    }
     let labels: Vec<&str> = options.iter().map(|o| o.label.as_str()).collect();
 
     let show = {
-        let (open, state, pickable) = (open.clone(), state.clone(), pickable.clone());
+        let (open, state, filter) = (open.clone(), state.clone(), filter.clone());
+        // Opening clears the filter: every enabled option.
+        let pickable: Vec<usize> = (0..options.len())
+            .filter(|&i| !options[i].disabled)
+            .collect();
         let disabled = props.disabled;
         move |last: bool| {
             if disabled {
                 return;
             }
+            filter.set(String::new());
             let mut state = state.borrow_mut();
             match current.filter(|i| pickable.contains(i)) {
                 Some(i) => state.set(Some(i)),
@@ -262,6 +319,7 @@ where
     let onkeydown = {
         let (is_open, state, redraw) = (*open, state.clone(), redraw.clone());
         let (open, pick, show) = (open.clone(), pick.clone(), show.clone());
+        let (filter, pickable) = (filter.clone(), pickable.clone());
         let labels: Vec<String> = labels.iter().map(|&l| l.to_owned()).collect();
         Callback::from(move |e: KeyboardEvent| {
             let key = e.key();
@@ -277,9 +335,14 @@ where
                 } else if let Some(c) = printable(&e) {
                     e.prevent_default();
                     show(false);
-                    state
-                        .borrow_mut()
-                        .typeahead(&pickable, &labels, c, e.time_stamp());
+                    if filtering {
+                        // Into the filter, which takes focus once placed.
+                        filter.set(c.to_string());
+                    } else {
+                        state
+                            .borrow_mut()
+                            .typeahead(&pickable, &labels, c, e.time_stamp());
+                    }
                 }
                 return;
             }
@@ -366,8 +429,13 @@ where
             }
         };
         let rows = group_runs(options).into_iter().enumerate().map(|(n, (group, run))| {
-            let run = run.into_iter().map(|i| option((i, &options[i])));
+            let run: Vec<Html> = run
+                .into_iter()
+                .filter(|i| shown.contains(i))
+                .map(|i| option((i, &options[i])))
+                .collect();
             match group {
+                _ if run.is_empty() => Html::default(),
                 None => html! { <>{ for run }</> },
                 Some(group) => {
                     let heading = format!("{}-group-{n}", *id);
@@ -382,8 +450,15 @@ where
                 }
             }
         });
-        // Focus stays on the face.
-        let onmousedown = Callback::from(|e: MouseEvent| e.prevent_default());
+        // Focus stays on the face, or in the filter field.
+        let onmousedown = Callback::from(|e: MouseEvent| {
+            let in_field = e
+                .target()
+                .is_some_and(|t| t.dyn_into::<web_sys::HtmlInputElement>().is_ok());
+            if !in_field {
+                e.prevent_default();
+            }
+        });
         let anchor_width = face.cast::<HtmlElement>().map(|f| f.offset_width());
         let style = placed.map(|p| {
             let mut style = format!(
@@ -398,12 +473,80 @@ where
             }
             style
         });
+        let testid = props
+            .testid
+            .as_ref()
+            .map(|t| AttrValue::from(format!("{t}-options")));
+        if !filtering {
+            return overlays.portal(html! {
+                <div ref={list.clone()} id={list_id.clone()} role="listbox"
+                    class={listbox(placed.is_some())} aria-label={props.label.clone()}
+                    {style} {onmousedown} data-testid={testid}>
+                    { for rows }
+                </div>
+            });
+        }
+        let oninput = {
+            let (filter, redraw) = (filter.clone(), redraw.clone());
+            Callback::from(move |e: InputEvent| {
+                filter.set(e.target_unchecked_into::<web_sys::HtmlInputElement>().value());
+                redraw.force_update();
+            })
+        };
+        let onkeydown = {
+            let (state, redraw, pick) = (state.clone(), redraw.clone(), pick.clone());
+            let (open, face, pickable) = (open.clone(), face.clone(), pickable.clone());
+            Callback::from(move |e: KeyboardEvent| {
+                let key = e.key();
+                if key == "Tab" {
+                    // From the face, so Tab goes on as from a closed field.
+                    if let Some(face) = face.cast::<HtmlElement>() {
+                        _ = face.focus();
+                    }
+                    open.set(false);
+                    return;
+                }
+                // Home, End and Space are the text's.
+                if matches!(key.as_str(), "Home" | "End" | " ") {
+                    return;
+                }
+                match state
+                    .borrow_mut()
+                    .key(&key, e.alt_key(), &pickable, e.time_stamp())
+                {
+                    ListKey::Ignored => return,
+                    ListKey::Moved => {}
+                    ListKey::Pick(i) => pick(i),
+                }
+                e.prevent_default();
+                redraw.force_update();
+            })
+        };
+        let empty = pickable.is_empty() && shown.is_empty();
         overlays.portal(html! {
-            <div ref={list.clone()} id={list_id.clone()} role="listbox"
-                class={listbox(placed.is_some())} aria-label={props.label.clone()}
-                {style} {onmousedown}
-                data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
-                { for rows }
+            <div ref={list.clone()} class={classes!(listbox(placed.is_some()), class::SELECT_POPUP)}
+                {style} {onmousedown} data-testid={testid}>
+                <div class={class::SELECT_FILTER}>
+                    <span class={input_box(InputSize::Regular, false, false, false)}>
+                        <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
+                        <input ref={input.clone()} class={class::INPUT_CONTROL} type="text"
+                            value={(*filter).clone()} placeholder={props.filter_label.clone()}
+                            aria-label={props.filter_label.clone()} role="combobox"
+                            aria-autocomplete="list" aria-expanded="true"
+                            aria-controls={list_id.clone()}
+                            aria-activedescendant={active.map(|i| option_id(&id, i))}
+                            autocomplete="off" spellcheck="false"
+                            data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-filter")))}
+                            {oninput} {onkeydown} />
+                    </span>
+                </div>
+                <div id={list_id.clone()} role="listbox" class={class::SELECT_OPTIONS}
+                    aria-label={props.label.clone()}>
+                    { for rows }
+                </div>
+                if empty {
+                    <p class={class::SELECT_EMPTY}>{ props.no_match.clone() }</p>
+                }
             </div>
         })
     });
@@ -417,7 +560,7 @@ where
                 )}
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
-                aria-activedescendant={open.then(|| active.map(|i| option_id(&id, i))).flatten()}
+                aria-activedescendant={(*open && !filtering).then(|| active.map(|i| option_id(&id, i))).flatten()}
                 aria-label={face_label(props.label.as_ref(), current.map(|i| options[i].label.as_str()))}
                 aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
@@ -560,6 +703,15 @@ mod tests {
             ]
         );
         assert!(group_runs::<u32>(&[]).is_empty());
+    }
+
+    #[test]
+    fn the_filter_matches_a_label_or_its_group_ignoring_case() {
+        let option = SelectOption::new(1, "Termagants").group("Battleline");
+        assert!(filter_matches(&option, ""));
+        assert!(filter_matches(&option, "MAGA"));
+        assert!(filter_matches(&option, "battle"));
+        assert!(!filter_matches(&option, "carnifex"));
     }
 
     #[test]

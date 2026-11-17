@@ -299,7 +299,7 @@ pub use search_select::{
     Listed, SearchOption, SearchSelect, SearchSelectProps, listed, search_matches, search_select,
 };
 pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};
-pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, select};
+pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, filter_matches, select};
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
