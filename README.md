@@ -1188,7 +1188,9 @@ small form), Tab and Shift+Tab move between its own fields and buttons and
 close it only past either end, and a focused field keeps its arrows and
 letters. A pick of an item or radio, Tab, Escape or a press outside closes
 it; all but the press return focus
-to the opener. A menu is on the one overlay stack, so Escape and a press
+to the opener. A pick gives it back before the menu goes, so a dialog the
+pick opens returns focus to the opener when it closes; Tab gives it back
+and moves on from there (Shift+Tab to what comes before it). A menu is on the one overlay stack, so Escape and a press
 outside close a menu opened from a popover or a dialog before what it
 opened from.
 
@@ -1198,7 +1200,9 @@ opened from.
 danger ones last (`ROW_ACTION_DANGER`, muted until hovered or focused),
 then `children`, then the overflow `Menu` behind its ellipsis when `more`
 holds its items (`more_label`, "More actions"; `more_disabled` keeps the
-opener, disabled, so every row ends the same way). `disabled`, `open`,
+opener, disabled, so every row ends the same way; `more_testid` its test
+id). The actions are named by `title`, or with `tips` by a styled tip
+(`data-tip`, for `DataTips`), the opener's too. `disabled`, `open`,
 `on_toggle`, `class`, `testid`.
 
 `SplitButton` is a main action (`text`, `onclick`, `icon`, `busy`) joined
@@ -1210,7 +1214,7 @@ to a `Menu` of its variants (its children; `menu_label`, "More options";
 `display: contents`, so it lays nothing out) and opens a menu of `items`
 at the pointer on a right-click, or a press held for half a second on a
 touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
-had it when it opened. `width`, `tight`, `label`, `disabled` (the browser's
+had it when it opened (Tab then moves on from there). `width`, `tight`, `label`, `disabled` (the browser's
 menu instead), `on_toggle`, `class`, `testid`.
 
 Size guarantees: the opener is a `Button`, so open and closed are the same

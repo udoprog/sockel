@@ -3,7 +3,7 @@ use yew::prelude::*;
 use crate::class;
 
 use plinth::{
-    Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, Glyph, Icon, Menu, MenuCheck,
+    Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, Dialog, Glyph, Icon, Menu, MenuCheck,
     MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction, RowActions,
     SplitButton, Stack, TextInput,
 };
@@ -156,6 +156,30 @@ fn FieldMenu() -> Html {
     }
 }
 
+/// An item opening a dialog: when it closes, focus is back on the opener.
+#[function_component]
+fn DialogMenu() -> Html {
+    let open = use_state(|| false);
+    let show = {
+        let open = open.clone();
+        Callback::from(move |_: MouseEvent| open.set(true))
+    };
+    let on_dismiss = {
+        let open = open.clone();
+        Callback::from(move |_: plinth::Dismiss| open.set(false))
+    };
+    html! {
+        <>
+            <Menu text={html! { "File" }} label="File">
+                <MenuItem onclick={show}>{ "Properties…" }</MenuItem>
+            </Menu>
+            <Dialog open={*open} {on_dismiss} title="Properties">
+                <p>{ "Close this dialog: focus goes back to File." }</p>
+            </Dialog>
+        </>
+    }
+}
+
 #[function_component]
 pub fn MenuPage() -> Html {
     let width = use_state(MenuWidth::default);
@@ -221,8 +245,9 @@ pub fn MenuPage() -> Html {
                 <Cluster>
                     <ToolMenu />
                     <FieldMenu />
+                    <DialogMenu />
                 </Cluster>
-                <p class={class::SAMPLE}>{ "The pen is a tool: a click toggles it, a right-click opens its sizes with the checked one focused. Rename holds a field: Tab moves between the field and Save, and closes past either end." }</p>
+                <p class={class::SAMPLE}>{ "The pen is a tool: a click toggles it, a right-click opens its sizes with the checked one focused. Rename holds a field: Tab moves between the field and Save, and closes past either end. Tab from any other open menu closes it and moves on past its opener. File's item opens a dialog, which gives focus back to File when it closes." }</p>
             </Stack>
         </Demo>
     }
@@ -234,6 +259,7 @@ pub fn RowActionsPage() -> Html {
     let more = use_state(|| true);
     let disabled = use_state(|| false);
     let more_disabled = use_state(|| false);
+    let tips = use_state(|| false);
     let pressed = use_state(|| false);
 
     let controls = html! {
@@ -241,6 +267,7 @@ pub fn RowActionsPage() -> Html {
             <Select<Text> label="Row text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="more (a menu)" value={*more} on_change={bind(&more)} />
             <Toggle label="more_disabled" value={*more_disabled} on_change={bind(&more_disabled)} />
+            <Toggle label="tips" value={*tips} on_change={bind(&tips)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
         </>
     };
@@ -279,6 +306,7 @@ pub fn RowActionsPage() -> Html {
                 "Some(html! { <MenuItem>{ \"Rename\" }</MenuItem> })",
             )
             .flag("more_disabled", *more_disabled)
+            .flag("tips", *tips)
             .flag("disabled", *disabled),
     );
 
@@ -286,7 +314,7 @@ pub fn RowActionsPage() -> Html {
         <Demo {controls} {code}>
             <Cluster justify={plinth::Justify::Between}>
                 <span class={class::SAMPLE}>{ text.of("A row") }</span>
-                <RowActions {actions} disabled={*disabled} more_disabled={*more_disabled}
+                <RowActions {actions} disabled={*disabled} more_disabled={*more_disabled} tips={*tips}
                     more={more.then(|| html! {
                         <>
                             <MenuItem>{ "Rename" }</MenuItem>

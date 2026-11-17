@@ -91,6 +91,13 @@ fn label_of(item: &HtmlElement) -> String {
         .unwrap_or_default()
 }
 
+/// Focuses `element` where the page stands.
+fn focus_quietly(element: &HtmlElement) {
+    let options = web_sys::FocusOptions::new();
+    options.set_prevent_scroll(true);
+    _ = element.focus_with_options(&options);
+}
+
 fn is_field(e: &Element) -> bool {
     e.matches("input, textarea, select").unwrap_or(false)
 }
@@ -124,18 +131,33 @@ fn tabs_within(list: &NodeRef, back: bool) -> bool {
     if back { at > 0 } else { at + 1 < shown.len() }
 }
 
+/// Whether focus is in `list`, or nowhere.
+fn focus_in(list: &NodeRef) -> bool {
+    let active = web_sys::window().and_then(|w| w.document()?.active_element());
+    crate::popover::focus_lost()
+        || list
+            .get()
+            .is_some_and(|l| active.is_some_and(|a| l.contains(Some(a.as_ref()))))
+}
+
 /// The keyboard of an open menu's list: arrows, Home, End, type-ahead;
-/// Tab closes it, unless it moves between the list's own fields and
-/// buttons. A focused field keeps its keys. Escape is the popover layer's.
+/// Tab closes it and moves on from where focus goes `back` to, unless it
+/// moves between the list's own fields and buttons. A focused field keeps
+/// its keys. Escape is the popover layer's.
 #[hook]
-fn use_menu_keys(list: NodeRef, close: Callback<()>) -> Callback<KeyboardEvent> {
+fn use_menu_keys(
+    list: NodeRef,
+    back: Callback<()>,
+    close: Callback<()>,
+) -> Callback<KeyboardEvent> {
     let typed = use_mut_ref(Typeahead::default);
     Callback::from(move |e: KeyboardEvent| {
         if e.key() == "Tab" {
             if tabs_within(&list, e.shift_key()) {
                 return;
             }
-            e.prevent_default();
+            // The browser's Tab then moves on from the opener.
+            back.emit(());
             close.emit(());
             return;
         }
@@ -205,6 +227,8 @@ struct ListProps {
     anchor: NodeRef,
     open: bool,
     on_dismiss: Callback<Dismiss>,
+    /// Gives focus back to the opener (or what had it), at once.
+    back: Callback<()>,
     side: Side,
     align: PopoverAlign,
     width: MenuWidth,
@@ -216,7 +240,8 @@ struct ListProps {
 }
 
 /// The open list in the overlay layer: placed beside `anchor`, closed by a
-/// pick, Tab, Escape or a press outside.
+/// pick, Tab, Escape or a press outside. A pick gives focus `back` before
+/// the menu goes, so a dialog it opens returns focus there when it closes.
 #[function_component]
 fn MenuList(props: &ListProps) -> Html {
     let overlays = use_overlays();
@@ -231,19 +256,26 @@ fn MenuList(props: &ListProps) -> Html {
     );
     use_focus_first(list.clone(), placed.is_some());
     let held = use_held_width(list.clone(), placed.is_some());
-    let onkeydown = use_menu_keys(list.clone(), props.on_dismiss.reform(|()| Dismiss::Close));
+    let onkeydown = use_menu_keys(
+        list.clone(),
+        props.back.clone(),
+        props.on_dismiss.reform(|()| Dismiss::Close),
+    );
 
     if !props.open {
         return Html::default();
     }
 
     let onclick = {
-        let on_dismiss = props.on_dismiss.clone();
+        let (on_dismiss, back, list) = (props.on_dismiss.clone(), props.back.clone(), list.clone());
         Callback::from(move |e: MouseEvent| {
             let picked = e
                 .target_dyn_into::<Element>()
                 .and_then(|t| t.closest(PICKS).ok().flatten());
             if picked.is_some() {
+                if focus_in(&list) {
+                    back.emit(());
+                }
                 on_dismiss.emit(Dismiss::Close);
             }
         })
@@ -347,9 +379,9 @@ pub struct MenuProps {
 }
 
 /// A button opening a list of actions beside it in the overlay layer. A
-/// pick, Tab, Escape or a press outside closes it, and Escape and a pick
-/// give focus back to the opener; the arrows, Home, End and type-ahead
-/// move between its items.
+/// pick, Tab, Escape or a press outside closes it, and all but the press
+/// give focus back to the opener (Tab then moves on from it); the arrows,
+/// Home, End and type-ahead move between its items.
 #[function_component]
 pub fn Menu(props: &MenuProps) -> Html {
     let opener = use_node_ref();
@@ -377,6 +409,14 @@ pub fn Menu(props: &MenuProps) -> Html {
         })
     };
     let on_dismiss = set_open.reform(|_: Dismiss| false);
+    let back = {
+        let opener = opener.clone();
+        Callback::from(move |()| {
+            if let Some(opener) = opener.cast::<HtmlElement>() {
+                focus_quietly(&opener);
+            }
+        })
+    };
     let has_text = !crate::button::is_empty(&props.text);
     let (icon, trailing) = match &props.icon {
         Some(icon) => (Some(icon.clone()), false),
@@ -403,7 +443,7 @@ pub fn Menu(props: &MenuProps) -> Html {
             } else {
                 { button }
             }
-            <MenuList anchor={opener} open={is_open} {on_dismiss}
+            <MenuList anchor={opener} open={is_open} {on_dismiss} {back}
                 side={props.side} align={props.align} width={props.width} tight={props.tight}
                 label={props.label.clone()} class={props.class.clone()}
                 testid={props.testid.clone()}>
@@ -733,6 +773,13 @@ pub struct RowActionsProps {
     /// every row ends the same way.
     #[prop_or_default]
     pub more_disabled: bool,
+    /// The overflow menu's test id; its opener's is it suffixed `-toggle`.
+    #[prop_or_default]
+    pub more_testid: Option<AttrValue>,
+    /// Name each action and the overflow opener with a styled tip
+    /// (`data-tip`, for [`DataTips`](crate::DataTips)) instead of `title`.
+    #[prop_or_default]
+    pub tips: bool,
     #[prop_or_default]
     pub disabled: bool,
     /// The overflow menu open, for a row that also opens it on a
@@ -754,11 +801,17 @@ pub struct RowActionsProps {
 /// danger ones last, then its overflow menu.
 #[function_component]
 pub fn RowActions(props: &RowActionsProps) -> Html {
+    let tips = props.tips;
     let button = |action: &RowAction| {
+        let (title, tip) = if tips {
+            (None, Some(action.label.clone()))
+        } else {
+            (Some(action.label.clone()), None)
+        };
         html! {
             <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                 class={classes!(action.danger.then_some(class::ROW_ACTION_DANGER))}
-                icon={action.icon.clone()} label={action.label.clone()} title={action.label.clone()}
+                icon={action.icon.clone()} label={action.label.clone()} {title} {tip}
                 pressed={action.pressed} disabled={props.disabled || action.disabled}
                 testid={action.testid.clone()} onclick={action.onclick.clone()} />
         }
@@ -774,6 +827,7 @@ pub fn RowActions(props: &RowActionsProps) -> Html {
             if let Some(more) = &props.more {
                 <Menu variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                     label={props.more_label.clone()} disabled={props.disabled || props.more_disabled}
+                    tip={tips.then(|| props.more_label.clone())} testid={props.more_testid.clone()}
                     open={props.open} on_toggle={props.on_toggle.clone()}>
                     { more.clone() }
                 </Menu>
@@ -948,6 +1002,14 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
             show.emit(None);
         })
     };
+    let back = {
+        let before = before.clone();
+        Callback::from(move |()| {
+            if let Some(before) = before.borrow().as_ref() {
+                focus_quietly(before);
+            }
+        })
+    };
     {
         let open = at.is_some();
         use_effect_with(open, move |&open| {
@@ -975,7 +1037,7 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
                     <span ref={point.clone()} class={class::MENU_POINT} style={point_style} aria-hidden="true"></span>
                 }) }
             }
-            <MenuList anchor={point} {open} {on_dismiss}
+            <MenuList anchor={point} {open} {on_dismiss} {back}
                 side={Side::Below} align={PopoverAlign::Start}
                 width={props.width} tight={props.tight}
                 label={props.label.clone()} class={props.class.clone()}
@@ -1152,6 +1214,25 @@ mod tests {
         assert!(edit < delete && delete < more, "{html}");
         assert!(html.contains(class::ROW_ACTION_DANGER), "{html}");
         assert!(html.contains(class::SMALL), "{html}");
+    }
+
+    #[test]
+    fn row_actions_can_be_tipped_and_their_menu_found() {
+        let html = render::<RowActions>(yew::props!(RowActionsProps {
+            actions: vec![RowAction::new(html! { <svg /> }, "Edit", Callback::noop())],
+            more: Some(html! { <MenuItem>{ "Rename" }</MenuItem> }),
+            more_testid: Some(AttrValue::Static("row-more")),
+            tips: true,
+        }));
+        assert!(html.contains("data-tip=\"Edit\""), "{html}");
+        assert!(html.contains("data-tip=\"More actions\""), "{html}");
+        assert!(!html.contains("title="), "{html}");
+        assert!(html.contains("data-testid=\"row-more-toggle\""), "{html}");
+        let html = render::<RowActions>(yew::props!(RowActionsProps {
+            actions: vec![RowAction::new(html! { <svg /> }, "Edit", Callback::noop())],
+        }));
+        assert!(html.contains("title=\"Edit\""), "{html}");
+        assert!(!html.contains("data-tip"), "{html}");
     }
 
     #[test]
