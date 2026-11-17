@@ -5,7 +5,9 @@
 // Tone is a modifier of the mark: `.plinth-accent`,
 // `.plinth-success`, `.plinth-warning`, `.plinth-danger`, `.plinth-busy` (the accent, its dot
 // pulsing) and `.plinth-unset` (outlined, no fill); neutral has none. A tone
-// only sets `--tone`.
+// only sets `--tone`. A pill, badge, count and status label are
+// `fit-content` wide, so a stretching parent (a column flex, a grid cell)
+// does not widen them.
 //
 // - `.plinth-pill`: a tinted label of `--mark-height`, led by a dot in its
 //   tone; `.plinth-plain` has no dot, `.plinth-pill-button` is a button (the
@@ -30,6 +32,7 @@
     --tone: var(--muted);
 
     display: inline-flex;
+    width: fit-content;
     flex: none;
     align-items: center;
     gap: var(--space-2);
@@ -110,6 +113,7 @@
     --tone: var(--muted);
 
     display: inline-flex;
+    width: fit-content;
     flex: none;
     align-items: center;
     justify-content: center;
@@ -185,6 +189,7 @@
     --count-digits: 2;
 
     display: inline-flex;
+    width: fit-content;
     flex: none;
     align-items: center;
     justify-content: center;
@@ -211,6 +216,7 @@
     --tone: var(--muted);
 
     display: inline-flex;
+    width: fit-content;
     align-items: center;
     gap: var(--space-2);
     box-sizing: border-box;

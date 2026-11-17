@@ -22,3 +22,30 @@ fn a_glyph_box_has_a_fixed_size() {
     assert!(rule.contains("overflow: hidden;"), "{rule}");
     assert!(STYLESHEET.contains("--glyph-size: 1em;"));
 }
+
+#[test]
+fn a_stepper_keeps_its_width_in_a_stretching_parent() {
+    let rule = STYLESHEET
+        .split(".plinth-stepper {")
+        .nth(1)
+        .and_then(|r| r.split('}').next())
+        .expect("a .plinth-stepper rule");
+    assert!(rule.contains("width: fit-content;"), "{rule}");
+}
+
+#[test]
+fn a_mark_keeps_its_width_in_a_stretching_parent() {
+    for selector in [
+        ".plinth-pill {",
+        ".plinth-badge {",
+        ".plinth-count {",
+        ".plinth-status-label {",
+    ] {
+        let rule = STYLESHEET
+            .split(selector)
+            .nth(1)
+            .and_then(|r| r.split('}').next())
+            .unwrap_or_else(|| panic!("a {selector} rule"));
+        assert!(rule.contains("width: fit-content;"), "{selector} {rule}");
+    }
+}
