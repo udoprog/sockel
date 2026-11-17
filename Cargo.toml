@@ -6,7 +6,7 @@ publish = false
 
 [dependencies]
 wasm-bindgen = "0.2.100"
-web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUnloadEvent", "Blob", "console", "Clipboard", "ClipboardEvent", "CssStyleDeclaration", "DataTransfer", "DataTransferItem", "DataTransferItemList", "Document", "DomRect", "DomTokenList", "DragEvent", "Element", "Event", "EventTarget", "File", "FileList", "FocusOptions", "HtmlCollection", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "HtmlTextAreaElement", "KeyboardEvent", "Navigator", "Node", "NodeList", "PointerEvent", "ResizeObserver", "ResizeObserverEntry", "ResizeObserverSize", "ScrollIntoViewOptions", "ScrollLogicalPosition", "Window"] }
+web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUnloadEvent", "Blob", "console", "Clipboard", "ClipboardEvent", "CssStyleDeclaration", "DataTransfer", "DataTransferItem", "DataTransferItemList", "Document", "DomRect", "DomRectList", "DomTokenList", "DragEvent", "Element", "Event", "EventTarget", "File", "FileList", "FocusOptions", "HtmlCollection", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "HtmlTextAreaElement", "KeyboardEvent", "Navigator", "Node", "NodeList", "PointerEvent", "ResizeObserver", "ResizeObserverEntry", "ResizeObserverSize", "ScrollIntoViewOptions", "ScrollLogicalPosition", "Window"] }
 yew = "0.23.0"
 
 [build-dependencies]

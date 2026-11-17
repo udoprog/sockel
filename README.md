@@ -966,7 +966,10 @@ opening it never moves the page, its anchor or the scrollbar. Its width is
 its content's up to `--popover-max-width`, whichever side it lands on, so a
 flip moves it without reflowing it; what is taller than the room scrolls in
 `.plinth-popover-body`, its scrollbar's room kept. It follows the anchor on
-scroll, resize and a change of either's size.
+scroll, resize and a change of either's size, and closes (as a press
+outside, focus left where it is) once the anchor is out of sight: no
+longer laid out, or scrolled or clipped wholly out of a box around it
+whose overflow clips. Menus, selects, pickers and tips share this placement.
 ## RowList, PickRow, SelectionBar, ActionRow and CardGrid
 
 `RowList` is a column of rows (`tag`, `ul` by default, with no bullets, margin

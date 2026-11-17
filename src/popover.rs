@@ -260,6 +260,47 @@ impl Drop for Listener {
 }
 
 /// What the viewport lets a fixed box use: without a scrollbar.
+/// The ancestors of `element` whose overflow clips it.
+fn clippers(element: &Element) -> Vec<Element> {
+    let Some(window) = web_sys::window() else {
+        return Vec::new();
+    };
+    let mut found = Vec::new();
+    let mut at = element.parent_element();
+    while let Some(e) = at {
+        if e.tag_name() == "BODY" || e.tag_name() == "HTML" {
+            break;
+        }
+        let clips = window
+            .get_computed_style(&e)
+            .ok()
+            .flatten()
+            .is_some_and(|style| {
+                ["overflow-x", "overflow-y"]
+                    .iter()
+                    .any(|p| style.get_property_value(p).is_ok_and(|v| v != "visible"))
+            });
+        if clips {
+            found.push(e.clone());
+        }
+        at = e.parent_element();
+    }
+    found
+}
+
+/// Whether `anchor` is out of sight: not laid out, or wholly outside one
+/// of the boxes clipping it.
+fn out_of_sight(anchor: &Element, clippers: &[Element]) -> bool {
+    if anchor.get_client_rects().length() == 0 {
+        return true;
+    }
+    let at = Rect::of(anchor);
+    clippers.iter().any(|c| {
+        let b = Rect::of(c);
+        at.bottom() <= b.top || at.top >= b.bottom() || at.right() <= b.left || at.left >= b.right()
+    })
+}
+
 fn viewport() -> Option<Rect> {
     let root = web_sys::window()?.document()?.document_element()?;
     Some(Rect {
@@ -374,9 +415,16 @@ fn use_placement(
                     overlays.layer()
                 });
                 let last = Rc::new(Cell::new(None::<Placed>));
+                let clipped = anchor
+                    .cast::<Element>()
+                    .map(|a| clippers(&a))
+                    .unwrap_or_default();
                 let measure = {
                     let (anchor, popover, placed) =
                         (anchor.clone(), popover.clone(), placed.clone());
+                    let (on_dismiss, refocus) = (on_dismiss.clone(), refocus.clone());
+                    let clipped = clipped.clone();
+                    let gone = Rc::new(Cell::new(false));
                     Rc::new(move || {
                         let (Some(at), Some(pop), Some(viewport)) = (
                             anchor.cast::<Element>(),
@@ -385,6 +433,15 @@ fn use_placement(
                         ) else {
                             return;
                         };
+                        // Its anchor scrolled away or hidden: nothing to
+                        // stand beside, so it goes.
+                        if out_of_sight(&at, &clipped) {
+                            if !gone.replace(true) {
+                                refocus.set(Some(false));
+                                on_dismiss.borrow().emit(Dismiss::Outside);
+                            }
+                            return;
+                        }
                         // Its natural height, whatever max-height cuts it to.
                         let size = (
                             f64::from(pop.offset_width()),
@@ -466,6 +523,9 @@ fn use_placement(
                         if let Some(element) = node.cast::<Element>() {
                             watch.observe(&element);
                         }
+                    }
+                    for element in &clipped {
+                        watch.observe(element);
                     }
                     observer = Some((watch, resized));
                 }
