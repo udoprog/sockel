@@ -1,0 +1,10 @@
+// A project whose dialogs are centred, capped and headed its own way.
+@use "../../style/tokens" with (
+    $dialog-centred: true,
+    $dialog-max-height: 85vh,
+    $dialog-body-padding: 1rem var(--dialog-pad) var(--dialog-pad),
+    $dialog-title-size: 1.125rem,
+    $dialog-scroll-gutter: auto,
+    $dialog-sheet-edge: top
+);
+@use "../../style/dialog";

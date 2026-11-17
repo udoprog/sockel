@@ -291,7 +291,8 @@ Breakpoints and the component settings (`$card-padding`,
 `$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
 `$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
 `$dialog-body-gap`, `$dialog-shadow`, `$dialog-head-padding`, `$dialog-head-rule`,
-`$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$popover-padding`, `$popover-shadow`,
+`$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$dialog-centred`,
+`$dialog-max-height`, `$dialog-scroll-gutter`, `$dialog-sheet-edge`, `$popover-padding`, `$popover-shadow`,
 `$visibility-breakpoint`) are Sass-only: an app built with
 `plinth-build` sets them with `Config::with`.
 
@@ -356,6 +357,9 @@ page can still override them at runtime.
 | `$dialog-head-padding`, `$dialog-head-rule` | `var(--space-3) var(--space-3) 0 var(--dialog-pad)`, `null` (no rule under the head; set, its `border-bottom`) |
 | `$dialog-body-padding` | `var(--space-3) var(--dialog-pad) var(--dialog-pad)` |
 | `$dialog-title-size`, `$dialog-title-weight` | `null`, `null` (the section head's; set, the dialog title's own) |
+| `$dialog-centred`, `$dialog-max-height` | `false` (hung from `--dialog-top`; `true` centres it, so growing content moves both edges), `null` (as tall as the window's room; set, at most that above `$sheet-breakpoint`) |
+| `$dialog-scroll-gutter` | `stable` (the body keeps its scrollbar's room; `auto` gives it to the content until it scrolls) |
+| `$dialog-sheet-edge` | `all` (a sheet keeps its side edges, its bottom transparent; `top`: only its top edge) |
 | `$popover-padding`, `$popover-shadow` | `var(--space-3)`, `var(--shadow-1)` (a popover's body padding and its shadow, a hover card's included) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
@@ -1067,8 +1071,11 @@ included, so a popover or menu opened inside it could not be used). Props:
 - `open`, `on_dismiss: Callback<Dismiss>` (the owner closes it), `title`
   (its heading and accessible name), `icon` (before the title).
 - `size`: `DialogSize::Default` (`--dialog-width`), `Wide`
-  (`plinth::class::WIDE`, `--dialog-width-wide`) or `Tall` (`TALL`, fixed at
-  `--dialog-height-tall`).
+  (`plinth::class::WIDE`, `--dialog-width-wide`), `Tall` (`TALL`, fixed at
+  `--dialog-height-tall`) or `WideTall` (both).
+- `flush`: a body without padding that does not scroll (`FLUSH` on
+  `.plinth-dialog-body`), for content that lays itself out and scrolls its
+  own parts, such as a manual with its contents beside it.
 - `dismiss`: `DialogDismiss::Any` (Escape, the close button, a press on the
   scrim), `NoOutside` (not the scrim) or `Actions` (no close button, Escape
   does nothing). `DialogDismiss::allows(Dismiss)` tells which.
@@ -1076,8 +1083,9 @@ included, so a popover or menu opened inside it could not be used). Props:
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
   at its start: a Delete), each an `ActionGroup` in `.plinth-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
-  the bottom, up to `--dialog-sheet-height`. `close_label` and
-  `close_testid` (the close button's), `class`, `testid`.
+  the bottom, up to `--dialog-sheet-height`. `close_label`,
+  `close_size` (`ButtonSize::Small` by default) and `close_testid` (the
+  close button's), `class`, `testid`.
 
 `dialog(size, sheet)` gives the classes. Parts: `.plinth-dialog-layer` (the
 scrim), `-head` (a `SectionHead`), `-body` (what scrolls), `-foot`.
@@ -1095,9 +1103,11 @@ Size guarantees: while a dialog is open the root takes
 page had a scrollbar, so the scrollbar's room stays and the page neither
 moves nor scrolls; an app whose root already has `scrollbar-gutter: stable`
 keeps it either way. The box hangs `--dialog-top` from the window's top,
-never centred, so content that loads or grows moves only its bottom edge;
+not centred unless `$dialog-centred` says so, so content that loads or grows
+moves only its bottom edge;
 it is at least `--dialog-min-height` and at most the window's room, beyond
-which the body scrolls with its scrollbar's room kept and the foot stays
+which the body scrolls with its scrollbar's room kept (unless
+`$dialog-scroll-gutter` says otherwise) and the foot stays
 pinned below it. Its width is fixed by its size, never by its content. A
 `Tall` dialog keeps one height whatever it holds; a sheet grows upward
 from the bottom edge.

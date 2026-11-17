@@ -58,3 +58,23 @@ fn configured_through_tokens() {
     assert!(css.contains("--text-md: 1.0625rem;"));
     assert!(css.contains("--radius-lg: 12px;"));
 }
+
+#[test]
+fn dialog_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("--dialog-room: calc(100dvh - var(--dialog-top) - var(--space-4));"));
+    let css = compile(&sass, "tests/fixtures/dialog_centred.scss");
+    assert!(css.contains(".plinth-dialog-layer {\n  align-items: center;"));
+    assert!(css.contains("--dialog-room: min(85vh, 100dvh - 2 * var(--space-4));"));
+    assert!(
+        css.contains(
+            "padding: 1rem var(--dialog-pad) var(--dialog-pad);\n  scrollbar-gutter: auto;"
+        )
+    );
+    assert!(css.contains("--section-title-size: 1.125rem;"));
+    assert!(
+        css.contains("border-bottom-color: transparent;\n    border-width: var(--space-px) 0 0;")
+    );
+    assert!(!defaults.contains("border-width: var(--space-px) 0 0;"));
+}

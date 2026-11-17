@@ -16,6 +16,7 @@ const SIZES: &[(&str, DialogSize)] = &[
     ("Default", DialogSize::Default),
     ("Wide", DialogSize::Wide),
     ("Tall", DialogSize::Tall),
+    ("WideTall", DialogSize::WideTall),
 ];
 
 const DISMISSES: &[(&str, DialogDismiss)] = &[
@@ -50,6 +51,8 @@ struct Setup {
     body: Body,
     icon: bool,
     head: bool,
+    flush: bool,
+    close_regular: bool,
     sheet: bool,
     actions: bool,
     start: bool,
@@ -166,8 +169,9 @@ fn DialogOf(props: &DialogDemoProps) -> Html {
     html! {
         <Dialog open={props.open} on_dismiss={close} title={s.title.of("Rename the list")}
             icon={s.icon.then(|| html! { <Icon glyph={Glyph::Ellipsis} /> })}
-            size={s.size} dismiss={s.dismiss} sheet={s.sheet}
+            size={s.size} dismiss={s.dismiss} flush={s.flush} sheet={s.sheet}
             head_actions={head.unwrap_or_default()}
+            close_size={if s.close_regular { ButtonSize::Regular } else { ButtonSize::Small }}
             actions={actions.unwrap_or_default()} actions_start={start.unwrap_or_default()}>
             <Content body={s.body} />
         </Dialog>
@@ -207,6 +211,8 @@ pub fn DialogPage() -> Html {
     let body = use_state(|| Body::Short);
     let icon = use_state(|| false);
     let head = use_state(|| false);
+    let flush = use_state(|| false);
+    let close_regular = use_state(|| false);
     let sheet = use_state(|| true);
     let actions = use_state(|| true);
     let start = use_state(|| false);
@@ -220,6 +226,8 @@ pub fn DialogPage() -> Html {
         body: *body,
         icon: *icon,
         head: *head,
+        flush: *flush,
+        close_regular: *close_regular,
         sheet: *sheet,
         actions: *actions,
         start: *start,
@@ -233,6 +241,8 @@ pub fn DialogPage() -> Html {
             <Select<Body> label="Body" options={BODIES} value={*body} on_change={bind(&body)} />
             <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
             <Toggle label="head_actions" value={*head} on_change={bind(&head)} />
+            <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
+            <Toggle label="regular close" value={*close_regular} on_change={bind(&close_regular)} />
             <Toggle label="sheet (on a phone)" value={*sheet} on_change={bind(&sheet)} />
             <Toggle label="actions" value={*actions} on_change={bind(&actions)} />
             <Toggle label="actions_start" value={*start} on_change={bind(&start)} />
@@ -263,6 +273,8 @@ pub fn DialogPage() -> Html {
             )
             .variant("size", *size)
             .variant("dismiss", *dismiss)
+            .expr_if(*flush, "flush", "true")
+            .expr_if(*close_regular, "close_size", "ButtonSize::Regular")
             .expr_if(!*sheet, "sheet", "false")
             .expr_if(*actions, "actions", format!("html! {{ {actions_code} }}"))
             .expr_if(

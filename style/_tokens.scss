@@ -155,6 +155,16 @@ $dialog-head-rule: null !default;
 $dialog-body-padding: var(--space-3) var(--dialog-pad) var(--dialog-pad) !default;
 $dialog-title-size: null !default;
 $dialog-title-weight: null !default;
+// Whether a dialog is centred in the window instead of hanging from
+// `--dialog-top` (content that grows then moves both its edges), its tallest
+// above `$sheet-breakpoint` (`null`: the window's room), its body's
+// `scrollbar-gutter` (`stable`: the scrollbar's room is kept, so text does
+// not rewrap once it scrolls), and the edges a sheet keeps (`all`: its sides
+// too, the bottom transparent; `top`: only its top).
+$dialog-centred: false !default;
+$dialog-max-height: null !default;
+$dialog-scroll-gutter: stable !default;
+$dialog-sheet-edge: all !default;
 // A popover's body padding and its shadow (a hover card's too).
 $popover-padding: var(--space-3) !default;
 $popover-shadow: var(--shadow-1) !default;

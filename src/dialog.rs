@@ -23,6 +23,8 @@ pub enum DialogSize {
     Wide,
     /// `--dialog-width`, and `--dialog-height-tall` whatever it holds.
     Tall,
+    /// `--dialog-width-wide`, and `--dialog-height-tall` whatever it holds.
+    WideTall,
 }
 
 /// What may close a dialog besides its own actions.
@@ -63,11 +65,18 @@ pub struct DialogProps {
     pub size: DialogSize,
     #[prop_or_default]
     pub dismiss: DialogDismiss,
+    /// A body without padding that does not scroll, for content that lays
+    /// itself out and scrolls its own parts.
+    #[prop_or_default]
+    pub flush: bool,
     /// A sheet from the bottom below the phone breakpoint; on by default.
     #[prop_or(true)]
     pub sheet: bool,
     #[prop_or(AttrValue::Static("Close"))]
     pub close_label: AttrValue,
+    /// The close button's size; small by default.
+    #[prop_or(ButtonSize::Small)]
+    pub close_size: ButtonSize,
     /// The close button's `data-testid`.
     #[prop_or_default]
     pub close_testid: Option<AttrValue>,
@@ -88,16 +97,15 @@ pub struct DialogProps {
     pub children: Html,
 }
 
-/// A dialog's classes: `dialog`, `wide` or `tall`, and `sheet` when it
-/// becomes one on a phone.
+/// A dialog's classes: `dialog`, `wide` and `tall` as its size says, and
+/// `sheet` when it becomes one on a phone.
 pub fn dialog(size: DialogSize, sheet: bool) -> Classes {
+    let wide = matches!(size, DialogSize::Wide | DialogSize::WideTall);
+    let tall = matches!(size, DialogSize::Tall | DialogSize::WideTall);
     classes!(
         class::DIALOG,
-        match size {
-            DialogSize::Default => None,
-            DialogSize::Wide => Some(class::WIDE),
-            DialogSize::Tall => Some(class::TALL),
-        },
+        wide.then_some(class::WIDE),
+        tall.then_some(class::TALL),
         sheet.then_some(class::SHEET)
     )
 }
@@ -313,7 +321,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
     let close = props.dismiss.allows(Dismiss::Close).then(|| {
         let onclick = props.on_dismiss.reform(|_: MouseEvent| Dismiss::Close);
         html! {
-            <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+            <Button variant={ButtonVariant::Quiet} size={props.close_size}
                 icon={html! { <Icon glyph={Glyph::Close} /> }}
                 label={props.close_label.clone()} testid={props.close_testid.clone()} {onclick} />
         }
@@ -343,7 +351,9 @@ pub fn Dialog(props: &DialogProps) -> Html {
                     { props.head_actions.clone() }
                     { for close }
                 </SectionHead>
-                <div class={class::DIALOG_BODY}>{ props.children.clone() }</div>
+                <div class={classes!(class::DIALOG_BODY, props.flush.then_some(class::FLUSH))}>
+                    { props.children.clone() }
+                </div>
                 { for foot }
             </div>
         </div>
@@ -377,6 +387,10 @@ mod tests {
             names(dialog(DialogSize::Tall, true)),
             [class::DIALOG, class::TALL, class::SHEET]
         );
+        assert_eq!(
+            names(dialog(DialogSize::WideTall, false)),
+            [class::DIALOG, class::WIDE, class::TALL]
+        );
     }
 
     #[test]
@@ -392,6 +406,10 @@ mod tests {
     }
 
     fn render(open: bool, dismiss: DialogDismiss, actions: Html) -> String {
+        render_flush(open, dismiss, actions, false)
+    }
+
+    fn render_flush(open: bool, dismiss: DialogDismiss, actions: Html, flush: bool) -> String {
         let props = DialogProps {
             open,
             on_dismiss: Callback::noop(),
@@ -399,8 +417,14 @@ mod tests {
             icon: None,
             size: DialogSize::Default,
             dismiss,
+            flush,
             sheet: true,
             close_label: "Close".into(),
+            close_size: if flush {
+                ButtonSize::Regular
+            } else {
+                ButtonSize::Small
+            },
             close_testid: Some("close".into()),
             head_actions: html! { <button>{ "Import" }</button> },
             actions,
@@ -429,6 +453,17 @@ mod tests {
         assert!(html.contains("data-testid=\"close\""), "{html}");
         let head = html.find("Import").expect("head action");
         assert!(head < html.find("aria-label=\"Close\"").unwrap(), "{html}");
+    }
+
+    #[test]
+    fn a_flush_body_and_the_close_size_are_modifiers() {
+        let body = format!("class=\"{} {}\"", class::DIALOG_BODY, class::FLUSH);
+        let html = render_flush(true, DialogDismiss::Any, Html::default(), true);
+        assert!(html.contains(&body), "{html}");
+        assert!(!html.contains(class::SMALL), "{html}");
+        let html = render(true, DialogDismiss::Any, Html::default());
+        assert!(!html.contains(&body), "{html}");
+        assert!(html.contains(class::SMALL), "{html}");
     }
 
     #[test]

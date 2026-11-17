@@ -17,7 +17,13 @@
 //   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
 //   with that gap when set), `$dialog-shadow`, `$dialog-head-padding`,
 //   `$dialog-head-rule` (a border under the head), `$dialog-body-padding`,
-//   `$dialog-title-size` and `$dialog-title-weight`.
+//   `$dialog-title-size` and `$dialog-title-weight`; `$dialog-centred`
+//   (centred in the window, not hung from `--dialog-top`),
+//   `$dialog-max-height` (its tallest above `$sheet-breakpoint`),
+//   `$dialog-scroll-gutter` (the body's `scrollbar-gutter`) and
+//   `$dialog-sheet-edge` (`top`: a sheet's top edge alone).
+// - `.plinth-dialog-body.plinth-flush`: a body without padding that does not
+//   scroll, for content that lays itself out and scrolls its own parts.
 
 @use "tokens" as base;
 
@@ -42,8 +48,22 @@
     overscroll-behavior: contain;
 }
 
+@if base.$dialog-centred {
+    .plinth-dialog-layer {
+        align-items: center;
+        padding-top: var(--space-4);
+    }
+}
+
 .plinth-dialog {
-    --dialog-room: calc(100dvh - var(--dialog-top) - var(--space-4));
+    $room: calc(100dvh - var(--dialog-top) - var(--space-4));
+    @if base.$dialog-centred {
+        $room: calc(100dvh - 2 * var(--space-4));
+    }
+    @if base.$dialog-max-height {
+        $room: min(base.$dialog-max-height, $room);
+    }
+    --dialog-room: #{$room};
     --dialog-pad: #{base.$dialog-padding};
 
     display: flex;
@@ -89,6 +109,15 @@
     @include base.scroll-area;
     flex: 1 1 auto;
     padding: base.$dialog-body-padding;
+    @if base.$dialog-scroll-gutter != stable {
+        scrollbar-gutter: base.$dialog-scroll-gutter;
+    }
+
+    &.plinth-flush {
+        overflow: hidden;
+        padding: 0;
+        scrollbar-gutter: auto;
+    }
 }
 
 @if base.$dialog-body-gap {
@@ -123,6 +152,9 @@
 
         width: 100%;
         border-bottom-color: transparent;
+        @if base.$dialog-sheet-edge == top {
+            border-width: var(--space-px) 0 0;
+        }
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         padding-bottom: env(safe-area-inset-bottom);
     }
