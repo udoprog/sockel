@@ -192,6 +192,17 @@ fn outside(layer: &Element) -> Vec<Element> {
     out
 }
 
+/// Whether `e` comes from an element outside the dialog's layer (an app's
+/// own popup rendered elsewhere, which closes alone); not when nothing has
+/// the focus.
+fn from_elsewhere(layer: &NodeRef, e: &web_sys::KeyboardEvent) -> bool {
+    let Some(target) = e.target().and_then(|t| t.dyn_into::<Element>().ok()) else {
+        return false;
+    };
+    let nowhere = matches!(target.tag_name().as_str(), "BODY" | "HTML");
+    !nowhere && layer.get().is_some_and(|l| !l.contains(Some(&target)))
+}
+
 /// A modal box over a scrim in the overlay layer, while `open`: its head
 /// (icon, title, close), a body that scrolls, and a foot of actions pinned
 /// below it. The page behind is out of reach and does not scroll or move;
@@ -253,6 +264,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
                 }
 
                 if let Some(document) = document {
+                    let root = layer_ref.clone();
                     let keyed = move |e: web_sys::Event| {
                         if !top.is_top() {
                             return;
@@ -260,7 +272,10 @@ pub fn Dialog(props: &DialogProps) -> Html {
                         let e = e.unchecked_ref::<web_sys::KeyboardEvent>();
                         match e.key().as_str() {
                             "Escape" => {
-                                if mode.borrow().allows(Dismiss::Escape) {
+                                if !e.default_prevented()
+                                    && !from_elsewhere(&root, e)
+                                    && mode.borrow().allows(Dismiss::Escape)
+                                {
                                     latest.borrow().emit(Dismiss::Escape);
                                 }
                             }
