@@ -141,6 +141,16 @@ fn drag_handle_settings() {
 }
 
 #[test]
+fn a_dialog_body_gap_spaces_its_paragraphs() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(!defaults.contains(".plinth-dialog-body > p"));
+    let css = compile(&sass, "tests/fixtures/dialog_body_gap.scss");
+    assert!(css.contains("gap: 1rem;"));
+    assert!(css.contains(".plinth-dialog-body > p {\n  margin: 0;\n}"));
+}
+
+#[test]
 fn a_native_select_gives_way_in_a_row() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

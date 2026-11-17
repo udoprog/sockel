@@ -15,7 +15,7 @@
 //   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays.
 // - Settings: `$dialog-padding` (and `$dialog-padding-phone` below
 //   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
-//   with that gap when set), `$dialog-shadow`, `$dialog-head-padding`,
+//   with that gap when set, its paragraphs without margins), `$dialog-shadow`, `$dialog-head-padding`,
 //   `$dialog-head-rule` (a border under the head), `$dialog-body-padding`,
 //   `$dialog-title-size` and `$dialog-title-weight`; `$dialog-centred`
 //   (centred in the window, not hung from `--dialog-top`),
@@ -125,6 +125,11 @@
         display: flex;
         flex-direction: column;
         gap: base.$dialog-body-gap;
+
+        // Spaced by the gap, not their own margins.
+        > p {
+            margin: 0;
+        }
     }
 }
 

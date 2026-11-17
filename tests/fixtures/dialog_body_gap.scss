@@ -1,0 +1,5 @@
+// A project whose dialog bodies are a column spaced by a gap.
+@use "../../style/tokens" with (
+    $dialog-body-gap: 1rem
+);
+@use "../../style/dialog";

@@ -144,7 +144,7 @@ $button-phone-height: null !default;
 // A dialog's padding (the head's start, the body's sides and bottom, the
 // foot's sides), that padding below `$sheet-breakpoint` (`null`: the
 // same), the gap between its body's children (`null`: the body is a plain
-// block) and its shadow.
+// block; set, its paragraphs lose their margins) and its shadow.
 $dialog-padding: var(--space-5) !default;
 $dialog-padding-phone: null !default;
 $dialog-body-gap: null !default;
