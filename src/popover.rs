@@ -231,10 +231,30 @@ impl Listener {
         capture: bool,
         f: impl Fn(web_sys::Event) + 'static,
     ) -> Self {
+        Self::with(target, kind, capture, true, f)
+    }
+
+    /// Not passive, so `f` can prevent the default (Tab kept in a dialog).
+    pub(crate) fn active(
+        target: web_sys::EventTarget,
+        kind: &'static str,
+        capture: bool,
+        f: impl Fn(web_sys::Event) + 'static,
+    ) -> Self {
+        Self::with(target, kind, capture, false, f)
+    }
+
+    fn with(
+        target: web_sys::EventTarget,
+        kind: &'static str,
+        capture: bool,
+        passive: bool,
+        f: impl Fn(web_sys::Event) + 'static,
+    ) -> Self {
         let closure = Closure::<dyn Fn(web_sys::Event)>::new(f);
         let options = web_sys::AddEventListenerOptions::new();
         options.set_capture(capture);
-        options.set_passive(true);
+        options.set_passive(passive);
         _ = target.add_event_listener_with_callback_and_add_event_listener_options(
             kind,
             closure.as_ref().unchecked_ref(),

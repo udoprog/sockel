@@ -257,7 +257,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
                             _ => {}
                         }
                     };
-                    held = Some(Listener::new(document.into(), "keydown", false, keyed));
+                    held = Some(Listener::active(document.into(), "keydown", false, keyed));
                 }
             }
 
