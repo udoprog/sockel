@@ -4,10 +4,30 @@ Opinionated layout primitives and components for [Yew] apps, built so
 components keep their size and don't jitter as their content changes.
 
 Each component comes with its Sass under `style/`, and its variants are
-modifier classes set by props.
+modifier classes set by props, so the markup and the styles stay in step.
 
 sockel was called plinth until 2026-11-17, and its history starts as
 `crates/plinth` in characterize.
+
+[`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
+app with Sass of its own builds it with sockel-build after sockel's, into
+one stylesheet, and passes that to [`Styles`] (see
+[Getting started](#getting-started)).
+The colours are the app's: sockel reads `--bg`, `--surface`, `--text`,
+`--muted`, `--border`, `--accent` and `--shadow-1`, and derives
+overridable defaults for `--danger`, `--success`, `--warning`,
+`--on-accent`, `--surface-raised` and `--scrim` from them.
+
+Each component (or small family) is a Cargo feature that gates its Rust,
+its class constants and its CSS together; `full`, the default, has all.
+
+The utilities against jitter (`.sockel-numeric`, `.sockel-scroll-area`,
+`.sockel-truncate`, `.sockel-clamp-*`, `.sockel-visually-hidden`,
+`.sockel-phone-only`, `.sockel-desktop-only`, `.sockel-focus-ring`) are
+classes only, in [`class`]; their mixins are in
+[Against jitter](#against-jitter-mixins-and-utilities).
+
+<br>
 
 ## Getting started
 
@@ -16,6 +36,8 @@ the app's own Sass, with `sockel-build` in its `build.rs`. No Sass step
 runs anywhere else, and no path leads into sockel's checkout. The blocks
 below are the files of a complete app (`scripts/check-packaged.sh` builds
 them against sockel's packages).
+
+<br>
 
 ### Dependencies
 
@@ -36,6 +58,8 @@ sockel-build = "0.1"
 sockel-build = "0.1"
 ```
 
+<br>
+
 ### Developing against a checkout
 
 sockel is not on a registry yet, so point both crates at a checkout once, in
@@ -50,6 +74,8 @@ sockel-build = { path = "../sockel/sockel-build" }
 
 The dependency lines stay as above, and dropping the patch later switches to
 the registry. Nothing else names the checkout.
+
+<br>
 
 ### Styles
 
@@ -87,6 +113,8 @@ Classes a dependency's markup writes (a sign-in form the app styles) are
 the exception: `Config::foreign(["auth-*"])` lets the app style them
 unprefixed (a trailing `*` is a prefix), and they get no constant.
 
+<br>
+
 ### `build.rs`
 
 At the package root:
@@ -105,13 +133,15 @@ It writes `style.css` and `classes.rs` to `OUT_DIR`, and reruns when
 `build.rs`, anything under `style/` (partials and new files included) or
 sockel's Sass changes.
 
+<br>
+
 ### The class constants and the stylesheet
 
 `classes.rs` holds the app's classes, named without the prefix
 (`.app-sidebar` is `class::SIDEBAR`); sockel's stay `sockel::class::...`.
 Every sockel component takes a `class` prop, so pass the constants there,
 and a class the Sass does not define does not compile. The stylesheet is
-mounted once at the root with `Styles`'s `css`:
+mounted once at the root with [`Styles`]'s `css`:
 
 <!-- check: src/main.rs -->
 ```rust
@@ -140,6 +170,8 @@ fn main() {
 }
 ```
 
+<br>
+
 ### No Sass elsewhere
 
 `index.html` links no stylesheet: no `<link data-trunk rel="scss">`, and no
@@ -148,6 +180,8 @@ fn main() {
 ```html
 <link data-trunk rel="rust" href="Cargo.toml" />
 ```
+
+<br>
 
 ### A guard against dead classes
 
@@ -183,6 +217,8 @@ single-use and dead counts. `STYLE_INVENTORY=PATH` also writes
 `class<TAB>uses` lines to `PATH`. sockel runs it on itself and on the
 showcase.
 
+<br>
+
 ### How sockel-build finds sockel
 
 sockel's own `build.rs` passes two values to the `build.rs` of every package
@@ -192,6 +228,8 @@ its package. `Config` builds those features from those sources, so the
 app's stylesheet always matches the sockel it links. A package that reaches
 sockel only through another crate is told neither: it names them with
 `Config::features([...])` and `Config::style(dir)`.
+
+<br>
 
 ### One stylesheet per app
 
@@ -213,6 +251,8 @@ constant is named after its class without the prefix, as an app's are:
 `.sockel-tight` is `sockel::class::TIGHT`.
 
 The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
+
+<br>
 
 ## Migrating from trunk's Sass step
 
@@ -251,6 +291,8 @@ wins over the media query. A dart-sass feature sasso lacks fails in
 Including sockel's Sass from a checkout (`@use "../sockel/style"`) does not
 work once sockel comes from a registry, and is not supported for apps.
 
+<br>
+
 ## Choosing features
 
 sockel has a Cargo feature per component, or per family of components that
@@ -263,7 +305,7 @@ the ones it needs:
 sockel = { version = "0.1", default-features = false, features = ["field", "input", "layout"] }
 ```
 
-A feature gates a component's Rust and its CSS together. `STYLESHEET` and
+A feature gates a component's Rust and its CSS together. [`STYLESHEET`] and
 `sockel::class` hold only the enabled features' rules and classes, so a
 component or class whose feature is off does not compile, rather than
 rendering unstyled. The tokens, hooks, utilities and the menus' shared
@@ -280,45 +322,47 @@ member wants more gets the union.
 
 | Feature | Brings in | Gives | CSS alone |
 | --- | --- | --- | --- |
-| `action-group` | | `ActionGroup` | 3.7 KB |
-| `badge` | `icons` | `Pill`, `Badge`, `Dot`, `Count`, `StatusLabel` | 9.6 KB |
-| `button` | `icons`, `skeleton` | `Button`, `IconButton` | 11.9 KB |
-| `card-grid` | | `CardGrid` | 4.1 KB |
-| `color-select` | `select` | `ColorSelect` | 48.1 KB |
-| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | `Confirm`, `ConfirmPopover`, `ConfirmButton`, `ConfirmInline`, `ConfirmHost` | 37.0 KB |
-| `disclosure` | `head`, `icons` | `Disclosure` | 15.2 KB |
-| `drop-zone` | `button` | `DropZone` | 14.3 KB |
-| `field` | | `Field`, `FormRow`, `FormRows`, `Fieldset`, `FieldCheck`, `FieldInputs` | 6.3 KB |
-| `head` | `layout` | `Head`, `PageHead`, `SectionHead` | 12.8 KB |
-| `icons` | | `Icon`, `IconSet`, `Glyph` | 4.0 KB |
-| `input` | `icons` | `TextInput`, `Textarea`, `SearchField`, `InputGroup`, `SecretInput` | 10.2 KB |
-| `layout` | | `Stack`, `Cluster`, `Card`, `Inset`, `Toolbar` | 9.0 KB |
-| `library-toolbar` | `input`, `layout` | `LibraryToolbar` | 15.8 KB |
-| `loadable` | `notice`, `skeleton` | `Loadable` | 22.2 KB |
-| `media` | `icons` | `Image`, `Avatar` | 5.6 KB |
-| `menu` | `button`, `icons`, `overlay` | `Menu`, `RowActions`, `SplitButton`, `ContextMenu` | 31.1 KB |
-| `notice` | `badge`, `button` | `Notice`, `ErrorBox`, `EmptyState` | 21.9 KB |
-| `overlay` | `action-group`, `button`, `head`, `icons` | `OverlayHost`, `Popover`, `Dialog` | 25.7 KB |
-| `pager` | `icons` | `Pager`, `PagerSummary` | 6.5 KB |
-| `panel` | | `Panel` | 4.8 KB |
-| `picker` | `overlay`, `pager`, `select` | `Picker`, `PickerMenu`, `PickerDialog`, `ChoiceList`, `FilterPicker` | 50.9 KB |
-| `reorder` | `icons`, `rows`, `tooltip` | `Reorder`, `DragHandle` | 33.3 KB |
-| `rows` | `button` | `RowList`, `PickRow`, `ActionRow`, `SelectionBar` | 16.9 KB |
-| `search-select` | `select` | `SearchSelect` | 45.1 KB |
-| `seam` | | `Seam` | 5.2 KB |
-| `select` | `input`, `menu`, `tooltip` | `Select`, `Listbox` | 43.9 KB |
-| `skeleton` | `icons`, `media` | `Skeleton`, `Spinner` | 7.4 KB |
-| `stepper` | `input` | `Stepper` | 11.2 KB |
-| `table` | `icons` | `Table`, `SortHeader` | 7.1 KB |
-| `tabs` | | `Tabs`, `SubTabs`, `NavList` | 6.9 KB |
-| `toast` | `badge`, `button`, `overlay` | `ToastHost`, `Toast`, `SaveBar` | 34.1 KB |
-| `toggles` | `icons` | `Checkbox`, `Switch`, `Choice`, `ChipList`, `ChipToggle` | 10.7 KB |
-| `tooltip` | `overlay` | `Tooltip`, `HoverCard`, `ReasonButton` | 26.8 KB |
+| `action-group` | | [`ActionGroup`] | 3.7 KB |
+| `badge` | `icons` | [`Pill`], [`Badge`], [`Dot`], [`Count`], [`StatusLabel`] | 9.6 KB |
+| `button` | `icons`, `skeleton` | [`Button`], [`IconButton`] | 11.9 KB |
+| `card-grid` | | [`CardGrid`] | 4.1 KB |
+| `color-select` | `select` | [`ColorSelect`] | 48.1 KB |
+| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`], [`ConfirmPopover`], [`ConfirmButton`], [`ConfirmInline`], [`ConfirmHost`] | 37.0 KB |
+| `disclosure` | `head`, `icons` | [`Disclosure`] | 15.2 KB |
+| `drop-zone` | `button` | [`DropZone`] | 14.3 KB |
+| `field` | | [`Field`], [`FormRow`], [`FormRows`], [`Fieldset`], [`FieldCheck`], [`FieldInputs`] | 6.3 KB |
+| `head` | `layout` | [`Head`], [`PageHead`], [`SectionHead`] | 12.8 KB |
+| `icons` | | [`Icon`], [`IconSet`], [`Glyph`] | 4.0 KB |
+| `input` | `icons` | [`TextInput`], [`Textarea`], [`SearchField`], [`InputGroup`], [`SecretInput`] | 10.2 KB |
+| `layout` | | [`Stack`], [`Cluster`], [`Card`], [`Inset`], [`Toolbar`] | 9.0 KB |
+| `library-toolbar` | `input`, `layout` | [`LibraryToolbar`] | 15.8 KB |
+| `loadable` | `notice`, `skeleton` | [`Loadable`] | 22.2 KB |
+| `media` | `icons` | [`Image`], [`Avatar`] | 5.6 KB |
+| `menu` | `button`, `icons`, `overlay` | [`Menu`], [`RowActions`], [`SplitButton`], [`ContextMenu`] | 31.1 KB |
+| `notice` | `badge`, `button` | [`Notice`], [`ErrorBox`], [`EmptyState`] | 21.9 KB |
+| `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`], [`Popover`], [`Dialog`] | 25.7 KB |
+| `pager` | `icons` | [`Pager`], [`PagerSummary`] | 6.5 KB |
+| `panel` | | [`Panel`] | 4.8 KB |
+| `picker` | `overlay`, `pager`, `select` | [`Picker`], [`PickerMenu`], [`PickerDialog`], [`ChoiceList`], [`FilterPicker`] | 50.9 KB |
+| `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`], [`DragHandle`] | 33.3 KB |
+| `rows` | `button` | [`RowList`], [`PickRow`], [`ActionRow`], [`SelectionBar`] | 16.9 KB |
+| `search-select` | `select` | [`SearchSelect`] | 45.1 KB |
+| `seam` | | [`Seam`] | 5.2 KB |
+| `select` | `input`, `menu`, `tooltip` | [`Select`], [`Listbox`] | 43.9 KB |
+| `skeleton` | `icons`, `media` | [`Skeleton`], [`Spinner`] | 7.4 KB |
+| `stepper` | `input` | [`Stepper`] | 11.2 KB |
+| `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
+| `tabs` | | [`Tabs`], [`SubTabs`], [`NavList`] | 6.9 KB |
+| `toast` | `badge`, `button`, `overlay` | [`ToastHost`], [`Toast`], [`SaveBar`] | 34.1 KB |
+| `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
+| `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
 
 "CSS alone" is `STYLESHEET` with only that feature and what it brings in;
 with none it is 3.4 KB, and with `full` 103 KB. `scripts/check-features.sh`
 checks that each feature builds alone and that its CSS holds no other
 feature's rules.
+
+<br>
 
 ## Theming
 
@@ -339,7 +383,7 @@ as `$danger` and the rest):
 | `--field-bg` | `--surface` | a field's fill |
 | `--card-border` | `--border` | a card's edge (`transparent` for cards without one) |
 | `--card-border-width` | `--space-px` | its width (`0` for a card whose content meets its rounded edge, with no frame) |
-| `--panel-border` | `--border` | a `Panel`'s ring |
+| `--panel-border` | `--border` | a [`Panel`]'s ring |
 | `--panel-tint-text` | `--text` | a tint `Panel`'s text |
 | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 | `--menu-item-icon-ink` | `currentColor` | a menu row's icon (an accent beside two-line rows, say) |
@@ -389,6 +433,8 @@ Breakpoints and the component settings (`$card-padding`,
 `$popover-radius`, `$popover-sheet-edge`, `$popover-scroll-gutter`, `$confirm-gap`,
 `$visibility-breakpoint`) are Sass-only: an app built with
 `sockel-build` sets them with `Config::with`.
+
+<br>
 
 ## Configuration
 
@@ -496,13 +542,15 @@ the custom properties, so a page can still override them at runtime.
 | `$selection-bar-count-ink`, `$selection-bar-count-weight`, `$selection-bar-count-padding` | `null` each (its count's colour, weight and start padding) |
 | `$selection-bar-count-wrap` | `false` (the count is cut to one line; `true` wraps a count that does not fit, so the bar grows a line and its actions never shrink) |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
-| `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay `ActionRow`'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
+| `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay [`ActionRow`]'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over sockel's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 | `$omit` | `()` (every part emitted; see [Leaving parts out](#leaving-parts-out)) |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
+
+<br>
 
 ### Cascade layers
 
@@ -524,6 +572,8 @@ sockel_build::Config::new()
 The app's partials then put their own rules in their layers
 (`@layer components { ... }`). Without either call the stylesheet is
 unchanged.
+
+<br>
 
 ### Leaving parts out
 
@@ -551,33 +601,170 @@ fn main() {
 | --- | --- |
 | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
 | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
-| fields | `fields.field` (`Field` itself, not a `FormRow`), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
+| fields | `fields.field` ([`Field`] itself, not a [`FormRow`]), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.sockel-compact`, `.sockel-one-row`), `heads.label`, `heads.list` |
 | buttons | `buttons.bare`, `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point), `menu.marks` (a check or radio item's mark), `menu.disabled` (a disabled item) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
-| notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
+| inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` ([`InputGroup`] and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
+| notices | `notices.notice` ([`Notice`]), `notices.empty-state` ([`EmptyState`]), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
 | drop | `drop.tall` |
 | utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
 
+<br>
+
+## Components
+
+- [`Stack`] (`.stack`): a column, its blocks a gap apart.
+- [`Cluster`] (`.cluster`): a row that wraps, its items centred.
+- [`ActionGroup`] (`.action-group`): the buttons ending a form, a panel
+  or a section.
+- [`Button`] (`.button`): a button or a link styled as one, its
+  variants and sizes, an icon slot, icon-only and fold, pressed and busy,
+  all in the same box.
+- [`Checkbox`] (`.checkbox`) and [`Switch`] (`.switch`): an on or off
+  toggle in a box of a fixed size.
+- [`Choice`] (`.choice`): a segmented pick-one group, its options of one
+  width; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
+  chips with a count.
+- [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
+  [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
+  line that can keep its room.
+- [`TextInput`] (`.input`), [`Textarea`] (`.textarea`), [`SearchField`]
+  (`.input-box`) and [`InputGroup`] (`.input-group`): text controls at a
+  control's height, a unit or a clear button inside the field, controls
+  joined in a row; [`native_select`] (`.native-select`) for a native
+  `<select>` in a field's look.
+- [`Stepper`] (`.stepper`): a number between a minus and a plus button,
+  its room that of the longest bound; [`SecretInput`] (`.input-box`): a
+  password with show, copy and clear slots that keep their room.
+- [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
+  the app supplies and styles.
+- [`Icon`] (`.glyph` or `.name`), [`IconSet`], [`use_icon`]: sockel's and the app's icons, from
+  the set an app provides or a built-in one, in a fixed box.
+- [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
+  placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
+  initials behind it.
+- [`Notice`] (`.notice`): an inline message in a tone, its action and
+  close; [`ErrorBox`] (`.error-box`): an error, its cause and a retry;
+  [`EmptyState`] (`.empty-state`): what stands where there is nothing,
+  compact for a row.
+- [`DropZone`] (`.drop-zone`): a target for dropped or pasted files, or
+  picked with its button, with over, refused, busy and error states drawn
+  by an overlay, so its box never changes; [`accepts`] and [`refusal`]
+  filter by type and size.
+- [`Pill`] (`.pill`), [`Badge`] (`.badge`), [`Dot`] (`.dot`) and [`Count`]
+  (`.count`): short marks of a fixed box, in a [`Tone`];
+  [`StatusLabel`] (`.status-label`): a status as wide as its widest state.
+- [`RowList`] (`.row-list`) with [`RowListItem`]: rows of a name, a detail
+  and what ends them, divided by lines that add no height; [`PickRow`]
+  (`.pick-row`): a row that is one press; [`SelectionBar`]
+  (`.selection-bar`): the picked count and its actions under a list;
+  [`ActionRow`] (`.action-row`): actions on what stands around them, over
+  a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
+  columns as fit.
+- [`Reorder`] (`.reorder`) with [`ReorderRow`]s or [`ReorderItem`] children
+  (their grip a [`ReorderHandle`]): rows moved by a drag on
+  their [`DragHandle`] (`.drag-handle`) or by keyboard, nothing reflowing
+  until the drop, each step announced.
+- [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
+  [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
+  have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
+  one box that keeps its height.
+- [`Table`] (`.table`) with [`TableRow`] and [`TableCell`]: a table in a
+  scroll area, its bulk actions' room reserved; [`SortHeader`]
+  (`.sort-header`): a column heading whose sort mark keeps its box.
+- [`Pager`] (`.pager`): page buttons in a fixed number of slots, first,
+  previous, numbers with gaps, next and last, so it keeps its width from
+  the first page to the last; [`Disclosure`] (`.disclosure`): a summary
+  row that toggles its body, one height shut or open.
+- [`ToastHost`] (`.toast-host`) and [`Toast`] (`.toast`): short messages
+  with an undo, fixed over the window's bottom so they move nothing, their
+  clock held under the pointer or focus; [`SaveBar`] (`.save-bar`): a
+  form's unsaved changes, save and discard, in the flow at one height,
+  with [`UnloadGuard`] for the browser's own prompt.
+- [`Toolbar`] (`.toolbar`): one line of controls; `band` wraps them
+  instead (`.band`, with `.chrome` and `.search`), in [`ToolbarPart`]s
+  (`.toolbar-part`, `.ruled`) that each keep to one line.
+- [`Panel`] (`.panel-box`): a ringed ground over a list or a view holding
+  its filters or a short form, as a column or a line, tinted or bare.
+- [`Seam`] (`.seam`): two panes and the divider dragged between them, each
+  pane keeping its least size.
+- [`use_width`]: an element's width, at most once a frame.
+- [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
+  an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
+  navigation, the current entry marked by `aria-current`.
+- [`Card`] (`.card`): a surface lifted off the page.
+- [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
+  page's or a section's title, its help and its actions.
+- [`OverlayHost`] (`.overlay-host`): the optional root of the overlay
+  layer, which [`use_overlays`] finds ([`overlay`] without one);
+  [`use_overlay`] puts an app's own overlay on its stack.
+- [`Popover`] (`.popover`): a surface beside its anchor in the overlay
+  layer, placed before it shows ([`place`], [`place_fit`], [`use_popover`]),
+  dismissed by a press outside or Escape, a sheet on a phone.
+- [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
+  scrolls and pinned actions, in three sizes; a sheet on a phone. The page
+  behind holds still; Escape closes the innermost overlay only.
+- [`Confirm`] (`.confirm`): a dialog asking before an action, with
+  [`ask`] and [`ConfirmHost`] for promise-style confirms;
+  [`ConfirmPopover`] and [`ConfirmButton`]: the same beside a button;
+  [`ConfirmInline`] (`.confirm-inline`): No and Yes replacing a button in
+  its box.
+- [`Tooltip`] (`.tooltip`) and [`DataTips`] (`data-tip`): a short tip in
+  the overlay layer after a pointer's rest or on keyboard focus;
+  [`HoverCard`] (`.hover-card`): a richer card on hover or focus;
+  [`ReasonButton`]: a [`Button`] that says why it cannot act, in one node.
+- [`Menu`] (`.menu`): a button opening a list of actions ([`MenuItem`],
+  [`MenuCheck`], [`MenuRadio`], separators, headings, notes), with
+  keyboard navigation and type-ahead; [`RowActions`] (`.row-actions`), a
+  row's icon buttons and overflow menu; [`SplitButton`]
+  (`.split-button`); [`ContextMenu`], opened at the pointer.
+- [`Select`] (`.select`): a field's box showing what is chosen, as wide
+  as its widest option, opening a [`Listbox`] (`.listbox`) of its options
+  while focus stays on it; [`Listbox`] is the list's keyboard state.
+- [`ColorSelect`] (`.color-select`): a swatch face of one width showing the
+  chosen colour, opening a grid of the app's palette (data) and an optional
+  custom colour, on the select pattern.
+- [`SearchSelect`] (`.search-select`): a text field filtering a
+  [`Listbox`] of options in groups, loaded here or elsewhere, the list
+  one width and `--picker-rows` high, loading or not.
+- [`FilterPicker`] (`.filter-picker`): a list's filter button,
+  `--filter-width` wide, the first choice and a reserved count of the
+  rest, opening a multi-select listbox.
+- [`Picker`] (`.picker`): a field of one width showing the current
+  option, opening a [`ChoiceList`] (`.choice-list`), options with icon,
+  mark, detail and badge slots under a search field, `--picker-rows`
+  high; [`PickerMenu`], the same from an action's button;
+  [`PickerDialog`], the searchable shell for a large
+  set, single or multi-select, in a [`Dialog`]; [`ChoicePopup`], the
+  list's popup below any opener the app renders.
+- [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
+  filter buttons, one row.
+
+Where a component cannot be used (the element is another component's),
+the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`], ...) give
+the same classes.
+
+<br>
+
 ## Button
 
-`Button` is a `<button>`, or with `href` an `<a>` styled as one. Its label
+[`Button`] is a `<button>`, or with `href` an `<a>` styled as one. Its label
 is its children; `icon` is the app's icon (`trailing` puts it after the
 label); `chevron` ends it in a chevron after the label, beside a leading
 icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare `<button>`.
 
-- `variant` (`ButtonVariant`): `Secondary` (the plain button, the
+- `variant` ([`ButtonVariant`]): `Secondary` (the plain button, the
   default), `Primary` (`sockel::class::PRIMARY`), `Ghost` (`GHOST`, no
   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
   (`DANGER`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
   padding or height of its own, for an opener whose content is its face,
   such as a swatch; the focus outline kept).
-- `size` (`ButtonSize`): `Regular` (`--control-height`), `Small` (`SMALL`,
+- `size` ([`ButtonSize`]): `Regular` (`--control-height`), `Small` (`SMALL`,
   `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
 - An icon without a label is the icon alone (`ICON`), square, named by
   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
@@ -589,8 +776,8 @@ icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare 
   lays the IconSet's spinner over it; a busy button ignores clicks.
   `disabled` disables a button; a disabled link loses its `href` and gets
   `aria-disabled="true"`.
-- `submit`, `onclick`, `onkeydown`, `title`, `testid` as on `IconButton`; `tip` is its
-  tooltip for `DataTips` (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
+- `submit`, `onclick`, `onkeydown`, `title`, `testid` as on [`IconButton`]; `tip` is its
+  tooltip for [`DataTips`] (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
   classes for an element that cannot be the component.
 - `role` gives it another role (`menuitemradio`, `switch`), `checked` its
   `aria-checked`, and `current` its `aria-current` (`page`, `step`).
@@ -617,9 +804,11 @@ Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
 `aria-expanded` and `aria-controls`), `current` (`aria-current`) and
 `node_ref`.
 
+<br>
+
 ## Stack, Cluster and Card
 
-`Stack` and `Cluster` (and `Card`) take a `tag` (`div` by default). A list
+[`Stack`] and [`Cluster`] (and [`Card`]) take a `tag` (`div` by default). A list
 tag, `ul` or `ol`, renders with no bullets, margin or padding
 (`sockel::class::PLAIN_LIST` is added for it), so it lays out exactly as a
 `div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
@@ -632,33 +821,35 @@ A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
 blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
 to the reading column (`--page-reading`), as a long entry's text.
 
+<br>
+
 ## Checkbox, Switch, Choice and chips
 
 All four mark a state by colour and background, never by weight, and
-draw it in a box of a fixed size. A `Field` supplies a label, hint and
+draw it in a box of a fixed size. A [`Field`] supplies a label, hint and
 error; give the control `label` (an `aria-label`) when the field names it
 and the control has no text of its own. Every component takes `class`.
 
-- `Checkbox` (`.sockel-checkbox`): a native checkbox drawn in a
+- [`Checkbox`] (`.sockel-checkbox`): a native checkbox drawn in a
   `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
   `checked`, `indeterminate` (set as the input's DOM property, drawn as a
   minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
   children as its text. `checkbox(disabled)` gives its classes.
-- `Switch` (`.sockel-switch`): a `<button role="switch">`, its track
+- [`Switch`] (`.sockel-switch`): a `<button role="switch">`, its track
   `--switch-width` by `--switch-height` and its thumb moved by transform.
   `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
   `disabled`, `invalid` (`INVALID`), `on_change(bool)`; `switch(on,
   invalid)` gives its classes.
-- `Choice` (`.sockel-choice`): a segmented pick-one `radiogroup` of
-  `ChoiceOption`s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
+- [`Choice`] (`.sockel-choice`): a segmented pick-one `radiogroup` of
+  [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
   `.disabled(bool)`). `value`, `on_change(value)`, `label` (the group's
-  name), `fit` (`ChoiceFit`: `Equal`, `Stretch` to fill the container
+  name), `fit` ([`ChoiceFit`]: `Equal`, `Stretch` to fill the container
   (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `small` (`SMALL`),
   `invalid`, `disabled`; `choice(fit, small, invalid, disabled)`. Roving
   tabindex: the selected option, or the first enabled, is the one tab
   stop; the arrows (with wrap), Home and End select and focus the next
   enabled option.
-- `ChipToggle` (`.sockel-chip`) and `ChipList` (`.sockel-chip-list`):
+- [`ChipToggle`] (`.sockel-chip`) and [`ChipList`] (`.sockel-chip-list`):
   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
   label; a list takes `label` and the chips as children.
@@ -676,13 +867,15 @@ a list is at least one chip high, so an empty list does not collapse and
 grow when chips arrive. New tokens: `$check-size`, `$switch-width`,
 `$switch-height`, `$choice-width`.
 
+<br>
+
 ## Tabs, SubTabs and NavList
 
 The current tab or entry is marked by colour, background or an inset
 shadow, never by weight, through the `current` mixin, so selecting one
 changes no box. Every component takes `class`.
 
-- `Tabs` (`.sockel-tabs`): a `tablist` of `TabItem`s (`new(value, label)`,
+- [`Tabs`] (`.sockel-tabs`): a `tablist` of [`TabItem`]s (`new(value, label)`,
   `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
   (the list's name); `tabs(small)` gives its classes. Roving tabindex: the
   selected tab, or the first enabled, is the one tab stop; Left and Right
@@ -692,9 +885,9 @@ changes no box. Every component takes `class`.
   as an inset shadow. Icons are hidden below the phone breakpoint. Tabs
   past the width scroll sideways with the scrollbar hidden and the edge
   that has hidden tabs faded (the `scroll-fade` mixin, shared with
-  `Toolbar`); no tab is hidden or reflowed.
-- `SubTabs`: the same props, at the small control height (`SMALL`).
-- `NavList` (`.sockel-nav-list`): a `nav` of a column of `NavItem`s
+  [`Toolbar`]); no tab is hidden or reflowed.
+- [`SubTabs`]: the same props, at the small control height (`SMALL`).
+- [`NavList`] (`.sockel-nav-list`): a `nav` of a column of [`NavItem`]s
   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
   link with an `href` and a button without. `value` is the current entry
   (`aria-current="page"`; colour and a tint), `on_select(value)`, `label`;
@@ -708,9 +901,11 @@ height with a reserved border, so the current one keeps its box. New
 tokens: `--tab-height` and `--tab-underline` (custom properties on
 `.sockel-tabs`); new mixin `scroll-fade`.
 
+<br>
+
 ## Field and FormRows
 
-`Field` is a label, the control (its `children`), a hint and an error,
+[`Field`] is a label, the control (its `children`), a hint and an error,
 stacked. `id` is the control's `id`, which the label's `for` names; the
 control takes `aria-describedby={field_describedby(&id, has_hint,
 has_error)}`, which names the hint's and the error's ids (`{id}-hint`,
@@ -737,12 +932,12 @@ app's.
   `--field-error-lines` (1) is cut with an ellipsis. Without it the error
   appears under the control and pushes what follows down.
 
-`FormRows` is a grid of `FormRow`s (the same props as `Field`) sharing one
+[`FormRows`] is a grid of [`FormRow`]s (the same props as `Field`) sharing one
 label column: as wide as the widest label up to half the grid, or with
 `wide_labels` (`WIDE_LABELS`) `--field-label-width` (12rem) so every section's
 controls start on one line. Below the phone breakpoint the label sits above
-its control. `Fieldset` is a `<fieldset>` with a `legend` and an optional
-`hint`; `FieldCheck` is a checkbox (its `children`) with its `label` after it,
+its control. [`Fieldset`] is a `<fieldset>` with a `legend` and an optional
+`hint`; [`FieldCheck`] is a checkbox (its `children`) with its `label` after it,
 as high as an input.
 
 Size guarantees: with `reserve_error` the field's height does not change
@@ -751,36 +946,38 @@ required). A form row's label cell is at least `--control-height` high, so
 the label is centred on a one-line control. The hint wraps (long words
 break) and never widens the field.
 
+<br>
+
 ## Pill, Badge, Dot, Count and StatusLabel
 
 Short marks whose box is fixed, so a state, a figure or a word changing does
 not move what is around them. Every component takes `class` and `testid`.
-`Tone` (`Neutral`, `Accent`, `Success`, `Warning`, `Danger`, `Busy`, `Unset`)
-is the one tone vocabulary, also `Notice`'s: a modifier (`ACCENT`, `SUCCESS`,
+[`Tone`] (`Neutral`, `Accent`, `Success`, `Warning`, `Danger`, `Busy`, `Unset`)
+is the one tone vocabulary, also [`Notice`]'s: a modifier (`ACCENT`, `SUCCESS`,
 `WARNING`, `DANGER`, `BUSY`, `UNSET`; neutral has none) that only sets
 `--tone`, from `--accent`, `--success`, `--warning` and `--danger`.
 
-- `Pill` (`.sockel-pill`): a tinted label `--mark-height` tall, led by a dot
+- [`Pill`] (`.sockel-pill`): a tinted label `--mark-height` tall, led by a dot
   of `--dot-size` in its tone. `tone`, `plain` (`PLAIN`, no dot), `on_click`
   (makes it a `<button>`, `PILL_BUTTON`; hover changes its fill only),
   `disabled`, children as the label, cut with an ellipsis in a narrow
   container. `pill(tone, plain, button)` gives its classes.
-- `Badge` (`.sockel-badge`): a bordered short text, `--mark-height` tall and
+- [`Badge`] (`.sockel-badge`): a bordered short text, `--mark-height` tall and
   at least as wide. `tone`, `solid` (`SOLID`, filled, the accent by
   default), `corner` (`CORNER`, `--corner-size`, over the top end corner of
   its positioned parent by transform, so it takes no room);
   `badge(tone, solid, corner)`.
-- `Dot` (`.sockel-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
+- [`Dot`] (`.sockel-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
   empty ring in the same box), `label` (its accessible name; without one it
   is decoration); `dot(tone, on)`.
-- `Count` (`.sockel-count`): a figure on a soft fill. `value`, `max` (99:
+- [`Count`] (`.sockel-count`): a figure on a soft fill. `value`, `max` (99:
   above it the count reads `99+`), `hide_zero` (`HIDDEN`: `visibility`, so
   the box stays; a zero shown is dimmed by `ZERO`). Its `min-width` is the
   digits of `max` and one more for the `+`, in tabular figures, so the
   count holds across `0..=max+1` and a hidden one does not move its
   neighbours. The figure is `value.to_string()`; koine has no number
   formatting. `count(value, hide_zero)` and `count_text(value, max)`.
-- `StatusLabel` (`.sockel-status-label`, `role="status"`): `states` (the
+- [`StatusLabel`] (`.sockel-status-label`, `role="status"`): `states` (the
   text of every state), `current` (an index, or none), `tone`, `spinner`
   (reserves the slot), `busy` (spins in it), `pill`. Every state's text sits
   in one grid cell and the others are `HIDDEN` (and `aria-hidden`), so the
@@ -792,17 +989,19 @@ Sizes: the height is `--mark-height` whatever the tone, hover or text; only
 a pill's, badge's or status label's own text sets its width. A busy dot
 pulses by opacity (still under `prefers-reduced-motion`).
 
+<br>
+
 ## TextInput, Textarea, SearchField and InputGroup
 
 Text controls at a control's height. All take `class`, `size`
-(`InputSize`: `Regular` is `--control-height`, `Small` (`SMALL`) is
+([`InputSize`]: `Regular` is `--control-height`, `Small` (`SMALL`) is
 `--control-height-small`, `Touch` (`TOUCH`) is `--touch-height`; the height
 never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
 `disabled`, `busy` (`aria-busy`, progress cursor) and `testid`. Inside a
-`Field`, pass the field's `id` and `describedby={field_describedby(..)}`.
+[`Field`], pass the field's `id` and `describedby={field_describedby(..)}`.
 
-- `TextInput` (`.sockel-input`): `value` and `on_input` (the new text), `on_change`,
-  `on_blur`, `on_keydown`, `kind` (`InputKind`: text, email, url, tel),
+- [`TextInput`] (`.sockel-input`): `value` and `on_input` (the new text), `on_change`,
+  `on_blur`, `on_keydown`, `kind` ([`InputKind`]: text, email, url, tel),
   `maxlength`, `list` (a `<datalist>`'s id), `inputmode` and `enterkeyhint`
   (a touch keyboard's kind and enter key),
   `placeholder`, `label` (the accessible name without a `Field`), `readonly`,
@@ -816,9 +1015,9 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   its widest option, cut at its container, and in a row it shrinks to give
   way to the items beside it; `fill` makes it its container's
   width. Set `aria-invalid` with `invalid`, as on a bare input.
-- `Textarea` (`.sockel-textarea`): `rows` (default 3), at least `--input-height`
+- [`Textarea`] (`.sockel-textarea`): `rows` (default 3), at least `--input-height`
   high, resized vertically by the user only.
-- `SearchField` (`.sockel-input-box`): a search icon, the text and a clear
+- [`SearchField`] (`.sockel-input-box`): a search icon, the text and a clear
   button. `label` is the placeholder and the accessible name, `clear_label`
   names the button, `busy` swaps the icon for a spinner in the same box.
   Clearing (the button or escape) calls `on_input("")` and returns the focus
@@ -833,10 +1032,10 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   option, and `expanded` (unset is shown) its `aria-expanded`. `placeholder`
   replaces the label as the placeholder, `title` is the text's tooltip,
   `keyshortcuts` its `aria-keyshortcuts`, and `on_focus`/`on_blur` see the
-  text's focus. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
-  and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the `IconSet`'s
+  text's focus. [`LibraryToolbar`] is a `SearchField` (class `LIBRARY_SEARCH`)
+  and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the [`IconSet`]'s
   search glyph.
-- `InputGroup` (`.sockel-input-group`): controls joined in a row. Give each
+- [`InputGroup`] (`.sockel-input-group`): controls joined in a row. Give each
   member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,
   `GROUP_MIDDLE` or `GROUP_LAST` square the corners that join (a lone member
   takes none), and `detached[i]` starts a new run after a `--space-2` gap
@@ -853,12 +1052,14 @@ is an outline); the SearchField's icon and clear slot are always laid out, the
 button only hidden while empty, so typing moves nothing; a group's members of
 one size are one height. New tokens: none. New partial: `_inputs.scss`.
 
+<br>
+
 ## Stepper and SecretInput
 
-- `Stepper` (`.sockel-stepper`, worn with `.sockel-input-box`): a number
+- [`Stepper`] (`.sockel-stepper`, worn with `.sockel-input-box`): a number
   between a minus and a plus button. `value`, `on_change(i64)`, `min`, `max`,
   `step` (default 1), `label` (the number's accessible name), `less_label`
-  and `more_label` (overrides of the catalog's words), `id`, `size` (`InputSize`),
+  and `more_label` (overrides of the catalog's words), `id`, `size` ([`InputSize`]),
   `invalid`, `disabled`, `busy`, `live` (report each number typed within the
   bounds at once, not only when committed; off by default), `class`,
   `testid`. The buttons step onto
@@ -869,7 +1070,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   is no number goes back). What is typed outside `min..=max` is marked invalid
   until committed. The buttons are out of the tab order. Helpers: `stepper(size,
   invalid, disabled, busy)`, `step_from`, `key_value`, `parse_number`.
-- `SecretInput` (`.sockel-input-box`): a password field with show or hide,
+- [`SecretInput`] (`.sockel-input-box`): a password field with show or hide,
   copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
   `show_label`, `hide_label`, `copy_label`,
@@ -877,7 +1078,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   only for a finished edit, on leaving the field or Enter, and on clear: for a
   value saved as it changes; the field and the slots follow what is typed
   meanwhile), `titles` (each slot's name as its tooltip too),
-  `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
+  `placeholder`, `reveal_ms` ([`REVEAL_MS`], 3000: a
   shown secret hides itself, showing again restarts the time; clearing
   hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
   `class`, `testid`. The strings are props; an app passes its own words.
@@ -900,9 +1101,11 @@ are always laid out (hidden, not removed, while empty). New classes:
 `Eye`, `EyeOff` and `Copy`. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
 set per Stepper).
 
+<br>
+
 ## Heads
 
-`PageHead` and `SectionHead` take one set of props (`HeadProps`):
+[`PageHead`] and [`SectionHead`] take one set of props ([`HeadProps`]):
 
 - `title` is Html; `icon` goes before its text in the heading, `subtitle` is a
   muted line under the row, `crumbs` (a list of links) stack above it, and
@@ -922,13 +1125,15 @@ set per Stepper).
   `ONE_ROW` (a crumb head that stays one row on a phone, the back link's
   words, `PAGE_HEAD_BACK_LABEL`, hidden) in `class`.
 
+<br>
+
 ## Icons
 
 sockel's own chrome (a dialog's close, a select's chevron, a busy spinner)
-draws its icons from an `IconSet`, and the app keeps its own icons in the same
+draws its icons from an [`IconSet`], and the app keeps its own icons in the same
 set. The set is opaque, built with a builder, so adding a glyph to sockel never
-breaks an adopter. `Glyph` (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`,
-`Check`, `Plus`, `Minus`, `Spinner`, `Grip`, `Ellipsis`, `Search`, `Eye`,
+breaks an adopter. [`Glyph`] (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`,
+`Check`, `Plus`, `Minus`, [`Spinner`], `Grip`, `Ellipsis`, `Search`, `Eye`,
 `EyeOff`, `Copy`) is `#[non_exhaustive]`: a `match` on it needs a wildcard. It is
 the one place sockel uses a context for something other than a runtime setting,
 and it carries icons only: classes never go through it.
@@ -965,9 +1170,11 @@ cannot change a control's size. Icons should draw in `currentColor`. The
 spinner's box turns (slower under `prefers-reduced-motion`); the set's
 spinner need not animate itself.
 
+<br>
+
 ## Notice, ErrorBox and EmptyState
 
-`Notice` is an inline message. `tone` (`Tone`, the accent by default;
+[`Notice`] is an inline message. `tone` ([`Tone`], the accent by default;
 see above), coloured from `--accent`, `--success`, `--warning` or
 `--danger`; `Neutral` is muted. `icon` is the app's icon, before the text; `action` is Html
 (a link or button) after it; `onclose: Some(callback)` shows a close button
@@ -976,7 +1183,7 @@ app stops rendering it, and the space it held collapses at once, which is
 intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `role="status"`. `notice(tone)` gives the classes.
 
-`ErrorBox` is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
+[`ErrorBox`] is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
 technical text, cut to three lines, whole in its `title` attribute) or
 `causes` (a chain of them, most specific last: `ERROR_BOX_CAUSES`, a list
 of a line each, never cut) and `onretry` (a small button, `retry_label`; `retrying` makes it
@@ -989,7 +1196,7 @@ gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
 `-cause-text` and `-text-end` (the space under a flanked box's text)
 (README, "Configuration").
 
-`EmptyState` is what stands where there is nothing: `title`, `icon`, `hint`
+[`EmptyState`] is what stands where there is nothing: `title`, `icon`, `hint`
 and actions (its children). `compact` (`COMPACT`) is one row for a list or a
 table. `empty_state(compact)` gives the classes.
 
@@ -1007,20 +1214,22 @@ exactly `--control-height` high whatever it says (title and hint cut to one
 line, its actions kept at the end), so it replaces a row of that height
 without moving what follows; the regular one grows with its text.
 
+<br>
+
 ## Toast, ToastHost and SaveBar
 
-`ToastHost` is where toasts stand: fixed over the window's bottom
+[`ToastHost`] is where toasts stand: fixed over the window's bottom
 (`--layer-toast`), centred, newest last, in an always-present polite live
-region. It renders in the overlay layer (see `OverlayHost`), wherever the
+region. It renders in the overlay layer (see [`OverlayHost`]), wherever the
 app places it, so an open dialog never puts it out of reach. Fixed, it takes no room: a toast coming or going moves nothing.
 `raised` lifts it by `--toast-tray`, the height of a tray or bar the app
 keeps at the bottom (0 unless the app sets it on `:root`). `toast_host(raised)`
 gives the classes.
 
-`Toast` is one message: `tone` (`Tone`, the accent by default), `icon`, the
+[`Toast`] is one message: `tone` ([`Tone`], the accent by default), `icon`, the
 text (its children), `action` (a label such as "Undo") with `onaction`,
 `action_icon` and `action_testid` (both none by default),
-`ondismiss` (closed or timed out), `duration` (milliseconds, `TOAST_MS` =
+`ondismiss` (closed or timed out), `duration` (milliseconds, [`TOAST_MS`] =
 8000; 0 keeps it until dismissed), `shortcut` (Ctrl or Cmd+Z takes the action
 while it shows, unless typing in a field) and `close_label`. The clock stops
 while the pointer is over the toast or focus is in it and starts afresh
@@ -1028,12 +1237,12 @@ after; the action and the dismissal happen once between them. Give each
 toast its own `key`. `toast(tone)` gives the classes. The app owns the list:
 it stops rendering a toast when `ondismiss` or `onaction` is called.
 
-`SaveBar` is a form's bar of unsaved changes: `dirty`, `busy` (the save
+[`SaveBar`] is a form's bar of unsaved changes: `dirty`, `busy` (the save
 button's spinner, clicks ignored), `disabled`, `label` (an override of the catalog's words),
 `status` (how the last save went), `onsave`, `ondiscard` (shows Discard),
 `save_label`, `discard_label`, `submit` (Save submits the form it stands in),
 `sticky`, and children (further actions). While `dirty` it holds an
-`UnloadGuard`, the browser's own prompt on closing or reloading the tab
+[`UnloadGuard`], the browser's own prompt on closing or reloading the tab
 (`guard=false` leaves that to the app, which can call `use_unload_guard(active)`
 itself; `unsaved()` says whether any guard is held). `save_bar(idle, sticky)`
 gives the classes.
@@ -1050,29 +1259,31 @@ plus padding high, hidden (`visibility`) while clean and not removed, so the
 form's first edit moves nothing; `sticky` keeps it at the bottom of the scroll
 container, still in the flow. Its save button is busy in its own box.
 
+<br>
+
 ## Spinner, Skeleton and Loadable
 
-`Spinner` is a spinning glyph (`Glyph::Spinner` from the icon set) in the
+[`Spinner`] is a spinning glyph (`Glyph::Spinner` from the icon set) in the
 icon box: inline, `1em`, in the colour of the text around it. `label` makes
-it a `role="status"` with that name; without one it is decoration. `Button`'s
+it a `role="status"` with that name; without one it is decoration. [`Button`]'s
 busy mark is a `Spinner`.
 
-`Skeleton` is a placeholder of the box its content will have. `shape`
-(`SkeletonShape`): `Line` (`LINE`, one line of the text around it, `1lh`),
+[`Skeleton`] is a placeholder of the box its content will have. `shape`
+([`SkeletonShape`]): `Line` (`LINE`, one line of the text around it, `1lh`),
 `Block` (the default, `--control-height`, or `--skeleton-height`), `Row`
-(`ROW`, one `RowListItem` high) or `Image(Ratio)` (an `Image`'s ratio
+(`ROW`, one [`RowListItem`] high) or `Image(Ratio)` (an [`Image`]'s ratio
 classes, `POSTER` and the rest). `count` stacks several in a column
 (`SKELETON_GROUP`); the last of several lines is `SHORT`. A group reserves
-the 1px border a `RowList` does, so `count` skeleton rows are exactly as high
+the 1px border a [`RowList`] does, so `count` skeleton rows are exactly as high
 as `count` one-line rows. It is `aria-hidden` and shimmers, still under
 `prefers-reduced-motion` (`--skeleton-duration`). `width` sets its width (each
 one's, with `count`), such as the length of the text it stands for.
 `skeleton(shape, short)` gives the classes.
 
-`Loadable` is one box for content that loads. `state` (`LoadState`):
+[`Loadable`] is one box for content that loads. `state` ([`LoadState`]):
 `Loading` shows the placeholder (`placeholder`, or `rows` skeleton rows),
-`Ready` the children, `Empty` an `EmptyState` (`empty` replaces it,
-`empty_title` names it) and `Error` an `ErrorBox` (`error`, `error_cause`,
+`Ready` the children, `Empty` an [`EmptyState`] (`empty` replaces it,
+`empty_title` names it) and `Error` an [`ErrorBox`] (`error`, `error_cause`,
 `onretry`, `retrying`). The empty state waits `empty_delay` (250 ms) before
 it shows, the placeholder standing in, so it never flashes before data.
 While it loads it is `aria-busy` and a visually hidden `role="status"` reads
@@ -1085,9 +1296,11 @@ nothing when the placeholder has the content's rows. Once settled it is as
 high as its content, so a shorter list shrinks. An empty state or an error
 taller than the box grows it; use `EmptyState` `compact` to stay inside.
 
+<br>
+
 ## Image and Avatar
 
-`Image` is a picture in a box whose ratio is fixed before it loads, so the
+[`Image`] is a picture in a box whose ratio is fixed before it loads, so the
 page does not shift as pictures arrive. Props:
 
 - `ratio` (required; there is no default, so no image lacks a box):
@@ -1109,7 +1322,7 @@ from the icon set, centred) and the loaded picture all fill the same box.
 A picture of another shape is cropped, never stretched; the box never
 resizes.
 
-`Avatar` is a round portrait of a fixed size: `name` (its initials, the first
+[`Avatar`] is a round portrait of a fixed size: `name` (its initials, the first
 letters of its first and last word, show behind the picture and are its
 accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
 `Large`, `Huge`: the `--avatar-sm`, `-md`, `-lg` and `-xl` tokens), `lazy`,
@@ -1117,11 +1330,13 @@ accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
 loading, failed, missing or loaded. `initials(name)` is the same function for
 a place of your own.
 
+<br>
+
 ## OverlayHost
 
 Popovers, menus, selects, tooltips, dialogs and toasts render in the overlay
 layer, a portal out of whatever scrolls or clips their owner. Its events
-still bubble through the owner. `OverlayHost` is optional and gives the app
+still bubble through the owner. [`OverlayHost`] is optional and gives the app
 its own layer:
 
 ```rust
@@ -1156,7 +1371,7 @@ colours an app sets below `:root`. On the server there is no layer, and
 overlays render in place.
 
 For a component of your own, `use_overlays()` returns the nearest host's
-`Overlays` (or the fallback), and `.portal(html)` renders into it.
+[`Overlays`] (or the fallback), and `.portal(html)` renders into it.
 `use_popover` already takes its place on the stack from it. An overlay the
 app draws itself (a full-screen panel, a drawer) joins the stack with
 `use_overlay(open, on_escape)`: while it is open, Escape calls `on_escape`
@@ -1175,10 +1390,12 @@ this, ordering is by opening, not kind. An open dialog puts the page and the ove
 reach (`inert`), but never the toast region: a toast's Undo over a dialog
 still works, and it is still announced.
 
+<br>
+
 ## Popover
 
-`Popover` is a surface beside its anchor, rendered while `open` in the
-overlay layer (see `OverlayHost`), so no scrolling or clipping box around
+[`Popover`] is a surface beside its anchor, rendered while `open` in the
+overlay layer (see [`OverlayHost`]), so no scrolling or clipping box around
 the owner cuts it, and its events still bubble through the owner. Props:
 
 - `anchor` (a `NodeRef` on the element it opens beside, where focus returns),
@@ -1202,14 +1419,14 @@ the owner cuts it, and its events still bubble through the owner. Props:
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
 - `focus_first`: without `focus`, focus moves once it is placed to an
   `[autofocus]` or `[data-autofocus]` element, else its body's first
-  control, else the surface (then `tabindex="-1"`), as in a `Dialog`: for a
+  control, else the surface (then `tabindex="-1"`), as in a [`Dialog`]: for a
   popover of fields or choices opened from the keyboard.
 - `within` (a selector): placed and kept inside the anchor's closest
   ancestor matching it, cut to the viewport, rather than the viewport
   alone: a popover raised in one of an app's docked windows stays over
   that window, not its neighbour. Without a match, the viewport.
 - `trap`: Tab stays inside it, from its last control to its first, as in a
-  `Dialog`; for a popover that asks for an answer (`ConfirmPopover` sets it).
+  `Dialog`; for a popover that asks for an answer ([`ConfirmPopover`] sets it).
 - `flush`: a body without padding (`sockel::class::FLUSH` on
   `.sockel-popover-body`), for content that lays out its own edges, such as
   a list that runs to the surface's; off by default.
@@ -1224,7 +1441,7 @@ the owner cuts it, and its events still bubble through the owner. Props:
   pointer is there (it is in the overlay layer, so the owner's own
   `pointerleave` fires as the pointer moves onto it).
 
-Dismissal (`Dismiss`), only while no overlay opened after it is open:
+Dismissal ([`Dismiss`]), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
 where the press put it; `Escape` (unless what has the focus took it,
 preventing its default, as a search field clearing its text does) and
@@ -1241,7 +1458,7 @@ dismissing. `place(anchor, (width, height), viewport, side, align)` is its
 pure placement: the given side unless the popover does not fit and the
 opposite side has more room, then moved back inside the viewport, its
 height capped (`max_height`) by the room on the side it took.
-`place_fit(.., fit)` is the same with a `Fit` (`place` is `Fit::Scroll`).
+`place_fit(.., fit)` is the same with a [`Fit`] (`place` is `Fit::Scroll`).
 `use_popover_within(.., within, on_dismiss)` takes `within` too, and
 `placement_bounds(anchor, within)` is the box either places inside, for a
 surface placed by its owner with `place` (`Rect::clip` cuts one box to
@@ -1261,23 +1478,26 @@ across the anchor. It closes (as a press
 outside, focus left where it is) once the anchor is out of sight: no
 longer laid out, or scrolled or clipped wholly out of a box around it
 whose overflow clips. Menus, selects, pickers and tips share this placement.
+
+<br>
+
 ## RowList, PickRow, SelectionBar, ActionRow and CardGrid
 
-`RowList` is a column of rows (`tag`, `ul` by default, with no bullets, margin
+[`RowList`] is a column of rows (`tag`, `ul` by default, with no bullets, margin
 or padding). `divided` (`DIVIDED`) draws a line above every row but the first;
-`boxed` (`BOXED`) gives it a bordered, rounded surface. `RowListItem` is a
+`boxed` (`BOXED`) gives it a bordered, rounded surface. [`RowListItem`] is a
 row: `name` (one line, cut), `detail` (under it, muted, cut), and its
-children, which end the row (an `ActionRow`, a `Checkbox`). `top` (`TOP`) is a
+children, which end the row (an [`ActionRow`], a [`Checkbox`]). `top` (`TOP`) is a
 tall row: parts to the top, the name wraps. `row_list(divided, boxed)` and
 `row_list_item(top)` give the classes. Parts: `ROW_LIST_MAIN`,
 `ROW_LIST_NAME`, `ROW_LIST_DETAIL`.
 
-`PickRow` is a button that is a whole row choosing one thing: `name`,
+[`PickRow`] is a button that is a whole row choosing one thing: `name`,
 `detail`, `mark` (before the name), children (after), `current`
 (`aria-current`, marked by background only), `disabled`, `onclick`.
 Parts: `PICK_ROW_MARK`, `PICK_ROW_NAME`, `PICK_ROW_DETAIL`.
 
-`SelectionBar` is the band under a list: `count`, `label` (the count as text,
+[`SelectionBar`] is the band under a list: `count`, `label` (the count as text,
 in a `role="status"`) and the actions as children. It is always in the flow
 at one height: with `count == 0` it is `IDLE` (`visibility: hidden`), so
 picking never moves the list. `inset` (`INSET`) levels its sides with the
@@ -1292,35 +1512,37 @@ it. It reads `--overlay-opacity`, `--overlay-events` and `--overlay-tint`,
 which a row sets; its corners and side padding are `--action-overlay-radius`
 and `--action-overlay-padding`. `action_row(overlay, nowrap)`.
 
-`CardGrid` lays cards in as many columns as fit (`tag`, `ul` by default).
-`size` (`GridSize`): `Normal` (columns of at least `--card-grid-min`), `Wide`
+[`CardGrid`] lays cards in as many columns as fit (`tag`, `ul` by default).
+`size` ([`GridSize`]): `Normal` (columns of at least `--card-grid-min`), `Wide`
 (`--card-grid-wide`) and `Narrow` (`--card-grid-narrow`, and
 `--card-grid-narrow-phone` with a closer gap on a phone). `card_grid(size)`.
 
 Every one takes `class` and `testid` (the parts' children aside).
 
 Size guarantees: a row is at least `--control-height` high, as a compact
-`EmptyState` is, so one replaces the other without moving what follows. Every
+[`EmptyState`] is, so one replaces the other without moving what follows. Every
 row reserves its top border, so `divided`, hover, focus and a chosen
 `PickRow` change no box. An overlay `ActionRow` takes no room, so revealing
 it moves nothing. A selection bar keeps its height whether anything is
 picked or not. A card grid's cards are as tall as their row.
 
+<br>
+
 ## Reorder and DragHandle
 
-`Reorder` is a list whose rows move by a drag on their `DragHandle` or by
+[`Reorder`] is a list whose rows move by a drag on their [`DragHandle`] or by
 keyboard. `rows` is a `Vec<ReorderRow>` (`ReorderRow::new(key, name)`,
 `.detail(html)`, `.end(html)`; the key is stable across moves), and
 `on_move((from, to))` reports a move, `to` an index in the list without the
 row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
-(as `RowList`'s), `disabled`, `class`, `testid`. The rows are
-`RowListItem`s (`.sockel-reorder-row`), the handle in their `start` slot
+(as [`RowList`]'s), `disabled`, `class`, `testid`. The rows are
+[`RowListItem`]s (`.sockel-reorder-row`), the handle in their `start` slot
 (a new `RowListItem` prop: what begins a row).
 
 Children mode, for rows that are the app's own (a row of fields, an
-editor): in place of `rows`, give `ReorderItem` children (`id`, stable
+editor): in place of `rows`, give [`ReorderItem`] children (`id`, stable
 across moves; `name`, for the announcements and the handle's name;
-`class`; `testid`), each holding its content and a `ReorderHandle`
+`class`; `testid`), each holding its content and a [`ReorderHandle`]
 (`class`, `testid`) wherever the row wants its grip. Each item is the row
 element itself (`.sockel-reorder-row` plus its `class`), a direct child of
 the `.sockel-reorder` element, which `class` lays out; the hint and the
@@ -1348,7 +1570,7 @@ renders nothing.
   1), read from a `role="status"` region. Without it they are the
   catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
   `reorder_text` gives their English.
-- `DragHandle` is the grip alone (the `IconSet`'s `Grip`): `label`, `lifted`,
+- `DragHandle` is the grip alone (the [`IconSet`]'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
   `testid`, `title`. Helpers: `reorder_row(index, lift)`,
   `drag_handle(lifted)`, `drag_target(middles, from, top, bottom)`,
@@ -1367,10 +1589,12 @@ classes:
 `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
 `DRAG_HANDLE`. New partial: `_reorder.scss`. New tokens: none.
 
+<br>
+
 ## Dialog
 
-`Dialog` is a modal box over a `--scrim`, rendered while `open` in the
-overlay layer (a portal, like `Popover`, not a native `<dialog>`: a modal
+[`Dialog`] is a modal box over a `--scrim`, rendered while `open` in the
+overlay layer (a portal, like [`Popover`], not a native `<dialog>`: a modal
 `<dialog>` makes everything outside the top layer inert, the overlay layer
 included, so a popover or menu opened inside it could not be used). Props:
 
@@ -1387,14 +1611,14 @@ included, so a popover or menu opened inside it could not be used). Props:
   does nothing). `DialogDismiss::allows(Dismiss)` tells which.
 - `head_actions`: tools in the head, before the close button.
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
-  at its start: a Delete), each an `ActionGroup` in `.sockel-dialog-foot`.
+  at its start: a Delete), each an [`ActionGroup`] in `.sockel-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
   the bottom, up to `--dialog-sheet-height`. `close_label`,
   `close_size` (`ButtonSize::Small` by default) and `close_testid` (the
   close button's), `class`, `testid`.
 
 `dialog(size, sheet)` gives the classes. Parts: `.sockel-dialog-layer` (the
-scrim), `-head` (a `SectionHead`), `-body` (what scrolls), `-foot`.
+scrim), `-head` (a [`SectionHead`]), `-body` (what scrolls), `-foot`.
 
 Behaviour: opening it moves focus to an `[autofocus]` or `[data-autofocus]`
 element, else the body's first control, else the box; Tab and Shift+Tab
@@ -1402,7 +1626,7 @@ wrap inside it; the page and the overlays open before it are `inert`. A
 dialog opened from a dialog stacks over it, the one beneath dimmed by its
 scrim and out of reach. Escape and a press outside close only the innermost
 overlay, a popover included: overlays are kept on one stack. An Escape
-whose default was prevented (a `SearchField` clearing its text) or that
+whose default was prevented (a [`SearchField`] clearing its text) or that
 comes from outside the dialog's own DOM (an app's own popup rendered
 elsewhere, which closes alone) leaves it open. While it is the innermost
 overlay, focus that falls to the page (its control removed or disabled) comes
@@ -1425,26 +1649,28 @@ pinned below it. Its width is fixed by its size, never by its content. A
 `Tall` dialog keeps one height whatever it holds; a sheet grows upward
 from the bottom edge.
 
+<br>
+
 ## Confirm, ConfirmPopover, ConfirmButton and ConfirmInline
 
-Asking before an action, in three places. `Confirm` is a `Dialog` (rendered
+Asking before an action, in three places. [`Confirm`] is a [`Dialog`] (rendered
 while `open`): `title` (its heading and name), `explanation`, `details` (a
 list of what it affects), `accept` (the accepting button's label) with `icon`,
 `cancel_label` (the catalog's "Cancel" unless given), `danger` (on by default: the accepting button is
 `Danger` and Cancel has the focus, so Enter never destroys by habit; off, it
-is `Primary` and has the focus), `busy`, `error` (a danger `Notice` under the
+is `Primary` and has the focus), `busy`, `error` (a danger [`Notice`] under the
 explanation), `on_accept` and `on_cancel`. Cancel, Escape, the close button
 and a press on the scrim all call `on_cancel`; the owner sets `open` to
 false. While `busy` the accepting button spins and nothing closes it.
 
-`ConfirmHost` and `ask` are promise-style confirms: render one `ConfirmHost`
+[`ConfirmHost`] and `ask` are promise-style confirms: render one `ConfirmHost`
 near the app's root, then `ask(ConfirmRequest::new(title, explanation))`
-from any code and `.await` the `Answer`: `true` when accepted, `false` when
+from any code and `.await` the [`Answer`]: `true` when accepted, `false` when
 cancelled, when another question replaced it, or when no host is mounted.
-`ConfirmRequest` has the same fields as `Confirm`, public.
+[`ConfirmRequest`] has the same fields as `Confirm`, public.
 
-`ConfirmPopover` is the same beside an element: `anchor` (or
-`anchor_element`), `open`, `side` and `align` as `Popover`, `title` (its name, and the sheet's heading on a phone),
+[`ConfirmPopover`] is the same beside an element: `anchor` (or
+`anchor_element`), `open`, `side` and `align` as [`Popover`], `title` (its name, and the sheet's heading on a phone),
 the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
 (Cancel, Escape and a press outside; not while busy). The focus goes in once
 it is placed (`Popover`'s `focus` prop), Tab stays inside it (`trap`), and
@@ -1457,11 +1683,11 @@ accepting button joined at the end as their icons alone, `Glyph::Close` and
 `cancel_label` and `accept`, so an app passes its own words for both. It is
 as wide as what it says, up to the viewport's width (not
 `--popover-max-width`, so the line is not cut short), and a full-width sheet on a phone
-without the head; the two are joined as an `InputGroup`'s members are.
-`ConfirmButton` is a `Button` (`variant`, `size`, `icon`, `busy`, `disabled`)
+without the head; the two are joined as an [`InputGroup`]'s members are.
+[`ConfirmButton`] is a [`Button`] (`variant`, `size`, `icon`, `busy`, `disabled`)
 that opens one beside itself and calls `on_accept` once accepted.
 
-`ConfirmInline` replaces a button by No and Yes in the same box, for a row's
+[`ConfirmInline`] replaces a button by No and Yes in the same box, for a row's
 own delete: the button's `variant`, `size`, `icon`, `disabled`, children as
 label, `no_label`, `yes_label`, `question` (the group's accessible name),
 `danger` (Yes is `Danger`, else `Primary`), `busy` (Yes spins, No is
@@ -1487,33 +1713,35 @@ whatever it says (a compact one is as wide as its line, fixed while open), and a
 only grows its bottom edge. A `ConfirmButton` keeps the button's box open or
 closed.
 
+<br>
+
 ## Tooltip, HoverCard and ReasonButton
 
 All three place themselves with `use_popover` in the overlay layer, so they
 inherit Popover's placement, following and Escape or press-outside dismissal.
 
-`Tooltip` is a short tip beside its anchor. Props: `anchor` (a `NodeRef`),
+[`Tooltip`] is a short tip beside its anchor. Props: `anchor` (a `NodeRef`),
 `text` (nothing is shown, and nothing described, while it is empty), `side`
-(`Side::Above` by default), `delay` (`TOOLTIP_DELAY`, 250 ms of the pointer's
+(`Side::Above` by default), `delay` ([`TOOLTIP_DELAY`], 250 ms of the pointer's
 rest), `id`, `class`, `testid`. Keyboard focus (`:focus-visible`) shows it at
 once; a touch pointer never does; a press, Escape, leaving or losing focus
 hides it. The anchor gets `aria-describedby` naming the tip while it has
 text. The tip (`.sockel-tooltip`, `sockel::class::TOOLTIP`; `tooltip(placed)`
 gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
 `PLACED`, and as wide as its text up to `--tooltip-max-width` (`$tooltip-max-width`,
-24rem), wrapping beyond. `DataTips`, mounted once, gives every element with a
+24rem), wrapping beyond. [`DataTips`], mounted once, gives every element with a
 `data-tip` attribute the same tip (none when it says what the element already
 says, or while its menu is open, `aria-expanded="true"`); it places the tip by
 a fixed stand-in (`TIP_ANCHOR`), and hides on scroll and Escape.
 
-`HoverCard` is a richer card (`.sockel-hover-card` on a `.sockel-popover`,
+[`HoverCard`] is a richer card (`.sockel-hover-card` on a `.sockel-popover`,
 `hover_card(placed)`): props `anchor`, `side`, `align`, `delay`
-(`HOVER_CARD_DELAY`, 400 ms to open and to close), `title` (its accessible
+([`HOVER_CARD_DELAY`], 400 ms to open and to close), `title` (its accessible
 name), `class`, `testid` and the card's children. It opens on hover or
 keyboard focus and stays open while the pointer is over the anchor or the
 card, so a link in it can be reached.
 
-`ReasonButton` is a `Button` (the props `class`, `variant`, `size`, `icon`,
+[`ReasonButton`] is a [`Button`] (the props `class`, `variant`, `size`, `icon`,
 `submit`, `onclick`, `label`, `testid`, children) with `reason: Option<AttrValue>`
 and `busy` with `working: Option<AttrValue>`: its tooltip says the reason, else
 what it is doing (`reason_text`). A button with a reason is `unavailable`
@@ -1526,9 +1754,11 @@ scrollbar. A `ReasonButton` is one `<button>` whether it is available,
 unavailable or busy: the same node, box and focus across the states (the busy
 spinner and the aria state change, the width does not).
 
+<br>
+
 ## Menu, RowActions, SplitButton and ContextMenu
 
-`Menu` is a `Button` (`aria-haspopup="menu"`, `aria-expanded`) opening a
+[`Menu`] is a [`Button`] (`aria-haspopup="menu"`, `aria-expanded`) opening a
 list of actions (`role="menu"`, `sockel::class::MENU`) beside it in the
 overlay layer, through `use_popover`. Props:
 
@@ -1544,12 +1774,12 @@ overlay layer, through `use_popover`. Props:
   is open reaches the browser's menu. `pressed: Some(on)` makes the opener
   a toggle (`aria-pressed`), which a right-click opens the same way, so an
   opener whose `on_click` comes and goes with its state stays one element.
-- `width` (`MenuWidth`): `Regular` (`--menu-width`), `Wide` (`WIDE`,
-  `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
+- `width` ([`MenuWidth`]): `Regular` (`--menu-width`), `Wide` (`WIDE`,
+  `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), [`Panel`]
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
   between rows; `sheet` (`SHEET`, off by default): below `$sheet-breakpoint`
   a sheet from the bottom over a scrim (`.sockel-menu-scrim`), as a
-  `Popover` is.
+  [`Popover`] is.
 - `side`, `align` (`End` by default), `within` (as `Popover`'s),
   `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
   `testid` (the list's; the opener's is it suffixed `-toggle`, or
@@ -1557,7 +1787,7 @@ overlay layer, through `use_popover`. Props:
   list rendered, `hidden`, while closed, for an item that owns what it
   opens (a dialog) and must not be dropped when the menu closes.
 
-Its children are the items: `MenuItem` (an action; `icon`, `detail` under
+Its children are the items: [`MenuItem`] (an action; `icon`, `detail` under
 the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 `disabled`, `onclick`; with `href` a link row, an `<a>` that loses its
 `href` when disabled, `new_tab` opening it in a new tab (`target="_blank"`,
@@ -1565,12 +1795,12 @@ the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 row's native tooltip; `dialog: Some(open)` a button row opening a dialog
 (`aria-haspopup="dialog"`, `aria-expanded`); `current` marks the page shown,
 `aria-current="page"`, by the accent's ground and ink; `tip` a styled tip,
-`data-tip`, naming what it acts on), `MenuCheck`
+`data-tip`, naming what it acts on), [`MenuCheck`]
 (`menuitemcheckbox`: `checked`, `on_change`; the menu stays open),
-`MenuRadio` (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
+[`MenuRadio`] (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
 `detail` and `hint`; `stay` on a `MenuItem` or `MenuRadio` (`data-stay`,
 which an app's own item can wear too) keeps the menu open on a pick, for
-a step to another list of the same menu or a row of choices it holds; `MenuSeparator`, `MenuHeading` and `MenuNote` (a line
+a step to another list of the same menu or a row of choices it holds; [`MenuSeparator`], [`MenuHeading`] and [`MenuNote`] (a line
 such as "nothing here"). Each takes `class` and `testid`. `menu(width, tight, placed)` and `menu_item(danger)` give the
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
@@ -1585,7 +1815,7 @@ starts over; one letter repeated cycles). In a menu that holds fields (a
 small form), Tab and Shift+Tab move between its own fields and buttons and
 close it only past either end, and a focused field keeps its arrows and
 letters. A pick of an item or radio (or of an option of a single-select
-`ChoiceList` the menu holds), Tab, Escape or a press outside closes
+[`ChoiceList`] the menu holds), Tab, Escape or a press outside closes
 it; all but the press return focus
 to the opener. A pick gives it back before the menu goes, so a dialog the
 pick opens returns focus to the opener when it closes; Tab gives it back
@@ -1594,7 +1824,7 @@ outside close a menu opened from a popover or a dialog before what it
 opened from. Where focus stays on the opener (a panel of text alone),
 Escape and Tab there close it too, and Escape goes no further.
 
-`RowActions` is a row's actions: `actions: Vec<RowAction>`
+[`RowActions`] is a row's actions: `actions: Vec<RowAction>`
 (`RowAction::new(icon, label, onclick)`, `.danger()`, `.pressed(on)`,
 `.disabled(..)`, `.testid(..)`), shown as small quiet icon buttons, the
 danger ones last (`ROW_ACTION_DANGER`, muted until hovered or focused),
@@ -1602,15 +1832,15 @@ then `children`, then the overflow `Menu` behind its ellipsis when `more`
 holds its items (`more_label`; `more_disabled` keeps the
 opener, disabled, so every row ends the same way; `more_testid` its test
 id). The actions are named by `title`, or with `tips` by a styled tip
-(`data-tip`, for `DataTips`), the opener's too. `disabled`, `open`,
+(`data-tip`, for [`DataTips`]), the opener's too. `disabled`, `open`,
 `on_toggle`, `class`, `testid`.
 
-`SplitButton` is a main action (`text`, `onclick`, `icon`, `busy`) joined
+[`SplitButton`] is a main action (`text`, `onclick`, `icon`, `busy`) joined
 to a `Menu` of its variants (its children; `menu_label`;
 `width`), `Primary` unless `variant` says otherwise, `size`, `disabled`,
 `class`, `testid` (the menu's is it suffixed `-menu`).
 
-`ContextMenu` wraps its children (`.sockel-context-target`,
+[`ContextMenu`] wraps its children (`.sockel-context-target`,
 `display: contents`, so it lays nothing out) and opens a menu of `items`
 at the pointer on a right-click, or a press held for half a second on a
 touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
@@ -1626,13 +1856,16 @@ room on its side it scrolls (`scroll-area`), its scrollbar's room kept. Its
 rows are `--control-height` at least, their border reserved, so hover and
 focus change only the fill and border colour; a check's or radio's mark
 keeps its box when off. Labels are one line, cut with an ellipsis.
+
+<br>
+
 ## Table and SortHeader
 
-`Table` is a table in a scroll area (`scrollbar-gutter: stable`, so rows
-starting to scroll move nothing). `head` is the heading cells (`TableCell`
-with `head`, or `SortHeader`s); the children are `TableRow`s of `TableCell`s.
-`columns` is the count the `empty` row spans: `empty` (an `EmptyState` with
-`compact`, or an `ErrorBox`) stands in the rows' place. `fixed` (`FIXED`)
+[`Table`] is a table in a scroll area (`scrollbar-gutter: stable`, so rows
+starting to scroll move nothing). `head` is the heading cells ([`TableCell`]
+with `head`, or [`SortHeader`]s); the children are [`TableRow`]s of `TableCell`s.
+`columns` is the count the `empty` row spans: `empty` (an [`EmptyState`] with
+`compact`, or an [`ErrorBox`]) stands in the rows' place. `fixed` (`FIXED`)
 sizes columns by the first row alone, so data arriving or a sort moves no
 column; give a cell `width`, and `cut` to cut its text with an ellipsis.
 `sticky` (`STICKY`, on the wrap) holds the head while the rows scroll past
@@ -1649,7 +1882,7 @@ give the classes. Parts: `TABLE_FRAME`, `TABLE_WRAP`, `TABLE_ROW`,
 `none`), `first` (the way a first press runs: names from A, sizes largest
 first), `numeric`, `disabled` and `onsort`, called with the direction asked
 for. `next_sort(current, first)` is the cycle: unsorted, `first`, the other
-way, unsorted. The mark (`SORT_HEADER_MARK`, a chevron from the `IconSet`)
+way, unsorted. The mark (`SORT_HEADER_MARK`, a chevron from the [`IconSet`])
 has its box whether sorted or not (`IDLE` hides it), so sorting never changes
 the heading's width. `sort_header(numeric)` and `sort_mark(idle)`.
 
@@ -1660,11 +1893,13 @@ their room. For markup sockel does not render, the mixins `table-base`
 (`$fixed`), `table-head-cell`, `table-cell` and `table-row-hover` give the
 same rules. New token: `--table-max-height`.
 
+<br>
+
 ## Pager and Disclosure
 
-`Pager` is page buttons in a fixed number of slots: first, previous, the
+[`Pager`] is page buttons in a fixed number of slots: first, previous, the
 numbers with gaps (`…`), next and last. `page` (from 0), `pages`, `on_page`
-(called with the page asked for), `slots` (default 7, at least `MIN_SLOTS`,
+(called with the page asked for), `slots` (default 7, at least [`MIN_SLOTS`],
 5), `edges` (default true: the first and last page buttons; hidden below the
 phone breakpoint, and worth turning off in a narrow container), `phone_steps`
 (default true: the previous and next page buttons below the phone breakpoint;
@@ -1692,11 +1927,11 @@ one that ends a list or table and lines up with its rows. `nav_ref` is the
 `nav` element, for an app that scrolls to what it
 pages. Parts: `PAGER_STATUS`, `PAGER_SHOWN`, `PAGER_POSITION`, `PAGER_STEPS`.
 
-`Disclosure` is a summary row that toggles its body: `title`, `summary` (what
+[`Disclosure`] is a summary row that toggles its body: `title`, `summary` (what
 it holds, beside the title while shut), `actions` (controls at the row's end,
 outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`
 (the body's, named by `aria-controls` while open), `disabled`, `level` (a
-`HeadLevel`: the toggle sits in that heading, `DISCLOSURE_HEADING`, its title
+[`HeadLevel`]: the toggle sits in that heading, `DISCLOSURE_HEADING`, its title
 at a list head's size, for a section whose title is a heading), `class`,
 `testid`, and the children as the body, rendered only while open.
 `disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`),
@@ -1723,6 +1958,8 @@ only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
 `DISCLOSURE_BODY` (`OPEN` is new too). New partials: `_pager.scss`,
 `_disclosure.scss`. New tokens: none (`--pager-chars` is set per Pager).
 
+<br>
+
 ## Select and Listbox
 
 `Select<T>` is the WAI-ARIA select-only combobox: a face in the tab order
@@ -1739,9 +1976,9 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   heading, `.testid(id)` its row's test id), `value:
   Option<T>`, `on_change` (told a pick that is not the one chosen),
   `placeholder` (muted, while nothing listed is chosen).
-- `width` (`SelectWidth`): `Widest` (the widest option or placeholder) or
+- `width` ([`SelectWidth`]): `Widest` (the widest option or placeholder) or
   `Fill` (`FILL`, its container's width).
-- `size` (`InputSize`, as a `TextInput`'s), `invalid`, `disabled`, `busy`
+- `size` ([`InputSize`], as a [`TextInput`]'s), `invalid`, `disabled`, `busy`
   (`aria-busy`; it still opens on what it has).
 - `filter_from: Option<usize>`: from how many options the list has a
   filter field above it (`None`, the default: never). It takes focus on
@@ -1768,11 +2005,11 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   `close_label`) above what scrolls (`SELECT_BODY`); its filter
   field is not focused on opening there, so the keyboard does not cover
   the sheet. Above the breakpoint the list is as without it.
-- `id` and `describedby` inside a `Field` (its label names and opens it),
+- `id` and `describedby` inside a [`Field`] (its label names and opens it),
   `label` (the accessible name without one), `class` (the face's), `testid`
   (the face's; the list's is it suffixed `-options`).
 
-In an `InputGroup`, give it `group_classes(..)[i]` as its `class` like any
+In an [`InputGroup`], give it `group_classes(..)[i]` as its `class` like any
 member. `select(size, width, invalid, disabled, busy)` gives the face's
 classes (the input box's, `SELECT`, `FILL`), `chosen(options, value)` the
 chosen option's index.
@@ -1781,12 +2018,12 @@ Keyboard: closed, the arrows, Enter, Space, Home and End open it (on the
 chosen option, else the first or, for ArrowUp and End, the last enabled
 one), and typing opens it on the option starting with what was typed.
 Open, the arrows (stopping at the ends), PageUp and PageDown (10), Home and
-End move over the enabled options, typing moves as a `Menu`'s type-ahead
+End move over the enabled options, typing moves as a [`Menu`]'s type-ahead
 does, Enter, Space and Alt+ArrowUp pick, and Escape, Tab or a press outside
 close it. A pointer over an option makes it active; a press on the list
 keeps focus on the face.
 
-`Listbox` is the list's keyboard state, for anything listing options under
+[`Listbox`] is the list's keyboard state, for anything listing options under
 what keeps focus (P12's searching pickers): `active`, `hover`, `set`,
 `step`, `go_to_end`, `settle` (after filtering), `typeahead(pickable,
 labels, char, now)`, `key(key, alt, pickable) -> ListKey` (`Moved`,
@@ -1820,6 +2057,8 @@ surface, row and mark are the mixins `list`, `item`, `item-active` and
 rules, so the listbox and the Select load none of the menu's. `.sockel-hidden`
 is `_hidden.scss`, which `_badges.scss` and `_select.scss` both load.
 
+<br>
+
 ## DropZone
 
 A target for files dropped on it, pasted, or picked with its button. While a
@@ -1846,13 +2085,13 @@ outside a text field go the same way), `tall` (a zone that may be taller
 than the screen: its label, larger, stays on screen while the zone
 scrolls; omittable part `drop.tall`), `pick` (a button with this label
 opens the file picker through a hidden input), `on_files` (the files taken,
-in order, from a drop, paste or pick), `on_refused` (a `Refusal`: `Type` or
+in order, from a drop, paste or pick), `on_refused` (a [`Refusal`]: `Type` or
 `TooLarge`), `testid`, `class`. `accepts(accept, name, kind)` and
 `refusal(accept, max_size, name, kind, size)` are the same filter as plain
 functions. A refusal the zone found itself is said until the next press in
 it or the next drag; a drag that carries no files passes through.
 
-Modifiers, set from `DropState` by `drop_zone(state, disabled)`:
+Modifiers, set from [`DropState`] by `drop_zone(state, disabled)`:
 `.sockel-dragging` (a file is dragged on the page), `.sockel-over`,
 `.sockel-refused`, `.sockel-busy`, `.sockel-error` and `.sockel-disabled`.
 Parts: `.sockel-drop-zone-overlay`, `-label` and `-pick`.
@@ -1875,10 +2114,12 @@ far inside the viewport's top and bottom a tall zone's label stays);
 `$drop-busy-pulse` (`null`; a duration, and the busy label, which carries
 `.sockel-busy`, pulses at it, still under reduced motion).
 
+<br>
+
 ## ColorSelect
 
-`ColorSelect` picks a colour from a palette the app passes in as data; sockel
-owns no palette. It is the select-only combobox pattern of `Select`: a face
+[`ColorSelect`] picks a colour from a palette the app passes in as data; sockel
+owns no palette. It is the select-only combobox pattern of [`Select`]: a face
 (a `<button>`, `role="combobox"`) with the chosen colour's swatch and name,
 opening a grid (`role="listbox"`) of swatches in the overlay layer through
 `use_popover`, while focus stays on the face. Props:
@@ -1892,15 +2133,15 @@ opening a grid (`role="listbox"`) of swatches in the overlay layer through
   to `on_change` like any other, and a value that is not in the palette is
   shown by its own text.
 - `columns` (6): swatches to a grid row (`--color-select-columns`).
-- `width` (`ColorSelectWidth`): `Fixed` (`--color-select-width`), `Fill`
+- `width` ([`ColorSelectWidth`]): `Fixed` (`--color-select-width`), `Fill`
   (`FILL`, the container's) or `Swatch` (`SWATCH_ONLY`, the swatch alone in a
   box as wide as it is high).
-- `size` (`InputSize`), `invalid`, `disabled`, `busy` (`aria-busy`; it still
-  opens on what it has), `id` and `describedby` inside a `Field`, `label` (the
+- `size` ([`InputSize`]), `invalid`, `disabled`, `busy` (`aria-busy`; it still
+  opens on what it has), `id` and `describedby` inside a [`Field`], `label` (the
   accessible name without one), `class` (the face's), `testid` (the face's;
   the grid's is it suffixed `-options`, the custom input's `-custom`).
 
-In an `InputGroup`, give it `group_classes(..)[i]` as its `class`.
+In an [`InputGroup`], give it `group_classes(..)[i]` as its `class`.
 `color_select(size, width, invalid, disabled, busy)`, `color_swatch(none)`,
 `color_list(placed)` and `color_option(active)` give the classes
 (`COLOR_SELECT`, `COLOR_SWATCH` with `NONE`, `COLOR_LIST` with `PLACED`,
@@ -1915,7 +2156,7 @@ Keyboard: closed, the arrows, Enter, Space, Home and End open it on the
 chosen colour (else the first or last), and typing opens it on the colour
 whose name starts with what was typed. Open, Left and Right move by one,
 Up and Down by a row (stopping at the ends), Home, End, PageUp and PageDown
-and type-ahead move as in a `Listbox`, Enter, Space and Alt+ArrowUp pick,
+and type-ahead move as in a [`Listbox`], Enter, Space and Alt+ArrowUp pick,
 Escape or a press outside close it, and Tab moves into the custom input
 (with `custom`; Shift+Tab or Tab from it closes and returns to the face).
 
@@ -1929,6 +2170,9 @@ menu's surface in a layer that lays nothing out, hidden until placed.
 New tokens: `--swatch-size`, `--color-select-width`. New partial:
 `_color-select.scss`; new classes as above (`SWATCH_ONLY` is new; `NONE`,
 `FILL`, `PLACED`, `ACTIVE` and `OFF` are shared).
+
+<br>
+
 ## SearchSelect and FilterPicker
 
 `SearchSelect<T>` is the WAI-ARIA editable combobox with list
@@ -1962,15 +2206,15 @@ chosen. Typing makes the first match active. Parts:
 `SEARCH_SELECT_LIST`, `SEARCH_SELECT_GROUP` with `SEARCH_SELECT_HEADING`,
 `SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row).
 
-`FilterPicker<T>` is a list's filter, for a `LibraryToolbar`: a button
+`FilterPicker<T>` is a list's filter, for a [`LibraryToolbar`]: a button
 (`BUTTON`, `FILTER_PICKER`, `ON` while anything is chosen) saying `all`, or
 the first choice and `+N` more, opening a multi-select listbox
 (`aria-multiselectable`): an option for all, then one per choice, checked
 when chosen. A pick leaves it open. Props: `choices: Vec<FilterChoice<T>>`,
 `chosen: Vec<T>` (in the order chosen), `on_change` (the choices after a
 pick, `toggled(chosen, value)`; empty for all), `label` (the accessible
-name and tooltip before what is chosen), `all` (an override of the catalog's word), `disabled`, `class`, `testid`. Keys as a `Select`'s. Past
-`SEARCH_FROM` (8) choices the pop-up is a `ChoiceList` (`multi`, all as
+name and tooltip before what is chosen), `all` (an override of the catalog's word), `disabled`, `class`, `testid`. Keys as a [`Select`]'s. Past
+[`SEARCH_FROM`] (8) choices the pop-up is a [`ChoiceList`] (`multi`, all as
 its first option) with its search field, prefix matches first and its
 `--picker-rows` height whatever matches; the field takes the focus.
 `filter_summary(all, labels)` gives its words and count. Parts:
@@ -1988,12 +2232,14 @@ its count's room (`3ch`) is kept, hidden, with none. New token:
 `--picker-rows` (`$picker-rows: 6`). New partials: `_search-select.scss`,
 `_filter-picker.scss`.
 
+<br>
+
 ## Picker, PickerMenu, ChoiceList and PickerDialog
 
 `ChoiceList<T>` is the list every picker opens: a listbox (`CHOICE_LIST`,
 `CHOICE_LIST_OPTIONS`) of `PickerOption<T>`s under a search field
 (`CHOICE_LIST_SEARCH`, an input box) once there are more than
-`SEARCH_FROM` (8) options, or with `always_search`. Focus stays in the
+[`SEARCH_FROM`] (8) options, or with `always_search`. Focus stays in the
 field (or on the list, without one), naming the active option with
 `aria-activedescendant`: the arrows, PageUp and PageDown move over the
 enabled options and Enter picks; without a field, Home, End, Space and
@@ -2001,23 +2247,23 @@ type-ahead too. Props: `options`, `value` (checked), `multi`
 (`aria-multiselectable`, `chosen` checked, the owner toggles a pick with
 `toggled`), `on_pick`, `label` (the list's name), `always_search`,
 `search_label` and `empty_label` (the app's words), `autofocus`, `class`,
-`clear_label` (the search field's clear button: it is a `SearchField`, so
+`clear_label` (the search field's clear button: it is a [`SearchField`], so
 Escape clears a query before it closes a popup), `detail_below` (each
 row's detail on a second line under its label, wrapping, in
-`LISTBOX_OPTION_TEXT` and `LISTBOX_OPTION_DESCRIPTION` as a `Select`'s
+`LISTBOX_OPTION_TEXT` and `LISTBOX_OPTION_DESCRIPTION` as a [`Select`]'s
 description), `testid` (the field's is it suffixed `-search`, each
 option's `-option`, the pager's `-pager`). Under a search field no option
 starts active (unless `tab_cycles`): ArrowDown goes to the first, ArrowUp
 to the last, Enter picks the first match, and the current option is
 scrolled into view. `on_search` is told the query as it changes (and
 blank when the list mounts), for options the app finds by it. `page_size`
-lists that many matches at a time with a `Pager` under them
+lists that many matches at a time with a [`Pager`] under them
 (`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
 a new query goes back to the first. `tab_cycles` makes Tab and Shift+Tab
 move the active option, wrapping, instead of leaving (a list adding one
 thing after another). `rows` sets a searching list's height in rows
 (`--picker-rows`), for a list whose every option should show. A keyboard
-pick is the option's click, so a `Menu` holding a single-select list
+pick is the option's click, so a [`Menu`] holding a single-select list
 closes on it as on a mouse pick.
 
 `PickerOption::new(value, label)` with `.detail(..)` (muted after the
@@ -2036,7 +2282,7 @@ with a word starting with it, then the rest.
 `Picker<T>` is a field (the input box, `PICKER`) showing the current
 option's icon and label (`PICKER_ICON`, `PICKER_TEXT`), or the placeholder
 (`PICKER_PLACEHOLDER`), and a chevron (`PICKER_CHEVRON`), opening a
-`ChoiceList` below it in the overlay layer (`PICKER_POPUP`, the menu's
+[`ChoiceList`] below it in the overlay layer (`PICKER_POPUP`, the menu's
 surface). A pick, Escape, Tab or a press outside closes it (Tab moving
 on from the field, as if it had not been open); ArrowDown or ArrowUp
 opens it. Props: `options`, `value`, `on_change`, `label` (the
@@ -2047,22 +2293,22 @@ accessible name, followed by the current option's label), `placeholder`,
 tooltip), `fold` (the current option's icon alone below the phone
 breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's is it suffixed `-popup`, the
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
-gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
+gives its classes. `PickerMenu<T>` is the same list opened from a [`Button`]
 for an action that takes an option (Add a language): `text`, `icon`,
 `chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `tip`, `disabled`, `on_pick`,
-`field` (the opener is a `Picker`'s field showing `icon` and `text`, not a
+`field` (the opener is a [`Picker`]'s field showing `icon` and `text`, not a
 button: a field of several choices, such as a filter; ArrowDown and ArrowUp
 open it) with `fill`, and the list's
-`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles`, `rows` and `list_testid`; `width` (the popup's, as `ChoicePopup`'s); `align`
+`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles`, `rows` and `list_testid`; `width` (the popup's, as [`ChoicePopup`]'s); `align`
 (`Start` by default), `open` and `on_toggle` for a list its owner also closes, `head` (above the list, a note) and
 its children (below it, a Done button). `PickerDialog<T>` is the
-searchable shell for a large set (languages, countries): a `Dialog`
+searchable shell for a large set (languages, countries): a [`Dialog`]
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
 `ChoiceList` that always searches, its field focused, single (the owner
 closes it on a pick) or `multi`. `ChoicePopup` is the list's popup on its own, for an
 opener the app renders (a `Button` with `node_ref`, a chip, a face): props
 `anchor` (the opener's ref), `open`, `on_dismiss` (Escape, Tab or a press
-outside; a pick is the owner's to close on), `align` (`PopoverAlign`,
+outside; a pick is the owner's to close on), `align` ([`PopoverAlign`],
 default `Start`), `width` (its least width in place of
 `$picker-popup-width`, a length such as `var(--menu-width-wide)`; the
 `--picker-popup-width` custom property), `testid` (suffixed `-popup`) and its children, a
@@ -2080,9 +2326,11 @@ list, its popup or its dialog (without a search field, which never
 filters, its rows' height, two-line rows included, as far as its popup allows); past that it scrolls, its scrollbar's room kept. Marks keep their
 box when off. New partial: `_picker.scss`. No new tokens.
 
+<br>
+
 ## ToolBand, Panel, Seam and use_width
 
-**ToolBand** is a `Toolbar` with `band`: its controls wrap onto further
+**ToolBand** is a [`Toolbar`] with `band`: its controls wrap onto further
 lines instead of scrolling sideways (`.sockel-toolbar.sockel-band`; no
 hidden scrollbar or fade). `chrome` sets it on `--band-chrome-ground`
 (`--surface`) with a rule under it (`.sockel-chrome`, an inset shadow, so
@@ -2090,13 +2338,13 @@ no border is added), its controls `--band-chrome-gap` apart; `search` sets
 it in `--band-search-text` (`--text-sm`), as a list's filter
 (`.sockel-search`). `tool_band(chrome, search)` gives a band's classes for
 markup that is not the component.
-Group its controls in `ToolbarPart`s (`.sockel-toolbar-part`, `role=group`):
+Group its controls in [`ToolbarPart`]s (`.sockel-toolbar-part`, `role=group`):
 a band wraps between parts, and inside a part only when that part alone is
 wider than the band (it never overflows the band).
 `ruled` rules a part off from the one before it (`.sockel-ruled`, a
 `--border` line and `--space-3` in) from the phone breakpoint up, where a
 band has the room. A band's height changes only when it wraps, so give its
-controls fixed widths (a `Button`'s busy and disabled states keep its box);
+controls fixed widths (a [`Button`]'s busy and disabled states keep its box);
 `toolbar_part(ruled)` gives a part's classes.
 
 **Panel** is a ground over a list or a view holding its filters or a short
@@ -2134,6 +2382,8 @@ at most one new value an animation frame, and only when it changed, so a
 component laid out against its own width renders once a frame of a resize.
 The observer goes with the component.
 
+<br>
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its
@@ -2154,7 +2404,9 @@ rule of the same weight; none uses `!important`.
 | `visually-hidden` | `.sockel-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
 | `phone-only`, `desktop-only` | `.sockel-phone-only`, `.sockel-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
-| `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded (`Toolbar`, `Tabs`). |
+| `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded ([`Toolbar`], [`Tabs`]). |
+
+<br>
 
 ### Recipes for markup sockel does not render
 
@@ -2180,6 +2432,8 @@ icon and a label.
 Layers: `--layer-sticky`, `--layer-overlay`, `--layer-toast` and
 `--layer-tooltip` are the one `z-index` scale for what floats, lowest first.
 Popovers, menus, lists and dialogs all sit at `--layer-overlay`.
+
+<br>
 
 ## Translations
 
@@ -2212,9 +2466,9 @@ let book = Phrasebook::builder()
 - Label props (`close_label`, `less_label`, `empty_label`, ...) are per-use
   overrides: `Option<AttrValue>`, `None` reading the catalog. `label="..."`
   in `html!` still compiles; a struct literal or a field read needs
-  `Some(..)`/`.as_deref()`. `ConfirmRequest`'s `accept` and `cancel_label`
+  `Some(..)`/`.as_deref()`. [`ConfirmRequest`]'s `accept` and `cancel_label`
   are `Option` too, and `ConfirmRequest::new` leaves them `None`.
-- `Reorder`'s announcements are `sockel-reorder-*` messages with the
+- [`Reorder`]'s announcements are `sockel-reorder-*` messages with the
   position and count as numbers; `text` still overrides them, and
   `reorder_text` returns the catalog's English.
 
@@ -2227,6 +2481,8 @@ both ways. The showcase provides the catalog and switches language (the
 Translations page).
 
 [phrasebook-catalog]: https://docs.rs/phrasebook-catalog
+
+<br>
 
 ## Showcase
 
@@ -2241,7 +2497,7 @@ trunk serve --port 8095 --open
 ```
 
 Pick a free port. The showcase dogfoods sockel: its page controls and
-its Theme picker are sockel's own `Select`, so every page also exercises
+its Theme picker are sockel's own [`Select`], so every page also exercises
 it. Neither the showcase nor sockel's components render a native
 `<select>`, whose open list the OS draws outside sockel's tokens.
 
@@ -2262,6 +2518,8 @@ children, and `snippet` around them), listing only the props that differ
 from their defaults, and passes it to `Demo` as `code`. A page without a
 `Demo` shows a `CodeCard` itself; the test fails for a page that shows
 no code.
+
+<br>
 
 ### Stability probe
 
@@ -2286,6 +2544,8 @@ otherwise lists each change by state, frame and part. The panel's
 `unstable`), and `?probe` before the page's `#id` runs it on load, so a
 browser check reads the result as text. Hover cannot be scripted, so it
 stays a manual check.
+
+<br>
 
 ## Checks
 
