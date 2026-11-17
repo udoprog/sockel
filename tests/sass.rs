@@ -44,7 +44,9 @@ fn configured_through_index() {
     assert!(css.contains("--text-md: 1.0625rem;"));
     assert!(css.contains("--radius-lg: 12px;"));
     assert!(css.contains("padding: var(--space-4) var(--space-5);"));
-    assert!(css.contains("@media (width < 42rem) {\n  .card {\n    padding: var(--space-3);"));
+    assert!(
+        css.contains("@media (width < 42rem) {\n  .plinth-card {\n    padding: var(--space-3);")
+    );
     assert!(css.contains("gap: var(--space-2);\n  min-width: 0;\n  overflow-x: auto;"));
     assert!(!css.contains("@media (width < 40rem)"));
 }

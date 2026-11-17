@@ -261,8 +261,9 @@ impl Config {
     }
 
     /// Builds and writes `style.css` (the whole stylesheet) and `classes.rs`:
-    /// plinth's constants, or with local styles only the local ones, named
-    /// without the prefix (`army-sidebar` is `SIDEBAR`).
+    /// plinth's constants, or with local styles only the local ones, each
+    /// named without its prefix (`plinth-stack` is `STACK`, `army-sidebar`
+    /// is `SIDEBAR`).
     pub fn write(&self) -> Result<Output, Error> {
         let output = self.build()?;
         let dir = match &self.out_dir {
@@ -273,7 +274,7 @@ impl Config {
         };
         let classes = match (&self.local, &self.prefix) {
             (Some(_), Some(prefix)) => prefixed_classes_rs(&output.local_classes, prefix)?,
-            _ => classes_rs(&output.plinth_classes)?,
+            _ => prefixed_classes_rs(&output.plinth_classes, "plinth-")?,
         };
         std::fs::write(dir.join("style.css"), &output.css)?;
         std::fs::write(dir.join("classes.rs"), classes)?;
@@ -465,8 +466,8 @@ mod tests {
     #[test]
     fn compiles_the_embedded_sources() {
         let output = Config::new().build().unwrap();
-        assert!(output.css.contains(".stack {"));
-        for class in ["page-head-title", "crumb", "trailing"] {
+        assert!(output.css.contains(".plinth-stack {"));
+        for class in ["plinth-page-head-title", "plinth-crumb", "plinth-trailing"] {
             assert!(
                 output.plinth_classes.iter().any(|found| found == class),
                 "{class}"
@@ -539,7 +540,7 @@ mod tests {
             .unwrap();
         let local = output.css.strip_prefix(&plinth.css).unwrap();
         assert_eq!(output.plinth_classes, plinth.plinth_classes);
-        assert_eq!(output.css.matches(".stack {").count(), 1);
+        assert_eq!(output.css.matches(".plinth-stack {").count(), 1);
         assert!(local.contains(".fixture-panel {"));
         assert!(local.contains("var(--space-2)"));
         assert!(local.contains("@media (width < 40rem)"));

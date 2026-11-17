@@ -26,11 +26,11 @@
 //! the same classes.
 
 /// A constant per class of [`STYLESHEET`], generated from plinth's Sass by
-/// plinth-build: upper case, `-` as `_` (`.page-head-title` is
-/// [`class::PAGE_HEAD_TITLE`]), so a misspelt class does not compile.
+/// plinth-build: without the `plinth-` prefix, upper case, `-` as `_`
+/// (`.plinth-page-head-title` is [`class::PAGE_HEAD_TITLE`]), so a misspelt class does not compile.
 ///
 /// ```
-/// assert_eq!(plinth::class::PAGE_HEAD_TITLE, "page-head-title");
+/// assert_eq!(plinth::class::PAGE_HEAD_TITLE, "plinth-page-head-title");
 /// ```
 ///
 /// ```compile_fail

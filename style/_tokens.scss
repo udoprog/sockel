@@ -138,7 +138,7 @@ $page-gutter: var(--space-8) !default;
     // The one gap between a rounded container and the rounded items in it.
     --nest-inset: #{$nest-inset};
     --control-height: #{$control-height};
-    // A small control (`button.small`, `.input.small`), for dense places.
+    // A small control (`button.small`, `.plinth-input.small`), for dense places.
     --control-height-small: #{$control-height-small};
     // A mark (an icon or a badge beside text) and a touch target.
     --mark-height: #{$mark-height};

@@ -178,18 +178,18 @@ fn the_scan_finds_class_literals() {
     let classes = known_classes();
     let source = r#"
         html! { <div class="anything" role="toolbar"> }
-        html! { <span class={"stack"} title_class="x" /> }
+        html! { <span class={"plinth-stack"} title_class="x" /> }
         classes!(class::CARD, flush.then_some("other"));
-        fn gap() -> Option<&'static str> { Some("tight") }
+        fn gap() -> Option<&'static str> { Some("plinth-tight") }
         let kind = 'x';
         html! { <button type={if submit { "submit" } else { "button" }} aria-label="card" /> }
-        // "stack" in a comment
-        /* class="stack" */
+        // "plinth-stack" in a comment
+        /* class="plinth-stack" */
         let tag = "div";
     "#;
     let found = violations(source, &classes);
     assert_eq!(found.len(), 5, "{found:#?}");
-    for text in ["anything", "stack", "x", "other", "tight"] {
+    for text in ["anything", "plinth-stack", "x", "other", "plinth-tight"] {
         assert!(
             found.iter().any(|v| v.contains(&format!("\"{text}\""))),
             "{text}"

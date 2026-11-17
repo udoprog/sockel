@@ -1,19 +1,19 @@
 // The heads of pages and sections (src/head.rs, PageHead and SectionHead).
 //
-// - `.page-head`: a page's title (`.page-head-title`, its h1) with its
-//   help, and its actions (`.page-head-actions`) at the row's end. The
+// - `.plinth-page-head`: a page's title (`.plinth-page-head-title`, its h1) with its
+//   help, and its actions (`.plinth-page-head-actions`) at the row's end. The
 //   actions are full-size buttons, centred on the title's line, the
 //   primary last; on a narrow screen they wrap under the title.
-// - `.section-head`: the same for a section in a page, its title
-//   (`.section-head-title`, an h2) a size smaller.
+// - `.plinth-section-head`: the same for a section in a page, its title
+//   (`.plinth-section-head-title`, an h2) a size smaller.
 //
 // - A title may take a `level`, `title_class` and a `suffix` after its help.
-// - `.page-head.crumb`: a head that leads back, `.page-head-crumbs`: the back
-//   link (`.page-head-back`), a `/` (`.page-head-sep`) and the title; its
-//   keywords (`.page-head-meta`) come before the actions.
-// - `.page-head.compact`: the head of a compact page (the game's): the
-//   actions as icons (their `.label-text` hidden), and on a phone one row,
-//   the title on two lines and the back link's words (`.page-head-back-label`)
+// - `.plinth-page-head.plinth-crumb`: a head that leads back, `.plinth-page-head-crumbs`: the back
+//   link (`.plinth-page-head-back`), a `/` (`.plinth-page-head-sep`) and the title; its
+//   keywords (`.plinth-page-head-meta`) come before the actions.
+// - `.plinth-page-head.plinth-compact`: the head of a compact page (the game's): the
+//   actions as icons (their label text hidden), and on a phone one row,
+//   the title on two lines and the back link's words (`.plinth-page-head-back-label`)
 //   gone.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
@@ -21,8 +21,8 @@
 
 @use "tokens" as base;
 
-.page-head,
-.section-head {
+.plinth-page-head,
+.plinth-section-head {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -34,19 +34,19 @@
     min-height: var(--control-height);
 }
 
-.page-head-title,
-.section-head-title {
+.plinth-page-head-title,
+.plinth-section-head-title {
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
 }
 
-.section-head-title {
+.plinth-section-head-title {
     font-size: var(--text-lg);
 }
 
-.page-head-actions,
-.section-head-actions {
+.plinth-page-head-actions,
+.plinth-section-head-actions {
     display: flex;
     flex-wrap: wrap;
     align-items: center;
@@ -60,45 +60,45 @@
     margin-left: auto;
 }
 
-.page-head-crumbs {
+.plinth-page-head-crumbs {
     display: flex;
     align-items: baseline;
     gap: var(--space-2);
     min-width: 0;
 
-    > .page-head-title {
+    > .plinth-page-head-title {
         overflow: hidden;
         text-overflow: ellipsis;
         white-space: nowrap;
     }
 }
 
-.page-head-sep {
+.plinth-page-head-sep {
     color: var(--muted);
 }
 
-.page-head-meta {
+.plinth-page-head-meta {
     display: flex;
     flex-wrap: wrap;
     gap: var(--space-1) var(--space-2);
 }
 
-// The compact head's actions are icons: their words (`.label-text`) hide,
+// The compact head's actions are icons: their words (the label text) hide,
 // and a phone's buttons are tighter (`base.button`).
-.page-head.compact {
+.plinth-page-head.plinth-compact {
     --label-display: none;
 }
 
 @include base.below("phone") {
-    .page-head.compact {
+    .plinth-page-head.plinth-compact {
         flex-wrap: nowrap;
 
-        > .page-head-crumbs {
+        > .plinth-page-head-crumbs {
             flex: 1 1 auto;
 
             // The title has what the icons leave: on two lines before it
             // is cut.
-            > .page-head-title {
+            > .plinth-page-head-title {
                 display: -webkit-box;
                 overflow: hidden;
                 font-size: var(--text-base);
@@ -110,13 +110,13 @@
             }
         }
 
-        .page-head-back-label,
-        .page-head-sep,
-        .page-head-meta {
+        .plinth-page-head-back-label,
+        .plinth-page-head-sep,
+        .plinth-page-head-meta {
             display: none;
         }
 
-        > .page-head-actions {
+        > .plinth-page-head-actions {
             flex-wrap: nowrap;
             gap: var(--space-0);
             --button-min-width: 2.25rem;

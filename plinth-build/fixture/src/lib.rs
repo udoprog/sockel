@@ -5,7 +5,7 @@
 //!
 //! ```
 //! assert_eq!(plinth_build_fixture::class::PANEL, "fixture-panel");
-//! assert!(plinth_build_fixture::STYLESHEET.contains(".stack {"));
+//! assert!(plinth_build_fixture::STYLESHEET.contains(".plinth-stack {"));
 //! ```
 //!
 //! ```compile_fail

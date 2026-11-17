@@ -194,7 +194,7 @@ body {
 
 // The controls an app brings: one height each, as plinth's tokens say.
 // The button's base has no weight, so plinth's own button rules (an
-// `.iconed.icon`'s width, of a type selector's weight) still apply.
+// `.plinth-iconed.plinth-icon`'s width, of a type selector's weight) still apply.
 :where(.showcase-button) {
     display: inline-flex;
     flex: 0 1 auto;
@@ -270,7 +270,7 @@ body {
     text-overflow: ellipsis;
 }
 
-.input {
+.plinth-input {
     height: var(--control-height);
     padding-inline: var(--space-2);
     border: 1px solid var(--border);

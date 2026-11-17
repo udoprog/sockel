@@ -4,6 +4,6 @@
 @use "plinth" as p;
 @use "panel";
 
-.stack.fixture-panel {
+.plinth-stack.fixture-panel {
     gap: var(--space-1);
 }

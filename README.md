@@ -30,8 +30,13 @@ html! {
 It adds the stylesheet to `<head>` as `<style id="plinth-styles">`, once,
 however many times it is mounted. The CSS is also `plinth::STYLESHEET`, for
 an app that serves or inlines it itself. Its classes are constants in
-`plinth::class` (`.page-head-title` is `plinth::class::PAGE_HEAD_TITLE`), so
-a misspelt class does not compile.
+`plinth::class`, so a misspelt class does not compile.
+
+Every class plinth styles starts with `plinth-`, modifiers included
+(`.plinth-stack.plinth-tight`), so none collides with an app's classes. A
+constant is named after its class without the prefix, as an app's are:
+`.plinth-page-head-title` is `plinth::class::PAGE_HEAD_TITLE`,
+`.plinth-tight` is `plinth::class::TIGHT`.
 
 ## Adopting plinth with styles of your own
 
@@ -66,7 +71,7 @@ step:
    }
 
    // plinth's classes are stable, so the app may refine them.
-   .card.army-sidebar {
+   .plinth-card.army-sidebar {
        --radius-lg: 12px;
    }
    ```
