@@ -104,42 +104,68 @@ fn border_width(entry: &ResizeObserverEntry) -> f64 {
         .unwrap_or_else(|| entry.content_rect().width())
 }
 
+/// A `ResizeObserver` on one element, disconnected when dropped.
+struct Observing {
+    element: Element,
+    observer: ResizeObserver,
+    _callback: Closure<dyn FnMut(web_sys::js_sys::Array)>,
+}
+
+impl Observing {
+    fn new(element: Element, width: UseStateHandle<f64>) -> Option<Self> {
+        let observed = Rc::new(Framed::new(move |w| width.set(w)));
+        let callback = Closure::<dyn FnMut(web_sys::js_sys::Array)>::new(
+            move |entries: web_sys::js_sys::Array| {
+                if let Some(entry) = entries.iter().next_back() {
+                    observed.offer(border_width(&entry.unchecked_into()));
+                }
+            },
+        );
+        let observer = ResizeObserver::new(callback.as_ref().unchecked_ref()).ok()?;
+        observer.observe(&element);
+        Some(Self {
+            element,
+            observer,
+            _callback: callback,
+        })
+    }
+}
+
+impl Drop for Observing {
+    fn drop(&mut self) {
+        self.observer.disconnect();
+    }
+}
+
 /// How wide `node`'s element is (its border box, in CSS pixels): `0.0` until
 /// the first measurement, then at most one new value per animation frame, and
 /// only when it changed, so a component laid out against it renders once per
-/// frame of a resize.
+/// frame of a resize. The element may attach after the first render (drawn
+/// through a portal) or be replaced; the observer follows it.
 #[hook]
 pub fn use_width(node: &NodeRef) -> f64 {
     let width = use_state_eq(|| 0.0f64);
+    let observing = use_mut_ref(|| None::<Observing>);
 
     {
         let width = width.clone();
-        use_effect_with(node.clone(), move |node| {
-            let framed = Framed::new(move |w| width.set(w));
-            let observed = Rc::new(framed);
-            let callback = {
-                let observed = observed.clone();
-                Closure::<dyn FnMut(web_sys::js_sys::Array)>::new(
-                    move |entries: web_sys::js_sys::Array| {
-                        if let Some(entry) = entries.iter().next_back() {
-                            observed.offer(border_width(&entry.unchecked_into()));
-                        }
-                    },
-                )
-            };
-            let observer = ResizeObserver::new(callback.as_ref().unchecked_ref()).ok();
-            if let (Some(observer), Some(element)) = (&observer, node.cast::<Element>()) {
-                observer.observe(&element);
-            }
-            move || {
-                if let Some(observer) = observer {
-                    observer.disconnect();
-                }
-                drop(callback);
-                drop(observed);
+        let observing = observing.clone();
+        let node = node.clone();
+        use_effect(move || {
+            let element = node.cast::<Element>();
+            let current = observing.borrow().as_ref().map(|o| o.element.clone());
+            if element != current {
+                let next = element.and_then(|element| Observing::new(element, width));
+                *observing.borrow_mut() = next;
             }
         });
     }
+
+    use_effect_with((), move |_| {
+        move || {
+            observing.borrow_mut().take();
+        }
+    });
 
     *width
 }
