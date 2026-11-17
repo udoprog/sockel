@@ -1,5 +1,7 @@
 use yew::prelude::*;
 
+use crate::class;
+
 use plinth::{ActionGroup, Cluster, IconButton, action_group, icon_button};
 
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
@@ -7,7 +9,7 @@ use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
 /// A small icon, as an app would supply one.
 fn icon() -> Html {
     html! {
-        <svg class="svg-icon" viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
+        <svg class={class::SVG_ICON} viewBox="0 0 16 16" width="16" height="16" aria-hidden="true"
             fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round">
             <path d="M8 3v10M3 8h10" />
         </svg>
@@ -15,7 +17,7 @@ fn icon() -> Html {
 }
 
 fn shown(call: &str, classes: &Classes) -> Html {
-    html! { <code class="class-call">{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
+    html! { <code class={class::CLASS_CALL}>{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
 }
 
 #[function_component]
@@ -41,15 +43,15 @@ pub fn ActionGroupPage() -> Html {
     let buttons: Html = (1..=*count)
         .map(|n| {
             let class = if *quiet {
-                classes!("button", "ghost", "icon")
+                classes!(class::BUTTON, class::GHOST, plinth::class::ICON)
             } else {
-                classes!("button", (n == 1).then_some("primary"))
+                classes!(class::BUTTON, (n == 1).then_some(class::PRIMARY))
             };
 
             html! {
                 <IconButton {class} title={AttrValue::from(format!("Action {n}"))}>
                     { icon() }
-                    if !*quiet { <span class="label-text">{ text.of(&format!("Action {n}")) }</span> }
+                    if !*quiet { <span class={class::LABEL_TEXT}>{ text.of(&format!("Action {n}")) }</span> }
                 </IconButton>
             }
         })
@@ -63,12 +65,12 @@ pub fn ActionGroupPage() -> Html {
         <Demo {controls}>
             { shown("action_group(end, quiet, wrap)", &action_group(*end, *quiet, !*nowrap)) }
             if *in_row {
-                <Cluster class="outlined">
+                <Cluster class={class::OUTLINED}>
                     <span>{ "Saved two minutes ago" }</span>
                     { group }
                 </Cluster>
             } else {
-                <div class="outlined">{ group }</div>
+                <div class={class::OUTLINED}>{ group }</div>
             }
         </Demo>
     }
@@ -76,10 +78,10 @@ pub fn ActionGroupPage() -> Html {
 
 const VARIANTS: &[(&str, &str)] = &[
     ("Plain", ""),
-    ("primary", "primary"),
-    ("ghost", "ghost"),
-    ("danger", "danger"),
-    ("icon (icon alone)", "icon"),
+    ("primary", class::PRIMARY),
+    ("ghost", class::GHOST),
+    ("danger", class::DANGER),
+    ("icon (icon alone)", plinth::class::ICON),
 ];
 
 const DIALOGS: &[(&str, bool)] = &[("No", false), ("Yes (click to open)", true)];
@@ -120,15 +122,15 @@ pub fn IconButtonPage() -> Html {
         })
     };
 
-    let alone = *variant == "icon";
+    let alone = *variant == plinth::class::ICON;
     let class = classes!(
-        "button",
+        class::BUTTON,
         (!variant.is_empty()).then_some(*variant),
-        small.then_some("small")
+        small.then_some(class::SMALL)
     );
     let classes = icon_button(class.clone(), *trailing);
-    let label =
-        (!alone).then(|| html! { <span class="label-text">{ text.of("Add an item") }</span> });
+    let label = (!alone)
+        .then(|| html! { <span class={class::LABEL_TEXT}>{ text.of("Add an item") }</span> });
 
     html! {
         <Demo {controls}>
@@ -139,7 +141,7 @@ pub fn IconButtonPage() -> Html {
                     label={named.then(|| AttrValue::from("Add an item to the list"))} {onclick}>
                     if *trailing { { for label.clone() } { icon() } } else { { icon() } { for label } }
                 </IconButton>
-                <span class="control-label">
+                <span class={class::CONTROL_LABEL}>
                     { format!("Clicked {} times{}", *clicks, if *dialog { format!(", dialog {}", if *open { "open" } else { "closed" }) } else { String::new() }) }
                 </span>
             </Cluster>

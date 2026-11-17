@@ -1,13 +1,16 @@
 use yew::prelude::*;
 
 /// Plinth's compiled stylesheet: `style/` built with its defaults.
-pub const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/plinth.css"));
+pub const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
-const STYLE_ID: &str = "plinth-styles";
+/// The id of the one `<style>` element [`Styles`] fills, whichever
+/// stylesheet it is given.
+pub const STYLE_ID: &str = "plinth-styles";
 
 trait StyleHost {
     fn has_style(&self, id: &str) -> bool;
-    fn add_style(&self, id: &str, css: &str);
+    /// Adds the style element, or replaces its text.
+    fn set_style(&self, id: &str, css: &str);
 }
 
 impl StyleHost for web_sys::Document {
@@ -15,7 +18,11 @@ impl StyleHost for web_sys::Document {
         self.get_element_by_id(id).is_some()
     }
 
-    fn add_style(&self, id: &str, css: &str) {
+    fn set_style(&self, id: &str, css: &str) {
+        if let Some(style) = self.get_element_by_id(id) {
+            style.set_text_content(Some(css));
+            return;
+        }
         let Some(head) = self.head() else { return };
         let Ok(style) = self.create_element("style") else {
             return;
@@ -26,18 +33,32 @@ impl StyleHost for web_sys::Document {
     }
 }
 
-fn ensure_styles(host: &impl StyleHost) {
-    if !host.has_style(STYLE_ID) {
-        host.add_style(STYLE_ID, STYLESHEET);
+/// An app's stylesheet (from plinth-build, plinth's CSS first) replaces
+/// whatever is there; plinth's alone is added only when nothing is, so the
+/// page has one stylesheet whichever `Styles` mounts first.
+fn ensure_styles(host: &impl StyleHost, css: Option<&str>) {
+    match css {
+        Some(css) => host.set_style(STYLE_ID, css),
+        None if !host.has_style(STYLE_ID) => host.set_style(STYLE_ID, STYLESHEET),
+        None => {}
     }
 }
 
-/// Adds [`STYLESHEET`] to `<head>` once, however many times it is mounted.
+#[derive(Properties, PartialEq)]
+pub struct StylesProps {
+    /// The app's own stylesheet from plinth-build, which holds plinth's
+    /// CSS; without it, [`STYLESHEET`].
+    #[prop_or_default]
+    pub css: Option<&'static str>,
+}
+
+/// Puts the page's one stylesheet in `<head>` (`<style id="plinth-styles">`),
+/// however many times it is mounted.
 #[function_component]
-pub fn Styles() -> Html {
-    use_effect_with((), |_| {
+pub fn Styles(props: &StylesProps) -> Html {
+    use_effect_with(props.css, |css| {
         if let Some(document) = web_sys::window().and_then(|window| window.document()) {
-            ensure_styles(&document);
+            ensure_styles(&document, *css);
         }
     });
     Html::default()
@@ -56,18 +77,43 @@ mod tests {
             self.0.borrow().iter().any(|(existing, _)| existing == id)
         }
 
-        fn add_style(&self, id: &str, css: &str) {
-            self.0.borrow_mut().push((id.to_owned(), css.to_owned()));
+        fn set_style(&self, id: &str, css: &str) {
+            let mut styles = self.0.borrow_mut();
+            match styles.iter_mut().find(|(existing, _)| existing == id) {
+                Some(style) => style.1 = css.to_owned(),
+                None => styles.push((id.to_owned(), css.to_owned())),
+            }
         }
+    }
+
+    fn only(head: &Head) -> (String, String) {
+        let styles = head.0.borrow();
+        assert_eq!(styles.len(), 1);
+        styles[0].clone()
     }
 
     #[test]
     fn injects_once() {
         let head = Head::default();
-        ensure_styles(&head);
-        ensure_styles(&head);
-        let styles = head.0.borrow();
-        assert_eq!(styles.len(), 1);
-        assert_eq!(styles[0], (STYLE_ID.to_owned(), STYLESHEET.to_owned()));
+        ensure_styles(&head, None);
+        ensure_styles(&head, None);
+        assert_eq!(only(&head), (STYLE_ID.to_owned(), STYLESHEET.to_owned()));
+    }
+
+    #[test]
+    fn an_apps_stylesheet_is_the_only_one_whichever_mounts_first() {
+        let app = format!("{STYLESHEET}.app-sidebar {{}}");
+        for app_first in [true, false] {
+            let head = Head::default();
+            if app_first {
+                ensure_styles(&head, Some(&app));
+                ensure_styles(&head, None);
+            } else {
+                ensure_styles(&head, None);
+                ensure_styles(&head, Some(&app));
+            }
+            ensure_styles(&head, None);
+            assert_eq!(only(&head), (STYLE_ID.to_owned(), app.clone()));
+        }
     }
 }

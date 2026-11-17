@@ -1,5 +1,7 @@
 use yew::prelude::*;
 
+use crate::class;
+
 use plinth::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind, button};
@@ -12,7 +14,7 @@ const LEVELS: &[(&str, Option<HeadLevel>)] = &[
     ("h4", Some(HeadLevel::H4)),
 ];
 
-const TITLE_CLASSES: &[(&str, &str)] = &[("None", ""), ("muted", "muted")];
+const TITLE_CLASSES: &[(&str, &str)] = &[("None", ""), ("muted", class::MUTED)];
 
 #[derive(Properties, PartialEq)]
 pub struct HeadPageProps {
@@ -58,32 +60,32 @@ pub fn HeadPage(props: &HeadPageProps) -> Html {
         title: title.of("The title").into(),
         help: help.then(|| {
             html! {
-                <button type="button" class="help-tip" aria-label="Help" title="What this is">{ "?" }</button>
+                <button type="button" class={class::HELP_TIP} aria-label="Help" title="What this is">{ "?" }</button>
             }
         }),
         level: *level,
-        suffix: suffix.then(|| html! { <span class="chip">{ "12" }</span> }),
+        suffix: suffix.then(|| html! { <span class={class::CHIP}>{ "12" }</span> }),
         help_testid: testids.then(|| AttrValue::from("head-help")),
         title_class: classes!((!title_class.is_empty()).then_some(*title_class)),
         title_testid: testids.then(|| AttrValue::from("head-title")),
         head_testid: testids.then(|| AttrValue::from("head")),
         testid: None,
-        class: classes!(compact.then_some("compact")),
+        class: classes!(compact.then_some(plinth::class::COMPACT)),
         back: back.then(|| {
             html! {
-                <a href="#" class="crumb-back page-head-back"
+                <a href="#" class={plinth::class::PAGE_HEAD_BACK}
                     onclick={Callback::from(|e: MouseEvent| e.prevent_default())}>
                     <span aria-hidden="true">{ "←" }</span>
-                    <span class="label-text page-head-back-label">{ "Back" }</span>
+                    <span class={classes!(class::LABEL_TEXT, plinth::class::PAGE_HEAD_BACK_LABEL)}>{ "Back" }</span>
                 </a>
             }
         }),
         back_label: back.then(|| AttrValue::from("Breadcrumb")),
         meta: meta.then(|| {
             html! {
-                <div class="page-head-meta">
-                    <span class="chip">{ "keyword" }</span>
-                    <span class="chip">{ "another" }</span>
+                <div class={plinth::class::PAGE_HEAD_META}>
+                    <span class={class::CHIP}>{ "keyword" }</span>
+                    <span class={class::CHIP}>{ "another" }</span>
                 </div>
             }
         }),

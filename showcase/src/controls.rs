@@ -4,6 +4,8 @@
 use web_sys::{HtmlInputElement, HtmlSelectElement};
 use yew::prelude::*;
 
+use crate::class;
+
 use plinth::{Card, Cluster, Gap, Stack};
 
 #[derive(Properties, PartialEq)]
@@ -30,8 +32,8 @@ where
 
     html! {
         <Stack tag="label" gap={Gap::Snug}>
-            <span class="control-label">{ props.label.clone() }</span>
-            <select class="input small" {onchange}>
+            <span class={class::CONTROL_LABEL}>{ props.label.clone() }</span>
+            <select class={classes!(plinth::class::INPUT, class::SMALL)} {onchange}>
                 { for options.iter().map(|(name, value)| html! {
                     <option selected={*value == props.value}>{ *name }</option>
                 }) }
@@ -56,7 +58,7 @@ pub fn Toggle(props: &ToggleProps) -> Html {
     html! {
         <Cluster tag="label" gap={Gap::Snug}>
             <input type="checkbox" checked={props.value} {onchange} />
-            <span class="control-label">{ props.label.clone() }</span>
+            <span class={class::CONTROL_LABEL}>{ props.label.clone() }</span>
         </Cluster>
     }
 }
@@ -119,13 +121,13 @@ pub fn Demo(props: &DemoProps) -> Html {
                     { props.controls.clone() }
                 </Cluster>
             </Card>
-            <div class="frames">
-                <section class="frame narrow" aria-label="Narrow">
-                    <span class="frame-label">{ "Narrow (drag the corner)" }</span>
+            <div class={class::FRAMES}>
+                <section class={classes!(class::FRAME, class::NARROW)} aria-label="Narrow">
+                    <span class={class::FRAME_LABEL}>{ "Narrow (drag the corner)" }</span>
                     { props.children.clone() }
                 </section>
-                <section class="frame wide" aria-label="Wide">
-                    <span class="frame-label">{ "Wide" }</span>
+                <section class={classes!(class::FRAME, class::WIDE)} aria-label="Wide">
+                    <span class={class::FRAME_LABEL}>{ "Wide" }</span>
                     { props.children.clone() }
                 </section>
             </div>
@@ -142,7 +144,7 @@ pub fn samples(count: usize, text: Text, mixed: bool, paragraphs: bool) -> Html 
         .map(|n| {
             let tall = mixed && n % 2 == 0;
             html! {
-                <@{tag} class={classes!("sample", tall.then_some("tall"))}>
+                <@{tag} class={classes!(class::SAMPLE, tall.then_some(class::TALL))}>
                     { text.of(&format!("Item {n}")) }
                 </@>
             }
@@ -152,15 +154,15 @@ pub fn samples(count: usize, text: Text, mixed: bool, paragraphs: bool) -> Html 
 
 pub fn button(label: String, primary: bool, small: bool) -> Html {
     let class = classes!(
-        "button",
-        primary.then_some("primary"),
-        small.then_some("small")
+        class::BUTTON,
+        primary.then_some(class::PRIMARY),
+        small.then_some(class::SMALL)
     );
 
     html! {
         <button type="button" {class}>
             <span aria-hidden="true">{ "+" }</span>
-            <span class="label-text">{ label }</span>
+            <span class={class::LABEL_TEXT}>{ label }</span>
         </button>
     }
 }

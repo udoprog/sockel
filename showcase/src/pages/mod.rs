@@ -101,8 +101,8 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "styles",
         title: "Styles",
-        about: "plinth's compiled stylesheet, and the component that adds it to the page.",
-        covers: &["STYLESHEET", "Styles"],
+        about: "plinth's compiled stylesheet, and the component that adds the page's one stylesheet.",
+        covers: &["STYLESHEET", "STYLE_ID", "Styles", "StylesProps"],
         render: || html! { <styles::StylesPage /> },
     },
 ];

@@ -3,6 +3,14 @@
 mod controls;
 mod pages;
 
+/// The showcase's own classes (`style/`), from plinth-build.
+mod class {
+    include!(concat!(env!("OUT_DIR"), "/classes.rs"));
+}
+
+/// The showcase's one stylesheet: plinth's CSS, then `style/`'s.
+const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
+
 use yew::prelude::*;
 
 use plinth::{Cluster, Gap, PageHead, Stack};
@@ -67,7 +75,7 @@ fn App() -> Html {
 
         html! {
             <li>
-                <a href={format!("#{}", page.id)} class="nav-link"
+                <a href={format!("#{}", page.id)} class={class::NAV_LINK}
                     aria-current={(index == *current).then_some("page")} {onclick}>
                     { page.title }
                 </a>
@@ -78,24 +86,25 @@ fn App() -> Html {
     let page = &PAGES[*current];
 
     html! {
-        <div class="showcase">
-            <nav class="showcase-nav" aria-label="Components">
+        <div class={class::SHELL}>
+            <plinth::Styles css={STYLESHEET} />
+            <nav class={class::NAV} aria-label="Components">
                 <Stack gap={Gap::Loose}>
-                    <strong class="showcase-name">{ "plinth" }</strong>
-                    <ul class="plain-list nav-list">
+                    <strong class={class::NAME}>{ "plinth" }</strong>
+                    <ul class={classes!(plinth::class::PLAIN_LIST, class::NAV_LIST)}>
                         { for PAGES.iter().enumerate().map(link) }
                     </ul>
                     <Select<Theme> label="Theme" options={THEMES} value={*theme} on_change={on_theme} />
                 </Stack>
             </nav>
-            <main class="showcase-main">
-                <Stack gap={Gap::Loose} class="workspace-page">
+            <main class={class::MAIN}>
+                <Stack gap={Gap::Loose} class={plinth::class::WORKSPACE_PAGE}>
                     <PageHead title={page.title} />
-                    <p class="prose muted">{ page.about }</p>
+                    <p class={classes!(class::PROSE, class::MUTED)}>{ page.about }</p>
                     <Cluster gap={Gap::Snug}>
-                        { for page.covers.iter().map(|name| html! { <code class="chip">{ *name }</code> }) }
+                        { for page.covers.iter().map(|name| html! { <code class={class::CHIP}>{ *name }</code> }) }
                     </Cluster>
-                    <div key={page.id} class="contents">{ (page.render)() }</div>
+                    <div key={page.id} class={plinth::class::CONTENTS}>{ (page.render)() }</div>
                 </Stack>
             </main>
         </div>

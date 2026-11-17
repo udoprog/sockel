@@ -17,5 +17,5 @@ yew = { version = "0.23.0", features = ["ssr"] }
 
 [workspace]
 resolver = "3"
-members = [".", "plinth-build", "showcase"]
+members = [".", "plinth-build", "plinth-build/fixture", "showcase"]
 exclude = [".claude"]

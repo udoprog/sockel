@@ -1,9 +1,11 @@
-//! Builds plinth's stylesheet and its class constants from a `build.rs`.
+//! Builds an app's one stylesheet and its class constants from a `build.rs`:
+//! plinth's, and a project's own Sass beside it ([`Config::local`]).
 //!
-//! plinth's Sass sources are embedded in this crate and compiled verbatim, so
-//! a build sees the sources of the plinth-build version it depends on and no
-//! path into plinth's repository. [`Config::compile`] writes `plinth.css` and
-//! `classes.rs` (a `pub const` per class) to `OUT_DIR`.
+//! plinth's Sass sources are embedded in this crate, so a build sees the
+//! sources of the plinth-build version it depends on and no path into
+//! plinth's repository; local Sass loads them as `@use "plinth" as p;`.
+//! [`Config::compile`] writes `style.css` and `classes.rs` (a `pub const` per
+//! class) to `OUT_DIR`.
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -34,12 +36,22 @@ const HOOKS_PROBE: &str =
 /// The directory the embedded sources are served under.
 const ROOT: &str = "plinth";
 
-/// The embedded sources as a grass file system.
+/// The embedded sources at relative paths (`plinth/...`), the disk at
+/// absolute ones: a project's files are always loaded by absolute path, so
+/// nothing on disk can stand in for plinth's sources.
 #[derive(Debug)]
-struct Embedded;
+struct Sources;
 
-impl Embedded {
-    fn source(path: &Path) -> Option<&'static str> {
+impl Sources {
+    /// A relative path without its `.` components.
+    fn relative(path: &Path) -> PathBuf {
+        path.components()
+            .filter(|part| *part != std::path::Component::CurDir)
+            .collect()
+    }
+
+    fn embedded(path: &Path) -> Option<&'static str> {
+        let path = Self::relative(path);
         let name = path.strip_prefix(ROOT).ok()?.to_str()?;
         SOURCES
             .iter()
@@ -48,19 +60,38 @@ impl Embedded {
     }
 }
 
-impl grass::Fs for Embedded {
+impl grass::Fs for Sources {
     fn is_dir(&self, path: &Path) -> bool {
-        path == Path::new(ROOT)
+        if path.is_absolute() {
+            path.is_dir()
+        } else {
+            Self::relative(path) == Path::new(ROOT)
+        }
     }
 
     fn is_file(&self, path: &Path) -> bool {
-        Self::source(path).is_some()
+        if path.is_absolute() {
+            path.is_file()
+        } else {
+            Self::embedded(path).is_some()
+        }
     }
 
     fn read(&self, path: &Path) -> io::Result<Vec<u8>> {
-        Self::source(path)
+        if path.is_absolute() {
+            return std::fs::read(path);
+        }
+        Self::embedded(path)
             .map(|source| source.as_bytes().to_vec())
             .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, path.display().to_string()))
+    }
+
+    fn canonicalize(&self, path: &Path) -> io::Result<PathBuf> {
+        if path.is_absolute() {
+            std::fs::canonicalize(path)
+        } else {
+            Ok(Self::relative(path))
+        }
     }
 }
 
@@ -72,15 +103,38 @@ pub enum Error {
     Name(String),
     /// Two classes that make the same constant.
     Collision(String, String),
+    /// Local styles without [`Config::prefix`].
+    NoPrefix,
+    /// A local class without the project's prefix.
+    Unprefixed {
+        class: String,
+        prefix: String,
+    },
+    /// A local directory with no `_index.scss` or `index.scss`.
+    NoIndex(PathBuf),
+    /// plinth's CSS did not come out first and unchanged.
+    NotVerbatim,
 }
 
 impl fmt::Display for Error {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         match self {
-            Error::Sass(error) => write!(f, "compile plinth's Sass: {error}"),
+            Error::Sass(error) => write!(f, "compile Sass: {error}"),
             Error::Io(error) => write!(f, "{error}"),
             Error::Name(class) => write!(f, "class .{class} makes no constant name"),
             Error::Collision(a, b) => write!(f, "classes .{a} and .{b} make the same constant"),
+            Error::NoPrefix => write!(
+                f,
+                "local styles need a prefix: Config::prefix(\"<project>-\")"
+            ),
+            Error::Unprefixed { class, prefix } => write!(
+                f,
+                "local class .{class} is neither plinth's nor prefixed `{prefix}`"
+            ),
+            Error::NoIndex(dir) => {
+                write!(f, "{} has no _index.scss or index.scss", dir.display())
+            }
+            Error::NotVerbatim => write!(f, "plinth's CSS did not come first and unchanged"),
         }
     }
 }
@@ -103,14 +157,19 @@ impl From<io::Error> for Error {
 #[derive(Clone, Debug, Default)]
 pub struct Config {
     out_dir: Option<PathBuf>,
+    local: Option<PathBuf>,
+    prefix: Option<String>,
 }
 
 /// A build's results.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Output {
+    /// The app's one stylesheet: plinth's CSS, then the local styles' CSS.
     pub css: String,
-    /// Every class the stylesheet's selectors name and every hook class, sorted.
-    pub classes: Vec<String>,
+    /// plinth's classes: every class its selectors name and every hook class, sorted.
+    pub plinth_classes: Vec<String>,
+    /// The local styles' own classes (each with the prefix), sorted.
+    pub local_classes: Vec<String>,
 }
 
 impl Config {
@@ -124,18 +183,64 @@ impl Config {
         self
     }
 
-    pub fn build(&self) -> Result<Output, Error> {
-        let options = grass::Options::default().fs(&Embedded);
-        let css = grass::from_path(Path::new(ROOT).join("_index.scss"), &options)?;
-        let hooks = grass::from_string(HOOKS_PROBE, &options)?;
-        let mut classes = class_names(&css);
-        classes.extend(class_names(&hooks));
-        classes.sort();
-        classes.dedup();
-        Ok(Output { css, classes })
+    /// The project's own Sass: `dir/_index.scss` (or `index.scss`), which can
+    /// `@use "plinth" as p;` for plinth's tokens and mixins. A relative
+    /// `dir` is taken from the current directory, a `build.rs`'s package root.
+    pub fn local(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.local = Some(dir.into());
+        self
     }
 
-    /// Builds and writes `plinth.css` and `classes.rs`.
+    /// The prefix every local class must start with (`"army-"`).
+    pub fn prefix(mut self, prefix: impl Into<String>) -> Self {
+        self.prefix = Some(prefix.into());
+        self
+    }
+
+    pub fn build(&self) -> Result<Output, Error> {
+        let options = grass::Options::default().fs(&Sources).load_path("");
+        let plinth_css = grass::from_path(Path::new(ROOT).join("_index.scss"), &options)?;
+        let hooks = grass::from_string(HOOKS_PROBE, &options)?;
+        let mut plinth_classes = class_names(&plinth_css);
+        plinth_classes.extend(class_names(&hooks));
+        plinth_classes.sort();
+        plinth_classes.dedup();
+
+        let Some(dir) = &self.local else {
+            return Ok(Output {
+                css: plinth_css,
+                plinth_classes,
+                local_classes: Vec::new(),
+            });
+        };
+        let prefix = self.prefix.as_deref().ok_or(Error::NoPrefix)?;
+        let index = local_index(dir)?;
+        // One compilation, plinth first, so a local `@use "plinth"` reuses
+        // the module loaded here and emits nothing again.
+        let entry = format!("@use \"plinth\";\n@use \"{}\";\n", sass_string(&index));
+        let css = grass::from_string(entry, &options)?;
+        let local_css = css.strip_prefix(&plinth_css).ok_or(Error::NotVerbatim)?;
+        let local_classes = class_names(local_css)
+            .into_iter()
+            .filter(|class| plinth_classes.binary_search(class).is_err())
+            .map(|class| match class.strip_prefix(prefix) {
+                Some(rest) if !rest.is_empty() => Ok(class),
+                _ => Err(Error::Unprefixed {
+                    class,
+                    prefix: prefix.to_owned(),
+                }),
+            })
+            .collect::<Result<_, _>>()?;
+        Ok(Output {
+            css,
+            plinth_classes,
+            local_classes,
+        })
+    }
+
+    /// Builds and writes `style.css` (the whole stylesheet) and `classes.rs`:
+    /// plinth's constants, or with local styles only the local ones, named
+    /// without the prefix (`army-sidebar` is `SIDEBAR`).
     pub fn write(&self) -> Result<Output, Error> {
         let output = self.build()?;
         let dir = match &self.out_dir {
@@ -144,17 +249,59 @@ impl Config {
                 .map(PathBuf::from)
                 .ok_or_else(|| io::Error::new(io::ErrorKind::NotFound, "OUT_DIR is not set"))?,
         };
-        std::fs::write(dir.join("plinth.css"), &output.css)?;
-        std::fs::write(dir.join("classes.rs"), classes_rs(&output.classes)?)?;
+        let classes = match (&self.local, &self.prefix) {
+            (Some(_), Some(prefix)) => prefixed_classes_rs(&output.local_classes, prefix)?,
+            _ => classes_rs(&output.plinth_classes)?,
+        };
+        std::fs::write(dir.join("style.css"), &output.css)?;
+        std::fs::write(dir.join("classes.rs"), classes)?;
         Ok(output)
     }
 
-    /// [`Config::write`] for a `build.rs`: panics with the error.
+    /// [`Config::write`] for a `build.rs`: reruns when `build.rs` or any local
+    /// file changes, and panics with the error.
     pub fn compile(&self) -> Output {
         println!("cargo:rerun-if-changed=build.rs");
+        if let Some(dir) = &self.local {
+            for path in local_files(dir).unwrap_or_else(|error| panic!("plinth-build: {error}")) {
+                println!("cargo:rerun-if-changed={}", path.display());
+            }
+        }
         self.write()
             .unwrap_or_else(|error| panic!("plinth-build: {error}"))
     }
+}
+
+fn local_index(dir: &Path) -> Result<PathBuf, Error> {
+    let dir = std::path::absolute(dir)?;
+    ["_index.scss", "index.scss"]
+        .iter()
+        .map(|name| dir.join(name))
+        .find(|path| path.is_file())
+        .ok_or(Error::NoIndex(dir))
+}
+
+/// `dir` and everything under it, directories included (so an added file
+/// reruns the build too), sorted.
+pub fn local_files(dir: &Path) -> io::Result<Vec<PathBuf>> {
+    let mut found = vec![dir.to_path_buf()];
+    let mut next = 0;
+    while let Some(path) = found.get(next).cloned() {
+        next += 1;
+        if path.is_dir() {
+            for entry in std::fs::read_dir(&path)? {
+                found.push(entry?.path());
+            }
+        }
+    }
+    found.sort();
+    Ok(found)
+}
+
+fn sass_string(path: &Path) -> String {
+    path.to_string_lossy()
+        .replace('\\', "\\\\")
+        .replace('"', "\\\"")
 }
 
 /// A class's constant: upper case, `-` as `_` (`page-head-title` is
@@ -184,10 +331,32 @@ pub fn classes_rs(classes: &[String]) -> Result<String, Error> {
             return Err(Error::Collision(other.clone(), class.clone()));
         }
     }
-    Ok(consts
+    Ok(consts_rs(consts))
+}
+
+/// [`classes_rs`] for local classes: each constant named without `prefix`.
+pub fn prefixed_classes_rs(classes: &[String], prefix: &str) -> Result<String, Error> {
+    let mut consts = BTreeMap::new();
+    for class in classes {
+        let name = class
+            .strip_prefix(prefix)
+            .ok_or_else(|| Error::Unprefixed {
+                class: class.clone(),
+                prefix: prefix.to_owned(),
+            })
+            .and_then(const_name)?;
+        if let Some(other) = consts.insert(name, class) {
+            return Err(Error::Collision(other.clone(), class.clone()));
+        }
+    }
+    Ok(consts_rs(consts))
+}
+
+fn consts_rs(consts: BTreeMap<String, &String>) -> String {
+    consts
         .into_iter()
         .map(|(name, class)| format!("/// `.{class}`\npub const {name}: &str = \"{class}\";\n"))
-        .collect())
+        .collect()
 }
 
 /// The classes a stylesheet's selectors name, sorted and once each; at-rule
@@ -276,7 +445,10 @@ mod tests {
         let output = Config::new().build().unwrap();
         assert!(output.css.contains(".stack {"));
         for class in ["page-head-title", "crumb", "trailing"] {
-            assert!(output.classes.iter().any(|found| found == class), "{class}");
+            assert!(
+                output.plinth_classes.iter().any(|found| found == class),
+                "{class}"
+            );
         }
         assert!(!output.css.contains("crumb {"));
         let style = Path::new(env!("CARGO_MANIFEST_DIR")).join("../style/_index.scss");
@@ -302,6 +474,80 @@ mod tests {
         assert_eq!(
             classes_rs(&["stack".to_owned()]).unwrap(),
             "/// `.stack`\npub const STACK: &str = \"stack\";\n"
+        );
+    }
+
+    fn fixture(name: &str) -> PathBuf {
+        Path::new(env!("CARGO_MANIFEST_DIR")).join(name)
+    }
+
+    #[test]
+    fn puts_plinth_first_and_verbatim_then_the_local_styles() {
+        let plinth = Config::new().build().unwrap();
+        let output = Config::new()
+            .local(fixture("fixture/style"))
+            .prefix("fixture-")
+            .build()
+            .unwrap();
+        let local = output.css.strip_prefix(&plinth.css).unwrap();
+        assert_eq!(output.plinth_classes, plinth.plinth_classes);
+        assert_eq!(output.css.matches(".stack {").count(), 1);
+        assert!(local.contains(".fixture-panel {"));
+        assert!(local.contains("var(--space-2)"));
+        assert!(local.contains("@media (width < 40rem)"));
+        assert_eq!(
+            output.local_classes,
+            ["fixture-panel", "fixture-panel-title"]
+        );
+    }
+
+    #[test]
+    fn names_local_constants_without_the_prefix() {
+        let dir = std::env::temp_dir().join(format!("plinth-build-{}", std::process::id()));
+        std::fs::create_dir_all(&dir).unwrap();
+        Config::new()
+            .local(fixture("fixture/style"))
+            .prefix("fixture-")
+            .out_dir(&dir)
+            .write()
+            .unwrap();
+        let classes = std::fs::read_to_string(dir.join("classes.rs")).unwrap();
+        let css = std::fs::read_to_string(dir.join("style.css")).unwrap();
+        std::fs::remove_dir_all(&dir).unwrap();
+        assert_eq!(
+            classes,
+            "/// `.fixture-panel`\npub const PANEL: &str = \"fixture-panel\";\n\
+             /// `.fixture-panel-title`\npub const PANEL_TITLE: &str = \"fixture-panel-title\";\n"
+        );
+        assert!(css.contains(".fixture-panel"));
+    }
+
+    #[test]
+    fn refuses_an_unprefixed_local_class() {
+        let error = Config::new()
+            .local(fixture("tests/unprefixed"))
+            .prefix("fixture-")
+            .build()
+            .unwrap_err();
+        assert!(
+            matches!(&error, Error::Unprefixed { class, .. } if class == "panel"),
+            "{error}"
+        );
+        let error = Config::new().local(fixture("fixture/style")).build();
+        assert!(matches!(error, Err(Error::NoPrefix)));
+    }
+
+    #[test]
+    fn lists_every_local_file() {
+        let dir = fixture("fixture/style");
+        let files = local_files(&dir).unwrap();
+        assert_eq!(
+            files,
+            [
+                dir.clone(),
+                dir.join("_index.scss"),
+                dir.join("_panel.scss")
+            ]
         );
     }
 }

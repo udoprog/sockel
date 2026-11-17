@@ -1,0 +1,9 @@
+// The fixture's local styles: a plinth class targeted, a partial, and
+// plinth's tokens and mixins through `@use "plinth"`.
+
+@use "plinth" as p;
+@use "panel";
+
+.stack.fixture-panel {
+    gap: var(--space-1);
+}

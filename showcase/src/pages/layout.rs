@@ -1,5 +1,7 @@
 use yew::prelude::*;
 
+use crate::class;
+
 use plinth::{
     Align, Card, Cluster, Gap, Inset, Justify, Stack, Toolbar, ToolbarSpacer, card, cluster, stack,
     toolbar,
@@ -63,7 +65,7 @@ pub fn StackPage() -> Html {
 
     html! {
         <Demo {controls}>
-            <Stack gap={*gap} tag={*tag} flush={*flush} class="outlined">
+            <Stack gap={*gap} tag={*tag} flush={*flush} class={class::OUTLINED}>
                 { samples(*count, *text, false, *paragraphs) }
             </Stack>
         </Demo>
@@ -103,7 +105,7 @@ pub fn ClusterPage() -> Html {
     html! {
         <Demo {controls}>
             <Cluster gap={*gap} justify={*justify} align={*align} nowrap={*nowrap} inline={*inline}
-                lines={*lines} flush={*flush} class="outlined">
+                lines={*lines} flush={*flush} class={class::OUTLINED}>
                 { samples(*count, *text, *mixed, *paragraphs) }
             </Cluster>
         </Demo>
@@ -167,7 +169,7 @@ pub fn CardPage() -> Html {
     let content = if *list {
         html! { <Stack gap={Gap::Hair}>{ samples(4, *text, false, false) }</Stack> }
     } else {
-        html! { <p class="prose">{ text.of("A card's content") }</p> }
+        html! { <p class={class::PROSE}>{ text.of("A card's content") }</p> }
     };
 
     html! {
@@ -206,16 +208,16 @@ pub fn ClassesPage() -> Html {
     let toolbar = toolbar(*boxed);
     let card = card(*inset, *link);
     let shown = |call: &str, classes: &Classes| {
-        html! { <code class="class-call">{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
+        html! { <code class={class::CLASS_CALL}>{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
     };
 
     html! {
         <Demo {controls}>
             <Stack gap={Gap::Loose}>
                 { shown("stack(gap)", &stack) }
-                <ul class={classes!(stack, "plain-list", "outlined")}>{ samples(3, Text::Short, false, false) }</ul>
+                <ul class={classes!(stack, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples(3, Text::Short, false, false) }</ul>
                 { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
-                <ul class={classes!(cluster, "plain-list", "outlined")}>{ samples(3, Text::Short, true, false) }</ul>
+                <ul class={classes!(cluster, plinth::class::PLAIN_LIST, class::OUTLINED)}>{ samples(3, Text::Short, true, false) }</ul>
                 { shown("toolbar(boxed)", &toolbar) }
                 <nav class={toolbar} aria-label="Toolbar classes">
                     { button("One".into(), false, false) }

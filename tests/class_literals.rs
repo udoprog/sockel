@@ -147,7 +147,7 @@ fn known_classes() -> Vec<String> {
     plinth_build::Config::new()
         .build()
         .expect("plinth's Sass")
-        .classes
+        .plinth_classes
 }
 
 #[test]

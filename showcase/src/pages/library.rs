@@ -1,5 +1,7 @@
 use yew::prelude::*;
 
+use crate::class;
+
 use plinth::LibraryToolbar;
 
 use crate::controls::{COUNTS, Demo, Select, Text, Toggle, bind};
@@ -35,15 +37,15 @@ pub fn LibraryToolbarPage() -> Html {
         };
 
         html! {
-            <button type="button" class="button filter" onclick={on_click}
+            <button type="button" class={classes!(class::BUTTON, class::FILTER)} onclick={on_click}
                 title="Click to pick another: the field keeps its width">
-                <span class="filter-text">{ format!("Filter {}: {}", n + 1, PICKS[picked[n]]) }</span>
+                <span class={class::FILTER_TEXT}>{ format!("Filter {}: {}", n + 1, PICKS[picked[n]]) }</span>
             </button>
         }
     };
 
     let search_icon = icon.then(|| {
-        html! { <span class="search-icon" aria-hidden="true">{ "⌕" }</span> }
+        html! { <span class={class::SEARCH_ICON} aria-hidden="true">{ "⌕" }</span> }
     });
 
     html! {
@@ -53,7 +55,7 @@ pub fn LibraryToolbarPage() -> Html {
                 icon={search_icon.unwrap_or_default()}>
                 { for (0..*filters).map(filter) }
             </LibraryToolbar>
-            <p class="control-label">{ format!("Searching for {:?}", *value) }</p>
+            <p class={class::CONTROL_LABEL}>{ format!("Searching for {:?}", *value) }</p>
         </Demo>
     }
 }

@@ -2,11 +2,11 @@
 //! each a component and its Sass (`style/`), its variants modifier classes
 //! set by props, so the markup and the styles stay in step.
 //!
-//! [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page; an
-//! app with its own Sass build can `@use "<path>/plinth/style"` (and
-//! `.../style/tokens` for the tokens and mixins) instead. The colours are the
-//! app's: plinth reads `--bg`, `--surface`, `--text`, `--muted`, `--border`,
-//! `--accent` and `--shadow-1`.
+//! [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
+//! app with Sass of its own builds it with plinth-build after plinth's, into
+//! one stylesheet, and passes that to [`Styles`] (README: "Adopting plinth").
+//! The colours are the app's: plinth reads `--bg`, `--surface`, `--text`,
+//! `--muted`, `--border`, `--accent` and `--shadow-1`.
 //!
 //! - [`Stack`] (`.stack`): a column, its blocks a gap apart.
 //! - [`Cluster`] (`.cluster`): a row that wraps, its items centred.
@@ -55,4 +55,4 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
-pub use styles::{STYLESHEET, Styles};
+pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};

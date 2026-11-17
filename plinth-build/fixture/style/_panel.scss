@@ -1,0 +1,13 @@
+@use "plinth" as p;
+
+.fixture-panel {
+    padding: var(--space-2);
+
+    @include p.below("phone") {
+        padding: 0;
+    }
+}
+
+.fixture-panel-title {
+    font-size: var(--text-lg);
+}

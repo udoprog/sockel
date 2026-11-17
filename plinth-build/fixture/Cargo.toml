@@ -1,0 +1,7 @@
+[package]
+name = "plinth-build-fixture"
+edition = "2024"
+publish = false
+
+[build-dependencies]
+plinth-build = { path = ".." }
