@@ -7,6 +7,16 @@
 // - `.plinth-section-head`: the same for a section in a page, its title
 //   (`.plinth-section-head-title`, an h2) a size smaller.
 //
+// - A head's title is Html, with an `icon` before it (`.plinth-head-icon`, in the
+//   accent). Its help follows the heading as its sibling, in the heading's
+//   group (`.plinth-head-heading`: title, help, suffix), so the heading's
+//   text excludes it. A `subtitle` (`.plinth-head-subtitle`) is one muted line
+//   under the row, and `crumbs` a stacked list above it (`.plinth-head-trail`,
+//   its list and items), each a link with a chevron after it.
+// - `.plinth-section-head.plinth-label`: a small-caps label head, whose
+//   children (a count, pills) sit beside the title; `.plinth-head-end` pushes
+//   one (a see-also link) to the row's end. `.plinth-section-head.plinth-list`: a
+//   list's head, smaller; `.plinth-nested` a step smaller still.
 // - A title may take a `level`, `title_class` and a `suffix` after its help.
 // - `.plinth-page-head.plinth-crumb`: a head that leads back, `.plinth-page-head-crumbs`: the back
 //   link (`.plinth-page-head-back`), a `/` (`.plinth-page-head-sep`) and the title; its
@@ -43,6 +53,91 @@
 
 .plinth-section-head-title {
     font-size: var(--text-lg);
+}
+
+// The title with its help and suffix beside it, one item of the head's row.
+.plinth-head-heading {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-1) var(--space-2);
+    min-width: 0;
+}
+
+.plinth-head-icon {
+    margin-right: 0.4em;
+    color: var(--accent);
+}
+
+// Whole rows of the head: the trail above the title, the subtitle under it.
+.plinth-head-trail,
+.plinth-head-subtitle {
+    flex: 0 0 100%;
+    min-width: 0;
+    margin: 0;
+}
+
+.plinth-head-trail-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--text-sm);
+}
+
+.plinth-head-trail-item {
+    display: inline-flex;
+    align-items: center;
+
+    &::after {
+        content: "\203A";
+        margin-inline: var(--space-1);
+        color: var(--muted);
+    }
+
+    a {
+        color: var(--muted);
+
+        &:hover {
+            color: var(--text);
+        }
+    }
+}
+
+.plinth-head-subtitle {
+    color: var(--muted);
+    font-size: var(--text-sm);
+}
+
+.plinth-head-end {
+    margin-left: auto;
+}
+
+.plinth-section-head.plinth-label {
+    gap: var(--space-1) var(--space-2);
+    justify-content: flex-start;
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.06em;
+    text-transform: uppercase;
+
+    > .plinth-head-heading > .plinth-section-head-title {
+        font: inherit;
+        color: inherit;
+    }
+}
+
+.plinth-section-head.plinth-list {
+    > .plinth-head-heading > .plinth-section-head-title {
+        font-size: var(--text-base);
+    }
+
+    &.plinth-nested > .plinth-head-heading > .plinth-section-head-title {
+        font-size: var(--text-sm);
+    }
 }
 
 .plinth-page-head-actions,

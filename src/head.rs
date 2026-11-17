@@ -5,9 +5,24 @@ use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
 pub struct HeadProps {
-    pub title: AttrValue,
-    /// What explains the page or section (a help tip), in the title's
-    /// line after its text.
+    /// The title's content: text, or formatted names and spans.
+    pub title: Html,
+    /// An icon before the title's text, inside the heading (a
+    /// `plinth-head-icon` span, in the accent).
+    #[prop_or_default]
+    pub icon: Option<Html>,
+    /// One muted line under the head's row (`plinth-head-subtitle`).
+    #[prop_or_default]
+    pub subtitle: Option<Html>,
+    /// The pages above this one, outermost first: each a link, stacked in
+    /// a list above the title's row with a chevron after it.
+    #[prop_or_default]
+    pub crumbs: Vec<Html>,
+    /// The crumbs' accessible name.
+    #[prop_or_default]
+    pub crumbs_label: Option<AttrValue>,
+    /// What explains the page or section (a help tip), after the heading
+    /// as its sibling, so the heading's text and test id exclude it.
     #[prop_or_default]
     pub help: Option<Html>,
     /// The title's heading level, instead of the head's own (`h1` for a
@@ -126,33 +141,56 @@ fn head(kind: Head, props: &HeadProps) -> Html {
 
     let title = html! {
         <@{tag} class={classes!(title, props.title_class.clone())} data-testid={testid}>
+            { for props.icon.clone().map(|icon| html! { <span class={class::HEAD_ICON}>{ icon }</span> }) }
             { props.title.clone() }
-            { for help }
         </@>
     };
     let meta = props.meta.clone();
+    let trail = (!props.crumbs.is_empty()).then(|| {
+        html! {
+            <nav class={class::HEAD_TRAIL} aria-label={props.crumbs_label.clone()}>
+                <ol class={class::HEAD_TRAIL_LIST}>
+                    { for props.crumbs.iter().map(|crumb| html! {
+                        <li class={class::HEAD_TRAIL_ITEM}>{ crumb.clone() }</li>
+                    }) }
+                </ol>
+            </nav>
+        }
+    });
+    let subtitle = props
+        .subtitle
+        .clone()
+        .map(|subtitle| html! { <p class={class::HEAD_SUBTITLE}>{ subtitle }</p> });
 
     let Some(back) = props.back.clone() else {
         return html! {
             <header class={classes!(head_classes(head, false), props.class.clone())} data-testid={props.head_testid.clone()}>
-                { title }
-                { for suffix }
+                { for trail }
+                <div class={class::HEAD_HEADING}>
+                    { title }
+                    { for help }
+                    { for suffix }
+                </div>
                 { for meta }
                 { for actions }
+                { for subtitle }
             </header>
         };
     };
 
     html! {
         <header class={classes!(head_classes(head, true), props.class.clone())} data-testid={props.head_testid.clone()}>
+            { for trail }
             <nav class={class::PAGE_HEAD_CRUMBS} aria-label={props.back_label.clone()}>
                 { back }
                 <span class={class::PAGE_HEAD_SEP} aria-hidden="true">{ "/" }</span>
                 { title }
+                { for help }
                 { for suffix }
             </nav>
             { for meta }
             { for actions }
+            { for subtitle }
         </header>
     }
 }
@@ -172,6 +210,67 @@ pub fn SectionHead(props: &HeadProps) -> Html {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use yew::LocalServerRenderer;
+
+    fn render(props: HeadProps) -> String {
+        futures::executor::block_on(
+            LocalServerRenderer::<PageHead>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    fn props() -> HeadProps {
+        yew::props!(HeadProps {
+            title: html! { <b>{ "Name" }</b> },
+        })
+    }
+
+    #[test]
+    fn the_help_follows_the_heading_as_its_sibling() {
+        let html = render(HeadProps {
+            help: Some(html! { <button>{ "?" }</button> }),
+            ..props()
+        });
+        let heading = html.split("</h1>").next().expect("a heading");
+        assert!(!heading.contains("<button>"), "{html}");
+        assert!(html.contains("</h1><button>?</button>"), "{html}");
+    }
+
+    #[test]
+    fn the_help_follows_the_title_in_a_crumb_too() {
+        let html = render(HeadProps {
+            back: Some(html! { <a href="#">{ "Back" }</a> }),
+            help: Some(html! { <button>{ "?" }</button> }),
+            ..props()
+        });
+        assert!(html.contains("</h1><button>?</button>"), "{html}");
+    }
+
+    #[test]
+    fn crumbs_stack_above_the_title_and_the_subtitle_follows_the_row() {
+        let html = render(HeadProps {
+            crumbs: vec![
+                html! { <a href="/a">{ "A" }</a> },
+                html! { <a href="/b">{ "B" }</a> },
+            ],
+            crumbs_label: Some("Trail".into()),
+            subtitle: Some(html! { { "Facts" } }),
+            icon: Some(html! { { "*" } }),
+            children: html! { <button>{ "Go" }</button> },
+            ..props()
+        });
+        let at = |needle: &str| {
+            html.find(needle)
+                .unwrap_or_else(|| panic!("{needle} in {html}"))
+        };
+        assert!(at("<nav") < at("<h1"));
+        assert!(at("<h1") < at("<button>Go"));
+        assert!(at("<button>Go") < at("<p class=\"plinth-head-subtitle\">Facts"));
+        assert!(html.contains("aria-label=\"Trail\""), "{html}");
+        assert_eq!(html.matches("<li ").count(), 2, "{html}");
+        assert!(html.contains("<h1 class=\"plinth-page-head-title\"><span class=\"plinth-head-icon\">*</span><b>Name</b></h1>"), "{html}");
+    }
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()

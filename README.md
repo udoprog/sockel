@@ -242,6 +242,19 @@ page can still override them at runtime.
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
 
+## Heads
+
+`PageHead` and `SectionHead` take one set of props (`HeadProps`):
+
+- `title` is Html; `icon` goes before its text in the heading, `subtitle` is a
+  muted line under the row, `crumbs` (a list of links) stack above it, and
+  `back` is the inline "back / title" crumb. Each is its own prop.
+- `help` follows the heading as its sibling, in `.plinth-head-heading` with
+  the `suffix`, so the heading's text and test id exclude the help button.
+- `SectionHead` takes the modifiers `plinth::class::LABEL` (small-caps label),
+  `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
+  child to the row's end.
+
 ## Showcase
 
 `showcase/` is an interactive gallery of every component: a page for
