@@ -449,6 +449,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         submit: props.submit,
         onclick: props.onclick.clone(),
         title: None,
+        tip: None,
         label: props.label.clone(),
         testid: props.testid.clone(),
         children: props.children.clone(),

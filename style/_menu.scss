@@ -13,14 +13,16 @@
 //   so hover and focus change its fill only. Parts: `-mark` (a check's or
 //   radio's, its box kept when off, `.plinth-off`), `-icon`, `-text`
 //   (`-label` on one line, `-detail` under it), `-hint` (a shortcut).
-//   `.plinth-danger`: in the danger colour.
+//   `.plinth-danger`: in the danger colour. An `<a>` row (a link) looks the
+//   same as a `<button>` one.
 // - `.plinth-menu-separator`, `.plinth-menu-heading`, `.plinth-menu-note`.
 // - `.plinth-row-actions`: a row's icon buttons and its overflow menu, one
 //   size; `.plinth-row-action-danger` is muted until hovered or focused.
 // - `.plinth-split-button`: a main action (`-main`) and its menu's opener
 //   (`-toggle`), one control sharing a border.
-// - `.plinth-context-target`: what a context menu opens on, laid out as if
-//   it were not there; `.plinth-menu-point`, the pointer's place it opens
+// - `.plinth-context-target`: what a context menu opens on (and a tool
+//   opener, whose menu a right-click opens), laid out as if it were not
+//   there; `.plinth-menu-point`, the pointer's place it opens
 //   at (`--menu-x`, `--menu-y`).
 
 @use "tokens" as base;
@@ -121,6 +123,8 @@
 
 .plinth-menu-item {
     @include item;
+
+    text-decoration: none;
 
     &:hover,
     &:focus-visible {

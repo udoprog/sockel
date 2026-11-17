@@ -3,9 +3,9 @@ use yew::prelude::*;
 use crate::class;
 
 use plinth::{
-    ButtonSize, ButtonVariant, Cluster, ContextMenu, Glyph, Icon, Menu, MenuCheck, MenuHeading,
-    MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction, RowActions, SplitButton,
-    Stack,
+    Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, Glyph, Icon, Menu, MenuCheck,
+    MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction, RowActions,
+    SplitButton, Stack, TextInput,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -75,6 +75,7 @@ fn SampleItems(props: &ItemsProps) -> Html {
                 <MenuItem detail="Keeps its history" onclick={pick("rename")}>{ "Rename" }</MenuItem>
                 <MenuItem disabled={props.disabled} onclick={pick("move")}>{ "Move to…" }</MenuItem>
                 <MenuItem onclick={pick("copy")}>{ "Copy link" }</MenuItem>
+                <MenuItem href="#menu" detail="A link row">{ "Open this page" }</MenuItem>
                 <MenuSeparator />
                 <MenuItem danger=true onclick={pick("delete")}>{ "Delete" }</MenuItem>
             </>
@@ -105,6 +106,53 @@ fn SampleItems(props: &ItemsProps) -> Html {
                 </>
             }
         }
+    }
+}
+
+/// A tool whose click toggles it and whose right-click opens its sizes,
+/// the checked one focused on open.
+#[function_component]
+fn ToolMenu() -> Html {
+    let on = use_state(|| false);
+    let size = use_state(|| 1usize);
+    let toggle = {
+        let on = on.clone();
+        Callback::from(move |_: MouseEvent| on.set(!*on))
+    };
+    let radio = |n: usize, name: &'static str| {
+        let size = size.clone();
+        html! {
+            <MenuRadio checked={*size == n} on_pick={Callback::from(move |()| size.set(n))}>
+                { name }
+            </MenuRadio>
+        }
+    };
+    html! {
+        <Menu label="Pen" tip="Pen: right-click for its size" icon={html! { <Icon glyph={Glyph::Plus} /> }}
+            on_click={toggle} pressed={Some(*on)}>
+            <MenuHeading>{ "Size" }</MenuHeading>
+            { radio(0, "Fine") }
+            { radio(1, "Medium") }
+            { radio(2, "Broad") }
+        </Menu>
+    }
+}
+
+/// A menu holding a field: Tab moves between it and the button.
+#[function_component]
+fn FieldMenu() -> Html {
+    let name = use_state(|| AttrValue::Static("Draft"));
+    let on_input = {
+        let name = name.clone();
+        Callback::from(move |v: String| name.set(v.into()))
+    };
+    html! {
+        <Menu text={html! { "Rename" }} label="Rename" width={MenuWidth::Panel}>
+            <Stack>
+                <TextInput value={(*name).clone()} {on_input} label="Name" />
+                <Button variant={ButtonVariant::Primary}>{ "Save" }</Button>
+            </Stack>
+        </Menu>
     }
 }
 
@@ -170,6 +218,11 @@ pub fn MenuPage() -> Html {
                     <button type="button" class={classes!(class::BUTTON)}>{ "Beside it" }</button>
                 </Cluster>
                 <p class={class::SAMPLE}>{ "Open the menu: nothing here moves. Arrows, Home, End and typing move between items; Escape closes it and focus returns to its opener." }</p>
+                <Cluster>
+                    <ToolMenu />
+                    <FieldMenu />
+                </Cluster>
+                <p class={class::SAMPLE}>{ "The pen is a tool: a click toggles it, a right-click opens its sizes with the checked one focused. Rename holds a field: Tab moves between the field and Save, and closes past either end." }</p>
             </Stack>
         </Demo>
     }

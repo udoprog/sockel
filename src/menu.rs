@@ -21,6 +21,9 @@ const ITEMS: &str = ":is([role=menuitem], [role=menuitemcheckbox], [role=menuite
 const PICKS: &str =
     ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
 
+/// What Tab moves between in a menu that holds fields.
+const TABBABLE: &str = "input:not(:disabled), textarea:not(:disabled), select:not(:disabled), button:not(:disabled), a[href], [tabindex]:not([tabindex='-1'])";
+
 /// How long a touch is held to open a context menu, in milliseconds.
 const LONG_PRESS_MS: u32 = 500;
 
@@ -88,15 +91,55 @@ fn label_of(item: &HtmlElement) -> String {
         .unwrap_or_default()
 }
 
+fn is_field(e: &Element) -> bool {
+    e.matches("input, textarea, select").unwrap_or(false)
+}
+
+/// Whether Tab (Shift+Tab with `back`) has another of the list's own
+/// controls to go to: only in a list that holds fields.
+fn tabs_within(list: &NodeRef, back: bool) -> bool {
+    let Some(list) = list.cast::<Element>() else {
+        return false;
+    };
+    if !list
+        .query_selector("input, textarea, select")
+        .is_ok_and(|f| f.is_some())
+    {
+        return false;
+    }
+    let Ok(found) = list.query_selector_all(TABBABLE) else {
+        return false;
+    };
+    let shown: Vec<Element> = (0..found.length())
+        .filter_map(|i| found.item(i)?.dyn_into::<Element>().ok())
+        .filter(|e| {
+            let r = e.get_bounding_client_rect();
+            r.width() > 0.0 || r.height() > 0.0
+        })
+        .collect();
+    let active = web_sys::window().and_then(|w| w.document()?.active_element());
+    let Some(at) = active.and_then(|a| shown.iter().position(|e| *e == a)) else {
+        return false;
+    };
+    if back { at > 0 } else { at + 1 < shown.len() }
+}
+
 /// The keyboard of an open menu's list: arrows, Home, End, type-ahead;
-/// Tab closes it. Escape is the popover layer's.
+/// Tab closes it, unless it moves between the list's own fields and
+/// buttons. A focused field keeps its keys. Escape is the popover layer's.
 #[hook]
 fn use_menu_keys(list: NodeRef, close: Callback<()>) -> Callback<KeyboardEvent> {
     let typed = use_mut_ref(Typeahead::default);
     Callback::from(move |e: KeyboardEvent| {
         if e.key() == "Tab" {
+            if tabs_within(&list, e.shift_key()) {
+                return;
+            }
             e.prevent_default();
             close.emit(());
+            return;
+        }
+        if e.target_dyn_into::<Element>().is_some_and(|t| is_field(&t)) {
             return;
         }
         let items = items_of(&list);
@@ -121,12 +164,21 @@ fn use_menu_keys(list: NodeRef, close: Callback<()>) -> Callback<KeyboardEvent> 
     })
 }
 
-/// Focuses the list's first item once the menu is placed.
+/// Focuses the list's checked radio once the menu is placed, else its
+/// first item.
 #[hook]
 fn use_focus_first(list: NodeRef, placed: bool) {
     use_effect_with(placed, move |&placed| {
-        if placed && let Some(first) = items_of(&list).first() {
-            _ = first.focus();
+        if !placed {
+            return;
+        }
+        let items = items_of(&list);
+        let checked = items.iter().find(|i| {
+            i.get_attribute("role").as_deref() == Some("menuitemradio")
+                && i.get_attribute("aria-checked").as_deref() == Some("true")
+        });
+        if let Some(item) = checked.or(items.first()) {
+            _ = item.focus();
         }
     });
 }
@@ -251,6 +303,17 @@ pub struct MenuProps {
     /// The opener's classes, beside the button's.
     #[prop_or_default]
     pub opener_class: Classes,
+    /// The opener's tooltip (`data-tip`, for [`DataTips`](crate::DataTips)).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
+    /// A click on the opener does this instead of opening the menu, for an
+    /// opener that is a tool of its own; a right-click (a long press on a
+    /// touch screen) opens the menu.
+    #[prop_or_default]
+    pub on_click: Option<Callback<MouseEvent>>,
+    /// The opener is a toggle and whether it is on (`aria-pressed`).
+    #[prop_or_default]
+    pub pressed: Option<bool>,
     #[prop_or_default]
     pub width: MenuWidth,
     /// No gap between rows.
@@ -292,8 +355,26 @@ pub fn Menu(props: &MenuProps) -> Html {
     let opener = use_node_ref();
     let (is_open, set_open) = use_open(props.open, props.on_toggle.clone());
     let onclick = {
-        let set_open = set_open.clone();
-        Callback::from(move |_: MouseEvent| set_open.emit(!is_open))
+        let (set_open, on_click) = (set_open.clone(), props.on_click.clone());
+        Callback::from(move |e: MouseEvent| match &on_click {
+            Some(on_click) => {
+                if is_open {
+                    set_open.emit(false);
+                }
+                on_click.emit(e);
+            }
+            None => set_open.emit(!is_open),
+        })
+    };
+    let oncontextmenu = {
+        let (set_open, disabled) = (set_open.clone(), props.disabled);
+        Callback::from(move |e: MouseEvent| {
+            // A second right-click reaches the browser's own menu.
+            if !disabled && !is_open {
+                e.prevent_default();
+                set_open.emit(true);
+            }
+        })
     };
     let on_dismiss = set_open.reform(|_: Dismiss| false);
     let has_text = !crate::button::is_empty(&props.text);
@@ -303,16 +384,25 @@ pub fn Menu(props: &MenuProps) -> Html {
         None => (Some(html! { <Icon glyph={Glyph::Ellipsis} /> }), false),
     };
 
+    let button = html! {
+        <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
+            class={props.opener_class.clone()} {icon} {trailing}
+            label={props.label.clone()} tip={props.tip.clone()} disabled={props.disabled}
+            pressed={props.pressed}
+            expanded={Some(is_open)} haspopup={AttrValue::Static("menu")}
+            testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))}
+            {onclick}>
+            { props.text.clone() }
+        </Button>
+    };
+
     html! {
         <>
-            <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
-                class={props.opener_class.clone()} {icon} {trailing}
-                label={props.label.clone()} disabled={props.disabled}
-                expanded={Some(is_open)} haspopup={AttrValue::Static("menu")}
-                testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-toggle")))}
-                {onclick}>
-                { props.text.clone() }
-            </Button>
+            if props.on_click.is_some() {
+                <span class={class::CONTEXT_TARGET} {oncontextmenu}>{ button }</span>
+            } else {
+                { button }
+            }
             <MenuList anchor={opener} open={is_open} {on_dismiss}
                 side={props.side} align={props.align} width={props.width} tight={props.tight}
                 label={props.label.clone()} class={props.class.clone()}
@@ -334,6 +424,9 @@ pub struct MenuItemProps {
     /// A note at the row's end, such as its shortcut.
     #[prop_or_default]
     pub hint: Option<AttrValue>,
+    /// A link row (`<a>`): picking it follows the link and closes the menu.
+    #[prop_or_default]
+    pub href: Option<AttrValue>,
     /// In the danger colour (Delete).
     #[prop_or_default]
     pub danger: bool,
@@ -391,12 +484,8 @@ impl Row<'_> {
                 }
             })
         };
-        html! {
-            <button type="button" role={self.role} tabindex="-1"
-                class={classes!(menu_item(p.danger), p.class.clone())}
-                aria-checked={self.checked.map(|on| on.to_string())}
-                aria-disabled={p.disabled.then_some("true")}
-                data-testid={p.testid.clone()} {onclick}>
+        let content = html! {
+            <>
                 { for mark }
                 { for icon }
                 <span class={class::MENU_ITEM_TEXT}>
@@ -404,7 +493,25 @@ impl Row<'_> {
                     { for detail }
                 </span>
                 { for hint }
-            </button>
+            </>
+        };
+        let class = classes!(menu_item(p.danger), p.class.clone());
+        let disabled = p.disabled.then_some("true");
+        match &p.href {
+            Some(href) => html! {
+                <a role={self.role} tabindex="-1" {class}
+                    href={(!p.disabled).then(|| href.clone())}
+                    aria-disabled={disabled} data-testid={p.testid.clone()} {onclick}>
+                    { content }
+                </a>
+            },
+            None => html! {
+                <button type="button" role={self.role} tabindex="-1" {class}
+                    aria-checked={self.checked.map(|on| on.to_string())}
+                    aria-disabled={disabled} data-testid={p.testid.clone()} {onclick}>
+                    { content }
+                </button>
+            },
         }
     }
 }
@@ -452,6 +559,7 @@ fn item_props(
         icon: None,
         detail: detail.clone(),
         hint: hint.clone(),
+        href: None,
         danger: false,
         disabled,
         onclick: Callback::noop(),
@@ -956,6 +1064,55 @@ mod tests {
             html.contains(&format!("{} {}", class::MENU_ITEM, class::DANGER)),
             "{html}"
         );
+    }
+
+    #[test]
+    fn a_link_item_is_an_anchor_without_its_href_when_disabled() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/help")),
+            children: html! { "Help" },
+        }));
+        assert!(html.starts_with("<a"), "{html}");
+        assert!(html.contains("role=\"menuitem\""), "{html}");
+        assert!(html.contains("href=\"/help\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/help")),
+            disabled: true,
+        }));
+        assert!(!html.contains("href"), "{html}");
+        assert!(html.contains("aria-disabled=\"true\""), "{html}");
+    }
+
+    #[test]
+    fn a_tool_opener_is_pressed_tipped_and_takes_a_right_click() {
+        let html = render::<Menu>(yew::props!(MenuProps {
+            label: Some(AttrValue::Static("Pen")),
+            tip: Some(AttrValue::Static("Pen (right-click for its sizes)")),
+            on_click: Some(Callback::noop()),
+            pressed: Some(true),
+        }));
+        assert!(html.contains("aria-pressed=\"true\""), "{html}");
+        assert!(html.contains("data-tip=\"Pen (right-click"), "{html}");
+        assert!(html.contains(class::CONTEXT_TARGET), "{html}");
+        // A plain menu's opener is the button alone.
+        let html = render::<Menu>(yew::props!(MenuProps {
+            label: Some(AttrValue::Static("Row")),
+        }));
+        assert!(!html.contains(class::CONTEXT_TARGET), "{html}");
+        assert!(!html.contains("data-tip"), "{html}");
+    }
+
+    #[test]
+    fn tab_reaches_every_control_of_a_field_menu() {
+        for part in [
+            "input:not(:disabled)",
+            "textarea",
+            "select",
+            "button:not(:disabled)",
+            "a[href]",
+        ] {
+            assert!(TABBABLE.contains(part), "{part}");
+        }
     }
 
     #[test]

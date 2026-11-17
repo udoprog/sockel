@@ -362,8 +362,8 @@ label). plinth styles only `.plinth-button`, never a bare `<button>`.
   lays the IconSet's spinner over it; a busy button ignores clicks.
   `disabled` disables a button; a disabled link loses its `href` and gets
   `aria-disabled="true"`.
-- `submit`, `onclick`, `title`, `testid` as on `IconButton`; `class` adds
-  the app's classes. `button(variant, size, icon_only, fold)` gives the
+- `submit`, `onclick`, `title`, `testid` as on `IconButton`; `tip` is its
+  tooltip for `DataTips` (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
   classes for an element that cannot be the component.
 
 Size guarantees: the height is the size's token, whatever the label (one
@@ -1145,7 +1145,13 @@ overlay layer, through `use_popover`. Props:
   alone), `icon` (the app's; a text opener without one ends in the
   IconSet's chevron, an icon-only one shows its ellipsis), `label` (the
   accessible name of the opener and the list), `variant` and `size` (the
-  opener's, `Regular` so it matches the buttons beside it), `opener_class`.
+  opener's, `Regular` so it matches the buttons beside it), `opener_class`,
+  `tip` (the opener's `data-tip`).
+- `on_click` and `pressed`: an opener that is a tool of its own. A click
+  runs `on_click` (closing the menu if open) and a right-click (a long
+  press on a touch screen) opens the menu; a second right-click while it
+  is open reaches the browser's menu. `pressed: Some(on)` makes the opener
+  a toggle (`aria-pressed`).
 - `width` (`MenuWidth`): `Regular` (`--menu-width`), `Wide` (`WIDE`,
   `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
@@ -1155,18 +1161,23 @@ overlay layer, through `use_popover`. Props:
   `testid` (the list's; the opener's is it suffixed `-toggle`).
 
 Its children are the items: `MenuItem` (an action; `icon`, `detail` under
-the label, `hint` at the end, `danger`, `disabled`, `onclick`),
+the label, `hint` at the end, `danger`, `disabled`, `onclick`; with `href`
+a link row, an `<a>` that loses its `href` when disabled),
 `MenuCheck` (`menuitemcheckbox`: `checked`, `on_change`; the menu stays
 open), `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), `MenuSeparator`,
 `MenuHeading` and `MenuNote` (a line such as "nothing here"). Each takes
 `class`. `menu(width, tight, placed)` and `menu_item(danger)` give the
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
-Keyboard: focus moves to the first item once the list is placed; the
+Keyboard: focus moves to the checked radio once the list is placed, else
+to the first item; the
 arrows (wrapping), Home and End move between enabled items, and typing
 moves to the next item starting with what was typed (a pause of 0.7 s
-starts over; one letter repeated cycles). A pick of an item or radio,
-Tab, Escape or a press outside closes it; all but the press return focus
+starts over; one letter repeated cycles). In a menu that holds fields (a
+small form), Tab and Shift+Tab move between its own fields and buttons and
+close it only past either end, and a focused field keeps its arrows and
+letters. A pick of an item or radio, Tab, Escape or a press outside closes
+it; all but the press return focus
 to the opener. A menu is on the one overlay stack, so Escape and a press
 outside close a menu opened from a popover or a dialog before what it
 opened from.

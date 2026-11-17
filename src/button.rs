@@ -79,6 +79,9 @@ pub struct ButtonProps {
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     /// The accessible name, when the label is not the full name or there
     /// is none (`aria-label`).
     #[prop_or_default]
@@ -182,6 +185,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-busy={busy}
                 aria-pressed={pressed}
                 title={props.title.clone()}
+                data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
                 {onclick}
@@ -200,6 +204,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-busy={busy}
                 aria-pressed={pressed}
                 title={props.title.clone()}
+                data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
                 {onclick}
@@ -245,6 +250,7 @@ mod tests {
             submit: false,
             onclick: Callback::noop(),
             title: None,
+            tip: None,
             label: None,
             testid: None,
             children: html! { "Save" },
@@ -400,6 +406,16 @@ mod tests {
         assert!(html.contains("aria-expanded=\"true\""), "{html}");
         assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
         assert!(!render(props()).contains("aria-expanded"));
+    }
+
+    #[test]
+    fn a_tip_is_its_data_tip() {
+        let html = render(ButtonProps {
+            tip: Some("Saves the draft".into()),
+            ..props()
+        });
+        assert!(html.contains("data-tip=\"Saves the draft\""), "{html}");
+        assert!(!render(props()).contains("data-tip"));
     }
 
     #[test]
