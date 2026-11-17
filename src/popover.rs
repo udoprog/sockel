@@ -270,6 +270,15 @@ fn viewport() -> Option<Rect> {
     })
 }
 
+/// Whether a popover closing with focus nowhere hands it back to its
+/// anchor: as its dismissal says (`Escape` and `Close` do, `Outside` does
+/// not), else when its owner closed it only if focus or a press was ever
+/// inside it, so a card that only the pointer opened and left (a hover
+/// card) does not take focus to its anchor as it goes.
+pub(crate) fn hands_back(dismissed: Option<bool>, inside: bool) -> bool {
+    dismissed.unwrap_or(inside)
+}
+
 /// Whether focus is nowhere: on `<body>`, where it falls when the element
 /// that had it goes.
 pub(crate) fn focus_lost() -> bool {
@@ -289,8 +298,10 @@ pub(crate) fn focus_lost() -> bool {
 /// shown, and again on scroll, resize and a change of either's size. A
 /// press outside both, or Escape, asks `on_dismiss` to close it, unless an
 /// overlay opened after it (a dialog from it) is still open; when it
-/// closes, focus left nowhere (it was inside the popover) goes back to the
-/// anchor, unless a press outside closed it. `None` until it is placed.
+/// closes, focus left nowhere goes back to the anchor after Escape or the
+/// sheet's close, and after its owner closed it if focus or a press was
+/// inside it (not after a press outside, nor for a card the pointer only
+/// passed over). `None` until it is placed.
 #[hook]
 pub fn use_popover(
     open: bool,
@@ -338,11 +349,25 @@ fn use_placement(
     {
         let placed = placed.clone();
         use_effect_with((open, side, align), move |&(open, side, align)| {
-            let refocus = Rc::new(Cell::new(true));
+            // Why it was dismissed (whether that returns focus), and
+            // whether focus or a press was ever inside it.
+            let refocus = Rc::new(Cell::new(None::<bool>));
+            let inside = Rc::new(Cell::new(false));
             let mut held: Vec<Listener> = Vec::new();
             let mut observer = None;
 
             if open {
+                if let Some(element) = popover.cast::<Element>() {
+                    for kind in ["focusin", "pointerdown"] {
+                        let inside = inside.clone();
+                        held.push(Listener::new(
+                            element.clone().into(),
+                            kind,
+                            true,
+                            move |_| inside.set(true),
+                        ));
+                    }
+                }
                 let layer = Rc::new(if tip {
                     overlays.tip_layer()
                 } else {
@@ -401,7 +426,7 @@ fn use_placement(
                                 if let Some(why) =
                                     Dismiss::for_press(within(&anchor, &e), within(&popover, &e))
                                 {
-                                    refocus.set(why.returns_focus());
+                                    refocus.set(Some(why.returns_focus()));
                                     on_dismiss.borrow().emit(why);
                                 }
                             }
@@ -423,7 +448,7 @@ fn use_placement(
                                 // event from another frame fails `instanceof`.
                                 let key = e.unchecked_ref::<web_sys::KeyboardEvent>().key();
                                 if let Some(why) = Dismiss::for_key(&key) {
-                                    refocus.set(why.returns_focus());
+                                    refocus.set(Some(why.returns_focus()));
                                     on_dismiss.borrow().emit(why);
                                 }
                             }
@@ -454,7 +479,7 @@ fn use_placement(
                     watch.disconnect();
                 }
                 if open
-                    && refocus.get()
+                    && hands_back(refocus.get(), inside.get())
                     && focus_lost()
                     && let Some(anchor) = anchor.cast::<HtmlElement>()
                 {
@@ -738,6 +763,14 @@ mod tests {
         assert_eq!(Dismiss::for_press(true, false), None);
         assert_eq!(Dismiss::for_press(false, true), None);
         assert!(!Dismiss::Outside.returns_focus());
+    }
+
+    #[test]
+    fn closed_by_its_owner_it_hands_focus_back_only_if_it_had_it() {
+        assert!(hands_back(None, true));
+        assert!(!hands_back(None, false));
+        assert!(hands_back(Some(true), false));
+        assert!(!hands_back(Some(false), true));
     }
 
     #[test]

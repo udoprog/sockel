@@ -945,8 +945,9 @@ the owner cuts it, and its events still bubble through the owner. Props:
 Dismissal (`Dismiss`), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
 where the press put it; `Escape` and `Close` (the
-sheet's button) return focus to the anchor, as does any close that leaves
-focus nowhere (it was inside the popover).
+sheet's button) return focus to the anchor, as does any close by its owner
+that leaves focus nowhere after focus or a press was inside the popover (one
+the pointer only passed over, a hover card, leaves focus alone).
 
 `use_popover(open, anchor, popover, side, align, on_dismiss)` is the hook
 under it, for a component that renders its own surface (a menu, a select):
