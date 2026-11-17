@@ -15,7 +15,9 @@
 // - `.plinth-listbox-group` (`role="group"`): a run of options under its
 //   `-group-name`, a muted heading.
 // - Settings: `$listbox-max-width` (the list's widest, past which labels
-//   are cut) and `$listbox-active-fill` (the active row's fill).
+//   are cut), `$listbox-max-height` (its tallest, below the room the
+//   popover measured), `$listbox-active-fill` (the active row's fill) and
+//   `$listbox-group-name-transform`/`-letter-spacing` (the headings' case).
 
 @use "tokens" as base;
 @use "menu-surface" as menu;
@@ -23,6 +25,10 @@
 .plinth-listbox {
     @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
     max-width: min(#{base.$listbox-max-width}, calc(100vw - 2 * var(--space-2)));
+
+    @if base.$listbox-max-height {
+        max-height: min(#{base.$listbox-max-height}, var(--popover-max-height, 100vh));
+    }
 }
 
 .plinth-listbox-option {
@@ -86,6 +92,8 @@
     color: var(--muted);
     font-size: var(--text-xs);
     font-weight: 600;
+    text-transform: base.$listbox-group-name-transform;
+    letter-spacing: base.$listbox-group-name-letter-spacing;
 }
 
 @media (forced-colors: active) {

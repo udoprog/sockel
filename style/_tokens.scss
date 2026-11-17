@@ -170,6 +170,11 @@ $popover-padding: var(--space-3) !default;
 // A listbox's widest (a Select's list), and its active row's fill.
 $listbox-max-width: var(--popover-max-width) !default;
 $listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
+// A listbox's tallest below the room beside its opener (`null`: that room),
+// and its group headings' case and letter spacing (`null`: as written).
+$listbox-max-height: null !default;
+$listbox-group-name-transform: null !default;
+$listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;
 // A menu's surface (its edge, ground, shadow, padding and type) and its
 // rows (height, padding, gap, corners, hover fill); `null` keeps the
