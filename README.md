@@ -254,6 +254,7 @@ as `$danger` and the rest):
 | `--panel-border` | `--border` | a `Panel`'s ring |
 | `--panel-tint-text` | `--text` | a tint `Panel`'s text |
 | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
+| `--menu-item-icon-ink` | `currentColor` | a menu row's icon (an accent beside two-line rows, say) |
 
 The status hues are mixed toward `--text`, so they keep their contrast on a
 light and a dark background alike. The defaults are computed on `:root`: an
@@ -354,7 +355,7 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |

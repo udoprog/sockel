@@ -703,6 +703,7 @@ mod tests {
             "--band-search-text: var(--text-sm)",
             "--panel-border: var(--border)",
             "--panel-tint-text: var(--text)",
+            "--menu-item-icon-ink: currentColor",
             "--focus-ring-color: var(--accent)",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");

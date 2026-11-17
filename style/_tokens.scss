@@ -44,7 +44,8 @@
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
 //   `--field-border`, `--field-bg`, `--card-border`, `--panel-ground`,
-//   `--panel-tint`, `--panel-border`, `--panel-tint-text`, `--band-chrome-ground`):
+//   `--panel-tint`, `--panel-border`, `--panel-tint-text`, `--band-chrome-ground`,
+//   `--menu-item-icon-ink`):
 //   each a default an app overrides by name.
 // - `--card-border-width`: a card's edge's width (`0` for no frame).
 // - `--panel-text`, `--panel-space-after`, `--panel-tint-space-after` and
@@ -253,6 +254,7 @@ $panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
 $panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
 $panel-border: var(--border) !default;
 $panel-tint-text: var(--text) !default;
+$menu-item-icon-ink: currentColor !default;
 $panel-text: 1em !default;
 $panel-space-after: 0 !default;
 $panel-tint-space-after: var(--panel-space-after) !default;
@@ -410,6 +412,7 @@ $sheet-breakpoint: "phone" !default;
     --panel-tint: #{$panel-tint};
     --panel-border: #{$panel-border};
     --panel-tint-text: #{$panel-tint-text};
+    --menu-item-icon-ink: #{$menu-item-icon-ink};
     --panel-text: #{$panel-text};
     --panel-space-after: #{$panel-space-after};
     --panel-tint-space-after: #{$panel-tint-space-after};
