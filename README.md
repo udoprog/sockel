@@ -1077,7 +1077,8 @@ gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
 `PLACED`, and as wide as its text up to `--tooltip-max-width` (`$tooltip-max-width`,
 24rem), wrapping beyond. `DataTips`, mounted once, gives every element with a
 `data-tip` attribute the same tip (none when it says what the element already
-says); it places the tip by a fixed stand-in (`TIP_ANCHOR`), and hides on scroll.
+says, or while its menu is open, `aria-expanded="true"`); it places the tip by
+a fixed stand-in (`TIP_ANCHOR`), and hides on scroll and Escape.
 
 `HoverCard` is a richer card (`.plinth-hover-card` on a `.plinth-popover`,
 `hover_card(placed)`): props `anchor`, `side`, `align`, `delay`

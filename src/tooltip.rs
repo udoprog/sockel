@@ -461,12 +461,18 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
     }
 }
 
-/// The tip an element asks for with `data-tip`: none when empty or when the
-/// element already says it.
+/// The tip an element asks for with `data-tip`: none when empty, when the
+/// element already says it, or while its menu is open, which the tip would
+/// cover.
 fn data_tip(element: &Element) -> Option<String> {
     let tip = element.get_attribute("data-tip")?;
     let says = element.text_content().unwrap_or_default();
-    (!tip.trim().is_empty() && says.trim() != tip.trim()).then_some(tip)
+    let expanded = element.get_attribute("aria-expanded").as_deref() == Some("true");
+    wanted(&tip, &says, expanded).then_some(tip)
+}
+
+fn wanted(tip: &str, says: &str, expanded: bool) -> bool {
+    !tip.trim().is_empty() && says.trim() != tip.trim() && !expanded
 }
 
 #[derive(Clone, PartialEq)]
@@ -551,6 +557,19 @@ pub fn DataTips() -> Html {
                             .is_some_and(|t| t.matches(":focus-visible").unwrap_or(false));
                         if focused && visible {
                             c.now(true);
+                        }
+                    },
+                ));
+                let c = control.clone();
+                held.push(Listener::new(
+                    window.clone().into(),
+                    "keydown",
+                    true,
+                    move |e| {
+                        if e.dyn_ref::<KeyboardEvent>()
+                            .is_some_and(|k| k.key() == "Escape")
+                        {
+                            c.now(false);
                         }
                     },
                 ));
@@ -654,6 +673,14 @@ mod tests {
             testid: None,
             children: html! { "Save" },
         }
+    }
+
+    #[test]
+    fn a_data_tip_is_wanted_only_where_it_adds_something() {
+        assert!(wanted("Delete", "", false));
+        assert!(!wanted(" ", "", false));
+        assert!(!wanted("Delete", " Delete ", false));
+        assert!(!wanted("More", "", true));
     }
 
     #[test]
