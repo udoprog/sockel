@@ -25,6 +25,10 @@ pub struct IconButtonProps {
     pub dialog: Option<bool>,
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// The accessible name, when the visible text is not the button's full
+    /// name (`aria-label`).
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
     /// The icon and the label.
     #[prop_or_default]
     pub children: Html,
@@ -49,6 +53,7 @@ pub fn IconButton(props: &IconButtonProps) -> Html {
             aria-haspopup={props.dialog.map(|_| "dialog")}
             aria-expanded={props.dialog.map(|open| open.to_string())}
             title={props.title.clone()}
+            aria-label={props.label.clone()}
             data-testid={props.testid.clone()}
         >
             { props.children.clone() }
