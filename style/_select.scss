@@ -16,6 +16,7 @@
 //   `$sheet-breakpoint` a sheet from the bottom over `-scrim`, its `-head`
 //   (`-title`, the close button) above `-body`, which scrolls; above it the
 //   head and scrim are not shown and the list is as without.
+//   `$select-sheet-row-height` sets the sheet's rows' height.
 
 @use "tokens" as base;
 @use "hidden";
@@ -125,6 +126,10 @@
         border-radius: var(--radius-lg) var(--radius-lg) 0 0;
         padding-top: var(--nest-inset);
         padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
+
+        @if base.$select-sheet-row-height {
+            --control-height: #{base.$select-sheet-row-height};
+        }
     }
 
     .plinth-select-head {

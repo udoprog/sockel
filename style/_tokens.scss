@@ -175,6 +175,9 @@ $listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
 $listbox-max-height: null !default;
 // A listbox's shadow (`null`: the menu surface's, `--shadow-1`).
 $listbox-shadow: null !default;
+// A Select's rows in its phone sheet (`null`: `--control-height`, as
+// above the breakpoint; `var(--touch-height)` gives a finger room).
+$select-sheet-row-height: null !default;
 $listbox-group-name-transform: null !default;
 $listbox-group-name-letter-spacing: null !default;
 $popover-shadow: var(--shadow-1) !default;

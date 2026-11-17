@@ -365,6 +365,7 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$listbox-max-width`, `$listbox-active-fill` | `var(--popover-max-width)`, `color-mix(in srgb, var(--text) 7%, transparent)` (a listbox's widest, a Select's list included, and its active row's fill: the menu's) |
 | `$listbox-max-height`, `$listbox-shadow`, `$listbox-group-name-transform`, `$listbox-group-name-letter-spacing` | `null` (a listbox's tallest, under the room beside its opener, which it always keeps within; its shadow, `null` keeping the list's `--shadow-1`; its group headings' `text-transform` and `letter-spacing`; `null` leaves each as without) |
+| `$select-sheet-row-height` | `null` (a Select's rows in its phone sheet, its close button too; `null` keeps `--control-height`, `var(--touch-height)` gives a finger room) |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
 | `$menu-edge`, `$menu-ground`, `$menu-shadow`, `$menu-padding`, `$menu-text` | `null` each (a menu's border colour, background, shadow, padding and font size; `null` keeps the list's: `--border`, `--surface-raised`, `--shadow-1`, `--nest-inset`, inherited) |
