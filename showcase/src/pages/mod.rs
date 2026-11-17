@@ -1,5 +1,6 @@
 mod actions;
 mod buttons;
+mod fields;
 mod foundations;
 mod heads;
 mod icons;
@@ -181,6 +182,57 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&[
                     "Count=7", "Count=0", "Count=42", "disabled", "focus", "click",
                 ]),
+            ),
+        ],
+    },
+    Page {
+        id: "field",
+        title: "Field",
+        about: "A label, the control, a hint and an error. With reserve_error the error line keeps its room: set an error and nothing below moves.",
+        covers: &[
+            "Field",
+            "FieldProps",
+            "field",
+            "field_error",
+            "field_describedby",
+        ],
+        render: || html! { <fields::FieldPage /> },
+        holds: &[
+            hold(plinth::class::FIELD, Size::Width, Across::All),
+            hold(
+                plinth::class::FIELD,
+                Size::Height,
+                Across::Only(&["error", "required", "disabled", "busy", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "form-rows",
+        title: "FormRows",
+        about: "Rows sharing one label column, the label above its control on a phone; with a Fieldset and a FieldCheck.",
+        covers: &[
+            "FormRows",
+            "FormRowsProps",
+            "FormRow",
+            "form_row",
+            "form_rows",
+            "Fieldset",
+            "FieldsetProps",
+            "FieldCheck",
+            "FieldCheckProps",
+        ],
+        render: || html! { <fields::FormRowsPage /> },
+        holds: &[
+            hold(plinth::class::FORM_ROWS, Size::Width, Across::All),
+            hold(
+                plinth::class::FORM_CONTROL,
+                Size::Width,
+                Across::Except(&["wide_labels", "label"]),
+            ),
+            hold(
+                plinth::class::FORM_ROW,
+                Size::Height,
+                Across::Only(&["error", "required", "disabled", "busy", "focus", "click"]),
             ),
         ],
     },

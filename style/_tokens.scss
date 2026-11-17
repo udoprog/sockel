@@ -11,6 +11,9 @@
 // - `--glyph-size`: the box of one of plinth's own icons, whatever icon fills it.
 // - `--avatar-sm`, `-md`, `-lg`, `-xl`: an avatar's fixed sizes.
 // - `--filter-width`: a list's filter button, one width whatever it says.
+// - `--field-label-width`: the label column of wide-label `FormRows`;
+//   `--field-message-line` and `--field-error-lines`: the line a field's hint and
+//   error are set on, and how many lines its reserved error line holds.
 // - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
 // - `--page-workspace` and `--page-reading`: the two content columns;
 //   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
@@ -115,6 +118,9 @@ $switch-width: 2.5rem !default;
 $switch-height: 1.5rem !default;
 $choice-width: 6rem !default;
 $filter-width: 10.5rem !default;
+$field-label-width: 12rem !default;
+$field-message-line: 1rem !default;
+$field-error-lines: 1 !default;
 $avatar-sm: 1.75rem !default;
 $avatar-md: 2.5rem !default;
 $avatar-lg: 3.5rem !default;
@@ -189,6 +195,10 @@ $visibility-breakpoint: "phone" !default;
     --choice-width: #{$choice-width};
     // A library page's filter button (`.picker.filter`).
     --filter-width: #{$filter-width};
+    // A field's label column, and its hint and error line (`.plinth-field`).
+    --field-label-width: #{$field-label-width};
+    --field-message-line: #{$field-message-line};
+    --field-error-lines: #{$field-error-lines};
     // An avatar's sizes (`.plinth-avatar`, its `-small`, `-large`, `-huge`).
     --avatar-sm: #{$avatar-sm};
     --avatar-md: #{$avatar-md};

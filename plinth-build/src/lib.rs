@@ -25,6 +25,7 @@ macro_rules! sources {
 pub const SOURCES: &[(&str, &str)] = sources!(
     "_actions.scss",
     "_buttons.scss",
+    "_fields.scss",
     "_heads.scss",
     "_hooks.scss",
     "_icons.scss",

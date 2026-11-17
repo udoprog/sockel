@@ -280,6 +280,7 @@ page can still override them at runtime.
 | `$glyph-size` | `1em` |
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$filter-width` | `10.5rem` |
+| `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
 | `$avatar-sm`, `$avatar-md`, `$avatar-lg`, `$avatar-xl` | `1.75rem`, `2.5rem`, `3.5rem`, `7rem` |
 | `$page-workspace`, `$page-reading`, `$page-wide`, `$page-gutter` | `64rem`, `40rem`, `90rem`, `var(--space-8)` |
 | `$card-padding` | `var(--space-4)` |
@@ -382,6 +383,41 @@ height; the selected one changes background and colour only, through the
 a list is at least one chip high, so an empty list does not collapse and
 grow when chips arrive. New tokens: `$check-size`, `$switch-width`,
 `$switch-height`, `$choice-width`.
+
+## Field and FormRows
+
+`Field` is a label, the control (its `children`), a hint and an error,
+stacked. `id` is the control's `id`, which the label's `for` names; the
+control takes `aria-describedby={field_describedby(&id, has_hint,
+has_error)}`, which names the hint's and the error's ids (`{id}-hint`,
+`{id}-error`). plinth has no input of its own here, so the control is the
+app's.
+
+- `label`, `hint`, `error` and `help` are Html (`help` ends the label's
+  row); `required` adds a `*` after the label (`aria-hidden`; the control
+  sets `required` itself).
+- `disabled` mutes the field (`plinth::class::DISABLED`) and `busy` sets
+  `aria-busy` with a progress cursor (`BUSY`); neither changes the box.
+  `class`, `testid` as elsewhere. `field(disabled, busy)` gives the classes.
+- `reserve_error` (`RESERVE`, on `FIELD_ERROR`) keeps the error line's room
+  while there is no error. The trade-off: the field is one line taller
+  (`--field-message-line`) when it has no error, and an error longer than
+  `--field-error-lines` (1) is cut with an ellipsis. Without it the error
+  appears under the control and pushes what follows down.
+
+`FormRows` is a grid of `FormRow`s (the same props as `Field`) sharing one
+label column: as wide as the widest label up to half the grid, or with
+`wide_labels` (`WIDE_LABELS`) `--field-label-width` (12rem) so every section's
+controls start on one line. Below the phone breakpoint the label sits above
+its control. `Fieldset` is a `<fieldset>` with a `legend` and an optional
+`hint`; `FieldCheck` is a checkbox (its `children`) with its `label` after it,
+as high as an input.
+
+Size guarantees: with `reserve_error` the field's height does not change
+when an error appears, nor does anything else (disabled, busy, focus,
+required). A form row's label cell is at least `--control-height` high, so
+the label is centred on a one-line control. The hint wraps (long words
+break) and never widens the field.
 
 ## Heads
 

@@ -1,0 +1,165 @@
+// Fields and form rows (src/field.rs).
+//
+// - `.plinth-field`: a label, the control, a hint and an error, one under
+//   the other. Parts: `-head` (label row), `-label`, `-required`, `-help`,
+//   `-hint`, `-error`. `.plinth-disabled` mutes it; `.plinth-busy` shows a
+//   progress cursor.
+// - `.plinth-field-error.plinth-reserve`: the error line keeps its room
+//   (`--field-error-lines` lines of `--field-message-line`, longer text
+//   cut), so an error appearing moves nothing below it.
+// - `.plinth-form-rows`: a grid with one label column shared by its rows;
+//   `.plinth-wide-labels` fixes it at `--field-label-width` on a wide
+//   screen. `.plinth-form-row` is a row of it (subgrid), `-label` and
+//   `-control` its cells. Below the phone breakpoint the label sits above.
+// - `.plinth-fieldset`, `.plinth-legend`: a titled group of fields.
+// - `.plinth-field-check`: a checkbox with its label after it.
+
+@use "tokens" as base;
+
+.plinth-field {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+
+    &.plinth-busy {
+        cursor: progress;
+    }
+}
+
+.plinth-field-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.plinth-field-label {
+    min-width: 0;
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
+}
+
+.plinth-field-required {
+    color: var(--danger);
+    font-size: var(--text-sm);
+}
+
+.plinth-field-help {
+    flex: none;
+    font-size: var(--text-sm);
+    margin-inline-start: auto;
+}
+
+.plinth-field-hint,
+.plinth-field-error {
+    margin: 0;
+    font-size: var(--text-xs);
+    line-height: var(--field-message-line);
+    overflow-wrap: anywhere;
+}
+
+.plinth-field-hint {
+    color: var(--muted);
+}
+
+.plinth-field-error {
+    color: var(--danger);
+
+    &.plinth-reserve {
+        display: -webkit-box;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: var(--field-error-lines);
+        min-height: calc(var(--field-error-lines) * var(--field-message-line));
+        overflow: hidden;
+    }
+}
+
+.plinth-field.plinth-disabled,
+.plinth-form-row.plinth-disabled,
+.plinth-field-check.plinth-disabled {
+    opacity: 0.5;
+}
+
+.plinth-form-rows {
+    display: grid;
+    grid-template-columns: fit-content(50%) minmax(0, 1fr);
+    column-gap: var(--space-4);
+    row-gap: var(--space-3);
+
+    &.plinth-wide-labels {
+        grid-template-columns: var(--field-label-width) minmax(0, 1fr);
+    }
+
+    @include base.below("phone") {
+        &,
+        &.plinth-wide-labels {
+            grid-template-columns: minmax(0, 1fr);
+        }
+    }
+}
+
+.plinth-form-row {
+    display: grid;
+    grid-column: 1 / -1;
+    grid-template-columns: subgrid;
+    align-items: start;
+
+    &.plinth-busy {
+        cursor: progress;
+    }
+
+    @include base.below("phone") {
+        row-gap: var(--space-1);
+    }
+}
+
+.plinth-form-label {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-height: var(--control-height);
+    min-width: 0;
+    font-size: var(--text-sm);
+
+    @include base.below("phone") {
+        min-height: 0;
+    }
+}
+
+.plinth-form-control {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.plinth-fieldset {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+    margin: 0;
+    padding: 0;
+    border: 0;
+}
+
+.plinth-legend {
+    padding: 0;
+    margin-block-end: var(--space-3);
+    font-size: var(--text-sm);
+    font-weight: 600;
+}
+
+.plinth-field-check {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height);
+    min-width: 0;
+    cursor: pointer;
+
+    &.plinth-disabled {
+        cursor: not-allowed;
+    }
+}

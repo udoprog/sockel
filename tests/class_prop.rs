@@ -161,3 +161,43 @@ fn toggles_keep_a_passed_class() {
         &own(class::CHIP_LIST),
     );
 }
+
+#[test]
+fn fields_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    let own = |class: &str| format!("{class} {MINE}");
+    let field = || FieldProps {
+        id: "x".into(),
+        label: html! { "X" },
+        required: false,
+        help: None,
+        hint: None,
+        error: None,
+        reserve_error: false,
+        disabled: false,
+        busy: false,
+        class: mine(),
+        testid: None,
+        children: Html::default(),
+    };
+    keeps(render::<Field>(field()), &own(class::FIELD));
+    keeps(render::<FormRow>(field()), &own(class::FORM_ROW));
+    keeps(
+        render::<FormRows>(yew::props!(FormRowsProps { class: mine() })),
+        &own(class::FORM_ROWS),
+    );
+    keeps(
+        render::<Fieldset>(yew::props!(FieldsetProps {
+            legend: html! { "Legend" },
+            class: mine()
+        })),
+        &own(class::FIELDSET),
+    );
+    keeps(
+        render::<FieldCheck>(yew::props!(FieldCheckProps {
+            label: html! { "Label" },
+            class: mine()
+        })),
+        &own(class::FIELD_CHECK),
+    );
+}

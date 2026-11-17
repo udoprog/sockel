@@ -27,6 +27,9 @@
 //! - [`Choice`] (`.choice`): a segmented pick-one group, its options of one
 //!   width; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
 //!   chips with a count.
+//! - [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
+//!   [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
+//!   line that can keep its room.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
@@ -65,6 +68,7 @@ mod button;
 mod checkbox;
 mod chip;
 mod choice;
+mod field;
 mod head;
 mod icon_button;
 mod icons;
@@ -78,6 +82,10 @@ pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
+pub use field::{
+    Field, FieldCheck, FieldCheckProps, FieldProps, Fieldset, FieldsetProps, FormRow, FormRows,
+    FormRowsProps, field, field_describedby, field_error, form_row, form_rows,
+};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
