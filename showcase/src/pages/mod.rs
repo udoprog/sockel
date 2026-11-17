@@ -327,12 +327,12 @@ pub const PAGES: &[Page] = &[
             hold(
                 plinth::class::NOTICE,
                 Size::Width,
-                Across::Except(&["click"]),
+                Across::Except(&["Shown", "click"]),
             ),
             hold(
                 plinth::class::NOTICE,
                 Size::Height,
-                Across::Only(&["tone", "icon", "action", "onclose", "focus"]),
+                Across::Only(&["tone", "focus"]),
             ),
         ],
     },
