@@ -38,6 +38,7 @@
     background: base.$menu-ground;
     box-shadow: base.$menu-shadow;
     font-size: base.$menu-text;
+    scrollbar-gutter: base.$menu-scroll-gutter;
 
     &.plinth-wide {
         --menu-least: var(--menu-width-wide);

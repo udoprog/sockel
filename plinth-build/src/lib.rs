@@ -883,6 +883,23 @@ mod tests {
     }
 
     #[test]
+    fn a_menu_keeps_its_scrollbar_room_unless_set() {
+        let plain = Config::new().build().unwrap();
+        let menu = declarations(&plain.css, ".plinth-menu");
+        assert!(menu.contains(&"scrollbar-gutter: stable".to_owned()));
+        assert!(!menu.contains(&"scrollbar-gutter: auto".to_owned()));
+        let tuned = Config::new()
+            .with("menu-scroll-gutter", "auto")
+            .build()
+            .unwrap();
+        let menu = declarations(&tuned.css, ".plinth-menu");
+        assert!(
+            menu.contains(&"scrollbar-gutter: auto".to_owned()),
+            "{menu:?}"
+        );
+    }
+
+    #[test]
     fn a_button_takes_its_look_and_colours_per_variant_from_settings() {
         let plain = Config::new().build().unwrap();
         let base = declarations(&plain.css, ".plinth-button");
