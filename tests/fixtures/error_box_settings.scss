@@ -1,0 +1,5 @@
+// A project whose flanked error boxes leave no space under their text.
+@use "../../style/tokens" with (
+    $error-box-text-end: 0
+);
+@use "../../style/notices";

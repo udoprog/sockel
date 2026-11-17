@@ -16,6 +16,10 @@ pub struct ErrorBoxProps {
     /// three lines.
     #[prop_or_default]
     pub cause: Option<AttrValue>,
+    /// Causes, one line each under the message and never cut, most
+    /// specific last; for a chain of errors.
+    #[prop_or_default]
+    pub causes: Vec<AttrValue>,
     /// Shows a retry button, which calls this.
     #[prop_or_default]
     pub onretry: Option<Callback<MouseEvent>>,
@@ -62,6 +66,11 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
             <p class={class::ERROR_BOX_MESSAGE}>{ props.children.clone() }</p>
             if let Some(cause) = &props.cause {
                 <p class={class::ERROR_BOX_CAUSE} title={cause.clone()}>{ cause.clone() }</p>
+            }
+            if !props.causes.is_empty() {
+                <ul class={class::ERROR_BOX_CAUSES}>
+                    { for props.causes.iter().map(|cause| html! { <li>{ cause.clone() }</li> }) }
+                </ul>
             }
             if let Some(onretry) = &props.onretry {
                 <div class={class::ERROR_BOX_ACTIONS}>
@@ -116,6 +125,7 @@ mod tests {
             class: Classes::new(),
             title: None,
             cause: None,
+            causes: Vec::new(),
             onretry: None,
             retry_label: None,
             retrying: false,
@@ -155,5 +165,20 @@ mod tests {
         assert!(html.contains(class::ERROR_BOX_CLOSE), "{html}");
         assert!(html.contains("aria-label=\"Dismiss error\""), "{html}");
         assert!(html.contains("title=\"Dismiss error\""), "{html}");
+    }
+
+    #[test]
+    fn causes_are_a_line_each() {
+        let html = render(props());
+        assert!(!html.contains(class::ERROR_BOX_CAUSES), "{html}");
+        let html = render(ErrorBoxProps {
+            causes: vec!["connection refused".into(), "os error 111".into()],
+            ..props()
+        });
+        assert!(html.contains(class::ERROR_BOX_CAUSES), "{html}");
+        assert!(
+            html.contains("<li>connection refused</li><li>os error 111</li>"),
+            "{html}"
+        );
     }
 }

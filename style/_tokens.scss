@@ -300,6 +300,9 @@ $error-box-shadow: null !default;
 $error-box-message-weight: null !default;
 $error-box-cause-font: ui-monospace, monospace !default;
 $error-box-cause-text: var(--text-xs) !default;
+// The space under a flanked box's text (`null`: as much as above it, which
+// centres one line against the icon and the dismiss button).
+$error-box-text-end: null !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
@@ -455,7 +458,7 @@ $-parts: (
     "layout.pages", "layout.plain-list", "layout.toolbar",
     "menu.context", "menu.current", "menu.danger", "menu.detail", "menu.heading", "menu.note",
     "menu.row-actions", "menu.separator", "menu.split-button", "menu.tight", "menu.widths",
-    "notices.empty-state", "notices.flanked", "notices.notice",
+    "notices.causes", "notices.empty-state", "notices.flanked", "notices.notice",
     "pager.edges", "pager.summary",
     "popover.match-anchor",
     "skeleton.group", "skeleton.loadable", "skeleton.row", "skeleton.short", "skeleton.spinner",

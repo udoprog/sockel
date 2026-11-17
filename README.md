@@ -426,7 +426,7 @@ part is emitted; a name plinth does not have is an error.
 | buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss) |
+| notices | `notices.notice` (`Notice`), `notices.empty-state` (`EmptyState`), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
@@ -825,15 +825,17 @@ intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `role="status"`. `notice(tone)` gives the classes.
 
 `ErrorBox` is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
-technical text, cut to three lines, whole in its `title` attribute) and
-`onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
+technical text, cut to three lines, whole in its `title` attribute) or
+`causes` (a chain of them, most specific last: `ERROR_BOX_CAUSES`, a list
+of a line each, never cut) and `onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
 busy and ignore clicks). `icon` (the app's, before the text, in the tone) and
 `ondismiss: Some(callback)` (a quiet close button after it, named and
 tooltipped by `dismiss_label`, "Dismiss"; the box does not remove itself)
 flank the text (`FLANKED`, the text in `ERROR_BOX_BODY`). `error_box(flanked)`
 gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
-`-fill`, `-edge`, `-shadow`, `-message-weight`, `-cause-font` and
-`-cause-text` (README, "Configuration").
+`-fill`, `-edge`, `-shadow`, `-message-weight`, `-cause-font`,
+`-cause-text` and `-text-end` (the space under a flanked box's text)
+(README, "Configuration").
 
 `EmptyState` is what stands where there is nothing: `title`, `icon`, `hint`
 and actions (its children). `compact` (`COMPACT`) is one row for a list or a

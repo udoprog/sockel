@@ -112,6 +112,17 @@ fn popover_and_confirm_settings() {
 }
 
 #[test]
+fn error_box_settings() {
+    let Some(sass) = sass() else { return };
+    let centred = "padding-block: calc((var(--control-height) - 1lh) / 2);";
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains(centred));
+    let css = compile(&sass, "tests/fixtures/error_box_settings.scss");
+    assert!(css.contains("padding-block: calc((var(--control-height) - 1lh) / 2) 0;"));
+    assert!(!css.contains(centred));
+}
+
+#[test]
 fn omitted_parts_are_left_out() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

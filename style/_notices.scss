@@ -9,7 +9,8 @@
 //   and the space it held: the content below moves up at once, by design.
 // - `.plinth-error-box`: an error with its cause and a retry. Parts:
 //   `-title`, `-message`, `-cause` (at most three lines, cut) and
-//   `-actions`.
+//   `-actions`. `-causes` is a list of causes instead, a line each and
+//   never cut.
 // - `.plinth-error-box.plinth-flanked`: an icon (`-icon`) before the text
 //   and a dismiss button (`-close`) after it, the text in `-body`.
 // - `.plinth-empty-state`: what stands where a list or page has nothing.
@@ -103,7 +104,12 @@
         flex-direction: column;
         gap: var(--space-1);
         min-width: 0;
-        padding-block: calc((var(--control-height) - 1lh) / 2);
+
+        @if base.$error-box-text-end == null {
+            padding-block: calc((var(--control-height) - 1lh) / 2);
+        } @else {
+            padding-block: calc((var(--control-height) - 1lh) / 2) base.$error-box-text-end;
+        }
     }
 
     .plinth-error-box-close {
@@ -133,6 +139,21 @@
     font-family: base.$error-box-cause-font;
     font-size: base.$error-box-cause-text;
     overflow-wrap: anywhere;
+}
+
+@if base.emits("notices.causes") {
+    .plinth-error-box-causes {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        margin: 0;
+        padding: 0;
+        color: var(--muted);
+        font-family: base.$error-box-cause-font;
+        font-size: base.$error-box-cause-text;
+        list-style: none;
+        overflow-wrap: anywhere;
+    }
 }
 
 .plinth-error-box-actions {

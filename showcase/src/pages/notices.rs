@@ -91,11 +91,17 @@ const CAUSES: &[(&str, Text)] = &[
     ("None", Text::Empty),
 ];
 
+const CAUSE_LIST: &[&str] = &[
+    "error sending request for url (http://localhost/api/items)",
+    "connection refused (os error 111)",
+];
+
 #[function_component]
 pub fn ErrorBoxPage() -> Html {
     let text = use_state(|| Text::Short);
     let titled = use_state(|| true);
     let cause = use_state(|| Text::Short);
+    let causes = use_state(|| false);
     let retry = use_state(|| true);
     let retrying = use_state(|| false);
     let retries = use_state(|| 0);
@@ -108,6 +114,7 @@ pub fn ErrorBoxPage() -> Html {
             <Select<Text> label="Message" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="title" value={*titled} on_change={bind(&titled)} />
             <Select<Text> label="cause" options={CAUSES} value={*cause} on_change={bind(&cause)} />
+            <Toggle label="causes" value={*causes} on_change={bind(&causes)} />
             <Toggle label="onretry" value={*retry} on_change={bind(&retry)} />
             <Toggle label="retrying" value={*retrying} on_change={bind(&retrying)} />
             <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
@@ -126,6 +133,12 @@ pub fn ErrorBoxPage() -> Html {
     let cause_text = (*cause != Text::Empty)
         .then(|| AttrValue::from(cause.of("TypeError: failed to fetch /api/items")));
 
+    let cause_list = if *causes {
+        CAUSE_LIST.iter().map(|c| AttrValue::Static(c)).collect()
+    } else {
+        Vec::new()
+    };
+
     let words = text.of("The list is not available right now");
     let code = snippet(
         &[],
@@ -135,6 +148,18 @@ pub fn ErrorBoxPage() -> Html {
                 *cause != Text::Empty,
                 "cause",
                 &cause.of("TypeError: failed to fetch /api/items"),
+            )
+            .expr_if(
+                *causes,
+                "causes",
+                format!(
+                    "vec![{}]",
+                    CAUSE_LIST
+                        .iter()
+                        .map(|c| format!("{c:?}.into()"))
+                        .collect::<Vec<_>>()
+                        .join(", ")
+                ),
             )
             .expr_if(*retry, "onretry", "on_retry")
             .flag("retrying", *retrying)
@@ -146,7 +171,7 @@ pub fn ErrorBoxPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <ErrorBox title={titled.then_some(AttrValue::Static("Could not load the items"))}
-                cause={cause_text} onretry={retry.then_some(onretry)} retrying={*retrying}
+                cause={cause_text} causes={cause_list} onretry={retry.then_some(onretry)} retrying={*retrying}
                 icon={icon.then(|| html! { "!" })}
                 ondismiss={dismiss.then_some(ondismiss)}>
                 { text.of("The list is not available right now") }
