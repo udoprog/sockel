@@ -5,11 +5,13 @@
 // - Type `--text-3xs`…`--text-2xl` (base `--text-base`, 15px).
 // - Space `--space-0` (2px), `--space-px`, `--space-1`…`--space-9`.
 // - Radii `--radius-xs` (check boxes), `--radius-sm` (controls),
-//   `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
+//   `--radius-md` (bars and panels between), `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
 // - `--control-height` and `--control-height-small`: every field, button
 //   and picker button is one of the two, so a row of them never jumps.
 // - `--filter-width`: a list's filter button, one width whatever it says.
-// - `--page-workspace` and `--page-reading`: the two content columns.
+// - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
+// - `--page-workspace` and `--page-reading`: the two content columns;
+//   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
 
@@ -24,7 +26,10 @@ $breakpoints: (
     "medium": 48rem,
     "large": 60rem,
     "tablet": 64rem,
+    "compact": 52rem,
+    "regular": 56rem,
     "wide": 84rem,
+    "broad": 90rem,
     "desktop": 100rem,
 );
 
@@ -78,6 +83,7 @@ $breakpoints: (
     // Controls take the small radius; cards, panels and dialogs the large.
     --radius-xs: 4px;
     --radius-sm: 8px;
+    --radius-md: 10px;
     --radius-lg: 16px;
     --radius-pill: 999px;
     // The one gap between a rounded container and the rounded items in it.
@@ -85,6 +91,9 @@ $breakpoints: (
     --control-height: 2.25rem;
     // A small control (`button.small`, `.input.small`), for dense places.
     --control-height-small: 1.75rem;
+    // A mark (an icon or a badge beside text) and a touch target.
+    --mark-height: 1.5rem;
+    --touch-height: 2.75rem;
     // A library page's filter button (`.picker.filter`).
     --filter-width: 10.5rem;
 
@@ -93,6 +102,9 @@ $breakpoints: (
     // forms and prose.
     --page-workspace: 64rem;
     --page-reading: 40rem;
+    // The widest column, and the gutter at a page's sides.
+    --page-wide: 90rem;
+    --page-gutter: var(--space-8);
 }
 
 // A page's content column: the workspace unless it is given the reading

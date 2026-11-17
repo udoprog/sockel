@@ -7,6 +7,7 @@
 // - `.section-head`: the same for a section in a page, its title
 //   (`.section-head-title`, an h2) a size smaller.
 //
+// - A title may take a `level`, `title_class` and a `suffix` after its help.
 // - `.page-head.crumb`: a head that leads back, `.page-head-crumbs`: the back
 //   link (`.page-head-back`), a `/` (`.page-head-sep`) and the title; its
 //   keywords (`.page-head-meta`) come before the actions.

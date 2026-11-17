@@ -242,6 +242,9 @@ pub struct ToolbarProps {
     /// A bar of its own, bordered on the surface.
     #[prop_or_default]
     pub boxed: bool,
+    /// The space between its controls; the normal gap is `--space-1`.
+    #[prop_or_default]
+    pub gap: Gap,
     /// What the toolbar is for, for assistive technology.
     pub label: AttrValue,
     #[prop_or_default]
@@ -258,7 +261,7 @@ pub struct ToolbarProps {
 pub fn Toolbar(props: &ToolbarProps) -> Html {
     html! {
         <div role="toolbar" aria-label={props.label.clone()}
-            class={classes!(toolbar(props.boxed), props.class.clone())}
+            class={classes!(toolbar(props.boxed), props.gap.class(), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </div>
@@ -386,6 +389,14 @@ mod tests {
     fn a_toolbar_and_a_card_take_their_modifiers() {
         assert_eq!(names(toolbar(false)), ["toolbar"]);
         assert_eq!(names(toolbar(true)), ["toolbar", "boxed"]);
+        assert_eq!(
+            names(classes!(toolbar(false), Gap::Tight.class())),
+            ["toolbar", "tight"]
+        );
+        assert_eq!(
+            names(classes!(toolbar(false), Gap::Normal.class())),
+            ["toolbar"]
+        );
         assert_eq!(names(card(Inset::Normal, false)), ["card"]);
         assert_eq!(
             names(card(Inset::Compact, true)),

@@ -9,6 +9,22 @@ pub struct HeadProps {
     /// line after its text.
     #[prop_or_default]
     pub help: Option<Html>,
+    /// The title's heading level, instead of the head's own (`h1` for a
+    /// page, `h2` for a section).
+    #[prop_or_default]
+    pub level: Option<HeadLevel>,
+    /// What follows the title (a count, a badge), after its help.
+    #[prop_or_default]
+    pub suffix: Option<Html>,
+    /// The help's test id; the help then sits in an element carrying it.
+    #[prop_or_default]
+    pub help_testid: Option<AttrValue>,
+    /// The title's own classes.
+    #[prop_or_default]
+    pub title_class: Classes,
+    /// The title's test id, as `testid`.
+    #[prop_or_default]
+    pub title_testid: Option<AttrValue>,
     /// The head's test id.
     #[prop_or_default]
     pub head_testid: Option<AttrValue>,
@@ -33,6 +49,26 @@ pub struct HeadProps {
     /// `icon-only`), so it stands as high as the buttons beside it.
     #[prop_or_default]
     pub children: Html,
+}
+
+/// A title's heading level.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub enum HeadLevel {
+    H1,
+    H2,
+    H3,
+    H4,
+}
+
+impl HeadLevel {
+    fn tag(self) -> &'static str {
+        match self {
+            HeadLevel::H1 => "h1",
+            HeadLevel::H2 => "h2",
+            HeadLevel::H3 => "h3",
+            HeadLevel::H4 => "h4",
+        }
+    }
 }
 
 /// Which head it is: its classes and its title's element.
@@ -67,13 +103,21 @@ fn head_classes(head: &'static str, crumb: bool) -> Classes {
 
 fn head(kind: Head, props: &HeadProps) -> Html {
     let [head, title, actions] = kind.classes();
-    let help = props.help.clone();
+    let help = props.help.clone().map(|help| match &props.help_testid {
+        Some(testid) => {
+            html! { <span class="contents" data-testid={testid.clone()}>{ help }</span> }
+        }
+        None => help,
+    });
+    let tag = props.level.map_or(kind.tag(), HeadLevel::tag);
+    let suffix = props.suffix.clone();
+    let testid = props.title_testid.clone().or_else(|| props.testid.clone());
     let actions = (props.children != Html::default()).then(|| {
         html! { <div class={actions}>{ props.children.clone() }</div> }
     });
 
     let title = html! {
-        <@{kind.tag()} class={title} data-testid={props.testid.clone()}>
+        <@{tag} class={classes!(title, props.title_class.clone())} data-testid={testid}>
             { props.title.clone() }
             { for help }
         </@>
@@ -84,6 +128,7 @@ fn head(kind: Head, props: &HeadProps) -> Html {
         return html! {
             <header class={classes!(head_classes(head, false), props.class.clone())} data-testid={props.head_testid.clone()}>
                 { title }
+                { for suffix }
                 { for meta }
                 { for actions }
             </header>
@@ -96,6 +141,7 @@ fn head(kind: Head, props: &HeadProps) -> Html {
                 { back }
                 <span class="page-head-sep" aria-hidden="true">{ "/" }</span>
                 { title }
+                { for suffix }
             </nav>
             { for meta }
             { for actions }
@@ -143,5 +189,11 @@ mod tests {
             ["section-head", "section-head-title", "section-head-actions"]
         );
         assert_eq!((Head::Page.tag(), Head::Section.tag()), ("h1", "h2"));
+    }
+
+    #[test]
+    fn a_level_names_its_heading() {
+        let tags = [HeadLevel::H1, HeadLevel::H2, HeadLevel::H3, HeadLevel::H4].map(HeadLevel::tag);
+        assert_eq!(tags, ["h1", "h2", "h3", "h4"]);
     }
 }
