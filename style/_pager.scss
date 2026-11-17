@@ -16,7 +16,8 @@
 // - `.plinth-pager.plinth-summary`: the summary pager, the counts at the
 //   start (`.plinth-pager-status`: `.plinth-pager-shown` over the muted
 //   `.plinth-pager-position`) and previous and next at the end
-//   (`.plinth-pager-steps`).
+//   (`.plinth-pager-steps`); `$pager-summary-padding` pads it (`null`:
+//   none).
 
 @use "tokens" as base;
 
@@ -130,6 +131,7 @@
     .plinth-pager.plinth-summary {
         justify-content: space-between;
         gap: var(--space-3);
+        padding: base.$pager-summary-padding;
     }
 
     .plinth-pager-status {

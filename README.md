@@ -1468,7 +1468,9 @@ place of the numbers and the first and last page, which items the page shows
 over where it stands (`PagerSummary::new(shown, position)`, the app's words,
 such as "1–50 of 312" and "Page 1 of 7"), in a polite live region, then previous and next at the row's
 end. A page past the last stays as given there, so previous leads back to the
-last page. `nav_ref` is the `nav` element, for an app that scrolls to what it
+last page. The setting `$pager-summary-padding` (`null`: none) pads it, for
+one that ends a list or table and lines up with its rows. `nav_ref` is the
+`nav` element, for an app that scrolls to what it
 pages. Parts: `PAGER_STATUS`, `PAGER_SHOWN`, `PAGER_POSITION`, `PAGER_STEPS`.
 
 `Disclosure` is a summary row that toggles its body: `title`, `summary` (what

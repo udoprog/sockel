@@ -287,6 +287,9 @@ $pager-current-fill: var(--accent) !default;
 $pager-current-ink: var(--on-accent) !default;
 $pager-step-ink: null !default;
 $pager-phone-height: null !default;
+// A summary pager's padding (`null`: none), for one that ends a list or
+// table and lines up with its rows.
+$pager-summary-padding: null !default;
 
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
