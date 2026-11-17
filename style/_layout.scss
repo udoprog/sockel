@@ -17,8 +17,9 @@
 //   gap. `.stack.flush` and `.cluster.flush` zero the block margins of their
 //   direct children (a paragraph's default).
 // - `.toolbar`: one line of controls, `--space-1` apart, scrolling sideways
-//   when it runs out of room (a gap modifier as a cluster's sets another); `.toolbar-spacer` pushes what follows to the
-//   end. `.boxed` draws it as a bar of its own.
+//   when it runs out of room, the gap scale setting another;
+//   `.toolbar-spacer` pushes what follows to the end. `.boxed` draws it as
+//   a bar of its own.
 // - `.library-toolbar`: a library page's search (`.library-search`, which
 //   grows from `14rem`) and its filters (`.picker.filter`, one width each),
 //   a row that wraps: on a phone the search has a row to itself.
@@ -155,9 +156,10 @@
     }
 }
 
-// The gap scale, after both so it wins over their own gaps.
+// The gap scale, one for every row and column primitive.
 .stack,
-.cluster {
+.cluster,
+.toolbar {
     &.none {
         gap: 0;
     }
@@ -203,34 +205,6 @@
     min-width: 0;
     overflow-x: auto;
     scrollbar-width: thin;
-
-    &.none {
-        gap: 0;
-    }
-
-    &.hair {
-        gap: var(--space-0);
-    }
-
-    &.snug {
-        gap: var(--space-1);
-    }
-
-    &.tight {
-        gap: var(--space-2);
-    }
-
-    &.medium {
-        gap: var(--space-3);
-    }
-
-    &.loose {
-        gap: var(--space-4);
-    }
-
-    &.wide {
-        gap: var(--space-6);
-    }
 
     &.boxed {
         border: 1px solid var(--border);
