@@ -277,7 +277,9 @@ pub use overlay::{
     OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlay,
     use_overlays,
 };
-pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_button, pager_slots};
+pub use pager::{
+    MIN_SLOTS, Pager, PagerProps, PagerSummary, Slot, page_count, pager, pager_button, pager_slots,
+};
 pub use panel::{Panel, PanelGround, PanelProps, panel};
 pub use picker::{
     ChoiceList, ChoiceListProps, Picker, PickerDialog, PickerDialogProps, PickerMenu,

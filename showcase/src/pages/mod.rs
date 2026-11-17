@@ -1258,10 +1258,11 @@ pub const PAGES: &[Page] = &[
         id: "pager",
         title: "Pager",
         group: Group::Navigation,
-        about: "Page buttons in a fixed number of slots: first, previous, numbers with gaps, next and last. The slot count and each button's width never change with the page, and the current page is marked without bold.",
+        about: "Page buttons in a fixed number of slots: first, previous, numbers with gaps, next and last. The slot count and each button's width never change with the page, and the current page is marked without bold. A summary pager says which items the page shows and where it stands, then previous and next.",
         covers: &[
             "Pager",
             "PagerProps",
+            "PagerSummary",
             "Slot",
             "MIN_SLOTS",
             "page_count",

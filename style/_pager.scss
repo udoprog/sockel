@@ -13,6 +13,10 @@
 // - `.plinth-pager-mark`: the chevrons of a button; `.plinth-pager-flip`
 //   turns them to point back; `.plinth-pager-echo` is the second chevron of
 //   the first and last page's double mark.
+// - `.plinth-pager.plinth-summary`: the summary pager, the counts at the
+//   start (`.plinth-pager-status`: `.plinth-pager-shown` over the muted
+//   `.plinth-pager-position`) and previous and next at the end
+//   (`.plinth-pager-steps`).
 
 @use "tokens" as base;
 
@@ -119,5 +123,37 @@
 @if base.emits("pager.edges") {
     .plinth-pager-echo {
         margin-inline-start: calc(-0.6 * var(--glyph-size));
+    }
+}
+
+@if base.emits("pager.summary") {
+    .plinth-pager.plinth-summary {
+        justify-content: space-between;
+        gap: var(--space-3);
+    }
+
+    .plinth-pager-status {
+        display: flex;
+        flex-direction: column;
+        min-width: 0;
+        line-height: 1.3;
+    }
+
+    .plinth-pager-shown {
+        @include base.truncate;
+        font-size: var(--text-sm);
+        font-weight: 600;
+    }
+
+    .plinth-pager-position {
+        @include base.truncate;
+        color: var(--muted);
+        font-size: var(--text-xs);
+    }
+
+    .plinth-pager-steps {
+        display: flex;
+        flex: none;
+        gap: base.$pager-gap;
     }
 }

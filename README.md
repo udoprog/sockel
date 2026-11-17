@@ -425,7 +425,7 @@ part is emitted; a name plinth does not have is an error.
 | buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| pager | `pager.edges` (the first and last page) |
+| pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
 | utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
@@ -1463,6 +1463,14 @@ colour and background, never its weight. `pager(disabled, busy)` and
 `pager_button(edge)` give the classes. Parts: `PAGER_BUTTON`, `PAGER_GAP`,
 `PAGER_MARK`, `PAGER_FLIP`, `PAGER_ECHO`, `PAGER_EDGE`.
 
+`summary: Option<PagerSummary>` makes it a summary pager (`SUMMARY`): in
+place of the numbers and the first and last page, which items the page shows
+over where it stands (`PagerSummary::new(shown, position)`, the app's words,
+such as "1–50 of 312" and "Page 1 of 7"), in a polite live region, then previous and next at the row's
+end. A page past the last stays as given there, so previous leads back to the
+last page. `nav_ref` is the `nav` element, for an app that scrolls to what it
+pages. Parts: `PAGER_STATUS`, `PAGER_SHOWN`, `PAGER_POSITION`, `PAGER_STEPS`.
+
 `Disclosure` is a summary row that toggles its body: `title`, `summary` (what
 it holds, beside the title while shut), `actions` (controls at the row's end,
 outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`
@@ -1480,7 +1488,9 @@ button and gap is as wide as the widest page number (`--pager-chars`, the
 digits of `pages`) with `numeric` figures, at least `--control-height`, so
 its width holds from the first page to the last (in a container too narrow
 the buttons shrink together, the same at every page); the current page adds
-no weight. The Disclosure's row is `--control-height` high shut or open
+no weight. A summary pager's counts are `numeric` and cut to one line each,
+its two buttons at its end, so only the counts' text changes with the page.
+The Disclosure's row is `--control-height` high shut or open
 (the setting `$disclosure-row-height` sets another, such as
 `var(--touch-height)`; `$disclosure-title-ink`, `null` by default, colours
 the title), the

@@ -60,6 +60,24 @@ pub fn pager_slots(pages: usize, page: usize, slots: usize) -> Vec<Slot> {
     }
 }
 
+/// What a summary pager says in place of its numbers: which items the page
+/// shows ("1–50 of 312") over where it stands ("Page 1 of 7"), in the
+/// app's words.
+#[derive(Clone, Debug, PartialEq)]
+pub struct PagerSummary {
+    pub shown: AttrValue,
+    pub position: AttrValue,
+}
+
+impl PagerSummary {
+    pub fn new(shown: impl Into<AttrValue>, position: impl Into<AttrValue>) -> Self {
+        Self {
+            shown: shown.into(),
+            position: position.into(),
+        }
+    }
+}
+
 #[derive(Properties, PartialEq)]
 pub struct PagerProps {
     /// The current page, counted from 0.
@@ -101,6 +119,15 @@ pub struct PagerProps {
     /// Loading the page: the buttons keep their room and ignore presses.
     #[prop_or_default]
     pub busy: bool,
+    /// Instead of the numbers and the first and last page: what the page
+    /// shows and where it stands (a polite live region), then the previous
+    /// and next page only (`SUMMARY`). A page past the last stays as given,
+    /// so previous goes back to the last page.
+    #[prop_or_default]
+    pub summary: Option<PagerSummary>,
+    /// The `nav` element, for an app that scrolls to what it pages.
+    #[prop_or_default]
+    pub nav_ref: NodeRef,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -139,6 +166,10 @@ pub fn Pager(props: &PagerProps) -> Html {
         Some(given) => format!("{given} {n}"),
         None => phrases.msg("plinth-pager-page", &args([("page", n)])),
     };
+    if let Some(summary) = &props.summary {
+        return summary_pager(props, summary, &nav_label, &previous_label, &next_label);
+    }
+
     let pages = props.pages.max(1);
     let page = props.page.min(pages - 1);
     let blocked = props.disabled || props.busy;
@@ -187,6 +218,7 @@ pub fn Pager(props: &PagerProps) -> Html {
         <nav class={classes!(pager(props.disabled, props.busy), props.class.clone())}
             aria-label={nav_label} aria-busy={props.busy.then_some("true")}
             style={format!("--pager-chars: {}", pages.to_string().len())}
+            ref={props.nav_ref.clone()}
             data-testid={props.testid.clone()}>
             if props.edges {
                 { step(&first_label, false, 0, page == 0, true) }
@@ -197,6 +229,49 @@ pub fn Pager(props: &PagerProps) -> Html {
             if props.edges {
                 { step(&last_label, true, pages - 1, page + 1 >= pages, true) }
             }
+        </nav>
+    }
+}
+
+/// A summary pager: the counts, then previous and next.
+fn summary_pager(
+    props: &PagerProps,
+    summary: &PagerSummary,
+    nav_label: &AttrValue,
+    previous_label: &AttrValue,
+    next_label: &AttrValue,
+) -> Html {
+    let pages = props.pages.max(1);
+    let page = props.page;
+    let blocked = props.disabled || props.busy;
+
+    let step = |label: &AttrValue, forward: bool, to: usize, off: bool| {
+        let on_page = props.on_page.clone();
+        let hidden = (!props.phone_steps).then_some(class::DESKTOP_ONLY);
+        html! {
+            <button type="button" class={classes!(class::PAGER_BUTTON, hidden)} aria-label={label.clone()}
+                title={props.titles.then(|| label.clone())}
+                disabled={blocked || off} onclick={Callback::from(move |_: MouseEvent| on_page.emit(to))}>
+                <span class={classes!(class::PAGER_MARK, (!forward).then_some(class::PAGER_FLIP))} aria-hidden="true">
+                    <Icon glyph={Glyph::ChevronRight} />
+                </span>
+            </button>
+        }
+    };
+
+    html! {
+        <nav class={classes!(pager(props.disabled, props.busy), class::SUMMARY, props.class.clone())}
+            aria-label={nav_label.clone()} aria-busy={props.busy.then_some("true")}
+            ref={props.nav_ref.clone()}
+            data-testid={props.testid.clone()}>
+            <span class={class::PAGER_STATUS} aria-live="polite">
+                <span class={class::PAGER_SHOWN}>{ summary.shown.clone() }</span>
+                <span class={class::PAGER_POSITION}>{ summary.position.clone() }</span>
+            </span>
+            <span class={class::PAGER_STEPS}>
+                { step(previous_label, false, page.saturating_sub(1).min(pages - 1), page == 0) }
+                { step(next_label, true, page + 1, page + 1 >= pages) }
+            </span>
         </nav>
     }
 }
@@ -363,6 +438,21 @@ mod tests {
                 "{title} in {titled}"
             );
         }
+    }
+
+    #[test]
+    fn a_summary_has_its_counts_and_two_steps() {
+        let html = render(yew::props!(PagerProps {
+            page: 1,
+            pages: 7,
+            on_page: Callback::noop(),
+            summary: Some(PagerSummary::new("51–100 of 312", "Page 2 of 7")),
+        }));
+        assert!(html.contains("51–100 of 312"), "{html}");
+        assert!(html.contains("Page 2 of 7"), "{html}");
+        assert!(html.contains(class::SUMMARY), "{html}");
+        assert_eq!(html.matches("<button").count(), 2, "{html}");
+        assert!(!html.contains(class::PAGER_GAP), "{html}");
     }
 
     #[test]
