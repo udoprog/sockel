@@ -1360,7 +1360,7 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   `.description(html)` a muted line under its label, such as why it cannot
   be picked, `.group(name)` the heading it is listed under: a group's
   options are given together, under a `role="group"` named by its
-  heading), `value:
+  heading, `.testid(id)` its row's test id), `value:
   Option<T>`, `on_change` (told a pick that is not the one chosen),
   `placeholder` (muted, while nothing listed is chosen).
 - `width` (`SelectWidth`): `Widest` (the widest option or placeholder) or

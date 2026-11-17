@@ -28,6 +28,8 @@ pub struct SelectOption<T> {
     /// The heading it is listed under. A group's options are given
     /// together; options of no group are listed by themselves.
     pub group: Option<AttrValue>,
+    /// Its row's test id.
+    pub testid: Option<AttrValue>,
 }
 
 impl<T> SelectOption<T> {
@@ -39,6 +41,7 @@ impl<T> SelectOption<T> {
             disabled: false,
             description: None,
             group: None,
+            testid: None,
         }
     }
 
@@ -63,6 +66,13 @@ impl<T> SelectOption<T> {
     pub fn group(self, group: impl Into<AttrValue>) -> Self {
         Self {
             group: Some(group.into()),
+            ..self
+        }
+    }
+
+    pub fn testid(self, testid: impl Into<AttrValue>) -> Self {
+        Self {
+            testid: Some(testid.into()),
             ..self
         }
     }
@@ -495,7 +505,8 @@ where
             html! {
                 <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
                     aria-selected={selected.to_string()}
-                    aria-disabled={o.disabled.then_some("true")} {onclick} {onmousemove}>
+                    aria-disabled={o.disabled.then_some("true")} data-testid={o.testid.clone()}
+                    {onclick} {onmousemove}>
                     <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
                         aria-hidden="true">
                         <Icon glyph={Glyph::Check} />
