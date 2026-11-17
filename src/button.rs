@@ -16,6 +16,9 @@ pub enum ButtonVariant {
     Quiet,
     Danger,
     Success,
+    /// No fill, edge, padding or height of its own: its content is its face,
+    /// such as a swatch.
+    Bare,
 }
 
 /// A button's height: `--control-height`, `--control-height-small` or
@@ -123,6 +126,7 @@ pub fn button(variant: ButtonVariant, size: ButtonSize, icon_only: bool, fold: b
         ButtonVariant::Quiet => Some(class::QUIET),
         ButtonVariant::Danger => Some(class::DANGER),
         ButtonVariant::Success => Some(class::SUCCESS),
+        ButtonVariant::Bare => Some(class::BARE),
     };
     let size = match size {
         ButtonSize::Regular => None,

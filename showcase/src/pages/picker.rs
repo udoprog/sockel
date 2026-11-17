@@ -228,6 +228,7 @@ pub fn PickerMenuPage() -> Html {
     let settings = use_state(initial);
     let added = use_state(Vec::<usize>::new);
     let multi = use_state(|| false);
+    let field = use_state(|| false);
     let open = use_state(|| false);
     let s = *settings;
     let options = s.options();
@@ -259,6 +260,7 @@ pub fn PickerMenuPage() -> Html {
             .expr("options", "options")
             .expr("on_pick", "add_lang")
             .expr("text", "html! { \"Add a language\" }")
+            .flag("field", *field)
             .text("label", "Add a language")
             .expr_if(
                 s.chevron,
@@ -279,6 +281,7 @@ pub fn PickerMenuPage() -> Html {
         <>
             { settings_controls(&settings) }
             <Toggle label="multi, with Done" value={*multi} on_change={bind(&multi)} />
+            <Toggle label="field" value={*field} on_change={bind(&field)} />
         </>
     };
     html! {
@@ -289,7 +292,7 @@ pub fn PickerMenuPage() -> Html {
                         label="Add a language" always_search={s.always_search} page_size={s.page_size()}
                         icon={s.chevron.then(|| html! { <Icon glyph={Glyph::Plus} /> })} chevron={s.chevron}
                         detail_below={s.detail_below} multi={*multi} chosen={(*added).clone()}
-                        open={multi.then_some(*open)} {on_toggle}
+                        open={multi.then_some(*open)} {on_toggle} field={*field}
                         disabled={s.disabled} testid="picker-menu">
                         if *multi {
                             <Button variant={ButtonVariant::Primary} size={ButtonSize::Small} onclick={done}>

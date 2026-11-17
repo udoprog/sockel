@@ -830,6 +830,14 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     /// See [`crate::ButtonProps::fold`].
     #[prop_or_default]
     pub fold: bool,
+    /// The opener is a [`Picker`]'s field (its icon, its text cut short and
+    /// a chevron in the input box), not a button: a field of several
+    /// choices, such as a filter. ArrowDown and ArrowUp open it.
+    #[prop_or_default]
+    pub field: bool,
+    /// With `field`, as wide as its container (`.plinth-fill`).
+    #[prop_or_default]
+    pub fill: bool,
     /// The button's classes, beside the button's own.
     #[prop_or_default]
     pub class: Classes,
@@ -879,9 +887,37 @@ where
         Some(icon) => (Some(icon.clone()), false),
         None => (Some(html! { <Icon glyph={Glyph::ChevronDown} /> }), true),
     };
-
-    html! {
-        <>
+    let opener_html = if props.field {
+        let onkeydown = {
+            let set = set.clone();
+            Callback::from(move |e: KeyboardEvent| {
+                if !is_open && matches!(e.key().as_str(), "ArrowDown" | "ArrowUp") {
+                    e.prevent_default();
+                    set.emit(true);
+                }
+            })
+        };
+        html! {
+            <button ref={opener.clone()} type="button"
+                class={classes!(
+                    picker(PickerVariant::Field, props.fill, false, props.disabled),
+                    props.class.clone()
+                )}
+                aria-haspopup="listbox" aria-expanded={is_open.to_string()}
+                aria-label={props.label.clone()} data-tip={props.tip.clone()}
+                disabled={props.disabled} data-testid={props.testid.clone()}
+                {onclick} {onkeydown}>
+                if let Some(icon) = &props.icon {
+                    <span class={class::PICKER_ICON} aria-hidden="true">{ icon.clone() }</span>
+                }
+                <span class={class::PICKER_TEXT}>{ props.text.clone() }</span>
+                <span class={class::PICKER_CHEVRON} aria-hidden="true">
+                    <Icon glyph={Glyph::ChevronDown} />
+                </span>
+            </button>
+        }
+    } else {
+        html! {
             <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
                 class={props.class.clone()} {icon} {trailing} fold={props.fold}
                 chevron={props.chevron && !trailing}
@@ -890,6 +926,12 @@ where
                 testid={props.testid.clone()} {onclick}>
                 { props.text.clone() }
             </Button>
+        }
+    };
+
+    html! {
+        <>
+            { opener_html }
             <ChoicePopup anchor={opener} open={is_open} {on_dismiss} align={props.align}
                 testid={props.testid.clone()}>
                 { props.head.clone() }
@@ -1169,6 +1211,32 @@ mod tests {
         assert!(closed.contains("data-tip=\"Pick languages\""), "{closed}");
         let open = render(Some(true));
         assert!(open.contains("aria-expanded=\"true\""), "{open}");
+    }
+
+    #[test]
+    fn a_picker_menu_field_is_a_pickers_face() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<PickerMenu<u32>>::with_props(yew::props!(
+                PickerMenuProps<u32> {
+                    options: languages(),
+                    label: AttrValue::Static("Languages"),
+                    text: html! { "Swedish +1" },
+                    field: true,
+                    fill: true,
+                }
+            ))
+            .hydratable(false)
+            .render(),
+        );
+        for part in [
+            class::PICKER,
+            class::FILL,
+            class::PICKER_TEXT,
+            class::PICKER_CHEVRON,
+        ] {
+            assert!(html.contains(part), "{part}: {html}");
+        }
+        assert!(!html.contains(class::BUTTON_CONTENT), "{html}");
     }
 
     #[test]

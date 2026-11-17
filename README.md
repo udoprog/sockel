@@ -431,7 +431,7 @@ part is emitted; a name plinth does not have is an error.
 | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
 | fields | `fields.field` (`Field` itself, not a `FormRow`), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.plinth-compact`, `.plinth-one-row`), `heads.label`, `heads.list` |
-| buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
+| buttons | `buttons.bare`, `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
 | inputs | `inputs.input` (`.plinth-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` (`InputGroup` and `group_classes`), `inputs.native-select` (`native_select`) |
@@ -452,7 +452,9 @@ icon too, as a menu's opener. plinth styles only `.plinth-button`, never a bare 
 - `variant` (`ButtonVariant`): `Secondary` (the plain button, the
   default), `Primary` (`plinth::class::PRIMARY`), `Ghost` (`GHOST`, no
   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
-  (`DANGER`), `Success` (`SUCCESS`).
+  (`DANGER`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
+  padding or height of its own, for an opener whose content is its face,
+  such as a swatch; the focus outline kept).
 - `size` (`ButtonSize`): `Regular` (`--control-height`), `Small` (`SMALL`,
   `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
 - An icon without a label is the icon alone (`ICON`), square, named by
@@ -1405,7 +1407,9 @@ row's native tooltip; `dialog: Some(open)` a button row opening a dialog
 `data-tip`, naming what it acts on), `MenuCheck`
 (`menuitemcheckbox`: `checked`, `on_change`; the menu stays open),
 `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
-`detail` and `hint`, `MenuSeparator`, `MenuHeading` and `MenuNote` (a line
+`detail` and `hint`; `stay` on a `MenuItem` or `MenuRadio` (`data-stay`,
+which an app's own item can wear too) keeps the menu open on a pick, for
+a step to another list of the same menu or a row of choices it holds; `MenuSeparator`, `MenuHeading` and `MenuNote` (a line
 such as "nothing here"). Each takes `class` and `testid`. `menu(width, tight, placed)` and `menu_item(danger)` give the
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
@@ -1877,7 +1881,10 @@ breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's 
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
 gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
 for an action that takes an option (Add a language): `text`, `icon`,
-`chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `tip`, `disabled`, `on_pick`, and the list's
+`chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `tip`, `disabled`, `on_pick`,
+`field` (the opener is a `Picker`'s field showing `icon` and `text`, not a
+button: a field of several choices, such as a filter; ArrowDown and ArrowUp
+open it) with `fill`, and the list's
 `value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles` and `list_testid`; `align`
 (`Start` by default), `open` and `on_toggle` for a list its owner also closes, `head` (above the list, a note) and
 its children (below it, a Done button). `PickerDialog<T>` is the

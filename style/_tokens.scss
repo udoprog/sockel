@@ -457,7 +457,7 @@ $input-phone-height: null !default;
 // renders. Empty, every part is emitted.
 $omit: () !default;
 $-parts: (
-    "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
+    "buttons.bare", "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
     "confirm.inline",
     "drop.tall",
     "fields.busy", "fields.check", "fields.disabled", "fields.error", "fields.field",

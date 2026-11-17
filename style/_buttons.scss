@@ -6,7 +6,9 @@
 //   is an outline. Parts: `-content` (icon and label), `-icon`, `-label`,
 //   and `-spinner`, laid over the content while busy.
 // - Variants: plain (secondary), `.plinth-primary`, `.plinth-ghost`,
-//   `.plinth-quiet`, `.plinth-danger`, `.plinth-success`.
+//   `.plinth-quiet`, `.plinth-danger`, `.plinth-success`; `.plinth-bare`, no
+//   fill, edge, padding or height of its own: its content is its face (a
+//   swatch), only the focus outline kept.
 // - Sizes: regular, `.plinth-small`, `.plinth-touch`.
 // - `.plinth-icon`: the icon alone, square. `.plinth-fold`: the icon alone
 //   below the phone breakpoint, the label kept for a screen reader;
@@ -58,6 +60,20 @@
         &.plinth-touch {
             height: var(--touch-height);
             padding-inline: var(--button-pad-x, var(--space-4));
+        }
+    }
+
+    @if base.emits("buttons.bare") {
+        &.plinth-bare {
+            --button-fill: transparent;
+            --button-hover-fill: transparent;
+            --button-pressed-fill: transparent;
+            --button-ink: currentcolor;
+            --button-hover-ink: currentcolor;
+            --button-pressed-ink: currentcolor;
+            height: auto;
+            padding-inline: 0;
+            border-width: 0;
         }
     }
 

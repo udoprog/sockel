@@ -19,9 +19,10 @@ use crate::{
 /// What the arrow keys, Home, End and type-ahead move between.
 const ITEMS: &str = ":is([role=menuitem], [role=menuitemcheckbox], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
 
-/// What closes the menu when picked: an action or a radio, not a check.
+/// What closes the menu when picked: an action or a radio, not a check,
+/// nor an item marked `data-stay`.
 const PICKS: &str =
-    ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true])";
+    ":is([role=menuitem], [role=menuitemradio]):not(:disabled, [aria-disabled=true], [data-stay])";
 
 /// What Tab moves between in a menu that holds fields.
 const TABBABLE: &str = "input:not(:disabled), textarea:not(:disabled), select:not(:disabled), button:not(:disabled), a[href], [tabindex]:not([tabindex='-1'])";
@@ -566,6 +567,10 @@ pub struct MenuItemProps {
     pub danger: bool,
     #[prop_or_default]
     pub disabled: bool,
+    /// Picking it leaves the menu open (`data-stay`): a step to another
+    /// list of the same menu.
+    #[prop_or_default]
+    pub stay: bool,
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
@@ -637,6 +642,7 @@ impl Row<'_> {
         let class = classes!(menu_item(p.danger), p.class.clone());
         let disabled = p.disabled.then_some("true");
         let current = p.current.then_some("page");
+        let stay = p.stay.then_some("true");
         match &p.href {
             Some(href) => html! {
                 <a role={self.role} tabindex="-1" {class}
@@ -645,7 +651,7 @@ impl Row<'_> {
                     rel={p.new_tab.then_some("noopener noreferrer")}
                     download={p.download.then_some("")} title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
-                    data-testid={p.testid.clone()} {onclick}>
+                    data-stay={stay} data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </a>
             },
@@ -656,7 +662,7 @@ impl Row<'_> {
                     aria-expanded={p.dialog.map(|open| open.to_string())}
                     title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
-                    data-testid={p.testid.clone()} {onclick}>
+                    data-stay={stay} data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </button>
             },
@@ -721,6 +727,7 @@ fn item_props(
         tip: None,
         danger: false,
         disabled,
+        stay: false,
         onclick: Callback::noop(),
         class: class.clone(),
         testid: testid.clone(),
@@ -754,8 +761,12 @@ pub fn MenuCheck(props: &MenuCheckProps) -> Html {
 #[derive(Properties, PartialEq)]
 pub struct MenuRadioProps {
     pub checked: bool,
-    /// Picked; the menu closes.
+    /// Picked; the menu closes, unless `stay`.
     pub on_pick: Callback<()>,
+    /// Picking it leaves the menu open (`data-stay`): one of several
+    /// choices the menu holds.
+    #[prop_or_default]
+    pub stay: bool,
     /// Its icon, in the box after its mark.
     #[prop_or_default]
     pub icon: Option<Html>,
@@ -777,7 +788,7 @@ pub struct MenuRadioProps {
 /// Its check's box is there either way.
 #[function_component]
 pub fn MenuRadio(props: &MenuRadioProps) -> Html {
-    let item = item_props(
+    let mut item = item_props(
         &props.icon,
         &props.detail,
         &props.hint,
@@ -786,6 +797,7 @@ pub fn MenuRadio(props: &MenuRadioProps) -> Html {
         &props.testid,
         &props.children,
     );
+    item.stay = props.stay;
     Row {
         role: "menuitemradio",
         checked: Some(props.checked),
@@ -1204,6 +1216,12 @@ mod tests {
     fn a_disabled_row_neither_moves_nor_closes() {
         assert!(ITEMS.contains("[aria-disabled=true]"));
         assert!(PICKS.contains("[aria-disabled=true]"));
+    }
+
+    #[test]
+    fn an_item_marked_stay_moves_but_does_not_close() {
+        assert!(PICKS.contains("[data-stay]"));
+        assert!(!ITEMS.contains("data-stay"));
     }
 
     #[test]
