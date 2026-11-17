@@ -1353,7 +1353,9 @@ scrim and out of reach. Escape and a press outside close only the innermost
 overlay, a popover included: overlays are kept on one stack. An Escape
 whose default was prevented (a `SearchField` clearing its text) or that
 comes from outside the dialog's own DOM (an app's own popup rendered
-elsewhere, which closes alone) leaves it open. On close focus returns to
+elsewhere, which closes alone) leaves it open. While it is the innermost
+overlay, focus that falls to the page (its control removed or disabled) comes
+back to the last control in it that had it, else to the box. On close focus returns to
 what had it.
 
 Size guarantees: while a dialog is open the root takes

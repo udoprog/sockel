@@ -10,6 +10,7 @@ use yew::prelude::*;
 use crate::layer::Layer;
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::popover::{Listener, focus_lost};
+use crate::timer::Timer;
 use crate::{
     ActionGroup, Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, SectionHead, class,
     use_overlays,
@@ -312,9 +313,50 @@ pub fn Dialog(props: &DialogProps) -> Html {
         });
     }
 
+    // While it is the topmost overlay, focus that fell to the page (what had
+    // it was removed or disabled) comes back to the last control in it that
+    // had it, else to the box.
+    let last = use_mut_ref(|| None::<HtmlElement>);
+    {
+        let (panel_ref, layer, last) = (panel_ref.clone(), layer.clone(), last.clone());
+        use_effect(move || {
+            let timer = Timer::start(0, move || {
+                let top = layer.borrow().as_ref().is_some_and(|l| l.is_top());
+                let Some(panel) = panel_ref.cast::<HtmlElement>() else {
+                    return;
+                };
+                if !top || !focus_lost() {
+                    return;
+                }
+                let back = last.borrow().clone().filter(|l| {
+                    l.is_connected()
+                        && l.offset_parent().is_some()
+                        && !l.matches(":disabled").unwrap_or(true)
+                });
+                focus(back.as_ref().unwrap_or(&panel));
+            });
+            move || drop(timer)
+        });
+    }
+
     if !props.open {
         return Html::default();
     }
+
+    let onfocusin = {
+        let panel_ref = panel_ref.clone();
+        Callback::from(move |e: FocusEvent| {
+            let Some(panel) = panel_ref.cast::<Element>() else {
+                return;
+            };
+            let target = e.target_dyn_into::<HtmlElement>();
+            if let Some(target) =
+                target.filter(|t| !t.is_same_node(Some(&panel)) && panel.contains(Some(t)))
+            {
+                *last.borrow_mut() = Some(target);
+            }
+        })
+    };
 
     let on_scrim = |layer_ref: &NodeRef, target: Option<web_sys::EventTarget>| {
         let target = target.and_then(|t| t.dyn_into::<web_sys::Node>().ok());
@@ -367,7 +409,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
             <div ref={panel_ref}
                 class={classes!(dialog(props.size, props.sheet), props.class.clone())}
                 role="dialog" aria-modal="true" aria-label={props.title.clone()} tabindex="-1"
-                data-testid={props.testid.clone()}>
+                data-testid={props.testid.clone()} {onfocusin}>
                 <SectionHead class={class::DIALOG_HEAD} title={html! { props.title.clone() }}
                     icon={props.icon.clone()}>
                     { props.head_actions.clone() }
