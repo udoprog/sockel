@@ -33,6 +33,7 @@ mod tabs;
 mod toasts;
 mod toggles;
 mod tooltips;
+mod translations;
 
 use yew::prelude::*;
 
@@ -124,7 +125,7 @@ const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
 
 /// A page with no states for the probe to cycle.
 #[cfg(test)]
-const UNPROBED: &[&str] = &["styles"];
+const UNPROBED: &[&str] = &["styles", "translations"];
 
 /// Every page, in the navigation's order. A name plinth exports must be in
 /// some page's `covers`, which the test below checks.
@@ -1846,6 +1847,15 @@ pub const PAGES: &[Page] = &[
         about: "plinth's compiled stylesheet, and the component that adds the page's one stylesheet.",
         covers: &["STYLESHEET", "STYLE_ID", "Styles", "StylesProps"],
         render: || html! { <styles::StylesPage /> },
+        holds: &[],
+    },
+    Page {
+        id: "translations",
+        title: "Translations",
+        group: Group::Foundations,
+        about: "plinth's words come from its phrasebook catalog, in the language the app provides; pick one under Language.",
+        covers: &[],
+        render: || html! { <translations::TranslationsPage /> },
         holds: &[],
     },
 ];

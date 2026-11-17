@@ -5,6 +5,7 @@ publish = false
 
 [dependencies]
 js-sys = "0.3.77"
+phrasebook02 = { package = "phrasebook", version = "0.2.0", features = ["browser", "yew023"] }
 plinth = { path = ".." }
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"

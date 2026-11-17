@@ -155,7 +155,7 @@ pub fn SaveBarPage() -> Html {
             { shown("save_bar(idle, sticky)", &save_bar(!*dirty, *sticky)) }
             <div class={class::SAMPLE}>{ "The form" }</div>
             <SaveBar dirty={*dirty} busy={*busy} disabled={*disabled} sticky={*sticky}
-                label={label}
+                label={(*text != Text::Short).then_some(label)}
                 status={html! { { status_text } }}
                 onsave={onsave.clone()}
                 ondiscard={discard.then_some(ondiscard)}>

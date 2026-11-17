@@ -13,6 +13,7 @@ mod class {
 /// The showcase's one stylesheet: plinth's CSS, then `style/`'s.
 const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
+use phrasebook02::{Lang, Phrasebook, Phrases, browser};
 use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
@@ -33,6 +34,20 @@ const THEMES: &[(&str, Theme)] = &[
     ("Light", Theme::Light),
     ("Dark", Theme::Dark),
 ];
+
+const SV_SE: Lang = Lang::new("sv-SE");
+
+/// The languages the showcase offers, by their own names.
+const LANGUAGES: &[(&str, Lang)] = &[("English", Lang::EN_US), ("Svenska", SV_SE)];
+
+/// The showcase's phrasebook: it has no messages of its own, only plinth's.
+fn phrasebook() -> Phrasebook {
+    let mut builder = Phrasebook::builder();
+    for &(name, lang) in LANGUAGES {
+        builder = builder.language(lang, name);
+    }
+    builder.catalog(&plinth::phrasebookcatalog01::L10N).build()
+}
 
 fn apply(theme: Theme) {
     let Some(root) = web_sys::window()
@@ -92,6 +107,17 @@ fn App() -> Html {
         })
     };
 
+    let phrases = use_state(|| browser::initial(&phrasebook()));
+    let on_lang = {
+        let phrases = phrases.clone();
+        Callback::from(move |lang: Lang| {
+            let next = phrases.with_lang(lang);
+            browser::set_document_lang(lang);
+            next.store();
+            phrases.set(next);
+        })
+    };
+
     let link = |index: usize| {
         let page = &PAGES[index];
         let onclick = {
@@ -112,6 +138,7 @@ fn App() -> Html {
     let page = &PAGES[*current];
 
     html! {
+        <ContextProvider<Phrases> context={(*phrases).clone()}>
         <OverlayHost>
         <div class={class::SHELL}>
             <plinth::Styles css={STYLESHEET} />
@@ -127,6 +154,7 @@ fn App() -> Html {
                         </Stack>
                     }) }
                     <Select<Theme> label="Theme" options={THEMES} value={*theme} on_change={on_theme} />
+                    <Select<Lang> label="Language" options={LANGUAGES} value={phrases.lang()} on_change={on_lang} />
                 </Stack>
             </nav>
             <main class={class::MAIN}>
@@ -144,6 +172,7 @@ fn App() -> Html {
             }
         </div>
         </OverlayHost>
+        </ContextProvider<Phrases>>
     }
 }
 

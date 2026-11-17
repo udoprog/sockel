@@ -1,10 +1,11 @@
+use phrasebook02::{Args, Phrases, yew023::use_phrases_with};
 use wasm_bindgen::JsCast;
 use web_sys::{Element, KeyboardEvent, KeyboardEventInit};
 use yew::prelude::*;
 
 use plinth::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderRow, ReorderText,
-    drag_handle, key_target, landing, move_item, reorder_row, reorder_text, slot_at,
+    drag_handle, key_target, landing, move_item, reorder_row, slot_at,
 };
 
 use crate::class;
@@ -14,6 +15,59 @@ use crate::controls::{Demo, Select, Text, Toggle, bind};
 const NAMES: &[&str] = &[
     "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel",
 ];
+
+/// What `reorder_text` says, in the provided language: the text callback
+/// overrides plinth's own words, so the page looks up the same messages.
+fn say(phrases: &Phrases, text: &ReorderText) -> String {
+    let (id, name, place) = match text {
+        ReorderText::Handle { name } => ("plinth-reorder-handle", Some(name), None),
+        ReorderText::Hint => ("plinth-reorder-hint", None, None),
+        ReorderText::Lifted {
+            name,
+            position,
+            count,
+        } => (
+            "plinth-reorder-lifted",
+            Some(name),
+            Some((*position, *count)),
+        ),
+        ReorderText::Moving {
+            name,
+            position,
+            count,
+        } => (
+            "plinth-reorder-moving",
+            Some(name),
+            Some((*position, *count)),
+        ),
+        ReorderText::Dropped {
+            name,
+            position,
+            count,
+        } => (
+            "plinth-reorder-dropped",
+            Some(name),
+            Some((*position, *count)),
+        ),
+        ReorderText::Cancelled {
+            name,
+            position,
+            count,
+        } => (
+            "plinth-reorder-cancelled",
+            Some(name),
+            Some((*position, *count)),
+        ),
+    };
+    let mut args = Args::new();
+    if let Some(name) = name {
+        args.set("name", name.as_str());
+    }
+    if let Some((position, count)) = place {
+        args.set("position", position).set("count", count);
+    }
+    phrases.msg(id, &args)
+}
 
 const COUNTS: &[(&str, usize)] = &[("5", 5), ("0 (empty)", 0), ("1", 1), ("8", 8)];
 
@@ -91,10 +145,11 @@ pub fn ReorderPage() -> Html {
             order.set(next);
         })
     };
+    let phrases = use_phrases_with(&plinth::phrasebookcatalog01::L10N);
     let text_cb = {
         let said = said.clone();
         Callback::from(move |t: ReorderText| {
-            let words = reorder_text(&t);
+            let words = say(&phrases, &t);
             if !matches!(t, ReorderText::Handle { .. } | ReorderText::Hint) {
                 said.set(words.clone());
             }
