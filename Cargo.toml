@@ -2,6 +2,7 @@
 name = "plinth"
 version = "0.1.0"
 edition = "2024"
+license = "MIT OR Apache-2.0"
 description = "Opinionated layout primitives and components for Yew apps that keep their size as their content changes."
 readme = "README.md"
 include = ["/build.rs", "/locales", "/src", "/style", "/README.md"]
