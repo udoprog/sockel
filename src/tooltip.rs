@@ -24,7 +24,7 @@ pub const HOVER_CARD_DELAY: u32 = 400;
 
 static IDS: AtomicUsize = AtomicUsize::new(0);
 
-fn next_id(kind: &str) -> AttrValue {
+pub(crate) fn next_id(kind: &str) -> AttrValue {
     AttrValue::from(format!(
         "plinth-{kind}-{}",
         IDS.fetch_add(1, Ordering::Relaxed)

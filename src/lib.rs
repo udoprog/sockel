@@ -96,6 +96,9 @@
 //!   keyboard navigation and type-ahead; [`RowActions`] (`.row-actions`), a
 //!   row's icon buttons and overflow menu; [`SplitButton`]
 //!   (`.split-button`); [`ContextMenu`], opened at the pointer.
+//! - [`Select`] (`.select`): a field's box showing what is chosen, as wide
+//!   as its widest option, opening a [`Listbox`] (`.listbox`) of its options
+//!   while focus stays on it; [`Listbox`] is the list's keyboard state.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -139,6 +142,7 @@ mod input;
 mod layer;
 mod layout;
 mod library_toolbar;
+mod listbox;
 mod loadable;
 mod menu;
 mod nav_list;
@@ -148,6 +152,7 @@ mod popover;
 mod roving;
 mod rows;
 mod secret_input;
+mod select;
 mod selection;
 mod skeleton;
 mod sort_header;
@@ -197,6 +202,7 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
+pub use listbox::{LISTBOX_PAGE, ListKey, Listbox, listbox, listbox_option, option_id};
 pub use loadable::{LoadState, Loadable, LoadableProps};
 pub use menu::{
     ContextMenu, ContextMenuProps, Menu, MenuCheck, MenuCheckProps, MenuHeading, MenuItem,
@@ -216,6 +222,7 @@ pub use rows::{
     row_list, row_list_item,
 };
 pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};
+pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, select};
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };

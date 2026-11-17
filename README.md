@@ -1076,6 +1076,67 @@ only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
 `DISCLOSURE_BODY` (`OPEN` is new too). New partials: `_pager.scss`,
 `_disclosure.scss`. New tokens: none (`--pager-chars` is set per Pager).
 
+## Select and Listbox
+
+`Select<T>` is the WAI-ARIA select-only combobox: a face in the tab order
+(a `<button>`, `role="combobox"`, `aria-haspopup="listbox"`) showing what is
+chosen, opening a listbox (`role="listbox"`, `plinth::class::LISTBOX`) under
+it in the overlay layer through `use_popover`, while focus stays on the face
+(`aria-activedescendant` names the active option). Props:
+
+- `options: Vec<SelectOption<T>>` (`SelectOption::new(value, label)`,
+  `.icon(html)` before its label in the list, `.disabled(..)`), `value:
+  Option<T>`, `on_change` (told a pick that is not the one chosen),
+  `placeholder` (muted, while nothing listed is chosen).
+- `width` (`SelectWidth`): `Widest` (the widest option or placeholder) or
+  `Fill` (`FILL`, its container's width).
+- `size` (`InputSize`, as a `TextInput`'s), `invalid`, `disabled`, `busy`
+  (`aria-busy`; it still opens on what it has).
+- `id` and `describedby` inside a `Field` (its label names and opens it),
+  `label` (the accessible name without one), `class` (the face's), `testid`
+  (the face's; the list's is it suffixed `-options`).
+
+In an `InputGroup`, give it `group_classes(..)[i]` as its `class` like any
+member. `select(size, width, invalid, disabled, busy)` gives the face's
+classes (the input box's, `SELECT`, `FILL`), `chosen(options, value)` the
+chosen option's index.
+
+Keyboard: closed, the arrows, Enter, Space, Home and End open it (on the
+chosen option, else the first or, for ArrowUp and End, the last enabled
+one), and typing opens it on the option starting with what was typed.
+Open, the arrows (stopping at the ends), PageUp and PageDown (10), Home and
+End move over the enabled options, typing moves as a `Menu`'s type-ahead
+does, Enter, Space and Alt+ArrowUp pick, and Escape, Tab or a press outside
+close it. A pointer over an option makes it active; a press on the list
+keeps focus on the face.
+
+`Listbox` is the list's keyboard state, for anything listing options under
+what keeps focus (P12's searching pickers): `active`, `hover`, `set`,
+`step`, `go_to_end`, `settle` (after filtering), `typeahead(pickable,
+labels, char, now)`, `key(key, alt, pickable) -> ListKey` (`Moved`,
+`Pick(i)`, `Ignored`) and `take_scroll` (scroll the active option into
+view). `option_id(base, i)`, `listbox(placed)` and `listbox_option(active)`
+(`LISTBOX_OPTION`, `ACTIVE`) give the ids and classes; an option's
+`aria-selected` and `aria-disabled` carry the rest. Its parts are
+`LISTBOX_OPTION_MARK` (the selected one's check, its box kept when off,
+`OFF`), `LISTBOX_OPTION_ICON` and `LISTBOX_OPTION_LABEL`.
+
+Size guarantees: the face is one width whatever is chosen. Every option's
+label and the placeholder are in one grid cell, all but the shown one
+`HIDDEN`, so `Widest` is the widest of them. Past its container it is cut
+with an ellipsis, never wrapped. `Fill` is the container's width. It is
+the input box's height for its size, and open, focus, hover and invalid
+change colours only. The face shows no option icon, which would change its
+width. The list is the menu's surface (fixed in a layer that lays nothing
+out, hidden until placed), at least as wide as the face
+(`--listbox-anchor-width`) and never narrower than it opened
+(`--listbox-open-width`). Its rows are `--control-height` at least, their
+border reserved, and the active row changes only its fill. Labels are one
+line. New tokens: none (the two custom properties are set by the
+component). New partials: `_listbox.scss`, `_select.scss`. The menu's
+surface, row and mark are now the mixins `list`, `item`, `item-active` and
+`mark` in `_menu.scss`, with the same output.
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

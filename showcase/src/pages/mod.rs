@@ -18,6 +18,7 @@ mod notices;
 mod pagers;
 mod popover;
 mod rows;
+mod select;
 mod steppers;
 mod styles;
 mod tables;
@@ -456,6 +457,51 @@ pub const PAGES: &[Page] = &[
                 plinth::class::INPUT,
                 Size::Height,
                 Across::Except(&["Size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "select",
+        title: "Select",
+        about: "A field's box showing what is chosen, opening a listbox in the overlay layer while focus stays on it: a placeholder, disabled options, joined inside an InputGroup. Its face is as wide as its widest option or the placeholder (or its container's, Fill), so a pick never changes its width. Listbox is the list's keyboard state: the active option, PageUp and PageDown, type-ahead.",
+        covers: &[
+            "Select",
+            "SelectProps",
+            "SelectOption",
+            "SelectWidth",
+            "select",
+            "chosen",
+            "Listbox",
+            "ListKey",
+            "LISTBOX_PAGE",
+            "listbox",
+            "listbox_option",
+            "option_id",
+        ],
+        render: || html! { <select::SelectPage /> },
+        holds: &[
+            hold(
+                plinth::class::SELECT,
+                Size::Box,
+                Across::Only(&[
+                    "value",
+                    "invalid",
+                    "disabled",
+                    "busy",
+                    "an option disabled",
+                    "focus",
+                    "click",
+                ]),
+            ),
+            hold(
+                plinth::class::SELECT,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+            hold(
+                plinth::class::INPUT_GROUP,
+                Size::Height,
+                Across::Except(&["size"]),
             ),
         ],
     },

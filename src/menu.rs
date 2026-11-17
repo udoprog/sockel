@@ -181,7 +181,7 @@ fn use_focus_first(list: NodeRef, placed: bool) {
 
 /// Holds the width a menu opened at while it stays open.
 #[hook]
-fn use_held_width(list: NodeRef, placed: bool) -> Option<i32> {
+pub(crate) fn use_held_width(list: NodeRef, placed: bool) -> Option<i32> {
     let held = use_state_eq(|| None::<i32>);
     {
         let held = held.clone();

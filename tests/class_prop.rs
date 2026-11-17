@@ -342,3 +342,15 @@ fn loading_components_keep_a_passed_class() {
         &format!("{} {MINE}", class::LOADABLE),
     );
 }
+
+#[test]
+fn a_select_keeps_a_passed_class() {
+    let html = render::<Select<u32>>(yew::props!(SelectProps<u32> {
+        options: vec![SelectOption::new(1, "One")],
+        class: classes!(MINE),
+    }));
+    assert!(
+        html.contains(&format!("{} {MINE}\"", class::SELECT)),
+        "{html}"
+    );
+}

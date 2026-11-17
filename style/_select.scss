@@ -1,0 +1,58 @@
+// Select (src/select.rs): a field's box (`.plinth-input-box`, _inputs.scss)
+// showing what is chosen, opening a listbox (_listbox.scss).
+//
+// - `.plinth-select`: the face, a button. As wide as its widest option or
+//   placeholder (every label is in `-value`'s one grid cell, the others
+//   `.plinth-hidden`), so a pick never changes its width; cut with an
+//   ellipsis past its container. `.plinth-fill`: as wide as its container
+//   instead. Sizes, `.plinth-invalid`, `.plinth-disabled` and `.plinth-busy`
+//   are the input box's.
+// - Parts: `-value` (the labels' cell), `-text` (one label), `-placeholder`
+//   (the placeholder, muted), `-chevron`.
+
+@use "tokens" as base;
+
+.plinth-select {
+    width: max-content;
+    max-width: 100%;
+    text-align: start;
+    cursor: pointer;
+
+    &.plinth-fill {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    &[aria-expanded="true"] {
+        --input-edge: var(--accent);
+    }
+
+    &.plinth-disabled {
+        cursor: not-allowed;
+    }
+}
+
+.plinth-select-value {
+    display: grid;
+    flex: 1 1 auto;
+    grid-template-columns: minmax(0, 1fr);
+    min-width: 0;
+}
+
+.plinth-select-text,
+.plinth-select-placeholder {
+    grid-area: 1 / 1;
+    min-width: 0;
+    @include base.truncate;
+}
+
+.plinth-select-placeholder {
+    color: var(--muted);
+}
+
+.plinth-select-chevron {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    color: var(--muted);
+}
