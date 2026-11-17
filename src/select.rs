@@ -12,6 +12,26 @@ use crate::{
     input_box, use_overlays,
 };
 
+/// Whether the list is open and what the filter holds, as the key handler
+/// last left them: keys pressed faster than a render see each other.
+#[derive(Default)]
+struct Live {
+    open: bool,
+    filter: String,
+}
+
+impl Live {
+    /// A letter typed with the filter: the first opens the list on it,
+    /// the next ones add to it. What the filter now holds.
+    fn type_filter(&mut self, c: char) -> String {
+        if !std::mem::replace(&mut self.open, true) {
+            self.filter.clear();
+        }
+        self.filter.push(c);
+        self.filter.clone()
+    }
+}
+
 /// One option of a [`Select`].
 #[derive(Clone, Debug, PartialEq)]
 pub struct SelectOption<T> {
@@ -261,6 +281,12 @@ where
     let input = use_node_ref();
     // The sheet's head, shown only while the list is a sheet.
     let head = use_node_ref();
+    let live = use_mut_ref(Live::default);
+    {
+        let mut live = live.borrow_mut();
+        live.open = *open;
+        live.filter.clone_from(&filter);
+    }
 
     let on_dismiss = {
         let open = open.clone();
@@ -344,6 +370,7 @@ where
 
     let show = {
         let (open, state, filter) = (open.clone(), state.clone(), filter.clone());
+        let live = live.clone();
         // Opening clears the filter: every enabled option.
         let pickable: Vec<usize> = (0..options.len())
             .filter(|&i| !options[i].disabled)
@@ -354,6 +381,10 @@ where
                 return;
             }
             filter.set(String::new());
+            *live.borrow_mut() = Live {
+                open: true,
+                filter: String::new(),
+            };
             let mut state = state.borrow_mut();
             match current.filter(|i| pickable.contains(i)) {
                 Some(i) => state.set(Some(i)),
@@ -364,6 +395,7 @@ where
     };
     let pick = {
         let (open, on_change) = (open.clone(), props.on_change.clone());
+        let live = live.clone();
         let on_change_values = props.on_change_values.clone();
         let values: Vec<(T, bool)> = options
             .iter()
@@ -384,6 +416,7 @@ where
                 on_change_values.emit(next);
                 return;
             }
+            live.borrow_mut().open = false;
             open.set(false);
             if current != Some(i) {
                 on_change.emit(value.clone());
@@ -409,7 +442,7 @@ where
         Callback::from(move |_: MouseEvent| *swallow.borrow_mut() = false)
     };
     let onkeydown = {
-        let (is_open, state, redraw) = (*open, state.clone(), redraw.clone());
+        let (live, state, redraw) = (live.clone(), state.clone(), redraw.clone());
         let (open, pick, show) = (open.clone(), pick.clone(), show.clone());
         let (filter, pickable, input) = (filter.clone(), pickable.clone(), input.clone());
         let labels: Vec<String> = labels.iter().map(|&l| l.to_owned()).collect();
@@ -417,7 +450,7 @@ where
             let key = e.key();
             *swallow.borrow_mut() = matches!(key.as_str(), "Enter" | " ");
             let labels: Vec<&str> = labels.iter().map(String::as_str).collect();
-            if !is_open {
+            if !live.borrow().open {
                 if matches!(
                     key.as_str(),
                     "ArrowDown" | "ArrowUp" | "Enter" | " " | "Home" | "End"
@@ -429,7 +462,7 @@ where
                     show(false);
                     if filtering {
                         // Into the filter, which takes focus once placed.
-                        filter.set(c.to_string());
+                        filter.set(live.borrow_mut().type_filter(c));
                     } else {
                         state
                             .borrow_mut()
@@ -439,6 +472,7 @@ where
                 return;
             }
             if key == "Tab" {
+                live.borrow_mut().open = false;
                 open.set(false);
                 return;
             }
@@ -452,7 +486,7 @@ where
                     // Open with the filter, focus back on the face (a
                     // press on it, a sheet's): into the filter, focused.
                     Some(c) if filtering => {
-                        filter.set(format!("{}{c}", *filter));
+                        filter.set(live.borrow_mut().type_filter(c));
                         if let Some(input) = input.cast::<HtmlElement>() {
                             _ = input.focus();
                         }
@@ -758,6 +792,18 @@ mod tests {
                 .hydratable(false)
                 .render(),
         )
+    }
+
+    #[test]
+    fn letters_typed_before_a_render_add_up_in_the_filter() {
+        let mut live = Live {
+            open: false,
+            filter: "old".into(),
+        };
+        assert_eq!(live.type_filter('z'), "z");
+        assert!(live.open);
+        assert_eq!(live.type_filter('z'), "zz");
+        assert_eq!(live.type_filter('y'), "zzy");
     }
 
     fn sizes() -> Vec<SelectOption<u32>> {
