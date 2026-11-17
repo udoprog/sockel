@@ -16,10 +16,10 @@ const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
-use plinth::{Cluster, Gap, OverlayHost, PageHead, Stack};
+use plinth::{Cluster, Gap, OverlayHost, PageHead, SectionHead, Stack};
 
 use controls::Select;
-use pages::{PAGES, Page};
+use pages::{FALLBACK, Group, PAGES, in_group};
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Theme {
@@ -49,13 +49,14 @@ fn apply(theme: Theme) {
     };
 }
 
-/// The page the address names, else the first.
+/// The page the address names, else the fallback.
 fn initial_page() -> usize {
     let hash = web_sys::window()
         .and_then(|w| w.location().hash().ok())
         .unwrap_or_default();
     let id = hash.trim_start_matches('#');
-    PAGES.iter().position(|p| p.id == id).unwrap_or_default()
+    let find = |id: &str| PAGES.iter().position(|p| p.id == id);
+    find(id).or_else(|| find(FALLBACK)).unwrap_or_default()
 }
 
 #[function_component]
@@ -91,7 +92,8 @@ fn App() -> Html {
         })
     };
 
-    let link = |(index, page): (usize, &Page)| {
+    let link = |index: usize| {
+        let page = &PAGES[index];
         let onclick = {
             let current = current.clone();
             Callback::from(move |_: MouseEvent| current.set(index))
@@ -116,9 +118,14 @@ fn App() -> Html {
             <nav class={class::NAV} aria-label="Components">
                 <Stack gap={Gap::Loose}>
                     <strong class={class::NAME}>{ "plinth" }</strong>
-                    <ul class={classes!(plinth::class::PLAIN_LIST, class::NAV_LIST)}>
-                        { for PAGES.iter().enumerate().map(link) }
-                    </ul>
+                    { for Group::ALL.iter().map(|&group| html! {
+                        <Stack gap={Gap::Snug}>
+                            <SectionHead title={group.title()} class={plinth::class::LABEL} />
+                            <ul class={classes!(plinth::class::PLAIN_LIST, class::NAV_LIST)}>
+                                { for in_group(group).into_iter().map(link) }
+                            </ul>
+                        </Stack>
+                    }) }
                     <Select<Theme> label="Theme" options={THEMES} value={*theme} on_change={on_theme} />
                 </Stack>
             </nav>

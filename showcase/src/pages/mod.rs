@@ -41,10 +41,68 @@ use plinth::Head;
 use crate::class;
 use crate::probe::{Across, Hold, Size};
 
+/// The kinds the navigation groups pages by, in display order.
+#[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
+pub enum Group {
+    Foundations,
+    Actions,
+    Feedback,
+    Inputs,
+    Layout,
+    Lists,
+    Media,
+    Navigation,
+    Overlays,
+    Pickers,
+}
+
+impl Group {
+    pub const ALL: [Group; 10] = [
+        Group::Foundations,
+        Group::Actions,
+        Group::Feedback,
+        Group::Inputs,
+        Group::Layout,
+        Group::Lists,
+        Group::Media,
+        Group::Navigation,
+        Group::Overlays,
+        Group::Pickers,
+    ];
+
+    pub fn title(self) -> &'static str {
+        match self {
+            Group::Foundations => "Foundations",
+            Group::Actions => "Actions",
+            Group::Feedback => "Feedback & status",
+            Group::Inputs => "Inputs & forms",
+            Group::Layout => "Layout",
+            Group::Lists => "Lists & tables",
+            Group::Media => "Media",
+            Group::Navigation => "Navigation",
+            Group::Overlays => "Overlays & menus",
+            Group::Pickers => "Pickers & selects",
+        }
+    }
+}
+
+/// The page shown for an unknown address.
+pub const FALLBACK: &str = "stack";
+
+/// The indexes into `PAGES` of a group's pages, alphabetical by title.
+pub fn in_group(group: Group) -> Vec<usize> {
+    let mut found: Vec<usize> = (0..PAGES.len())
+        .filter(|&index| PAGES[index].group == group)
+        .collect();
+    found.sort_by_key(|&index| PAGES[index].title.to_lowercase());
+    found
+}
+
 pub struct Page {
     /// The page's address, after the `#`.
     pub id: &'static str,
     pub title: &'static str,
+    pub group: Group,
     /// What the page is about, under its title.
     pub about: &'static str,
     /// The names exported from plinth that the page shows (its component,
@@ -74,6 +132,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "stack",
         title: "Stack",
+        group: Group::Layout,
         about: "A column, its blocks a gap apart.",
         covers: &["Stack", "StackProps", "Gap"],
         render: || html! { <layout::StackPage /> },
@@ -86,6 +145,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "cluster",
         title: "Cluster",
+        group: Group::Layout,
         about: "A row that wraps, its items centred.",
         covers: &["Cluster", "ClusterProps", "Justify", "Align"],
         render: || html! { <layout::ClusterPage /> },
@@ -102,6 +162,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "action-group",
         title: "ActionGroup",
+        group: Group::Actions,
         about: "The buttons that end a form, a panel or a section, the primary first.",
         covers: &["ActionGroup", "ActionGroupProps", "action_group"],
         render: || html! { <actions::ActionGroupPage /> },
@@ -114,6 +175,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "button",
         title: "Button",
+        group: Group::Actions,
         about: "A button or a link styled as one: variants, sizes, an icon, icon-only, fold, pressed and busy, in the same box. Click it; tab to it; hover it.",
         covers: &[
             "Button",
@@ -146,6 +208,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "checkbox",
         title: "Checkbox",
+        group: Group::Inputs,
         about: "A native checkbox in a box of a fixed size, with an indeterminate state. Click it; tab to it; press space.",
         covers: &["Checkbox", "CheckboxProps", "checkbox"],
         render: || html! { <toggles::CheckboxPage /> },
@@ -154,6 +217,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "switch",
         title: "Switch",
+        group: Group::Inputs,
         about: "An on or off switch (role=switch): its thumb moves by transform, and busy shows a spinner in it. Click it.",
         covers: &["Switch", "SwitchProps", "switch"],
         render: || html! { <toggles::SwitchPage /> },
@@ -165,6 +229,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "choice",
         title: "Choice",
+        group: Group::Inputs,
         about: "A segmented pick-one group: the selected option is marked by its background alone, and the options keep one width. Tab to it, then use the arrow keys.",
         covers: &[
             "Choice",
@@ -190,6 +255,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "chip",
         title: "ChipToggle",
+        group: Group::Inputs,
         about: "Filter chips with an on state and a count, in a list that keeps one row's height when it is empty. Click a chip.",
         covers: &[
             "ChipToggle",
@@ -217,6 +283,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "field",
         title: "Field",
+        group: Group::Inputs,
         about: "A label, the control, a hint and an error. With reserve_error the error line keeps its room: set an error and nothing below moves.",
         covers: &[
             "Field",
@@ -238,6 +305,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "form-rows",
         title: "FormRows",
+        group: Group::Inputs,
         about: "Rows sharing one label column, the label above its control on a phone; with a Fieldset and a FieldCheck.",
         covers: &[
             "FormRows",
@@ -268,6 +336,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "pill",
         title: "Pill",
+        group: Group::Feedback,
         about: "A tinted label of one height, led by a dot in its tone; a button when it has on_click. Change the tone, hover, click.",
         covers: &["Pill", "PillProps", "Tone", "pill"],
         render: || html! { <badges::PillPage /> },
@@ -283,6 +352,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "text-input",
         title: "TextInput",
+        group: Group::Inputs,
         about: "A text input at a control's height, bare or with a unit inside the field, and a Textarea. Type a long value; tab to it; set it invalid.",
         covers: &[
             "TextInput",
@@ -322,6 +392,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "badge",
         title: "Badge",
+        group: Group::Feedback,
         about: "A short bordered mark, solid or over a corner, and the Dot beside it: filled or a ring, the same box.",
         covers: &["Badge", "BadgeProps", "badge", "Dot", "DotProps", "dot"],
         render: || html! { <badges::BadgePage /> },
@@ -342,6 +413,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "count",
         title: "Count",
+        group: Group::Feedback,
         about: "A figure whose width is reserved for its max digits and a +, hidden at none without losing its box.",
         covers: &["Count", "CountProps", "count", "count_text"],
         render: || html! { <badges::CountPage /> },
@@ -354,6 +426,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "status-label",
         title: "StatusLabel",
+        group: Group::Feedback,
         about: "A status as wide as its widest state, so Loading... to Saved does not resize it; its spinner slot is always reserved.",
         covers: &["StatusLabel", "StatusLabelProps", "status_label"],
         render: || html! { <badges::StatusLabelPage /> },
@@ -373,6 +446,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "search-field",
         title: "SearchField",
+        group: Group::Inputs,
         about: "A search icon, the text and a clear button whose room is always kept: type, then clear it, and the field does not move. Escape clears too.",
         covers: &["SearchField", "SearchFieldProps"],
         render: || html! { <inputs::SearchFieldPage /> },
@@ -397,6 +471,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "stepper",
         title: "Stepper",
+        group: Group::Inputs,
         about: "A number between a minus and a plus button, its room that of the longest bound. Step it, type past the bounds, use the arrow keys.",
         covers: &[
             "Stepper",
@@ -428,6 +503,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "secret-input",
         title: "SecretInput",
+        group: Group::Inputs,
         about: "A password field with show, copy and clear slots that keep their room; the secret hides itself after a while. Show it; clear it.",
         covers: &["SecretInput", "SecretInputProps", "Reveal", "REVEAL_MS"],
         render: || html! { <steppers::SecretInputPage /> },
@@ -452,6 +528,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "input-group",
         title: "InputGroup",
+        group: Group::Inputs,
         about: "Controls joined in a row, the corners that join squared and one border between them; the members keep one height. A detached member stands apart.",
         covers: &["InputGroup", "InputGroupProps", "group_classes"],
         render: || html! { <inputs::InputGroupPage /> },
@@ -471,6 +548,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "color-select",
         title: "ColorSelect",
+        group: Group::Pickers,
         about: "A colour picker on the select pattern: a face of one width showing the chosen swatch and name, opening a grid of the app's palette (passed as data) and an optional custom colour. A pick, or a palette still loading, never changes the face's box.",
         covers: &[
             "ColorSelect",
@@ -527,6 +605,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "select",
         title: "Select",
+        group: Group::Pickers,
         about: "A field's box showing what is chosen, opening a listbox in the overlay layer while focus stays on it: a placeholder, disabled options, joined inside an InputGroup. Its face is as wide as its widest option or the placeholder (or its container's, Fill), so a pick never changes its width. Listbox is the list's keyboard state: the active option, PageUp and PageDown, type-ahead.",
         covers: &[
             "Select",
@@ -579,6 +658,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "search-select",
         title: "SearchSelect",
+        group: Group::Pickers,
         about: "A text field filtering a listbox of options under it, in groups, with details: filtered here, or loaded elsewhere with results for an older query ignored (a loading row stands in). The list is one width and --picker-rows rows high, loading, loaded or empty.",
         covers: &[
             "SearchSelect",
@@ -613,6 +693,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "filter-picker",
         title: "FilterPicker",
+        group: Group::Pickers,
         about: "A list's filter button, --filter-width wide: all, or the first choice and a count of the rest in a slot kept with none. It opens a multi-select listbox, an option for all first; a pick leaves it open.",
         covers: &[
             "FilterPicker",
@@ -631,6 +712,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "picker",
         title: "Picker",
+        group: Group::Pickers,
         about: "A field of one width showing the current option, its icon and label, opening a ChoiceList below it: options with icon, mark, detail and badge slots, a search field over them past eight (ranked: labels starting with the text first), --picker-rows rows high however many match.",
         covers: &[
             "Picker",
@@ -667,6 +749,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "picker-menu",
         title: "PickerMenu",
+        group: Group::Pickers,
         about: "A button for an action that takes an option, such as adding one, opening the same searchable ChoiceList as a Picker; a pick closes it.",
         covers: &["PickerMenu", "PickerMenuProps"],
         render: || html! { <picker::PickerMenuPage /> },
@@ -679,6 +762,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "picker-dialog",
         title: "PickerDialog",
+        group: Group::Pickers,
         about: "The searchable picker shell for a large set (languages, countries): a dialog holding a ChoiceList, single or multi-select, its search field focused. Shown inline too: filtering, no matches and multi never change its box.",
         covers: &[
             "PickerDialog",
@@ -699,6 +783,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "icon-button",
         title: "IconButton",
+        group: Group::Actions,
         about: "A button that leads with (or ends in) an icon the app supplies. Click it; tab to it.",
         covers: &["IconButton", "IconButtonProps", "icon_button"],
         render: || html! { <actions::IconButtonPage /> },
@@ -718,6 +803,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "icon",
         title: "Icon",
+        group: Group::Media,
         about: "plinth's glyphs and the app's own icons by name, from the app's IconSet or the built-in one, always in the same box. A missing icon is the empty box; swap the set and the sizes do not move.",
         covers: &[
             "Icon",
@@ -746,6 +832,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "image",
         title: "Image",
+        group: Group::Media,
         about: "A picture in a box of a fixed ratio: its placeholder while it loads, when it fails and when there is none is drawn in the same box. Switch the source and the ratio.",
         covers: &["Image", "ImageProps", "Ratio", "Status", "image"],
         render: || html! { <media::ImagePage /> },
@@ -765,6 +852,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "avatar",
         title: "Avatar",
+        group: Group::Media,
         about: "A round portrait of a fixed size, its initials behind the picture: loading, loaded, failed or missing, it is the same box.",
         covers: &["Avatar", "AvatarProps", "AvatarSize", "avatar", "initials"],
         render: || html! { <media::AvatarPage /> },
@@ -780,6 +868,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "notice",
         title: "Notice",
+        group: Group::Feedback,
         about: "An inline message in a tone, with an optional icon, action and close. Closing one collapses its space, by design.",
         covers: &["Notice", "NoticeProps", "notice"],
         render: || html! { <notices::NoticePage /> },
@@ -799,6 +888,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "error-box",
         title: "ErrorBox",
+        group: Group::Feedback,
         about: "An error with its cause and a retry; a retry in progress keeps the button's box.",
         covers: &["ErrorBox", "ErrorBoxProps"],
         render: || html! { <notices::ErrorBoxPage /> },
@@ -814,6 +904,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "empty-state",
         title: "EmptyState",
+        group: Group::Feedback,
         about: "What stands where there is nothing. Compact, it is one row high, like the row it replaces.",
         covers: &["EmptyState", "EmptyStateProps", "empty_state"],
         render: || html! { <notices::EmptyStatePage /> },
@@ -829,6 +920,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "spinner",
         title: "Spinner",
+        group: Group::Feedback,
         about: "A spinning glyph in the icon box, in the colour of the text around it; the busy mark of a Button.",
         covers: &["Spinner", "SpinnerProps"],
         render: || html! { <loading::SpinnerPage /> },
@@ -837,6 +929,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "skeleton",
         title: "Skeleton",
+        group: Group::Feedback,
         about: "A placeholder of the box its content will have: a line, a block, a row as high as a RowList row, or a picture of an Image's ratio.",
         covers: &["Skeleton", "SkeletonProps", "SkeletonShape", "skeleton"],
         render: || html! { <loading::SkeletonPage /> },
@@ -849,6 +942,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "loadable",
         title: "Loadable",
+        group: Group::Feedback,
         about: "Loading, empty, error and ready content in one box: it keeps the height it last had while it loads again, and the empty state waits a moment so it never flashes before data.",
         covers: &["Loadable", "LoadableProps", "LoadState"],
         render: || html! { <loading::LoadablePage /> },
@@ -864,6 +958,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "toast",
         title: "Toast",
+        group: Group::Feedback,
         about: "A short message after an action, with an undo, fixed over the window's bottom so it moves nothing; its clock stops under the pointer or focus. Tick Live toast.",
         covers: &[
             "Toast",
@@ -911,6 +1006,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "save-bar",
         title: "SaveBar",
+        group: Group::Feedback,
         about: "A form's unsaved changes: a note, save and discard, always in the flow at one height and only hidden while clean, so the first edit moves nothing.",
         covers: &[
             "SaveBar",
@@ -938,6 +1034,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "row-list",
         title: "RowList",
+        group: Group::Lists,
         about: "Rows of a name, a detail and what ends them, divided by lines that add no height. Hover or tab to a row.",
         covers: &[
             "RowList",
@@ -965,6 +1062,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "pick-row",
         title: "PickRow",
+        group: Group::Lists,
         about: "A row that is one press, choosing the thing it names: the chosen row is marked by its background alone.",
         covers: &["PickRow", "PickRowProps", "pick_row"],
         render: || html! { <rows::PickRowPage /> },
@@ -985,6 +1083,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "selection-bar",
         title: "SelectionBar",
+        group: Group::Lists,
         about: "The picked count and its actions under a list. It keeps its room at one height, hidden while nothing is picked, so picking moves nothing.",
         covers: &["SelectionBar", "SelectionBarProps", "selection_bar"],
         render: || html! { <rows::SelectionBarPage /> },
@@ -1005,6 +1104,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "action-row",
         title: "ActionRow",
+        group: Group::Lists,
         about: "Actions acting on what stands around them; as an overlay it lies over its row's end, invisible and inert until the row is hovered or focused.",
         covers: &["ActionRow", "ActionRowProps", "action_row"],
         render: || html! { <rows::ActionRowPage /> },
@@ -1020,6 +1120,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "card-grid",
         title: "CardGrid",
+        group: Group::Layout,
         about: "Cards in as many columns as fit, each at least a size's width, sharing the room.",
         covers: &["CardGrid", "CardGridProps", "GridSize", "card_grid"],
         render: || html! { <rows::CardGridPage /> },
@@ -1035,6 +1136,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "reorder",
         title: "Reorder",
+        group: Group::Lists,
         about: "Rows moved by a drag on their handle or by keyboard (Space lifts, the arrows aim, Space drops, Escape cancels; Alt and an arrow moves at once). Nothing reflows until the drop.",
         covers: &[
             "Reorder",
@@ -1078,6 +1180,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "table",
         title: "Table",
+        group: Group::Lists,
         about: "A table in a scroll area with a sticky head, hover rows and numeric columns; the bulk actions' room is reserved above it. Press a heading to sort.",
         covers: &[
             "Table",
@@ -1114,6 +1217,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "sort-header",
         title: "SortHeader",
+        group: Group::Lists,
         about: "A column heading that sorts: unsorted, first way, the other way, unsorted. The mark has its box in every state, so sorting never changes the heading's width.",
         covers: &[
             "SortHeader",
@@ -1136,6 +1240,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "pager",
         title: "Pager",
+        group: Group::Navigation,
         about: "Page buttons in a fixed number of slots: first, previous, numbers with gaps, next and last. The slot count and each button's width never change with the page, and the current page is marked without bold.",
         covers: &[
             "Pager",
@@ -1160,6 +1265,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "disclosure",
         title: "Disclosure",
+        group: Group::Navigation,
         about: "A summary row that toggles its body (aria-expanded). The row is one height shut or open: the mark turns inside its box and the summary is cut to one line.",
         covers: &[
             "Disclosure",
@@ -1189,6 +1295,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "drop-zone",
         title: "DropZone",
+        group: Group::Inputs,
         about: "A target for dropped or pasted files, or picked with its button. Over, refused, busy and error are drawn by an overlay inside a border the zone always has, so no state or message changes its size. Drop a file on it to see its states.",
         covers: &[
             "DropState",
@@ -1212,6 +1319,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "toolbar",
         title: "Toolbar",
+        group: Group::Layout,
         about: "One line of controls; a ToolbarSpacer pushes the rest to its end. Tab through its buttons.",
         covers: &[
             "Toolbar",
@@ -1232,6 +1340,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "tool-band",
         title: "ToolBand",
+        group: Group::Layout,
         about: "A Toolbar with band: its controls wrap onto further lines instead of scrolling, in ToolbarParts that each keep to one line, ruled off from the part before from the phone breakpoint up; chrome sets it on --band-chrome-ground with a rule under it, --band-chrome-gap apart; search sets it in --band-search-text. tool_band(chrome, search) gives these classes to markup that is not the component. Its buttons keep one width when disabled, so the band never rewraps. Tab through it.",
         covers: &[
             "ToolbarPart",
@@ -1257,6 +1366,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "panel",
         title: "Panel",
+        group: Group::Layout,
         about: "A ringed ground over a list or a view holding its filters or a short form: a column, or a line that wraps; tinted or bare; small sets it in --text-sm. Its ring, type and tint text come from --panel-border, --panel-text and --panel-tint-text, the room under it from --panel-space-after. As wide as what it holds, never wider than its column; its ring is always there, so the ground changes nothing of its box.",
         covers: &["Panel", "PanelProps", "PanelGround", "panel"],
         render: || html! { <structures::PanelPage /> },
@@ -1269,6 +1379,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "seam",
         title: "Seam",
+        group: Group::Layout,
         about: "Two panes and the divider between them: drag it (one change a frame), focus it and use the arrow keys, Home and End, or double-click it to even the panes. Each pane keeps --seam-min, so neither collapses, and the divider keeps its box.",
         covers: &["Seam", "SeamProps", "SeamAxis", "seam"],
         render: || html! { <structures::SeamPage /> },
@@ -1289,6 +1400,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "use-width",
         title: "use_width",
+        group: Group::Layout,
         about: "An element's width as a hook, from a ResizeObserver: at most one new value a frame, and only when it changed. Drag the narrow frame's corner.",
         covers: &["use_width"],
         render: || html! { <structures::WidthPage /> },
@@ -1297,6 +1409,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "card",
         title: "Card",
+        group: Group::Layout,
         about: "A surface lifted off the page.",
         covers: &["Card", "CardProps", "Inset"],
         render: || html! { <layout::CardPage /> },
@@ -1308,6 +1421,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "page-head",
         title: "PageHead",
+        group: Group::Layout,
         about: "A page's title with its help, and its actions.",
         covers: &["PageHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Page} /> },
@@ -1330,6 +1444,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "section-head",
         title: "SectionHead",
+        group: Group::Layout,
         about: "A section's title with its help, and its actions.",
         covers: &["SectionHead", "HeadProps", "Head", "HeadLevel"],
         render: || html! { <heads::HeadPage kind={Head::Section} /> },
@@ -1352,6 +1467,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "library-toolbar",
         title: "LibraryToolbar",
+        group: Group::Lists,
         about: "A list's search field and its filters: click a filter to change its text, and the field keeps its width.",
         covers: &["LibraryToolbar", "LibraryToolbarProps"],
         render: || html! { <library::LibraryToolbarPage /> },
@@ -1367,6 +1483,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "popover",
         title: "Popover",
+        group: Group::Overlays,
         about: "A surface beside its anchor in the overlay layer: placed before it shows, flipped and kept inside the window, following its anchor as the page scrolls; a press outside or Escape closes it, and focus goes back to the anchor. A sheet from the bottom on a phone.",
         covers: &[
             "Popover",
@@ -1405,6 +1522,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "dialog",
         title: "Dialog",
+        group: Group::Overlays,
         about: "A modal box over a scrim: its head, a body that scrolls (or a flush one that lays itself out) and actions pinned below it, in four sizes, a sheet from the bottom on a phone. The page behind does not move or lose its scrollbar's room; Tab stays inside; Escape closes the innermost overlay first (open the popover or the second dialog from it), and focus goes back where it was.",
         covers: &[
             "Dialog",
@@ -1422,6 +1540,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "overlays",
         title: "Overlays",
+        group: Group::Overlays,
         about: "Overlays nested in one another, with and without an OverlayHost. Open a dialog, then a menu or a toast from it (the toast's Undo still works), a panel of the app's own (use_overlay) with a menu in it, or a popover with a tooltip on its button: Escape and a press outside close the innermost first and focus goes back. Turn the host off to see the fallback at the end of <body>; set the frame's colours to see a host inside it take them and the fallback not.",
         covers: &["OverlayHost", "use_overlays", "use_overlay"],
         render: || html! { <overlays::OverlaysPage /> },
@@ -1433,6 +1552,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "confirm",
         title: "Confirm",
+        group: Group::Overlays,
         about: "A dialog asking before an action: the explanation, then Cancel and the accepting button pinned below, the focus on Cancel when accepting destroys. Escape and the scrim cancel. ConfirmHost and ask put the same question from any code and resolve with the answer: press ask(..).await.",
         covers: &[
             "Confirm",
@@ -1451,6 +1571,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "confirm-popover",
         title: "ConfirmPopover",
+        group: Group::Overlays,
         about: "A confirm beside the button that asked, in a popover of a fixed width: the focus on Cancel when accepting destroys, Escape and a press outside cancel and focus returns to the button. Compact asks on one line with two named icons, as wide as it says. ConfirmButton is a Button that opens it. A sheet on a phone.",
         covers: &[
             "ConfirmPopover",
@@ -1468,6 +1589,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "confirm-inline",
         title: "ConfirmInline",
+        group: Group::Actions,
         about: "No and Yes replacing a button in its own box: both are always laid out in one cell, so the row is as wide as the wider and as high as the button whether it asks or not. No takes the focus; Escape goes back.",
         covers: &["ConfirmInline", "ConfirmInlineProps", "confirm_inline"],
         render: || html! { <confirms::ConfirmInlinePage /> },
@@ -1480,6 +1602,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "tooltip",
         title: "Tooltip",
+        group: Group::Overlays,
         about: "A short tip in the overlay layer, shown after the pointer rests on its anchor or at once on keyboard focus, and from a data-tip attribute with DataTips. It never moves the page. Hover it; tab to it; press Escape.",
         covers: &[
             "Tooltip",
@@ -1497,6 +1620,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "hover-card",
         title: "HoverCard",
+        group: Group::Overlays,
         about: "A richer card beside its anchor, opened by hover or keyboard focus and kept open while the pointer is over it, so a link in it can be reached.",
         covers: &[
             "HoverCard",
@@ -1513,6 +1637,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "reason-button",
         title: "ReasonButton",
+        group: Group::Actions,
         about: "A Button that says why it cannot act, or what it is doing, in a tooltip. One button across available, unavailable (aria-disabled, so it keeps focus) and working. Tab to it while unavailable.",
         covers: &["ReasonButton", "ReasonButtonProps", "reason_text"],
         render: || html! { <tooltips::ReasonButtonPage /> },
@@ -1537,6 +1662,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "menu",
         title: "Menu",
+        group: Group::Overlays,
         about: "A button opening a list of actions in the overlay layer: items with an icon, a detail and a hint, checks and radios, headings, separators and notes. Arrows, Home, End and type-ahead move between items; a pick, Tab, Escape or a press outside closes it, and Escape returns focus to the opener. Its width is set once on open.",
         covers: &[
             "Menu",
@@ -1575,6 +1701,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "row-actions",
         title: "RowActions",
+        group: Group::Overlays,
         about: "A row's actions: small icon buttons of one size, always shown, the danger ones last and muted until pointed at, then the overflow menu behind its ellipsis.",
         covers: &["RowActions", "RowActionsProps", "RowAction"],
         render: || html! { <menus::RowActionsPage /> },
@@ -1590,6 +1717,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "split-button",
         title: "SplitButton",
+        group: Group::Actions,
         about: "A main action joined to a menu of its variants: one control of one height, the two parts sharing a border.",
         covers: &["SplitButton", "SplitButtonProps"],
         render: || html! { <menus::SplitButtonPage /> },
@@ -1609,6 +1737,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "context-menu",
         title: "ContextMenu",
+        group: Group::Overlays,
         about: "A menu opened at the pointer by a right-click, or a long press on a touch screen. What it wraps is laid out as if it were not there.",
         covers: &["ContextMenu", "ContextMenuProps"],
         render: || html! { <menus::ContextMenuPage /> },
@@ -1617,6 +1746,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "classes",
         title: "Class functions",
+        group: Group::Foundations,
         about: "The classes of a stack, cluster, toolbar and card, for an element that cannot be the component.",
         covers: &["stack", "cluster", "toolbar", "card"],
         render: || html! { <layout::ClassesPage /> },
@@ -1625,6 +1755,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "foundations",
         title: "Foundations",
+        group: Group::Foundations,
         about: "The utilities and mixins against jitter: text fitting, tabular figures, a scroll area, the current item, showing by width, the focus ring; and the colours plinth derives.",
         covers: &[],
         render: || html! { <foundations::FoundationsPage /> },
@@ -1649,6 +1780,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "tabs",
         title: "Tabs",
+        group: Group::Navigation,
         about: "A tab list: the selected tab is marked by its colour and an underline inside its box, and tabs past the width scroll sideways. Tab to it, then use the arrow keys.",
         covers: &["Tabs", "SubTabs", "TabsProps", "TabItem", "tabs"],
         render: || html! { <tabs::TabsPage /> },
@@ -1668,6 +1800,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "nav-list",
         title: "NavList",
+        group: Group::Navigation,
         about: "A side or settings navigation: the current entry is marked by aria-current, its colour and a tint, never its weight.",
         covers: &["NavList", "NavListProps", "NavItem", "nav_list"],
         render: || html! { <tabs::NavListPage /> },
@@ -1680,6 +1813,7 @@ pub const PAGES: &[Page] = &[
     Page {
         id: "styles",
         title: "Styles",
+        group: Group::Foundations,
         about: "plinth's compiled stylesheet, and the component that adds the page's one stylesheet.",
         covers: &["STYLESHEET", "STYLE_ID", "Styles", "StylesProps"],
         render: || html! { <styles::StylesPage /> },
@@ -1691,7 +1825,27 @@ pub const PAGES: &[Page] = &[
 mod tests {
     use std::collections::BTreeSet;
 
-    use super::{PAGES, UNPROBED};
+    use super::{FALLBACK, Group, PAGES, UNPROBED, in_group};
+
+    #[test]
+    fn each_group_is_alphabetical_and_each_page_is_in_one() {
+        let mut seen = Vec::new();
+        for group in Group::ALL {
+            let titles: Vec<String> = in_group(group)
+                .iter()
+                .map(|&i| PAGES[i].title.to_lowercase())
+                .collect();
+            assert!(titles.windows(2).all(|w| w[0] <= w[1]), "{group:?}");
+            seen.extend(in_group(group));
+        }
+        seen.sort();
+        assert_eq!(seen, (0..PAGES.len()).collect::<Vec<_>>());
+    }
+
+    #[test]
+    fn the_fallback_is_a_page() {
+        assert!(PAGES.iter().any(|p| p.id == FALLBACK));
+    }
 
     /// The names in `src/lib.rs`'s `pub use` items.
     fn exported() -> BTreeSet<&'static str> {
