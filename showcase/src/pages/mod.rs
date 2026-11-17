@@ -450,7 +450,7 @@ pub const PAGES: &[Page] = &[
         id: "search-field",
         title: "SearchField",
         group: Group::Inputs,
-        about: "A search icon, the text and a clear button whose room is always kept: type, then clear it, and the field does not move. Escape clears too.",
+        about: "A search icon, the text and a clear button whose room is always kept: type, then clear it, and the field does not move. Escape clears too, unless escape clears is off (a combobox keeps escape to close its list).",
         covers: &["SearchField", "SearchFieldProps"],
         render: || html! { <inputs::SearchFieldPage /> },
         holds: &[

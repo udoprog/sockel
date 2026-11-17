@@ -691,7 +691,11 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   names the button, `busy` swaps the icon for a spinner in the same box.
   Clearing (the button or escape) calls `on_input("")` and returns the focus
   to the text. `input_ref` is the text input's ref; `on_keydown` sees each
-  key first (preventing escape's default keeps the text). `controls` (a
+  key first (preventing escape's default keeps the text); `escape_clears`
+  (default `true`) set to `false` hands escape to `on_keydown` alone, its
+  default prevented before `on_keydown` runs (a component's message is
+  handled after the field has read the key, too late to prevent it), for a
+  combobox that closes its list with escape. `controls` (a
   listbox's id) makes it that list's combobox (`role="combobox"`,
   `aria-controls`, autocomplete off), `activedescendant` naming its active
   option, and `expanded` (unset is shown) its `aria-expanded`. `placeholder`

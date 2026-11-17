@@ -336,6 +336,11 @@ pub struct SearchFieldProps {
     /// prevents the default.
     #[prop_or_default]
     pub on_keydown: Option<Callback<KeyboardEvent>>,
+    /// Escape clears the text (the default). `false` leaves escape to
+    /// `on_keydown`, its default already prevented, for a combobox that
+    /// closes its list with it.
+    #[prop_or(true)]
+    pub escape_clears: bool,
     /// The id of the listbox it filters, making it that list's combobox
     /// (`role="combobox"`, `aria-controls`).
     #[prop_or_default]
@@ -390,11 +395,17 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
     let onkeydown = {
         let clear = clear.clone();
         let on_keydown = props.on_keydown.clone();
+        let escape_clears = props.escape_clears;
         Callback::from(move |e: KeyboardEvent| {
+            // Prevented before `on_keydown` sees it: a component's message
+            // is handled only after this returns.
+            if e.key() == "Escape" && !escape_clears {
+                e.prevent_default();
+            }
             if let Some(on_keydown) = &on_keydown {
                 on_keydown.emit(e.clone());
             }
-            if e.key() == "Escape" && !empty && !e.default_prevented() {
+            if e.key() == "Escape" && escape_clears && !empty && !e.default_prevented() {
                 e.prevent_default();
                 clear.emit(());
             }
@@ -469,6 +480,7 @@ mod tests {
             testid: None,
             input_ref: None,
             on_keydown: None,
+            escape_clears: true,
             controls: None,
             activedescendant: None,
             expanded: None,
@@ -597,6 +609,16 @@ mod tests {
         assert!(empty.contains("tabindex=\"-1\""), "{empty}");
         assert!(!filled.contains(class::EMPTY), "{filled}");
         assert!(!filled.contains("tabindex"), "{filled}");
+    }
+
+    #[test]
+    fn escape_clears_unless_turned_off() {
+        let props = yew::props!(SearchFieldProps {
+            value: AttrValue::from(""),
+            on_input: Callback::noop(),
+            label: AttrValue::from("Search"),
+        });
+        assert!(props.escape_clears);
     }
 
     #[test]

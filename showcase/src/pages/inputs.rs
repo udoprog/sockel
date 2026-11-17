@@ -196,6 +196,7 @@ struct SearchSettings {
     disabled: bool,
     busy: bool,
     placeholder: bool,
+    escape_clears: bool,
 }
 
 /// The search demo's own placeholder, when it has one.
@@ -215,7 +216,8 @@ fn SearchCase(props: &SearchCaseProps) -> Html {
         <SearchField value={props.value.clone()} on_input={props.on_input.clone()}
             label={s.label.of("Search")} size={s.size} invalid={s.invalid}
             disabled={s.disabled} busy={s.busy}
-            placeholder={s.placeholder.then_some(AttrValue::from(SEARCH_PLACEHOLDER))} />
+            placeholder={s.placeholder.then_some(AttrValue::from(SEARCH_PLACEHOLDER))}
+            escape_clears={s.escape_clears} />
     }
 }
 
@@ -228,6 +230,7 @@ pub fn SearchFieldPage() -> Html {
         disabled: false,
         busy: false,
         placeholder: false,
+        escape_clears: true,
     });
     let value = use_state(String::new);
     let text = use_state(|| Text::Empty);
@@ -263,6 +266,7 @@ pub fn SearchFieldPage() -> Html {
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
             <Toggle label="busy" value={s.busy} on_change={set(|s, on| s.busy = on)} />
             <Toggle label="placeholder" value={s.placeholder} on_change={set(|s, on| s.placeholder = on)} />
+            <Toggle label="escape clears" value={s.escape_clears} on_change={set(|s, on| s.escape_clears = on)} />
         </>
     };
     let on_input = bind(&value);
@@ -276,7 +280,8 @@ pub fn SearchFieldPage() -> Html {
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled)
             .flag("busy", s.busy)
-            .text_if(s.placeholder, "placeholder", SEARCH_PLACEHOLDER),
+            .text_if(s.placeholder, "placeholder", SEARCH_PLACEHOLDER)
+            .expr_if(!s.escape_clears, "escape_clears", "false"),
     );
 
     html! {
