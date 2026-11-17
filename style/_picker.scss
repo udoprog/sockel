@@ -4,16 +4,16 @@
 //   button showing the current option, `--menu-width-wide` wide (small:
 //   `--menu-width`) whatever it shows, `.plinth-fill` its container's. Parts:
 //   `-icon`, `-text` (cut with an ellipsis), `-placeholder` (muted),
-//   `-chevron`.
+//   `-chevron`; `-text.plinth-fold`, hidden below the phone breakpoint.
 // - `.plinth-picker-popup`: the menu's surface (_menu.scss) below its
 //   opener in the overlay layer, `--menu-width-wide` or the opener's width
-//   if wider, hidden until `.plinth-placed`.
+//   if wider (`$picker-popup-width`), hidden until `.plinth-placed`.
 // - `.plinth-choice-list`: a search field (`-search`, an input box) over the
 //   options (`-options`, a listbox of `.plinth-listbox-option` rows,
 //   _listbox.scss) `--picker-rows` rows high whatever matches, so filtering
 //   never resizes it. Option parts beside the listbox's: `-detail` (muted
 //   after the label), `-badge` (at the row's end); `-note`, the no-match
-//   row.
+//   row; `-pager`, a page's worth of matches' Pager under them, over a rule.
 
 @use "tokens" as base;
 @use "menu";
@@ -62,6 +62,12 @@
     color: var(--muted);
 }
 
+.plinth-picker-text.plinth-fold {
+    @include base.below("phone") {
+        @include base.visually-hidden;
+    }
+}
+
 .plinth-picker-chevron {
     display: inline-flex;
     flex: none;
@@ -70,8 +76,8 @@
 }
 
 .plinth-picker-popup {
-    @include menu.list(var(--listbox-anchor-width, 0px), var(--menu-width-wide));
-    width: max(var(--listbox-anchor-width, 0px), var(--menu-width-wide));
+    @include menu.list(var(--listbox-anchor-width, 0px), base.$picker-popup-width);
+    width: max(var(--listbox-anchor-width, 0px), #{base.$picker-popup-width});
     overflow: hidden;
 }
 
@@ -93,7 +99,13 @@
     flex-direction: column;
     gap: var(--space-0);
     box-sizing: border-box;
-    height: calc(var(--picker-rows) * (var(--control-height) + var(--space-0)));
+    // A list without a search field never filters: it is as many rows high
+    // as it has (`--choice-list-rows`, set by the component), up to the
+    // searching list's height.
+    height: calc(
+        min(var(--choice-list-rows, var(--picker-rows)), var(--picker-rows)) *
+            (var(--control-height) + var(--space-0))
+    );
     @include base.scroll-area;
     border-radius: var(--radius-inner, var(--radius-sm));
     @include base.focus-ring;
@@ -101,7 +113,9 @@
 
 .plinth-choice-list-detail {
     @include base.truncate;
-    flex: 0 1 auto;
+    // Only the room the label leaves: the label is cut only once the
+    // detail is gone.
+    flex: 1 1 0;
     min-width: 0;
     color: var(--muted);
     font-size: var(--text-sm);
@@ -122,4 +136,12 @@
     min-height: var(--control-height);
     padding: var(--space-1) var(--space-3);
     color: var(--muted);
+}
+
+.plinth-choice-list-pager {
+    display: flex;
+    flex: none;
+    justify-content: center;
+    padding-top: var(--space-1);
+    border-top: 1px solid var(--border);
 }

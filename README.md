@@ -373,6 +373,7 @@ page can still override them at runtime.
 | `$confirm-gap` | `var(--space-3)` (between what a confirm says and its buttons) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
+| `$picker-popup-width` | `var(--menu-width-wide)` (a Picker's or PickerMenu's list's least width; never measured from its text) |
 | `$listbox-max-width`, `$listbox-active-fill` | `var(--popover-max-width)`, `color-mix(in srgb, var(--text) 7%, transparent)` (a listbox's widest, a Select's list included, and its active row's fill: the menu's) |
 | `$listbox-max-height`, `$listbox-shadow`, `$listbox-group-name-transform`, `$listbox-group-name-letter-spacing` | `null` (a listbox's tallest, under the room beside its opener, which it always keeps within; its shadow, `null` keeping the list's `--shadow-1`; its group headings' `text-transform` and `letter-spacing`; `null` leaves each as without) |
 | `$select-sheet-row-height` | `null` (a Select's rows in its phone sheet, its close button too; `null` keeps `--control-height`, `var(--touch-height)` gives a finger room) |
@@ -1717,12 +1718,22 @@ type-ahead too. Props: `options`, `value` (checked), `multi`
 (`aria-multiselectable`, `chosen` checked, the owner toggles a pick with
 `toggled`), `on_pick`, `label` (the list's name), `always_search`,
 `search_label` and `empty_label` (the app's words), `autofocus`, `class`,
-`testid` (the field's is it suffixed `-search`, each option's `-option`).
+`testid` (the field's is it suffixed `-search`, each option's `-option`,
+the pager's `-pager`). `on_search` is told the query as it changes (and
+blank when the list mounts), for options the app finds by it. `page_size`
+lists that many matches at a time with a `Pager` under them
+(`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
+a new query goes back to the first. `tab_cycles` makes Tab and Shift+Tab
+move the active option, wrapping, instead of leaving (a list adding one
+thing after another).
 
 `PickerOption::new(value, label)` with `.detail(..)` (muted after the
 label, searched), `.icon(html)` (a slot kept on every row once any option
 has one), `.badge(html)` (at the row's end), `.keywords(..)` (searched, not
-shown) and `.disabled(..)`. Rows are the listbox's (`LISTBOX_OPTION` with
+shown), `.disabled(..)`, `.marked(..)` (checked beside the current one,
+such as those already chosen), `.found(..)` (the app's answer to the
+query: listed whatever it reads like) and `.data_value(..)` (the value as
+text, the row's `data-value`). Rows are the listbox's (`LISTBOX_OPTION` with
 its `-mark`, `-icon`, `-label`), plus `CHOICE_LIST_DETAIL`,
 `CHOICE_LIST_BADGE`, and `CHOICE_LIST_NOTE` for no matches.
 `picker_matches(options, query)` finds every word in the label, detail or
@@ -1733,16 +1744,20 @@ with a word starting with it, then the rest.
 option's icon and label (`PICKER_ICON`, `PICKER_TEXT`), or the placeholder
 (`PICKER_PLACEHOLDER`), and a chevron (`PICKER_CHEVRON`), opening a
 `ChoiceList` below it in the overlay layer (`PICKER_POPUP`, the menu's
-surface). A pick, Escape, Tab or a press outside closes it; ArrowDown or
-ArrowUp opens it. Props: `options`, `value`, `on_change`, `label` (the
+surface). A pick, Escape, Tab or a press outside closes it (Tab moving
+on from the field, as if it had not been open); ArrowDown or ArrowUp
+opens it. Props: `options`, `value`, `on_change`, `label` (the
 accessible name, followed by the current option's label), `placeholder`,
 `variant` (`PickerVariant::Field` or `Small`, `SMALL`), `fill` (`FILL`),
 `invalid`, `disabled`, `always_search`, `search_label`, `empty_label`,
-`id`, `describedby`, `class`, `testid` (the popup's is it suffixed
-`-popup`, the list's `-list`). `picker(variant, fill, invalid, disabled)`
+`on_search`, `page_size`, `id`, `describedby`, `title` (the field's
+tooltip), `fold` (the current option's icon alone below the phone
+breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's is it suffixed `-popup`, the
+list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
 gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
 for an action that takes an option (Add a language): `text`, `icon`,
-`label`, `variant`, `size`, `disabled`, `on_pick`. `PickerDialog<T>` is the
+`label`, `variant`, `size`, `fold` (as a `Button`'s), `disabled`, `on_pick`, and the list's
+`on_search`, `page_size`, `tab_cycles` and `list_testid`. `PickerDialog<T>` is the
 searchable shell for a large set (languages, countries): a `Dialog`
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
 `ChoiceList` that always searches, its field focused, single (the owner
@@ -1751,10 +1766,11 @@ closes it on a pick) or `multi`.
 Size guarantees: the Picker's field is `--menu-width-wide` wide (small:
 `--menu-width`; its container's with `Fill`) and the input box's height,
 whatever is chosen; its label is cut with an ellipsis. The popup is
-`--menu-width-wide` or the field's width if wider, never measured from its
-text. A ChoiceList's options are `--picker-rows` rows high whatever
-matches, none included, so typing never resizes the list, its popup or its
-dialog; past that it scrolls, its scrollbar's room kept. Marks keep their
+`$picker-popup-width` (`--menu-width-wide`) or the field's width if wider,
+never measured from its text. A ChoiceList's options are `--picker-rows`
+rows high whatever matches, none included, so typing never resizes the
+list, its popup or its dialog (without a search field, which never
+filters, as many rows as it has up to that); past that it scrolls, its scrollbar's room kept. Marks keep their
 box when off. New partial: `_picker.scss`. No new tokens.
 
 ## ToolBand, Panel, Seam and use_width

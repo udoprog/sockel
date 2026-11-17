@@ -6,11 +6,11 @@ use web_sys::{Element, HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox_option, option_id};
-use crate::roving::printable;
+use crate::roving::{menu_step, printable};
 use crate::select::scroll_to;
 use crate::{
-    Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Dismiss, Glyph, Icon, InputSize,
-    PopoverAlign, Side, class, input_box, use_overlays, use_popover,
+    Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Dismiss, Glyph, Icon, InputSize, Pager,
+    PopoverAlign, Side, class, input_box, page_count, use_overlays, use_popover,
 };
 
 /// How many options a list has before it offers a search field.
@@ -30,6 +30,13 @@ pub struct PickerOption<T> {
     /// More words it is found by, not shown, such as a language's codes.
     pub keywords: Option<AttrValue>,
     pub disabled: bool,
+    /// Checked beside the current one, such as those already chosen.
+    pub marked: bool,
+    /// Found by the app for the query (see [`ChoiceListProps::on_search`]):
+    /// listed whatever it reads like.
+    pub found: bool,
+    /// The value as text, the row's `data-value`.
+    pub data_value: Option<AttrValue>,
 }
 
 impl<T> PickerOption<T> {
@@ -42,6 +49,9 @@ impl<T> PickerOption<T> {
             badge: None,
             keywords: None,
             disabled: false,
+            marked: false,
+            found: false,
+            data_value: None,
         }
     }
 
@@ -76,13 +86,29 @@ impl<T> PickerOption<T> {
     pub fn disabled(self, disabled: bool) -> Self {
         Self { disabled, ..self }
     }
+
+    pub fn marked(self, marked: bool) -> Self {
+        Self { marked, ..self }
+    }
+
+    pub fn found(self, found: bool) -> Self {
+        Self { found, ..self }
+    }
+
+    pub fn data_value(self, value: impl Into<AttrValue>) -> Self {
+        Self {
+            data_value: Some(value.into()),
+            ..self
+        }
+    }
 }
 
 /// The indices of the options in which every word of `query` is found (in
 /// the label, detail or keywords, ignoring case); all of them for a blank
 /// one. Labels starting with the query come first, then those with a word
 /// starting with its first word, then the rest, each in their own order:
-/// `swed` finds Swedish before English (Sweden).
+/// `swed` finds Swedish before English (Sweden). A `found` option is listed
+/// whatever the query, among the rest if it does not match.
 pub fn picker_matches<T>(options: &[PickerOption<T>], query: &str) -> Vec<usize> {
     let needle = query.trim().to_lowercase();
     let words: Vec<&str> = needle.split_whitespace().collect();
@@ -98,7 +124,7 @@ pub fn picker_matches<T>(options: &[PickerOption<T>], query: &str) -> Vec<usize>
             let keywords = o.keywords.as_deref().unwrap_or_default().to_lowercase();
             let has = |w: &&str| label.contains(w) || detail.contains(w) || keywords.contains(w);
             if !words.iter().all(has) {
-                return None;
+                return o.found.then_some((2, i));
             }
             let rank = if label.starts_with(&needle) {
                 0
@@ -174,10 +200,22 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     /// Takes the focus when its dialog or popup opens (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
+    /// Told the query as it changes, and blank when the list mounts, for
+    /// options the app finds by it (marked `found`).
+    #[prop_or_default]
+    pub on_search: Callback<String>,
+    /// Lists that many matches at a time, with a [`Pager`] under them;
+    /// it opens on the current option's page.
+    #[prop_or_default]
+    pub page_size: Option<usize>,
+    /// Tab and Shift+Tab move the active option, wrapping, rather than
+    /// leaving: for a list adding one thing after another.
+    #[prop_or_default]
+    pub tab_cycles: bool,
     #[prop_or_default]
     pub class: Classes,
     /// Its test id; the search field's is it suffixed `-search`, each
-    /// option's `-option`.
+    /// option's `-option`, the pager's `-pager`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
 }
@@ -201,14 +239,37 @@ where
     let options = &props.options;
     let is_chosen = |i: usize| {
         let value = &options[i].value;
-        if props.multi {
+        if options[i].marked {
+            true
+        } else if props.multi {
             props.chosen.contains(value)
         } else {
             props.value.as_ref() == Some(value)
         }
     };
     let searchable = props.always_search || options.len() > SEARCH_FROM;
-    let shown = picker_matches(options, &query);
+    let matches = picker_matches(options, &query);
+    let page = use_state_eq(|| {
+        let size = props.page_size.unwrap_or(usize::MAX).max(1);
+        matches
+            .iter()
+            .position(|&i| is_chosen(i))
+            .map_or(0, |at| at / size)
+    });
+    let (shown, pages) = match props.page_size {
+        Some(size) => {
+            let size = size.max(1);
+            let pages = page_count(matches.len(), size);
+            let start = (*page).min(pages - 1) * size;
+            let end = (start + size).min(matches.len());
+            (matches[start..end].to_vec(), pages)
+        }
+        None => (matches.clone(), 1),
+    };
+    {
+        let on_search = props.on_search.clone();
+        use_effect_with((), move |()| on_search.emit(String::new()));
+    }
     let pickable: Vec<usize> = shown
         .iter()
         .copied()
@@ -258,8 +319,25 @@ where
             pickable.clone(),
         );
         let labels: Vec<String> = options.iter().map(|o| o.label.to_string()).collect();
+        let tab_cycles = props.tab_cycles;
         Callback::from(move |e: KeyboardEvent| {
             let key = e.key();
+            if tab_cycles && key == "Tab" {
+                let at = state.borrow().active();
+                let at = pickable.iter().position(|&i| Some(i) == at);
+                let arrow = if e.shift_key() {
+                    "ArrowUp"
+                } else {
+                    "ArrowDown"
+                };
+                if let Some(next) = menu_step(arrow, at, pickable.len()) {
+                    e.prevent_default();
+                    e.stop_propagation();
+                    state.borrow_mut().set(Some(pickable[next]));
+                    redraw.force_update();
+                }
+                return;
+            }
             // In the search field, Home, End and Space edit the text.
             if searchable && matches!(key.as_str(), "Home" | "End" | " ") {
                 return;
@@ -286,10 +364,21 @@ where
         })
     };
     let oninput = {
-        let (query, state) = (query.clone(), state.clone());
+        let (query, state, page) = (query.clone(), state.clone(), page.clone());
+        let on_search = props.on_search.clone();
         Callback::from(move |e: InputEvent| {
+            let text = e.target_unchecked_into::<HtmlInputElement>().value();
             state.borrow_mut().set(None);
-            query.set(e.target_unchecked_into::<HtmlInputElement>().value());
+            page.set(0);
+            on_search.emit(text.clone());
+            query.set(text);
+        })
+    };
+    let on_page = {
+        let (page, state) = (page.clone(), state.clone());
+        Callback::from(move |p: usize| {
+            state.borrow_mut().set(None);
+            page.set(p);
         })
     };
 
@@ -319,6 +408,7 @@ where
             <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
                 aria-selected={selected.to_string()}
                 aria-disabled={o.disabled.then_some("true")}
+                data-value={o.data_value.clone()}
                 data-testid={option_testid.clone()} {onclick} {onmousemove}>
                 <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
                     aria-hidden="true">
@@ -364,14 +454,21 @@ where
                 aria-multiselectable={props.multi.then_some("true")}
                 tabindex={(!searchable).then_some("0")}
                 aria-activedescendant={(!searchable).then_some(active_id).flatten()}
+                style={(!searchable).then(|| format!("--choice-list-rows: {};", shown.len().max(1)))}
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
-                onkeydown={(!searchable).then_some(onkeydown)} {onmousedown}>
+                onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
                 if shown.is_empty() {
                     <div class={class::CHOICE_LIST_NOTE} role="status">{ props.empty_label.clone() }</div>
                 } else {
                     { for shown.iter().copied().map(option) }
                 }
             </div>
+            if pages > 1 {
+                <div class={class::CHOICE_LIST_PAGER} onmousedown={onmousedown.clone()}>
+                    <Pager page={(*page).min(pages - 1)} {pages} {on_page} slots={5} edges={false}
+                        testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-pager")))} />
+                </div>
+            }
         </div>
     }
 }
@@ -386,7 +483,8 @@ pub(crate) struct PopupProps {
 }
 
 /// A [`ChoiceList`]'s surface beside `anchor` in the overlay layer, its
-/// `data-autofocus` element focused once placed; Tab closes it.
+/// `data-autofocus` element focused once placed; Tab closes it and moves on
+/// from `anchor`.
 #[function_component]
 pub(crate) fn ChoicePopup(props: &PopupProps) -> Html {
     let overlays = use_overlays();
@@ -415,12 +513,15 @@ pub(crate) fn ChoicePopup(props: &PopupProps) -> Html {
     if !props.open {
         return Html::default();
     }
+    // Tab goes on from the opener, as if the list had not been open.
     let onkeydown = {
-        let on_dismiss = props.on_dismiss.clone();
+        let (on_dismiss, anchor) = (props.on_dismiss.clone(), props.anchor.clone());
         Callback::from(move |e: KeyboardEvent| {
             if e.key() == "Tab" {
-                e.prevent_default();
-                on_dismiss.emit(Dismiss::Escape);
+                if let Some(anchor) = anchor.cast::<HtmlElement>() {
+                    _ = anchor.focus();
+                }
+                on_dismiss.emit(Dismiss::Outside);
             }
         })
     };
@@ -477,12 +578,36 @@ pub struct PickerProps<T: PartialEq + 'static> {
     pub id: Option<AttrValue>,
     #[prop_or_default]
     pub describedby: Option<AttrValue>,
+    /// The field's tooltip.
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
+    /// The current option's icon alone below the phone breakpoint, its
+    /// label kept for a screen reader (`.plinth-fold` on the text).
+    #[prop_or_default]
+    pub fold: bool,
+    /// See [`ChoiceListProps::on_search`].
+    #[prop_or_default]
+    pub on_search: Callback<String>,
+    /// See [`ChoiceListProps::page_size`].
+    #[prop_or_default]
+    pub page_size: Option<usize>,
     #[prop_or_default]
     pub class: Classes,
     /// The field's test id; the popup's is it suffixed `-popup`, the
-    /// list's `-list`.
+    /// list's `-list` unless `list_testid` names it.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub list_testid: Option<AttrValue>,
+}
+
+/// The list's test id: `list` or the opener's suffixed `-list`.
+fn list_testid(testid: &Option<AttrValue>, list: &Option<AttrValue>) -> Option<AttrValue> {
+    list.clone().or_else(|| {
+        testid
+            .as_ref()
+            .map(|t| AttrValue::from(format!("{t}-list")))
+    })
 }
 
 /// A field of one width showing the current option (its icon and label),
@@ -536,7 +661,9 @@ where
                 if let Some(icon) = &o.icon {
                     <span class={class::PICKER_ICON} aria-hidden="true">{ icon.clone() }</span>
                 }
-                <span class={class::PICKER_TEXT}>{ o.label.clone() }</span>
+                <span class={classes!(class::PICKER_TEXT, (props.fold && o.icon.is_some()).then_some(class::FOLD))}>
+                    { o.label.clone() }
+                </span>
             </>
         },
         None => html! {
@@ -557,6 +684,7 @@ where
                 )}
                 aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-label={name} aria-describedby={props.describedby.clone()}
+                title={props.title.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 disabled={props.disabled} data-testid={props.testid.clone()}
                 onclick={toggle} {onkeydown}>
@@ -569,8 +697,8 @@ where
                 <ChoiceList<T> options={props.options.clone()} value={props.value.clone()} {on_pick}
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
-                    autofocus=true
-                    testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-list")))} />
+                    autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
+                    testid={list_testid(&props.testid, &props.list_testid)} />
             </ChoicePopup>
         </>
     }
@@ -601,13 +729,27 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     pub search_label: AttrValue,
     #[prop_or("No matches".into())]
     pub empty_label: AttrValue,
+    /// See [`ChoiceListProps::on_search`].
+    #[prop_or_default]
+    pub on_search: Callback<String>,
+    /// See [`ChoiceListProps::page_size`].
+    #[prop_or_default]
+    pub page_size: Option<usize>,
+    /// See [`ChoiceListProps::tab_cycles`].
+    #[prop_or_default]
+    pub tab_cycles: bool,
+    /// See [`crate::ButtonProps::fold`].
+    #[prop_or_default]
+    pub fold: bool,
     /// The button's classes, beside the button's own.
     #[prop_or_default]
     pub class: Classes,
     /// The button's test id; the popup's is it suffixed `-popup`, the
-    /// list's `-list`.
+    /// list's `-list` unless `list_testid` names it.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub list_testid: Option<AttrValue>,
 }
 
 /// A [`Button`] for an action that takes an option (adding one), opening a
@@ -642,7 +784,7 @@ where
     html! {
         <>
             <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
-                class={props.class.clone()} {icon} {trailing}
+                class={props.class.clone()} {icon} {trailing} fold={props.fold}
                 label={Some(props.label.clone())} disabled={props.disabled}
                 expanded={Some(*open)} haspopup={AttrValue::Static("listbox")}
                 testid={props.testid.clone()} {onclick}>
@@ -652,8 +794,9 @@ where
                 <ChoiceList<T> options={props.options.clone()} {on_pick}
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
-                    autofocus=true
-                    testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-list")))} />
+                    autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
+                    tab_cycles={props.tab_cycles}
+                    testid={list_testid(&props.testid, &props.list_testid)} />
             </ChoicePopup>
         </>
     }
@@ -794,6 +937,50 @@ mod tests {
         assert!(html.contains("role=\"combobox\""), "{html}");
         assert!(html.contains("aria-multiselectable=\"true\""), "{html}");
         assert_eq!(html.matches("aria-selected=\"true\"").count(), 2, "{html}");
+    }
+
+    #[test]
+    fn a_found_option_is_listed_whatever_the_query() {
+        let mut o = languages();
+        o.push(PickerOption::new(5, "Klingon").found(true));
+        assert_eq!(picker_matches(&o, "swedish fi"), [4, 5]);
+        assert_eq!(picker_matches(&o, "kling"), [5]);
+    }
+
+    #[test]
+    fn marked_options_are_checked_beside_the_current_one() {
+        let options: Vec<_> = languages()
+            .into_iter()
+            .map(|o| {
+                let (marked, text) = (o.value == 1, format!("lang-{}", o.value));
+                o.marked(marked).data_value(text)
+            })
+            .collect();
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options,
+            value: Some(3),
+            label: AttrValue::Static("Language"),
+        }));
+        assert_eq!(html.matches("aria-selected=\"true\"").count(), 2, "{html}");
+        assert!(html.contains("data-value=\"lang-4\""), "{html}");
+    }
+
+    #[test]
+    fn a_page_size_lists_a_page_with_a_pager() {
+        let options: Vec<_> = (0..30u32)
+            .map(|i| PickerOption::new(i, format!("Option {i}")))
+            .collect();
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options,
+            value: Some(27),
+            page_size: Some(25),
+            label: AttrValue::Static("Options"),
+            testid: AttrValue::Static("list"),
+        }));
+        assert_eq!(html.matches("role=\"option\"").count(), 5, "{html}");
+        assert!(html.contains(">Option 27<"), "{html}");
+        assert!(html.contains("data-testid=\"list-pager\""), "{html}");
+        assert!(html.contains(class::CHOICE_LIST_PAGER), "{html}");
     }
 
     #[test]

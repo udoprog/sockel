@@ -51,7 +51,13 @@ const LANGUAGES: [(&str, &str, &str); 24] = [
     ("Japanese", "ja", "nihongo"),
 ];
 
-fn languages(count: usize, text: Text, icons: bool, badge: bool) -> Vec<PickerOption<usize>> {
+fn languages(
+    count: usize,
+    text: Text,
+    icons: bool,
+    badge: bool,
+    marked: bool,
+) -> Vec<PickerOption<usize>> {
     LANGUAGES
         .iter()
         .take(count)
@@ -69,7 +75,7 @@ fn languages(count: usize, text: Text, icons: bool, badge: bool) -> Vec<PickerOp
             if badge && i == 1 {
                 option = option.badge(html! { <Badge>{ "New" }</Badge> });
             }
-            option.disabled(i == 3)
+            option.disabled(i == 3).marked(marked && i == 2)
         })
         .collect()
 }
@@ -84,6 +90,18 @@ struct Settings {
     invalid: bool,
     disabled: bool,
     always_search: bool,
+    marked: bool,
+    paged: bool,
+}
+
+impl Settings {
+    fn page_size(&self) -> Option<usize> {
+        self.paged.then_some(10)
+    }
+
+    fn options(&self) -> Vec<PickerOption<usize>> {
+        languages(self.count, self.text, self.icons, true, self.marked)
+    }
 }
 
 #[derive(Properties, PartialEq)]
@@ -102,7 +120,7 @@ fn PickerSample(props: &SampleProps) -> Html {
         <Stack>
             <Field id={id.clone()} label={html! { "Language" }} error={error} reserve_error=true
                 disabled={s.disabled}>
-                <plinth::Picker<usize> id={id.clone()} options={languages(s.count, s.text, s.icons, true)}
+                <plinth::Picker<usize> id={id.clone()} options={s.options()} page_size={s.page_size()}
                     value={props.value} on_change={props.on_change.clone()}
                     label="Language" placeholder="Choose a language" variant={s.variant}
                     fill={s.fill} invalid={s.invalid} disabled={s.disabled}
@@ -140,6 +158,8 @@ fn settings_controls(settings: &UseStateHandle<Settings>) -> Html {
             }} />
             <Toggle label="icons" value={s.icons} on_change={set(|s, on| s.icons = on)} />
             <Toggle label="always_search" value={s.always_search} on_change={set(|s, on| s.always_search = on)} />
+            <Toggle label="page_size 10" value={s.paged} on_change={set(|s, on| s.paged = on)} />
+            <Toggle label="marked (English (Sweden))" value={s.marked} on_change={set(|s, on| s.marked = on)} />
             <Toggle label="fill" value={s.fill} on_change={set(|s, on| s.fill = on)} />
             <Toggle label="invalid" value={s.invalid} on_change={set(|s, on| s.invalid = on)} />
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
@@ -157,6 +177,8 @@ fn initial() -> Settings {
         invalid: false,
         disabled: false,
         always_search: false,
+        marked: false,
+        paged: false,
     }
 }
 
@@ -177,6 +199,7 @@ pub fn PickerPage() -> Html {
             .text("placeholder", "Choose a language")
             .variant("variant", s.variant)
             .flag("always_search", s.always_search)
+            .expr_if(s.paged, "page_size", "Some(10)")
             .flag("fill", s.fill)
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled),
@@ -197,7 +220,7 @@ pub fn PickerMenuPage() -> Html {
     let settings = use_state(initial);
     let added = use_state(Vec::<usize>::new);
     let s = *settings;
-    let options = languages(s.count, s.text, s.icons, true);
+    let options = s.options();
     let on_pick = {
         let added = added.clone();
         Callback::from(move |v: usize| {
@@ -218,6 +241,7 @@ pub fn PickerMenuPage() -> Html {
             .expr("text", "html! { \"Add a language\" }")
             .text("label", "Add a language")
             .flag("always_search", s.always_search)
+            .expr_if(s.paged, "page_size", "Some(10)")
             .flag("disabled", s.disabled),
     );
     html! {
@@ -225,7 +249,7 @@ pub fn PickerMenuPage() -> Html {
             <Stack>
                 <Cluster>
                     <PickerMenu<usize> {options} {on_pick} text={html! { "Add a language" }}
-                        label="Add a language" always_search={s.always_search}
+                        label="Add a language" always_search={s.always_search} page_size={s.page_size()}
                         disabled={s.disabled} testid="picker-menu" />
                 </Cluster>
                 <p class={class::SAMPLE}>{ format!("Added: {}", if names.is_empty() { "none".to_owned() } else { names.join(", ") }) }</p>
@@ -245,7 +269,7 @@ pub fn PickerDialogPage() -> Html {
     let chosen = use_state(|| vec![0usize, 4]);
     let value = use_state(|| Some(0usize));
     let s = *settings;
-    let options = languages(s.count, s.text, s.icons, true);
+    let options = s.options();
     let on_pick = {
         let (chosen, value, open, multi) = (chosen.clone(), value.clone(), open.clone(), *multi);
         Callback::from(move |v: usize| {
@@ -296,7 +320,7 @@ pub fn PickerDialogPage() -> Html {
                 </Cluster>
                 <ChoiceList<usize> options={options.clone()} value={*value} multi={*multi}
                     chosen={(*chosen).clone()} on_pick={on_pick.clone()} label="Languages"
-                    always_search={s.always_search} testid="choice-list" />
+                    always_search={s.always_search} page_size={s.page_size()} testid="choice-list" />
                 <p class={class::SAMPLE}>{ "The same ChoiceList inline: filtering keeps its height. The dialog holds it, its search field focused." }</p>
                 <PickerDialog<usize> open={*open} on_dismiss={close.reform(|_: plinth::Dismiss| ())} title="Languages"
                     {options} value={*value} multi={*multi} chosen={(*chosen).clone()} {on_pick}
