@@ -180,12 +180,17 @@
     gap: var(--space-2);
     box-sizing: border-box;
     min-width: 0;
-    min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px));
-    padding: var(--space-2) 0;
-    border-top: var(--space-px) solid var(--border);
+    min-height: base.$selection-bar-min-height;
+    margin: base.$selection-bar-margin;
+    padding: base.$selection-bar-padding;
+    border-top: base.$selection-bar-rule;
+    border-radius: base.$selection-bar-radius;
+    background: base.$selection-bar-ground;
+    font-size: base.$selection-bar-text;
 
     &.plinth-inset {
-        padding-inline: var(--space-3);
+        margin: base.$selection-bar-inset-margin;
+        padding-inline: base.$selection-bar-inset-padding;
     }
 
     &.plinth-idle {
@@ -205,6 +210,9 @@
     @include base.truncate;
 
     flex: 1 1 auto;
+    padding-inline-start: base.$selection-bar-count-padding;
+    color: base.$selection-bar-count-ink;
+    font-weight: base.$selection-bar-count-weight;
 }
 
 .plinth-action-row {

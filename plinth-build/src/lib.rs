@@ -883,6 +883,49 @@ mod tests {
     }
 
     #[test]
+    fn a_selection_bar_takes_its_look_from_settings() {
+        let plain = Config::new().build().unwrap();
+        let bar = declarations(&plain.css, ".plinth-selection-bar");
+        assert!(bar.contains(&"border-top: var(--space-px) solid var(--border)".to_owned()));
+        assert!(!bar.iter().any(|l| l.starts_with("background")));
+        let tuned = Config::new()
+            .with("selection-bar-ground", "var(--tint)")
+            .with("selection-bar-rule", "none")
+            .with("selection-bar-padding", "3px")
+            .with("selection-bar-min-height", "0")
+            .with("selection-bar-radius", "8px")
+            .with("selection-bar-margin", "0 0 4px")
+            .with("selection-bar-text", "13px")
+            .with("selection-bar-inset-margin", "0 6px 6px")
+            .with("selection-bar-count-ink", "var(--ink)")
+            .with("selection-bar-count-weight", "500")
+            .with("selection-bar-count-padding", "10px")
+            .build()
+            .unwrap();
+        let bar = declarations(&tuned.css, ".plinth-selection-bar");
+        for line in [
+            "min-height: 0",
+            "margin: 0 0 4px",
+            "padding: 3px",
+            "border-top: none",
+            "border-radius: 8px",
+            "background: var(--tint)",
+            "font-size: 13px",
+        ] {
+            assert!(bar.contains(&line.to_owned()), "{line} in {bar:?}");
+        }
+        assert!(tuned.css.contains("margin: 0 6px 6px"));
+        let count = declarations(&tuned.css, ".plinth-selection-bar-count");
+        for line in [
+            "padding-inline-start: 10px",
+            "color: var(--ink)",
+            "font-weight: 500",
+        ] {
+            assert!(count.contains(&line.to_owned()), "{line} in {count:?}");
+        }
+    }
+
+    #[test]
     fn a_menu_keeps_its_scrollbar_room_unless_set() {
         let plain = Config::new().build().unwrap();
         let menu = declarations(&plain.css, ".plinth-menu");

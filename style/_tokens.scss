@@ -203,6 +203,22 @@ $popover-scroll-gutter: stable !default;
 // The room between what a confirm says and its buttons.
 $confirm-gap: var(--space-3) !default;
 
+// A selection bar's ground, the rule above it, its padding, least height,
+// corners, outer margin and type, an inset one's side padding and margin,
+// and its count's ink, weight and padding; `null` leaves each out.
+$selection-bar-ground: null !default;
+$selection-bar-rule: var(--space-px) solid var(--border) !default;
+$selection-bar-padding: var(--space-2) 0 !default;
+$selection-bar-min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px)) !default;
+$selection-bar-radius: null !default;
+$selection-bar-margin: null !default;
+$selection-bar-text: null !default;
+$selection-bar-inset-padding: var(--space-3) !default;
+$selection-bar-inset-margin: null !default;
+$selection-bar-count-ink: null !default;
+$selection-bar-count-weight: null !default;
+$selection-bar-count-padding: null !default;
+
 // Every token, configurable with `@use ... with (...)`; `:root` emits
 // each as its custom property.
 $text-3xs: 0.625rem !default;
