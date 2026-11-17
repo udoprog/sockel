@@ -234,7 +234,7 @@ pub use confirm::{
     confirm_inline,
 };
 pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
-pub use disclosure::{Disclosure, DisclosureProps, disclosure};
+pub use disclosure::{Disclosure, DisclosureProps, disclosure, disclosure_summary};
 pub use drop_zone::{DropState, DropZone, DropZoneProps, Refusal, accepts, drop_zone, refusal};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
 pub use error_box::{ErrorBox, ErrorBoxProps};

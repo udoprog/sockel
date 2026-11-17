@@ -1154,7 +1154,12 @@ pub const PAGES: &[Page] = &[
         id: "disclosure",
         title: "Disclosure",
         about: "A summary row that toggles its body (aria-expanded). The row is one height shut or open: the mark turns inside its box and the summary is cut to one line.",
-        covers: &["Disclosure", "DisclosureProps", "disclosure"],
+        covers: &[
+            "Disclosure",
+            "DisclosureProps",
+            "disclosure",
+            "disclosure_summary",
+        ],
         render: || html! { <disclosures::DisclosurePage /> },
         holds: &[
             hold(plinth::class::DISCLOSURE, Size::Width, Across::All),

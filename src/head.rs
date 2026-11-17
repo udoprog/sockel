@@ -77,7 +77,7 @@ pub enum HeadLevel {
 }
 
 impl HeadLevel {
-    fn tag(self) -> &'static str {
+    pub(crate) fn tag(self) -> &'static str {
         match self {
             HeadLevel::H1 => "h1",
             HeadLevel::H2 => "h2",

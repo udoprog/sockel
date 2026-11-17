@@ -1221,9 +1221,12 @@ colour and background, never its weight. `pager(disabled, busy)` and
 `Disclosure` is a summary row that toggles its body: `title`, `summary` (what
 it holds, beside the title while shut), `actions` (controls at the row's end,
 outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`
-(the body's, named by `aria-controls` while open), `disabled`, `class`,
+(the body's, named by `aria-controls` while open), `disabled`, `level` (a
+`HeadLevel`: the toggle sits in that heading, `DISCLOSURE_HEADING`, its title
+at a list head's size, for a section whose title is a heading), `class`,
 `testid`, and the children as the body, rendered only while open.
-`disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`). Parts:
+`disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`),
+`disclosure_summary(heading)` the toggle's (`HEADING`). Parts:
 `DISCLOSURE_HEAD`, `DISCLOSURE_SUMMARY`, `DISCLOSURE_MARK`, `DISCLOSURE_TITLE`,
 `DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`, `DISCLOSURE_BODY`.
 

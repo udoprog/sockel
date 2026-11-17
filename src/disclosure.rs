@@ -1,6 +1,6 @@
 //! Disclosure (`style/_disclosure.scss`).
 
-use crate::{Glyph, Icon, class};
+use crate::{Glyph, HeadLevel, Icon, class};
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -20,12 +20,21 @@ pub struct DisclosureProps {
     pub id: Option<AttrValue>,
     #[prop_or_default]
     pub disabled: bool,
+    /// The toggle in a heading of this level, its title at a list head's
+    /// size: a section whose title is a heading.
+    #[prop_or_default]
+    pub level: Option<HeadLevel>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
     #[prop_or_default]
     pub children: Html,
+}
+
+/// A disclosure's toggle: `heading` when it is in one.
+pub fn disclosure_summary(heading: bool) -> Classes {
+    classes!(class::DISCLOSURE_SUMMARY, heading.then_some(class::HEADING))
 }
 
 /// A disclosure's classes: `disclosure`, and `open` while its body shows.
@@ -48,20 +57,30 @@ pub fn Disclosure(props: &DisclosureProps) -> Html {
             |summary| html! { <span class={class::DISCLOSURE_DETAIL}>{ summary.clone() }</span> },
         );
 
+    let summary = html! {
+        <button type="button" class={disclosure_summary(props.level.is_some())}
+            aria-expanded={props.open.to_string()}
+            aria-controls={props.open.then(|| props.id.clone()).flatten()}
+            disabled={props.disabled} {onclick}>
+            <span class={classes!(class::DISCLOSURE_MARK, props.open.then_some(class::OPEN))} aria-hidden="true">
+                <Icon glyph={Glyph::ChevronRight} />
+            </span>
+            <span class={class::DISCLOSURE_TITLE}>{ props.title.clone() }</span>
+            { detail }
+        </button>
+    };
+    let heading = match props.level {
+        Some(level) => html! {
+            <@{level.tag()} class={class::DISCLOSURE_HEADING}>{ summary }</@>
+        },
+        None => summary,
+    };
+
     html! {
         <div class={classes!(disclosure(props.open), props.class.clone())}
             data-testid={props.testid.clone()}>
             <div class={class::DISCLOSURE_HEAD}>
-                <button type="button" class={class::DISCLOSURE_SUMMARY}
-                    aria-expanded={props.open.to_string()}
-                    aria-controls={props.open.then(|| props.id.clone()).flatten()}
-                    disabled={props.disabled} {onclick}>
-                    <span class={classes!(class::DISCLOSURE_MARK, props.open.then_some(class::OPEN))} aria-hidden="true">
-                        <Icon glyph={Glyph::ChevronRight} />
-                    </span>
-                    <span class={class::DISCLOSURE_TITLE}>{ props.title.clone() }</span>
-                    { detail }
-                </button>
+                { heading }
                 <span class={class::DISCLOSURE_ACTIONS}>{ props.actions.clone() }</span>
             </div>
             if props.open {
@@ -77,6 +96,18 @@ mod tests {
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()
+    }
+
+    #[test]
+    fn a_heading_toggle_is_a_modifier() {
+        assert_eq!(
+            names(disclosure_summary(false)),
+            [class::DISCLOSURE_SUMMARY]
+        );
+        assert_eq!(
+            names(disclosure_summary(true)),
+            [class::DISCLOSURE_SUMMARY, class::HEADING]
+        );
     }
 
     #[test]

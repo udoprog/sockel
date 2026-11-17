@@ -10,6 +10,9 @@
 // - `.plinth-disclosure-title` and `.plinth-disclosure-detail`: the title and
 //   the muted summary of what it holds while shut, each cut to one line.
 // - `.plinth-disclosure-body`: the content, shown while open.
+// - `.plinth-disclosure-heading`: the heading the toggle sits in when the
+//   section's title is one; `.plinth-disclosure-summary.plinth-heading` sets
+//   its title at a list head's size.
 
 @use "tokens" as base;
 
@@ -50,6 +53,19 @@
         opacity: 0.5;
         cursor: not-allowed;
     }
+}
+
+.plinth-disclosure-heading {
+    display: flex;
+    flex: 1;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    font: inherit;
+}
+
+.plinth-disclosure-summary.plinth-heading {
+    font-size: var(--text-base);
 }
 
 .plinth-disclosure-mark {
