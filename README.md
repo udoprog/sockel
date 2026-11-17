@@ -736,6 +736,7 @@ the owner. Props:
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
   `title` as its heading and a close button (`close_label`, "Close").
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
+- `focus` (a `NodeRef`): the element that takes focus once it is placed.
 
 Dismissal (`Dismiss`), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
@@ -846,6 +847,55 @@ which the body scrolls with its scrollbar's room kept and the foot stays
 pinned below it. Its width is fixed by its size, never by its content. A
 `Tall` dialog keeps one height whatever it holds; a sheet grows upward
 from the bottom edge.
+
+## Confirm, ConfirmPopover, ConfirmButton and ConfirmInline
+
+Asking before an action, in three places. `Confirm` is a `Dialog` (rendered
+while `open`): `title` (its heading and name), `explanation`, `details` (a
+list of what it affects), `accept` (the accepting button's label) with `icon`,
+`cancel_label` ("Cancel"), `danger` (on by default: the accepting button is
+`Danger` and Cancel has the focus, so Enter never destroys by habit; off, it
+is `Primary` and has the focus), `busy`, `error` (a danger `Notice` under the
+explanation), `on_accept` and `on_cancel`. Cancel, Escape, the close button
+and a press on the scrim all call `on_cancel`; the owner sets `open` to
+false. While `busy` the accepting button spins and nothing closes it.
+
+`ConfirmHost` and `ask` are promise-style confirms: render one `ConfirmHost`
+near the app's root, then `ask(ConfirmRequest::new(title, explanation))`
+from any code and `.await` the `Answer`: `true` when accepted, `false` when
+cancelled, when another question replaced it, or when no host is mounted.
+`ConfirmRequest` has the same fields as `Confirm`, public.
+
+`ConfirmPopover` is the same beside an element: `anchor`, `open`, `side` and
+`align` as `Popover`, `title` (its name, and the sheet's heading on a phone),
+the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
+(Cancel, Escape and a press outside; not while busy). The focus goes in once
+it is placed (`Popover`'s `focus` prop) and returns to the anchor.
+`ConfirmButton` is a `Button` (`variant`, `size`, `icon`, `busy`, `disabled`)
+that opens one beside itself and calls `on_accept` once accepted.
+
+`ConfirmInline` replaces a button by No and Yes in the same box, for a row's
+own delete: the button's `variant`, `size`, `icon`, `disabled`, children as
+label, `no_label`, `yes_label`, `question` (the group's accessible name),
+`danger` (Yes is `Danger`, else `Primary`), `busy` (Yes spins, No is
+disabled), `on_accept`. It holds its own state, or the owner's: `asking`
+(`Some`) with `on_ask`. No takes the focus; Escape and No go back and focus
+returns to the button; a click does not bubble to a clickable row.
+
+Every one takes `class`, and `testid` (`confirm-cancel` and `confirm-accept`
+name the buttons). Classes: `CONFIRM` and `CONFIRM_TEXT` (the body),
+`CONFIRM_POPOVER`, `CONFIRM_INLINE` with its parts `CONFIRM_IDLE` (the button)
+and `CONFIRM_ASK` (No and Yes), and `AWAY` on the part not shown;
+`confirm_inline(part, away)` gives them. No new tokens.
+
+Size guarantees: `ConfirmInline` lays the button and the No and Yes in one
+grid cell and hides (`visibility`) the one not shown, so its box is the same
+asking or not: as wide as the wider of the two, as high as the button, and a
+row it ends never moves. `ConfirmPopover` is `--popover-max-width` wide
+whatever it says, and a flip moves it without reflowing; the page behind a
+`Confirm` holds still, and the dialog hangs from the top, so an error line
+only grows its bottom edge. A `ConfirmButton` keeps the button's box open or
+closed.
 
 ## Tooltip, HoverCard and ReasonButton
 

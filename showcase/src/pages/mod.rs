@@ -1,6 +1,7 @@
 mod actions;
 mod badges;
 mod buttons;
+mod confirms;
 mod dialog;
 mod disclosures;
 mod fields;
@@ -44,6 +45,11 @@ pub struct Page {
     /// The boxes the stability probe checks hold across the page's states.
     pub holds: &'static [Hold],
 }
+
+/// The states of a ConfirmInline that keep its box: not its label, size or icon.
+const ASKING: Across = Across::Only(&[
+    "danger", "disabled", "busy", "asking", "variant", "focus", "click",
+]);
 
 const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
     Hold { part, size, across }
@@ -949,6 +955,52 @@ pub const PAGES: &[Page] = &[
         holds: &[
             hold(plinth::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "confirm",
+        title: "Confirm",
+        about: "A dialog asking before an action: the explanation, then Cancel and the accepting button pinned below, the focus on Cancel when accepting destroys. Escape and the scrim cancel. ConfirmHost and ask put the same question from any code and resolve with the answer: press ask(..).await.",
+        covers: &[
+            "Confirm",
+            "ConfirmProps",
+            "ConfirmHost",
+            "ConfirmRequest",
+            "Answer",
+            "ask",
+        ],
+        render: || html! { <confirms::ConfirmPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "confirm-popover",
+        title: "ConfirmPopover",
+        about: "A confirm beside the button that asked, in a popover of a fixed width: the focus on Cancel when accepting destroys, Escape and a press outside cancel and focus returns to the button. ConfirmButton is a Button that opens it. A sheet on a phone.",
+        covers: &[
+            "ConfirmPopover",
+            "ConfirmPopoverProps",
+            "ConfirmButton",
+            "ConfirmButtonProps",
+        ],
+        render: || html! { <confirms::ConfirmPopoverPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "confirm-inline",
+        title: "ConfirmInline",
+        about: "No and Yes replacing a button in its own box: both are always laid out in one cell, so the row is as wide as the wider and as high as the button whether it asks or not. No takes the focus; Escape goes back.",
+        covers: &["ConfirmInline", "ConfirmInlineProps", "confirm_inline"],
+        render: || html! { <confirms::ConfirmInlinePage /> },
+        holds: &[
+            hold(plinth::class::CONFIRM_INLINE, Size::Box, ASKING),
+            hold(plinth::class::CONFIRM_IDLE, Size::Box, ASKING),
+            hold(class::SAMPLE, Size::Box, ASKING),
         ],
     },
     Page {

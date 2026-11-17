@@ -492,6 +492,10 @@ pub struct PopoverProps {
     /// The sheet's close button's accessible name.
     #[prop_or(AttrValue::Static("Close"))]
     pub close_label: AttrValue,
+    /// Takes focus once it is placed (it is hidden until then), such as the
+    /// safe button of a confirm.
+    #[prop_or_default]
+    pub focus: Option<NodeRef>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -525,6 +529,16 @@ pub fn Popover(props: &PopoverProps) -> Html {
         props.align,
         props.on_dismiss.clone(),
     );
+    {
+        let focus = props.focus.clone();
+        use_effect_with(placed.is_some(), move |&placed| {
+            if placed && let Some(target) = focus.and_then(|f| f.cast::<HtmlElement>()) {
+                let options = web_sys::FocusOptions::new();
+                options.set_prevent_scroll(true);
+                _ = target.focus_with_options(&options);
+            }
+        });
+    }
 
     if !props.open {
         return Html::default();
@@ -740,6 +754,7 @@ mod tests {
             sheet,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
+            focus: None,
             class: Classes::new(),
             testid: None,
             children: html! { "Body" },

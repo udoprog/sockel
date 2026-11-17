@@ -1,0 +1,52 @@
+// Confirm, ConfirmPopover, ConfirmButton and ConfirmInline (src/confirm.rs).
+//
+// - `.plinth-confirm`: what a confirm says, a column `--space-3` apart;
+//   `-text` is the explanation, which wraps even an unbroken word.
+// - `.plinth-confirm-popover`: a popover `--popover-max-width` wide, so what
+//   it says never changes its width (a sheet on a phone is full width).
+// - `.plinth-confirm-inline`: the button and its No and Yes in one grid
+//   cell, so the box is as wide as the wider and as high as the button
+//   whichever shows. `-idle` is the button and `-ask` the No and Yes;
+//   `.plinth-away` hides the one not shown (`visibility`: it keeps its
+//   room and leaves the tab order).
+
+@use "tokens" as base;
+
+.plinth-confirm {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-3);
+    min-width: 0;
+}
+
+.plinth-confirm-text {
+    margin: 0;
+    overflow-wrap: anywhere;
+}
+
+.plinth-confirm-popover {
+    width: var(--popover-max-width);
+}
+
+.plinth-confirm-inline {
+    display: inline-grid;
+    align-items: center;
+    justify-items: start;
+    max-width: 100%;
+}
+
+.plinth-confirm-idle,
+.plinth-confirm-ask {
+    grid-area: 1 / 1;
+}
+
+.plinth-confirm-ask {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.plinth-confirm-idle.plinth-away,
+.plinth-confirm-ask.plinth-away {
+    visibility: hidden;
+}

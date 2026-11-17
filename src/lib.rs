@@ -82,6 +82,11 @@
 //! - [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
 //!   scrolls and pinned actions, in three sizes; a sheet on a phone. The page
 //!   behind holds still; Escape closes the innermost overlay only.
+//! - [`Confirm`] (`.confirm`): a dialog asking before an action, with
+//!   [`ask`] and [`ConfirmHost`] for promise-style confirms;
+//!   [`ConfirmPopover`] and [`ConfirmButton`]: the same beside a button;
+//!   [`ConfirmInline`] (`.confirm-inline`): No and Yes replacing a button in
+//!   its box.
 //! - [`Tooltip`] (`.tooltip`) and [`DataTips`] (`data-tip`): a short tip in
 //!   the overlay layer after a pointer's rest or on keyboard focus;
 //!   [`HoverCard`] (`.hover-card`): a richer card on hover or focus;
@@ -120,6 +125,7 @@ mod card_grid;
 mod checkbox;
 mod chip;
 mod choice;
+mod confirm;
 mod dialog;
 mod disclosure;
 mod empty_state;
@@ -163,6 +169,11 @@ pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
+pub use confirm::{
+    Answer, Confirm, ConfirmButton, ConfirmButtonProps, ConfirmHost, ConfirmInline,
+    ConfirmInlineProps, ConfirmPopover, ConfirmPopoverProps, ConfirmProps, ConfirmRequest, ask,
+    confirm_inline,
+};
 pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
 pub use disclosure::{Disclosure, DisclosureProps, disclosure};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
