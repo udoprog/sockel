@@ -92,6 +92,8 @@ struct Settings {
     always_search: bool,
     marked: bool,
     paged: bool,
+    detail_below: bool,
+    chevron: bool,
 }
 
 impl Settings {
@@ -124,7 +126,7 @@ fn PickerSample(props: &SampleProps) -> Html {
                     value={props.value} on_change={props.on_change.clone()}
                     label="Language" placeholder="Choose a language" variant={s.variant}
                     fill={s.fill} invalid={s.invalid} disabled={s.disabled}
-                    always_search={s.always_search}
+                    always_search={s.always_search} detail_below={s.detail_below}
                     describedby={field_describedby(&id, false, s.invalid)} testid="picker" />
             </Field>
             <p class={class::SAMPLE}>{ "The field keeps its width whatever is chosen. Past eight options the list has a search field; the list is --picker-rows rows high however many match." }</p>
@@ -160,6 +162,8 @@ fn settings_controls(settings: &UseStateHandle<Settings>) -> Html {
             <Toggle label="always_search" value={s.always_search} on_change={set(|s, on| s.always_search = on)} />
             <Toggle label="page_size 10" value={s.paged} on_change={set(|s, on| s.paged = on)} />
             <Toggle label="marked (English (Sweden))" value={s.marked} on_change={set(|s, on| s.marked = on)} />
+            <Toggle label="detail_below" value={s.detail_below} on_change={set(|s, on| s.detail_below = on)} />
+            <Toggle label="chevron (PickerMenu, with an icon)" value={s.chevron} on_change={set(|s, on| s.chevron = on)} />
             <Toggle label="fill" value={s.fill} on_change={set(|s, on| s.fill = on)} />
             <Toggle label="invalid" value={s.invalid} on_change={set(|s, on| s.invalid = on)} />
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
@@ -179,6 +183,8 @@ fn initial() -> Settings {
         always_search: false,
         marked: false,
         paged: false,
+        detail_below: false,
+        chevron: false,
     }
 }
 
@@ -200,6 +206,7 @@ pub fn PickerPage() -> Html {
             .variant("variant", s.variant)
             .flag("always_search", s.always_search)
             .expr_if(s.paged, "page_size", "Some(10)")
+            .flag("detail_below", s.detail_below)
             .flag("fill", s.fill)
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled),
@@ -240,8 +247,15 @@ pub fn PickerMenuPage() -> Html {
             .expr("on_pick", "add_lang")
             .expr("text", "html! { \"Add a language\" }")
             .text("label", "Add a language")
+            .expr_if(
+                s.chevron,
+                "icon",
+                "Some(html! { <Icon glyph={Glyph::Plus} /> })",
+            )
+            .flag("chevron", s.chevron)
             .flag("always_search", s.always_search)
             .expr_if(s.paged, "page_size", "Some(10)")
+            .flag("detail_below", s.detail_below)
             .flag("disabled", s.disabled),
     );
     html! {
@@ -250,6 +264,8 @@ pub fn PickerMenuPage() -> Html {
                 <Cluster>
                     <PickerMenu<usize> {options} {on_pick} text={html! { "Add a language" }}
                         label="Add a language" always_search={s.always_search} page_size={s.page_size()}
+                        icon={s.chevron.then(|| html! { <Icon glyph={Glyph::Plus} /> })} chevron={s.chevron}
+                        detail_below={s.detail_below}
                         disabled={s.disabled} testid="picker-menu" />
                 </Cluster>
                 <p class={class::SAMPLE}>{ format!("Added: {}", if names.is_empty() { "none".to_owned() } else { names.join(", ") }) }</p>

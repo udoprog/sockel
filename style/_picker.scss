@@ -11,8 +11,9 @@
 // - `.plinth-choice-list`: a search field (`-search`, an input box) over the
 //   options (`-options`, a listbox of `.plinth-listbox-option` rows,
 //   _listbox.scss) `--picker-rows` rows high whatever matches, so filtering
-//   never resizes it. The options scroll, not the popup, so only they keep
-//   a scrollbar gutter. Option parts beside the listbox's: `-detail` (muted
+//   never resizes it; without a search field, its rows' height.
+//   The options scroll, not the popup, so only they keep a scrollbar
+//   gutter. Option parts beside the listbox's: `-detail` (muted
 //   after the label), `-badge` (at the row's end); `-note`, the no-match
 //   row; `-pager`, a page's worth of matches' Pager under them, over a rule.
 
@@ -89,6 +90,7 @@
     flex-direction: column;
     gap: var(--space-1);
     min-width: 0;
+    min-height: 0;
 }
 
 .plinth-choice-list-search {
@@ -98,16 +100,18 @@
 
 .plinth-choice-list-options {
     display: flex;
-    flex: none;
+    // Shrinks only in a popup too short for it, scrolling rather than cut.
+    flex: 0 1 auto;
     flex-direction: column;
     gap: var(--space-0);
     box-sizing: border-box;
-    // A list without a search field never filters: it is as many rows high
-    // as it has (`--choice-list-rows`, set by the component), up to the
-    // searching list's height.
-    height: calc(
-        min(var(--choice-list-rows, var(--picker-rows)), var(--picker-rows)) *
-            (var(--control-height) + var(--space-0))
+    min-height: 0;
+    // A list without a search field never filters: it is its rows' height,
+    // two-line rows included, as far as its popup allows
+    // (`--choice-list-height: auto`, set by the component).
+    height: var(
+        --choice-list-height,
+        calc(var(--picker-rows) * (var(--control-height) + var(--space-0)))
     );
     @include base.scroll-area;
     border-radius: var(--radius-inner, var(--radius-sm));

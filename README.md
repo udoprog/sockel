@@ -434,7 +434,8 @@ part is emitted; a name plinth does not have is an error.
 
 `Button` is a `<button>`, or with `href` an `<a>` styled as one. Its label
 is its children; `icon` is the app's icon (`trailing` puts it after the
-label). plinth styles only `.plinth-button`, never a bare `<button>`.
+label); `chevron` ends it in a chevron after the label, beside a leading
+icon too, as a menu's opener. plinth styles only `.plinth-button`, never a bare `<button>`.
 
 - `variant` (`ButtonVariant`): `Secondary` (the plain button, the
   default), `Primary` (`plinth::class::PRIMARY`), `Ghost` (`GHOST`, no
@@ -670,7 +671,10 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   names the button, `busy` swaps the icon for a spinner in the same box.
   Clearing (the button or escape) calls `on_input("")` and returns the focus
   to the text. `input_ref` is the text input's ref; `on_keydown` sees each
-  key first (preventing escape's default keeps the text). `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
+  key first (preventing escape's default keeps the text). `controls` (a
+  listbox's id) makes it that list's combobox (`role="combobox"`,
+  `aria-controls`, autocomplete off), `activedescendant` naming its active
+  option. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
   and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the `IconSet`'s
   search glyph.
 - `InputGroup` (`.plinth-input-group`): controls joined in a row. Give each
@@ -1046,8 +1050,9 @@ the owner cuts it, and its events still bubble through the owner. Props:
 
 Dismissal (`Dismiss`), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
-where the press put it; `Escape` and `Close` (the
-sheet's button) return focus to the anchor, as does any close by its owner
+where the press put it; `Escape` (unless what has the focus took it,
+preventing its default, as a search field clearing its text does) and
+`Close` (the sheet's button) return focus to the anchor, as does any close by its owner
 that leaves focus nowhere after focus or a press was inside the popover (one
 the pointer only passed over, a hover card, leaves focus alone). Focus goes
 back to what had it inside the anchor when it opened, such as the button of
@@ -1772,8 +1777,15 @@ type-ahead too. Props: `options`, `value` (checked), `multi`
 (`aria-multiselectable`, `chosen` checked, the owner toggles a pick with
 `toggled`), `on_pick`, `label` (the list's name), `always_search`,
 `search_label` and `empty_label` (the app's words), `autofocus`, `class`,
-`testid` (the field's is it suffixed `-search`, each option's `-option`,
-the pager's `-pager`). `on_search` is told the query as it changes (and
+`clear_label` (the search field's clear button: it is a `SearchField`, so
+Escape clears a query before it closes a popup), `detail_below` (each
+row's detail on a second line under its label, wrapping, in
+`LISTBOX_OPTION_TEXT` and `LISTBOX_OPTION_DESCRIPTION` as a `Select`'s
+description), `testid` (the field's is it suffixed `-search`, each
+option's `-option`, the pager's `-pager`). Under a search field no option
+starts active (unless `tab_cycles`): ArrowDown goes to the first, ArrowUp
+to the last, Enter picks the first match, and the current option is
+scrolled into view. `on_search` is told the query as it changes (and
 blank when the list mounts), for options the app finds by it. `page_size`
 lists that many matches at a time with a `Pager` under them
 (`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
@@ -1804,13 +1816,13 @@ opens it. Props: `options`, `value`, `on_change`, `label` (the
 accessible name, followed by the current option's label), `placeholder`,
 `variant` (`PickerVariant::Field` or `Small`, `SMALL`), `fill` (`FILL`),
 `invalid`, `disabled`, `always_search`, `search_label`, `empty_label`,
-`on_search`, `page_size`, `id`, `describedby`, `title` (the field's
+`on_search`, `page_size`, `clear_label`, `detail_below`, `id`, `describedby`, `title` (the field's
 tooltip), `fold` (the current option's icon alone below the phone
 breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's is it suffixed `-popup`, the
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
 gives its classes. `PickerMenu<T>` is the same list opened from a `Button`
 for an action that takes an option (Add a language): `text`, `icon`,
-`label`, `variant`, `size`, `fold` (as a `Button`'s), `disabled`, `on_pick`, and the list's
+`chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `disabled`, `on_pick`, and the list's
 `on_search`, `page_size`, `tab_cycles` and `list_testid`. `PickerDialog<T>` is the
 searchable shell for a large set (languages, countries): a `Dialog`
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
@@ -1824,7 +1836,7 @@ whatever is chosen; its label is cut with an ellipsis. The popup is
 never measured from its text. A ChoiceList's options are `--picker-rows`
 rows high whatever matches, none included, so typing never resizes the
 list, its popup or its dialog (without a search field, which never
-filters, as many rows as it has up to that); past that it scrolls, its scrollbar's room kept. Marks keep their
+filters, its rows' height, two-line rows included, as far as its popup allows); past that it scrolls, its scrollbar's room kept. Marks keep their
 box when off. New partial: `_picker.scss`. No new tokens.
 
 ## ToolBand, Panel, Seam and use_width

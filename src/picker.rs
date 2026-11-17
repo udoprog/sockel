@@ -3,7 +3,7 @@
 //! a dialog (`style/_picker.scss`).
 
 use phrasebook02::yew023::use_phrases_with;
-use web_sys::{Element, HtmlElement, HtmlInputElement};
+use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::listbox::{ListKey, Listbox, listbox_option, option_id};
@@ -12,7 +12,7 @@ use crate::roving::{menu_step, printable};
 use crate::select::scroll_to;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Dismiss, Glyph, Icon, InputSize, Pager,
-    PopoverAlign, Side, class, input_box, page_count, use_overlays, use_popover,
+    PopoverAlign, SearchField, Side, class, input_box, page_count, use_overlays, use_popover,
 };
 
 /// How many options a list has before it offers a search field.
@@ -199,6 +199,13 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     /// Said when nothing matches.
     #[prop_or_default]
     pub empty_label: Option<AttrValue>,
+    /// The search field's clear button's name (the catalog's when none).
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
+    /// Each row's detail on a second line under its label, wrapping, rather
+    /// than after it on one line.
+    #[prop_or_default]
+    pub detail_below: bool,
     /// Takes the focus when its dialog or popup opens (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
@@ -226,7 +233,9 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
 /// when there are more than a few (or `always_search`). Focus stays in the
 /// field (or on the list, without one), naming the active option with
 /// `aria-activedescendant`: the arrows, PageUp and PageDown move, Enter
-/// picks; without a field, Home, End, Space and type-ahead too.
+/// picks; without a field, Home, End, Space and type-ahead too. Under a
+/// field no option starts active (unless `tab_cycles`): ArrowDown goes to
+/// the first, and Enter picks the first match.
 #[function_component]
 pub fn ChoiceList<T>(props: &ChoiceListProps<T>) -> Html
 where
@@ -252,6 +261,7 @@ where
         }
     };
     let searchable = props.always_search || options.len() > SEARCH_FROM;
+    let rests = searchable && !props.tab_cycles;
     let matches = picker_matches(options, &query);
     let page = use_state_eq(|| {
         let size = props.page_size.unwrap_or(usize::MAX).max(1);
@@ -281,7 +291,12 @@ where
         .collect();
     {
         let mut state = state.borrow_mut();
-        if !std::mem::replace(&mut *started.borrow_mut(), true) {
+        let first = !std::mem::replace(&mut *started.borrow_mut(), true);
+        if rests {
+            if !state.active().is_some_and(|a| pickable.contains(&a)) {
+                state.set(None);
+            }
+        } else if first {
             match pickable.iter().copied().find(|&i| is_chosen(i)) {
                 Some(i) => state.set(Some(i)),
                 None => state.go_to_end(&pickable, false),
@@ -291,6 +306,18 @@ where
         }
     }
     let active = state.borrow().active();
+    {
+        // The current option in view, though not active.
+        let current = rests
+            .then(|| shown.iter().copied().find(|&i| is_chosen(i)))
+            .flatten();
+        let base = (*id).clone();
+        use_effect_with((), move |()| {
+            if let Some(i) = current {
+                scroll_to(&option_id(&base, i));
+            }
+        });
+    }
     {
         let (state, base) = (state.clone(), (*id).clone());
         use_effect(move || {
@@ -346,6 +373,13 @@ where
             if searchable && matches!(key.as_str(), "Home" | "End" | " ") {
                 return;
             }
+            if rests && key == "Enter" && state.borrow().active().is_none() {
+                if let Some(&first) = pickable.first() {
+                    e.prevent_default();
+                    pick(first);
+                }
+                return;
+            }
             let taken = state
                 .borrow_mut()
                 .key(&key, e.alt_key(), &pickable, e.time_stamp());
@@ -367,11 +401,10 @@ where
             redraw.force_update();
         })
     };
-    let oninput = {
+    let on_input = {
         let (query, state, page) = (query.clone(), state.clone(), page.clone());
         let on_search = props.on_search.clone();
-        Callback::from(move |e: InputEvent| {
-            let text = e.target_unchecked_into::<HtmlInputElement>().value();
+        Callback::from(move |text: String| {
             state.borrow_mut().set(None);
             page.set(0);
             on_search.emit(text.clone());
@@ -388,6 +421,7 @@ where
 
     let list_id = format!("{}-list", *id);
     let decorated = options.iter().any(|o| o.icon.is_some());
+    let detail_below = props.detail_below;
     let option_testid = props
         .testid
         .as_ref()
@@ -423,9 +457,16 @@ where
                         { o.icon.clone().unwrap_or_default() }
                     </span>
                 }
-                <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
-                if let Some(detail) = &o.detail {
-                    <span class={class::CHOICE_LIST_DETAIL}>{ detail.clone() }</span>
+                if let (Some(detail), true) = (&o.detail, detail_below) {
+                    <span class={class::LISTBOX_OPTION_TEXT}>
+                        <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                        <span class={class::LISTBOX_OPTION_DESCRIPTION}>{ detail.clone() }</span>
+                    </span>
+                } else {
+                    <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                    if let Some(detail) = &o.detail {
+                        <span class={class::CHOICE_LIST_DETAIL}>{ detail.clone() }</span>
+                    }
                 }
                 if let Some(badge) = &o.badge {
                     <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
@@ -441,24 +482,18 @@ where
         <div class={classes!(class::CHOICE_LIST, props.class.clone())}
             data-testid={props.testid.clone()}>
             if searchable {
-                <span class={classes!(input_box(InputSize::Regular, false, false, false), class::CHOICE_LIST_SEARCH)}>
-                    <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
-                    <input class={class::INPUT_CONTROL} type="text" value={(*query).clone()}
-                        placeholder={search_label.clone()} aria-label={search_label}
-                        role="combobox" aria-autocomplete="list" aria-expanded="true"
-                        aria-controls={list_id.clone()} aria-activedescendant={active_id.clone()}
-                        autocomplete="off" spellcheck="false"
-                        data-autofocus={props.autofocus.then_some("")}
-                        data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-search")))}
-                        {oninput} onkeydown={onkeydown.clone()} />
-                </span>
+                <SearchField class={class::CHOICE_LIST_SEARCH} value={AttrValue::from((*query).clone())}
+                    {on_input} label={search_label} clear_label={props.clear_label.clone()}
+                    controls={AttrValue::from(list_id.clone())} activedescendant={active_id.clone().map(AttrValue::from)}
+                    autofocus={props.autofocus} on_keydown={onkeydown.clone()}
+                    testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-search")))} />
             }
             <div id={list_id.clone()} role="listbox" class={class::CHOICE_LIST_OPTIONS}
                 aria-label={props.label.clone()}
                 aria-multiselectable={props.multi.then_some("true")}
                 tabindex={(!searchable).then_some("0")}
                 aria-activedescendant={(!searchable).then_some(active_id).flatten()}
-                style={(!searchable).then(|| format!("--choice-list-rows: {};", shown.len().max(1)))}
+                style={(!searchable).then_some("--choice-list-height: auto;")}
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
                 onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
                 if shown.is_empty() {
@@ -578,6 +613,12 @@ pub struct PickerProps<T: PartialEq + 'static> {
     pub search_label: Option<AttrValue>,
     #[prop_or_default]
     pub empty_label: Option<AttrValue>,
+    /// The search field's clear button's name (the catalog's when none).
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
+    /// See [`ChoiceListProps::detail_below`].
+    #[prop_or_default]
+    pub detail_below: bool,
     #[prop_or_default]
     pub id: Option<AttrValue>,
     #[prop_or_default]
@@ -701,6 +742,7 @@ where
                 <ChoiceList<T> options={props.options.clone()} value={props.value.clone()} {on_pick}
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
+                    clear_label={props.clear_label.clone()} detail_below={props.detail_below}
                     autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
                     testid={list_testid(&props.testid, &props.list_testid)} />
             </ChoicePopup>
@@ -719,6 +761,9 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     /// The button's icon, which the app supplies; else it ends in a chevron.
     #[prop_or_default]
     pub icon: Option<Html>,
+    /// Ends in a chevron beside an `icon` too.
+    #[prop_or_default]
+    pub chevron: bool,
     /// The button's and the list's accessible name.
     pub label: AttrValue,
     #[prop_or_default]
@@ -733,6 +778,12 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     pub search_label: Option<AttrValue>,
     #[prop_or_default]
     pub empty_label: Option<AttrValue>,
+    /// The search field's clear button's name (the catalog's when none).
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
+    /// See [`ChoiceListProps::detail_below`].
+    #[prop_or_default]
+    pub detail_below: bool,
     /// See [`ChoiceListProps::on_search`].
     #[prop_or_default]
     pub on_search: Callback<String>,
@@ -789,6 +840,7 @@ where
         <>
             <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
                 class={props.class.clone()} {icon} {trailing} fold={props.fold}
+                chevron={props.chevron && !trailing}
                 label={Some(props.label.clone())} disabled={props.disabled}
                 expanded={Some(*open)} haspopup={AttrValue::Static("listbox")}
                 testid={props.testid.clone()} {onclick}>
@@ -799,7 +851,8 @@ where
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
                     autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
-                    tab_cycles={props.tab_cycles}
+                    tab_cycles={props.tab_cycles} clear_label={props.clear_label.clone()}
+                    detail_below={props.detail_below}
                     testid={list_testid(&props.testid, &props.list_testid)} />
             </ChoicePopup>
         </>
@@ -827,6 +880,9 @@ pub struct PickerDialogProps<T: PartialEq + 'static> {
     pub search_label: Option<AttrValue>,
     #[prop_or_default]
     pub empty_label: Option<AttrValue>,
+    /// The search field's clear button's name (the catalog's when none).
+    #[prop_or_default]
+    pub clear_label: Option<AttrValue>,
     #[prop_or_default]
     pub size: DialogSize,
     /// The footer's buttons, such as Done for a multi-select.
@@ -855,6 +911,7 @@ where
                 multi={props.multi} chosen={props.chosen.clone()} on_pick={props.on_pick.clone()}
                 label={props.title.clone()} always_search=true autofocus=true
                 search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
+                clear_label={props.clear_label.clone()}
                 testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-list")))} />
         </Dialog>
     }
@@ -927,6 +984,7 @@ mod tests {
         assert!(html.contains("tabindex=\"0\""), "{html}");
         assert!(html.contains("aria-selected=\"true\""), "{html}");
         assert!(html.contains(">en-SE</span>"), "{html}");
+        assert!(html.contains("--choice-list-height: auto;"), "{html}");
     }
 
     #[test]
@@ -985,6 +1043,45 @@ mod tests {
         assert!(html.contains(">Option 27<"), "{html}");
         assert!(html.contains("data-testid=\"list-pager\""), "{html}");
         assert!(html.contains(class::CHOICE_LIST_PAGER), "{html}");
+    }
+
+    #[test]
+    fn a_detail_below_is_the_rows_second_line() {
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options: languages(),
+            detail_below: true,
+            label: AttrValue::Static("Language"),
+        }));
+        assert!(html.contains(class::LISTBOX_OPTION_DESCRIPTION), "{html}");
+        assert!(!html.contains(class::CHOICE_LIST_DETAIL), "{html}");
+        assert_eq!(
+            html.matches(class::LISTBOX_OPTION_TEXT).count(),
+            3,
+            "{html}"
+        );
+    }
+
+    #[test]
+    fn under_a_search_field_no_option_starts_active() {
+        let options = || -> Vec<_> {
+            (0..=SEARCH_FROM as u32)
+                .map(|i| PickerOption::new(i, format!("Option {i}")))
+                .collect()
+        };
+        let active = format!("{} {}", class::LISTBOX_OPTION, class::ACTIVE);
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options: options(),
+            value: Some(3),
+            label: AttrValue::Static("Options"),
+        }));
+        assert!(!html.contains(&active), "{html}");
+        assert!(html.contains(class::INPUT_CLEAR), "{html}");
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options: options(),
+            tab_cycles: true,
+            label: AttrValue::Static("Options"),
+        }));
+        assert!(html.contains(&active), "{html}");
     }
 
     #[test]
