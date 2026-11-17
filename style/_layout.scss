@@ -20,6 +20,12 @@
 //   when it runs out of room with its scrollbar hidden and the edge that has hidden controls faded, the gap scale setting another;
 //   `.plinth-toolbar-spacer` pushes what follows to the end. `.plinth-boxed` draws it as
 //   a bar of its own.
+// - `.plinth-toolbar.plinth-band`: its controls wrap instead of scrolling;
+//   `.plinth-chrome` sets it on the surface with a rule under it,
+//   `.plinth-search` in the smaller type of a list's filter.
+//   `.plinth-toolbar-part` groups controls that it wraps between, never
+//   inside, unless the part alone is wider than the band; `.plinth-ruled` rules a part off from the one before it, from the
+//   phone breakpoint up.
 // - `.plinth-library-toolbar`: a library page's search (`.plinth-library-search`, which
 //   grows from `14rem`) and its filters (`.picker.filter`, one width each),
 //   a row that wraps: on a phone the search has a row to itself.
@@ -239,6 +245,44 @@
         border-radius: var(--radius-sm);
         background: var(--surface);
         @include base.nests(var(--radius-sm));
+    }
+
+    // A band: its controls wrap onto further lines rather than scroll.
+    &.plinth-band {
+        flex-wrap: wrap;
+        overflow-x: visible;
+        mask-image: none;
+        animation: none;
+    }
+
+    &.plinth-chrome {
+        padding: var(--space-1) var(--space-3);
+        background: var(--surface);
+        box-shadow: inset 0 calc(var(--space-px) * -1) 0 var(--border);
+    }
+
+    &.plinth-search {
+        font-size: var(--text-sm);
+    }
+}
+
+// A group of a band's controls: the band wraps between parts, and a part
+// wraps inside only when it alone is wider than the band.
+.plinth-toolbar-part {
+    display: flex;
+    flex: 0 1 auto;
+    flex-wrap: wrap;
+    align-items: center;
+    max-width: 100%;
+    gap: base.$toolbar-gap;
+    min-width: 0;
+}
+
+// Ruled off from the part before it where the band has room for the rule.
+@include base.above("phone") {
+    .plinth-toolbar-part.plinth-ruled {
+        padding-inline-start: var(--space-3);
+        box-shadow: inset var(--space-px) 0 0 var(--border);
     }
 }
 

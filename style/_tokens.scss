@@ -38,8 +38,10 @@
 //   window's top, and a dialog sheet's tallest.
 // - `--menu-width`, `--menu-width-wide`, `--menu-width-wider`: a menu's
 //   least widths; `--menu-width-panel`: a panel menu's width.
+// - `--seam-grip` and `--seam-min`: a seam's divider and each pane's least length.
 // - Colours derived from the app's seven (`--danger`, `--success`,
-//   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`): each a
+//   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
+//   `--panel-ground`, `--panel-tint`): each a
 //   default an app overrides by name.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
@@ -186,6 +188,8 @@ $menu-width: 12rem !default;
 $menu-width-wide: 16rem !default;
 $menu-width-wider: 20rem !default;
 $menu-width-panel: 34rem !default;
+$seam-grip: var(--space-3) !default;
+$seam-min: 8rem !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -194,6 +198,8 @@ $warning: color-mix(in srgb, #dc8a00 70%, var(--text)) !default;
 $on-accent: var(--bg) !default;
 $surface-raised: var(--surface) !default;
 $scrim: rgb(0 0 0 / 0.45) !default;
+$panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
+$panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
 // The breakpoint `phone-only` and `desktop-only` switch at.
 $visibility-breakpoint: "phone" !default;
 // The breakpoint below which a popover is a sheet from the bottom.
@@ -316,6 +322,9 @@ $sheet-breakpoint: "phone" !default;
     --menu-width-wide: #{$menu-width-wide};
     --menu-width-wider: #{$menu-width-wider};
     --menu-width-panel: #{$menu-width-panel};
+    // A seam's divider (its grip, the line drawn in it), and each pane's least length.
+    --seam-grip: #{$seam-grip};
+    --seam-min: #{$seam-min};
 
     // Derived from the app's colours on `:root`: an app that sets those on
     // a narrower element sets these there too.
@@ -328,6 +337,9 @@ $sheet-breakpoint: "phone" !default;
     --surface-raised: #{$surface-raised};
     // What dims the page behind a dialog.
     --scrim: #{$scrim};
+    // A panel's sunken ground, and a tinted panel's.
+    --panel-ground: #{$panel-ground};
+    --panel-tint: #{$panel-tint};
 }
 
 // A page's content column: the workspace unless it is given the reading

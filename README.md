@@ -1470,6 +1470,53 @@ matches, none included, so typing never resizes the list, its popup or its
 dialog; past that it scrolls, its scrollbar's room kept. Marks keep their
 box when off. New partial: `_picker.scss`. No new tokens.
 
+## ToolBand, Panel, Seam and use_width
+
+**ToolBand** is a `Toolbar` with `band`: its controls wrap onto further
+lines instead of scrolling sideways (`.plinth-toolbar.plinth-band`; no
+hidden scrollbar or fade). `chrome` sets it on `--surface` with a rule
+under it (`.plinth-chrome`, an inset shadow, so no border is added);
+`search` sets it in `--text-sm`, as a list's filter (`.plinth-search`).
+Group its controls in `ToolbarPart`s (`.plinth-toolbar-part`, `role=group`):
+a band wraps between parts, and inside a part only when that part alone is
+wider than the band (it never overflows the band).
+`ruled` rules a part off from the one before it (`.plinth-ruled`, a
+`--border` line and `--space-3` in) from the phone breakpoint up, where a
+band has the room. A band's height changes only when it wraps, so give its
+controls fixed widths (a `Button`'s busy and disabled states keep its box);
+`toolbar_part(ruled)` gives a part's classes.
+
+**Panel** is a ground over a list or a view holding its filters or a short
+form (`.plinth-panel-box`): a column `--space-2` apart, on `--panel-ground`
+in a `--border` ring that is always there, as wide as what it holds and
+never wider than its column. `line` lays it out as one row that wraps
+(`.plinth-line`); `ground` is `Sunk`, `Tint` (a rounded `--panel-tint`
+chip, `.plinth-tint`) or `Bare` (only the spacing, `.plinth-bare`); the
+ring turns transparent rather than going, so the ground never changes its
+box. `centered` centres it in its column (`.plinth-center`). With a `label`
+it is a named `group`. `panel(ground, line, centered)` gives its classes.
+
+**Seam** is two panes, `start` and `end`, and the divider dragged between
+them (`.plinth-seam`, `.plinth-seam-pane`, `.plinth-seam-grip`). `at` is the
+first pane's share of the room beside the divider (0 to 1); the owner keeps
+it and sets it from `on_change`, which a drag calls at most once an
+animation frame, with the pointer captured, and `on_settle` once the drag
+ends. The divider is a `separator`: the arrow keys move it by 5%, Home and
+End to the ends, and a double-click returns it to `reset` (0.5). `min` and
+`max` bound the share, and each pane keeps `--seam-min` (8rem) besides,
+both in what it reports and in the grid, so neither pane collapses and an
+`at` out of range still lays out. The divider is `--seam-grip` wide
+whatever its state: hover, focus and a drag (`.plinth-active` on the seam)
+light its line only. `axis: SeamAxis::Rows` stacks the panes
+(`.plinth-rows`); give the seam a height. Each pane scrolls what overflows
+it, so its content never widens it.
+
+**`use_width(&node)`** is the width of `node`'s element (its border box, in
+CSS pixels) from a `ResizeObserver`: `0.0` until it is first measured, then
+at most one new value an animation frame, and only when it changed, so a
+component laid out against its own width renders once a frame of a resize.
+The observer goes with the component.
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

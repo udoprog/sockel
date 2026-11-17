@@ -81,7 +81,14 @@
 //!   clock held under the pointer or focus; [`SaveBar`] (`.save-bar`): a
 //!   form's unsaved changes, save and discard, in the flow at one height,
 //!   with [`UnloadGuard`] for the browser's own prompt.
-//! - [`Toolbar`] (`.toolbar`): one line of controls.
+//! - [`Toolbar`] (`.toolbar`): one line of controls; `band` wraps them
+//!   instead (`.band`, with `.chrome` and `.search`), in [`ToolbarPart`]s
+//!   (`.toolbar-part`, `.ruled`) that each keep to one line.
+//! - [`Panel`] (`.panel-box`): a ringed ground over a list or a view holding
+//!   its filters or a short form, as a column or a line, tinted or bare.
+//! - [`Seam`] (`.seam`): two panes and the divider dragged between them, each
+//!   pane keeping its least size.
+//! - [`use_width`]: an element's width, at most once a frame.
 //! - [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
 //!   an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
 //!   navigation, the current entry marked by `aria-current`.
@@ -132,7 +139,7 @@
 //!   filter buttons, one row.
 //!
 //! Where a component cannot be used (the element is another component's),
-//! the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`]) give
+//! the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`], ...) give
 //! the same classes.
 
 /// A constant per class of [`STYLESHEET`], generated from plinth's Sass by
@@ -181,16 +188,19 @@ mod nav_list;
 mod notice;
 mod overlay;
 mod pager;
+mod panel;
 mod picker;
 mod popover;
 mod reorder;
 mod roving;
 mod rows;
 mod save_bar;
+mod seam;
 mod search_select;
 mod secret_input;
 mod select;
 mod selection;
+mod size;
 mod skeleton;
 mod sort_header;
 mod spinner;
@@ -246,7 +256,8 @@ pub use input::{
 };
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
-    ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster, stack, toolbar,
+    ToolbarPart, ToolbarPartProps, ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster,
+    stack, toolbar, toolbar_part,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
 pub use listbox::{LISTBOX_PAGE, ListKey, Listbox, listbox, listbox_option, option_id};
@@ -263,6 +274,7 @@ pub use overlay::{
     OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlays,
 };
 pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_button, pager_slots};
+pub use panel::{Panel, PanelGround, PanelProps, panel};
 pub use picker::{
     ChoiceList, ChoiceListProps, Picker, PickerDialog, PickerDialogProps, PickerMenu,
     PickerMenuProps, PickerOption, PickerProps, PickerVariant, SEARCH_FROM, picker, picker_matches,
@@ -279,6 +291,7 @@ pub use rows::{
     row_list, row_list_item,
 };
 pub use save_bar::{SaveBar, SaveBarProps, UnloadGuard, save_bar, unsaved, use_unload_guard};
+pub use seam::{Seam, SeamAxis, SeamProps, seam};
 pub use search_select::{
     Listed, SearchOption, SearchSelect, SearchSelectProps, listed, search_matches, search_select,
 };
@@ -287,6 +300,7 @@ pub use select::{Select, SelectOption, SelectProps, SelectWidth, chosen, select}
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
+pub use size::use_width;
 pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
 pub use sort_header::{
     SortDirection, SortHeader, SortHeaderProps, next_sort, sort_header, sort_mark,

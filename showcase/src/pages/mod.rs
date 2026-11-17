@@ -25,6 +25,7 @@ mod reorder;
 mod rows;
 mod select;
 mod steppers;
+mod structures;
 mod styles;
 mod tables;
 mod tabs;
@@ -1213,6 +1214,66 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["Labels", "ToolbarSpacer", "focus", "click"]),
             ),
         ],
+    },
+    Page {
+        id: "tool-band",
+        title: "ToolBand",
+        about: "A Toolbar with band: its controls wrap onto further lines instead of scrolling, in ToolbarParts that each keep to one line, ruled off from the part before from the phone breakpoint up; chrome sets it on the surface with a rule under it. Its buttons keep one width when disabled, so the band never rewraps. Tab through it.",
+        covers: &["ToolbarPart", "ToolbarPartProps", "toolbar_part"],
+        render: || html! { <structures::ToolBandPage /> },
+        holds: &[
+            hold(plinth::class::TOOLBAR, Size::Width, Across::All),
+            hold(
+                plinth::class::TOOLBAR,
+                Size::Height,
+                Across::Only(&["disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::TOOLBAR_PART,
+                Size::Box,
+                Across::Only(&["disabled", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "panel",
+        title: "Panel",
+        about: "A ringed ground over a list or a view holding its filters or a short form: a column, or a line that wraps; tinted or bare. As wide as what it holds, never wider than its column; its ring is always there, so the ground changes nothing of its box.",
+        covers: &["Panel", "PanelProps", "PanelGround", "panel"],
+        render: || html! { <structures::PanelPage /> },
+        holds: &[hold(
+            plinth::class::PANEL_BOX,
+            Size::Box,
+            Across::Only(&["ground", "disabled", "focus", "click"]),
+        )],
+    },
+    Page {
+        id: "seam",
+        title: "Seam",
+        about: "Two panes and the divider between them: drag it (one change a frame), focus it and use the arrow keys, Home and End, or double-click it to even the panes. Each pane keeps --seam-min, so neither collapses, and the divider keeps its box.",
+        covers: &["Seam", "SeamProps", "SeamAxis", "seam"],
+        render: || html! { <structures::SeamPage /> },
+        holds: &[
+            hold(plinth::class::SEAM, Size::Box, Across::Except(&["axis"])),
+            hold(
+                plinth::class::SEAM_GRIP,
+                Size::Both,
+                Across::Except(&["axis"]),
+            ),
+            hold(
+                plinth::class::SEAM_PANE,
+                Size::Width,
+                Across::Only(&["Text", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "use-width",
+        title: "use_width",
+        about: "An element's width as a hook, from a ResizeObserver: at most one new value a frame, and only when it changed. Drag the narrow frame's corner.",
+        covers: &["use_width"],
+        render: || html! { <structures::WidthPage /> },
+        holds: &[hold(class::READOUT, Size::Height, Across::All)],
     },
     Page {
         id: "card",

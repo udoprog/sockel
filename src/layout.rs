@@ -138,6 +138,23 @@ pub fn toolbar(boxed: bool) -> Classes {
     classes!(class::TOOLBAR, boxed.then_some(class::BOXED))
 }
 
+/// A toolbar's classes with the band modifiers: `band` wraps its controls
+/// instead of scrolling them, `chrome` sets it on the surface with a rule
+/// under it, `search` sets it in the smaller type of a list's filter.
+fn toolbar_with(boxed: bool, band: bool, chrome: bool, search: bool) -> Classes {
+    classes!(
+        toolbar(boxed),
+        band.then_some(class::BAND),
+        chrome.then_some(class::CHROME),
+        search.then_some(class::SEARCH)
+    )
+}
+
+/// A toolbar part's classes; `ruled` rules it off from the part before it.
+pub fn toolbar_part(ruled: bool) -> Classes {
+    classes!(class::TOOLBAR_PART, ruled.then_some(class::RULED))
+}
+
 /// How much room a card leaves inside it.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum Inset {
@@ -251,6 +268,15 @@ pub struct ToolbarProps {
     /// The space between its controls; the normal gap is `--space-1`.
     #[prop_or_default]
     pub gap: Gap,
+    /// A band: its controls wrap onto further lines instead of scrolling.
+    #[prop_or_default]
+    pub band: bool,
+    /// On the surface, with a rule under it: a window's or a section's bar.
+    #[prop_or_default]
+    pub chrome: bool,
+    /// In the smaller type of a list's filter.
+    #[prop_or_default]
+    pub search: bool,
     /// What the toolbar is for, for assistive technology.
     pub label: AttrValue,
     #[prop_or_default]
@@ -267,7 +293,11 @@ pub struct ToolbarProps {
 pub fn Toolbar(props: &ToolbarProps) -> Html {
     html! {
         <div role="toolbar" aria-label={props.label.clone()}
-            class={classes!(toolbar(props.boxed), props.gap.class(), props.class.clone())}
+            class={classes!(
+                toolbar_with(props.boxed, props.band, props.chrome, props.search),
+                props.gap.class(),
+                props.class.clone()
+            )}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </div>
@@ -285,6 +315,31 @@ pub struct ToolbarSpacerProps {
 pub fn ToolbarSpacer(props: &ToolbarSpacerProps) -> Html {
     html! {
         <span class={classes!(class::TOOLBAR_SPACER, props.class.clone())} aria-hidden="true" />
+    }
+}
+
+#[derive(Properties, PartialEq)]
+pub struct ToolbarPartProps {
+    /// Ruled off from the part before it, from the phone breakpoint up.
+    #[prop_or_default]
+    pub ruled: bool,
+    #[prop_or_default]
+    pub class: Classes,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub children: Html,
+}
+
+/// A group of a toolbar's controls that a band wraps between, and inside
+/// only when the part alone is wider than the band.
+#[function_component]
+pub fn ToolbarPart(props: &ToolbarPartProps) -> Html {
+    html! {
+        <div role="group" class={classes!(toolbar_part(props.ruled), props.class.clone())}
+            data-testid={props.testid.clone()}>
+            { props.children.clone() }
+        </div>
     }
 }
 
@@ -417,6 +472,33 @@ mod tests {
         assert_eq!(list_reset("ol"), Some(class::PLAIN_LIST));
         assert_eq!(list_reset("div"), None);
         assert_eq!(list_reset("section"), None);
+    }
+
+    #[test]
+    fn a_band_and_its_parts_take_their_modifiers() {
+        assert_eq!(
+            names(toolbar_with(false, false, false, false)),
+            [class::TOOLBAR]
+        );
+        assert_eq!(
+            names(toolbar_with(false, true, false, false)),
+            [class::TOOLBAR, class::BAND]
+        );
+        assert_eq!(
+            names(toolbar_with(true, true, true, true)),
+            [
+                class::TOOLBAR,
+                class::BOXED,
+                class::BAND,
+                class::CHROME,
+                class::SEARCH
+            ]
+        );
+        assert_eq!(names(toolbar_part(false)), [class::TOOLBAR_PART]);
+        assert_eq!(
+            names(toolbar_part(true)),
+            [class::TOOLBAR_PART, class::RULED]
+        );
     }
 
     #[test]

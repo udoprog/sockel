@@ -1,0 +1,94 @@
+// Seam (src/seam.rs): two panes and the divider dragged between them.
+//
+// - `.plinth-seam`: a grid of the first pane (`--plinth-seam-at`, set by the
+//   component, of the room beside the divider), the divider
+//   (`--seam-grip` wide) and the second pane; each pane at least
+//   `--seam-min`, so neither collapses however far the divider is dragged.
+//   `.plinth-rows` stacks the panes (give the seam a height).
+// - `.plinth-seam-pane`: a pane, scrolling what overflows it.
+// - `.plinth-seam-grip`: the divider, a line in a fixed box that lights on
+//   hover, focus and while held (`.plinth-active` on the seam).
+
+@use "tokens" as base;
+
+.plinth-seam {
+    --plinth-seam-track: min(
+        calc((100% - var(--seam-grip)) * var(--plinth-seam-at)),
+        calc(100% - var(--seam-grip) - var(--seam-min))
+    );
+
+    display: grid;
+    grid-template-columns:
+        minmax(var(--seam-min), var(--plinth-seam-track))
+        var(--seam-grip)
+        minmax(var(--seam-min), 1fr);
+    min-width: 0;
+    min-height: 0;
+    overflow: hidden;
+
+    &.plinth-rows {
+        grid-template-columns: minmax(0, 1fr);
+        grid-template-rows:
+            minmax(var(--seam-min), var(--plinth-seam-track))
+            var(--seam-grip)
+            minmax(var(--seam-min), 1fr);
+    }
+
+    &.plinth-active {
+        user-select: none;
+        cursor: col-resize;
+    }
+
+    &.plinth-rows.plinth-active {
+        cursor: row-resize;
+    }
+}
+
+.plinth-seam-pane {
+    min-width: var(--seam-min);
+    min-height: 0;
+    overflow: auto;
+    overscroll-behavior: contain;
+}
+
+.plinth-seam.plinth-rows > .plinth-seam-pane {
+    min-width: 0;
+    min-height: var(--seam-min);
+}
+
+.plinth-seam-grip {
+    position: relative;
+    cursor: col-resize;
+    touch-action: none;
+    @include base.focus-ring;
+
+    &::before {
+        content: "";
+        position: absolute;
+        inset-block: 0;
+        inset-inline-start: calc(50% - var(--space-px) / 2);
+        width: var(--space-px);
+        background: var(--border);
+    }
+
+    &:hover::before,
+    &:focus-visible::before {
+        background: var(--accent);
+    }
+}
+
+.plinth-seam.plinth-active > .plinth-seam-grip::before {
+    background: var(--accent);
+}
+
+.plinth-seam.plinth-rows > .plinth-seam-grip {
+    cursor: row-resize;
+
+    &::before {
+        inset-block: auto;
+        inset-inline: 0;
+        inset-block-start: calc(50% - var(--space-px) / 2);
+        width: auto;
+        height: var(--space-px);
+    }
+}

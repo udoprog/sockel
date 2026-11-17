@@ -313,6 +313,12 @@ body {
     font-size: var(--text-xs);
 }
 
+// The seam page's box (pages/structures.rs): a height for stacked panes.
+.showcase-seam-box {
+    height: 18rem;
+    outline: var(--space-px) dashed var(--border);
+}
+
 // The badge page's positioned parent for a corner badge (pages/badges.rs).
 .showcase-anchor {
     position: relative;
