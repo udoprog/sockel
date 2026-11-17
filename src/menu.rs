@@ -187,7 +187,7 @@ fn use_menu_keys(
 }
 
 /// Focuses the list's checked radio once the menu is placed, else its
-/// first item.
+/// first item, else (a menu holding only fields) its first control.
 #[hook]
 fn use_focus_first(list: NodeRef, placed: bool) {
     use_effect_with(placed, move |&placed| {
@@ -199,7 +199,18 @@ fn use_focus_first(list: NodeRef, placed: bool) {
             i.get_attribute("role").as_deref() == Some("menuitemradio")
                 && i.get_attribute("aria-checked").as_deref() == Some("true")
         });
-        if let Some(item) = checked.or(items.first()) {
+        let control = || {
+            list.cast::<Element>()?
+                .query_selector(TABBABLE)
+                .ok()??
+                .dyn_into::<HtmlElement>()
+                .ok()
+        };
+        if let Some(item) = checked
+            .cloned()
+            .or_else(|| items.first().cloned())
+            .or_else(control)
+        {
             _ = item.focus();
         }
     });

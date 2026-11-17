@@ -3,9 +3,9 @@ use yew::prelude::*;
 use crate::class;
 
 use plinth::{
-    Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, Dialog, Glyph, Icon, Menu, MenuCheck,
-    MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction, RowActions,
-    SplitButton, Stack, TextInput,
+    Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, DataTips, Dialog, Glyph, Icon, Menu,
+    MenuCheck, MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction,
+    RowActions, SplitButton, Stack, TextInput,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -247,6 +247,7 @@ pub fn MenuPage() -> Html {
                     <FieldMenu />
                     <DialogMenu />
                 </Cluster>
+                <DataTips />
                 <p class={class::SAMPLE}>{ "The pen is a tool: a click toggles it, a right-click opens its sizes with the checked one focused. Rename holds a field: Tab moves between the field and Save, and closes past either end. Tab from any other open menu closes it and moves on past its opener. File's item opens a dialog, which gives focus back to File when it closes." }</p>
             </Stack>
         </Demo>
@@ -314,6 +315,7 @@ pub fn RowActionsPage() -> Html {
         <Demo {controls} {code}>
             <Cluster justify={plinth::Justify::Between}>
                 <span class={class::SAMPLE}>{ text.of("A row") }</span>
+                <DataTips />
                 <RowActions {actions} disabled={*disabled} more_disabled={*more_disabled} tips={*tips}
                     more={more.then(|| html! {
                         <>

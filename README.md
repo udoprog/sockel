@@ -1180,7 +1180,7 @@ open), `MenuRadio` (`menuitemradio`: `checked`, `on_pick`), `MenuSeparator`,
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
 Keyboard: focus moves to the checked radio once the list is placed, else
-to the first item; the
+to the first item, else (a menu of fields alone) to its first control; the
 arrows (wrapping), Home and End move between enabled items, and typing
 moves to the next item starting with what was typed (a pause of 0.7 s
 starts over; one letter repeated cycles). In a menu that holds fields (a
