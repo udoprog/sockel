@@ -693,6 +693,8 @@ mod tests {
             "--danger: color-mix(in srgb, #d92d20 70%, var(--text))",
             "--on-accent: var(--bg)",
             "--surface-raised: var(--surface)",
+            "--field-border: var(--border)",
+            "--field-bg: var(--surface)",
             "--focus-ring-color: var(--accent)",
         ] {
             assert!(root.iter().any(|line| line == token), "{token} in {root:?}");

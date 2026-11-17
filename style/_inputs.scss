@@ -25,13 +25,13 @@
 
 @mixin box {
     --input-height: var(--control-height);
-    --input-edge: var(--border);
+    --input-edge: var(--field-border);
 
     box-sizing: border-box;
     margin: 0;
     @include base.reserved-border(var(--input-edge));
     border-radius: var(--radius-inner, var(--radius-sm));
-    background: var(--surface);
+    background: var(--field-bg);
     color: var(--text);
     font: inherit;
 

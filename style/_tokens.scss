@@ -42,7 +42,7 @@
 // - `--seam-grip` and `--seam-min`: a seam's divider and each pane's least length.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
-//   `--panel-ground`, `--panel-tint`): each a
+//   `--field-border`, `--field-bg`, `--panel-ground`, `--panel-tint`): each a
 //   default an app overrides by name.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
@@ -200,6 +200,8 @@ $warning: color-mix(in srgb, #dc8a00 70%, var(--text)) !default;
 $on-accent: var(--bg) !default;
 $surface-raised: var(--surface) !default;
 $scrim: rgb(0 0 0 / 0.45) !default;
+$field-border: var(--border) !default;
+$field-bg: var(--surface) !default;
 $panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
 $panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
 // The breakpoint `phone-only` and `desktop-only` switch at.
@@ -338,6 +340,10 @@ $sheet-breakpoint: "phone" !default;
     --surface-raised: #{$surface-raised};
     // What dims the page behind a dialog.
     --scrim: #{$scrim};
+    // A field's edge and fill (inputs, select and picker faces), and the
+    // edge of a checkbox, switch and choice.
+    --field-border: #{$field-border};
+    --field-bg: #{$field-bg};
     // A panel's sunken ground, and a tinted panel's.
     --panel-ground: #{$panel-ground};
     --panel-tint: #{$panel-tint};

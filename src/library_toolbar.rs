@@ -16,10 +16,16 @@ pub struct LibraryToolbarProps {
     /// (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
-    /// The filters after the field: filter buttons of class `filter`, one
-    /// width each.
+    /// The search field's text input.
+    #[prop_or_default]
+    pub input_ref: Option<NodeRef>,
+    /// Keys in the search field (see [`SearchField`]).
+    #[prop_or_default]
+    pub on_keydown: Option<Callback<KeyboardEvent>>,
     #[prop_or_default]
     pub class: Classes,
+    /// The filters after the field: filter buttons of class `filter`, one
+    /// width each.
     #[prop_or_default]
     pub children: Html,
 }
@@ -33,7 +39,8 @@ pub fn LibraryToolbar(props: &LibraryToolbarProps) -> Html {
         <div class={classes!(class::LIBRARY_TOOLBAR, props.class.clone())}>
             <SearchField class={class::LIBRARY_SEARCH} value={props.value.clone()}
                 label={props.label.clone()} testid={props.testid.clone()}
-                on_input={props.on_input.clone()} autofocus={props.autofocus} />
+                on_input={props.on_input.clone()} autofocus={props.autofocus}
+                input_ref={props.input_ref.clone()} on_keydown={props.on_keydown.clone()} />
             { props.children.clone() }
         </div>
     }

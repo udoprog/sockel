@@ -208,7 +208,7 @@ The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
 ## Theming
 
 The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
-`--muted`, `--border`, `--accent` and `--shadow-1`. plinth derives six more
+`--muted`, `--border`, `--accent` and `--shadow-1`. plinth derives eight more
 from them, each a default the app overrides by name (or with `Config::with`,
 as `$danger` and the rest):
 
@@ -220,6 +220,8 @@ as `$danger` and the rest):
 | `--on-accent` | `--bg` | text and icons on an accent background |
 | `--surface-raised` | `--surface` | menus, popovers, dialogs |
 | `--scrim` | `rgb(0 0 0 / 0.45)` | what dims the page behind a dialog |
+| `--field-border` | `--border` | a field's edge (inputs, select and picker faces) and a checkbox's, switch's and choice's |
+| `--field-bg` | `--surface` | a field's fill |
 
 The status hues are mixed toward `--text`, so they keep their contrast on a
 light and a dark background alike. The defaults are computed on `:root`: an
@@ -304,7 +306,7 @@ page can still override them at runtime.
 | `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg` | see [Theming](#theming) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 
@@ -534,8 +536,9 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   button. `label` is the placeholder and the accessible name, `clear_label`
   names the button, `busy` swaps the icon for a spinner in the same box.
   Clearing (the button or escape) calls `on_input("")` and returns the focus
-  to the text. `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
-  and its filters; its `icon` prop is gone, the icon is the `IconSet`'s
+  to the text. `input_ref` is the text input's ref; `on_keydown` sees each
+  key first (preventing escape's default keeps the text). `LibraryToolbar` is a `SearchField` (class `LIBRARY_SEARCH`)
+  and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the `IconSet`'s
   search glyph.
 - `InputGroup` (`.plinth-input-group`): controls joined in a row. Give each
   member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,

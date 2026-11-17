@@ -313,6 +313,13 @@ pub struct SearchFieldProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The text input, for a caller that focuses or reads it.
+    #[prop_or_default]
+    pub input_ref: Option<NodeRef>,
+    /// Keys in the text, before the field's own: escape clears unless this
+    /// prevents the default.
+    #[prop_or_default]
+    pub on_keydown: Option<Callback<KeyboardEvent>>,
 }
 
 /// A search icon, the text and a button that clears it. The icon's and the
@@ -322,7 +329,8 @@ pub struct SearchFieldProps {
 /// text.
 #[function_component]
 pub fn SearchField(props: &SearchFieldProps) -> Html {
-    let input = use_node_ref();
+    let own = use_node_ref();
+    let input = props.input_ref.clone().unwrap_or(own);
     let empty = props.value.is_empty();
 
     let oninput = props.on_input.reform(|e: InputEvent| value_of(&e));
@@ -339,8 +347,12 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
     let onclick = clear.reform(|_: MouseEvent| ());
     let onkeydown = {
         let clear = clear.clone();
+        let on_keydown = props.on_keydown.clone();
         Callback::from(move |e: KeyboardEvent| {
-            if e.key() == "Escape" && !empty {
+            if let Some(on_keydown) = &on_keydown {
+                on_keydown.emit(e.clone());
+            }
+            if e.key() == "Escape" && !empty && !e.default_prevented() {
                 e.prevent_default();
                 clear.emit(());
             }
@@ -404,6 +416,8 @@ mod tests {
             autofocus: false,
             class: Classes::new(),
             testid: None,
+            input_ref: None,
+            on_keydown: None,
         }
     }
 
