@@ -700,6 +700,16 @@ pub struct PopoverProps {
     /// lays out its own edges, such as a list running to the surface's.
     #[prop_or_default]
     pub flush: bool,
+    /// At least as wide as its anchor (`plinth::class::MATCH_ANCHOR`, the
+    /// anchor's width as `--popover-anchor-width`), as a field's list under
+    /// it; off by default. A sheet stays the screen's width.
+    #[prop_or_default]
+    pub match_anchor: bool,
+    /// A press inside it, other than on a control (a field, button, link or
+    /// anything focusable), keeps focus where it is: a search field that
+    /// keeps the keyboard while its results are clicked; off by default.
+    #[prop_or_default]
+    pub keep_focus: bool,
     /// Its accessible name, and the sheet's heading.
     #[prop_or_default]
     pub title: Option<AttrValue>,
@@ -749,6 +759,9 @@ fn first_of(surface: &HtmlElement) -> HtmlElement {
         })
         .unwrap_or_else(|| surface.clone())
 }
+
+/// What a press in a `keep_focus` popover may still focus.
+const KEEPS_PRESS: &str = "input, button, textarea, select, a[href], [tabindex], [contenteditable]";
 
 /// A popover's classes: `popover`, `sheet` when it becomes one on a phone,
 /// and `placed` once it has been measured and placed (it is hidden until
@@ -800,11 +813,35 @@ pub fn Popover(props: &PopoverProps) -> Html {
         return Html::default();
     }
 
-    let style = placed.map(|p| {
+    let mut style = placed.map(|p| {
         format!(
             "--popover-left: {}px; --popover-top: {}px; --popover-max-height: {}px;",
             p.left, p.top, p.max_height
         )
+    });
+    if props.match_anchor
+        && let Some(anchor) = props.anchor.cast::<HtmlElement>()
+    {
+        let width = format!("--popover-anchor-width: {}px;", anchor.offset_width());
+        style = Some(match style {
+            Some(style) => format!("{style} {width}"),
+            None => width,
+        });
+    }
+    let onmousedown = props.keep_focus.then(|| {
+        let node = node.clone();
+        Callback::from(move |e: MouseEvent| {
+            // Not the surface itself, focusable for `focus_first`.
+            let surface = node.cast::<Element>();
+            let on_control = e
+                .target()
+                .and_then(|t| t.dyn_into::<Element>().ok())
+                .and_then(|t| t.closest(KEEPS_PRESS).ok().flatten())
+                .is_some_and(|c| Some(&c) != surface.as_ref());
+            if !on_control {
+                e.prevent_default();
+            }
+        })
     });
     let onkeydown = props.trap.then(|| {
         let node = node.clone();
@@ -834,8 +871,12 @@ pub fn Popover(props: &PopoverProps) -> Html {
                 <div class={class::POPOVER_SCRIM} aria-hidden="true"></div>
             }
             <div ref={node}
-                class={classes!(popover(props.sheet, placed.is_some()), props.class.clone())}
-                role="dialog" aria-label={props.title.clone()} {style} {onkeydown}
+                class={classes!(
+                    popover(props.sheet, placed.is_some()),
+                    props.match_anchor.then_some(class::MATCH_ANCHOR),
+                    props.class.clone()
+                )}
+                role="dialog" aria-label={props.title.clone()} {style} {onkeydown} {onmousedown}
                 tabindex={props.focus_first.then_some("-1")}
                 onpointerenter={props.on_pointer_enter.clone()}
                 onpointerleave={props.on_pointer_leave.clone()}
@@ -1100,6 +1141,8 @@ mod tests {
             head,
             trap: false,
             flush,
+            match_anchor: false,
+            keep_focus: false,
             title: title.map(AttrValue::Static),
             close_label: "Close".into(),
             focus: None,
@@ -1165,6 +1208,14 @@ mod tests {
         assert!(!html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(html.contains("aria-label=\"Filters\""), "{html}");
+    }
+
+    #[test]
+    fn match_anchor_and_keep_focus_are_off_by_default() {
+        let html = render(true, false, None);
+        assert!(!html.contains(class::MATCH_ANCHOR), "{html}");
+        assert!(!html.contains("--popover-anchor-width"), "{html}");
+        assert!(super::KEEPS_PRESS.contains("input"));
     }
 
     #[test]

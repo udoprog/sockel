@@ -980,6 +980,12 @@ the owner cuts it, and its events still bubble through the owner. Props:
 - `flush`: a body without padding (`plinth::class::FLUSH` on
   `.plinth-popover-body`), for content that lays out its own edges, such as
   a list that runs to the surface's; off by default.
+- `match_anchor`: at least as wide as the anchor (`plinth::class::MATCH_ANCHOR`,
+  the anchor's width in `--popover-anchor-width`), as a field's list under
+  it; off by default. A sheet stays the screen's width.
+- `keep_focus`: a press inside it that is not on a control (a field, button,
+  link, select or anything with a `tabindex`) keeps focus where it is, such
+  as in a search field whose results are clicked; off by default.
 - `on_pointer_enter` and `on_pointer_leave` (`Option<Callback<PointerEvent>>`):
   the pointer over the surface, for an owner that keeps it open while the
   pointer is there (it is in the overlay layer, so the owner's own

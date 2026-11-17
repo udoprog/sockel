@@ -1390,7 +1390,12 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <popover::PopoverPage /> },
         holds: &[
-            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            // Widened by match_anchor, to show the popover matching it.
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Except(&["match_anchor"]),
+            ),
             hold(class::SAMPLE, Size::Box, Across::All),
         ],
     },

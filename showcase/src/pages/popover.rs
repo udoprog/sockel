@@ -32,6 +32,8 @@ struct PopoverDemoProps {
     within: bool,
     flush: bool,
     focus_first: bool,
+    match_anchor: bool,
+    keep_focus: bool,
 }
 
 /// One anchor and its popover, with its own open state, so each frame has
@@ -66,7 +68,9 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
     html! {
         <Stack>
             <Cluster>
+                // Wide, when the popover matches it, to show it doing so.
                 <button type="button" ref={anchor.clone()} class={classes}
+                    style={props.match_anchor.then_some("min-width: 20rem")}
                     aria-expanded={open.to_string()} onclick={toggle}>
                     <span class={plinth::class::BUTTON_LABEL}>{ "Open the popover" }</span>
                 </button>
@@ -82,6 +86,7 @@ fn PopoverDemo(props: &PopoverDemoProps) -> Html {
                 side={props.side} align={props.align} sheet={props.sheet}
                 within={props.within.then(|| AttrValue::from(format!(".{}", class::FRAME)))}
                 flush={props.flush} focus_first={props.focus_first}
+                match_anchor={props.match_anchor} keep_focus={props.keep_focus}
                 title={props.titled.then_some(AttrValue::Static("Filters"))}>
                 <Stack>
                     if !text.is_empty() {
@@ -108,6 +113,8 @@ pub fn PopoverPage() -> Html {
     let within = use_state(|| false);
     let flush = use_state(|| false);
     let focus_first = use_state(|| false);
+    let match_anchor = use_state(|| false);
+    let keep_focus = use_state(|| false);
 
     let controls = html! {
         <>
@@ -119,6 +126,8 @@ pub fn PopoverPage() -> Html {
             <Toggle label="within its frame" value={*within} on_change={bind(&within)} />
             <Toggle label="flush" value={*flush} on_change={bind(&flush)} />
             <Toggle label="focus_first" value={*focus_first} on_change={bind(&focus_first)} />
+            <Toggle label="match_anchor" value={*match_anchor} on_change={bind(&match_anchor)} />
+            <Toggle label="keep_focus" value={*keep_focus} on_change={bind(&keep_focus)} />
         </>
     };
 
@@ -136,6 +145,8 @@ pub fn PopoverPage() -> Html {
             .text_if(*within, "within", &format!(".{}", class::FRAME))
             .expr_if(*flush, "flush", "true")
             .expr_if(*focus_first, "focus_first", "true")
+            .expr_if(*match_anchor, "match_anchor", "true")
+            .expr_if(*keep_focus, "keep_focus", "true")
             .child(
                 El::new("Stack")
                     .line_if(!words.is_empty(), format!("<p>{}</p>", text_node(&words)))
@@ -147,7 +158,8 @@ pub fn PopoverPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush} focus_first={*focus_first} />
+            <PopoverDemo side={*side} align={*align} text={*text} sheet={*sheet} titled={*titled} within={*within} flush={*flush}
+                focus_first={*focus_first} match_anchor={*match_anchor} keep_focus={*keep_focus} />
         </Demo>
     }
 }

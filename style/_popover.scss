@@ -14,6 +14,8 @@
 //   `-scrim` behind it.
 // - `.plinth-popover-body.plinth-flush`: a body without padding, for content
 //   that lays out its own edges (a list running to the surface's).
+// - `.plinth-popover.plinth-match-anchor`: at least as wide as its anchor
+//   (`--popover-anchor-width`, set by popover.rs), as a field's list.
 // - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom
 //   over the scrim, with its head.
 // - Settings: `$popover-padding` (the body's), `$popover-shadow`,
@@ -55,6 +57,10 @@
     // Focused by `focus_first` only when it holds no control.
     &:focus {
         outline: none;
+    }
+
+    &.plinth-match-anchor {
+        min-width: min(var(--popover-anchor-width, 0px), calc(100vw - 2 * var(--space-2)));
     }
 }
 
