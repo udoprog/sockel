@@ -113,7 +113,7 @@ pub struct SelectProps<T: PartialEq + 'static> {
 }
 
 /// A key that types a character, rather than a command.
-fn printable(e: &KeyboardEvent) -> Option<char> {
+pub(crate) fn printable(e: &KeyboardEvent) -> Option<char> {
     if e.ctrl_key() || e.meta_key() || e.alt_key() {
         return None;
     }
@@ -385,7 +385,7 @@ where
     }
 }
 
-fn scroll_to(id: &str) {
+pub(crate) fn scroll_to(id: &str) {
     let Some(element) = web_sys::window()
         .and_then(|w| w.document())
         .and_then(|d| d.get_element_by_id(id))

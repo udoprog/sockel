@@ -9,6 +9,7 @@
 // - `--control-height` and `--control-height-small`: every field, button
 //   and picker button is one of the two, so a row of them never jumps.
 // - `--glyph-size`: the box of one of plinth's own icons, whatever icon fills it.
+// - `--swatch-size`: a colour swatch's box; `--color-select-width`: a ColorSelect face's width.
 // - `--skeleton-duration`: the time a skeleton's shimmer takes to cross.
 // - `--table-max-height`: where a table with a sticky head starts to scroll.
 // - `--drop-min-height`, `--drop-tint`, `--drop-tint-over`: a drop zone's least
@@ -134,6 +135,8 @@ $touch-height: 2.75rem !default;
 $dot-size: 0.5rem !default;
 $corner-size: 1.125rem !default;
 $glyph-size: 1em !default;
+$swatch-size: 1.25rem !default;
+$color-select-width: 10rem !default;
 $skeleton-duration: 1.4s !default;
 $check-size: 1.25rem !default;
 $switch-width: 2.5rem !default;
@@ -238,6 +241,9 @@ $sheet-breakpoint: "phone" !default;
     --corner-size: #{$corner-size};
     // The box an icon of plinth's own sits in (`.plinth-glyph`).
     --glyph-size: #{$glyph-size};
+    // A colour swatch (`.plinth-color-swatch`) and a ColorSelect face's width.
+    --swatch-size: #{$swatch-size};
+    --color-select-width: #{$color-select-width};
     // The time a skeleton's shimmer takes to cross (`.plinth-skeleton`).
     --skeleton-duration: #{$skeleton-duration};
     --check-size: #{$check-size};

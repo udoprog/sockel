@@ -1,0 +1,167 @@
+// ColorSelect (src/color_select.rs): a field's box (`.plinth-input-box`,
+// _inputs.scss) showing the chosen colour, opening a grid of swatches.
+//
+// - `.plinth-color-select`: the face, a button, `--color-select-width` wide
+//   whatever is chosen, its label cut with an ellipsis. `.plinth-fill`: as
+//   wide as its container. `.plinth-swatch-only`: the swatch alone, as wide
+//   as the box is high. Sizes, `.plinth-invalid`, `.plinth-disabled` and
+//   `.plinth-busy` are the input box's. Parts: `-label`, `-placeholder`
+//   (muted), `-chevron`.
+// - `.plinth-color-swatch`: a colour's chip, `--swatch-size`, its colour the
+//   `--swatch` custom property. `.plinth-none`: no colour, struck through.
+// - `.plinth-color-list`: the open popup, the menu's surface (_menu.scss) in
+//   the overlay layer, hidden until `.plinth-placed`. `.plinth-color-grid`:
+//   its swatches, `--color-select-columns` to a row.
+// - `.plinth-color-option`: a cell at `--control-height` square, its border
+//   reserved: `.plinth-active` (under the keyboard or pointer) changes its
+//   fill only, `[aria-selected="true"]` its border's colour, and `-mark` (a
+//   check over the swatch, its box kept when off, `.plinth-off`) shows.
+// - `.plinth-color-custom`: the row of the native colour input (`-input`)
+//   under the grid, with its `-label`.
+
+@use "tokens" as base;
+@use "menu";
+
+.plinth-color-select {
+    width: var(--color-select-width);
+    max-width: 100%;
+    text-align: start;
+    cursor: pointer;
+
+    &.plinth-fill {
+        flex: 1 1 auto;
+        width: 100%;
+    }
+
+    &.plinth-swatch-only {
+        justify-content: center;
+        width: var(--input-height);
+        padding-inline: 0;
+    }
+
+    &[aria-expanded="true"] {
+        --input-edge: var(--accent);
+    }
+
+    &.plinth-disabled {
+        cursor: not-allowed;
+    }
+}
+
+.plinth-color-select-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    @include base.truncate;
+}
+
+.plinth-color-select-placeholder {
+    color: var(--muted);
+}
+
+.plinth-color-select-chevron {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    color: var(--muted);
+}
+
+.plinth-color-swatch {
+    flex: none;
+    box-sizing: border-box;
+    width: var(--swatch-size);
+    height: var(--swatch-size);
+    border: var(--space-px) solid color-mix(in srgb, var(--text) 25%, transparent);
+    border-radius: var(--radius-xs);
+    background: var(--swatch, transparent);
+
+    &.plinth-none {
+        background: linear-gradient(
+            to top right,
+            transparent calc(50% - var(--space-px)),
+            var(--danger) calc(50% - var(--space-px)),
+            var(--danger) calc(50% + var(--space-px)),
+            transparent calc(50% + var(--space-px))
+        );
+    }
+}
+
+.plinth-color-list {
+    @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
+}
+
+.plinth-color-grid {
+    display: grid;
+    grid-template-columns: repeat(var(--color-select-columns, 6), var(--control-height));
+    gap: var(--space-0);
+    padding: var(--space-1);
+}
+
+.plinth-color-option {
+    position: relative;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--control-height);
+    height: var(--control-height);
+    @include base.reserved-border;
+    border-radius: var(--radius-sm);
+    cursor: pointer;
+
+    &.plinth-active {
+        @include menu.item-active;
+    }
+
+    &[aria-selected="true"] {
+        border-color: var(--accent);
+    }
+}
+
+.plinth-color-option-mark {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: var(--corner-size);
+    height: var(--corner-size);
+    margin: auto;
+    border-radius: var(--radius-pill);
+    background: var(--surface-raised);
+    color: var(--text);
+
+    &.plinth-off {
+        visibility: hidden;
+    }
+}
+
+.plinth-color-custom {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-height: var(--control-height);
+    padding: var(--space-1) var(--space-2);
+    border-top: var(--space-px) solid var(--border);
+    cursor: pointer;
+}
+
+.plinth-color-custom-label {
+    flex: 1 1 auto;
+    min-width: 0;
+    @include base.truncate;
+}
+
+.plinth-color-custom-input {
+    flex: none;
+    box-sizing: border-box;
+    width: var(--control-height);
+    height: var(--control-height-small);
+    margin: 0;
+    padding: 0;
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-sm);
+    background: none;
+    cursor: pointer;
+    @include base.focus-ring;
+}

@@ -111,6 +111,9 @@
 //! - [`Select`] (`.select`): a field's box showing what is chosen, as wide
 //!   as its widest option, opening a [`Listbox`] (`.listbox`) of its options
 //!   while focus stays on it; [`Listbox`] is the list's keyboard state.
+//! - [`ColorSelect`] (`.color-select`): a swatch face of one width showing the
+//!   chosen colour, opening a grid of the app's palette (data) and an optional
+//!   custom colour, on the select pattern.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -140,6 +143,7 @@ mod card_grid;
 mod checkbox;
 mod chip;
 mod choice;
+mod color_select;
 mod confirm;
 mod dialog;
 mod disclosure;
@@ -191,6 +195,10 @@ pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
+pub use color_select::{
+    ColorOption, ColorSelect, ColorSelectProps, ColorSelectWidth, color_index, color_input_value,
+    color_key, color_list, color_name, color_option, color_select, color_swatch,
+};
 pub use confirm::{
     Answer, Confirm, ConfirmButton, ConfirmButtonProps, ConfirmHost, ConfirmInline,
     ConfirmInlineProps, ConfirmPopover, ConfirmPopoverProps, ConfirmProps, ConfirmRequest, ask,

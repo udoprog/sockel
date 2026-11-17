@@ -1,6 +1,7 @@
 mod actions;
 mod badges;
 mod buttons;
+mod color_select;
 mod confirms;
 mod dialog;
 mod disclosures;
@@ -460,6 +461,62 @@ pub const PAGES: &[Page] = &[
                 plinth::class::INPUT,
                 Size::Height,
                 Across::Except(&["Size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "color-select",
+        title: "ColorSelect",
+        about: "A colour picker on the select pattern: a face of one width showing the chosen swatch and name, opening a grid of the app's palette (passed as data) and an optional custom colour. A pick, or a palette still loading, never changes the face's box.",
+        covers: &[
+            "ColorSelect",
+            "ColorSelectProps",
+            "ColorSelectWidth",
+            "ColorOption",
+            "color_select",
+            "color_swatch",
+            "color_list",
+            "color_option",
+            "color_index",
+            "color_name",
+            "color_input_value",
+            "color_key",
+        ],
+        render: || html! { <color_select::ColorSelectPage /> },
+        holds: &[
+            hold(
+                plinth::class::COLOR_SELECT,
+                Size::Box,
+                Across::Only(&[
+                    "value",
+                    "Label text",
+                    "placeholder",
+                    "custom",
+                    "palette",
+                    "columns",
+                    "invalid",
+                    "disabled",
+                    "busy",
+                    "focus",
+                    "click",
+                ]),
+            ),
+            hold(
+                plinth::class::COLOR_SELECT,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+            hold(
+                plinth::class::COLOR_SWATCH,
+                Size::Box,
+                Across::Only(&[
+                    "value",
+                    "Label text",
+                    "palette",
+                    "invalid",
+                    "disabled",
+                    "busy",
+                ]),
             ),
         ],
     },

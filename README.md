@@ -1260,6 +1260,61 @@ zone's least height is `--drop-min-height`.
 
 Tokens: `--drop-min-height`, `--drop-tint` and `--drop-tint-over`.
 
+## ColorSelect
+
+`ColorSelect` picks a colour from a palette the app passes in as data; plinth
+owns no palette. It is the select-only combobox pattern of `Select`: a face
+(a `<button>`, `role="combobox"`) with the chosen colour's swatch and name,
+opening a grid (`role="listbox"`) of swatches in the overlay layer through
+`use_popover`, while focus stays on the face. Props:
+
+- `options: Vec<ColorOption>` (`ColorOption::new(value, label)`; the value is
+  any CSS colour, and an empty one is "no colour", drawn struck through),
+  `value: Option<AttrValue>`, `on_change` (told a pick that is not the one
+  chosen), `placeholder` (muted, while `value` is `None`).
+- `custom: Option<AttrValue>`: the label of a row under the grid holding the
+  browser's native colour input (`#rrggbb`); a colour picked there is told
+  to `on_change` like any other, and a value that is not in the palette is
+  shown by its own text.
+- `columns` (6): swatches to a grid row (`--color-select-columns`).
+- `width` (`ColorSelectWidth`): `Fixed` (`--color-select-width`), `Fill`
+  (`FILL`, the container's) or `Swatch` (`SWATCH_ONLY`, the swatch alone in a
+  box as wide as it is high).
+- `size` (`InputSize`), `invalid`, `disabled`, `busy` (`aria-busy`; it still
+  opens on what it has), `id` and `describedby` inside a `Field`, `label` (the
+  accessible name without one), `class` (the face's), `testid` (the face's;
+  the grid's is it suffixed `-options`, the custom input's `-custom`).
+
+In an `InputGroup`, give it `group_classes(..)[i]` as its `class`.
+`color_select(size, width, invalid, disabled, busy)`, `color_swatch(none)`,
+`color_list(placed)` and `color_option(active)` give the classes
+(`COLOR_SELECT`, `COLOR_SWATCH` with `NONE`, `COLOR_LIST` with `PLACED`,
+`COLOR_OPTION` with `ACTIVE`; parts `COLOR_SELECT_LABEL`,
+`COLOR_SELECT_PLACEHOLDER`, `COLOR_SELECT_CHEVRON`, `COLOR_GRID`,
+`COLOR_OPTION_MARK`, `COLOR_CUSTOM` with `_LABEL` and `_INPUT`);
+`color_index(options, value)`, `color_name(options, value)` and
+`color_input_value(value)` give the chosen option, its name and the native
+input's value.
+
+Keyboard: closed, the arrows, Enter, Space, Home and End open it on the
+chosen colour (else the first or last), and typing opens it on the colour
+whose name starts with what was typed. Open, Left and Right move by one,
+Up and Down by a row (stopping at the ends), Home, End, PageUp and PageDown
+and type-ahead move as in a `Listbox`, Enter, Space and Alt+ArrowUp pick,
+Escape or a press outside close it, and Tab moves into the custom input
+(with `custom`; Shift+Tab or Tab from it closes and returns to the face).
+
+Size guarantees: the face is one width whatever is chosen or loaded, the
+label cut with an ellipsis, never wrapped; it is the input box's height for
+its size, and open, focus, hover and invalid change colours only. A swatch
+is `--swatch-size` square, a grid cell `--control-height` square with its
+border reserved, and the active and selected cells change fill and border
+colour only; the selected mark keeps its box when off. The popup is the
+menu's surface in a layer that lays nothing out, hidden until placed.
+New tokens: `--swatch-size`, `--color-select-width`. New partial:
+`_color-select.scss`; new classes as above (`SWATCH_ONLY` is new; `NONE`,
+`FILL`, `PLACED`, `ACTIVE` and `OFF` are shared).
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its
