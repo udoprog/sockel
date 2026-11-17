@@ -1385,7 +1385,7 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   (`aria-busy`; it still opens on what it has).
 - `filter_from: Option<usize>`: from how many options the list has a
   filter field above it (`None`, the default: never). It takes focus on
-  opening, typing on the face goes into it, and it narrows the list to the
+  opening, typing on the face (closed, or open with focus back on it) goes into it, and it narrows the list to the
   options whose label or group holds its text, ignoring case
   (`filter_matches`); the arrows, PageUp, PageDown, Enter and Alt+ArrowUp
   still move and pick, Home, End and Space are the text's, and Tab closes

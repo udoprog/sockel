@@ -411,7 +411,7 @@ where
     let onkeydown = {
         let (is_open, state, redraw) = (*open, state.clone(), redraw.clone());
         let (open, pick, show) = (open.clone(), pick.clone(), show.clone());
-        let (filter, pickable) = (filter.clone(), pickable.clone());
+        let (filter, pickable, input) = (filter.clone(), pickable.clone(), input.clone());
         let labels: Vec<String> = labels.iter().map(|&l| l.to_owned()).collect();
         Callback::from(move |e: KeyboardEvent| {
             let key = e.key();
@@ -449,6 +449,14 @@ where
                 ListKey::Moved => {}
                 ListKey::Pick(i) => pick(i),
                 ListKey::Ignored => match printable(&e) {
+                    // Open with the filter, focus back on the face (a
+                    // press on it, a sheet's): into the filter, focused.
+                    Some(c) if filtering => {
+                        filter.set(format!("{}{c}", *filter));
+                        if let Some(input) = input.cast::<HtmlElement>() {
+                            _ = input.focus();
+                        }
+                    }
                     Some(c) => state
                         .borrow_mut()
                         .typeahead(&pickable, &labels, c, e.time_stamp()),
