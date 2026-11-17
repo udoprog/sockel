@@ -1184,6 +1184,45 @@ mod tests {
     }
 
     #[test]
+    fn a_button_colour_setting_replaces_plinth_s_in_place() {
+        let tuned = Config::new()
+            .with(
+                "button-colours",
+                "(danger: (fill: var(--danger-bg), edge: transparent))",
+            )
+            .build()
+            .unwrap();
+        let danger = declarations(&tuned.css, ".plinth-button.plinth-danger");
+        assert_eq!(
+            danger,
+            [
+                "--button-ink: var(--danger)",
+                "--button-edge: transparent",
+                "--button-hover-edge: var(--text)",
+                "--button-fill: var(--danger-bg)",
+            ]
+        );
+    }
+
+    #[test]
+    fn omitted_parts_are_left_out() {
+        let plain = Config::new().build().unwrap();
+        let lean = Config::new()
+            .with(
+                "omit",
+                r#"("layout.toolbar", "menu.context", "tokens.seam")"#,
+            )
+            .build()
+            .unwrap();
+        for part in [".plinth-toolbar", ".plinth-context-target", "--seam-grip:"] {
+            assert!(plain.css.contains(part), "{part}");
+            assert!(!lean.css.contains(part), "{part}");
+        }
+        assert!(lean.css.len() < plain.css.len());
+        assert!(Config::new().with("omit", r#"("seam")"#).build().is_err());
+    }
+
+    #[test]
     fn a_popover_takes_its_padding_and_shadow_from_settings() {
         let plain = Config::new().build().unwrap();
         assert!(

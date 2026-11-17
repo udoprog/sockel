@@ -43,23 +43,27 @@
     border-radius: base.$menu-radius;
     scrollbar-gutter: base.$menu-scroll-gutter;
 
-    &.plinth-wide {
-        --menu-least: var(--menu-width-wide);
+    @if base.emits("menu.widths") {
+        &.plinth-wide {
+            --menu-least: var(--menu-width-wide);
+        }
+
+        &.plinth-wider {
+            --menu-least: var(--menu-width-wider);
+        }
+
+        &.plinth-panel {
+            --menu-least: var(--menu-width-panel);
+
+            width: min(var(--menu-width-panel), calc(100vw - 2 * var(--space-2)));
+            max-width: none;
+        }
     }
 
-    &.plinth-wider {
-        --menu-least: var(--menu-width-wider);
-    }
-
-    &.plinth-panel {
-        --menu-least: var(--menu-width-panel);
-
-        width: min(var(--menu-width-panel), calc(100vw - 2 * var(--space-2)));
-        max-width: none;
-    }
-
-    &.plinth-tight {
-        gap: 0;
+    @if base.emits("menu.tight") {
+        &.plinth-tight {
+            gap: 0;
+        }
     }
 
     // Closed, its items kept (`keep_mounted`).
@@ -128,17 +132,21 @@
         }
     }
 
-    &.plinth-danger {
-        color: var(--danger);
+    @if base.emits("menu.danger") {
+        &.plinth-danger {
+            color: var(--danger);
+        }
     }
 
-    // The page shown, in a menu of links: by ground and its label's ink.
-    &[aria-current="page"] {
-        background: color-mix(in srgb, var(--accent) 14%, transparent);
+    @if base.emits("menu.current") {
+        // The page shown, in a menu of links: by ground and its label's ink.
+        &[aria-current="page"] {
+            background: color-mix(in srgb, var(--accent) 14%, transparent);
 
-        .plinth-menu-item-label {
-            color: var(--accent);
-            font-weight: 600;
+            .plinth-menu-item-label {
+                color: var(--accent);
+                font-weight: 600;
+            }
         }
     }
 
@@ -187,91 +195,107 @@
     @include base.truncate;
 }
 
-.plinth-menu-item-detail {
-    color: var(--muted);
-    font-size: var(--text-xs);
-}
-
-.plinth-menu-item-hint {
-    @include base.numeric;
-    flex: none;
-    margin-inline-start: var(--space-4);
-    color: var(--muted);
-    font-size: var(--text-xs);
-}
-
-.plinth-menu-separator {
-    flex: none;
-    height: 0;
-    margin: var(--space-1) 0;
-    border-top: var(--space-px) solid var(--border);
-}
-
-.plinth-menu-heading {
-    @include base.truncate;
-    flex: none;
-    padding: var(--space-1) var(--space-3) 0;
-    color: var(--muted);
-    font-size: var(--text-xs);
-    font-weight: 600;
-}
-
-.plinth-menu-note {
-    flex: none;
-    margin: 0;
-    padding: var(--space-2) var(--space-3);
-    color: var(--muted);
-    font-size: var(--text-sm);
-}
-
-.plinth-row-actions {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    gap: var(--space-1);
-}
-
-.plinth-row-action-danger {
-    --button-ink: var(--muted);
-
-    &:hover,
-    &:focus-visible {
-        --button-ink: var(--danger);
-        --button-hover-ink: var(--danger);
+@if base.emits("menu.detail") {
+    .plinth-menu-item-detail {
+        color: var(--muted);
+        font-size: var(--text-xs);
     }
 }
 
-.plinth-split-button {
-    display: inline-flex;
-    flex: 0 1 auto;
-    align-items: stretch;
-    min-width: 0;
-}
-
-.plinth-split-button-main {
-    border-start-end-radius: 0;
-    border-end-end-radius: 0;
-}
-
-.plinth-split-button-toggle {
-    margin-inline-start: calc(-1 * var(--space-px));
-    border-start-start-radius: 0;
-    border-end-start-radius: 0;
-
-    &.plinth-primary {
-        border-inline-start-color: color-mix(in srgb, var(--on-accent) 25%, var(--accent));
+@if base.emits("menu.detail") {
+    .plinth-menu-item-hint {
+        @include base.numeric;
+        flex: none;
+        margin-inline-start: var(--space-4);
+        color: var(--muted);
+        font-size: var(--text-xs);
     }
 }
 
-.plinth-context-target {
-    display: contents;
-    -webkit-touch-callout: none;
+@if base.emits("menu.separator") {
+    .plinth-menu-separator {
+        flex: none;
+        height: 0;
+        margin: var(--space-1) 0;
+        border-top: var(--space-px) solid var(--border);
+    }
 }
 
-.plinth-menu-point {
-    position: fixed;
-    top: var(--menu-y, 0);
-    left: var(--menu-x, 0);
-    width: 0;
-    height: 0;
+@if base.emits("menu.heading") {
+    .plinth-menu-heading {
+        @include base.truncate;
+        flex: none;
+        padding: var(--space-1) var(--space-3) 0;
+        color: var(--muted);
+        font-size: var(--text-xs);
+        font-weight: 600;
+    }
+}
+
+@if base.emits("menu.note") {
+    .plinth-menu-note {
+        flex: none;
+        margin: 0;
+        padding: var(--space-2) var(--space-3);
+        color: var(--muted);
+        font-size: var(--text-sm);
+    }
+}
+
+@if base.emits("menu.row-actions") {
+    .plinth-row-actions {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        gap: var(--space-1);
+    }
+
+    .plinth-row-action-danger {
+        --button-ink: var(--muted);
+
+        &:hover,
+        &:focus-visible {
+            --button-ink: var(--danger);
+            --button-hover-ink: var(--danger);
+        }
+    }
+}
+
+@if base.emits("menu.split-button") {
+    .plinth-split-button {
+        display: inline-flex;
+        flex: 0 1 auto;
+        align-items: stretch;
+        min-width: 0;
+    }
+
+    .plinth-split-button-main {
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
+    }
+
+    .plinth-split-button-toggle {
+        margin-inline-start: calc(-1 * var(--space-px));
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
+
+        &.plinth-primary {
+            border-inline-start-color: color-mix(in srgb, var(--on-accent) 25%, var(--accent));
+        }
+    }
+}
+
+@if base.emits("menu.context") {
+    .plinth-context-target {
+        display: contents;
+        -webkit-touch-callout: none;
+    }
+
+    .plinth-menu-point {
+        position: fixed;
+        top: var(--menu-y, 0);
+        left: var(--menu-x, 0);
+        width: 0;
+        height: 0;
+    }
 }

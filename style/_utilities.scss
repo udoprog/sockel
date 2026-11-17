@@ -13,25 +13,35 @@
 
 @use "tokens" as base;
 
-.plinth-focus-ring {
-    @include base.focus-ring;
+@if base.emits("utilities.focus-ring") {
+    .plinth-focus-ring {
+        @include base.focus-ring;
+    }
 }
 
-.plinth-numeric {
-    @include base.numeric;
+@if base.emits("utilities.numeric") {
+    .plinth-numeric {
+        @include base.numeric;
+    }
 }
 
-.plinth-scroll-area {
-    @include base.scroll-area;
+@if base.emits("utilities.scroll-area") {
+    .plinth-scroll-area {
+        @include base.scroll-area;
+    }
 }
 
-.plinth-truncate {
-    @include base.truncate;
+@if base.emits("utilities.truncate") {
+    .plinth-truncate {
+        @include base.truncate;
+    }
 }
 
-@each $lines in (2, 3, 4) {
-    .plinth-clamp-#{$lines} {
-        @include base.clamp($lines);
+@if base.emits("utilities.clamp") {
+    @each $lines in (2, 3, 4) {
+        .plinth-clamp-#{$lines} {
+            @include base.clamp($lines);
+        }
     }
 }
 
@@ -41,10 +51,14 @@
 
 // The class twice, so it hides a component with a modifier
 // (`.plinth-cluster.plinth-inline`) too, without `!important`.
-.plinth-phone-only.plinth-phone-only {
-    @include base.phone-only;
+@if base.emits("utilities.phone-only") {
+    .plinth-phone-only.plinth-phone-only {
+        @include base.phone-only;
+    }
 }
 
-.plinth-desktop-only.plinth-desktop-only {
-    @include base.desktop-only;
+@if base.emits("utilities.desktop-only") {
+    .plinth-desktop-only.plinth-desktop-only {
+        @include base.desktop-only;
+    }
 }

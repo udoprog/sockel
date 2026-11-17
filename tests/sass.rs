@@ -28,6 +28,17 @@ fn compile(sass: &Path, file: &str) -> String {
     String::from_utf8(output.stdout).expect("utf-8 css")
 }
 
+fn fails(sass: &Path, file: &str) -> String {
+    let file = Path::new(env!("CARGO_MANIFEST_DIR")).join(file);
+    let output = Command::new(sass)
+        .arg("--no-source-map")
+        .arg(&file)
+        .output()
+        .expect("run sass");
+    assert!(!output.status.success(), "{file:?} compiled");
+    String::from_utf8_lossy(&output.stderr).into_owned()
+}
+
 #[test]
 fn defaults_compile() {
     let Some(sass) = sass() else { return };
@@ -98,4 +109,39 @@ fn popover_and_confirm_settings() {
     assert!(css.contains(
         ".plinth-confirm-popover.plinth-compact {\n    --popover-max-width: 100vw;\n    width: max-content;"
     ));
+}
+
+#[test]
+fn omitted_parts_are_left_out() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    let css = compile(&sass, "tests/fixtures/omit.scss");
+    for part in [
+        ".plinth-toolbar",
+        "--band-chrome-ground",
+        ".plinth-cluster.plinth-wide",
+        ".plinth-button.plinth-fold {",
+        ".plinth-head-trail",
+        ".plinth-split-button",
+        "--table-max-height",
+        "--danger:",
+    ] {
+        assert!(defaults.contains(part), "{part} in the defaults");
+        assert!(!css.contains(part), "{part} left out");
+    }
+    for kept in [
+        ".plinth-stack.plinth-loose,\n.plinth-cluster.plinth-loose {",
+        ".plinth-button.plinth-fold-wide",
+        ".plinth-head-subtitle {\n  flex: 0 0 100%;",
+        ".plinth-menu-item {",
+        "--success:",
+    ] {
+        assert!(css.contains(kept), "{kept} kept");
+    }
+}
+
+#[test]
+fn an_unknown_part_is_an_error() {
+    let Some(sass) = sass() else { return };
+    assert!(fails(&sass, "tests/fixtures/omit_unknown.scss").contains("no part layout.toolbars"));
 }

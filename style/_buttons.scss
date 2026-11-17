@@ -30,8 +30,10 @@
         @include base.button-variant(primary);
     }
 
-    &.plinth-ghost {
-        @include base.button-variant(ghost);
+    @if base.emits("buttons.ghost") {
+        &.plinth-ghost {
+            @include base.button-variant(ghost);
+        }
     }
 
     &.plinth-quiet {
@@ -52,9 +54,11 @@
         font-size: base.$button-text-small;
     }
 
-    &.plinth-touch {
-        height: var(--touch-height);
-        padding-inline: var(--button-pad-x, var(--space-4));
+    @if base.emits("buttons.touch") {
+        &.plinth-touch {
+            height: var(--touch-height);
+            padding-inline: var(--button-pad-x, var(--space-4));
+        }
     }
 
     &.plinth-icon {
@@ -63,19 +67,23 @@
         padding-inline: 0;
     }
 
-    &.plinth-fold {
-        @include base.below("phone") {
-            flex: none;
-            aspect-ratio: 1;
-            padding-inline: 0;
+    @if base.emits("buttons.fold") {
+        &.plinth-fold {
+            @include base.below("phone") {
+                flex: none;
+                aspect-ratio: 1;
+                padding-inline: 0;
+            }
         }
     }
 
-    &.plinth-fold-wide {
-        @include base.above("phone") {
-            flex: none;
-            aspect-ratio: 1;
-            padding-inline: 0;
+    @if base.emits("buttons.fold-wide") {
+        &.plinth-fold-wide {
+            @include base.above("phone") {
+                flex: none;
+                aspect-ratio: 1;
+                padding-inline: 0;
+            }
         }
     }
 }
@@ -103,8 +111,10 @@
     gap: base.$button-content-gap;
     min-width: 0;
 
-    &.plinth-busy {
-        visibility: hidden;
+    @if base.emits("buttons.busy") {
+        &.plinth-busy {
+            visibility: hidden;
+        }
     }
 }
 
@@ -119,15 +129,19 @@
         margin-inline-start: base.$button-icon-offset;
     }
 
-    @include base.below("phone") {
-        .plinth-button.plinth-fold .plinth-button-icon:first-child:not(:last-child) {
-            margin-inline-start: 0;
+    @if base.emits("buttons.fold") {
+        @include base.below("phone") {
+            .plinth-button.plinth-fold .plinth-button-icon:first-child:not(:last-child) {
+                margin-inline-start: 0;
+            }
         }
     }
 
-    @include base.above("phone") {
-        .plinth-button.plinth-fold-wide .plinth-button-icon:first-child:not(:last-child) {
-            margin-inline-start: 0;
+    @if base.emits("buttons.fold-wide") {
+        @include base.above("phone") {
+            .plinth-button.plinth-fold-wide .plinth-button-icon:first-child:not(:last-child) {
+                margin-inline-start: 0;
+            }
         }
     }
 }
@@ -135,24 +149,30 @@
 .plinth-button-label {
     @include base.truncate;
 
-    &.plinth-fold {
-        @include base.below("phone") {
-            @include base.visually-hidden;
+    @if base.emits("buttons.fold") {
+        &.plinth-fold {
+            @include base.below("phone") {
+                @include base.visually-hidden;
+            }
         }
     }
 
-    &.plinth-fold-wide {
-        @include base.above("phone") {
-            @include base.visually-hidden;
+    @if base.emits("buttons.fold-wide") {
+        &.plinth-fold-wide {
+            @include base.above("phone") {
+                @include base.visually-hidden;
+            }
         }
     }
 }
 
-.plinth-button-spinner {
-    position: absolute;
-    inset: 0;
-    display: grid;
-    place-items: center;
+@if base.emits("buttons.busy") {
+    .plinth-button-spinner {
+        position: absolute;
+        inset: 0;
+        display: grid;
+        place-items: center;
+    }
 }
 
 button:where(.plinth-iconed:not([hidden])) {

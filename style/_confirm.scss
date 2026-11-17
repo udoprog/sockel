@@ -75,25 +75,27 @@
     }
 }
 
-.plinth-confirm-inline {
-    display: inline-grid;
-    align-items: center;
-    justify-items: start;
-    max-width: 100%;
-}
+@if base.emits("confirm.inline") {
+    .plinth-confirm-inline {
+        display: inline-grid;
+        align-items: center;
+        justify-items: start;
+        max-width: 100%;
+    }
 
-.plinth-confirm-idle,
-.plinth-confirm-ask {
-    grid-area: 1 / 1;
-}
+    .plinth-confirm-idle,
+    .plinth-confirm-ask {
+        grid-area: 1 / 1;
+    }
 
-.plinth-confirm-ask {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-}
+    .plinth-confirm-ask {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+    }
 
-.plinth-confirm-idle.plinth-away,
-.plinth-confirm-ask.plinth-away {
-    visibility: hidden;
+    .plinth-confirm-idle.plinth-away,
+    .plinth-confirm-ask.plinth-away {
+        visibility: hidden;
+    }
 }

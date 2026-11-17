@@ -20,11 +20,13 @@
 
 @use "tokens" as base;
 
-.plinth-spinner {
-    display: inline-flex;
-    flex: none;
-    color: inherit;
-    vertical-align: middle;
+@if base.emits("skeleton.spinner") {
+    .plinth-spinner {
+        display: inline-flex;
+        flex: none;
+        color: inherit;
+        vertical-align: middle;
+    }
 }
 
 .plinth-skeleton {
@@ -73,9 +75,11 @@
         }
     }
 
-    &.plinth-row {
-        --skeleton-height: var(--control-height);
-        --skeleton-inset: var(--space-1);
+    @if base.emits("skeleton.row") {
+        &.plinth-row {
+            --skeleton-height: var(--control-height);
+            --skeleton-inset: var(--space-1);
+        }
     }
 
     &.plinth-poster,
@@ -101,33 +105,39 @@
         --ratio: 21 / 4;
     }
 
-    &.plinth-short {
-        width: 60%;
+    @if base.emits("skeleton.short") {
+        &.plinth-short {
+            width: 60%;
+        }
     }
 }
 
-.plinth-skeleton-group {
-    display: flex;
-    flex-direction: column;
-    box-sizing: border-box;
-    min-width: 0;
-    @include base.reserved-border;
+@if base.emits("skeleton.group") {
+    .plinth-skeleton-group {
+        display: flex;
+        flex-direction: column;
+        box-sizing: border-box;
+        min-width: 0;
+        @include base.reserved-border;
+    }
 }
 
-.plinth-loadable {
-    --loadable-rows: 3;
-    --loadable-kept: 0px;
+@if base.emits("skeleton.loadable") {
+    .plinth-loadable {
+        --loadable-rows: 3;
+        --loadable-kept: 0px;
 
-    display: flow-root;
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: 0;
+        display: flow-root;
+        box-sizing: border-box;
+        min-width: 0;
+        min-height: 0;
 
-    &[aria-busy="true"] {
-        min-height: max(
-            var(--loadable-kept),
-            calc(var(--loadable-rows) * var(--control-height) + 2 * var(--space-px))
-        );
+        &[aria-busy="true"] {
+            min-height: max(
+                var(--loadable-kept),
+                calc(var(--loadable-rows) * var(--control-height) + 2 * var(--space-px))
+            );
+        }
     }
 }
 

@@ -66,21 +66,23 @@
 
 // A flex item that takes the room left in its row, and may shrink. The class
 // twice, so it wins over the item's own flex (a button's, an input's).
-.plinth-grow.plinth-grow {
-    flex: 1 1 auto;
-    min-width: 0;
+@if base.emits("layout.grow") {
+    .plinth-grow.plinth-grow {
+        flex: 1 1 auto;
+        min-width: 0;
 
-    // Starting widths for a field in a row of controls.
-    &.plinth-basis-sm {
-        flex: 1 1 9rem;
-    }
+        // Starting widths for a field in a row of controls.
+        &.plinth-basis-sm {
+            flex: 1 1 9rem;
+        }
 
-    &.plinth-basis-md {
-        flex: 1 1 14rem;
-    }
+        &.plinth-basis-md {
+            flex: 1 1 14rem;
+        }
 
-    &.plinth-basis-lg {
-        flex: 2 1 10rem;
+        &.plinth-basis-lg {
+            flex: 2 1 10rem;
+        }
     }
 }
 
@@ -99,28 +101,32 @@
     display: contents;
 }
 
-.plinth-workspace-page {
-    @include base.page;
-}
-
-.plinth-library-page {
-    @include base.page;
-
-    // The stack's gap spaces the blocks, not their own margins (a paragraph's
-    // default, a toolbar's).
-    > * {
-        margin-block: 0;
+@if base.emits("layout.pages") {
+    .plinth-workspace-page {
+        @include base.page;
     }
 
-    &.plinth-reading > * {
-        max-width: var(--page-reading);
+    .plinth-library-page {
+        @include base.page;
+
+        // The stack's gap spaces the blocks, not their own margins (a paragraph's
+        // default, a toolbar's).
+        > * {
+            margin-block: 0;
+        }
+
+        &.plinth-reading > * {
+            max-width: var(--page-reading);
+        }
     }
 }
 
-.plinth-plain-list {
-    margin: 0;
-    padding: 0;
-    list-style: none;
+@if base.emits("layout.plain-list") {
+    .plinth-plain-list {
+        margin: 0;
+        padding: 0;
+        list-style: none;
+    }
 }
 
 .plinth-cluster {
@@ -164,151 +170,159 @@
 }
 
 // The gap scale, one for every row and column primitive.
-.plinth-stack,
-.plinth-cluster,
-.plinth-toolbar {
-    &.plinth-none {
-        gap: 0;
+$-gaps: (
+    none: 0,
+    hair: var(--space-0),
+    snug: var(--space-1),
+    tight: var(--space-2),
+    medium: var(--space-3),
+    loose: var(--space-4),
+    wide: var(--space-6),
+);
+@mixin -gap-scale {
+    @each $name, $gap in $-gaps {
+        @if base.emits("layout.gap-#{$name}") {
+            &.plinth-#{$name} {
+                gap: $gap;
+            }
+        }
     }
 
-    &.plinth-hair {
-        gap: var(--space-0);
+    @if base.emits("layout.flush") {
+        &.plinth-flush > * {
+            margin-block: 0;
+        }
+    }
+}
+
+@if base.emits("layout.toolbar") {
+    .plinth-stack,
+    .plinth-cluster,
+    .plinth-toolbar {
+        @include -gap-scale;
+    }
+} @else {
+    .plinth-stack,
+    .plinth-cluster {
+        @include -gap-scale;
+    }
+}
+
+@if base.emits("layout.lines") {
+        .plinth-cluster.plinth-lines {
+            row-gap: var(--space-1);
+        }
     }
 
-    &.plinth-snug {
-        gap: var(--space-1);
+    @if base.emits("layout.toolbar") {
+    @property --plinth-fade-start {
+        syntax: "<length>";
+        inherits: false;
+        initial-value: 0;
     }
 
-    &.plinth-tight {
+    @property --plinth-fade-end {
+        syntax: "<length>";
+        inherits: false;
+        initial-value: 0;
+    }
+
+    @keyframes plinth-toolbar-fade {
+        0% {
+            --plinth-fade-start: 0;
+            --plinth-fade-end: var(--space-7);
+        }
+
+        10%,
+        90% {
+            --plinth-fade-start: var(--space-7);
+            --plinth-fade-end: var(--space-7);
+        }
+
+        100% {
+            --plinth-fade-start: var(--space-7);
+            --plinth-fade-end: 0;
+        }
+    }
+
+    .plinth-toolbar {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: base.$toolbar-gap;
+        @include base.scroll-fade;
+
+        &.plinth-boxed {
+            @include base.reserved-border(var(--border));
+            border-radius: var(--radius-sm);
+            background: var(--surface);
+            @include base.nests(var(--radius-sm));
+        }
+
+        // A band: its controls wrap onto further lines rather than scroll.
+        &.plinth-band {
+            flex-wrap: wrap;
+            overflow-x: visible;
+            mask-image: none;
+            animation: none;
+        }
+
+        &.plinth-chrome {
+            gap: var(--band-chrome-gap);
+            padding: var(--space-1) var(--space-3);
+            background: var(--band-chrome-ground);
+            box-shadow: inset 0 calc(var(--space-px) * -1) 0 var(--border);
+        }
+
+        &.plinth-search {
+            font-size: var(--band-search-text);
+        }
+    }
+
+    // A group of a band's controls: the band wraps between parts, and a part
+    // wraps inside only when it alone is wider than the band.
+    .plinth-toolbar-part {
+        display: flex;
+        flex: 0 1 auto;
+        flex-wrap: wrap;
+        align-items: center;
+        max-width: 100%;
+        gap: base.$toolbar-gap;
+        min-width: 0;
+    }
+
+    // Ruled off from the part before it where the band has room for the rule.
+    @include base.above("phone") {
+        .plinth-toolbar-part.plinth-ruled {
+            padding-inline-start: var(--space-3);
+            box-shadow: inset var(--space-px) 0 0 var(--border);
+        }
+    }
+
+    .plinth-library-toolbar {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
         gap: var(--space-2);
     }
 
-    &.plinth-medium {
-        gap: var(--space-3);
+    .plinth-library-search.plinth-input-box {
+        flex: 1 1 14rem;
+        width: auto;
     }
 
-    &.plinth-loose {
-        gap: var(--space-4);
+    .plinth-toolbar-spacer {
+        flex: 1 1 auto;
     }
-
-    &.plinth-wide {
-        gap: var(--space-6);
-    }
-
-    &.plinth-flush > * {
-        margin-block: 0;
-    }
-}
-
-.plinth-cluster.plinth-lines {
-    row-gap: var(--space-1);
-}
-
-@property --plinth-fade-start {
-    syntax: "<length>";
-    inherits: false;
-    initial-value: 0;
-}
-
-@property --plinth-fade-end {
-    syntax: "<length>";
-    inherits: false;
-    initial-value: 0;
-}
-
-@keyframes plinth-toolbar-fade {
-    0% {
-        --plinth-fade-start: 0;
-        --plinth-fade-end: var(--space-7);
-    }
-
-    10%,
-    90% {
-        --plinth-fade-start: var(--space-7);
-        --plinth-fade-end: var(--space-7);
-    }
-
-    100% {
-        --plinth-fade-start: var(--space-7);
-        --plinth-fade-end: 0;
-    }
-}
-
-.plinth-toolbar {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: base.$toolbar-gap;
-    @include base.scroll-fade;
-
-    &.plinth-boxed {
-        @include base.reserved-border(var(--border));
-        border-radius: var(--radius-sm);
-        background: var(--surface);
-        @include base.nests(var(--radius-sm));
-    }
-
-    // A band: its controls wrap onto further lines rather than scroll.
-    &.plinth-band {
-        flex-wrap: wrap;
-        overflow-x: visible;
-        mask-image: none;
-        animation: none;
-    }
-
-    &.plinth-chrome {
-        gap: var(--band-chrome-gap);
-        padding: var(--space-1) var(--space-3);
-        background: var(--band-chrome-ground);
-        box-shadow: inset 0 calc(var(--space-px) * -1) 0 var(--border);
-    }
-
-    &.plinth-search {
-        font-size: var(--band-search-text);
-    }
-}
-
-// A group of a band's controls: the band wraps between parts, and a part
-// wraps inside only when it alone is wider than the band.
-.plinth-toolbar-part {
-    display: flex;
-    flex: 0 1 auto;
-    flex-wrap: wrap;
-    align-items: center;
-    max-width: 100%;
-    gap: base.$toolbar-gap;
-    min-width: 0;
-}
-
-// Ruled off from the part before it where the band has room for the rule.
-@include base.above("phone") {
-    .plinth-toolbar-part.plinth-ruled {
-        padding-inline-start: var(--space-3);
-        box-shadow: inset var(--space-px) 0 0 var(--border);
-    }
-}
-
-.plinth-library-toolbar {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-}
-
-.plinth-library-search.plinth-input-box {
-    flex: 1 1 14rem;
-    width: auto;
-}
-
-.plinth-toolbar-spacer {
-    flex: 1 1 auto;
 }
 
 .plinth-card {
     @include base.card;
 
-    &.plinth-compact {
-        padding: var(--space-3);
+    @if base.emits("layout.card-compact") {
+        &.plinth-compact {
+            padding: var(--space-3);
+        }
     }
 
     // A bordered row or panel inside a page: the small radius, no lift.
@@ -317,9 +331,11 @@
         box-shadow: none;
     }
 
-    // As tight as a row of controls.
-    &.plinth-dense {
-        padding: var(--space-1) var(--space-2);
+    @if base.emits("layout.card-dense") {
+        // As tight as a row of controls.
+        &.plinth-dense {
+            padding: var(--space-1) var(--space-2);
+        }
     }
 
     &.plinth-flush {
@@ -327,23 +343,27 @@
         overflow: hidden;
     }
 
-    &.plinth-link {
-        text-decoration: none;
-        cursor: pointer;
+    @if base.emits("layout.card-link") {
+        &.plinth-link {
+            text-decoration: none;
+            cursor: pointer;
 
-        &:hover,
-        &:focus-visible {
-            border-color: var(--accent);
+            &:hover,
+            &:focus-visible {
+                border-color: var(--accent);
+            }
+
+            @include base.focus-ring;
         }
-
-        @include base.focus-ring;
     }
 }
 
-// A link card is a block (a link is inline) at no weight, so a layout
-// primitive or a component's own display on the same element wins.
-:where(.plinth-card.plinth-link) {
-    display: block;
+@if base.emits("layout.card-link") {
+    // A link card is a block (a link is inline) at no weight, so a layout
+    // primitive or a component's own display on the same element wins.
+    :where(.plinth-card.plinth-link) {
+        display: block;
+    }
 }
 
 @if base.$card-padding-phone {

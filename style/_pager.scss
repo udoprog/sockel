@@ -84,9 +84,11 @@
         cursor: not-allowed;
     }
 
-    &.plinth-pager-edge {
-        @include base.below(phone) {
-            display: none;
+    @if base.emits("pager.edges") {
+        &.plinth-pager-edge {
+            @include base.below(phone) {
+                display: none;
+            }
         }
     }
 }
@@ -114,6 +116,8 @@
 }
 
 // The second chevron of a double mark, overlapping the first.
-.plinth-pager-echo {
-    margin-inline-start: calc(-0.6 * var(--glyph-size));
+@if base.emits("pager.edges") {
+    .plinth-pager-echo {
+        margin-inline-start: calc(-0.6 * var(--glyph-size));
+    }
 }

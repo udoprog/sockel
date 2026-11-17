@@ -323,7 +323,7 @@ mod tests {
     fn a_compact_heads_icons_never_shrink_under_its_title() {
         let sass = include_str!("../style/_heads.scss");
         let rule = sass
-            .split(".plinth-page-head.plinth-compact {\n        flex-wrap: nowrap;")
+            .split(".plinth-page-head.plinth-compact {\n            flex-wrap: nowrap;")
             .nth(1)
             .and_then(|rest| rest.split("> .plinth-page-head-actions {").nth(1))
             .and_then(|rest| rest.split('}').next())

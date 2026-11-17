@@ -259,7 +259,10 @@ as `$danger` and the rest):
 The status hues are mixed toward `--text`, so they keep their contrast on a
 light and a dark background alike. The defaults are computed on `:root`: an
 app that sets its colours on a narrower element (a dark panel) sets these
-there too. `--focus-ring-color` (default `--accent`) colours the focus ring.
+there too. An app whose theme defines one of `--danger` to
+`--card-border-width` and `--menu-item-icon-ink` itself sets its variable to
+`false` (`$danger: false`), and plinth leaves its default off `:root`.
+`--focus-ring-color` (default `--accent`) colours the focus ring.
 
 plinth's own scales are custom
 properties on `:root` too (`--text-*`, `--space-*`, `--radius-*`,
@@ -354,7 +357,7 @@ page can still override them at runtime.
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
 | `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
 | `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |
-| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge` over plinth's; a variant falls back on the plain button's |
+| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`, each in place of plinth's; a variant falls back on the plain button's |
 | `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
 | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
@@ -398,9 +401,34 @@ page can still override them at runtime.
 | `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay `ActionRow`'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over plinth's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
+| `$omit` | `()` (every part emitted; see [Leaving parts out](#leaving-parts-out)) |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
+
+### Leaving parts out
+
+`$omit` names the optional parts an app never renders, and plinth leaves them
+out of its CSS: a modifier no markup sets, a variant no button takes, the
+tokens of a partial the app does not load. It is empty by default, and every
+part is emitted; a name plinth does not have is an error.
+
+```scss
+@use "../plinth/style/tokens" with ($omit: ("layout.toolbar", "menu.split-button", "tokens.table"));
+```
+
+| Partial | Parts |
+| --- | --- |
+| tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
+| layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
+| heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.plinth-compact`, `.plinth-one-row`), `heads.label`, `heads.list` |
+| buttons | `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
+| menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point) |
+| skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
+| pager | `pager.edges` (the first and last page) |
+| popover | `popover.match-anchor` |
+| confirm | `confirm.inline` |
+| utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
 
 ## Button
 

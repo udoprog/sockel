@@ -410,6 +410,45 @@ $visibility-breakpoint: "phone" !default;
 // The breakpoint below which a popover is a sheet from the bottom.
 $sheet-breakpoint: "phone" !default;
 
+// Optional parts an app leaves out of its CSS, by name (README, "Leaving
+// parts out"): the modifiers, variants and tokens of components it never
+// renders. Empty, every part is emitted.
+$omit: () !default;
+$-parts: (
+    "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
+    "confirm.inline",
+    "heads.crumbs", "heads.label", "heads.list", "heads.trail",
+    "layout.card-compact", "layout.card-dense", "layout.card-link", "layout.flush",
+    "layout.gap-hair", "layout.gap-loose", "layout.gap-medium", "layout.gap-none",
+    "layout.gap-snug", "layout.gap-tight", "layout.gap-wide", "layout.grow", "layout.lines",
+    "layout.pages", "layout.plain-list", "layout.toolbar",
+    "menu.context", "menu.current", "menu.danger", "menu.detail", "menu.heading", "menu.note",
+    "menu.row-actions", "menu.separator", "menu.split-button", "menu.tight", "menu.widths",
+    "pager.edges",
+    "popover.match-anchor",
+    "skeleton.group", "skeleton.loadable", "skeleton.row", "skeleton.short", "skeleton.spinner",
+    "tokens.actions", "tokens.card-grid", "tokens.color-select", "tokens.drop", "tokens.fields",
+    "tokens.filter-picker", "tokens.media", "tokens.panel", "tokens.picker", "tokens.seam",
+    "tokens.table", "tokens.toast", "tokens.toggles", "tokens.tooltip",
+    "utilities.clamp", "utilities.desktop-only", "utilities.focus-ring", "utilities.numeric",
+    "utilities.phone-only", "utilities.scroll-area", "utilities.truncate",
+);
+
+@each $part in $omit {
+    @if not list.index($-parts, $part) {
+        @error "$omit: no part #{$part}";
+    }
+}
+
+// Whether `$part` is emitted: not named in `$omit`.
+@function emits($part) {
+    @if not list.index($-parts, $part) {
+        @error "emits: no part #{$part}";
+    }
+
+    @return not list.index($omit, $part);
+}
+
 :root {
     --text-3xs: #{$text-3xs};
     --text-2xs: #{$text-2xs};
@@ -457,44 +496,62 @@ $sheet-breakpoint: "phone" !default;
     // The box an icon of plinth's own sits in (`.plinth-glyph`).
     --glyph-size: #{$glyph-size};
     // A colour swatch (`.plinth-color-swatch`) and a ColorSelect face's width.
-    --swatch-size: #{$swatch-size};
-    --color-select-width: #{$color-select-width};
+    @if emits("tokens.color-select") {
+        --swatch-size: #{$swatch-size};
+        --color-select-width: #{$color-select-width};
+    }
     // The time a skeleton's shimmer takes to cross (`.plinth-skeleton`).
     --skeleton-duration: #{$skeleton-duration};
-    --check-size: #{$check-size};
-    --switch-width: #{$switch-width};
-    --switch-height: #{$switch-height};
-    --choice-width: #{$choice-width};
+    @if emits("tokens.toggles") {
+        --check-size: #{$check-size};
+        --switch-width: #{$switch-width};
+        --switch-height: #{$switch-height};
+        --choice-width: #{$choice-width};
+    }
     // A library page's filter button (`.picker.filter`).
-    --filter-width: #{$filter-width};
+    @if emits("tokens.filter-picker") {
+        --filter-width: #{$filter-width};
+    }
     // How many rows a searching list keeps room for (`.plinth-search-select-list`).
-    --picker-rows: #{$picker-rows};
+    @if emits("tokens.picker") {
+        --picker-rows: #{$picker-rows};
+    }
     // A field's label column, and its hint and error line (`.plinth-field`).
-    --field-label-width: #{$field-label-width};
-    --field-message-line: #{$field-message-line};
-    --field-error-lines: #{$field-error-lines};
+    @if emits("tokens.fields") {
+        --field-label-width: #{$field-label-width};
+        --field-message-line: #{$field-message-line};
+        --field-error-lines: #{$field-error-lines};
+    }
     // An avatar's sizes (`.plinth-avatar`, its `-small`, `-large`, `-huge`).
-    --avatar-sm: #{$avatar-sm};
-    --avatar-md: #{$avatar-md};
-    --avatar-lg: #{$avatar-lg};
-    --avatar-xl: #{$avatar-xl};
+    @if emits("tokens.media") {
+        --avatar-sm: #{$avatar-sm};
+        --avatar-md: #{$avatar-md};
+        --avatar-lg: #{$avatar-lg};
+        --avatar-xl: #{$avatar-xl};
+    }
 
     // The narrowest column of a card grid (`.plinth-card-grid`, its `-wide`,
     // `-narrow` and `-narrow` on a phone).
-    --card-grid-min: #{$card-grid-min};
-    --card-grid-wide: #{$card-grid-wide};
-    --card-grid-narrow: #{$card-grid-narrow};
-    --card-grid-narrow-phone: #{$card-grid-narrow-phone};
+    @if emits("tokens.card-grid") {
+        --card-grid-min: #{$card-grid-min};
+        --card-grid-wide: #{$card-grid-wide};
+        --card-grid-narrow: #{$card-grid-narrow};
+        --card-grid-narrow-phone: #{$card-grid-narrow-phone};
+    }
 
     // How tall a sticky-headed table (`.plinth-table-wrap.plinth-sticky`) grows
     // before it scrolls.
-    --table-max-height: #{$table-max-height};
+    @if emits("tokens.table") {
+        --table-max-height: #{$table-max-height};
+    }
 
     // A drop zone (`.plinth-drop-zone`): its least height, and how strongly
     // its overlay tints it while a file is dragged near, and over it.
-    --drop-min-height: #{$drop-min-height};
-    --drop-tint: #{$drop-tint};
-    --drop-tint-over: #{$drop-tint-over};
+    @if emits("tokens.drop") {
+        --drop-min-height: #{$drop-min-height};
+        --drop-tint: #{$drop-tint};
+        --drop-tint-over: #{$drop-tint-over};
+    }
 
     // The two content columns: the
     // workspace for lists, sheets and the manual, the reading column for
@@ -522,49 +579,88 @@ $sheet-breakpoint: "phone" !default;
     --dialog-height-tall: #{$dialog-height-tall};
     --dialog-top: #{$dialog-top};
     --dialog-sheet-height: #{$dialog-sheet-height};
-    --tooltip-max-width: #{$tooltip-max-width};
-    --toast-max-width: #{$toast-max-width};
+    @if emits("tokens.tooltip") {
+        --tooltip-max-width: #{$tooltip-max-width};
+    }
+    @if emits("tokens.toast") {
+        --toast-max-width: #{$toast-max-width};
+    }
     --menu-width: #{$menu-width};
     --menu-width-wide: #{$menu-width-wide};
-    --menu-width-wider: #{$menu-width-wider};
-    --menu-width-panel: #{$menu-width-panel};
+    @if emits("menu.widths") {
+        --menu-width-wider: #{$menu-width-wider};
+        --menu-width-panel: #{$menu-width-panel};
+    }
     // A seam's divider (its grip, the line drawn in it), and each pane's least length.
-    --seam-grip: #{$seam-grip};
-    --seam-min: #{$seam-min};
+    @if emits("tokens.seam") {
+        --seam-grip: #{$seam-grip};
+        --seam-min: #{$seam-min};
+    }
 
     // Derived from the app's colours on `:root`: an app that sets those on
-    // a narrower element sets these there too.
-    --danger: #{$danger};
-    --success: #{$success};
-    --warning: #{$warning};
+    // a narrower element sets these there too. One set to `false` is left
+    // out, for an app whose theme defines it.
+    @if $danger {
+        --danger: #{$danger};
+    }
+    @if $success {
+        --success: #{$success};
+    }
+    @if $warning {
+        --warning: #{$warning};
+    }
     // Text and icons on an accent background.
-    --on-accent: #{$on-accent};
+    @if $on-accent {
+        --on-accent: #{$on-accent};
+    }
     // A menu's, popover's or dialog's surface.
-    --surface-raised: #{$surface-raised};
+    @if $surface-raised {
+        --surface-raised: #{$surface-raised};
+    }
     // What dims the page behind a dialog.
-    --scrim: #{$scrim};
+    @if $scrim {
+        --scrim: #{$scrim};
+    }
     // A field's edge and fill (inputs, select and picker faces), and the
     // edge of a checkbox, switch and choice.
-    --field-border: #{$field-border};
-    --field-bg: #{$field-bg};
+    @if $field-border {
+        --field-border: #{$field-border};
+    }
+    @if $field-bg {
+        --field-bg: #{$field-bg};
+    }
     // A card's edge and its width (`0` for cards without one).
-    --card-border: #{$card-border};
-    --card-border-width: #{$card-border-width};
+    @if $card-border {
+        --card-border: #{$card-border};
+    }
+    @if $card-border-width {
+        --card-border-width: #{$card-border-width};
+    }
     // A panel's sunken ground, and a tinted panel's.
-    --panel-ground: #{$panel-ground};
-    --panel-tint: #{$panel-tint};
-    --panel-border: #{$panel-border};
-    --panel-tint-text: #{$panel-tint-text};
-    --menu-item-icon-ink: #{$menu-item-icon-ink};
-    --panel-text: #{$panel-text};
-    --panel-space-after: #{$panel-space-after};
-    --panel-tint-space-after: #{$panel-tint-space-after};
-    --panel-tint-radius: #{$panel-tint-radius};
-    --band-chrome-ground: #{$band-chrome-ground};
-    --band-chrome-gap: #{$band-chrome-gap};
-    --band-search-text: #{$band-search-text};
-    --action-overlay-radius: #{$action-overlay-radius};
-    --action-overlay-padding: #{$action-overlay-padding};
+    @if emits("tokens.panel") {
+        --panel-ground: #{$panel-ground};
+        --panel-tint: #{$panel-tint};
+        --panel-border: #{$panel-border};
+        --panel-tint-text: #{$panel-tint-text};
+    }
+    @if $menu-item-icon-ink {
+        --menu-item-icon-ink: #{$menu-item-icon-ink};
+    }
+    @if emits("tokens.panel") {
+        --panel-text: #{$panel-text};
+        --panel-space-after: #{$panel-space-after};
+        --panel-tint-space-after: #{$panel-tint-space-after};
+        --panel-tint-radius: #{$panel-tint-radius};
+    }
+    @if emits("layout.toolbar") {
+        --band-chrome-ground: #{$band-chrome-ground};
+        --band-chrome-gap: #{$band-chrome-gap};
+        --band-search-text: #{$band-search-text};
+    }
+    @if emits("tokens.actions") {
+        --action-overlay-radius: #{$action-overlay-radius};
+        --action-overlay-padding: #{$action-overlay-padding};
+    }
 }
 
 // A page's content column: the workspace unless it is given the reading
@@ -822,45 +918,37 @@ $sheet-breakpoint: "phone" !default;
 }
 
 // The colours of a `.plinth-button` variant: `secondary` (the plain
-// button), `primary`, `ghost`, `quiet`, `danger` or `success`.
+// button), `primary`, `ghost`, `quiet`, `danger` or `success`, each with
+// its `$button-colours` in place of plinth's.
+$-button-variants: (
+    secondary: (fill: var(--surface), ink: var(--text), edge: var(--border), hover-edge: var(--accent)),
+    primary: (fill: var(--accent), ink: var(--on-accent), edge: var(--accent), hover-edge: var(--text)),
+    ghost: (fill: transparent),
+    quiet: (fill: transparent, ink: var(--muted), edge: transparent, hover-edge: var(--border)),
+    danger: (ink: var(--danger), edge: var(--danger), hover-edge: var(--text)),
+    success: (ink: var(--success), edge: var(--success), hover-edge: var(--text)),
+);
+
 @mixin button-variant($variant) {
-    @if $variant == secondary {
-        --button-fill: var(--surface);
-        --button-ink: var(--text);
-        --button-edge: var(--border);
-        --button-hover-edge: var(--accent);
-    } @else if $variant == primary {
-        --button-fill: var(--accent);
-        --button-ink: var(--on-accent);
-        --button-edge: var(--accent);
-        --button-hover-edge: var(--text);
-        font-weight: $button-primary-weight;
-    } @else if $variant == ghost {
-        --button-fill: transparent;
-    } @else if $variant == quiet {
-        --button-fill: transparent;
-        --button-ink: var(--muted);
-        --button-edge: transparent;
-        --button-hover-edge: var(--border);
-    } @else if $variant == danger {
-        --button-ink: var(--danger);
-        --button-edge: var(--danger);
-        --button-hover-edge: var(--text);
-    } @else if $variant == success {
-        --button-ink: var(--success);
-        --button-edge: var(--success);
-        --button-hover-edge: var(--text);
-    } @else {
+    @if not map.has-key($-button-variants, $variant) {
         @error "button-variant: secondary, primary, ghost, quiet, danger or success, not #{$variant}";
     }
 
+    $colours: map.get($-button-variants, $variant);
     @if map.has-key($button-colours, $variant) {
         @each $part, $colour in map.get($button-colours, $variant) {
             @if not list.index(fill ink edge hover-edge hover-fill hover-ink pressed-fill pressed-ink pressed-edge, $part) {
                 @error "$button-colours: #{$part} is not a button colour";
             }
-            --button-#{$part}: #{$colour};
+            $colours: map.set($colours, $part, $colour);
         }
+    }
+
+    @each $part, $colour in $colours {
+        --button-#{$part}: #{$colour};
+    }
+    @if $variant == primary {
+        font-weight: $button-primary-weight;
     }
 }
 
@@ -925,8 +1013,10 @@ $sheet-breakpoint: "phone" !default;
         color: var(--button-pressed-ink, var(--button-ink));
     }
 
-    &[aria-busy="true"] {
-        cursor: progress;
+    @if emits("buttons.busy") {
+        &[aria-busy="true"] {
+            cursor: progress;
+        }
     }
 
     &:disabled,

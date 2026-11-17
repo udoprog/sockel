@@ -59,8 +59,10 @@
         outline: none;
     }
 
-    &.plinth-match-anchor {
-        min-width: min(var(--popover-anchor-width, 0px), calc(100vw - 2 * var(--space-2)));
+    @if base.emits("popover.match-anchor") {
+        &.plinth-match-anchor {
+            min-width: min(var(--popover-anchor-width, 0px), calc(100vw - 2 * var(--space-2)));
+        }
     }
 }
 
