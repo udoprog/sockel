@@ -17,6 +17,7 @@ mod loading;
 mod media;
 mod menus;
 mod notices;
+mod overlays;
 mod pagers;
 mod picker;
 mod pickers;
@@ -1386,6 +1387,17 @@ pub const PAGES: &[Page] = &[
             "dialog",
         ],
         render: || html! { <dialog::DialogPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "overlays",
+        title: "Overlays",
+        about: "Overlays nested in one another, with and without an OverlayHost. Open a dialog, then a menu or a toast from it (the toast's Undo still works), or a popover with a tooltip on its button: Escape and a press outside close the innermost first and focus goes back. Turn the host off to see the fallback at the end of <body>; set the frame's colours to see a host inside it take them and the fallback not. A menu opened from the dialog still renders under it (card c4e229ed).",
+        covers: &["OverlayHost", "use_overlays"],
+        render: || html! { <overlays::OverlaysPage /> },
         holds: &[
             hold(plinth::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),

@@ -487,3 +487,37 @@ body {
         visibility: hidden;
     }
 }
+
+// A frame that sets its own colours below the page's, to see overlays take
+// them (pages/overlays.rs): a host inside it does, the body's fallback does not.
+.showcase-scope {
+    padding: var(--space-3);
+    border-radius: var(--radius-sm);
+    background: var(--bg);
+    color: var(--text);
+
+    // The derived colours resolve where they are set: a scope sets its own.
+    --surface-raised: var(--surface);
+
+    &.showcase-scope-light {
+        --bg: #e8f4f1;
+        --surface: #fbfffe;
+        --text: #10302a;
+        --muted: #4d6b64;
+        --border: #a8cfc6;
+        --accent: #0f7a66;
+        --on-accent: #ffffff;
+        color-scheme: light;
+    }
+
+    &.showcase-scope-dark {
+        --bg: #2a1a12;
+        --surface: #38241a;
+        --text: #f6e7dd;
+        --muted: #c9a994;
+        --border: #5c3d2e;
+        --accent: #f0955c;
+        --on-accent: #2a1a12;
+        color-scheme: dark;
+    }
+}

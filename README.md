@@ -787,7 +787,10 @@ html! {
 - It keeps the app's stack of open overlays, so Escape and a press outside
   close the innermost first. Two hosts in two separate roots keep separate
   stacks. A host inside another gets its own layer, for a sub-tree with
-  its own colours, and shares the outer one's stack.
+  its own colours, and shares the outer one's stack. The colours derived
+  from the app's (`--surface-raised`, `--on-accent`, `--scrim`, the status
+  hues) resolve on `:root`, so a scope that sets its own colours sets
+  those there too, as `--surface-raised: var(--surface)`.
 - Props: `class` (on the host element) and `testid`. `overlay_host(class)`
   gives the classes.
 
