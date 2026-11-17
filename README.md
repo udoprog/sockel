@@ -710,7 +710,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 - `Stepper` (`.plinth-stepper`, worn with `.plinth-input-box`): a number
   between a minus and a plus button. `value`, `on_change(i64)`, `min`, `max`,
   `step` (default 1), `label` (the number's accessible name), `less_label`
-  ("Decrease") and `more_label` ("Increase"), `id`, `size` (`InputSize`),
+  and `more_label` (overrides of the catalog's words), `id`, `size` (`InputSize`),
   `invalid`, `disabled`, `busy`, `live` (report each number typed within the
   bounds at once, not only when committed; off by default), `class`,
   `testid`. The buttons step onto
@@ -724,8 +724,8 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 - `SecretInput` (`.plinth-input-box`): a password field with show or hide,
   copy and clear slots (`.plinth-input-action`, the `INPUT_CLEAR` button's
   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
-  `show_label` ("Show"), `hide_label` ("Hide"), `copy_label` ("Copy"),
-  `clear_label` ("Clear"), `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
+  `show_label`, `hide_label`, `copy_label`,
+  `clear_label` (each an override of the catalog's word), `placeholder`, `reveal_ms` (`REVEAL_MS`, 3000: a
   shown secret hides itself, showing again restarts the time; clearing
   hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
   `class`, `testid`. The strings are props; an app passes its own words.
@@ -819,7 +819,7 @@ spinner need not animate itself.
 see above), coloured from `--accent`, `--success`, `--warning` or
 `--danger`; `Neutral` is muted. `icon` is the app's icon, before the text; `action` is Html
 (a link or button) after it; `onclose: Some(callback)` shows a close button
-(`close_label`, "Dismiss", names it). The notice does not remove itself: the
+(`close_label`, an override of the catalog's word, names it). The notice does not remove itself: the
 app stops rendering it, and the space it held collapses at once, which is
 intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `role="status"`. `notice(tone)` gives the classes.
@@ -827,10 +827,10 @@ intended. A `Warning` or `Danger` notice has `role="alert"`, the others
 `ErrorBox` is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
 technical text, cut to three lines, whole in its `title` attribute) or
 `causes` (a chain of them, most specific last: `ERROR_BOX_CAUSES`, a list
-of a line each, never cut) and `onretry` (a small button, `retry_label`, "Try again"; `retrying` makes it
+of a line each, never cut) and `onretry` (a small button, `retry_label`; `retrying` makes it
 busy and ignore clicks). `icon` (the app's, before the text, in the tone) and
 `ondismiss: Some(callback)` (a quiet close button after it, named and
-tooltipped by `dismiss_label`, "Dismiss"; the box does not remove itself)
+tooltipped by `dismiss_label`; the box does not remove itself)
 flank the text (`FLANKED`, the text in `ERROR_BOX_BODY`). `error_box(flanked)`
 gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
 `-fill`, `-edge`, `-shadow`, `-message-weight`, `-cause-font`,
@@ -877,7 +877,7 @@ toast its own `key`. `toast(tone)` gives the classes. The app owns the list:
 it stops rendering a toast when `ondismiss` or `onaction` is called.
 
 `SaveBar` is a form's bar of unsaved changes: `dirty`, `busy` (the save
-button's spinner, clicks ignored), `disabled`, `label` ("Unsaved changes"),
+button's spinner, clicks ignored), `disabled`, `label` (an override of the catalog's words),
 `status` (how the last save went), `onsave`, `ondiscard` (shows Discard),
 `save_label`, `discard_label`, `submit` (Save submits the form it stands in),
 `sticky`, and children (further actions). While `dirty` it holds an
@@ -924,7 +924,7 @@ one's, with `count`), such as the length of the text it stands for.
 `onretry`, `retrying`). The empty state waits `empty_delay` (250 ms) before
 it shows, the placeholder standing in, so it never flashes before data.
 While it loads it is `aria-busy` and a visually hidden `role="status"` reads
-`label` ("Loading"). Every one takes `class` and `testid`.
+`label` (an override of the catalog's word). Every one takes `class` and `testid`.
 
 Size guarantees: while loading, a `Loadable` is at least `rows` rows high the
 first time and at least the height it last had settled (ready, empty or
@@ -1040,7 +1040,7 @@ the owner cuts it, and its events still bubble through the owner. Props:
   taller than that: a long menu at phone height shown whole.
 - `sheet` (on by default, `plinth::class::SHEET`): below `$sheet-breakpoint`
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
-  `title` as its heading and a close button (`close_label`, "Close"), unless
+  `title` as its heading and a close button (`close_label`, an override of the catalog's word), unless
   `head` is off (on by default).
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
@@ -1242,7 +1242,7 @@ from the bottom edge.
 Asking before an action, in three places. `Confirm` is a `Dialog` (rendered
 while `open`): `title` (its heading and name), `explanation`, `details` (a
 list of what it affects), `accept` (the accepting button's label) with `icon`,
-`cancel_label` ("Cancel"), `danger` (on by default: the accepting button is
+`cancel_label` (the catalog's "Cancel" unless given), `danger` (on by default: the accepting button is
 `Danger` and Cancel has the focus, so Enter never destroys by habit; off, it
 is `Primary` and has the focus), `busy`, `error` (a danger `Notice` under the
 explanation), `on_accept` and `on_cancel`. Cancel, Escape, the close button
@@ -1405,14 +1405,14 @@ Escape and Tab there close it too, and Escape goes no further.
 `.disabled(..)`, `.testid(..)`), shown as small quiet icon buttons, the
 danger ones last (`ROW_ACTION_DANGER`, muted until hovered or focused),
 then `children`, then the overflow `Menu` behind its ellipsis when `more`
-holds its items (`more_label`, "More actions"; `more_disabled` keeps the
+holds its items (`more_label`; `more_disabled` keeps the
 opener, disabled, so every row ends the same way; `more_testid` its test
 id). The actions are named by `title`, or with `tips` by a styled tip
 (`data-tip`, for `DataTips`), the opener's too. `disabled`, `open`,
 `on_toggle`, `class`, `testid`.
 
 `SplitButton` is a main action (`text`, `onclick`, `icon`, `busy`) joined
-to a `Menu` of its variants (its children; `menu_label`, "More options";
+to a `Menu` of its variants (its children; `menu_label`;
 `width`), `Primary` unless `variant` says otherwise, `size`, `disabled`,
 `class`, `testid` (the menu's is it suffixed `-menu`).
 
@@ -1476,9 +1476,9 @@ phone breakpoint, and worth turning off in a narrow container), `phone_steps`
 (default true: the previous and next page buttons below the phone breakpoint;
 false hides them there with `DESKTOP_ONLY`, so `_utilities.scss` must be
 loaded), `titles` (default false: every button's accessible name as its
-`title` too, a tooltip), `label` ("Pages"),
+`title` too, a tooltip), `label`,
 `first_label`, `previous_label`, `next_label`, `last_label`, `page_label`
-("Page", the number appended) and `disabled` and `busy` (the buttons keep
+(given, the number is appended) and `disabled` and `busy` (the buttons keep
 their room and ignore presses). `pager_slots(pages, page, slots)` is the pure
 layout: every page when they fit, otherwise exactly `slots` entries, the
 first and last page always among them and each gap hiding at least two
@@ -1555,8 +1555,8 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   options whose label or group holds its text, ignoring case
   (`filter_matches`); the arrows, PageUp, PageDown, Enter and Alt+ArrowUp
   still move and pick, Home, End and Space are the text's, and Tab closes
-  it from the face. `filter_label` (its placeholder and name, "Filter") and
-  `no_match` ("No matches") are its words. The list is then
+  it from the face. `filter_label` (its placeholder and name) and
+  `no_match` are its words, the catalog's unless given. The list is then
   `SELECT_POPUP`: the field (`SELECT_FILTER`, staying at the top as the
   options scroll), the `role="listbox"` (`SELECT_OPTIONS`) and
   `SELECT_EMPTY`; the field's test id is the face's suffixed `-filter`.
@@ -1571,7 +1571,7 @@ it in the overlay layer through `use_popover`, while focus stays on the face
 - `sheet` (off by default): below the phone breakpoint the list is a
   sheet from the bottom over a scrim (`SELECT_SHEET`, `SELECT_SCRIM`),
   headed by `label` and a close button (`SELECT_HEAD`, `SELECT_TITLE`;
-  `close_label`, "Close") above what scrolls (`SELECT_BODY`); its filter
+  `close_label`) above what scrolls (`SELECT_BODY`); its filter
   field is not focused on opening there, so the keyboard does not cover
   the sheet. Above the breakpoint the list is as without it.
 - `id` and `describedby` inside a `Field` (its label names and opens it),
@@ -1775,8 +1775,7 @@ the first choice and `+N` more, opening a multi-select listbox
 when chosen. A pick leaves it open. Props: `choices: Vec<FilterChoice<T>>`,
 `chosen: Vec<T>` (in the order chosen), `on_change` (the choices after a
 pick, `toggled(chosen, value)`; empty for all), `label` (the accessible
-name and tooltip before what is chosen), `all` (the app's word, `"All"` by
-default), `disabled`, `class`, `testid`. Keys as a `Select`'s. Past
+name and tooltip before what is chosen), `all` (an override of the catalog's word), `disabled`, `class`, `testid`. Keys as a `Select`'s. Past
 `SEARCH_FROM` (8) choices the pop-up is a `ChoiceList` (`multi`, all as
 its first option) with its search field, prefix matches first and its
 `--picker-rows` height whatever matches; the field takes the focus.
@@ -1978,6 +1977,53 @@ icon and a label.
 Layers: `--layer-sticky`, `--layer-overlay`, `--layer-toast` and
 `--layer-tooltip` are the one `z-index` scale for what floats, lowest first.
 Popovers, menus, lists and dialogs all sit at `--layer-overlay`.
+
+## Translations
+
+plinth has no English in its code. Every word a component shows or announces
+(button names, `aria-label`s, empty states, reorder announcements) is a
+message in `locales/en-US.ftl` and `locales/sv-SE.ftl`, every id under the
+`plinth-` prefix, exported as `plinth::phrasebookcatalog01::L10N` (a
+[phrasebook-catalog] 0.1 `Catalog`). Components read the `Phrases` an app
+provides with `ContextProvider<Phrases>` (phrasebook 0.2, `yew023`, the same
+major version as plinth's). With no provider, or one without plinth's
+catalog, they render the catalog's English and phrasebook warns once.
+
+An app adds the catalog after its own:
+
+```rust
+let book = Phrasebook::builder()
+    .language(Lang::EN_US, "English")
+    .language(Lang::new("sv-SE"), "Svenska")
+    .catalog(&APP)
+    .catalog(&plinth::phrasebookcatalog01::L10N)
+    .build();
+```
+
+- Later catalogs fill the ids earlier ones lack, so an app translates or
+  rewords a plinth word by defining the same `plinth-*` id in its own
+  `.ftl`. A language plinth does not ship (and the app does not translate)
+  falls back as phrasebook says.
+- Check the result with `phrasebook::check` (syntax, prefixes, duplicates,
+  coverage) as for any catalog of the app's.
+- Label props (`close_label`, `less_label`, `empty_label`, ...) are per-use
+  overrides: `Option<AttrValue>`, `None` reading the catalog. `label="..."`
+  in `html!` still compiles; a struct literal or a field read needs
+  `Some(..)`/`.as_deref()`. `ConfirmRequest`'s `accept` and `cancel_label`
+  are `Option` too, and `ConfirmRequest::new` leaves them `None`.
+- `Reorder`'s announcements are `plinth-reorder-*` messages with the
+  position and count as numbers; `text` still overrides them, and
+  `reorder_text` returns the catalog's English.
+
+plinth's own rule: no user-visible text as a literal in a component. Every
+word comes from the catalog, with numbers passed as numbers so the language
+formats them. `tests/english_literals.rs` fails on a capitalised literal in
+`src/` outside a short list of key names, and the catalog tests check
+`en-US`/`sv-SE` parity and the ids the code asks for against the catalog,
+both ways. The showcase provides the catalog and switches language (the
+Translations page).
+
+[phrasebook-catalog]: https://docs.rs/phrasebook-catalog
 
 ## Showcase
 
