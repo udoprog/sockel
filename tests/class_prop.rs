@@ -115,3 +115,49 @@ fn media_keeps_a_passed_class() {
         &format!("{MINE} {}", class::AVATAR),
     );
 }
+
+#[test]
+fn toggles_keep_a_passed_class() {
+    let mine = || classes!(MINE);
+    let own = |class: &str| format!("{class} {MINE}");
+    keeps(
+        render::<Checkbox>(yew::props!(CheckboxProps {
+            checked: false,
+            on_change: Callback::noop(),
+            class: mine()
+        })),
+        &own(class::CHECKBOX),
+    );
+    keeps(
+        render::<Switch>(yew::props!(SwitchProps {
+            on: false,
+            on_change: Callback::noop(),
+            class: mine()
+        })),
+        &own(class::SWITCH),
+    );
+    keeps(
+        render::<Choice>(yew::props!(ChoiceProps {
+            options: vec![ChoiceOption::new("a", "A")],
+            on_change: Callback::noop(),
+            label: "Pick",
+            class: mine()
+        })),
+        &own(class::CHOICE),
+    );
+    keeps(
+        render::<ChipToggle>(yew::props!(ChipToggleProps {
+            on: false,
+            on_toggle: Callback::noop(),
+            class: mine()
+        })),
+        &own(class::CHIP),
+    );
+    keeps(
+        render::<ChipList>(yew::props!(ChipListProps {
+            label: "Filters",
+            class: mine()
+        })),
+        &own(class::CHIP_LIST),
+    );
+}

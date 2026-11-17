@@ -278,6 +278,7 @@ page can still override them at runtime.
 | `$control-height`, `$control-height-small` | `2.25rem`, `1.75rem` |
 | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
 | `$glyph-size` | `1em` |
+| `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$filter-width` | `10.5rem` |
 | `$avatar-sm`, `$avatar-md`, `$avatar-lg`, `$avatar-xl` | `1.75rem`, `2.5rem`, `3.5rem`, `7rem` |
 | `$page-workspace`, `$page-reading`, `$page-wide`, `$page-gutter` | `64rem`, `40rem`, `90rem`, `var(--space-8)` |
@@ -337,6 +338,50 @@ tag, `ul` or `ol`, renders with no bullets, margin or padding
 `div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
 working. `stack_with` and `cluster_with` return the same classes for any
 tag, so a list built from them adds `PLAIN_LIST` itself.
+
+## Checkbox, Switch, Choice and chips
+
+All four mark a state by colour and background, never by weight, and
+draw it in a box of a fixed size. A `Field` supplies a label, hint and
+error; give the control `label` (an `aria-label`) when the field names it
+and the control has no text of its own. Every component takes `class`.
+
+- `Checkbox` (`.plinth-checkbox`): a native checkbox drawn in a
+  `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
+  `checked`, `indeterminate` (set as the input's DOM property, drawn as a
+  minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
+  children as its text. `checkbox(disabled)` gives its classes.
+- `Switch` (`.plinth-switch`): a `<button role="switch">`, its track
+  `--switch-width` by `--switch-height` and its thumb moved by transform.
+  `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
+  `disabled`, `invalid` (`INVALID`), `on_change(bool)`; `switch(on,
+  invalid)` gives its classes.
+- `Choice` (`.plinth-choice`): a segmented pick-one `radiogroup` of
+  `ChoiceOption`s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
+  `.disabled(bool)`). `value`, `on_change(value)`, `label` (the group's
+  name), `fit` (`ChoiceFit`: `Equal`, `Stretch` to fill the container
+  (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `small` (`SMALL`),
+  `invalid`, `disabled`; `choice(fit, small, invalid, disabled)`. Roving
+  tabindex: the selected option, or the first enabled, is the one tab
+  stop; the arrows (with wrap), Home and End select and focus the next
+  enabled option.
+- `ChipToggle` (`.plinth-chip`) and `ChipList` (`.plinth-chip-list`):
+  filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
+  zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
+  label; a list takes `label` and the chips as children.
+
+Size guarantees: the checkbox box, the switch's track and thumb, and a
+chip's height are tokens (`--check-size`, `--switch-width` and
+`--switch-height`, `--control-height-small`), so no state, hover or
+focus changes them (borders are reserved, focus is an outline). A
+choice's options all take the width of the widest (or the container's, or
+`--choice-width`), whichever is selected, and its height is the control
+height; the selected one changes background and colour only, through the
+`current` mixin, which now also matches `aria-checked="true"` and
+`aria-pressed="true"`. A chip's count has room for two figures (tabular);
+a list is at least one chip high, so an empty list does not collapse and
+grow when chips arrive. New tokens: `$check-size`, `$switch-width`,
+`$switch-height`, `$choice-width`.
 
 ## Heads
 

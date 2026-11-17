@@ -4,7 +4,7 @@ edition = "2024"
 publish = false
 
 [dependencies]
-web-sys = { version = "0.3.77", features = ["Document", "Element", "HtmlHeadElement", "HtmlInputElement", "Node", "Window"] }
+web-sys = { version = "0.3.77", features = ["Document", "Element", "HtmlElement", "HtmlHeadElement", "HtmlInputElement", "KeyboardEvent", "Node", "NodeList", "Window"] }
 yew = "0.23.0"
 
 [build-dependencies]

@@ -1,0 +1,304 @@
+// Toggles (src/checkbox.rs, src/choice.rs, src/chip.rs). A selected or on
+// state is marked by colour and background, never by weight, and every
+// box is a fixed size, so a toggle keeps its box across its states.
+//
+// - `.plinth-checkbox`: a label around a native checkbox and its text. The
+//   box (`-mark`, `--check-size` square) holds the input drawn as a box and
+//   the check or minus glyph over it. `-label` is the text.
+// - `.plinth-switch`: a button (`role="switch"`) of a track and thumb
+//   (`--switch-width` by `--switch-height`) and an optional label. The thumb
+//   moves by transform; `.plinth-on` is its state, `[aria-busy]` puts a
+//   spinner in the thumb.
+// - `.plinth-choice`: a segmented pick-one group. Its options share one
+//   width, that of the widest; `.plinth-stretch` fills the container,
+//   `.plinth-fixed` gives each `--choice-width`. `.plinth-small` is the
+//   small control height. Parts: `-option`, `-icon`, `-label`.
+// - `.plinth-chip`: a filter toggle (`aria-pressed`) of a label and an
+//   optional count (`-count`, two figures wide, `.plinth-zero` dims it).
+//   `.plinth-chip-list` wraps chips and keeps one row's height when empty.
+// - `.plinth-disabled` and `.plinth-invalid` on a checkbox, switch or
+//   choice: dimmed, or the border in `--danger`.
+
+@use "tokens" as base;
+
+.plinth-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 100%;
+    min-height: var(--control-height-small);
+    cursor: pointer;
+
+    &.plinth-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.plinth-checkbox-mark {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--check-size);
+    height: var(--check-size);
+    color: var(--on-accent);
+    font-size: var(--text-sm);
+}
+
+.plinth-checkbox-input {
+    grid-area: 1 / 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    appearance: none;
+    cursor: inherit;
+
+    &:hover:not(:disabled) {
+        border-color: var(--accent);
+    }
+
+    &:checked,
+    &:indeterminate {
+        border-color: var(--accent);
+        background: var(--accent);
+    }
+
+    &[aria-invalid="true"] {
+        border-color: var(--danger);
+    }
+
+    @include base.focus-ring;
+}
+
+.plinth-checkbox-glyph {
+    grid-area: 1 / 1;
+    pointer-events: none;
+}
+
+.plinth-checkbox-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.plinth-switch {
+    --switch-fill: var(--surface);
+    --switch-edge: var(--border);
+    --switch-thumb: var(--muted);
+    --switch-spin: var(--surface);
+    --switch-shift: 0px;
+
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 100%;
+    min-height: var(--control-height-small);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    @include base.focus-ring;
+
+    &.plinth-on {
+        --switch-fill: var(--accent);
+        --switch-edge: var(--accent);
+        --switch-thumb: var(--on-accent);
+        --switch-spin: var(--accent);
+        --switch-shift: calc(var(--switch-width) - var(--switch-height));
+    }
+
+    &.plinth-invalid {
+        --switch-edge: var(--danger);
+    }
+
+    &[aria-busy="true"] {
+        cursor: progress;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.plinth-switch-track {
+    display: flex;
+    flex: none;
+    align-items: center;
+    box-sizing: border-box;
+    width: var(--switch-width);
+    height: var(--switch-height);
+    padding: var(--space-px);
+    @include base.reserved-border(var(--switch-edge));
+    border-radius: var(--radius-pill);
+    background: var(--switch-fill);
+}
+
+.plinth-switch-thumb {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: calc(var(--switch-height) - 4 * var(--space-px));
+    height: calc(var(--switch-height) - 4 * var(--space-px));
+    border-radius: var(--radius-pill);
+    background: var(--switch-thumb);
+    color: var(--switch-spin);
+    font-size: var(--text-xs);
+    transform: translateX(var(--switch-shift));
+    transition: transform 0.15s ease;
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.plinth-switch-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.plinth-choice {
+    --choice-height: var(--control-height);
+
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: 1fr;
+    box-sizing: border-box;
+    max-width: 100%;
+    height: var(--choice-height);
+    @include base.nests(var(--radius-md));
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-md);
+    background: var(--surface);
+
+    &.plinth-small {
+        --choice-height: var(--control-height-small);
+    }
+
+    &.plinth-stretch {
+        display: grid;
+        width: 100%;
+    }
+
+    &.plinth-fixed {
+        grid-auto-columns: var(--choice-width);
+    }
+
+    &.plinth-invalid {
+        border-color: var(--danger);
+    }
+
+    &.plinth-disabled {
+        opacity: 0.5;
+    }
+}
+
+.plinth-choice-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-width: 0;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--space-3);
+    @include base.reserved-border;
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    @include base.focus-ring;
+    @include base.current;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.plinth-choice-icon {
+    display: inline-flex;
+    flex: none;
+}
+
+.plinth-choice-label {
+    @include base.truncate;
+}
+
+.plinth-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height-small);
+}
+
+.plinth-chip {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    max-width: 100%;
+    height: var(--control-height-small);
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--space-3);
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: var(--text-sm);
+    line-height: 1;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        border-color: var(--accent);
+    }
+
+    @include base.focus-ring;
+
+    &[aria-pressed="true"] {
+        border-color: var(--accent);
+    }
+
+    @include base.current;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.plinth-chip-label {
+    @include base.truncate;
+}
+
+.plinth-chip-count {
+    @include base.numeric;
+    flex: none;
+    min-width: 2ch;
+    text-align: center;
+
+    &.plinth-zero {
+        opacity: 0.6;
+    }
+}

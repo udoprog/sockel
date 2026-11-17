@@ -110,6 +110,10 @@ $control-height-small: 1.75rem !default;
 $mark-height: 1.5rem !default;
 $touch-height: 2.75rem !default;
 $glyph-size: 1em !default;
+$check-size: 1.25rem !default;
+$switch-width: 2.5rem !default;
+$switch-height: 1.5rem !default;
+$choice-width: 6rem !default;
 $filter-width: 10.5rem !default;
 $avatar-sm: 1.75rem !default;
 $avatar-md: 2.5rem !default;
@@ -179,6 +183,10 @@ $visibility-breakpoint: "phone" !default;
     --touch-height: #{$touch-height};
     // The box an icon of plinth's own sits in (`.plinth-glyph`).
     --glyph-size: #{$glyph-size};
+    --check-size: #{$check-size};
+    --switch-width: #{$switch-width};
+    --switch-height: #{$switch-height};
+    --choice-width: #{$choice-width};
     // A library page's filter button (`.picker.filter`).
     --filter-width: #{$filter-width};
     // An avatar's sizes (`.plinth-avatar`, its `-small`, `-large`, `-huge`).
@@ -311,12 +319,15 @@ $visibility-breakpoint: "phone" !default;
     }
 }
 
-// The current or selected item (`aria-current`, `aria-selected="true"`),
+// The current or selected item (`aria-current`, `aria-selected="true"`,
+// a radio's `aria-checked="true"` or a toggle's `aria-pressed="true"`),
 // marked by its colour, background or underline, never its weight, so it
 // keeps its width. `$by` is `background`, `color` or `underline`.
 @mixin current($by: background) {
     &[aria-current]:not([aria-current="false"]),
-    &[aria-selected="true"] {
+    &[aria-selected="true"],
+    &[aria-checked="true"],
+    &[aria-pressed="true"] {
         @if $by == background {
             background: var(--accent);
             color: var(--on-accent);

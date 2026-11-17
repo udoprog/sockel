@@ -31,6 +31,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_index.scss",
     "_layout.scss",
     "_media.scss",
+    "_toggles.scss",
     "_tokens.scss",
     "_utilities.scss",
 );
@@ -592,14 +593,20 @@ mod tests {
         assert!(probe.contains("@media (width >= 40rem) {\n  .x-phone {\n    display: none;"));
         assert!(probe.contains("@media (width < 40rem) {\n  .x-desktop {\n    display: none;"));
         let current = "[aria-current]:not([aria-current=false]), ";
+        let also = "[aria-checked=true], .x-bg[aria-pressed=true]";
         assert_eq!(
-            declarations(probe, &format!(".x-bg{current}.x-bg[aria-selected=true]")),
+            declarations(
+                probe,
+                &format!(".x-bg{current}.x-bg[aria-selected=true], .x-bg{also}")
+            ),
             ["background: var(--accent)", "color: var(--on-accent)"]
         );
         assert_eq!(
             declarations(
                 probe,
-                &format!(".x-color{current}.x-color[aria-selected=true]")
+                &format!(
+                    ".x-color{current}.x-color[aria-selected=true], .x-color[aria-checked=true], .x-color[aria-pressed=true]"
+                )
             ),
             ["color: var(--accent)"]
         );

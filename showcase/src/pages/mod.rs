@@ -7,6 +7,7 @@ mod layout;
 mod library;
 mod media;
 mod styles;
+mod toggles;
 
 use yew::prelude::*;
 
@@ -109,6 +110,77 @@ pub const PAGES: &[Page] = &[
                 plinth::class::BUTTON,
                 Size::Height,
                 Across::Except(&["size"]),
+            ),
+        ],
+    },
+    Page {
+        id: "checkbox",
+        title: "Checkbox",
+        about: "A native checkbox in a box of a fixed size, with an indeterminate state. Click it; tab to it; press space.",
+        covers: &["Checkbox", "CheckboxProps", "checkbox"],
+        render: || html! { <toggles::CheckboxPage /> },
+        holds: &[hold(plinth::class::CHECKBOX_MARK, Size::Both, Across::All)],
+    },
+    Page {
+        id: "switch",
+        title: "Switch",
+        about: "An on or off switch (role=switch): its thumb moves by transform, and busy shows a spinner in it. Click it.",
+        covers: &["Switch", "SwitchProps", "switch"],
+        render: || html! { <toggles::SwitchPage /> },
+        holds: &[
+            hold(plinth::class::SWITCH_TRACK, Size::Both, Across::All),
+            hold(plinth::class::SWITCH_THUMB, Size::Both, Across::All),
+        ],
+    },
+    Page {
+        id: "choice",
+        title: "Choice",
+        about: "A segmented pick-one group: the selected option is marked by its background alone, and the options keep one width. Tab to it, then use the arrow keys.",
+        covers: &[
+            "Choice",
+            "ChoiceProps",
+            "ChoiceOption",
+            "ChoiceFit",
+            "choice",
+        ],
+        render: || html! { <toggles::ChoicePage /> },
+        holds: &[
+            hold(
+                plinth::class::CHOICE,
+                Size::Height,
+                Across::Except(&["small"]),
+            ),
+            hold(
+                plinth::class::CHOICE_OPTION,
+                Size::Box,
+                Across::Only(&["Selected", "invalid", "disabled", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "chip",
+        title: "ChipToggle",
+        about: "Filter chips with an on state and a count, in a list that keeps one row's height when it is empty. Click a chip.",
+        covers: &[
+            "ChipToggle",
+            "ChipToggleProps",
+            "ChipList",
+            "ChipListProps",
+            "chip_count",
+        ],
+        render: || html! { <toggles::ChipPage /> },
+        holds: &[
+            hold(
+                plinth::class::CHIP_LIST,
+                Size::Height,
+                Across::Only(&["Chips=1", "Chips=0 (empty)"]),
+            ),
+            hold(
+                plinth::class::CHIP,
+                Size::Both,
+                Across::Only(&[
+                    "Count=7", "Count=0", "Count=42", "disabled", "focus", "click",
+                ]),
             ),
         ],
     },

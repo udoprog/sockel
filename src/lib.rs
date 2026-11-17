@@ -22,6 +22,11 @@
 //! - [`Button`] (`.button`): a button or a link styled as one, its
 //!   variants and sizes, an icon slot, icon-only and fold, pressed and busy,
 //!   all in the same box.
+//! - [`Checkbox`] (`.checkbox`) and [`Switch`] (`.switch`): an on or off
+//!   toggle in a box of a fixed size.
+//! - [`Choice`] (`.choice`): a segmented pick-one group, its options of one
+//!   width; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
+//!   chips with a count.
 //! - [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
 //!   the app supplies and styles.
 //! - [`Icon`] (`.glyph`), [`IconSet`], [`use_icon`]: plinth's own icons, from
@@ -57,6 +62,9 @@ pub mod class {
 
 mod action_group;
 mod button;
+mod checkbox;
+mod chip;
+mod choice;
 mod head;
 mod icon_button;
 mod icons;
@@ -67,6 +75,9 @@ mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
+pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
+pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
+pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
 pub use head::{Head, HeadLevel, HeadProps, PageHead, SectionHead};
 pub use icon_button::{IconButton, IconButtonProps, icon_button};
 pub use icons::{Glyph, Icon, IconProps, IconSet, icon, use_icon, use_icons};
