@@ -75,6 +75,9 @@ pub struct PagerProps {
     /// `false` hides them there (`DESKTOP_ONLY`, from `_utilities.scss`).
     #[prop_or(true)]
     pub phone_steps: bool,
+    /// Gives every button a `title`, its accessible name, as a tooltip.
+    #[prop_or_default]
+    pub titles: bool,
     /// What the navigation is for (`aria-label` of the `nav`).
     #[prop_or("Pages".into())]
     pub label: AttrValue,
@@ -137,6 +140,7 @@ pub fn Pager(props: &PagerProps) -> Html {
         let hidden = (!edge && !props.phone_steps).then_some(class::DESKTOP_ONLY);
         html! {
             <button type="button" class={classes!(pager_button(edge), hidden)} aria-label={label.clone()}
+                title={props.titles.then(|| label.clone())}
                 disabled={blocked || off} onclick={go(to)}>
                 <span class={classes!(class::PAGER_MARK, (!forward).then_some(class::PAGER_FLIP))} aria-hidden="true">
                     <Icon glyph={Glyph::ChevronRight} />
@@ -152,9 +156,11 @@ pub fn Pager(props: &PagerProps) -> Html {
             Slot::Gap => html! { <span class={class::PAGER_GAP} aria-hidden="true">{ "…" }</span> },
             Slot::Page(n) => {
                 let current = n == page;
+                let label = format!("{} {}", props.page_label, n + 1);
                 html! {
                     <button type="button" class={class::PAGER_BUTTON}
-                        aria-label={format!("{} {}", props.page_label, n + 1)}
+                        title={props.titles.then(|| label.clone())}
+                        aria-label={label}
                         aria-current={current.then_some("page")}
                         disabled={blocked}
                         onclick={if current { Callback::noop() } else { go(n) }}>
@@ -308,6 +314,42 @@ mod tests {
         assert_eq!(page_count(50, 50), 1);
         assert_eq!(page_count(51, 50), 2);
         assert_eq!(page_count(10, 0), 10);
+    }
+
+    fn render(props: PagerProps) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<Pager>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn titles_repeat_each_buttons_name() {
+        let plain = render(yew::props!(PagerProps {
+            page: 0,
+            pages: 3,
+            on_page: Callback::noop()
+        }));
+        assert!(!plain.contains("title="), "{plain}");
+        let titled = render(yew::props!(PagerProps {
+            page: 0,
+            pages: 3,
+            on_page: Callback::noop(),
+            titles: true,
+        }));
+        for title in [
+            "First page",
+            "Previous page",
+            "Page 2",
+            "Next page",
+            "Last page",
+        ] {
+            assert!(
+                titled.contains(&format!("title=\"{title}\"")),
+                "{title} in {titled}"
+            );
+        }
     }
 
     #[test]

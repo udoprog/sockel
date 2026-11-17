@@ -1401,7 +1401,8 @@ numbers with gaps (`…`), next and last. `page` (from 0), `pages`, `on_page`
 phone breakpoint, and worth turning off in a narrow container), `phone_steps`
 (default true: the previous and next page buttons below the phone breakpoint;
 false hides them there with `DESKTOP_ONLY`, so `_utilities.scss` must be
-loaded), `label` ("Pages"),
+loaded), `titles` (default false: every button's accessible name as its
+`title` too, a tooltip), `label` ("Pages"),
 `first_label`, `previous_label`, `next_label`, `last_label`, `page_label`
 ("Page", the number appended) and `disabled` and `busy` (the buttons keep
 their room and ignore presses). `pager_slots(pages, page, slots)` is the pure

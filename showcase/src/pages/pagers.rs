@@ -26,6 +26,7 @@ pub fn PagerPage() -> Html {
     let slots = use_state(|| 7usize);
     let edges = use_state(|| true);
     let phone_steps = use_state(|| true);
+    let titles = use_state(|| false);
     let disabled = use_state(|| false);
     let busy = use_state(|| false);
     let page = use_state(|| 0usize);
@@ -36,6 +37,7 @@ pub fn PagerPage() -> Html {
             <Select<usize> label="Slots" options={SLOTS} value={*slots} on_change={bind(&slots)} />
             <Toggle label="edges" value={*edges} on_change={bind(&edges)} />
             <Toggle label="phone_steps" value={*phone_steps} on_change={bind(&phone_steps)} />
+            <Toggle label="titles" value={*titles} on_change={bind(&titles)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
         </>
@@ -49,6 +51,7 @@ pub fn PagerPage() -> Html {
             .expr_if(*slots != 7, "slots", slots.to_string())
             .expr_if(!*edges, "edges", "false")
             .expr_if(!*phone_steps, "phone_steps", "false")
+            .flag("titles", *titles)
             .flag("disabled", *disabled)
             .flag("busy", *busy),
     );
@@ -61,7 +64,7 @@ pub fn PagerPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Pager page={current} pages={*pages} slots={*slots} edges={*edges} phone_steps={*phone_steps}
+            <Pager page={current} pages={*pages} slots={*slots} edges={*edges} phone_steps={*phone_steps} titles={*titles}
                 disabled={*disabled} busy={*busy} on_page={bind(&page)} />
             <span class={class::CONTROL_LABEL}>{ format!("Page {} of {}", current + 1, *pages) }</span>
             <span class={class::CONTROL_LABEL}>{ format!("Items 1 to 50 of {} fill {} pages", 50 * *pages, page_count(50 * *pages, 50)) }</span>
