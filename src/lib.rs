@@ -2,11 +2,11 @@
 //! each a component and its Sass (`style/`), its variants modifier classes
 //! set by props, so the markup and the styles stay in step.
 //!
-//! The Sass is used from the app's stylesheet: `@use "<path>/plinth/style"`
-//! for every primitive's rules, and `@use "<path>/plinth/style/tokens"` for
-//! the tokens and mixins (breakpoints, page widths, nesting). The colours
-//! are the app's: plinth reads `--bg`, `--surface`, `--text`, `--muted`,
-//! `--border`, `--accent` and `--shadow-1`.
+//! [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page; an
+//! app with its own Sass build can `@use "<path>/plinth/style"` (and
+//! `.../style/tokens` for the tokens and mixins) instead. The colours are the
+//! app's: plinth reads `--bg`, `--surface`, `--text`, `--muted`, `--border`,
+//! `--accent` and `--shadow-1`.
 //!
 //! - [`Stack`] (`.stack`): a column, its blocks a gap apart.
 //! - [`Cluster`] (`.cluster`): a row that wraps, its items centred.
@@ -30,6 +30,7 @@ mod head;
 mod icon_button;
 mod layout;
 mod library_toolbar;
+mod styles;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use head::{Head, HeadProps, PageHead, SectionHead};
@@ -39,3 +40,4 @@ pub use layout::{
     ToolbarProps, ToolbarSpacer, card, cluster, stack, toolbar,
 };
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
+pub use styles::{STYLESHEET, Styles};

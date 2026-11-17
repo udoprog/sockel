@@ -4,20 +4,71 @@ Opinionated layout primitives and components for [Yew] apps, built so
 components keep their size and don't jitter as their content changes.
 
 Each component comes with its Sass under `style/`, and its variants are
-modifier classes set by props. An app uses them like this:
+modifier classes set by props.
 
 ```toml
 [dependencies]
 plinth = { path = "../plinth" }
 ```
 
+## Including the styles
+
+plinth compiles `style/` with its defaults when the crate builds (with
+[grass], in `build.rs`), so an app needs no Sass step of its own. Mount
+`<plinth::Styles/>` once at the app's root:
+
+```rust
+html! {
+    <>
+        <plinth::Styles/>
+        <App/>
+    </>
+}
+```
+
+It adds the stylesheet to `<head>` as `<style id="plinth-styles">`, once,
+however many times it is mounted. The CSS is also `plinth::STYLESHEET`, for
+an app that serves or inlines it itself.
+
+An app with its own Sass build can instead use the sources directly, which
+also lets it configure them (see [Configuration](#configuration)); it then
+does not mount `Styles`:
+
 ```scss
 @use "../plinth/style";          // every primitive's rules
 @use "../plinth/style/tokens";   // tokens and mixins
 ```
 
+## Theming
+
 The app supplies the colour tokens: `--bg`, `--surface`, `--text`, `--muted`,
-`--border`, `--accent` and `--shadow-1`.
+`--border`, `--accent` and `--shadow-1`. plinth's own scales are custom
+properties on `:root` too (`--text-*`, `--space-*`, `--radius-*`,
+`--control-height`, `--page-*` and the rest, listed under Configuration), and
+every rule reads them, so an app retunes the embedded stylesheet by
+overriding them in its own CSS, loaded after it or with a more specific
+selector:
+
+```css
+:root {
+    --bg: #fafafa;
+    --surface: #fff;
+    --text: #1d1d1f;
+    --muted: #6e6e73;
+    --border: #d2d2d7;
+    --accent: #0a66c2;
+    --shadow-1: 0 1px 2px rgb(0 0 0 / 0.08);
+    --radius-lg: 12px;
+}
+
+.dense {
+    --control-height: 2rem;
+}
+```
+
+Breakpoints and the component settings (`$card-padding`,
+`$card-padding-phone`, `$toolbar-gap`) are Sass-only: changing them needs the
+app's own Sass build.
 
 ## Configuration
 
@@ -72,3 +123,4 @@ cargo test
 ```
 
 [Yew]: https://yew.rs
+[grass]: https://crates.io/crates/grass

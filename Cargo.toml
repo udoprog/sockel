@@ -4,8 +4,11 @@ edition = "2024"
 publish = false
 
 [dependencies]
-web-sys = { version = "0.3.77", features = ["HtmlInputElement"] }
+web-sys = { version = "0.3.77", features = ["Document", "Element", "HtmlHeadElement", "HtmlInputElement", "Node", "Window"] }
 yew = "0.23.0"
+
+[build-dependencies]
+grass = { version = "=0.13.4", default-features = false }
 
 [workspace]
 resolver = "3"
