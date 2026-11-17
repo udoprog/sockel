@@ -4,7 +4,8 @@
 //   border, the sizes (`.plinth-small`, `.plinth-touch`), the states
 //   (`.plinth-invalid`, `.plinth-disabled`, `.plinth-busy`) and the focus
 //   ring; it only drops that box's stretch and padding. Its width is its
-//   buttons and the number's room.
+//   buttons and the number's room (`fit-content`, so a flex column or a
+//   grid cell does not stretch it either).
 // - `.plinth-stepper-control`: the number, `--stepper-chars` wide in `ch`
 //   (the digits of the longest of min and max, set by the component), its
 //   figures of one width, so the box holds from min to max;
@@ -24,7 +25,7 @@
 .plinth-stepper {
     display: inline-flex;
     gap: 0;
-    width: auto;
+    width: fit-content;
     max-width: 100%;
     padding-inline: 0;
     background: base.$stepper-ground;
