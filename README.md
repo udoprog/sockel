@@ -350,6 +350,7 @@ page can still override them at runtime.
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
 | `$toolbar-gap` | `var(--space-1)` |
 | `$button-padding`, `$button-padding-small` | `var(--space-3)`, `var(--space-2)` (a `.plinth-button`'s sides, regular and small) |
+| `$button-line-height` | `1` (a button's line height; an app whose labels carry descenders in a clipped label part can use `inherit`) |
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
 | `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
 | `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |

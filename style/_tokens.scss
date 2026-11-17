@@ -136,6 +136,7 @@ $button-colours: () !default;
 // height below the phone breakpoint (every size's but touch, a small one
 // there taking the regular type; `null`: its size's).
 $button-text: null !default;
+$button-line-height: 1 !default;
 $button-text-small: var(--text-sm) !default;
 $button-content-gap: var(--space-2) !default;
 $button-icon-offset: null !default;
@@ -872,7 +873,7 @@ $sheet-breakpoint: "phone" !default;
     @if $button-text {
         font-size: $button-text;
     }
-    line-height: 1;
+    line-height: $button-line-height;
     text-decoration: none;
     white-space: nowrap;
     vertical-align: middle;

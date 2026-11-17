@@ -1023,6 +1023,22 @@ mod tests {
     }
 
     #[test]
+    fn a_buttons_line_height_is_a_setting() {
+        let plain = Config::new().build().unwrap();
+        let base = declarations(&plain.css, ".plinth-button");
+        assert!(base.contains(&"line-height: 1".to_owned()));
+        let tuned = Config::new()
+            .with("button-line-height", "inherit")
+            .build()
+            .unwrap();
+        let base = declarations(&tuned.css, ".plinth-button");
+        assert!(
+            base.contains(&"line-height: inherit".to_owned()),
+            "{base:?}"
+        );
+    }
+
+    #[test]
     fn a_switch_takes_its_fill_thumb_and_inset_from_settings() {
         let plain = Config::new().build().unwrap();
         let switch = declarations(&plain.css, ".plinth-switch");
