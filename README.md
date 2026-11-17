@@ -1384,7 +1384,9 @@ Size guarantees: while a dialog is open the root takes
 `.plinth-scroll-locked` (no scrolling), and `.plinth-gutter-kept` when the
 page had a scrollbar, so the scrollbar's room stays and the page neither
 moves nor scrolls; an app whose root already has `scrollbar-gutter: stable`
-keeps it either way. The box hangs `--dialog-top` from the window's top,
+keeps it either way. The kept room's width is `--scroll-gutter` on the root
+while a dialog is open, and the scrim reaches over it, so it covers the
+whole window. The box hangs `--dialog-top` from the window's top,
 not centred unless `$dialog-centred` says so, so content that loads or grows
 moves only its bottom edge;
 it is at least `--dialog-min-height` and at most the window's room, beyond

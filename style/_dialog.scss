@@ -12,7 +12,8 @@
 // - `.plinth-sheet`: below `$sheet-breakpoint`, a sheet from the bottom,
 //   up to `--dialog-sheet-height`.
 // - `.plinth-scroll-locked` on the root while a dialog is open, with
-//   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays.
+//   `.plinth-gutter-kept` when the page had a scrollbar, so its room stays;
+//   the layer's scrim reaches over that room (`--scroll-gutter`, its width).
 // - Settings: `$dialog-padding` (and `$dialog-padding-phone` below
 //   `$sheet-breakpoint`) as `--dialog-pad`, `$dialog-body-gap` (a column
 //   with that gap when set, its paragraphs without margins), `$dialog-shadow`, `$dialog-head-padding`,
@@ -37,7 +38,7 @@
 
 .plinth-dialog-layer {
     position: fixed;
-    inset: 0;
+    inset: 0 calc(-1 * var(--scroll-gutter, 0px)) 0 0;
     z-index: var(--layer-overlay);
     display: flex;
     align-items: flex-start;

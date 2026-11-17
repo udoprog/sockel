@@ -141,6 +141,15 @@ fn drag_handle_settings() {
 }
 
 #[test]
+fn a_dialogs_scrim_reaches_over_the_kept_gutter() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains(
+        ".plinth-dialog-layer {\n  position: fixed;\n  inset: 0 calc(-1 * var(--scroll-gutter, 0px)) 0 0;"
+    ));
+}
+
+#[test]
 fn a_dialog_body_gap_spaces_its_paragraphs() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

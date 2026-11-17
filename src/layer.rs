@@ -78,7 +78,9 @@ impl Drop for Layer {
 
 /// The page's scroll locked while held: the first lock sets
 /// `.plinth-scroll-locked` on the root, with `.plinth-gutter-kept` when the
-/// page had a scrollbar, so its room stays and the page does not move.
+/// page had a scrollbar, so its room stays and the page does not move; the
+/// width of the room kept (by it or the page's own `scrollbar-gutter`) is
+/// `--scroll-gutter` on the root, for layers reaching over it.
 pub(crate) struct ScrollLock;
 
 impl ScrollLock {
@@ -91,6 +93,7 @@ impl ScrollLock {
                 _ = classes.add_1(crate::class::GUTTER_KEPT);
             }
             _ = classes.add_1(crate::class::SCROLL_LOCKED);
+            set_gutter(&root, Some(gutter(&root)));
         }
         Self
     }
@@ -106,8 +109,29 @@ impl Drop for ScrollLock {
             _ = root
                 .class_list()
                 .remove_2(crate::class::SCROLL_LOCKED, crate::class::GUTTER_KEPT);
+            set_gutter(&root, None);
         }
     }
+}
+
+/// The room beside the page kept for its scrollbar: the window's width
+/// beside the root's box (its `clientWidth` misreports it when zoomed).
+fn gutter(root: &web_sys::Element) -> f64 {
+    let window = web_sys::window().and_then(|w| w.inner_width().ok());
+    let width = window.and_then(|w| w.as_f64()).unwrap_or_default();
+    (width - root.get_bounding_client_rect().width()).max(0.0)
+}
+
+fn set_gutter(root: &web_sys::Element, width: Option<f64>) {
+    use wasm_bindgen::JsCast;
+
+    let Some(style) = root.dyn_ref::<web_sys::HtmlElement>().map(|e| e.style()) else {
+        return;
+    };
+    _ = match width {
+        Some(width) => style.set_property("--scroll-gutter", &format!("{width}px")),
+        None => style.remove_property("--scroll-gutter").map(drop),
+    };
 }
 
 fn root() -> Option<web_sys::Element> {
