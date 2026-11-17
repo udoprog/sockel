@@ -1,0 +1,144 @@
+// The table and its sort headings (src/table.rs, src/sort_header.rs). Every
+// line is a reserved border and a sort mark has its box always, so data
+// arriving, hovering or sorting moves no column or row.
+//
+// - `.plinth-table-frame`: the bulk bar above and the wrap under it.
+// - `.plinth-table-bulk`: the bulk actions' room, one height whether or not
+//   it holds anything; `.plinth-idle` hides it and keeps the room.
+// - `.plinth-table-wrap`: the scroll area (its scrollbar's room kept).
+//   `.plinth-sticky` caps it at `--table-max-height`, the head held to its top.
+// - `.plinth-table`: the table. `.plinth-fixed` sizes columns by the first
+//   row alone, so cells are cut rather than widening a column.
+// - `.plinth-table-row`: a row, tinted on hover. `.plinth-table-head-cell`
+//   and `.plinth-table-cell`, a row high; `.plinth-numeric` on a cell sets
+//   figures of one width, to the end. `.plinth-table-empty` holds the empty
+//   or failed state, one row high.
+// - `.plinth-sort-header`: a heading cell with a button
+//   (`.plinth-sort-header-button`) of its label and a mark
+//   (`.plinth-sort-header-mark`) in a box of the glyph size, kept whether
+//   sorted or not. `.plinth-numeric` sets it to the end.
+
+@use "tokens" as base;
+
+.plinth-table-frame {
+    display: flex;
+    flex-direction: column;
+    min-width: 0;
+}
+
+.plinth-table-bulk {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-height: calc(var(--control-height) + 2 * var(--space-2));
+    padding: var(--space-2) var(--space-3);
+
+    &.plinth-idle {
+        visibility: hidden;
+    }
+}
+
+.plinth-table-wrap {
+    @include base.scroll-area;
+
+    min-width: 0;
+
+    &.plinth-sticky {
+        max-height: var(--table-max-height);
+    }
+}
+
+.plinth-table {
+    @include base.table-base;
+
+    &.plinth-fixed {
+        table-layout: fixed;
+    }
+}
+
+.plinth-table-row {
+    &:hover,
+    &:focus-within {
+        @include base.table-row-hover;
+    }
+}
+
+.plinth-table-head-cell {
+    @include base.table-head-cell;
+
+    &.plinth-numeric {
+        text-align: end;
+    }
+}
+
+.plinth-table-cell {
+    @include base.table-cell;
+
+    &.plinth-numeric {
+        text-align: end;
+    }
+}
+
+.plinth-table-empty {
+    @include base.table-cell;
+
+    padding: 0;
+}
+
+.plinth-sort-header {
+    @include base.table-head-cell;
+
+    padding: 0;
+
+    &.plinth-numeric {
+        text-align: end;
+    }
+}
+
+.plinth-sort-header-button {
+    display: flex;
+    align-items: center;
+    gap: var(--space-1);
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    padding: 0 var(--space-3);
+    @include base.reserved-border;
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        color: var(--text);
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &:focus-visible {
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: calc(-1 * var(--focus-ring-width));
+    }
+
+    &.plinth-numeric {
+        justify-content: flex-end;
+    }
+}
+
+.plinth-sort-header-label {
+    @include base.truncate;
+}
+
+.plinth-sort-header-mark {
+    display: inline-flex;
+    flex: none;
+
+    &.plinth-idle {
+        visibility: hidden;
+    }
+}

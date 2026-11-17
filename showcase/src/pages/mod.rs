@@ -17,6 +17,7 @@ mod popover;
 mod rows;
 mod steppers;
 mod styles;
+mod tables;
 mod toggles;
 mod tooltips;
 
@@ -708,6 +709,64 @@ pub const PAGES: &[Page] = &[
                 Size::Box,
                 Across::Only(&["focus", "click"]),
             ),
+        ],
+    },
+    Page {
+        id: "table",
+        title: "Table",
+        about: "A table in a scroll area with a sticky head, hover rows and numeric columns; the bulk actions' room is reserved above it. Press a heading to sort.",
+        covers: &[
+            "Table",
+            "TableProps",
+            "TableRow",
+            "TableRowProps",
+            "TableCell",
+            "TableCellProps",
+            "table",
+            "table_wrap",
+            "table_bulk",
+            "table_cell",
+        ],
+        render: || html! { <tables::TablePage /> },
+        holds: &[
+            hold(plinth::class::TABLE_FRAME, Size::Width, Across::All),
+            hold(
+                plinth::class::SORT_HEADER,
+                Size::Box,
+                Across::Only(&["Sort", "Picked", "disabled", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::TABLE_BULK,
+                Size::Box,
+                Across::Only(&["Picked", "Sort", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::TABLE_ROW,
+                Size::Height,
+                Across::Only(&["Sort", "Picked", "fixed", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "sort-header",
+        title: "SortHeader",
+        about: "A column heading that sorts: unsorted, first way, the other way, unsorted. The mark has its box in every state, so sorting never changes the heading's width.",
+        covers: &[
+            "SortHeader",
+            "SortHeaderProps",
+            "SortDirection",
+            "next_sort",
+            "sort_header",
+            "sort_mark",
+        ],
+        render: || html! { <tables::SortHeaderPage /> },
+        holds: &[
+            hold(
+                plinth::class::SORT_HEADER,
+                Size::Box,
+                Across::Only(&["Sort", "disabled", "Descending first", "focus", "click"]),
+            ),
+            hold(plinth::class::TABLE_FRAME, Size::Width, Across::All),
         ],
     },
     Page {

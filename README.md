@@ -920,6 +920,39 @@ room on its side it scrolls (`scroll-area`), its scrollbar's room kept. Its
 rows are `--control-height` at least, their border reserved, so hover and
 focus change only the fill and border colour; a check's or radio's mark
 keeps its box when off. Labels are one line, cut with an ellipsis.
+## Table and SortHeader
+
+`Table` is a table in a scroll area (`scrollbar-gutter: stable`, so rows
+starting to scroll move nothing). `head` is the heading cells (`TableCell`
+with `head`, or `SortHeader`s); the children are `TableRow`s of `TableCell`s.
+`columns` is the count the `empty` row spans: `empty` (an `EmptyState` with
+`compact`, or an `ErrorBox`) stands in the rows' place. `fixed` (`FIXED`)
+sizes columns by the first row alone, so data arriving or a sort moves no
+column; give a cell `width`, and `cut` to cut its text with an ellipsis.
+`sticky` (`STICKY`, on the wrap) holds the head while the rows scroll past
+`--table-max-height`. `bulk` is the bulk actions above the table: given,
+its room (`TABLE_BULK`, one height) is always kept, and `bulk_active` shows
+it, so selecting rows moves nothing; `IDLE` hides it. `numeric` on a cell
+(`NUMERIC`) sets figures of one width, to the end. `table(fixed)`,
+`table_wrap(sticky)`, `table_bulk(idle)` and `table_cell(head, numeric, cut)`
+give the classes. Parts: `TABLE_FRAME`, `TABLE_WRAP`, `TABLE_ROW`,
+`TABLE_CELL`, `TABLE_HEAD_CELL`, `TABLE_EMPTY`.
+
+`SortHeader` is a heading cell with a button: `label`, `direction`
+(`Option<SortDirection>`; `aria-sort` is `ascending`, `descending` or
+`none`), `first` (the way a first press runs: names from A, sizes largest
+first), `numeric`, `disabled` and `onsort`, called with the direction asked
+for. `next_sort(current, first)` is the cycle: unsorted, `first`, the other
+way, unsorted. The mark (`SORT_HEADER_MARK`, a chevron from the `IconSet`)
+has its box whether sorted or not (`IDLE` hides it), so sorting never changes
+the heading's width. `sort_header(numeric)` and `sort_mark(idle)`.
+
+Every one takes `class` and `testid`. Size guarantees: a row and a heading
+are at least `--control-height` high, every line is a reserved border, and
+hover tints the row without changing a box; the mark and the bulk bar keep
+their room. For markup plinth does not render, the mixins `table-base`
+(`$fixed`), `table-head-cell`, `table-cell` and `table-row-hover` give the
+same rules. New token: `--table-max-height`.
 
 ## Against jitter: mixins and utilities
 

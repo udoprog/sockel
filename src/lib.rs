@@ -62,6 +62,9 @@
 //!   [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
 //!   have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
 //!   one box that keeps its height.
+//! - [`Table`] (`.table`) with [`TableRow`] and [`TableCell`]: a table in a
+//!   scroll area, its bulk actions' room reserved; [`SortHeader`]
+//!   (`.sort-header`): a column heading whose sort mark keeps its box.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Card`] (`.card`): a surface lifted off the page.
 //! - [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
@@ -130,10 +133,12 @@ mod rows;
 mod secret_input;
 mod selection;
 mod skeleton;
+mod sort_header;
 mod spinner;
 mod status;
 mod stepper;
 mod styles;
+mod table;
 mod tooltip;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
@@ -189,10 +194,17 @@ pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
 pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
+pub use sort_header::{
+    SortDirection, SortHeader, SortHeaderProps, next_sort, sort_header, sort_mark,
+};
 pub use spinner::{Spinner, SpinnerProps};
 pub use status::{StatusLabel, StatusLabelProps, status_label};
 pub use stepper::{Stepper, StepperProps, key_value, parse_number, step_from, stepper};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
+pub use table::{
+    Table, TableCell, TableCellProps, TableProps, TableRow, TableRowProps, table, table_bulk,
+    table_cell, table_wrap,
+};
 pub use tooltip::{
     DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,
     TOOLTIP_DELAY, Tooltip, TooltipProps, hover_card, reason_text, tooltip,
