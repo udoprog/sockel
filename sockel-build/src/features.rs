@@ -201,3 +201,39 @@ fn a_subset_leaves_out_its_parts_and_an_apps() {
     assert!(!omitted.contains("--band-chrome-gap:"));
     assert!(layout.contains("--band-chrome-gap:"));
 }
+
+#[test]
+fn tokens_features_leave_out_the_feature_parts() {
+    let cargo = cargo_features();
+    let sources = test_sources();
+    let options = sasso::Options::new().with_importer(&sources);
+    let compile = |with: String| {
+        let sass = format!("@use \"sockel/tokens\" with ({with});\n@use \"sockel/skeleton\";\n");
+        sasso::compile(&sass, &options).unwrap()
+    };
+    for (feature, _) in FEATURES {
+        let on = closure(&cargo, feature);
+        let map: Vec<_> = on.iter().map(|name| format!("\"{name}\": true")).collect();
+        let omit: Vec<_> = FEATURE_PARTS
+            .iter()
+            .filter(|(_, features)| !features.iter().any(|name| on.contains(*name)))
+            .map(|(part, _)| format!("\"{part}\""))
+            .collect();
+        assert_eq!(
+            compile(format!("$features: ({})", map.join(", "))),
+            compile(format!("$omit: ({},)", omit.join(", "))),
+            "{feature}"
+        );
+    }
+    assert_eq!(
+        compile("$features: ()".into()),
+        compile(format!(
+            "$omit: ({},)",
+            FEATURE_PARTS
+                .iter()
+                .map(|(part, _)| format!("\"{part}\""))
+                .collect::<Vec<_>>()
+                .join(", ")
+        ))
+    );
+}

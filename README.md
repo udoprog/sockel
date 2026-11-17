@@ -551,6 +551,7 @@ the custom properties, so a page can still override them at runtime.
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over sockel's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
 | `$omit` | `()` (every part emitted; see [Leaving parts out](#leaving-parts-out)) |
+| `$features` | `null` (with [trug], `pkg:sockel/features`'s `$features`; see [Leaving parts out](#leaving-parts-out)) |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
@@ -590,6 +591,14 @@ finer parts of components an app does render; a component it does not
 render is left out by its feature (see [Choosing features](#choosing-features)),
 which also leaves out the `tokens.*` part only it reads, and Loadable's
 `skeleton.loadable`.
+
+Sass compiled with [trug] instead loads the tokens with the build's
+features, and the same parts follow them:
+
+```scss
+@use "pkg:sockel/features" as f;
+@use "pkg:sockel/tokens" with ($features: f.$features, $omit: ("layout.toolbar",));
+```
 
 <!-- check-variant: build.rs -->
 ```rust

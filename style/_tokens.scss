@@ -501,13 +501,52 @@ $-parts: (
     }
 }
 
-// Whether `$part` is emitted: not named in `$omit`.
+// The features of this build, as a map of enabled names (trug's
+// `pkg:sockel/features` `$features`): the parts below are left out while
+// none of their features is on. Null, they follow `$omit` alone.
+$features: null !default;
+// The parts a feature owns, with the features that read them, as
+// sockel-build's FEATURE_PARTS.
+$-feature-parts: (
+    "skeleton.loadable": ("loadable",),
+    "tokens.actions": ("rows",),
+    "tokens.card-grid": ("card-grid",),
+    "tokens.color-select": ("color-select",),
+    "tokens.drop": ("drop-zone",),
+    "tokens.fields": ("field",),
+    "tokens.filter-picker": ("picker",),
+    "tokens.media": ("media",),
+    "tokens.panel": ("panel",),
+    "tokens.picker": ("picker", "search-select"),
+    "tokens.seam": ("seam",),
+    "tokens.table": ("table",),
+    "tokens.toast": ("toast",),
+    "tokens.toggles": ("toggles",),
+    "tokens.tooltip": ("tooltip",),
+);
+
+// Whether `$part` is emitted: not named in `$omit`, and with `$features`
+// set, a part a feature owns only while one of its features is on.
 @function emits($part) {
     @if not list.index($-parts, $part) {
         @error "emits: no part #{$part}";
     }
 
-    @return not list.index($omit, $part);
+    @if list.index($omit, $part) {
+        @return false;
+    }
+
+    @if $features != null and map.has-key($-feature-parts, $part) {
+        @each $feature in map.get($-feature-parts, $part) {
+            @if map.has-key($features, $feature) {
+                @return true;
+            }
+        }
+
+        @return false;
+    }
+
+    @return true;
 }
 
 :root {
