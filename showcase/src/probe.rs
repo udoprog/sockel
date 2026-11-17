@@ -182,7 +182,10 @@ pub fn report(holds: &[Hold], baseline: &Boxes, states: &[State]) -> (bool, Stri
 mod dom {
     use wasm_bindgen::JsCast;
     use wasm_bindgen_futures::JsFuture;
-    use web_sys::{Document, Element, Event, EventInit, HtmlElement, HtmlSelectElement};
+    use web_sys::{
+        Document, Element, Event, EventInit, HtmlElement, HtmlSelectElement, KeyboardEvent,
+        KeyboardEventInit,
+    };
 
     use super::{Boxes, Hold, Rect, State, class};
 
@@ -288,6 +291,16 @@ mod dom {
         }
     }
 
+    /// Closes what a click opened, as a user's Escape would.
+    fn escape(el: &Element) {
+        let init = KeyboardEventInit::new();
+        init.set_bubbles(true);
+        init.set_key("Escape");
+        if let Ok(event) = KeyboardEvent::new_with_keyboard_event_init_dict("keydown", &init) {
+            let _ = el.dispatch_event(&event);
+        }
+    }
+
     /// Every state, each one control away from the page's own.
     pub async fn run(holds: &[Hold]) -> (Boxes, Vec<State>) {
         let Some(doc) = web_sys::window().and_then(|w| w.document()) else {
@@ -355,6 +368,8 @@ mod dom {
                     value: i.to_string(),
                     boxes: measure(&doc, holds),
                 });
+                escape(el);
+                settle().await;
             }
         }
         settle().await;

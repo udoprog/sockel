@@ -1279,7 +1279,8 @@ single value as `"label=value"`, or the probe's own `focus` and
 The panel in the window's corner (fixed, so it never moves the page)
 runs the probe: it sets each control to each of its values in turn,
 one control at a time, toggles each checkbox, then focuses each control
-in the frames and clicks each button there, measuring every declared
+in the frames and clicks each button there (pressing Escape after each
+click, so nothing it opened stays open), measuring every declared
 part in both frames after each state. Its `<pre>` reads `probe: stable`
 when no declared box moved or resized by more than half a pixel, and
 otherwise lists each change by state, frame and part. The panel's

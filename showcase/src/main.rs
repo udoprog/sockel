@@ -13,6 +13,7 @@ mod class {
 /// The showcase's one stylesheet: plinth's CSS, then `style/`'s.
 const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
+use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
 use plinth::{Cluster, Gap, PageHead, Stack};
@@ -60,6 +61,27 @@ fn initial_page() -> usize {
 #[function_component]
 fn App() -> Html {
     let current = use_state(initial_page);
+    {
+        let current = current.clone();
+        use_effect_with((), move |()| {
+            let listener = Closure::<dyn Fn()>::new(move || current.set(initial_page()));
+            let window = web_sys::window();
+            if let Some(window) = &window {
+                let _ = window.add_event_listener_with_callback(
+                    "hashchange",
+                    listener.as_ref().unchecked_ref(),
+                );
+            }
+            move || {
+                if let Some(window) = window {
+                    let _ = window.remove_event_listener_with_callback(
+                        "hashchange",
+                        listener.as_ref().unchecked_ref(),
+                    );
+                }
+            }
+        });
+    }
     let theme = use_state(|| Theme::System);
     let on_theme = {
         let theme = theme.clone();
