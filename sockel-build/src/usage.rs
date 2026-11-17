@@ -11,8 +11,8 @@ use crate::{Config, Error, const_name};
 /// those sources writes on purpose.
 ///
 /// A source writes a class by its constant (`class::PANEL`) or by its name in
-/// a string literal. Comments, and a file's code from its first
-/// `#[cfg(test)]` on, are not counted.
+/// a string literal. Comments, and each item marked `#[cfg(test)]` (a test
+/// module, function or `use`), are not counted.
 #[derive(Clone, Debug, Default)]
 pub struct Usage {
     sources: Vec<PathBuf>,
@@ -187,9 +187,64 @@ fn count_words(text: &str) -> BTreeMap<String, usize> {
 /// The source without comments and without its test code, string literals
 /// kept as `\u{1}contents\u{2}`.
 fn code(source: &str) -> String {
-    let source = source
-        .find("#[cfg(test)]")
-        .map_or(source, |end| &source[..end]);
+    without_tests(&strip(source))
+}
+
+/// `code` without each `#[cfg(test)]` and the item it marks: up to the
+/// item's `;`, or through its first `{ ... }` block.
+fn without_tests(code: &str) -> String {
+    const MARK: &str = "#[cfg(test)]";
+    let mut out = String::new();
+    let mut rest = code;
+    while let Some(at) = find_outside_literals(rest, MARK) {
+        out.push_str(&rest[..at]);
+        let item = &rest[at + MARK.len()..];
+        let mut depth = 0usize;
+        let mut inside = false;
+        let mut end = item.len();
+        for (i, c) in item.char_indices() {
+            match c {
+                '\u{1}' => inside = true,
+                '\u{2}' => inside = false,
+                _ if inside => {}
+                ';' if depth == 0 => {
+                    end = i + 1;
+                    break;
+                }
+                '{' => depth += 1,
+                '}' => {
+                    depth = depth.saturating_sub(1);
+                    if depth == 0 {
+                        end = i + 1;
+                        break;
+                    }
+                }
+                _ => {}
+            }
+        }
+        out.extend(item[..end].chars().filter(|&c| c == '\n'));
+        rest = &item[end..];
+    }
+    out.push_str(rest);
+    out
+}
+
+fn find_outside_literals(code: &str, needle: &str) -> Option<usize> {
+    let mut inside = false;
+    for (i, c) in code.char_indices() {
+        match c {
+            '\u{1}' => inside = true,
+            '\u{2}' => inside = false,
+            _ if !inside && code[i..].starts_with(needle) => return Some(i),
+            _ => {}
+        }
+    }
+    None
+}
+
+/// The source without comments, string literals kept as
+/// `\u{1}contents\u{2}`.
+fn strip(source: &str) -> String {
     let mut out = String::new();
     let mut chars = source.chars().peekable();
     while let Some(c) = chars.next() {
@@ -267,6 +322,18 @@ mod tests {
             crate::sockel().local(dir.join("style")).prefix("usage-"),
             Usage::new().source(dir.join("src")),
         )
+    }
+
+    #[test]
+    fn skips_only_the_items_marked_for_tests() {
+        let source = "#[cfg(test)]\nuse a::B;\nfn f() { \"kept\" }\n\
+                      #[cfg(test)]\nmod tests { fn g() { \"}\" ; \"gone\" } }\n\
+                      const C: &str = \"after\";\n";
+        let words = literals(&code(source));
+        assert_eq!(
+            words.split_whitespace().collect::<Vec<_>>(),
+            ["kept", "after"]
+        );
     }
 
     #[test]

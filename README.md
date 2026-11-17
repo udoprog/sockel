@@ -176,8 +176,8 @@ fn every_styled_class_is_written() {
 package's crates. `.dynamic(["app-tone-*"])` allows classes built at runtime
 (a trailing `*` is a prefix) and `.foreign([...])` ones a dependency writes.
 A class counts as written when a source names its constant
-(`class::SIDEBAR`) or the class in a string literal; comments and code after
-a file's first `#[cfg(test)]` do not count. The test fails on a dead class
+(`class::SIDEBAR`) or the class in a string literal; comments and each
+item marked `#[cfg(test)]` (a test module, function or `use`) do not count. The test fails on a dead class
 and on an allowed pattern that matches no class, and prints the class,
 single-use and dead counts. `STYLE_INVENTORY=PATH` also writes
 `class<TAB>uses` lines to `PATH`. sockel runs it on itself and on the
