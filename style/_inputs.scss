@@ -20,40 +20,46 @@
 //   `-middle` or `-last`, which square the corners that join, and
 //   `.plinth-group-detached` to stand apart after a gap; a lone member needs
 //   none. `group_classes` gives them, so no rule looks at a sibling.
+// - Parts an app may leave out (`$omit`): `inputs.input` (`.plinth-input`),
+//   `inputs.textarea`, `inputs.mark` (`-mark` and `-unit`) and `inputs.group`
+//   (the group and its members' classes).
 
 @use "tokens" as base;
 
-
-.plinth-input {
-    @include base.input;
+@if base.emits("inputs.input") {
+    .plinth-input {
+        @include base.input;
+    }
 }
 
-.plinth-textarea {
-    @include base.input-box;
-    display: block;
-    width: 100%;
-    min-width: 0;
-    min-height: var(--input-height);
-    padding-block: var(--space-1);
-    padding-inline: var(--space-2);
-    line-height: 1.4;
-    resize: vertical;
+@if base.emits("inputs.textarea") {
+    .plinth-textarea {
+        @include base.input-box;
+        display: block;
+        width: 100%;
+        min-width: 0;
+        min-height: var(--input-height);
+        padding-block: var(--space-1);
+        padding-inline: var(--space-2);
+        line-height: 1.4;
+        resize: vertical;
 
-    &::placeholder {
-        color: var(--muted);
-        opacity: 1;
+        &::placeholder {
+            color: var(--muted);
+            opacity: 1;
+        }
+
+        &[aria-invalid="true"] {
+            --input-edge: var(--danger);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @include base.focus-ring;
     }
-
-    &[aria-invalid="true"] {
-        --input-edge: var(--danger);
-    }
-
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
-    }
-
-    @include base.focus-ring;
 }
 
 .plinth-input-box {
@@ -115,17 +121,19 @@
     }
 }
 
-.plinth-input-mark {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    color: var(--muted);
-    pointer-events: none;
-}
+@if base.emits("inputs.mark") {
+    .plinth-input-mark {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
+        color: var(--muted);
+        pointer-events: none;
+    }
 
-.plinth-input-unit {
-    font-size: var(--text-sm);
-    @include base.numeric;
+    .plinth-input-unit {
+        font-size: var(--text-sm);
+        @include base.numeric;
+    }
 }
 
 .plinth-input-clear,
@@ -157,47 +165,49 @@
     @include base.focus-ring;
 }
 
-.plinth-input-group {
-    display: flex;
-    align-items: stretch;
-    min-width: 0;
+@if base.emits("inputs.group") {
+    .plinth-input-group {
+        display: flex;
+        align-items: stretch;
+        min-width: 0;
 
-    // The bare input is the one member that takes the room left.
-    > .plinth-input {
-        flex: 1 1 0;
+        // The bare input is the one member that takes the room left.
+        > .plinth-input {
+            flex: 1 1 0;
+        }
     }
-}
 
-.plinth-group-first,
-.plinth-group-middle,
-.plinth-group-last {
-    position: relative;
-    min-width: 0;
+    .plinth-group-first,
+    .plinth-group-middle,
+    .plinth-group-last {
+        position: relative;
+        min-width: 0;
 
-    &:hover,
-    &:focus-within {
-        z-index: 1;
+        &:hover,
+        &:focus-within {
+            z-index: 1;
+        }
     }
-}
 
-.plinth-group-first {
-    border-start-end-radius: 0;
-    border-end-end-radius: 0;
-}
+    .plinth-group-first {
+        border-start-end-radius: 0;
+        border-end-end-radius: 0;
+    }
 
-.plinth-group-middle {
-    border-radius: 0;
-    margin-inline-start: calc(-1 * var(--space-px));
-}
+    .plinth-group-middle {
+        border-radius: 0;
+        margin-inline-start: calc(-1 * var(--space-px));
+    }
 
-.plinth-group-last {
-    border-start-start-radius: 0;
-    border-end-start-radius: 0;
-    margin-inline-start: calc(-1 * var(--space-px));
-}
+    .plinth-group-last {
+        border-start-start-radius: 0;
+        border-end-start-radius: 0;
+        margin-inline-start: calc(-1 * var(--space-px));
+    }
 
-// After the rules above, so a detached member that starts a run keeps
-// its gap.
-.plinth-group-detached {
-    margin-inline-start: var(--space-2);
+    // After the rules above, so a detached member that starts a run keeps
+    // its gap.
+    .plinth-group-detached {
+        margin-inline-start: var(--space-2);
+    }
 }
