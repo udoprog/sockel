@@ -2,7 +2,8 @@
 // primitive reads, the breakpoints, and the recipes for a page's column and
 // for rounded things nested in rounded things.
 //
-// - Type `--text-3xs`…`--text-2xl` (base `--text-base`, 15px).
+// - Type `--text-3xs`…`--text-2xl` (base `--text-base`, 15px);
+//   `--section-title-size`, a section head's title.
 // - Space `--space-0` (2px), `--space-px`, `--space-1`…`--space-9`.
 // - Radii `--radius-xs` (check boxes), `--radius-sm` (controls),
 //   `--radius-md` (bars and panels between), `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
@@ -115,6 +116,7 @@ $text-lg: 1.25rem !default;
 $text-title: 1.4rem !default;
 $text-xl: 1.5rem !default;
 $text-2xl: 1.75rem !default;
+$section-title-size: var(--text-lg) !default;
 $space-0: 0.125rem !default;
 $space-px: 1px !default;
 $space-1: 0.25rem !default;
@@ -221,6 +223,8 @@ $sheet-breakpoint: "phone" !default;
     --text-title: #{$text-title};
     --text-xl: #{$text-xl};
     --text-2xl: #{$text-2xl};
+    // A section head's title (`.plinth-section-head-title`).
+    --section-title-size: #{$section-title-size};
 
     --space-0: #{$space-0};
     --space-px: #{$space-px};
