@@ -85,7 +85,7 @@
 }
 
 .plinth-switch {
-    --switch-fill: var(--surface);
+    --switch-fill: #{base.$switch-fill};
     --switch-edge: var(--field-border);
     --switch-thumb: var(--muted);
     --switch-spin: var(--surface);
@@ -110,7 +110,7 @@
     &.plinth-on {
         --switch-fill: var(--accent);
         --switch-edge: var(--accent);
-        --switch-thumb: var(--on-accent);
+        --switch-thumb: #{base.$switch-on-thumb};
         --switch-spin: var(--accent);
         --switch-shift: calc(var(--switch-width) - var(--switch-height));
     }
@@ -140,6 +140,10 @@
     @include base.reserved-border(var(--switch-edge));
     border-radius: var(--radius-pill);
     background: var(--switch-fill);
+
+    @if base.$switch-thumb-inset {
+        padding: calc(#{base.$switch-thumb-inset} - var(--space-px));
+    }
 }
 
 .plinth-switch-thumb {
@@ -154,6 +158,11 @@
     font-size: var(--text-xs);
     transform: translateX(var(--switch-shift));
     transition: transform 0.15s ease;
+
+    @if base.$switch-thumb-inset {
+        width: calc(var(--switch-height) - 2 * #{base.$switch-thumb-inset});
+        height: calc(var(--switch-height) - 2 * #{base.$switch-thumb-inset});
+    }
 
     @media (prefers-reduced-motion: reduce) {
         transition: none;

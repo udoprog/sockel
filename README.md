@@ -337,6 +337,7 @@ page can still override them at runtime.
 | `$glyph-size` | `1em` |
 | `$skeleton-duration` | `1.4s` |
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
+| `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 | `$filter-width` | `10.5rem` |
 | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
 | `$avatar-sm`, `$avatar-md`, `$avatar-lg`, `$avatar-xl` | `1.75rem`, `2.5rem`, `3.5rem`, `7rem` |

@@ -956,6 +956,37 @@ mod tests {
     }
 
     #[test]
+    fn a_switch_takes_its_fill_thumb_and_inset_from_settings() {
+        let plain = Config::new().build().unwrap();
+        let switch = declarations(&plain.css, ".plinth-switch");
+        assert!(switch.contains(&"--switch-fill: var(--surface)".to_owned()));
+        let track = declarations(&plain.css, ".plinth-switch-track");
+        assert!(track.contains(&"padding: var(--space-px)".to_owned()));
+        let tuned = Config::new()
+            .with("switch-fill", "var(--sunken)")
+            .with("switch-on-thumb", "#fff")
+            .with("switch-thumb-inset", "3px")
+            .build()
+            .unwrap();
+        let switch = declarations(&tuned.css, ".plinth-switch");
+        assert!(
+            switch.contains(&"--switch-fill: var(--sunken)".to_owned()),
+            "{switch:?}"
+        );
+        assert!(tuned.css.contains("--switch-thumb: #fff"));
+        let track = declarations(&tuned.css, ".plinth-switch-track");
+        assert!(
+            track.contains(&"padding: calc(3px - var(--space-px))".to_owned()),
+            "{track:?}"
+        );
+        let thumb = declarations(&tuned.css, ".plinth-switch-thumb");
+        assert!(
+            thumb.contains(&"width: calc(var(--switch-height) - 2 * 3px)".to_owned()),
+            "{thumb:?}"
+        );
+    }
+
+    #[test]
     fn a_selection_bar_count_wraps_only_when_set() {
         let plain = Config::new().build().unwrap();
         let count = declarations(&plain.css, ".plinth-selection-bar-count");
