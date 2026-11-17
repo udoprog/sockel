@@ -288,6 +288,7 @@ page can still override them at runtime.
 | `$card-padding-phone` | `null` (a card keeps `$card-padding` on a phone) |
 | `$toolbar-gap` | `var(--space-1)` |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
+| `$tooltip-max-width` | `24rem` |
 | `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim` | see [Theming](#theming) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
@@ -746,6 +747,44 @@ which the body scrolls with its scrollbar's room kept and the foot stays
 pinned below it. Its width is fixed by its size, never by its content. A
 `Tall` dialog keeps one height whatever it holds; a sheet grows upward
 from the bottom edge.
+
+## Tooltip, HoverCard and ReasonButton
+
+All three place themselves with `use_popover` in the overlay layer, so they
+inherit Popover's placement, following and Escape or press-outside dismissal.
+
+`Tooltip` is a short tip beside its anchor. Props: `anchor` (a `NodeRef`),
+`text` (nothing is shown, and nothing described, while it is empty), `side`
+(`Side::Above` by default), `delay` (`TOOLTIP_DELAY`, 250 ms of the pointer's
+rest), `id`, `class`, `testid`. Keyboard focus (`:focus-visible`) shows it at
+once; a touch pointer never does; a press, Escape, leaving or losing focus
+hides it. The anchor gets `aria-describedby` naming the tip while it has
+text. The tip (`.plinth-tooltip`, `plinth::class::TOOLTIP`; `tooltip(placed)`
+gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
+`PLACED`, and as wide as its text up to `--tooltip-max-width` (`$tooltip-max-width`,
+24rem), wrapping beyond. `DataTips`, mounted once, gives every element with a
+`data-tip` attribute the same tip (none when it says what the element already
+says); it places the tip by a fixed stand-in (`TIP_ANCHOR`), and hides on scroll.
+
+`HoverCard` is a richer card (`.plinth-hover-card` on a `.plinth-popover`,
+`hover_card(placed)`): props `anchor`, `side`, `align`, `delay`
+(`HOVER_CARD_DELAY`, 400 ms to open and to close), `title` (its accessible
+name), `class`, `testid` and the card's children. It opens on hover or
+keyboard focus and stays open while the pointer is over the anchor or the
+card, so a link in it can be reached.
+
+`ReasonButton` is a `Button` (the props `class`, `variant`, `size`, `icon`,
+`submit`, `onclick`, `label`, `testid`, children) with `reason: Option<AttrValue>`
+and `busy` with `working: Option<AttrValue>`: its tooltip says the reason, else
+what it is doing (`reason_text`). A button with a reason is `unavailable`
+(`aria-disabled`, not `disabled`), so it keeps focus and hover and a click does
+nothing. `Button` has `unavailable` and `node_ref` props for this.
+
+Size guarantees: the tip and card are `position: fixed` in the overlay layer,
+hidden until measured, so showing them never moves the page, the anchor or the
+scrollbar. A `ReasonButton` is one `<button>` whether it is available,
+unavailable or busy: the same node, box and focus across the states (the busy
+spinner and the aria state change, the width does not).
 
 ## Against jitter: mixins and utilities
 

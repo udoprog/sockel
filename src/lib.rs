@@ -65,6 +65,10 @@
 //! - [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
 //!   scrolls and pinned actions, in three sizes; a sheet on a phone. The page
 //!   behind holds still; Escape closes the innermost overlay only.
+//! - [`Tooltip`] (`.tooltip`) and [`DataTips`] (`data-tip`): a short tip in
+//!   the overlay layer after a pointer's rest or on keyboard focus;
+//!   [`HoverCard`] (`.hover-card`): a richer card on hover or focus;
+//!   [`ReasonButton`]: a [`Button`] that says why it cannot act, in one node.
 //! - [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
 //!   filter buttons, one row.
 //!
@@ -112,6 +116,7 @@ mod rows;
 mod selection;
 mod status;
 mod styles;
+mod tooltip;
 
 pub use action_group::{ActionGroup, ActionGroupProps, action_group};
 pub use badge::{
@@ -159,3 +164,7 @@ pub use selection::{
 };
 pub use status::{StatusLabel, StatusLabelProps, status_label};
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
+pub use tooltip::{
+    DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,
+    TOOLTIP_DELAY, Tooltip, TooltipProps, hover_card, reason_text, tooltip,
+};

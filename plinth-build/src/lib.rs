@@ -41,6 +41,7 @@ pub const SOURCES: &[(&str, &str)] = sources!(
     "_rows.scss",
     "_toggles.scss",
     "_tokens.scss",
+    "_tooltip.scss",
     "_utilities.scss",
 );
 

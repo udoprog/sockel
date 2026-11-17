@@ -1,0 +1,61 @@
+// Tooltip and HoverCard (src/tooltip.rs).
+//
+// - `.plinth-tooltip`: a short tip in the overlay layer, fixed at the
+//   place popover.rs measured (`--tooltip-left`, `--tooltip-top`), hidden
+//   until `.plinth-placed`. It takes no pointer events and lays nothing
+//   out, so showing it never moves the page.
+// - `.plinth-tip-anchor`: the stand-in DataTips places its tip by, fixed
+//   over the element the tip is for (`--tip-left`, `--tip-top`,
+//   `--tip-width`, `--tip-height`); invisible and untouchable.
+// - `.plinth-hover-card`: a popover (`.plinth-popover`) that opens on hover
+//   or focus, in smaller type.
+
+.plinth-tooltip {
+    position: fixed;
+    top: var(--tooltip-top, 0);
+    left: var(--tooltip-left, 0);
+    z-index: var(--layer-tooltip);
+    box-sizing: border-box;
+    width: max-content;
+    max-width: min(var(--tooltip-max-width), calc(100vw - 2 * var(--space-2)));
+    padding: var(--space-0) var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--text);
+    color: var(--bg);
+    box-shadow: var(--shadow-1);
+    font-size: var(--text-xs);
+    font-weight: 500;
+    line-height: 1.5;
+    overflow-wrap: anywhere;
+    pointer-events: none;
+    visibility: hidden;
+
+    &.plinth-placed {
+        visibility: visible;
+        animation: plinth-tooltip-in 120ms ease both;
+
+        @media (prefers-reduced-motion: reduce) {
+            animation: none;
+        }
+    }
+}
+
+.plinth-tip-anchor {
+    position: fixed;
+    top: var(--tip-top, 0);
+    left: var(--tip-left, 0);
+    width: var(--tip-width, 0);
+    height: var(--tip-height, 0);
+    pointer-events: none;
+    visibility: hidden;
+}
+
+.plinth-hover-card {
+    font-size: var(--text-sm);
+}
+
+@keyframes plinth-tooltip-in {
+    from {
+        opacity: 0;
+    }
+}

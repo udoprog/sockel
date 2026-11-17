@@ -21,6 +21,7 @@
 // - `--focus-ring-*`: the focus ring's colour, width and offset.
 // - `--layer-*`: the stacking order of what floats (sticky, overlay,
 //   dialog, toast, tooltip).
+// - `--tooltip-max-width`: a tooltip's widest.
 // - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
 //   and a sheet's tallest; `$sheet-breakpoint` is where a popover turns
 //   into a sheet.
@@ -160,6 +161,7 @@ $dialog-min-height: 10rem !default;
 $dialog-height-tall: 40rem !default;
 $dialog-top: 8dvh !default;
 $dialog-sheet-height: 85dvh !default;
+$tooltip-max-width: 24rem !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -267,6 +269,7 @@ $sheet-breakpoint: "phone" !default;
     --dialog-height-tall: #{$dialog-height-tall};
     --dialog-top: #{$dialog-top};
     --dialog-sheet-height: #{$dialog-sheet-height};
+    --tooltip-max-width: #{$tooltip-max-width};
 
     // Derived from the app's colours on `:root`: an app that sets those on
     // a narrower element sets these there too.

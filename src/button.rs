@@ -56,6 +56,13 @@ pub struct ButtonProps {
     pub busy: bool,
     #[prop_or_default]
     pub disabled: bool,
+    /// Cannot act now but stays focusable and hoverable, so it can say why
+    /// (`aria-disabled`, drawn as disabled): a click does nothing.
+    #[prop_or_default]
+    pub unavailable: bool,
+    /// The button's element, for what anchors beside it.
+    #[prop_or_default]
+    pub node_ref: NodeRef,
     /// A link styled as a button (`<a>`); disabled, it loses its `href`.
     #[prop_or_default]
     pub href: Option<AttrValue>,
@@ -145,7 +152,7 @@ pub fn Button(props: &ButtonProps) -> Html {
 
     let onclick = {
         let onclick = props.onclick.clone();
-        let blocked = props.busy || props.disabled;
+        let blocked = props.busy || props.disabled || props.unavailable;
         Callback::from(move |e: MouseEvent| {
             if blocked {
                 e.prevent_default();
@@ -155,13 +162,14 @@ pub fn Button(props: &ButtonProps) -> Html {
         })
     };
     let busy = props.busy.then_some("true");
+    let unavailable = props.unavailable.then_some("true");
     let pressed = props.pressed.map(|on| on.to_string());
 
     match &props.href {
         Some(href) => html! {
-            <a {class}
+            <a {class} ref={props.node_ref.clone()}
                 href={(!props.disabled).then(|| href.clone())}
-                aria-disabled={props.disabled.then_some("true")}
+                aria-disabled={(props.disabled || props.unavailable).then_some("true")}
                 aria-busy={busy}
                 aria-pressed={pressed}
                 title={props.title.clone()}
@@ -173,10 +181,11 @@ pub fn Button(props: &ButtonProps) -> Html {
             </a>
         },
         None => html! {
-            <button
+            <button ref={props.node_ref.clone()}
                 type={if props.submit { "submit" } else { "button" }}
                 {class}
                 disabled={props.disabled}
+                aria-disabled={unavailable}
                 aria-busy={busy}
                 aria-pressed={pressed}
                 title={props.title.clone()}
@@ -217,6 +226,8 @@ mod tests {
             pressed: None,
             busy: false,
             disabled: false,
+            unavailable: false,
+            node_ref: NodeRef::default(),
             href: None,
             submit: false,
             onclick: Callback::noop(),
@@ -354,6 +365,16 @@ mod tests {
         });
         assert!(html.contains("aria-disabled=\"true\""), "{html}");
         assert!(!html.contains("href"), "{html}");
+    }
+
+    #[test]
+    fn an_unavailable_button_is_aria_disabled_and_stays_enabled() {
+        let html = render(ButtonProps {
+            unavailable: true,
+            ..props()
+        });
+        assert!(html.contains("aria-disabled=\"true\""), "{html}");
+        assert!(!html.contains(" disabled"), "{html}");
     }
 
     #[test]

@@ -15,6 +15,7 @@ mod popover;
 mod rows;
 mod styles;
 mod toggles;
+mod tooltips;
 
 use yew::prelude::*;
 
@@ -745,6 +746,63 @@ pub const PAGES: &[Page] = &[
         holds: &[
             hold(plinth::class::BUTTON, Size::Box, Across::All),
             hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "tooltip",
+        title: "Tooltip",
+        about: "A short tip in the overlay layer, shown after the pointer rests on its anchor or at once on keyboard focus, and from a data-tip attribute with DataTips. It never moves the page. Hover it; tab to it; press Escape.",
+        covers: &[
+            "Tooltip",
+            "TooltipProps",
+            "DataTips",
+            "TOOLTIP_DELAY",
+            "tooltip",
+        ],
+        render: || html! { <tooltips::TooltipPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "hover-card",
+        title: "HoverCard",
+        about: "A richer card beside its anchor, opened by hover or keyboard focus and kept open while the pointer is over it, so a link in it can be reached.",
+        covers: &[
+            "HoverCard",
+            "HoverCardProps",
+            "HOVER_CARD_DELAY",
+            "hover_card",
+        ],
+        render: || html! { <tooltips::HoverCardPage /> },
+        holds: &[
+            hold(plinth::class::BUTTON, Size::Box, Across::All),
+            hold(class::SAMPLE, Size::Box, Across::All),
+        ],
+    },
+    Page {
+        id: "reason-button",
+        title: "ReasonButton",
+        about: "A Button that says why it cannot act, or what it is doing, in a tooltip. One button across available, unavailable (aria-disabled, so it keeps focus) and working. Tab to it while unavailable.",
+        covers: &["ReasonButton", "ReasonButtonProps", "reason_text"],
+        render: || html! { <tooltips::ReasonButtonPage /> },
+        holds: &[
+            hold(
+                plinth::class::BUTTON,
+                Size::Box,
+                Across::Only(&["state", "reason", "focus", "click"]),
+            ),
+            hold(
+                plinth::class::BUTTON,
+                Size::Height,
+                Across::Except(&["size"]),
+            ),
+            hold(
+                class::SAMPLE,
+                Size::Box,
+                Across::Only(&["state", "reason", "focus", "click"]),
+            ),
         ],
     },
     Page {
