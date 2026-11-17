@@ -1,0 +1,110 @@
+// Pager (src/pager.rs): page buttons in a fixed number of slots.
+//
+// - `.plinth-pager`: the row. It never wraps, and every button is as wide
+//   as the widest page number (`--pager-chars`, the digits of the page
+//   count, set by the component), so the row keeps its width from the first
+//   page to the last; in a container too narrow for them the buttons shrink
+//   together, the same at every page. `.plinth-disabled` and `.plinth-busy` mute it.
+// - `.plinth-pager-button`: a page, or the previous and next page. The
+//   current page (`aria-current`) is marked by colour and background, never
+//   its weight. `.plinth-pager-edge` (first and last page) is hidden on a
+//   phone.
+// - `.plinth-pager-gap`: the ellipsis for pages left out, a button's box.
+// - `.plinth-pager-mark`: the chevrons of a button; `.plinth-pager-flip`
+//   turns them to point back; `.plinth-pager-echo` is the second chevron of
+//   the first and last page's double mark.
+
+@use "tokens" as base;
+
+.plinth-pager {
+    --pager-button-width: max(
+        var(--control-height),
+        calc(var(--pager-chars) * 1ch + 2 * var(--space-2) + 2 * var(--space-px))
+    );
+
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    justify-content: center;
+    gap: var(--space-1);
+    max-width: 100%;
+    @include base.numeric;
+
+    &.plinth-disabled,
+    &.plinth-busy {
+        opacity: 0.6;
+    }
+
+    &.plinth-busy {
+        cursor: progress;
+    }
+}
+
+.plinth-pager-button {
+    display: inline-flex;
+    flex: 0 1 var(--pager-button-width);
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--pager-button-width);
+    height: var(--control-height);
+    margin: 0;
+    padding: 0;
+    @include base.reserved-border;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--text);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover:not(:disabled) {
+        background: color-mix(in srgb, var(--accent) 12%, transparent);
+    }
+
+    @include base.focus-ring;
+
+    &[aria-current]:not([aria-current="false"]) {
+        background: var(--accent);
+        color: var(--on-accent);
+        cursor: default;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.plinth-pager-edge {
+        @include base.below(phone) {
+            display: none;
+        }
+    }
+}
+
+.plinth-pager-gap {
+    display: inline-flex;
+    flex: 0 1 var(--pager-button-width);
+    min-width: 0;
+    align-items: center;
+    justify-content: center;
+    box-sizing: border-box;
+    width: var(--pager-button-width);
+    height: var(--control-height);
+    color: var(--muted);
+}
+
+.plinth-pager-mark {
+    display: inline-flex;
+    align-items: center;
+
+    &.plinth-pager-flip {
+        transform: rotate(180deg);
+    }
+}
+
+// The second chevron of a double mark, overlapping the first.
+.plinth-pager-echo {
+    margin-inline-start: calc(-0.6 * var(--glyph-size));
+}

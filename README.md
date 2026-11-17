@@ -985,6 +985,47 @@ their room. For markup plinth does not render, the mixins `table-base`
 (`$fixed`), `table-head-cell`, `table-cell` and `table-row-hover` give the
 same rules. New token: `--table-max-height`.
 
+## Pager and Disclosure
+
+`Pager` is page buttons in a fixed number of slots: first, previous, the
+numbers with gaps (`…`), next and last. `page` (from 0), `pages`, `on_page`
+(called with the page asked for), `slots` (default 7, at least `MIN_SLOTS`,
+5), `edges` (default true: the first and last page buttons; hidden below the
+phone breakpoint, and worth turning off in a narrow container), `label` ("Pages"),
+`first_label`, `previous_label`, `next_label`, `last_label`, `page_label`
+("Page", the number appended) and `disabled` and `busy` (the buttons keep
+their room and ignore presses). `pager_slots(pages, page, slots)` is the pure
+layout: every page when they fit, otherwise exactly `slots` entries, the
+first and last page always among them and each gap hiding at least two
+pages, so the count does not change with the page. `page_count(total, size)`
+rounds up, at least one. The current page is marked by `aria-current`, its
+colour and background, never its weight. `pager(disabled, busy)` and
+`pager_button(edge)` give the classes. Parts: `PAGER_BUTTON`, `PAGER_GAP`,
+`PAGER_MARK`, `PAGER_FLIP`, `PAGER_ECHO`, `PAGER_EDGE`.
+
+`Disclosure` is a summary row that toggles its body: `title`, `summary` (what
+it holds, beside the title while shut), `actions` (controls at the row's end,
+outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`
+(the body's, named by `aria-controls` while open), `disabled`, `class`,
+`testid`, and the children as the body, rendered only while open.
+`disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`). Parts:
+`DISCLOSURE_HEAD`, `DISCLOSURE_SUMMARY`, `DISCLOSURE_MARK`, `DISCLOSURE_TITLE`,
+`DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`, `DISCLOSURE_BODY`.
+
+Size guarantees: the Pager's slots are as many whatever the page, and each
+button and gap is as wide as the widest page number (`--pager-chars`, the
+digits of `pages`) with `numeric` figures, at least `--control-height`, so
+its width holds from the first page to the last (in a container too narrow
+the buttons shrink together, the same at every page); the current page adds
+no weight. The Disclosure's row is `--control-height` high shut or open, the
+mark turns inside its own box, and the title and summary are cut to one line;
+only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
+`PAGER_MARK`, `PAGER_FLIP`, `PAGER_ECHO`, `PAGER_EDGE`, `DISCLOSURE`,
+`DISCLOSURE_HEAD`, `DISCLOSURE_SUMMARY`, `DISCLOSURE_MARK`,
+`DISCLOSURE_TITLE`, `DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`,
+`DISCLOSURE_BODY` (`OPEN` is new too). New partials: `_pager.scss`,
+`_disclosure.scss`. New tokens: none (`--pager-chars` is set per Pager).
+
 ## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its

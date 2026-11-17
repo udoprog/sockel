@@ -1,0 +1,93 @@
+// Disclosure (src/disclosure.rs): a summary row that toggles its body.
+//
+// - `.plinth-disclosure`: a rule above the row; `.plinth-open` while the
+//   body shows.
+// - `.plinth-disclosure-head`: the row, one `--control-height` high shut or
+//   open: the toggle (`.plinth-disclosure-summary`, a button across the
+//   row) and the actions (`.plinth-disclosure-actions`) at its end.
+// - `.plinth-disclosure-mark`: the chevron in a box of its own; open turns
+//   it (`.plinth-open`) a quarter turn inside the box, which changes nothing around it.
+// - `.plinth-disclosure-title` and `.plinth-disclosure-detail`: the title and
+//   the muted summary of what it holds while shut, each cut to one line.
+// - `.plinth-disclosure-body`: the content, shown while open.
+
+@use "tokens" as base;
+
+.plinth-disclosure {
+    border-top: var(--space-px) solid var(--border);
+}
+
+.plinth-disclosure-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    height: var(--control-height);
+}
+
+.plinth-disclosure-summary {
+    display: flex;
+    flex: 1;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-width: 0;
+    height: 100%;
+    margin: 0;
+    padding: 0;
+    @include base.reserved-border;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: inherit;
+    font: inherit;
+    font-size: var(--text-sm);
+    text-align: start;
+    cursor: pointer;
+
+    @include base.focus-ring;
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.plinth-disclosure-mark {
+    display: inline-flex;
+    flex: none;
+    color: var(--muted);
+    transition: transform 0.15s ease;
+
+    &.plinth-open {
+        transform: rotate(90deg);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.plinth-disclosure-title {
+    flex: none;
+    max-width: 100%;
+    @include base.truncate;
+    font-weight: 600;
+}
+
+.plinth-disclosure-detail {
+    flex: 1;
+    min-width: 0;
+    @include base.truncate;
+    color: var(--muted);
+}
+
+.plinth-disclosure-actions {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.plinth-disclosure-body {
+    padding-block: var(--space-2) var(--space-3);
+}

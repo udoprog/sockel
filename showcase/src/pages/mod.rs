@@ -2,6 +2,7 @@ mod actions;
 mod badges;
 mod buttons;
 mod dialog;
+mod disclosures;
 mod fields;
 mod foundations;
 mod heads;
@@ -13,6 +14,7 @@ mod loading;
 mod media;
 mod menus;
 mod notices;
+mod pagers;
 mod popover;
 mod rows;
 mod steppers;
@@ -768,6 +770,54 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["Sort", "disabled", "Descending first", "focus", "click"]),
             ),
             hold(plinth::class::TABLE_FRAME, Size::Width, Across::All),
+        ],
+    },
+    Page {
+        id: "pager",
+        title: "Pager",
+        about: "Page buttons in a fixed number of slots: first, previous, numbers with gaps, next and last. The slot count and each button's width never change with the page, and the current page is marked without bold.",
+        covers: &[
+            "Pager",
+            "PagerProps",
+            "Slot",
+            "MIN_SLOTS",
+            "page_count",
+            "pager",
+            "pager_button",
+            "pager_slots",
+        ],
+        render: || html! { <pagers::PagerPage /> },
+        holds: &[
+            hold(
+                plinth::class::PAGER,
+                Size::Width,
+                Across::Only(&["disabled", "busy", "focus", "click"]),
+            ),
+            hold(plinth::class::PAGER, Size::Height, Across::All),
+        ],
+    },
+    Page {
+        id: "disclosure",
+        title: "Disclosure",
+        about: "A summary row that toggles its body (aria-expanded). The row is one height shut or open: the mark turns inside its box and the summary is cut to one line.",
+        covers: &["Disclosure", "DisclosureProps", "disclosure"],
+        render: || html! { <disclosures::DisclosurePage /> },
+        holds: &[
+            hold(plinth::class::DISCLOSURE, Size::Width, Across::All),
+            hold(
+                plinth::class::DISCLOSURE_HEAD,
+                Size::Box,
+                Across::Only(&[
+                    "Title", "Summary", "open", "actions", "disabled", "focus", "click",
+                ]),
+            ),
+            hold(
+                plinth::class::DISCLOSURE_MARK,
+                Size::Box,
+                Across::Only(&[
+                    "Title", "Summary", "open", "actions", "disabled", "focus", "click",
+                ]),
+            ),
         ],
     },
     Page {

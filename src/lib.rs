@@ -65,6 +65,10 @@
 //! - [`Table`] (`.table`) with [`TableRow`] and [`TableCell`]: a table in a
 //!   scroll area, its bulk actions' room reserved; [`SortHeader`]
 //!   (`.sort-header`): a column heading whose sort mark keeps its box.
+//! - [`Pager`] (`.pager`): page buttons in a fixed number of slots, first,
+//!   previous, numbers with gaps, next and last, so it keeps its width from
+//!   the first page to the last; [`Disclosure`] (`.disclosure`): a summary
+//!   row that toggles its body, one height shut or open.
 //! - [`Toolbar`] (`.toolbar`): one line of controls.
 //! - [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
 //!   an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
@@ -117,6 +121,7 @@ mod checkbox;
 mod chip;
 mod choice;
 mod dialog;
+mod disclosure;
 mod empty_state;
 mod error_box;
 mod field;
@@ -132,6 +137,7 @@ mod loadable;
 mod menu;
 mod nav_list;
 mod notice;
+mod pager;
 mod popover;
 mod roving;
 mod rows;
@@ -158,6 +164,7 @@ pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switc
 pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, choice};
 pub use dialog::{Dialog, DialogDismiss, DialogProps, DialogSize, dialog};
+pub use disclosure::{Disclosure, DisclosureProps, disclosure};
 pub use empty_state::{EmptyState, EmptyStateProps, empty_state};
 pub use error_box::{ErrorBox, ErrorBoxProps};
 pub use field::{
@@ -188,6 +195,7 @@ pub use menu::{
 };
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 pub use notice::{Notice, NoticeProps, notice};
+pub use pager::{MIN_SLOTS, Pager, PagerProps, Slot, page_count, pager, pager_button, pager_slots};
 pub use popover::{
     Dismiss, OVERLAY_ID, Placed, Popover, PopoverAlign, PopoverProps, Rect, Side, overlay, place,
     popover, use_popover,
