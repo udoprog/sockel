@@ -223,10 +223,7 @@ pub fn report(holds: &[Hold], baseline: &Boxes, states: &[State]) -> (bool, Stri
 mod dom {
     use wasm_bindgen::JsCast;
     use wasm_bindgen_futures::JsFuture;
-    use web_sys::{
-        Document, Element, Event, EventInit, HtmlElement, HtmlSelectElement, KeyboardEvent,
-        KeyboardEventInit,
-    };
+    use web_sys::{Document, Element, HtmlElement, KeyboardEvent, KeyboardEventInit};
 
     use super::{Boxes, Hold, Rect, Size, State, class};
 
@@ -375,12 +372,30 @@ mod dom {
             .to_owned()
     }
 
-    fn change(el: &Element) {
-        let init = EventInit::new();
-        init.set_bubbles(true);
-        if let Ok(event) = Event::new_with_event_init_dict("change", &init) {
-            let _ = el.dispatch_event(&event);
+    /// A Select's options, opened from its face.
+    async fn open(doc: &Document, face: &HtmlElement) -> Vec<HtmlElement> {
+        face.click();
+        settle().await;
+        let Some(list) = face
+            .get_attribute("aria-controls")
+            .and_then(|id| doc.get_element_by_id(&id))
+        else {
+            return Vec::new();
+        };
+        let Ok(nodes) = list.query_selector_all("[role=option]") else {
+            return Vec::new();
+        };
+        (0..nodes.length())
+            .filter_map(|i| nodes.item(i)?.dyn_into().ok())
+            .collect()
+    }
+
+    /// Picks a Select's `index`th option, from its face.
+    async fn pick(doc: &Document, face: &HtmlElement, index: usize) {
+        if let Some(option) = open(doc, face).await.get(index) {
+            option.click();
         }
+        settle().await;
     }
 
     /// Closes what a click opened, as a user's Escape would.
@@ -401,29 +416,46 @@ mod dom {
         let mut states = Vec::new();
         let baseline = measure(&doc, holds);
 
-        let controls = list(&doc, "main select, main input[type=checkbox]");
+        let controls = list(
+            &doc,
+            "main [role=combobox][aria-haspopup=listbox], main input[type=checkbox]",
+        );
         for control in controls.iter().filter(|c| !in_frame(c)) {
             let label = label_of(control);
-            if let Some(select) = control.dyn_ref::<HtmlSelectElement>() {
-                let own = select.selected_index();
-                for i in (0..select.length() as i32).filter(|i| *i != own) {
-                    let value = select
-                        .item(i as u32)
-                        .and_then(|o| o.text_content())
-                        .unwrap_or_default();
-                    select.set_selected_index(i);
-                    change(control);
-                    settle().await;
+            let Some(input) = control.dyn_ref::<HtmlElement>() else {
+                continue;
+            };
+            if control.get_attribute("role").as_deref() == Some("combobox") {
+                let options = open(&doc, input).await;
+                let values: Vec<String> = options
+                    .iter()
+                    .map(|o| o.text_content().unwrap_or_default().trim().to_owned())
+                    .collect();
+                let own = options
+                    .iter()
+                    .position(|o| o.get_attribute("aria-selected").as_deref() == Some("true"));
+                // Picking the chosen one closes it unchanged.
+                if let Some(o) = own.and_then(|i| options.get(i)) {
+                    o.click();
+                } else {
+                    escape(control);
+                }
+                settle().await;
+                for (i, value) in values.into_iter().enumerate() {
+                    if Some(i) == own {
+                        continue;
+                    }
+                    pick(&doc, input, i).await;
                     states.push(State {
                         control: label.clone(),
                         value,
                         boxes: measure(&doc, holds),
                     });
                 }
-                select.set_selected_index(own);
-                change(control);
-                settle().await;
-            } else if let Some(input) = control.dyn_ref::<HtmlElement>() {
+                if let Some(own) = own {
+                    pick(&doc, input, own).await;
+                }
+            } else {
                 input.click();
                 settle().await;
                 states.push(State {
@@ -436,7 +468,7 @@ mod dom {
             }
         }
 
-        let focusable = list(&doc, "main button, main a[href], main input, main select");
+        let focusable = list(&doc, "main button, main a[href], main input");
         for (i, el) in focusable.iter().filter(|e| in_frame(e)).enumerate() {
             if let Some(el) = el.dyn_ref::<HtmlElement>() {
                 let _ = el.focus();

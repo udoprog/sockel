@@ -1,7 +1,7 @@
 //! The controls a page sets its component's props with, and the frames it
 //! shows the component in.
 
-use web_sys::{HtmlInputElement, HtmlSelectElement};
+use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
 use crate::class;
@@ -17,28 +17,23 @@ pub struct SelectProps<T: PartialEq + 'static> {
     pub on_change: Callback<T>,
 }
 
-/// One of a fixed set of values, by name.
+/// One of a fixed set of values, by name: plinth's own Select.
 #[function_component]
 pub fn Select<T>(props: &SelectProps<T>) -> Html
 where
     T: PartialEq + Copy + 'static,
 {
-    let options = props.options;
-    let onchange = props.on_change.reform(move |e: Event| {
-        let index = e
-            .target_unchecked_into::<HtmlSelectElement>()
-            .selected_index();
-        options[usize::try_from(index).unwrap_or_default()].1
-    });
+    let options: Vec<_> = props
+        .options
+        .iter()
+        .map(|(name, value)| plinth::SelectOption::new(*value, *name))
+        .collect();
 
     html! {
         <Stack tag="label" gap={Gap::Snug}>
             <span class={class::CONTROL_LABEL}>{ props.label.clone() }</span>
-            <select class={classes!(plinth::class::INPUT, plinth::class::SMALL)} {onchange}>
-                { for options.iter().map(|(name, value)| html! {
-                    <option selected={*value == props.value}>{ *name }</option>
-                }) }
-            </select>
+            <plinth::Select<T> {options} value={Some(props.value)} on_change={props.on_change.clone()}
+                label={props.label.clone()} size={plinth::InputSize::Small} />
         </Stack>
     }
 }

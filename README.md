@@ -1958,7 +1958,12 @@ cd showcase
 trunk serve --port 8095 --open
 ```
 
-Pick a free port. A new component lands with its showcase page: add it to
+Pick a free port. The showcase dogfoods plinth: its page controls and
+its Theme picker are plinth's own `Select`, so every page also exercises
+it. Neither the showcase nor plinth's components render a native
+`<select>`, whose open list the OS draws outside plinth's tokens.
+
+A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
 `cargo test --workspace` fails.
 
@@ -1982,9 +1987,10 @@ single value as `"label=value"`, or the probe's own `focus` and
 
 The panel in the window's corner (fixed, so it never moves the page)
 runs the probe: it sets each control to each of its values in turn,
-one control at a time, toggles each checkbox, then focuses each control
-in the frames and clicks each button there (pressing Escape after each
-click, so nothing it opened stays open), measuring every declared
+one control at a time (opening its Select and clicking the option),
+toggles each checkbox, then focuses each control in the frames and
+clicks each button there (pressing Escape after each click, so nothing
+it opened stays open), measuring every declared
 part in both frames after each state. Its `<pre>` reads `probe: stable`
 when no declared box moved or resized by more than half a pixel, and
 otherwise lists each change by state, frame and part. The panel's
