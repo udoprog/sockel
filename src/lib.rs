@@ -791,7 +791,9 @@
 //! - `variant` ([`ButtonVariant`]): `Secondary` (the plain button, the
 //!   default), `Primary` (`sockel::class::PRIMARY`), `Ghost` (`GHOST`, no
 //!   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
-//!   (`DANGER`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
+//!   (`DANGER`; with `Ghost`, passed as `class`, it is the quiet destructive
+//!   button: no edge, danger ink, a danger tint on hover; configured as
+//!   `ghost-danger` in `$button-colours`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
 //!   padding or height of its own, for an opener whose content is its face,
 //!   such as a swatch; the focus outline kept).
 //! - `size` ([`ButtonSize`]): `Regular` (`--control-height`), `Small` (`SMALL`,

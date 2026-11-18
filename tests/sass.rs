@@ -123,6 +123,19 @@ fn error_box_settings() {
 }
 
 #[test]
+fn a_ghost_danger_button_has_no_edge() {
+    let Some(sass) = sass() else { return };
+    let css = compile(&sass, "style/_index.scss");
+    let rule = css
+        .split(".sockel-button.sockel-ghost.sockel-danger {")
+        .nth(1)
+        .and_then(|rest| rest.split('}').next())
+        .expect("a ghost danger rule");
+    assert!(rule.contains("--button-edge: transparent;"));
+    assert!(rule.contains("--button-ink: var(--danger);"));
+}
+
+#[test]
 fn notice_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

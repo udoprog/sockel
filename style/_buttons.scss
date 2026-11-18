@@ -6,7 +6,8 @@
 //   is an outline. Parts: `-content` (icon and label), `-icon`, `-label`,
 //   and `-spinner`, laid over the content while busy.
 // - Variants: plain (secondary), `.sockel-primary`, `.sockel-ghost`,
-//   `.sockel-quiet`, `.sockel-danger`, `.sockel-success`; `.sockel-bare`, no
+//   `.sockel-quiet`, `.sockel-danger`, `.sockel-success`; `.sockel-ghost` with
+//   `.sockel-danger` is the quiet destructive button (no edge, red ink); `.sockel-bare`, no
 //   fill, edge, padding or height of its own: its content is its face (a
 //   swatch), only the focus outline kept.
 // - Sizes: regular, `.sockel-small`, `.sockel-touch`.
@@ -48,6 +49,12 @@
 
     &.sockel-success {
         @include base.button-variant(success);
+    }
+
+    @if base.emits("buttons.ghost") {
+        &.sockel-ghost.sockel-danger {
+            @include base.button-variant(ghost-danger);
+        }
     }
 
     &.sockel-small {

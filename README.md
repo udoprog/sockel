@@ -517,7 +517,7 @@ source for the value. The module must emit no CSS.
 | `$button-primary-weight` | `null` (a primary button keeps the weight it inherits) |
 | `$button-radius` | `var(--radius-inner, var(--radius-sm))` |
 | `$button-gap`, `$button-press-shade`, `$button-transition` | `null` (no gap on the button itself, for an app's markup that puts its icon and text straight in it; no shade laid over it while pressed down; no transition) |
-| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`, each in place of sockel's; a variant falls back on the plain button's |
+| `$button-colours` | `()`: per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `ghost-danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`, each in place of sockel's; a variant falls back on the plain button's |
 | `$button-text`, `$button-text-small` | `null` (the parent's), `var(--text-sm)` |
 | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
@@ -798,7 +798,9 @@ icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare 
 - `variant` ([`ButtonVariant`]): `Secondary` (the plain button, the
   default), `Primary` (`sockel::class::PRIMARY`), `Ghost` (`GHOST`, no
   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
-  (`DANGER`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
+  (`DANGER`; with `Ghost`, passed as `class`, it is the quiet destructive
+  button: no edge, danger ink, a danger tint on hover; configured as
+  `ghost-danger` in `$button-colours`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
   padding or height of its own, for an opener whose content is its face,
   such as a swatch; the focus outline kept).
 - `size` ([`ButtonSize`]): `Regular` (`--control-height`), `Small` (`SMALL`,

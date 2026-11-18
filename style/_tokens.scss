@@ -127,7 +127,8 @@ $button-gap: null !default;
 $button-press-shade: null !default;
 $button-transition: null !default;
 // A button's colours per variant, over sockel's: a map from `secondary`,
-// `primary`, `ghost`, `quiet`, `danger` or `success` to any of `fill`,
+// `primary`, `ghost`, `quiet`, `danger`, `ghost-danger` (a ghost button that
+// is also danger: `.sockel-ghost.sockel-danger`) or `success` to any of `fill`,
 // `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`,
 // `pressed-ink` and `pressed-edge`. A variant falls back on the plain button's.
 $button-colours: () !default;
@@ -1127,7 +1128,7 @@ $-feature-parts: (
 }
 
 // The colours of a `.sockel-button` variant: `secondary` (the plain
-// button), `primary`, `ghost`, `quiet`, `danger` or `success`, each with
+// button), `primary`, `ghost`, `quiet`, `danger`, `ghost-danger` or `success`, each with
 // its `$button-colours` in place of sockel's.
 $-button-variants: (
     secondary: (fill: var(--surface), ink: var(--text), edge: var(--border), hover-edge: var(--accent)),
@@ -1135,12 +1136,19 @@ $-button-variants: (
     ghost: (fill: transparent),
     quiet: (fill: transparent, ink: var(--muted), edge: transparent, hover-edge: var(--border)),
     danger: (ink: var(--danger), edge: var(--danger), hover-edge: var(--text)),
+    ghost-danger: (
+        ink: var(--danger),
+        edge: transparent,
+        hover-edge: transparent,
+        hover-fill: color-mix(in srgb, var(--danger) 12%, transparent),
+        hover-ink: var(--danger),
+    ),
     success: (ink: var(--success), edge: var(--success), hover-edge: var(--text)),
 );
 
 @mixin button-variant($variant) {
     @if not map.has-key($-button-variants, $variant) {
-        @error "button-variant: secondary, primary, ghost, quiet, danger or success, not #{$variant}";
+        @error "button-variant: secondary, primary, ghost, quiet, danger, ghost-danger or success, not #{$variant}";
     }
 
     $colours: map.get($-button-variants, $variant);
