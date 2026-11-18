@@ -866,6 +866,10 @@ pub struct PopoverProps {
     /// bound to scroll in): a list opened at the current choice.
     #[prop_or_default]
     pub on_placed: Option<Callback<()>>,
+    /// Its ARIA role, `dialog` by default: `tooltip` for a description shown
+    /// on hover or focus, which takes no focus and is no dialog.
+    #[prop_or(AttrValue::Static("dialog"))]
+    pub role: AttrValue,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -1026,7 +1030,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
                     props.match_anchor.then_some(class::MATCH_ANCHOR),
                     props.class.clone()
                 )}
-                role="dialog" aria-label={props.title.clone()} {style} {onkeydown} {onmousedown}
+                role={props.role.clone()} aria-label={props.title.clone()} {style} {onkeydown} {onmousedown}
                 tabindex={props.focus_first.then_some("-1")}
                 onpointerenter={props.on_pointer_enter.clone()}
                 onpointerleave={props.on_pointer_leave.clone()}
