@@ -359,6 +359,19 @@ $notice-line-height: 1.4 !default;
 $notice-icon-height: var(--control-height-small) !default;
 $notice-icon-ink: var(--tone) !default;
 $notice-danger-ink: null !default;
+// An EmptyState's padding, edge (a border, e.g. `1px dashed var(--border)`),
+// corner radius (`-compact-radius` of the compact one) and icon size, and its
+// icon's fill, ink, box (width and height) and radius, to draw it as a
+// card with a round icon (`null`: none emitted, the icon the text's size).
+$empty-state-padding: var(--space-7) var(--space-4) !default;
+$empty-state-edge: null !default;
+$empty-state-radius: null !default;
+$empty-state-compact-radius: null !default;
+$empty-state-icon-size: var(--text-2xl) !default;
+$empty-state-icon-fill: null !default;
+$empty-state-icon-ink: null !default;
+$empty-state-icon-box: null !default;
+$empty-state-icon-radius: null !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
 // weight, and its cause's font and size (`null`: none, or inherited).
 $error-box-padding: var(--space-4) !default;

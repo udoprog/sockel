@@ -1313,6 +1313,10 @@ gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
 and actions (its children). `compact` (`COMPACT`) is one row for a list or a
 table. `empty_state(compact)` gives the classes.
 
+An empty state's look is configured by `$empty-state-padding`, `-edge` (a border), `-radius`,
+`-compact-radius`, `-icon-size`, `-icon-fill`, `-icon-ink`, `-icon-box` (width and height) and
+`-icon-radius` (README, "Configuration"); with the edge, radius and a round filled icon it is a dashed card.
+
 A notice's look is configured by `$notice-padding`, `-gap`, `-radius`, `-fill`, `-edge`, `-align`,
 `-min-height`, `-body-padding`, `-line-height`, `-icon-height`, `-icon-ink` and `-danger-ink`
 (README, "Configuration"); `-min-height`, `-body-padding`, `-line-height` and `-icon-height` set to

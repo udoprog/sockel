@@ -1,0 +1,9 @@
+// A project whose empty states are dashed cards with a round icon.
+@use "../../style/tokens" with (
+    $empty-state-edge: 1px dashed gray,
+    $empty-state-radius: 12px,
+    $empty-state-icon-fill: rgba(1, 2, 3, 0.1),
+    $empty-state-icon-box: 3rem,
+    $empty-state-icon-radius: 50%
+);
+@use "../../style/notices";

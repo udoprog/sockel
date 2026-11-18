@@ -169,7 +169,7 @@
 
 @if base.emits("notices.empty-state") {
     .sockel-empty-state {
-        --empty-icon-size: var(--text-2xl);
+        --empty-icon-size: #{base.$empty-state-icon-size};
         --empty-nowrap: normal;
         --empty-hint-flex: 0 1 auto;
         --empty-actions-margin: var(--space-2) 0 0;
@@ -180,7 +180,9 @@
         align-items: center;
         box-sizing: border-box;
         min-width: 0;
-        padding: var(--space-7) var(--space-4);
+        padding: base.$empty-state-padding;
+        border: base.$empty-state-edge;
+        border-radius: base.$empty-state-radius;
         color: var(--muted);
         text-align: center;
 
@@ -194,6 +196,7 @@
             height: var(--control-height);
             padding: 0 var(--space-3);
             overflow: hidden;
+            border-radius: base.$empty-state-compact-radius;
             text-align: start;
         }
     }
@@ -203,6 +206,11 @@
         flex: none;
         align-items: center;
         justify-content: center;
+        width: base.$empty-state-icon-box;
+        height: base.$empty-state-icon-box;
+        border-radius: base.$empty-state-icon-radius;
+        background: base.$empty-state-icon-fill;
+        color: base.$empty-state-icon-ink;
         font-size: var(--empty-icon-size);
         line-height: 1;
     }

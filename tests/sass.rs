@@ -123,6 +123,25 @@ fn error_box_settings() {
 }
 
 #[test]
+fn empty_state_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    let rule = |css: &str| {
+        css.split(".sockel-empty-state {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("an empty state rule")
+            .to_string()
+    };
+    assert!(!rule(&defaults).contains("border:"));
+    let css = compile(&sass, "tests/fixtures/empty_state_settings.scss");
+    assert!(rule(&css).contains("border: 1px dashed gray;"));
+    assert!(rule(&css).contains("border-radius: 12px;"));
+    assert!(css.contains("width: 3rem;"));
+    assert!(css.contains("border-radius: 50%;"));
+}
+
+#[test]
 fn a_ghost_danger_button_has_no_edge() {
     let Some(sass) = sass() else { return };
     let css = compile(&sass, "style/_index.scss");
