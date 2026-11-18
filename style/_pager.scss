@@ -32,7 +32,7 @@
 
 .sockel-pager {
     --pager-button-width: max(
-        var(--control-height),
+        #{base.$pager-button-height},
         calc(var(--pager-chars) * 1ch + 2 * #{base.$pager-button-padding} + 2 * var(--space-px))
     );
 

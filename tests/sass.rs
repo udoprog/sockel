@@ -174,6 +174,7 @@ fn pager_settings() {
     let css = compile(&sass, "tests/fixtures/pager_settings.scss");
     assert!(css.contains("height: 32px;\n  min-height: 0;\n  margin: 0;"));
     assert!(css.contains("2 * 4px"));
+    assert!(css.contains("max(\n      32px,\n"));
     assert!(css.contains("border-color: red;"));
     assert!(css.contains("font-size: 13px;"));
 }
