@@ -2,7 +2,8 @@
 // styles: hooks for an app's own rules (`.sockel-page-head.sockel-crumb`,
 // `.sockel-page-head-back`, `.sockel-iconed.sockel-trailing`, an image's
 // `.sockel-loading` and `.sockel-empty`, `.sockel-ratio` for one of its own
-// ratio, a stepper's `.sockel-zero` unless its settings style it), and
+// ratio, a stepper's `.sockel-zero` and a choice option's `.sockel-icon`
+// unless their settings style them), and
 // `#sockel-overlay`, the overlay layer's id. sockel-build makes a constant
 // of each; they add no CSS.
 
@@ -14,5 +15,6 @@ $classes: (
     "sockel-empty",
     "sockel-ratio",
     "sockel-overlay",
-    "sockel-zero"
+    "sockel-zero",
+    "sockel-icon"
 );
