@@ -1622,7 +1622,9 @@ is swallowed at the window).
   `ReorderHandle` renders nothing, a press on it starts no drag), but the
   others land beside it, so a heading or marker between rows is a drop
   position. `on_move`'s indices count it; map `to` to what it means with
-  the list without the moved row (what sits at `to`, or the end).
+  the list without the moved row (what sits at `to`, or the end). The
+  announcements' positions count only the rows that move, so both sides
+  of a fixed row are the same position.
 - `lifted_only` (an item): `hidden` until a row is lifted, by pointer or
   keyboard, a place to drop that shows only then (a marker at the end).
   It is always among the children, so the indices do not change when it
@@ -1660,7 +1662,8 @@ is swallowed at the window).
   puts it back.
 - Keyboard, on a focused handle: Space or Enter lifts, the arrows, Home and
   End aim, Space or Enter drops, Escape or leaving the handle cancels.
-  Alt and an arrow moves the row at once. Focus follows the moved row.
+  Alt and an arrow moves the row at once. Focus follows the moved row,
+  wherever the app's new order puts it.
 - The row it lands beside is marked `DROP_BEFORE` or `DROP_AFTER`.
 - `text: Callback<ReorderText, String>` gives the handle's name
   (`Handle`), its hint (`Hint`, its `aria-describedby`) and the
@@ -1682,7 +1685,10 @@ margins; the order changes once, on the drop. A keyboard lift moves only
 the marks. The handle is `--control-height-small` square with a reserved
 border; hover, focus and lifted change colours only. Settings:
 `$drag-handle-size`, `$drag-handle-phone-size` (`null`: as above the
-phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`. New
+phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`,
+`$drag-handle-compact-size` (a handle with `COMPACT`, as its
+`ReorderHandle`'s `class`: only as big as its glyph, `1rem`). An app's
+blanket button `min-height` or `min-width` does not stretch a handle. New
 classes:
 `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
 `DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`. New partial: `_reorder.scss`. New tokens: none.

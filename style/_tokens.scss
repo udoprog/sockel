@@ -312,6 +312,7 @@ $drag-handle-size: var(--control-height-small) !default;
 $drag-handle-phone-size: null !default;
 $drag-handle-radius: var(--radius-xs) !default;
 $drag-handle-hover-fill: color-mix(in srgb, var(--text) 6%, transparent) !default;
+$drag-handle-compact-size: 1rem !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
 // weight, and its cause's font and size (`null`: none, or inherited).
 $error-box-padding: var(--space-4) !default;

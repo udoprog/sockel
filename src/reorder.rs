@@ -193,6 +193,17 @@ pub fn edge_step(y: f64, top: f64, bottom: f64) -> f64 {
     }
 }
 
+/// Where a row lifted from `from` lands at `to` among the rows that move,
+/// from 1, and how many move: fixed rows (`stays`) are not counted.
+fn place(stays: &[bool], from: usize, to: usize) -> (usize, usize) {
+    let before = (0..stays.len())
+        .filter(|i| *i != from)
+        .take(to)
+        .filter(|i| !stays[*i])
+        .count();
+    (before + 1, stays.iter().filter(|s| !**s).count())
+}
+
 /// Moves `list[from]` to `to`, as [`Reorder`]'s `on_move` reports it.
 pub fn move_item<T>(list: &mut Vec<T>, from: usize, to: usize) {
     if from < list.len() {
@@ -555,9 +566,11 @@ struct Live {
     lift: Option<Lift>,
     drag: Option<Drag>,
     status: String,
-    /// The key of a row just moved by keyboard and its index, to focus once
-    /// the app has rendered the new order.
-    focus: Option<(AttrValue, usize)>,
+    /// The key of a row just moved and the keys before the move: its
+    /// handle is focused wherever the app's new order puts it.
+    focus: Option<(AttrValue, Vec<AttrValue>)>,
+    /// The keys as last rendered.
+    keys: Vec<AttrValue>,
     /// The aim last told `on_aim`.
     aimed: Option<(usize, usize)>,
 }
@@ -662,6 +675,12 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     } else {
         props.rows.iter().map(|r| r.key.clone()).collect()
     };
+    let stays: Rc<[bool]> = if items {
+        props.children.iter().map(|c| c.props.fixed).collect()
+    } else {
+        vec![false; count].into()
+    };
+    live.borrow_mut().keys = keys.clone();
 
     {
         let live = live.clone();
@@ -671,11 +690,13 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         let grid = props.grid;
         use_effect(move || {
             let pending = live.borrow().focus.clone();
-            if let Some((key, to)) = pending
-                && keys.get(to) == Some(&key)
+            if let Some((key, before)) = pending
+                && keys != before
             {
                 live.borrow_mut().focus = None;
-                if let Some(handle) = handle_at(&list, to) {
+                if let Some(at) = keys.iter().position(|k| *k == key)
+                    && let Some(handle) = handle_at(&list, at)
+                {
                     let _ = handle.focus();
                 }
             }
@@ -707,6 +728,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             say: say.clone(),
             index,
             count,
+            stays: stays.clone(),
             name,
             key: keys[index].clone(),
             quick: props.quick_keys,
@@ -814,6 +836,7 @@ impl PartialEq for Grip {
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
+            && a.stays == b.stays
             && (a.body, a.auto, a.grid, a.disabled, a.fixed)
                 == (b.body, b.auto, b.grid, b.disabled, b.fixed)
             && (&a.name, &a.key) == (&b.name, &b.key)
@@ -854,6 +877,8 @@ struct Ctx {
     say: Rc<dyn Fn(ReorderText) -> String>,
     index: usize,
     count: usize,
+    /// Which rows are fixed, by index.
+    stays: Rc<[bool]>,
     name: AttrValue,
     key: AttrValue,
     /// The arrows move at once (`quick_keys`).
@@ -872,39 +897,44 @@ impl Ctx {
     }
 
     fn lifted(&self, at: usize) -> ReorderText {
+        let (position, count) = place(&self.stays, self.index, at);
         ReorderText::Lifted {
             name: self.name.clone(),
-            position: at + 1,
-            count: self.count,
+            position,
+            count,
         }
     }
 
     fn moving(&self, at: usize) -> ReorderText {
+        let (position, count) = place(&self.stays, self.index, at);
         ReorderText::Moving {
             name: self.name.clone(),
-            position: at + 1,
-            count: self.count,
+            position,
+            count,
         }
     }
 
     fn cancelled(&self) -> ReorderText {
+        let (position, count) = place(&self.stays, self.index, self.index);
         ReorderText::Cancelled {
             name: self.name.clone(),
-            position: self.index + 1,
-            count: self.count,
+            position,
+            count,
         }
     }
 
     /// Ends a lift at `to`: the one place the order changes.
     fn drop_at(&self, to: usize) {
         if to != self.index {
+            let before = self.live.borrow().keys.clone();
             self.on_move.emit((self.index, to));
-            self.live.borrow_mut().focus = Some((self.key.clone(), to));
+            self.live.borrow_mut().focus = Some((self.key.clone(), before));
         }
+        let (position, count) = place(&self.stays, self.index, to);
         self.announce(ReorderText::Dropped {
             name: self.name.clone(),
-            position: to + 1,
-            count: self.count,
+            position,
+            count,
         });
         self.live.borrow_mut().lift = None;
         self.redraw.force_update();
@@ -1328,6 +1358,19 @@ mod tests {
         assert_eq!(edge_step(120.0, 100.0, 500.0), -STEP / 2.0);
         assert_eq!(edge_step(500.0, 100.0, 500.0), STEP);
         assert_eq!(edge_step(480.0, 100.0, 500.0), STEP / 2.0);
+    }
+
+    #[test]
+    fn positions_count_only_the_rows_that_move() {
+        let stays = [false, false, true, false];
+        assert_eq!(place(&stays, 0, 0), (1, 3));
+        assert_eq!(place(&stays, 1, 1), (2, 3));
+        // Either side of the fixed row: last but one, or after it.
+        assert_eq!(place(&stays, 0, 1), (2, 3));
+        assert_eq!(place(&stays, 0, 2), (2, 3));
+        assert_eq!(place(&stays, 0, 3), (3, 3));
+        assert_eq!(place(&stays, 3, 0), (1, 3));
+        assert_eq!(place(&[false; 4], 2, 3), (4, 4));
     }
 
     #[test]
