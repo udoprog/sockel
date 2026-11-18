@@ -1448,6 +1448,9 @@ the owner cuts it, and its events still bubble through the owner. Props:
   `[autofocus]` or `[data-autofocus]` element, else its body's first
   control, else the surface (then `tabindex="-1"`), as in a [`Dialog`]: for a
   popover of fields or choices opened from the keyboard.
+- `on_placed` (`Option<Callback<()>>`): emitted once it is placed and shown,
+  such as to scroll a list to its current row, which cannot scroll before
+  the popover's height is bound.
 - `within` (a selector): placed and kept inside the anchor's closest
   ancestor matching it, cut to the viewport, rather than the viewport
   alone: a popover raised in one of an app's docked windows stays over

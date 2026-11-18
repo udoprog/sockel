@@ -861,6 +861,11 @@ pub struct PopoverProps {
     /// choices opened from the keyboard.
     #[prop_or_default]
     pub focus_first: bool,
+    /// Emitted once it has been placed and is shown, for an owner that
+    /// scrolls its content to a row only then (before, it has no height
+    /// bound to scroll in): a list opened at the current choice.
+    #[prop_or_default]
+    pub on_placed: Option<Callback<()>>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -931,9 +936,13 @@ pub fn Popover(props: &PopoverProps) -> Html {
     );
     {
         let (focus, first, node) = (props.focus.clone(), props.focus_first, node.clone());
+        let on_placed = props.on_placed.clone();
         use_effect_with(placed.is_some(), move |&placed| {
             if !placed {
                 return;
+            }
+            if let Some(on_placed) = &on_placed {
+                on_placed.emit(());
             }
             let target = match focus {
                 Some(focus) => focus.cast::<HtmlElement>(),
@@ -1395,6 +1404,7 @@ mod tests {
             close_label: None,
             focus: None,
             focus_first: false,
+            on_placed: None,
             class: Classes::new(),
             testid: None,
             on_pointer_enter: None,
