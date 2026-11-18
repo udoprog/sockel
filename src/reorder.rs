@@ -6,7 +6,8 @@ use std::rc::Rc;
 use phrasebook02::yew023::use_phrases_with;
 use phrasebook02::{Args, Phrases};
 use wasm_bindgen::JsCast;
-use web_sys::{Element, HtmlElement};
+use wasm_bindgen::closure::Closure;
+use web_sys::{DomRect, Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
@@ -164,11 +165,13 @@ pub fn drag_target(middles: &[f64], from: usize, top: f64, bottom: f64) -> usize
 
 /// The index a row lifted from `from` lands at in a wrapping layout while
 /// its middle is at (`x`, `y`), among the rows' `centers` measured at the
-/// press: that of the nearest cell, as an index in the list without the row.
+/// press: that of the nearest cell (one without a box, `NaN`, is none), as
+/// an index in the list without the row.
 pub fn grid_target(centers: &[(f64, f64)], from: usize, x: f64, y: f64) -> usize {
     centers
         .iter()
         .enumerate()
+        .filter(|(_, c)| !c.0.is_nan() && !c.1.is_nan())
         .min_by(|(_, a), (_, b)| {
             (a.0 - x)
                 .hypot(a.1 - y)
@@ -290,10 +293,30 @@ pub struct ReorderItemProps {
     pub id: AttrValue,
     /// What the announcements and the handle's name call the row.
     pub name: AttrValue,
+    /// The row stays where it is and has no handle, but the others land
+    /// beside it: a heading or a marker among them.
+    #[prop_or_default]
+    pub fixed: bool,
+    /// Shown only while a row is lifted, as a place to drop it (a marker
+    /// at the list's end); best last, so no row moves when it shows.
+    #[prop_or_default]
+    pub lifted_only: bool,
+    /// The list's current row (`aria-current`).
+    #[prop_or_default]
+    pub current: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Never the click a drag of it ends in.
+    #[prop_or_default]
+    pub onclick: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub oncontextmenu: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub onmouseenter: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub onmouseleave: Callback<MouseEvent>,
     #[prop_or_default]
     pub children: Html,
 }
@@ -303,7 +326,10 @@ pub struct ReorderItemProps {
 #[function_component]
 pub fn ReorderItem(props: &ReorderItemProps) -> Html {
     html! {
-        <div class={props.class.clone()} data-testid={props.testid.clone()}>
+        <div class={props.class.clone()} data-testid={props.testid.clone()}
+            aria-current={props.current.then_some("true")}
+            onclick={props.onclick.clone()} oncontextmenu={props.oncontextmenu.clone()}
+            onmouseenter={props.onmouseenter.clone()} onmouseleave={props.onmouseleave.clone()}>
             { props.children.clone() }
         </div>
     }
@@ -369,6 +395,10 @@ pub struct ReorderProps {
     /// nearest cell, and the drop is marked at the row's side.
     #[prop_or_default]
     pub grid: bool,
+    /// Where a lifted row aims, `(from, to)` as `on_move` would report it,
+    /// each time that changes; `None` once it is set down.
+    #[prop_or_default]
+    pub on_aim: Callback<Option<(usize, usize)>>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -382,11 +412,10 @@ struct Lift {
     pointer: bool,
 }
 
-struct Drag {
-    id: i32,
-    from: usize,
-    /// Where it was pressed, within the page and what scrolls the list.
-    start: (f64, f64),
+/// The rows as measured for a drag, within the page and what scrolls the
+/// list. A row with no box (one shown only while a row is lifted) has no
+/// middle, so no drag passes it.
+struct Layout {
     middles: Vec<f64>,
     /// The rows' middles across and down, for a grid.
     centers: Vec<(f64, f64)>,
@@ -396,6 +425,69 @@ struct Drag {
     most: f64,
     least_x: f64,
     most_x: f64,
+    unshown: bool,
+}
+
+impl Layout {
+    fn measure(rows: &[DomRect], from: usize, (ox, oy): (f64, f64), grid: bool) -> Option<Self> {
+        let own = rows.get(from)?;
+        let shown = |r: &DomRect| r.width() > 0.0 || r.height() > 0.0;
+        let boxed: Vec<_> = rows.iter().filter(|r| shown(r)).collect();
+        let (first, last) = (boxed.first()?, boxed.last()?);
+        let (least_x, most_x) = if grid {
+            let left = boxed.iter().map(|r| r.left()).fold(f64::MAX, f64::min);
+            let right = boxed.iter().map(|r| r.right()).fold(f64::MIN, f64::max);
+            (left - own.left(), right - own.right())
+        } else {
+            (0.0, 0.0)
+        };
+        let (least, most) = if grid {
+            let top = boxed.iter().map(|r| r.top()).fold(f64::MAX, f64::min);
+            let bottom = boxed.iter().map(|r| r.bottom()).fold(f64::MIN, f64::max);
+            (top - own.top(), bottom - own.bottom())
+        } else {
+            (first.top() - own.top(), last.bottom() - own.bottom())
+        };
+        let middle = |r: &DomRect| {
+            if shown(r) {
+                r.top() + r.height() / 2.0 + oy
+            } else {
+                f64::NAN
+            }
+        };
+        Some(Self {
+            middles: rows.iter().map(middle).collect(),
+            centers: if grid {
+                rows.iter()
+                    .map(|r| (r.left() + r.width() / 2.0 + ox, middle(r)))
+                    .collect()
+            } else {
+                Vec::new()
+            },
+            half: own.height() / 2.0,
+            least,
+            most,
+            least_x,
+            most_x,
+            unshown: boxed.len() < rows.len(),
+        })
+    }
+}
+
+fn rects(list: &Element, count: usize) -> Vec<DomRect> {
+    let rows = list.children();
+    (0..count as u32)
+        .filter_map(|i| rows.item(i))
+        .map(|r| r.get_bounding_client_rect())
+        .collect()
+}
+
+struct Drag {
+    id: i32,
+    from: usize,
+    /// Where it was pressed, within the page and what scrolls the list.
+    start: (f64, f64),
+    layout: Layout,
     active: bool,
     row: Element,
     /// The pointer's client position at its last move.
@@ -466,6 +558,66 @@ struct Live {
     /// The key of a row just moved by keyboard and its index, to focus once
     /// the app has rendered the new order.
     focus: Option<(AttrValue, usize)>,
+    /// The aim last told `on_aim`.
+    aimed: Option<(usize, usize)>,
+}
+
+/// Keeps the click a drag ends in from reaching anything: once, at the
+/// window before anyone else hears it, or not at all once this task ends.
+fn swallow_click() {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let swallow = Closure::<dyn Fn(web_sys::Event)>::new(|e: web_sys::Event| {
+        e.stop_propagation();
+        e.prevent_default();
+    });
+    let f: web_sys::js_sys::Function = swallow.as_ref().clone().unchecked_into();
+    let options = web_sys::AddEventListenerOptions::new();
+    options.set_capture(true);
+    options.set_once(true);
+    if window
+        .add_event_listener_with_callback_and_add_event_listener_options("click", &f, &options)
+        .is_err()
+    {
+        return;
+    }
+    let end = Closure::once_into_js(move || {
+        if let Some(window) = web_sys::window() {
+            let _ = window.remove_event_listener_with_callback_and_bool("click", &f, true);
+        }
+        drop(swallow);
+    });
+    let _ = window.set_timeout_with_callback(end.unchecked_ref());
+}
+
+/// Measures a drag's rows again once the lift has shown those it had no box
+/// for at the press, keeping the pointer's place on the lifted row.
+fn remeasure(live: &mut Live, list: &Element, count: usize, grid: bool) {
+    if live.lift.is_none() {
+        return;
+    }
+    let Some(drag) = live.drag.as_mut().filter(|d| d.active && d.layout.unshown) else {
+        return;
+    };
+    let style = drag.row.get_attribute("style");
+    let _ = drag.row.remove_attribute("style");
+    let offset = scrolled(drag.scroller.as_ref());
+    let layout = Layout::measure(&rects(list, count), drag.from, offset, grid);
+    if let Some(style) = style {
+        let _ = drag.row.set_attribute("style", &style);
+    }
+    let Some(mut layout) = layout else {
+        return;
+    };
+    let from = drag.from;
+    drag.start.1 += layout.middles[from] - drag.layout.middles[from];
+    if grid {
+        drag.start.0 += layout.centers[from].0 - drag.layout.centers[from].0;
+    }
+    // Once: a row the app keeps without a box stays without a middle.
+    layout.unshown = false;
+    drag.layout = layout;
 }
 
 fn handle_at(list: &NodeRef, index: usize) -> Option<HtmlElement> {
@@ -515,6 +667,8 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         let live = live.clone();
         let list = list.clone();
         let keys = keys.clone();
+        let on_aim = props.on_aim.clone();
+        let grid = props.grid;
         use_effect(move || {
             let pending = live.borrow().focus.clone();
             if let Some((key, to)) = pending
@@ -524,6 +678,14 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 if let Some(handle) = handle_at(&list, to) {
                     let _ = handle.focus();
                 }
+            }
+            if let Some(list) = list.cast::<Element>() {
+                remeasure(&mut live.borrow_mut(), &list, keys.len(), grid);
+            }
+            let aim = live.borrow().lift.map(|l| (l.from, l.to));
+            if live.borrow().aimed != aim {
+                live.borrow_mut().aimed = aim;
+                on_aim.emit(aim);
             }
         });
     }
@@ -536,7 +698,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         live.borrow_mut().lift = None;
     }
     let lift = live.borrow().lift;
-    let grip = |index: usize, name: AttrValue| Grip {
+    let grip = |index: usize, name: AttrValue, fixed: bool| Grip {
         ctx: Ctx {
             live: live.clone(),
             redraw: redraw.clone(),
@@ -552,16 +714,17 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             auto: props.auto_scroll,
             grid: props.grid,
             disabled: props.disabled,
+            fixed,
         },
         lifted: lift.is_some_and(|l| l.from == index),
         disabled: props.disabled,
         hint: (*hint_id).clone(),
         titles: props.titles,
     };
-    let marks = |index: usize| {
+    let marks = |index: usize, fixed: bool| {
         classes!(
             reorder_row(index, lift.map(|l| (l.from, l.to))),
-            props.body_drag.then_some(class::REORDER_GRAB),
+            (props.body_drag && !fixed).then_some(class::REORDER_GRAB),
             props.grid.then_some(class::REORDER_TILED)
         )
     };
@@ -581,12 +744,15 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             .enumerate()
             .map(|(index, item)| {
                 let item = &item.props;
-                let grip = grip(index, item.name.clone());
+                let grip = grip(index, item.name.clone(), item.fixed);
                 let onpointerdown = grip.ctx.clone().body_down();
+                let onclick = item.onclick.clone();
                 html! {
                     <ContextProvider<Grip> key={item.id.to_string()} context={grip}>
-                        <div class={classes!(marks(index), item.class.clone())} data-testid={item.testid.clone()}
-                            {onpointerdown}>
+                        <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
+                            hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
+                            {onpointerdown} {onclick} oncontextmenu={item.oncontextmenu.clone()}
+                            onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
                             { item.children.clone() }
                         </div>
                     </ContextProvider<Grip>>
@@ -609,13 +775,13 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         .iter()
         .enumerate()
         .map(|(index, row)| {
-            let grip = grip(index, row.name.clone());
+            let grip = grip(index, row.name.clone(), false);
             let onpointerdown = grip.ctx.clone().body_down();
             let handle = grip.handle(Classes::new(), None);
             html! {
                 <RowListItem key={row.key.to_string()} name={html! { { row.name.clone() } }}
                     detail={row.detail.clone()} start={handle}
-                    class={marks(index)} {onpointerdown}>
+                    class={marks(index, false)} {onpointerdown}>
                     { row.end.clone() }
                 </RowListItem>
             }
@@ -648,7 +814,8 @@ impl PartialEq for Grip {
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
-            && (a.body, a.auto, a.grid, a.disabled) == (b.body, b.auto, b.grid, b.disabled)
+            && (a.body, a.auto, a.grid, a.disabled, a.fixed)
+                == (b.body, b.auto, b.grid, b.disabled, b.fixed)
             && (&a.name, &a.key) == (&b.name, &b.key)
             && (self.lifted, self.disabled, self.titles)
                 == (other.lifted, other.disabled, other.titles)
@@ -659,6 +826,9 @@ impl PartialEq for Grip {
 impl Grip {
     fn handle(&self, class: Classes, testid: Option<AttrValue>) -> Html {
         let ctx = &self.ctx;
+        if ctx.fixed {
+            return Html::default();
+        }
         let label: AttrValue = (ctx.say)(ReorderText::Handle {
             name: ctx.name.clone(),
         })
@@ -692,6 +862,8 @@ struct Ctx {
     auto: bool,
     grid: bool,
     disabled: bool,
+    /// The row stays put ([`ReorderItemProps::fixed`]).
+    fixed: bool,
 }
 
 impl Ctx {
@@ -778,6 +950,7 @@ impl Ctx {
         Callback::from(move |e: PointerEvent| {
             if !self.body
                 || self.disabled
+                || self.fixed
                 || e.button() != 0
                 || e.pointer_type() == "touch"
                 || self.live.borrow().lift.is_some()
@@ -798,6 +971,11 @@ impl Ctx {
             else {
                 return;
             };
+            // Yew bubbles a press in a portal (a menu the row opened) through
+            // the row, whose element does not hold it.
+            if !row.contains(Some(&target)) {
+                return;
+            }
             if target
                 .closest(CONTROLS)
                 .ok()
@@ -822,37 +1000,19 @@ impl Ctx {
         let Some(list) = self.list.cast::<Element>() else {
             return;
         };
-        let rows = list.children();
-        let Some(row) = rows.item(self.index as u32) else {
+        let Some(row) = list.children().item(self.index as u32) else {
+            return;
+        };
+        let scroller = self.auto.then(|| scroller_of(&list)).flatten();
+        let (ox, oy) = scrolled(scroller.as_ref());
+        let Some(layout) =
+            Layout::measure(&rects(&list, self.count), self.index, (ox, oy), self.grid)
+        else {
             return;
         };
         e.prevent_default();
         let _ = handle.focus();
         let _ = handle.set_pointer_capture(e.pointer_id());
-        let scroller = self.auto.then(|| scroller_of(&list)).flatten();
-        let (ox, oy) = scrolled(scroller.as_ref());
-        let rects: Vec<_> = (0..self.count as u32)
-            .filter_map(|i| rows.item(i))
-            .map(|r| r.get_bounding_client_rect())
-            .collect();
-        let own = row.get_bounding_client_rect();
-        let (Some(first), Some(last)) = (rects.first(), rects.last()) else {
-            return;
-        };
-        let (least_x, most_x) = if self.grid {
-            let left = rects.iter().map(|r| r.left()).fold(f64::MAX, f64::min);
-            let right = rects.iter().map(|r| r.right()).fold(f64::MIN, f64::max);
-            (left - own.left(), right - own.right())
-        } else {
-            (0.0, 0.0)
-        };
-        let (least, most) = if self.grid {
-            let top = rects.iter().map(|r| r.top()).fold(f64::MAX, f64::min);
-            let bottom = rects.iter().map(|r| r.bottom()).fold(f64::MIN, f64::max);
-            (top - own.top(), bottom - own.bottom())
-        } else {
-            (first.top() - own.top(), last.bottom() - own.bottom())
-        };
         let ticker = scroller.is_some().then(|| {
             let ctx = self.clone();
             Ticker::start(30, move || ctx.tick())
@@ -861,28 +1021,7 @@ impl Ctx {
             id: e.pointer_id(),
             from: self.index,
             start: (f64::from(e.client_x()) + ox, f64::from(e.client_y()) + oy),
-            middles: rects
-                .iter()
-                .map(|r| r.top() + r.height() / 2.0 + oy)
-                .collect(),
-            centers: if self.grid {
-                rects
-                    .iter()
-                    .map(|r| {
-                        (
-                            r.left() + r.width() / 2.0 + ox,
-                            r.top() + r.height() / 2.0 + oy,
-                        )
-                    })
-                    .collect()
-            } else {
-                Vec::new()
-            },
-            half: own.height() / 2.0,
-            least,
-            most,
-            least_x,
-            most_x,
+            layout,
             active: false,
             row,
             at: (f64::from(e.client_x()), f64::from(e.client_y())),
@@ -952,8 +1091,9 @@ impl Ctx {
         if !drag.active && dx.hypot(dy) < SLOP {
             return;
         }
-        let dy = dy.clamp(drag.least, drag.most);
-        let dx = dx.clamp(drag.least_x, drag.most_x);
+        let layout = &drag.layout;
+        let dy = dy.clamp(layout.least, layout.most);
+        let dx = dx.clamp(layout.least_x, layout.most_x);
         let style = if self.grid {
             format!("--reorder-shift: {dy}px; --reorder-shift-x: {dx}px")
         } else {
@@ -961,15 +1101,15 @@ impl Ctx {
         };
         let _ = drag.row.set_attribute("style", &style);
         let to = if self.grid {
-            let (cx, cy) = drag.centers[drag.from];
-            grid_target(&drag.centers, drag.from, cx + dx, cy + dy)
+            let (cx, cy) = layout.centers[drag.from];
+            grid_target(&layout.centers, drag.from, cx + dx, cy + dy)
         } else {
-            let middle = drag.middles[drag.from] + dy;
+            let middle = layout.middles[drag.from] + dy;
             drag_target(
-                &drag.middles,
+                &layout.middles,
                 drag.from,
-                middle - drag.half,
-                middle + drag.half,
+                middle - layout.half,
+                middle + layout.half,
             )
         };
         let from = drag.from;
@@ -996,6 +1136,9 @@ impl Ctx {
                 return;
             };
             let _ = drag.row.remove_attribute("style");
+            if drag.active {
+                swallow_click();
+            }
             let lift = self.live.borrow().lift;
             match lift {
                 Some(lift) if drag.active && lift.pointer => self.drop_at(lift.to),
@@ -1148,6 +1291,9 @@ mod tests {
         assert_eq!(drag_target(&middles, 1, 0.0, 100.0), 0);
         assert_eq!(drag_target(&middles, 0, 104.0, 124.0), 1);
         assert_eq!(drag_target(&middles, 5, 0.0, 1.0), 5);
+        // A row without a box is never passed.
+        let middles = [16.0, 64.0, f64::NAN];
+        assert_eq!(drag_target(&middles, 0, 200.0, 232.0), 1);
     }
 
     #[test]
@@ -1167,6 +1313,10 @@ mod tests {
         assert_eq!(grid_target(&centers, 5, 20.0, 15.0), 0);
         assert_eq!(grid_target(&centers, 2, 30.0, 70.0), 3);
         assert_eq!(grid_target(&[], 3, 0.0, 0.0), 3);
+        assert_eq!(
+            grid_target(&[(25.0, 20.0), (f64::NAN, f64::NAN)], 0, 0.0, 0.0),
+            0
+        );
     }
 
     #[test]

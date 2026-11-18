@@ -10,7 +10,8 @@
 //   `.sockel-drop-after` mark the row it lands beside.
 //   `.sockel-reorder-grab` (`body_drag`) shows the whole row grabs;
 //   `.sockel-reorder-tiled` (`grid`) moves the marks to its sides and the
-//   lifted row by `--reorder-shift-x` as well.
+//   lifted row by `--reorder-shift-x` as well. A `lifted_only` row is
+//   `hidden` until a row is lifted, whatever display its own class gives.
 // - `.sockel-drag-handle`: the grip button. `.sockel-lifted` while its row
 //   is.
 
@@ -25,6 +26,10 @@
     --reorder-shift: 0px;
     --reorder-shift-x: 0px;
     --reorder-mark: var(--space-0);
+
+    &[hidden] {
+        display: none;
+    }
 
     &.sockel-lifted {
         z-index: var(--layer-sticky);

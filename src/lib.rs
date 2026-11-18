@@ -1614,7 +1614,24 @@
 //! element itself (`.sockel-reorder-row` plus its `class`), a direct child of
 //! the `.sockel-reorder` element, which `class` lays out; the hint and the
 //! status follow the rows there. A `ReorderHandle` outside a `Reorder`
-//! renders nothing.
+//! renders nothing. An item also takes `current` (`aria-current`) and
+//! `onclick`, `oncontextmenu`, `onmouseenter`, `onmouseleave` for the row
+//! element; a real drag never ends in a click on it (the click after a drag
+//! is swallowed at the window).
+//!
+//! - `fixed` (an item): it stays where it is and has no handle (its
+//!   `ReorderHandle` renders nothing, a press on it starts no drag), but the
+//!   others land beside it, so a heading or marker between rows is a drop
+//!   position. `on_move`'s indices count it; map `to` to what it means with
+//!   the list without the moved row (what sits at `to`, or the end).
+//! - `lifted_only` (an item): `hidden` until a row is lifted, by pointer or
+//!   keyboard, a place to drop that shows only then (a marker at the end).
+//!   It is always among the children, so the indices do not change when it
+//!   shows; a drag measures it once it shows. Put it last, so no row moves
+//!   when it does.
+//! - `on_aim`: where a lifted row aims, `Some((from, to))` as `on_move` would
+//!   report it, each time that changes, and `None` once it is set down (to
+//!   say on the row what a drop there does).
 //!
 //! - `quick_keys`: the arrows move a focused handle's row at once, as Alt and
 //!   an arrow do, for apps whose handles did so; Space and Enter still lift.
