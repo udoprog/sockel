@@ -28,6 +28,11 @@ pub struct TableProps {
     /// Tops the cells, for rows whose text runs on.
     #[prop_or_default]
     pub top: bool,
+    /// Draws the table as a card: bordered, rounded and raised on the
+    /// surface, a faint band behind the headings, the last row's line the
+    /// frame's own.
+    #[prop_or_default]
+    pub framed: bool,
     /// The bulk actions above the table. Given, its room is always kept.
     #[prop_or_default]
     pub bulk: Option<Html>,
@@ -64,6 +69,11 @@ pub fn table_mode(cards: bool, foot: bool, top: bool) -> Classes {
     )
 }
 
+/// A table frame's classes: `framed` draws it as a card.
+pub fn table_frame(framed: bool) -> Classes {
+    classes!(class::TABLE_FRAME, framed.then_some(class::FRAMED))
+}
+
 /// A table wrap's classes: a scroll area, `sticky` capped in height.
 pub fn table_wrap(sticky: bool) -> Classes {
     classes!(class::TABLE_WRAP, sticky.then_some(class::STICKY))
@@ -88,7 +98,7 @@ pub fn Table(props: &TableProps) -> Html {
     };
 
     html! {
-        <div class={classes!(class::TABLE_FRAME, props.class.clone())} data-testid={props.testid.clone()}>
+        <div class={classes!(table_frame(props.framed), props.class.clone())} data-testid={props.testid.clone()}>
             if let Some(bulk) = &props.bulk {
                 <div class={table_bulk(!props.bulk_active)} role="status">{ bulk.clone() }</div>
             }
@@ -236,6 +246,15 @@ mod tests {
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()
+    }
+
+    #[test]
+    fn frame_framed() {
+        assert_eq!(names(table_frame(false)), [class::TABLE_FRAME]);
+        assert_eq!(
+            names(table_frame(true)),
+            [class::TABLE_FRAME, class::FRAMED]
+        );
     }
 
     #[test]

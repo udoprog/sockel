@@ -5,7 +5,7 @@ use crate::class;
 use sockel::{
     Button, ButtonSize, ButtonVariant, EmptyState, ErrorBox, Glyph, Icon, SortDirection,
     SortHeader, Table, TableCell, TableRow, next_sort, sort_header, sort_mark, table, table_bulk,
-    table_cell, table_cell_part, table_mode, table_wrap,
+    table_cell, table_cell_part, table_frame, table_mode, table_wrap,
 };
 
 use crate::code::{El, each, snippet, text_node};
@@ -111,6 +111,7 @@ pub fn TablePage() -> Html {
     let disabled = use_state(|| false);
     let cards = use_state(|| true);
     let foot = use_state(|| false);
+    let framed = use_state(|| false);
     let top = use_state(|| false);
     let flagged = use_state(|| true);
     let sort = use_state(|| None::<(Column, SortDirection)>);
@@ -129,6 +130,7 @@ pub fn TablePage() -> Html {
             <Toggle label="cards" value={*cards} on_change={bind(&cards)} />
             <Toggle label="foot" value={*foot} on_change={bind(&foot)} />
             <Toggle label="top" value={*top} on_change={bind(&top)} />
+            <Toggle label="framed" value={*framed} on_change={bind(&framed)} />
             <Toggle label="flagged" value={*flagged} on_change={bind(&flagged)} />
         </>
     };
@@ -198,6 +200,7 @@ pub fn TablePage() -> Html {
             .flag("cards", *cards)
             .flag("foot", *foot)
             .flag("top", *top)
+            .flag("framed", *framed)
             .expr_if(*bulk, "bulk", "Some(html! { { bulk_actions } })")
             .flag("bulk_active", *bulk && *picked)
             .child(
@@ -216,12 +219,13 @@ pub fn TablePage() -> Html {
     html! {
         <Demo {controls} {code}>
             <Table head={head} columns={4} fixed={*fixed} sticky={*sticky}
-                cards={*cards} foot={*foot} top={*top}
+                cards={*cards} foot={*foot} top={*top} framed={*framed}
                 bulk={bulk_bar} bulk_active={*bulk && *picked} {empty} label="Items">
                 { rows }
             </Table>
             <span class={class::CONTROL_LABEL}>{ "Press a heading to sort: ascending, descending, then back." }</span>
             { shown("table(fixed)", &table(*fixed)) }
+            { shown("table_frame(framed)", &table_frame(*framed)) }
             { shown("table_wrap(sticky)", &table_wrap(*sticky)) }
             { shown("table_bulk(idle)", &table_bulk(!*picked)) }
             { shown("table_cell(head, numeric, cut)", &table_cell(false, true, true)) }

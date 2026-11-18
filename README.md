@@ -1909,7 +1909,7 @@ column; give a cell `width`, and `cut` to cut its text with an ellipsis.
 its room (`TABLE_BULK`, one height) is always kept, and `bulk_active` shows
 it, so selecting rows moves nothing; `IDLE` hides it. `numeric` on a cell
 (`NUMERIC`) sets figures of one width, to the end. `table(fixed)`,
-`table_wrap(sticky)`, `table_bulk(idle)`, `table_cell(head, numeric, cut)`,
+`table_frame(framed)`, `table_wrap(sticky)`, `table_bulk(idle)`, `table_cell(head, numeric, cut)`,
 `table_mode(cards, foot, top)` and `table_cell_part(wrap, title, actions,
 hidden)` give the classes. Parts: `TABLE_FRAME`, `TABLE_WRAP`, `TABLE_ROW`,
 `TABLE_CELL`, `TABLE_HEAD_CELL`, `TABLE_EMPTY`.
@@ -1922,6 +1922,9 @@ gone. On a cell, `title` (`TITLE`) bolds that first line (in cards), `actions`
 room kept is `--table-card-actions`, 5rem; a row with none sets 0rem), and
 `wrap` (`WRAP`) wraps its text with room for it. `foot` (`FOOT`) puts a
 card's actions on a line under it instead. `top` (`TOP`) tops the cells.
+`framed` (`FRAMED`, on the frame) draws the table as a card: a border, rounded
+corners and a raise on the surface, a faint band behind the headings, and the
+last row's line the frame's own.
 `flagged` on a row (`FLAGGED`) marks its start edge in `--danger`. A
 heading cell takes `hidden` (`VISUALLY_HIDDEN`, for a screen reader only),
 `colspan`, and `scope`; a `scope` on a cell that is not a `head` makes it a

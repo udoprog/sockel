@@ -1252,6 +1252,7 @@ pub const PAGES: &[Page] = &[
             "TableCell",
             "TableCellProps",
             "table",
+            "table_frame",
             "table_wrap",
             "table_bulk",
             "table_cell",

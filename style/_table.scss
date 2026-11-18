@@ -3,6 +3,10 @@
 // arriving, hovering or sorting moves no column or row.
 //
 // - `.sockel-table-frame`: the bulk bar above and the wrap under it.
+//   `.sockel-framed` on it draws the table as a card: a border, rounded
+//   corners and a raise on the surface (what scrolls is clipped to them), a
+//   faint band behind the headings, and the last row's line the frame's own
+//   (its room kept, so no row moves).
 // - `.sockel-table-bulk`: the bulk actions' room, one height whether or not
 //   it holds anything; `.sockel-idle` hides it and keeps the room.
 // - `.sockel-table-wrap`: the scroll area (its scrollbar's room kept).
@@ -37,6 +41,23 @@
     display: flex;
     flex-direction: column;
     min-width: 0;
+
+    &.sockel-framed {
+        overflow: hidden;
+        border: var(--space-px) solid var(--border);
+        border-radius: var(--radius-lg);
+        background: var(--surface);
+        box-shadow: var(--shadow-1);
+
+        .sockel-table-head-cell,
+        .sockel-sort-header {
+            background: color-mix(in srgb, var(--text) 3%, var(--surface));
+        }
+
+        .sockel-table-row:last-child > .sockel-table-cell {
+            border-bottom-color: transparent;
+        }
+    }
 }
 
 .sockel-table-bulk {
