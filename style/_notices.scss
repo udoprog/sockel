@@ -217,6 +217,14 @@
         margin-bottom: base.$empty-state-icon-gap;
     }
 
+    .sockel-empty-state-icon.sockel-bare {
+        width: auto;
+        height: auto;
+        margin-bottom: 0;
+        border-radius: 0;
+        background: none;
+    }
+
     .sockel-empty-state-title,
     .sockel-empty-state-hint {
         min-width: 0;

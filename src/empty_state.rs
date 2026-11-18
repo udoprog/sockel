@@ -11,6 +11,9 @@ pub struct EmptyStateProps {
     pub title: AttrValue,
     #[prop_or_default]
     pub icon: Option<Html>,
+    /// The icon is its own picture: no box, disc or fill round it, and no gap below.
+    #[prop_or_default]
+    pub bare_icon: bool,
     /// What to do about it.
     #[prop_or_default]
     pub hint: Option<Html>,
@@ -37,7 +40,7 @@ pub fn EmptyState(props: &EmptyStateProps) -> Html {
         <div class={classes!(empty_state(props.compact), props.class.clone())}
             data-testid={props.testid.clone()}>
             if let Some(icon) = &props.icon {
-                <span class={class::EMPTY_STATE_ICON} aria-hidden="true">{ icon.clone() }</span>
+                <span class={classes!(class::EMPTY_STATE_ICON, props.bare_icon.then_some(class::BARE))} aria-hidden="true">{ icon.clone() }</span>
             }
             if !props.title.is_empty() {
                 <p class={class::EMPTY_STATE_TITLE}>{ props.title.clone() }</p>
