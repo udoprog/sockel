@@ -22,6 +22,12 @@ const SLOP: f64 = 4.0;
 const EDGE: f64 = 40.0;
 const STEP: f64 = 14.0;
 
+/// The attribute of a place outside the list a row may be let go on (a
+/// [`Pager`](crate::Pager)'s page numbers, with its `drop_page`), and the
+/// one a row held over it sets on it.
+const DROP_PAGE: &str = "data-sort-page";
+const DROP_OVER: &str = "data-drop-over";
+
 /// What a press on is not a drag of the row: its own controls.
 const CONTROLS: &str = "button, input, a, textarea, select, label, [contenteditable], \
     [role=button], [role=checkbox], [role=radio], [role=switch], [role=slider], [role=menuitem]";
@@ -410,6 +416,14 @@ pub struct ReorderProps {
     /// each time that changes; `None` once it is set down.
     #[prop_or_default]
     pub on_aim: Callback<Option<(usize, usize)>>,
+    /// A row dragged by the pointer may be let go on a place outside the
+    /// list wearing `data-sort-page` (another page's number in a
+    /// [`Pager`](crate::Pager) with `drop_page`): `(from, value)`, the row's
+    /// index and that attribute's value, in place of `on_move`. While the
+    /// pointer holds a row over one, the place wears `data-drop-over` and
+    /// no row is marked.
+    #[prop_or_default]
+    pub on_drop_page: Option<Callback<(usize, AttrValue)>>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -496,6 +510,11 @@ fn rects(list: &Element, count: usize) -> Vec<DomRect> {
 struct Drag {
     id: i32,
     from: usize,
+    /// Held by the row itself, which has no handle (`body_drag`): the row
+    /// hears the pointer.
+    by_row: bool,
+    /// The place outside the list it is held over (`on_drop_page`).
+    over: Option<Element>,
     /// Where it was pressed, within the page and what scrolls the list.
     start: (f64, f64),
     layout: Layout,
@@ -633,6 +652,30 @@ fn remeasure(live: &mut Live, list: &Element, count: usize, grid: bool) {
     drag.layout = layout;
 }
 
+/// The place outside the list under the client position `(x, y)` that a
+/// row may be let go on.
+fn drop_page_at((x, y): (f64, f64)) -> Option<Element> {
+    web_sys::window()?
+        .document()?
+        .element_from_point(x as f32, y as f32)?
+        .closest(&format!("[{DROP_PAGE}]"))
+        .ok()?
+}
+
+/// Marks `over` as the place a held row is over, unmarking the one before.
+fn mark_over(drag: &mut Drag, over: Option<Element>) {
+    if drag.over == over {
+        return;
+    }
+    if let Some(old) = &drag.over {
+        let _ = old.remove_attribute(DROP_OVER);
+    }
+    if let Some(new) = &over {
+        let _ = new.set_attribute(DROP_OVER, "");
+    }
+    drag.over = over;
+}
+
 fn handle_at(list: &NodeRef, index: usize) -> Option<HtmlElement> {
     list.cast::<Element>()?
         .children()
@@ -725,6 +768,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             redraw: redraw.clone(),
             list: list.clone(),
             on_move: props.on_move.clone(),
+            on_drop_page: props.on_drop_page.clone(),
             say: say.clone(),
             index,
             count,
@@ -768,12 +812,17 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 let item = &item.props;
                 let grip = grip(index, item.name.clone(), item.fixed);
                 let onpointerdown = grip.ctx.clone().body_down();
+                // A row without a handle hears its own drag.
+                let onpointermove = grip.ctx.clone().row_only(grip.ctx.clone().pointer_move());
+                let onpointerup = grip.ctx.clone().row_only(grip.ctx.clone().pointer_up());
+                let onpointercancel = grip.ctx.clone().row_only(grip.ctx.clone().pointer_cancel());
                 let onclick = item.onclick.clone();
                 html! {
                     <ContextProvider<Grip> key={item.id.to_string()} context={grip}>
                         <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
                             hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
-                            {onpointerdown} {onclick} oncontextmenu={item.oncontextmenu.clone()}
+                            {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
+                            {onclick} oncontextmenu={item.oncontextmenu.clone()}
                             onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
                             { item.children.clone() }
                         </div>
@@ -835,6 +884,7 @@ impl PartialEq for Grip {
         Rc::ptr_eq(&a.live, &b.live)
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
+            && a.on_drop_page == b.on_drop_page
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
             && a.stays == b.stays
             && (a.body, a.auto, a.grid, a.disabled, a.fixed)
@@ -874,6 +924,7 @@ struct Ctx {
     redraw: UseForceUpdateHandle,
     list: NodeRef,
     on_move: Callback<(usize, usize)>,
+    on_drop_page: Option<Callback<(usize, AttrValue)>>,
     say: Rc<dyn Fn(ReorderText) -> String>,
     index: usize,
     count: usize,
@@ -942,8 +993,9 @@ impl Ctx {
 
     fn cancel(&self) {
         let drag = self.live.borrow_mut().drag.take();
-        if let Some(drag) = drag {
+        if let Some(mut drag) = drag {
             let _ = drag.row.remove_attribute("style");
+            mark_over(&mut drag, None);
         }
         self.live.borrow_mut().lift = None;
         self.announce(self.cancelled());
@@ -970,7 +1022,7 @@ impl Ctx {
             else {
                 return;
             };
-            self.begin(&e, &handle);
+            self.begin(&e, &handle, false);
         })
     }
 
@@ -1014,19 +1066,27 @@ impl Ctx {
             {
                 return;
             }
-            let Some(handle) = row
-                .query_selector(&handle_class)
-                .ok()
-                .flatten()
-                .and_then(|h| h.dyn_into::<HtmlElement>().ok())
-            else {
+            // A row without a handle is held by itself.
+            let handle = row.query_selector(&handle_class).ok().flatten();
+            let by_row = handle.is_none();
+            let Ok(handle) = handle.unwrap_or(row).dyn_into::<HtmlElement>() else {
                 return;
             };
-            self.begin(&e, &handle);
+            self.begin(&e, &handle, by_row);
         })
     }
 
-    fn begin(&self, e: &PointerEvent, handle: &HtmlElement) {
+    /// `then` for a pointer event the row itself hears while it is held
+    /// by itself, not by its handle.
+    fn row_only(self, then: Callback<PointerEvent>) -> Callback<PointerEvent> {
+        Callback::from(move |e: PointerEvent| {
+            if self.live.borrow().drag.as_ref().is_some_and(|d| d.by_row) {
+                then.emit(e);
+            }
+        })
+    }
+
+    fn begin(&self, e: &PointerEvent, handle: &HtmlElement, by_row: bool) {
         let Some(list) = self.list.cast::<Element>() else {
             return;
         };
@@ -1050,6 +1110,8 @@ impl Ctx {
         let drag = Drag {
             id: e.pointer_id(),
             from: self.index,
+            by_row,
+            over: None,
             start: (f64::from(e.client_x()) + ox, f64::from(e.client_y()) + oy),
             layout,
             active: false,
@@ -1130,7 +1192,12 @@ impl Ctx {
             format!("--reorder-shift: {dy}px")
         };
         let _ = drag.row.set_attribute("style", &style);
-        let to = if self.grid {
+        let over = self.on_drop_page.as_ref().and_then(|_| drop_page_at(at));
+        let to = if over.is_some() {
+            // Over a place outside the list: the row goes there, not
+            // among the rows.
+            drag.from
+        } else if self.grid {
             let (cx, cy) = layout.centers[drag.from];
             grid_target(&layout.centers, drag.from, cx + dx, cy + dy)
         } else {
@@ -1142,6 +1209,7 @@ impl Ctx {
                 middle + layout.half,
             )
         };
+        mark_over(drag, over);
         let from = drag.from;
         let started = !drag.active;
         drag.active = true;
@@ -1162,12 +1230,27 @@ impl Ctx {
     fn pointer_up(self) -> Callback<PointerEvent> {
         Callback::from(move |e: PointerEvent| {
             let drag = self.live.borrow_mut().drag.take();
-            let Some(drag) = drag.filter(|d| d.id == e.pointer_id()) else {
+            let Some(mut drag) = drag.filter(|d| d.id == e.pointer_id()) else {
                 return;
             };
             let _ = drag.row.remove_attribute("style");
+            mark_over(&mut drag, None);
             if drag.active {
                 swallow_click();
+            }
+            let page = match &self.on_drop_page {
+                Some(on) if drag.active => {
+                    drop_page_at((f64::from(e.client_x()), f64::from(e.client_y())))
+                        .and_then(|page| page.get_attribute(DROP_PAGE))
+                        .map(|value| (on, value))
+                }
+                _ => None,
+            };
+            if let Some((on, value)) = page {
+                self.live.borrow_mut().lift = None;
+                on.emit((self.index, value.into()));
+                self.redraw.force_update();
+                return;
             }
             let lift = self.live.borrow().lift;
             match lift {

@@ -68,6 +68,13 @@
     }
 }
 
+// A row list in children mode: the hint and the status follow the rows, so
+// its last row takes the list's corners as a row list's last child does.
+.sockel-reorder.sockel-row-list > .sockel-row-list-item:nth-last-child(1 of .sockel-reorder-row) {
+    border-end-start-radius: inherit;
+    border-end-end-radius: inherit;
+}
+
 // A ReorderTree's empty list a row is aimed at.
 .sockel-drop-inside {
     box-shadow: inset 0 0 0 var(--space-px) var(--accent);

@@ -1698,7 +1698,9 @@ is swallowed at the window).
   controls (a button, input, link, label or role widget in it does not
   start a drag); a finger still only by the handle, so the list scrolls
   under it. The keyboard works as ever on the handle. The row wears
-  `REORDER_GRAB` (a grab cursor).
+  `REORDER_GRAB` (a grab cursor). A row with no `ReorderHandle` in it
+  is dragged by itself: by a mouse or pen only, and not by the keyboard
+  (give it another way to move, such as a menu of places).
 - `auto_scroll`: while a row is dragged near the top or bottom edge of
   what scrolls the list (the nearest `overflow-y: auto|scroll` ancestor,
   else the page) that scrolls, faster the nearer the edge
@@ -1709,6 +1711,13 @@ is swallowed at the window).
   (`grid_target(centers, from, x, y)`), and the drop is marked at the
   row's side (`DROP_BEFORE` the left, `DROP_AFTER` the right), the rows
   wearing `REORDER_TILED`. The arrows still step through reading order.
+- `on_drop_page: Option<Callback<(usize, AttrValue)>>`: a row dragged by
+  the pointer may be let go outside the list on a place wearing
+  `data-sort-page` (another page's number in a [`Pager`] with
+  `drop_page`): it reports `(from, value)`, the row's index and that
+  attribute's value, in place of `on_move`. While a row is held over
+  one, the place wears `data-drop-over` (the Pager's accent) and no row
+  is marked.
 
 - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
   follows the pointer, kept within the list. It passes a row once its top
