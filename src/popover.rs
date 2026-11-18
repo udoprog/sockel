@@ -1409,6 +1409,7 @@ mod tests {
             focus: None,
             focus_first: false,
             on_placed: None,
+            role: AttrValue::Static("dialog"),
             class: Classes::new(),
             testid: None,
             on_pointer_enter: None,
