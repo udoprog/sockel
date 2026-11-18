@@ -268,7 +268,7 @@ mod tests {
                 .tip("Tip A")
                 .class("mine")
                 .content(html! { <b>{ "Rich" }</b> })
-                .after(html! { <i class="cross" /> }),
+                .after(html! { <i data-after="" /> }),
         ];
         let html = html_of::<Tabs>(props(Some("a"), t));
         assert!(html.contains("data-testid=\"tab-a\""), "{html}");
@@ -276,7 +276,7 @@ mod tests {
         assert!(html.contains("aria-label=\"Tip A\""), "{html}");
         assert!(html.contains("mine"), "{html}");
         assert!(html.contains("<b>Rich</b>"), "{html}");
-        assert!(html.find("cross") > html.find("</button>"), "{html}");
+        assert!(html.find("data-after") > html.find("</button>"), "{html}");
     }
 
     #[test]
