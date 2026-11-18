@@ -28,6 +28,14 @@ pub struct ChoiceOption {
     /// Only the icon is shown; the label is kept as its name.
     pub icon_only: bool,
     pub disabled: bool,
+    /// The app's `data-testid` on the option.
+    pub testid: Option<AttrValue>,
+    /// A `data-tip` for the option (an icon-only option's hint).
+    pub tip: Option<AttrValue>,
+    /// The app's classes on the option.
+    pub class: Classes,
+    /// More `data-*` attributes (`("data-shape", ..)`) the app's code reads.
+    pub data: Vec<(&'static str, AttrValue)>,
 }
 
 impl ChoiceOption {
@@ -38,7 +46,31 @@ impl ChoiceOption {
             icon: None,
             icon_only: false,
             disabled: false,
+            testid: None,
+            tip: None,
+            class: Classes::new(),
+            data: Vec::new(),
         }
+    }
+
+    pub fn data(mut self, name: &'static str, value: impl Into<AttrValue>) -> Self {
+        self.data.push((name, value.into()));
+        self
+    }
+
+    pub fn testid(mut self, testid: impl Into<AttrValue>) -> Self {
+        self.testid = Some(testid.into());
+        self
+    }
+
+    pub fn tip(mut self, tip: impl Into<AttrValue>) -> Self {
+        self.tip = Some(tip.into());
+        self
+    }
+
+    pub fn class(mut self, class: impl Into<Classes>) -> Self {
+        self.class = class.into();
+        self
     }
 
     pub fn icon(mut self, icon: Html) -> Self {
@@ -70,6 +102,10 @@ pub struct ChoiceProps {
     pub on_change: Callback<AttrValue>,
     /// What is being chosen (`aria-label` of the group).
     pub label: AttrValue,
+    /// The id of the element that names the group (`aria-labelledby`),
+    /// instead of `label`, which is then not set.
+    #[prop_or_default]
+    pub labelled_by: Option<AttrValue>,
     #[prop_or_default]
     pub fit: ChoiceFit,
     /// The small control height.
@@ -132,7 +168,8 @@ pub fn Choice(props: &ChoiceProps) -> Html {
 
     html! {
         <div role="radiogroup" class={classes!(choice(props.fit, props.small, props.invalid, props.disabled), props.class.clone())}
-            aria-label={props.label.clone()}
+            aria-label={props.labelled_by.is_none().then(|| props.label.clone())}
+            aria-labelledby={props.labelled_by.clone()}
             aria-invalid={props.invalid.then_some("true")}
             aria-disabled={props.disabled.then_some("true")}
             data-testid={props.testid.clone()}
@@ -144,11 +181,13 @@ pub fn Choice(props: &ChoiceProps) -> Html {
                     let value = option.value.clone();
                     Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
                 };
-                html! {
-                    <button type="button" role="radio" class={class::CHOICE_OPTION}
+                let mut button = html! {
+                    <button type="button" role="radio" class={classes!(class::CHOICE_OPTION, option.class.clone())}
+                        data-testid={option.testid.clone()}
+                        data-tip={option.tip.clone()}
                         aria-checked={selected.to_string()}
                         aria-label={option.icon_only.then(|| option.label.clone())}
-                        title={option.icon_only.then(|| option.label.clone())}
+                        title={(option.icon_only && option.tip.is_none()).then(|| option.label.clone())}
                         tabindex={if stop == Some(i) { "0" } else { "-1" }}
                         disabled={props.disabled || option.disabled}
                         {onclick}>
@@ -159,7 +198,13 @@ pub fn Choice(props: &ChoiceProps) -> Html {
                             <span class={class::CHOICE_LABEL}>{ option.label.clone() }</span>
                         }
                     </button>
+                };
+                if let Html::VTag(tag) = &mut button {
+                    for (name, value) in &option.data {
+                        std::rc::Rc::make_mut(tag).add_attribute(name, value.clone());
+                    }
                 }
+                button
             }) }
         </div>
     }

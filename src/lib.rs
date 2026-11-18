@@ -491,6 +491,9 @@
 //! | `$skeleton-fill`, `$skeleton-edge`, `$skeleton-radius` | 8% of `--text` over `--surface`, `null` (none), `var(--radius-sm)` (a skeleton's fill, the 1px line inside its edge and its corners) |
 //! | `$skeleton-line-height`, `$skeleton-line-inset`, `$skeleton-phone-height` | `1lh`, `null` (a fifth of a line), `null` (a line's height and the transparent inset that thins it; a block's height below the phone breakpoint) |
 //! | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
+//! | `$choice-fill`, `$choice-radius`, `$choice-inset`, `$choice-padding` | `var(--surface)`, `var(--radius-md)`, `var(--nest-inset)`, `var(--space-3)` (a choice's ground, radius, inset and an option's inline padding) |
+//! | `$choice-ink`, `$choice-font-size`, `$choice-divider` | `var(--text)`, `null`, `null` (an option's ink and size, and the colour of the rule between options; `null`: inherited, none) |
+//! | `$choice-hover-fill`, `$choice-selected-fill`, `$choice-selected-ink` | `color-mix(in srgb, var(--accent) 12%, transparent)`, `var(--accent)`, `var(--on-accent)` |
 //! | `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 //! | `$filter-width` | `10.5rem` |
 //! | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
@@ -863,8 +866,8 @@
 //!   invalid)` gives its classes.
 //! - [`Choice`] (`.sockel-choice`): a segmented pick-one `radiogroup` of
 //!   [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
-//!   `.disabled(bool)`). `value`, `on_change(value)`, `label` (the group's
-//!   name), `fit` ([`ChoiceFit`]: `Equal`, `Stretch` to fill the container
+//!   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`, `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
+//!   name; `labelled_by`: the id of the element that names it), `fit` ([`ChoiceFit`]: `Equal`, `Stretch` to fill the container
 //!   (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `small` (`SMALL`),
 //!   `invalid`, `disabled`; `choice(fit, small, invalid, disabled)`. Roving
 //!   tabindex: the selected option, or the first enabled, is the one tab

@@ -385,6 +385,19 @@ $switch-fill: var(--surface) !default;
 $switch-on-thumb: var(--on-accent) !default;
 $switch-thumb-inset: null !default;
 $choice-width: 6rem !default;
+// A choice's look: the group's ground, radius and inset, an option's inline
+// padding, ink and font size (`null`: inherited), the rule between options
+// (`null`: none), the hover fill and the selected option's fill and ink.
+$choice-fill: var(--surface) !default;
+$choice-radius: var(--radius-md) !default;
+$choice-inset: var(--nest-inset) !default;
+$choice-padding: var(--space-3) !default;
+$choice-ink: var(--text) !default;
+$choice-font-size: null !default;
+$choice-divider: null !default;
+$choice-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
+$choice-selected-fill: var(--accent) !default;
+$choice-selected-ink: var(--on-accent) !default;
 $filter-width: 10.5rem !default;
 $picker-rows: 6 !default;
 $picker-popup-width: var(--menu-width-wide) !default;

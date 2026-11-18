@@ -1,0 +1,12 @@
+@use "../../style/index" with (
+    $choice-fill: var(--bg),
+    $choice-radius: var(--radius-sm),
+    $choice-inset: 0,
+    $choice-padding: var(--space-2),
+    $choice-ink: var(--muted),
+    $choice-font-size: var(--text-sm),
+    $choice-divider: var(--border),
+    $choice-hover-fill: color-mix(in srgb, var(--text) 7%, transparent),
+    $choice-selected-fill: color-mix(in srgb, var(--accent) 22%, transparent),
+    $choice-selected-ink: var(--accent)
+);

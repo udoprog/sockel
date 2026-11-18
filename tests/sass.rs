@@ -260,3 +260,16 @@ fn badge_settings() {
     assert!(css.contains("background: color-mix(in srgb, var(--tone) 12%, transparent);"));
     assert!(css.contains("calc((var(--count-digits) + 1) * 1ch + 2 * 0.25rem)"));
 }
+
+#[test]
+fn choice_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("background: var(--accent);"));
+    assert!(!defaults.contains("border-inline-start-color: var(--border);"));
+    let css = compile(&sass, "tests/fixtures/choice_settings.scss");
+    assert!(css.contains("border-inline-start-color: var(--border);"));
+    assert!(css.contains("color: var(--muted);"));
+    assert!(css.contains("background: color-mix(in srgb, var(--accent) 22%, transparent);"));
+    assert!(css.contains("padding: 0;"));
+}

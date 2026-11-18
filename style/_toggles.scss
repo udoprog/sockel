@@ -183,10 +183,12 @@
     box-sizing: border-box;
     max-width: 100%;
     height: var(--choice-height);
-    @include base.nests(var(--radius-md));
+    @include base.nests(base.$choice-radius);
+    padding: base.$choice-inset;
+    --radius-inner: calc(#{base.$choice-radius} - #{base.$choice-inset} - 1px);
     @include base.reserved-border(var(--field-border));
-    border-radius: var(--radius-md);
-    background: var(--surface);
+    border-radius: base.$choice-radius;
+    background: base.$choice-fill;
 
     &.sockel-small {
         --choice-height: var(--control-height-small);
@@ -219,21 +221,35 @@
     min-width: 0;
     margin: 0;
     padding-block: 0;
-    padding-inline: var(--space-3);
+    padding-inline: base.$choice-padding;
     @include base.reserved-border;
     border-radius: var(--radius-inner, var(--radius-sm));
     background: transparent;
-    color: var(--text);
+    color: base.$choice-ink;
     font: inherit;
+    @if base.$choice-font-size {
+        font-size: base.$choice-font-size;
+    }
     line-height: 1;
     cursor: pointer;
 
-    &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
+    @if base.$choice-divider {
+        + .sockel-choice-option {
+            border-inline-start-color: base.$choice-divider;
+        }
+    }
+
+    &:hover:not(:disabled):not([aria-checked="true"]) {
+        background: base.$choice-hover-fill;
     }
 
     @include base.focus-ring;
     @include base.current;
+
+    &[aria-checked="true"] {
+        background: base.$choice-selected-fill;
+        color: base.$choice-selected-ink;
+    }
 
     &:disabled {
         opacity: 0.5;
