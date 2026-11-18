@@ -142,8 +142,6 @@ $button-line-height: 1 !default;
 $button-text-small: var(--text-sm) !default;
 $button-content-gap: var(--space-2) !default;
 $button-icon-offset: null !default;
-// An icon-only button's width (`null`: square, as high as its size).
-$button-icon-width: null !default;
 $button-phone-height: null !default;
 // A disabled button's cursor.
 $button-disabled-cursor: not-allowed !default;

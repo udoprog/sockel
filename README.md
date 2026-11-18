@@ -527,7 +527,6 @@ source for the value. The module must emit no CSS.
 | `$button-content-gap` | `var(--space-2)` (between a button's icon and label) |
 | `$button-icon-offset` | `null` (a leading icon's inline-start margin beside a label; a negative one sets it into the padding) |
 | `$button-disabled-cursor` | `not-allowed` (a disabled button's or pager button's cursor) |
-| `$button-icon-width` | `null` (an icon-only button is square at its size's height; set, it is this wide whatever its size, e.g. `var(--control-height)` so a small one stays as wide as a regular one) |
 | `$button-phone-height` | `null` (below the phone breakpoint every size but touch keeps its height; when set, a small button there is this high in the regular type) |
 | `$dialog-padding`, `$dialog-padding-phone` | `var(--space-5)`, `null` (a dialog's head start, body and foot sides as `--dialog-pad`; on a sheet, `null` keeps `$dialog-padding`) |
 | `$dialog-body-gap`, `$dialog-shadow` | `null` (the body is a plain block; set, a column with that gap, its paragraphs without margins), `var(--shadow-1)` |
@@ -815,7 +814,7 @@ icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare 
 - An icon without a label is the icon alone (`ICON`), square, named by
   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
   alone below the phone breakpoint, its label kept for a screen reader;
-  `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `form`, `hidden` and `data` (more `data-*` attributes) are attributes;
+  `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `wide` (`WIDE`) makes an icon-only button as wide as a regular control is high whatever its size; `form`, `hidden` and `data` (more `data-*` attributes) are attributes;
   `fold_wide` (`FOLD_WIDE`) the other way round, the icon alone from the
   phone breakpoint up.
 - `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and

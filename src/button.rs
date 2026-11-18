@@ -63,6 +63,11 @@ pub struct ButtonProps {
     /// chevron: only with both an icon and a label.
     #[prop_or_default]
     pub spread: bool,
+    /// An icon-only button as wide as a regular control is high
+    /// (`--control-height`) whatever its size (`.sockel-wide`), its height
+    /// the size's: a small icon button that stays as wide as a regular one.
+    #[prop_or_default]
+    pub wide: bool,
     /// A toggle and whether it is on (`aria-pressed`).
     #[prop_or_default]
     pub pressed: Option<bool>,
@@ -181,6 +186,7 @@ pub fn Button(props: &ButtonProps) -> Html {
     let class = classes!(
         button(props.variant, props.size, icon_only, fold),
         fold_wide.then_some(class::FOLD_WIDE),
+        (props.wide && icon_only).then_some(class::WIDE),
         (props.spread && props.icon.is_some() && has_label).then_some(class::SPREAD),
         props.class.clone()
     );
@@ -320,6 +326,7 @@ mod tests {
             fold: false,
             fold_wide: false,
             spread: false,
+            wide: false,
             form: None,
             hidden: false,
             data: Vec::new(),
@@ -472,6 +479,20 @@ mod tests {
         for attr in ["data-state", "form=", "hidden"] {
             assert!(!html.contains(attr), "{attr}: {html}");
         }
+    }
+
+    #[test]
+    fn wide_is_for_an_icon_alone() {
+        let wide = |label: Html| {
+            render(ButtonProps {
+                icon: Some(html! { <svg /> }),
+                wide: true,
+                children: label,
+                ..props()
+            })
+        };
+        assert!(wide(Html::default()).contains(class::WIDE));
+        assert!(!wide(html! { "Open" }).contains(class::WIDE));
     }
 
     #[test]

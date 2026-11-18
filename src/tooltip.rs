@@ -441,6 +441,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         fold: false,
         fold_wide: false,
         spread: false,
+        wide: false,
         form: None,
         hidden: false,
         data: Vec::new(),

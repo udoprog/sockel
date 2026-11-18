@@ -15,9 +15,9 @@
 //   below the phone breakpoint, the label kept for a screen reader;
 //   `.sockel-fold-wide` the same from the phone breakpoint up.
 // - `.sockel-spread`: spans its container, the icon and the label at the two
-//   ends. `$button-icon-width` sets an icon-only button's width (the height
-//   is its size's), for an app whose small icon buttons stay as wide as a
-//   regular one.
+//   ends. `.sockel-wide` with `.sockel-icon`: an icon-only button as wide as a
+//   regular control is high (`--control-height`) whatever its size, the
+//   height its size's.
 // - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
 //   working, its content hidden by visibility so it keeps its room.
 //
@@ -98,10 +98,9 @@
         padding-inline: 0;
     }
 
-    @if base.$button-icon-width {
-        &.sockel-icon {
-            width: base.$button-icon-width;
-        }
+    // As wide as a regular control is high, at any size.
+    &.sockel-icon.sockel-wide {
+        width: var(--control-height);
     }
 
     &.sockel-spread {
