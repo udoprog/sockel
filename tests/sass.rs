@@ -188,6 +188,16 @@ fn pager_settings() {
 }
 
 #[test]
+fn button_icon_width_and_spread() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains(".sockel-button.sockel-spread {\n  width: 100%;"));
+    assert!(defaults.contains(".sockel-button[hidden] {\n  display: none;"));
+    let css = compile(&sass, "tests/fixtures/button_icon_width.scss");
+    assert!(css.contains(".sockel-button.sockel-icon {\n  width: var(--control-height);"));
+}
+
+#[test]
 fn carried_rows_are_dimmed() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

@@ -807,6 +807,7 @@
 //! - An icon without a label is the icon alone (`ICON`), square, named by
 //!   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
 //!   alone below the phone breakpoint, its label kept for a screen reader;
+//!   `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `form`, `hidden` and `data` (more `data-*` attributes) are attributes;
 //!   `fold_wide` (`FOLD_WIDE`) the other way round, the icon alone from the
 //!   phone breakpoint up.
 //! - `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and

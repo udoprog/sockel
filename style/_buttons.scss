@@ -14,6 +14,10 @@
 // - `.sockel-icon`: the icon alone, square. `.sockel-fold`: the icon alone
 //   below the phone breakpoint, the label kept for a screen reader;
 //   `.sockel-fold-wide` the same from the phone breakpoint up.
+// - `.sockel-spread`: spans its container, the icon and the label at the two
+//   ends. `$button-icon-width` sets an icon-only button's width (the height
+//   is its size's), for an app whose small icon buttons stay as wide as a
+//   regular one.
 // - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
 //   working, its content hidden by visibility so it keeps its room.
 //
@@ -28,6 +32,10 @@
 
 .sockel-button {
     @include base.button;
+
+    &[hidden] {
+        display: none;
+    }
 
     &.sockel-primary {
         @include base.button-variant(primary);
@@ -88,6 +96,22 @@
         flex: none;
         aspect-ratio: 1;
         padding-inline: 0;
+    }
+
+    @if base.$button-icon-width {
+        &.sockel-icon {
+            width: base.$button-icon-width;
+        }
+    }
+
+    &.sockel-spread {
+        width: 100%;
+        justify-content: space-between;
+
+        > .sockel-button-content {
+            flex: 1 1 auto;
+            justify-content: space-between;
+        }
     }
 
     @if base.emits("buttons.fold") {

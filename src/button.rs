@@ -58,6 +58,11 @@ pub struct ButtonProps {
     /// screen reader (`.sockel-fold-wide`): `fold` the other way round.
     #[prop_or_default]
     pub fold_wide: bool,
+    /// The icon and the label at the two ends of a button that spans its
+    /// container (`.sockel-spread`), as a collapsible head's title and
+    /// chevron: only with both an icon and a label.
+    #[prop_or_default]
+    pub spread: bool,
     /// A toggle and whether it is on (`aria-pressed`).
     #[prop_or_default]
     pub pressed: Option<bool>,
@@ -86,6 +91,16 @@ pub struct ButtonProps {
     /// A submit button of its form (the default is a plain button).
     #[prop_or_default]
     pub submit: bool,
+    /// The form it submits when it stands outside it (`form`, an id).
+    #[prop_or_default]
+    pub form: Option<AttrValue>,
+    /// Hidden (`hidden`), its place and `.sockel-button` display aside: it
+    /// is not drawn, whatever display the button's classes give.
+    #[prop_or_default]
+    pub hidden: bool,
+    /// More `data-*` attributes (`("data-state", ..)`) the app's code reads.
+    #[prop_or_default]
+    pub data: Vec<(&'static str, AttrValue)>,
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
@@ -166,6 +181,7 @@ pub fn Button(props: &ButtonProps) -> Html {
     let class = classes!(
         button(props.variant, props.size, icon_only, fold),
         fold_wide.then_some(class::FOLD_WIDE),
+        (props.spread && props.icon.is_some() && has_label).then_some(class::SPREAD),
         props.class.clone()
     );
 
@@ -216,7 +232,7 @@ pub fn Button(props: &ButtonProps) -> Html {
     let expanded = props.expanded.map(|on| on.to_string());
     let checked = props.checked.map(|on| on.to_string());
 
-    match &props.href {
+    let mut node = match &props.href {
         Some(href) => html! {
             <a {class} ref={props.node_ref.clone()}
                 aria-expanded={expanded.clone()}
@@ -233,6 +249,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 role={props.role.clone()}
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
+                hidden={props.hidden}
                 {onclick}
                 onkeydown={props.onkeydown.clone()}
             >
@@ -244,6 +261,8 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-expanded={expanded.clone()}
                 aria-haspopup={props.haspopup.clone()}
                 type={if props.submit { "submit" } else { "button" }}
+                form={props.form.clone()}
+                hidden={props.hidden}
                 {class}
                 disabled={props.disabled}
                 aria-disabled={unavailable}
@@ -263,7 +282,15 @@ pub fn Button(props: &ButtonProps) -> Html {
                 { content }{ for spinner }
             </button>
         },
+    };
+
+    if let Html::VTag(tag) = &mut node {
+        for (name, value) in &props.data {
+            std::rc::Rc::make_mut(tag).add_attribute(name, value.clone());
+        }
     }
+
+    node
 }
 
 #[cfg(test)]
@@ -292,6 +319,10 @@ mod tests {
             chevron: false,
             fold: false,
             fold_wide: false,
+            spread: false,
+            form: None,
+            hidden: false,
+            data: Vec::new(),
             pressed: None,
             busy: false,
             disabled: false,
@@ -423,6 +454,39 @@ mod tests {
         ] {
             assert!(html.contains(attr), "{attr}: {html}");
         }
+    }
+
+    #[test]
+    fn data_form_and_hidden_are_attributes() {
+        let html = render(ButtonProps {
+            data: vec![("data-state", AttrValue::from("on"))],
+            form: Some("poll-form".into()),
+            hidden: true,
+            submit: true,
+            ..props()
+        });
+        for attr in ["data-state=\"on\"", "form=\"poll-form\"", "hidden"] {
+            assert!(html.contains(attr), "{attr}: {html}");
+        }
+        let html = render(props());
+        for attr in ["data-state", "form=", "hidden"] {
+            assert!(!html.contains(attr), "{attr}: {html}");
+        }
+    }
+
+    #[test]
+    fn spread_needs_an_icon_and_a_label() {
+        let spread = |icon: Option<Html>, label: Html| {
+            render(ButtonProps {
+                icon,
+                spread: true,
+                children: label,
+                ..props()
+            })
+        };
+        assert!(spread(Some(html! { <svg /> }), html! { "Open" }).contains(class::SPREAD));
+        assert!(!spread(None, html! { "Open" }).contains(class::SPREAD));
+        assert!(!spread(Some(html! { <svg /> }), Html::default()).contains(class::SPREAD));
     }
 
     #[test]
