@@ -23,6 +23,7 @@ mod picker;
 mod pickers;
 mod popover;
 mod reorder;
+mod reorder_tree;
 mod rows;
 mod select;
 mod steppers;
@@ -1166,6 +1167,30 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["focus", "click"]),
             ),
         ],
+    },
+    Page {
+        id: "reorder-tree",
+        title: "ReorderTree",
+        group: Group::Lists,
+        about: "Rows moved within and between nested lists: a drag aims at the innermost list under the pointer that takes the row; the arrows step through every place in reading order, into a nested list and back out. accepts keeps groups among groups and entries in groups.",
+        covers: &[
+            "ReorderTree",
+            "ReorderTreeProps",
+            "ReorderList",
+            "ReorderListProps",
+            "ReorderTreeHandle",
+            "ReorderTreeHandleProps",
+            "ReorderTreeMove",
+            "ReorderSpot",
+            "TreeList",
+            "tree_slots",
+        ],
+        render: || html! { <reorder_tree::ReorderTreePage /> },
+        holds: &[hold(
+            sockel::class::REORDER,
+            Size::Box,
+            Across::Only(&["disabled", "titles", "focus", "click"]),
+        )],
     },
     Page {
         id: "reorder",

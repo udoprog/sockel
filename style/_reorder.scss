@@ -68,6 +68,11 @@
     }
 }
 
+// A ReorderTree's empty list a row is aimed at.
+.sockel-drop-inside {
+    box-shadow: inset 0 0 0 var(--space-px) var(--accent);
+}
+
 .sockel-drag-handle {
     display: inline-flex;
     flex: none;

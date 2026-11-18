@@ -542,6 +542,21 @@ body {
     background: var(--surface);
 }
 
+// ReorderTree's groups, each a head and a list of entries.
+.showcase-reorder-group {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+}
+
+.showcase-reorder-entries {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-1);
+    min-height: var(--control-height-small);
+    padding-inline-start: var(--space-4);
+}
+
 // Reorder's grid: tiles that wrap in a strip.
 .showcase-reorder-tiles {
     display: flex;

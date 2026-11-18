@@ -94,7 +94,7 @@ pub fn reorder_text(text: &ReorderText) -> String {
     phrase(&Phrases::from_catalog(&L10N), text)
 }
 
-fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
+pub(crate) fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
     let (id, name, place) = match text {
         ReorderText::Handle { name } => ("sockel-reorder-handle", Some(name), None),
         ReorderText::Hint => ("sockel-reorder-hint", None, None),
@@ -509,7 +509,7 @@ struct Drag {
 
 /// What scrolls `list`: itself or the nearest element around it that
 /// scrolls up and down, else the page.
-fn scroller_of(list: &Element) -> Option<Element> {
+pub(crate) fn scroller_of(list: &Element) -> Option<Element> {
     let window = web_sys::window()?;
     let mut at = Some(list.clone());
     while let Some(el) = at {
@@ -533,7 +533,7 @@ fn is_page(el: &Element) -> bool {
 
 /// How far the page and `scroller` (when not the page) are scrolled: what a
 /// client position adds to be one measured at the press.
-fn scrolled(scroller: Option<&Element>) -> (f64, f64) {
+pub(crate) fn scrolled(scroller: Option<&Element>) -> (f64, f64) {
     let Some(window) = web_sys::window() else {
         return (0.0, 0.0);
     };

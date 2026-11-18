@@ -696,6 +696,9 @@
 //!   (their grip a [`ReorderHandle`]): rows moved by a drag on
 //!   their [`DragHandle`] (`.drag-handle`) or by keyboard, nothing reflowing
 //!   until the drop, each step announced.
+//! - [`ReorderTree`] with [`ReorderList`]s at any depth (their rows'
+//!   grip a [`ReorderTreeHandle`]): rows moved within and between nested
+//!   lists, into a list and out of it by keyboard too.
 //! - [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
 //!   [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
 //!   have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
@@ -1701,6 +1704,48 @@
 //! classes:
 //! `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
 //! `DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`. New partial: `_reorder.scss`. New tokens: none.
+//!
+//! <br>
+//!
+//! ### ReorderTree
+//!
+//! [`ReorderTree`] holds nested lists whose rows move within a list and
+//! between lists: a layout of rows holding columns holding widgets, a list
+//! of groups and their entries. Its `children` are the app's markup, with a
+//! [`ReorderList`] (`id`, unique in the tree; `across`, for rows side by
+//! side; `focusable`, each row taking focus on a tap; `class`; `testid`) wherever a list is, at any depth, each holding
+//! [`ReorderItem`]s whose grip is a [`ReorderTreeHandle`] (`class`,
+//! `testid`). A list is laid out by its `class`; its items are its direct
+//! children, with their `current` and handlers (a click a drag ends in is
+//! not their click); `fixed` and `lifted_only` are `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
+//! [`ReorderSpot`] (`list`, `index`), `to.index` an index in its list
+//! without the row (as `move_item` takes within one list).
+//! `accepts: Callback<ReorderTreeMove, bool>` refuses the places a row may
+//! not go (its kind does not belong there); a row never goes into a list
+//! inside itself. `text`, `disabled`, `titles`, `class` and `testid` are
+//! [`Reorder`]'s.
+//!
+//! - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
+//!   follows the pointer freely. It aims at the innermost list under the
+//!   pointer that accepts it, else the lists around that one, before the
+//!   first row whose middle (across: left to right) the pointer has not
+//!   passed. Release drops it, Escape or a cancelled pointer puts it back.
+//! - Keyboard, on a focused handle: Space or Enter lifts; the arrows step
+//!   through every place the row may go in reading order
+//!   (`tree_slots(lists)`: a list's gap before a row, the lists inside that
+//!   row, the gap after it), so they move a row into a nested list and back
+//!   out of it; Home and End aim at the ends of the current list; Space or
+//!   Enter drops, Escape or leaving the handle cancels. Alt and an arrow
+//!   moves the row one place at once. Focus follows the moved row.
+//! - The row it lands beside is marked `DROP_BEFORE` or `DROP_AFTER`
+//!   (`REORDER_TILED` in an `across` list, marks at its sides); an empty
+//!   list aimed at wears `DROP_INSIDE`.
+//! - The announcements are [`Reorder`]'s, their position and count in the
+//!   list aimed at; they do not name that list.
+//!
+//! Size guarantees as [`Reorder`]'s: nothing reflows until the drop, the
+//! lifted row moving by a transform and the marks being inset box shadows.
+//! New class: `DROP_INSIDE`. New tokens: none.
 //!
 //! <br>
 //!
@@ -2808,6 +2853,8 @@ mod picker;
 mod popover;
 #[cfg(feature = "reorder")]
 mod reorder;
+#[cfg(feature = "reorder")]
+mod reorder_tree;
 mod roving;
 #[cfg(feature = "rows")]
 mod rows;
@@ -2959,6 +3006,11 @@ pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderHandle, ReorderHandleProps, ReorderItem,
     ReorderItemProps, ReorderProps, ReorderRow, ReorderText, drag_handle, drag_target, edge_step,
     grid_target, key_target, landing, move_item, reorder_row, reorder_text, slot_at,
+};
+#[cfg(feature = "reorder")]
+pub use reorder_tree::{
+    ReorderList, ReorderListProps, ReorderSpot, ReorderTree, ReorderTreeHandle,
+    ReorderTreeHandleProps, ReorderTreeMove, ReorderTreeProps, TreeList, tree_slots,
 };
 pub use roving::{menu_step, printable, typeahead};
 #[cfg(feature = "rows")]
