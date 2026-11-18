@@ -25,6 +25,9 @@ pub struct TabItem {
     /// Markup right after the tab, in the tab list: a control that belongs
     /// to the tab (a remove cross), not itself a tab.
     pub after: Option<Html>,
+    /// Below the phone breakpoint, `after` shows only while its tab is
+    /// selected (a remove cross for the open tab alone).
+    pub after_selected_only: bool,
     /// The tab's content is refused (`aria-invalid`), and the tab shows it
     /// in `--danger`.
     pub invalid: bool,
@@ -47,6 +50,7 @@ impl TabItem {
             tip: None,
             content: None,
             after: None,
+            after_selected_only: false,
             invalid: false,
             href: None,
             onclick: None,
@@ -85,6 +89,11 @@ impl TabItem {
 
     pub fn after(mut self, after: Html) -> Self {
         self.after = Some(after);
+        self
+    }
+
+    pub fn after_selected_only(mut self, only: bool) -> Self {
+        self.after_selected_only = only;
         self
     }
 
@@ -180,6 +189,17 @@ fn face(tab: &TabItem) -> Html {
     }
 }
 
+/// The markup after a tab: bare, or when `after_selected_only` in a
+/// `tab-after` span that a phone hides unless the tab is `selected`.
+fn after(tab: &TabItem, selected: bool) -> Html {
+    match (&tab.after, tab.after_selected_only) {
+        (Some(after), true) => html! {
+            <span class={class::TAB_AFTER} data-selected={selected.to_string()}>{ after.clone() }</span>
+        },
+        (after, _) => after.clone().unwrap_or_default(),
+    }
+}
+
 fn name(tab: &TabItem) -> Option<AttrValue> {
     tab.tip
         .clone()
@@ -235,7 +255,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
                         {onclick}>
                         { face(tab) }
                     </button>
-                    { for tab.after.clone() }
+                    { after(tab, selected) }
                     </>
                 }
             }) }
@@ -285,7 +305,7 @@ pub fn LinkTabs(props: &LinkTabsProps) -> Html {
                         {onclick}>
                         { face(tab) }
                     </a>
-                    { for tab.after.clone() }
+                    { after(tab, current) }
                     </>
                 }
             }) }
@@ -393,6 +413,19 @@ mod tests {
         assert!(html.contains("mine"), "{html}");
         assert!(html.contains("<b>Rich</b>"), "{html}");
         assert!(html.find("data-after") > html.find("</button>"), "{html}");
+    }
+
+    #[test]
+    fn after_selected_only_wraps_after_with_the_tab_state() {
+        let t = vec![
+            TabItem::new("a", "A")
+                .after(html! { <i data-after="a" /> })
+                .after_selected_only(true),
+            TabItem::new("b", "B").after(html! { <i data-after="b" /> }),
+        ];
+        let html = html_of::<Tabs>(props(Some("a"), t));
+        assert!(html.contains("data-selected=\"true\""), "{html}");
+        assert_eq!(html.matches("data-selected").count(), 1, "{html}");
     }
 
     #[test]

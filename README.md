@@ -946,7 +946,9 @@ changes no box. Every component takes `class`.
   an icon-only tab), `content` (markup for the label, such as a flag with a
   name, where text is not enough; `label` is then its `aria-label`),
   `after` (markup right after the tab in the list, for a control of the
-  tab's own such as a remove cross; it is not a tab and the arrows skip it)
+  tab's own such as a remove cross; it is not a tab and the arrows skip it;
+  `after_selected_only(true)` hides it below the phone breakpoint unless its
+  tab is selected)
   and `invalid(bool)` (`aria-invalid` and the tab in `--danger`).
   `segmented` on the list sets the tabs in a tinted pill with the selected
   one a raised segment (`SEGMENTED`) instead of an underline. `fill`

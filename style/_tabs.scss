@@ -10,7 +10,10 @@
 //   (`aria-selected`) takes the accent colour and an underline of
 //   `--tab-underline` drawn by an inset shadow, so the box is the same.
 //   Parts: `-icon` (hidden below the phone breakpoint unless
-//   `$tab-phone-icons`), `-label`, `$tab-gap` apart.
+//   `$tab-phone-icons`), `-label` (a row of its parts, `$tab-gap` apart),
+//   `$tab-gap` apart. `-after` wraps a tab's `after` markup when it is
+//   `after_selected_only`: below the phone breakpoint it is hidden unless
+//   its tab is selected.
 //   `.sockel-invalid` (`aria-invalid`) shows the tab in `--danger`. A link
 //   tab (LinkTabs) is the same, `aria-current="page"` its selected state.
 // - `.sockel-segmented` on a `.sockel-tabs`: the tabs sit in a tinted pill,
@@ -152,7 +155,20 @@
 }
 
 .sockel-tab-label {
+    display: inline-flex;
+    align-items: center;
+    gap: base.$tab-gap;
     white-space: nowrap;
+}
+
+.sockel-tab-after {
+    display: contents;
+
+    @include base.below("phone") {
+        &[data-selected="false"] {
+            display: none;
+        }
+    }
 }
 
 .sockel-nav-list {
