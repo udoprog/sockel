@@ -605,9 +605,10 @@ fn rects(list: &Element, count: usize) -> Vec<DomRect> {
 
 struct Drag {
     id: i32,
-    /// What takes the pointer once the press moves past `SLOP`; a press
-    /// that never does keeps its click.
-    handle: HtmlElement,
+    /// What takes the pointer once a press on the row's body moves past
+    /// `SLOP`, so one that never does keeps its click; `None` once taken
+    /// (a press on the handle takes it at once).
+    deferred: Option<HtmlElement>,
     from: usize,
     /// Held by the row itself, which has no handle (`body_drag`): the row
     /// hears the pointer.
@@ -1156,7 +1157,7 @@ impl Ctx {
             else {
                 return;
             };
-            self.begin(&e, &handle, false);
+            self.begin(&e, &handle, false, false);
         })
     }
 
@@ -1206,7 +1207,7 @@ impl Ctx {
             let Ok(handle) = handle.unwrap_or(row).dyn_into::<HtmlElement>() else {
                 return;
             };
-            self.begin(&e, &handle, by_row);
+            self.begin(&e, &handle, by_row, true);
         })
     }
 
@@ -1214,13 +1215,20 @@ impl Ctx {
     /// by itself, not by its handle.
     fn row_only(self, then: Callback<PointerEvent>) -> Callback<PointerEvent> {
         Callback::from(move |e: PointerEvent| {
-            if self.live.borrow().drag.as_ref().is_some_and(|d| d.by_row) {
+            // The row hears a body press until it takes the pointer.
+            if self
+                .live
+                .borrow()
+                .drag
+                .as_ref()
+                .is_some_and(|d| d.by_row || d.deferred.is_some())
+            {
                 then.emit(e);
             }
         })
     }
 
-    fn begin(&self, e: &PointerEvent, handle: &HtmlElement, by_row: bool) {
+    fn begin(&self, e: &PointerEvent, handle: &HtmlElement, by_row: bool, defer: bool) {
         let Some(list) = self.list.cast::<Element>() else {
             return;
         };
@@ -1236,13 +1244,16 @@ impl Ctx {
         };
         e.prevent_default();
         let _ = handle.focus();
+        if !defer {
+            let _ = handle.set_pointer_capture(e.pointer_id());
+        }
         let ticker = scroller.is_some().then(|| {
             let ctx = self.clone();
             Ticker::start(30, move || ctx.tick())
         });
         let drag = Drag {
             id: e.pointer_id(),
-            handle: handle.clone(),
+            deferred: defer.then(|| handle.clone()),
             from: self.index,
             by_row,
             over: None,
@@ -1346,8 +1357,8 @@ impl Ctx {
         mark_over(drag, over);
         let from = drag.from;
         let started = !drag.active;
-        if started {
-            let _ = drag.handle.set_pointer_capture(drag.id);
+        if let Some(handle) = drag.deferred.take() {
+            let _ = handle.set_pointer_capture(drag.id);
         }
         drag.active = true;
         if started || live.lift.is_none_or(|l| l.to != to) {
