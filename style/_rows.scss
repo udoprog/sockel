@@ -45,12 +45,20 @@
     }
 }
 
+$name-wrap: nowrap;
+$name-break: normal;
+
+@if base.$row-list-name-wrap {
+    $name-wrap: normal;
+    $name-break: anywhere;
+}
+
 .sockel-row-list-item {
     --overlay-tint: transparent;
     --overlay-opacity: 0;
     --overlay-events: none;
-    --row-name-wrap: nowrap;
-    --row-name-break: normal;
+    --row-name-wrap: #{$name-wrap};
+    --row-name-break: #{$name-break};
     --row-main-basis: auto;
 
     position: relative;
@@ -60,8 +68,8 @@
     gap: var(--space-3);
     box-sizing: border-box;
     min-width: 0;
-    min-height: var(--control-height);
-    padding: 0 var(--space-3);
+    min-height: base.$row-list-item-height;
+    padding: base.$row-list-item-padding;
     border-top: var(--space-px) solid var(--row-line);
 
     // The tint stays inside the box's corners; nothing is clipped.
@@ -78,7 +86,7 @@
 
     &:hover,
     &:focus-within {
-        --overlay-tint: color-mix(in srgb, var(--text) 4%, transparent);
+        --overlay-tint: #{base.$row-list-hover-fill};
         --overlay-opacity: 1;
         --overlay-events: auto;
 
