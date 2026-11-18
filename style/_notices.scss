@@ -45,7 +45,7 @@
         align-items: center;
         justify-content: center;
         height: base.$notice-icon-height;
-        color: var(--tone);
+        color: base.$notice-icon-ink;
     }
 
     // The text sits in the middle of the least height, whatever its lines.
