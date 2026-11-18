@@ -5,8 +5,8 @@ use yew::prelude::*;
 
 use sockel::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
-    ReorderRow, ReorderText, drag_handle, drag_target, key_target, landing, move_item, reorder_row,
-    slot_at,
+    ReorderRow, ReorderText, drag_handle, drag_target, edge_step, grid_target, key_target, landing,
+    move_item, reorder_row, slot_at,
 };
 
 use crate::class;
@@ -132,6 +132,9 @@ pub fn ReorderPage() -> Html {
     let children = use_state(|| false);
     let quick_keys = use_state(|| false);
     let titles = use_state(|| false);
+    let body_drag = use_state(|| false);
+    let auto_scroll = use_state(|| false);
+    let grid = use_state(|| false);
     let keys = use_state(|| 0usize);
     let order = use_state(|| (0..NAMES.len()).collect::<Vec<_>>());
     let said = use_state(String::new);
@@ -160,6 +163,8 @@ pub fn ReorderPage() -> Html {
             words
         })
     };
+    // A grid is the children mode's: the rows are tiles the page lays out.
+    let as_items = *children || *grid;
     let rows: Vec<ReorderRow> = order
         .iter()
         .filter(|i| **i < *count)
@@ -195,18 +200,29 @@ pub fn ReorderPage() -> Html {
             <Toggle label="children" value={*children} on_change={bind(&children)} />
             <Toggle label="quick_keys" value={*quick_keys} on_change={bind(&quick_keys)} />
             <Toggle label="titles" value={*titles} on_change={bind(&titles)} />
+            <Toggle label="body_drag" value={*body_drag} on_change={bind(&body_drag)} />
+            <Toggle label="auto_scroll" value={*auto_scroll} on_change={bind(&auto_scroll)} />
+            <Toggle label="grid" value={*grid} on_change={bind(&grid)} />
         </>
     };
+    let items_class = if *grid {
+        class::REORDER_TILES
+    } else {
+        class::REORDER_ITEMS
+    };
     let reorder = El::new("Reorder")
-        .expr_if(!*children, "rows", "rows.clone()")
+        .expr_if(!as_items, "rows", "rows.clone()")
         .expr("on_move", "on_move.clone()")
-        .flag("divided", *divided && !*children)
-        .flag("boxed", *boxed && !*children)
+        .flag("divided", *divided && !as_items)
+        .flag("boxed", *boxed && !as_items)
         .flag("disabled", *disabled)
         .flag("quick_keys", *quick_keys)
-        .flag("titles", *titles);
-    let reorder = if *children {
-        reorder.text("class", class::REORDER_ITEMS).line(each(
+        .flag("titles", *titles)
+        .flag("body_drag", *body_drag)
+        .flag("auto_scroll", *auto_scroll)
+        .flag("grid", *grid);
+    let reorder = if as_items {
+        reorder.text("class", items_class).line(each(
             "steps",
             "step_item",
             rows.len(),
@@ -217,15 +233,18 @@ pub fn ReorderPage() -> Html {
     };
     let code = snippet(&[], reorder);
     let lifted = (1, 3);
+    let scroll_box = classes!(auto_scroll.then_some(class::REORDER_SCROLL));
 
     html! {
         <Demo {controls} {code}>
             if rows.is_empty() {
                 <EmptyState compact={true} title="Nothing to order" />
-            } else if *children {
+            } else if as_items {
                 // The app's own rows, its handle placed in them.
+                <div class={scroll_box}>
                 <Reorder {on_move} text={text_cb} disabled={*disabled} quick_keys={*quick_keys}
-                    titles={*titles} class={class::REORDER_ITEMS}>
+                    titles={*titles} body_drag={*body_drag} auto_scroll={*auto_scroll} grid={*grid}
+                    class={items_class}>
                     { for rows.iter().map(|row| html_nested! {
                         <ReorderItem id={row.key.clone()} name={row.name.clone()} class={class::REORDER_ITEM}>
                             <ReorderHandle />
@@ -237,9 +256,13 @@ pub fn ReorderPage() -> Html {
                         </ReorderItem>
                     }) }
                 </Reorder>
+                </div>
             } else {
+                <div class={scroll_box}>
                 <Reorder {rows} {on_move} text={text_cb} divided={*divided} boxed={*boxed}
-                    disabled={*disabled} quick_keys={*quick_keys} titles={*titles} />
+                    disabled={*disabled} quick_keys={*quick_keys} titles={*titles}
+                    body_drag={*body_drag} auto_scroll={*auto_scroll} />
+                </div>
             }
             <p class={class::CONTROL_LABEL}>{ format!("Said: {}", *said) }</p>
             { shown("reorder_row(3, Some((1, 3)))", &reorder_row(3, Some(lifted))) }
@@ -255,6 +278,13 @@ pub fn ReorderPage() -> Html {
                 { format!(
                     "drag_target(middles, 0, top, bottom) = {}",
                     drag_target(&[10.0, 30.0, 50.0], 0, 34.0, 52.0),
+                ) }
+            </p>
+            <p class={class::CONTROL_LABEL}>
+                { format!(
+                    "grid_target(centers, 0, x, y) = {}; edge_step(y, top, bottom) = {}",
+                    grid_target(&[(10.0, 10.0), (30.0, 10.0), (10.0, 30.0)], 0, 12.0, 28.0),
+                    edge_step(105.0, 100.0, 500.0),
                 ) }
             </p>
             <DragHandle label="Move (a handle alone)" />

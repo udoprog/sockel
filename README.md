@@ -1593,6 +1593,21 @@ renders nothing.
   an arrow do, for apps whose handles did so; Space and Enter still lift.
 - `titles`: each handle's name is its tooltip too (`DragHandle`'s new
   `title`).
+- `body_drag`: a mouse or pen also drags a row from anywhere on it off its
+  controls (a button, input, link, label or role widget in it does not
+  start a drag); a finger still only by the handle, so the list scrolls
+  under it. The keyboard works as ever on the handle. The row wears
+  `REORDER_GRAB` (a grab cursor).
+- `auto_scroll`: while a row is dragged near the top or bottom edge of
+  what scrolls the list (the nearest `overflow-y: auto|scroll` ancestor,
+  else the page) that scrolls, faster the nearer the edge
+  (`edge_step(y, top, bottom)`), and the row keeps following the pointer.
+- `grid` (children mode): the rows wrap in a strip or grid laid out by
+  `class`. A dragged row moves across and down (`--reorder-shift-x` and
+  `--reorder-shift`), lands in the cell nearest its middle
+  (`grid_target(centers, from, x, y)`), and the drop is marked at the
+  row's side (`DROP_BEFORE` the left, `DROP_AFTER` the right), the rows
+  wearing `REORDER_TILED`. The arrows still step through reading order.
 
 - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
   follows the pointer, kept within the list. It passes a row once its top
@@ -1627,7 +1642,7 @@ border; hover, focus and lifted change colours only. Settings:
 phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`. New
 classes:
 `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
-`DRAG_HANDLE`. New partial: `_reorder.scss`. New tokens: none.
+`DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`. New partial: `_reorder.scss`. New tokens: none.
 
 <br>
 

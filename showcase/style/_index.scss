@@ -541,3 +541,16 @@ body {
     border-radius: var(--radius-sm);
     background: var(--surface);
 }
+
+// Reorder's grid: tiles that wrap in a strip.
+.showcase-reorder-tiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-2);
+}
+
+// Reorder's auto_scroll: a short list box that scrolls.
+.showcase-reorder-scroll {
+    max-height: 12rem;
+    overflow-y: auto;
+}

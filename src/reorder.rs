@@ -10,11 +10,20 @@ use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
+use crate::timer::Ticker;
 use crate::tooltip::next_id;
 use crate::{Glyph, Icon, RowListItem, class, row_list};
 
 /// How far a pointer travels before a press on a handle becomes a drag.
 const SLOP: f64 = 4.0;
+/// How near the edge of what scrolls a dragged row scrolls it, and its most
+/// per tick.
+const EDGE: f64 = 40.0;
+const STEP: f64 = 14.0;
+
+/// What a press on is not a drag of the row: its own controls.
+const CONTROLS: &str = "button, input, a, textarea, select, label, [contenteditable], \
+    [role=button], [role=checkbox], [role=radio], [role=switch], [role=slider], [role=menuitem]";
 
 /// One row of a [`Reorder`].
 #[derive(Clone, PartialEq)]
@@ -151,6 +160,34 @@ pub fn drag_target(middles: &[f64], from: usize, top: f64, bottom: f64) -> usize
     let up = middles[..from].iter().filter(|m| **m > top).count();
     let down = middles[from + 1..].iter().filter(|m| **m < bottom).count();
     from - up + down
+}
+
+/// The index a row lifted from `from` lands at in a wrapping layout while
+/// its middle is at (`x`, `y`), among the rows' `centers` measured at the
+/// press: that of the nearest cell, as an index in the list without the row.
+pub fn grid_target(centers: &[(f64, f64)], from: usize, x: f64, y: f64) -> usize {
+    centers
+        .iter()
+        .enumerate()
+        .min_by(|(_, a), (_, b)| {
+            (a.0 - x)
+                .hypot(a.1 - y)
+                .total_cmp(&(b.0 - x).hypot(b.1 - y))
+        })
+        .map_or(from, |(at, _)| at)
+}
+
+/// How far to scroll for a pointer at `y` when what scrolls shows `top` to
+/// `bottom`: up (negative) or down (positive) by up to a step, more the
+/// nearer the edge, none away from them.
+pub fn edge_step(y: f64, top: f64, bottom: f64) -> f64 {
+    if y < top + EDGE {
+        -STEP * ((top + EDGE - y) / EDGE).min(1.0)
+    } else if y > bottom - EDGE {
+        STEP * ((y - (bottom - EDGE)) / EDGE).min(1.0)
+    } else {
+        0.0
+    }
 }
 
 /// Moves `list[from]` to `to`, as [`Reorder`]'s `on_move` reports it.
@@ -319,6 +356,19 @@ pub struct ReorderProps {
     /// Each handle's name is its tooltip too.
     #[prop_or_default]
     pub titles: bool,
+    /// A mouse or pen drags a row from anywhere on it that is off its
+    /// controls, not only by the handle; a finger still only by the handle.
+    #[prop_or_default]
+    pub body_drag: bool,
+    /// A dragged row near the top or bottom edge of what scrolls the list
+    /// (the nearest scrolling ancestor, else the page) scrolls it.
+    #[prop_or_default]
+    pub auto_scroll: bool,
+    /// The rows wrap in a strip or grid (children mode, laid out by
+    /// `class`): a dragged row moves in both directions and lands in the
+    /// nearest cell, and the drop is marked at the row's side.
+    #[prop_or_default]
+    pub grid: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -335,14 +385,77 @@ struct Lift {
 struct Drag {
     id: i32,
     from: usize,
-    start: f64,
+    /// Where it was pressed, within the page and what scrolls the list.
+    start: (f64, f64),
     middles: Vec<f64>,
+    /// The rows' middles across and down, for a grid.
+    centers: Vec<(f64, f64)>,
     /// Half the lifted row's height.
     half: f64,
     least: f64,
     most: f64,
+    least_x: f64,
+    most_x: f64,
     active: bool,
     row: Element,
+    /// The pointer's client position at its last move.
+    at: (f64, f64),
+    scroller: Option<Element>,
+    _ticker: Option<Ticker>,
+}
+
+/// What scrolls `list`: itself or the nearest element around it that
+/// scrolls up and down, else the page.
+fn scroller_of(list: &Element) -> Option<Element> {
+    let window = web_sys::window()?;
+    let mut at = Some(list.clone());
+    while let Some(el) = at {
+        if let Ok(Some(style)) = window.get_computed_style(&el)
+            && let Ok(overflow) = style.get_property_value("overflow-y")
+            && matches!(overflow.as_str(), "auto" | "scroll")
+        {
+            return Some(el);
+        }
+        at = el.parent_element();
+    }
+    window.document()?.scrolling_element()
+}
+
+fn is_page(el: &Element) -> bool {
+    web_sys::window()
+        .and_then(|w| w.document())
+        .and_then(|d| d.scrolling_element())
+        .is_some_and(|page| page == *el)
+}
+
+/// How far the page and `scroller` (when not the page) are scrolled: what a
+/// client position adds to be one measured at the press.
+fn scrolled(scroller: Option<&Element>) -> (f64, f64) {
+    let Some(window) = web_sys::window() else {
+        return (0.0, 0.0);
+    };
+    let (x, y) = (
+        window.scroll_x().unwrap_or_default(),
+        window.scroll_y().unwrap_or_default(),
+    );
+    let inner = scroller
+        .filter(|s| !is_page(s))
+        .map_or(0.0, |s| f64::from(s.scroll_top()));
+    (x, y + inner)
+}
+
+/// The top and bottom of what `scroller` shows, in client heights.
+fn shown(scroller: &Element) -> (f64, f64) {
+    if is_page(scroller) {
+        let height = web_sys::window()
+            .and_then(|w| w.inner_height().ok())
+            .and_then(|h| h.as_f64())
+            .unwrap_or_default();
+        (0.0, height)
+    } else {
+        let rect = scroller.get_bounding_client_rect();
+        (rect.top(), rect.bottom())
+    }
 }
 
 #[derive(Default)]
@@ -435,13 +548,23 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             name,
             key: keys[index].clone(),
             quick: props.quick_keys,
+            body: props.body_drag,
+            auto: props.auto_scroll,
+            grid: props.grid,
+            disabled: props.disabled,
         },
         lifted: lift.is_some_and(|l| l.from == index),
         disabled: props.disabled,
         hint: (*hint_id).clone(),
         titles: props.titles,
     };
-    let marks = |index: usize| reorder_row(index, lift.map(|l| (l.from, l.to)));
+    let marks = |index: usize| {
+        classes!(
+            reorder_row(index, lift.map(|l| (l.from, l.to))),
+            props.body_drag.then_some(class::REORDER_GRAB),
+            props.grid.then_some(class::REORDER_TILED)
+        )
+    };
     let status = html! {
         <>
             <span id={(*hint_id).clone()} class={class::VISUALLY_HIDDEN}>{ say(ReorderText::Hint) }</span>
@@ -458,9 +581,12 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             .enumerate()
             .map(|(index, item)| {
                 let item = &item.props;
+                let grip = grip(index, item.name.clone());
+                let onpointerdown = grip.ctx.clone().body_down();
                 html! {
-                    <ContextProvider<Grip> key={item.id.to_string()} context={grip(index, item.name.clone())}>
-                        <div class={classes!(marks(index), item.class.clone())} data-testid={item.testid.clone()}>
+                    <ContextProvider<Grip> key={item.id.to_string()} context={grip}>
+                        <div class={classes!(marks(index), item.class.clone())} data-testid={item.testid.clone()}
+                            {onpointerdown}>
                             { item.children.clone() }
                         </div>
                     </ContextProvider<Grip>>
@@ -483,11 +609,13 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         .iter()
         .enumerate()
         .map(|(index, row)| {
-            let handle = grip(index, row.name.clone()).handle(Classes::new(), None);
+            let grip = grip(index, row.name.clone());
+            let onpointerdown = grip.ctx.clone().body_down();
+            let handle = grip.handle(Classes::new(), None);
             html! {
                 <RowListItem key={row.key.to_string()} name={html! { { row.name.clone() } }}
                     detail={row.detail.clone()} start={handle}
-                    class={marks(index)}>
+                    class={marks(index)} {onpointerdown}>
                     { row.end.clone() }
                 </RowListItem>
             }
@@ -520,6 +648,7 @@ impl PartialEq for Grip {
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
+            && (a.body, a.auto, a.grid, a.disabled) == (b.body, b.auto, b.grid, b.disabled)
             && (&a.name, &a.key) == (&b.name, &b.key)
             && (self.lifted, self.disabled, self.titles)
                 == (other.lifted, other.disabled, other.titles)
@@ -559,6 +688,10 @@ struct Ctx {
     key: AttrValue,
     /// The arrows move at once (`quick_keys`).
     quick: bool,
+    body: bool,
+    auto: bool,
+    grid: bool,
+    disabled: bool,
 }
 
 impl Ctx {
@@ -635,81 +768,225 @@ impl Ctx {
             else {
                 return;
             };
-            let Some(rows) = self.list.cast::<Element>().map(|l| l.children()) else {
-                return;
-            };
-            let Some(row) = rows.item(self.index as u32) else {
-                return;
-            };
-            e.prevent_default();
-            let _ = handle.focus();
-            let _ = handle.set_pointer_capture(e.pointer_id());
-            let scroll = web_sys::window()
-                .and_then(|w| w.scroll_y().ok())
-                .unwrap_or_default();
-            let rects: Vec<_> = (0..self.count as u32)
-                .filter_map(|i| rows.item(i))
-                .map(|r| r.get_bounding_client_rect())
-                .collect();
-            let own = row.get_bounding_client_rect();
-            let (Some(first), Some(last)) = (rects.first(), rects.last()) else {
-                return;
-            };
-            let drag = Drag {
-                id: e.pointer_id(),
-                from: self.index,
-                start: f64::from(e.page_y()),
-                middles: rects
-                    .iter()
-                    .map(|r| r.top() + r.height() / 2.0 + scroll)
-                    .collect(),
-                half: own.height() / 2.0,
-                least: first.top() - own.top(),
-                most: last.bottom() - own.bottom(),
-                active: false,
-                row,
-            };
-            self.live.borrow_mut().drag = Some(drag);
+            self.begin(&e, &handle);
         })
+    }
+
+    /// A press on the row off its handle and controls (`body_drag`), by a
+    /// mouse or pen.
+    fn body_down(self) -> Callback<PointerEvent> {
+        Callback::from(move |e: PointerEvent| {
+            if !self.body
+                || self.disabled
+                || e.button() != 0
+                || e.pointer_type() == "touch"
+                || self.live.borrow().lift.is_some()
+            {
+                return;
+            }
+            let Some(target) = e.target().and_then(|t| t.dyn_into::<Element>().ok()) else {
+                return;
+            };
+            let handle_class = format!(".{}", class::DRAG_HANDLE);
+            if target.closest(&handle_class).ok().flatten().is_some() {
+                return;
+            }
+            let Some(row) = self
+                .list
+                .cast::<Element>()
+                .and_then(|l| l.children().item(self.index as u32))
+            else {
+                return;
+            };
+            if target
+                .closest(CONTROLS)
+                .ok()
+                .flatten()
+                .is_some_and(|c| row.contains(Some(&c)))
+            {
+                return;
+            }
+            let Some(handle) = row
+                .query_selector(&handle_class)
+                .ok()
+                .flatten()
+                .and_then(|h| h.dyn_into::<HtmlElement>().ok())
+            else {
+                return;
+            };
+            self.begin(&e, &handle);
+        })
+    }
+
+    fn begin(&self, e: &PointerEvent, handle: &HtmlElement) {
+        let Some(list) = self.list.cast::<Element>() else {
+            return;
+        };
+        let rows = list.children();
+        let Some(row) = rows.item(self.index as u32) else {
+            return;
+        };
+        e.prevent_default();
+        let _ = handle.focus();
+        let _ = handle.set_pointer_capture(e.pointer_id());
+        let scroller = self.auto.then(|| scroller_of(&list)).flatten();
+        let (ox, oy) = scrolled(scroller.as_ref());
+        let rects: Vec<_> = (0..self.count as u32)
+            .filter_map(|i| rows.item(i))
+            .map(|r| r.get_bounding_client_rect())
+            .collect();
+        let own = row.get_bounding_client_rect();
+        let (Some(first), Some(last)) = (rects.first(), rects.last()) else {
+            return;
+        };
+        let (least_x, most_x) = if self.grid {
+            let left = rects.iter().map(|r| r.left()).fold(f64::MAX, f64::min);
+            let right = rects.iter().map(|r| r.right()).fold(f64::MIN, f64::max);
+            (left - own.left(), right - own.right())
+        } else {
+            (0.0, 0.0)
+        };
+        let (least, most) = if self.grid {
+            let top = rects.iter().map(|r| r.top()).fold(f64::MAX, f64::min);
+            let bottom = rects.iter().map(|r| r.bottom()).fold(f64::MIN, f64::max);
+            (top - own.top(), bottom - own.bottom())
+        } else {
+            (first.top() - own.top(), last.bottom() - own.bottom())
+        };
+        let ticker = scroller.is_some().then(|| {
+            let ctx = self.clone();
+            Ticker::start(30, move || ctx.tick())
+        });
+        let drag = Drag {
+            id: e.pointer_id(),
+            from: self.index,
+            start: (f64::from(e.client_x()) + ox, f64::from(e.client_y()) + oy),
+            middles: rects
+                .iter()
+                .map(|r| r.top() + r.height() / 2.0 + oy)
+                .collect(),
+            centers: if self.grid {
+                rects
+                    .iter()
+                    .map(|r| {
+                        (
+                            r.left() + r.width() / 2.0 + ox,
+                            r.top() + r.height() / 2.0 + oy,
+                        )
+                    })
+                    .collect()
+            } else {
+                Vec::new()
+            },
+            half: own.height() / 2.0,
+            least,
+            most,
+            least_x,
+            most_x,
+            active: false,
+            row,
+            at: (f64::from(e.client_x()), f64::from(e.client_y())),
+            scroller,
+            _ticker: ticker.flatten(),
+        };
+        self.live.borrow_mut().drag = Some(drag);
+    }
+
+    /// Scrolls what holds the list while the dragged row's pointer is near
+    /// its edge; `false` once the drag is over.
+    fn tick(&self) -> bool {
+        let (scroller, at, active) = {
+            let live = self.live.borrow();
+            let Some(drag) = live.drag.as_ref().filter(|d| d.row.is_connected()) else {
+                return false;
+            };
+            let Some(scroller) = drag.scroller.clone() else {
+                return false;
+            };
+            (scroller, drag.at, drag.active)
+        };
+        if !active {
+            return true;
+        }
+        let (top, bottom) = shown(&scroller);
+        let by = edge_step(at.1, top, bottom);
+        if by != 0.0 {
+            let before = scroller.scroll_top();
+            scroller.set_scroll_top(before + by.round() as i32);
+            if scroller.scroll_top() != before {
+                self.drag_to(at);
+            }
+        }
+        true
     }
 
     fn pointer_move(self) -> Callback<PointerEvent> {
         Callback::from(move |e: PointerEvent| {
-            let mut live = self.live.borrow_mut();
-            let Some(drag) = live.drag.as_mut().filter(|d| d.id == e.pointer_id()) else {
-                return;
-            };
-            let dy = f64::from(e.page_y()) - drag.start;
-            if !drag.active && dy.abs() < SLOP {
-                return;
+            let ours = self
+                .live
+                .borrow()
+                .drag
+                .as_ref()
+                .is_some_and(|d| d.id == e.pointer_id());
+            if ours {
+                self.drag_to((f64::from(e.client_x()), f64::from(e.client_y())));
             }
-            let dy = dy.clamp(drag.least, drag.most);
-            let _ = drag
-                .row
-                .set_attribute("style", &format!("--reorder-shift: {dy}px"));
+        })
+    }
+
+    /// The dragged row follows the pointer at client `at` (or what scrolled
+    /// under it).
+    fn drag_to(&self, at: (f64, f64)) {
+        let mut live = self.live.borrow_mut();
+        let Some(drag) = live.drag.as_mut() else {
+            return;
+        };
+        drag.at = at;
+        let (ox, oy) = scrolled(drag.scroller.as_ref());
+        let dy = at.1 + oy - drag.start.1;
+        let dx = if self.grid {
+            at.0 + ox - drag.start.0
+        } else {
+            0.0
+        };
+        if !drag.active && dx.hypot(dy) < SLOP {
+            return;
+        }
+        let dy = dy.clamp(drag.least, drag.most);
+        let dx = dx.clamp(drag.least_x, drag.most_x);
+        let style = if self.grid {
+            format!("--reorder-shift: {dy}px; --reorder-shift-x: {dx}px")
+        } else {
+            format!("--reorder-shift: {dy}px")
+        };
+        let _ = drag.row.set_attribute("style", &style);
+        let to = if self.grid {
+            let (cx, cy) = drag.centers[drag.from];
+            grid_target(&drag.centers, drag.from, cx + dx, cy + dy)
+        } else {
             let middle = drag.middles[drag.from] + dy;
-            let to = drag_target(
+            drag_target(
                 &drag.middles,
                 drag.from,
                 middle - drag.half,
                 middle + drag.half,
-            );
-            let from = drag.from;
-            let started = !drag.active;
-            drag.active = true;
-            if started || live.lift.is_none_or(|l| l.to != to) {
-                live.lift = Some(Lift {
-                    from,
-                    to,
-                    pointer: true,
-                });
-                drop(live);
-                if started {
-                    self.announce(self.lifted(from));
-                }
-                self.redraw.force_update();
+            )
+        };
+        let from = drag.from;
+        let started = !drag.active;
+        drag.active = true;
+        if started || live.lift.is_none_or(|l| l.to != to) {
+            live.lift = Some(Lift {
+                from,
+                to,
+                pointer: true,
+            });
+            drop(live);
+            if started {
+                self.announce(self.lifted(from));
             }
-        })
+            self.redraw.force_update();
+        }
     }
 
     fn pointer_up(self) -> Callback<PointerEvent> {
@@ -871,6 +1148,36 @@ mod tests {
         assert_eq!(drag_target(&middles, 1, 0.0, 100.0), 0);
         assert_eq!(drag_target(&middles, 0, 104.0, 124.0), 1);
         assert_eq!(drag_target(&middles, 5, 0.0, 1.0), 5);
+    }
+
+    #[test]
+    fn a_grid_drag_lands_in_the_nearest_cell() {
+        // Two rows of three cells, 50 apart across and 40 down.
+        let centers = [
+            (25.0, 20.0),
+            (75.0, 20.0),
+            (125.0, 20.0),
+            (25.0, 60.0),
+            (75.0, 60.0),
+            (125.0, 60.0),
+        ];
+        assert_eq!(grid_target(&centers, 0, 25.0, 20.0), 0);
+        assert_eq!(grid_target(&centers, 0, 70.0, 25.0), 1);
+        assert_eq!(grid_target(&centers, 0, 125.0, 60.0), 5);
+        assert_eq!(grid_target(&centers, 5, 20.0, 15.0), 0);
+        assert_eq!(grid_target(&centers, 2, 30.0, 70.0), 3);
+        assert_eq!(grid_target(&[], 3, 0.0, 0.0), 3);
+    }
+
+    #[test]
+    fn the_edges_scroll_faster_the_nearer_the_pointer() {
+        assert_eq!(edge_step(300.0, 100.0, 500.0), 0.0);
+        assert_eq!(edge_step(140.0, 100.0, 500.0), 0.0);
+        assert_eq!(edge_step(100.0, 100.0, 500.0), -STEP);
+        assert_eq!(edge_step(-20.0, 100.0, 500.0), -STEP);
+        assert_eq!(edge_step(120.0, 100.0, 500.0), -STEP / 2.0);
+        assert_eq!(edge_step(500.0, 100.0, 500.0), STEP);
+        assert_eq!(edge_step(480.0, 100.0, 500.0), STEP / 2.0);
     }
 
     #[test]

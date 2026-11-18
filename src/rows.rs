@@ -62,6 +62,8 @@ pub struct RowListItemProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub onpointerdown: Callback<PointerEvent>,
     /// What ends the row: an [`ActionRow`](crate::ActionRow), a checkbox.
     #[prop_or_default]
     pub children: Html,
@@ -78,7 +80,7 @@ pub fn row_list_item(top: bool) -> Classes {
 pub fn RowListItem(props: &RowListItemProps) -> Html {
     html! {
         <@{props.tag} class={classes!(row_list_item(props.top), props.class.clone())}
-            data-testid={props.testid.clone()}>
+            data-testid={props.testid.clone()} onpointerdown={props.onpointerdown.clone()}>
             if let Some(start) = &props.start {
                 { start.clone() }
             }

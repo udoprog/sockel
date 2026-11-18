@@ -1,6 +1,6 @@
 //! Timeouts that clean up after themselves.
 
-use std::cell::RefCell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
@@ -41,6 +41,50 @@ impl Drop for Timer {
     fn drop(&mut self) {
         if let Some(window) = web_sys::window() {
             window.clear_timeout_with_handle(self.id);
+        }
+    }
+}
+
+/// An interval that is cleared and its closure freed when dropped.
+pub(crate) struct Ticker {
+    id: Rc<Cell<i32>>,
+    _callback: Closure<dyn FnMut()>,
+}
+
+impl Ticker {
+    /// Runs `f` every `ms` while it returns `true`; it stops itself on `false`.
+    pub(crate) fn start(ms: i32, mut f: impl FnMut() -> bool + 'static) -> Option<Self> {
+        let window = web_sys::window()?;
+        let id = Rc::new(Cell::new(0));
+        let callback = Closure::<dyn FnMut()>::new({
+            let id = id.clone();
+            move || {
+                if !f()
+                    && let Some(window) = web_sys::window()
+                {
+                    window.clear_interval_with_handle(id.get());
+                }
+            }
+        });
+        id.set(
+            window
+                .set_interval_with_callback_and_timeout_and_arguments_0(
+                    callback.as_ref().unchecked_ref(),
+                    ms,
+                )
+                .ok()?,
+        );
+        Some(Self {
+            id,
+            _callback: callback,
+        })
+    }
+}
+
+impl Drop for Ticker {
+    fn drop(&mut self) {
+        if let Some(window) = web_sys::window() {
+            window.clear_interval_with_handle(self.id.get());
         }
     }
 }

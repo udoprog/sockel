@@ -1181,6 +1181,8 @@ pub const PAGES: &[Page] = &[
             "DragHandleProps",
             "drag_handle",
             "drag_target",
+            "edge_step",
+            "grid_target",
             "reorder_row",
             "reorder_text",
             "landing",
