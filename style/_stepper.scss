@@ -19,6 +19,8 @@
 //   box at rest (`null`: the field's edge and ground, no shadow); hover,
 //   invalid and focus still mark it as on any field.
 // - `.sockel-stepper-button`: a square of the box's height.
+// - `.sockel-stepper-field` (with `unit`): the box and its unit
+//   (`.sockel-stepper-unit`, muted) as one control on one line.
 
 @use "tokens" as base;
 
@@ -93,4 +95,17 @@
     }
 
     @include base.focus-ring;
+}
+
+.sockel-stepper-field {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.sockel-stepper-unit {
+    color: var(--muted);
+    font-size: var(--text-sm);
 }

@@ -33,39 +33,121 @@ pub fn step_from(value: i64, dir: i64, count: i64, step: i64, min: i64, max: i64
 
 /// The number in typed `text`, if it is one.
 pub fn parse_number(text: &str) -> Option<i64> {
-    text.trim().parse().ok()
+    parse_decimal(text, 0)
+}
+
+/// The number typed as `text` in units of the last of `decimals` digits:
+/// at most that many after a point or comma (none, and no separator, for
+/// 0), a sign allowed.
+pub fn parse_decimal(text: &str, decimals: u8) -> Option<i64> {
+    let text = text.trim();
+    let (negative, digits) = match text.strip_prefix('-') {
+        Some(rest) => (true, rest),
+        None => (false, text.strip_prefix('+').unwrap_or(text)),
+    };
+    let (whole, part) = digits.split_once(['.', ',']).unwrap_or((digits, ""));
+
+    if whole.is_empty() && part.is_empty()
+        || part.len() > usize::from(decimals)
+        || digits.len() != whole.len() + part.len() && decimals == 0
+        || !whole
+            .chars()
+            .chain(part.chars())
+            .all(|c| c.is_ascii_digit())
+    {
+        return None;
+    }
+
+    let scale = 10_i64.pow(u32::from(decimals));
+    let whole = if whole.is_empty() {
+        0
+    } else {
+        whole.parse::<i64>().ok()?
+    };
+    let part = format!("{part:0<width$}", width = usize::from(decimals));
+    let part = if part.is_empty() {
+        0
+    } else {
+        part.parse::<i64>().ok()?
+    };
+    let value = whole.checked_mul(scale)?.checked_add(part)?;
+    Some(if negative { -value } else { value })
+}
+
+/// `value` as a stepper writes it: its last `decimals` digits after the
+/// point, trailing zeros left out, and at least `pad` digits before it.
+pub fn format_number(value: i64, decimals: u8, pad: u8) -> String {
+    let scale = 10_i64.pow(u32::from(decimals));
+    let sign = if value < 0 { "-" } else { "" };
+    let (whole, part) = (value.abs() / scale, value.abs() % scale);
+    let whole = format!("{sign}{whole:0pad$}", pad = usize::from(pad));
+
+    if part == 0 {
+        return whole;
+    }
+
+    let part = format!("{part:0width$}", width = usize::from(decimals));
+    format!("{whole}.{}", part.trim_end_matches('0'))
+}
+
+/// `value` moved by `delta` onto the nearest multiple of `snap` in that
+/// direction, within `min..=max`: from 7, +5 onto 5s is 10 and -5 is 5.
+pub fn step_by(value: i64, delta: i64, snap: i64, min: i64, max: i64) -> i64 {
+    let snap = snap.max(1);
+    let next = value + delta;
+    let next = if delta >= 0 {
+        next.div_euclid(snap) * snap
+    } else {
+        -(-next).div_euclid(snap) * snap
+    };
+    next.clamp(min, max.max(min))
 }
 
 /// The number a `live` stepper reports as `text` is typed: one within
 /// `min..=max` other than `value`; nothing when not `live`.
-fn live_value(live: bool, text: &str, value: i64, min: i64, max: i64) -> Option<i64> {
-    parse_number(text).filter(|n| live && *n != value && (min..=max).contains(n))
+fn live_value(live: bool, text: &str, value: i64, decimals: u8, min: i64, max: i64) -> Option<i64> {
+    parse_decimal(text, decimals).filter(|n| live && *n != value && (min..=max).contains(n))
 }
 
 /// What a step starts from: the number typed and not yet committed
 /// (within the bounds), else `value`.
-fn step_base(draft: Option<&str>, value: i64, min: i64, max: i64) -> i64 {
+fn step_base(draft: Option<&str>, value: i64, decimals: u8, min: i64, max: i64) -> i64 {
     draft
-        .and_then(parse_number)
+        .and_then(|d| parse_decimal(d, decimals))
         .map_or(value, |n| n.clamp(min, max))
+}
+
+/// How far a key steps and onto what multiple, if it is one of a stepper's
+/// step keys: the arrows step by `arrow` (onto no multiple) or else by
+/// `step` onto multiples of `snap`; Page Up and Down ten times as far.
+pub fn key_step(key: &str, step: i64, snap: i64, arrow: Option<i64>) -> Option<(i64, i64)> {
+    let (by, snap) = match arrow {
+        Some(arrow) => (arrow, 1),
+        None => (step, snap),
+    };
+
+    Some(match key {
+        "ArrowUp" => (by, snap),
+        "ArrowDown" => (-by, snap),
+        "PageUp" => (by * 10, snap),
+        "PageDown" => (-by * 10, snap),
+        _ => return None,
+    })
 }
 
 /// The value a key moves a stepper to, if it is one of its keys: the arrows
 /// step, Page Up and Down ten steps, Home and End go to the bounds.
 pub fn key_value(key: &str, value: i64, step: i64, min: i64, max: i64) -> Option<i64> {
-    Some(match key {
-        "ArrowUp" => step_from(value, 1, 1, step, min, max),
-        "ArrowDown" => step_from(value, -1, 1, step, min, max),
-        "PageUp" => step_from(value, 1, 10, step, min, max),
-        "PageDown" => step_from(value, -1, 10, step, min, max),
-        "Home" => min,
-        "End" => max.max(min),
-        _ => return None,
-    })
+    match key {
+        "Home" => Some(min),
+        "End" => Some(max.max(min)),
+        _ => key_step(key, step, step, None).map(|(by, snap)| step_by(value, by, snap, min, max)),
+    }
 }
 
 #[derive(Properties, PartialEq)]
 pub struct StepperProps {
+    /// The number, in units of the last of [`StepperProps::decimals`].
     pub value: i64,
     /// A number typed or stepped to, always within `min..=max`.
     pub on_change: Callback<i64>,
@@ -74,6 +156,20 @@ pub struct StepperProps {
     /// How far the buttons and arrow keys step, onto its multiples.
     #[prop_or(1)]
     pub step: i64,
+    /// What the buttons and arrow keys step onto multiples of, in their
+    /// direction; `step` when unset.
+    #[prop_or_default]
+    pub snap: Option<i64>,
+    /// How far the arrow keys step, onto no multiple, instead of `step`
+    /// onto multiples of `snap`.
+    #[prop_or_default]
+    pub arrow: Option<i64>,
+    /// How many of the value's last digits follow the decimal point.
+    #[prop_or_default]
+    pub decimals: u8,
+    /// The fewest digits shown before the point, padded with zeros.
+    #[prop_or_default]
+    pub pad: u8,
     /// The accessible name of the number.
     pub label: AttrValue,
     #[prop_or_default]
@@ -94,18 +190,56 @@ pub struct StepperProps {
     /// it is committed; the typed text stays until then.
     #[prop_or_default]
     pub live: bool,
+    /// What is typed outside the bounds, or no number, is never clamped or
+    /// dropped when committed: it stays, marked, until it is a number
+    /// within them, and a step from it lands on the nearest bound.
+    #[prop_or_default]
+    pub strict: bool,
+    /// Whether what is typed is a number within `min..=max`, told as it
+    /// changes and when it is left.
+    #[prop_or_default]
+    pub on_valid: Callback<bool>,
+    /// Takes the steps instead, as how far and onto what multiple, for an
+    /// owner whose step carries into other fields; the Home and End keys
+    /// are then idle, and `can_less` and `can_more` say which way it may
+    /// step.
+    #[prop_or_default]
+    pub on_step: Option<Callback<(i64, i64)>>,
+    #[prop_or(true)]
+    pub can_less: bool,
+    #[prop_or(true)]
+    pub can_more: bool,
+    /// The values it stands for differ, or it has none (see `on_empty`):
+    /// the field shows none, `placeholder` in its place, until a number is
+    /// typed or stepped to (from `value`).
+    #[prop_or_default]
+    pub mixed: bool,
+    #[prop_or_default]
+    pub placeholder: Option<AttrValue>,
+    /// The number may be left out: an emptied field tells this instead of
+    /// being marked, and its owner then shows it `mixed`.
+    #[prop_or_default]
+    pub on_empty: Option<Callback<()>>,
+    /// Takes the focus when its dialog or popup opens (`data-autofocus`).
+    #[prop_or_default]
+    pub autofocus: bool,
+    /// What the number counts (%, cells, ft), shown after the box on its
+    /// line as part of the control (`.sockel-stepper-field`).
+    #[prop_or_default]
+    pub unit: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
+    /// The number's test id; the buttons have it with `-less` and `-more`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
 }
 
 /// A number between a minus and a plus button, in one box. What is typed is
 /// kept while it is no number within the bounds (marked invalid) and
-/// clamped when committed; the buttons are out of the tab order since the
-/// arrow keys step it. The number's room is that of the longest of `min`
-/// and `max` in figures of one width, so the box does not change from the
-/// least value to the most.
+/// clamped when committed (unless `strict`); the buttons are out of the tab
+/// order since the arrow keys step it. The number's room is that of the
+/// longest of `min` and `max` in figures of one width, so the box does not
+/// change from the least value to the most.
 #[function_component]
 pub fn Stepper(props: &StepperProps) -> Html {
     let phrases = use_phrases_with(&L10N);
@@ -113,22 +247,48 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let more_label = label(&phrases, &props.more_label, "sockel-stepper-increase");
     let draft = use_state(|| None::<String>);
     let (min, max) = (props.min, props.max.max(props.min));
-    let chars = min.to_string().len().max(max.to_string().len());
-    let shown = draft
+    let (decimals, pad) = (props.decimals, props.pad);
+    let (strict, live, mixed) = (props.strict, props.live, props.mixed);
+    let figures = |n: i64| format_number(n, decimals, pad).len();
+    let chars = props
+        .placeholder
+        .iter()
+        .map(|p| p.chars().count())
+        .fold(figures(min).max(figures(max)), usize::max);
+    let shown = match draft.as_deref() {
+        Some(draft) => draft.to_owned(),
+        None if mixed => String::new(),
+        None => format_number(props.value, decimals, pad),
+    };
+    let typed = draft
         .as_deref()
-        .map(str::to_owned)
-        .unwrap_or_else(|| props.value.to_string());
-    let typed_ok = draft
-        .as_deref()
-        .is_none_or(|d| parse_number(d).is_some_and(|n| (min..=max).contains(&n)));
+        .map_or(Some(props.value), |d| parse_decimal(d, decimals));
+    let typed_ok = typed.is_some_and(|n| (min..=max).contains(&n));
+
+    // A draft the value has left stays only while it says the value, such
+    // as `1.` on the way to `1.5`.
+    {
+        let draft = draft.clone();
+        let on_valid = props.on_valid.clone();
+        use_effect_with(props.value, move |value| {
+            if let Some(text) = draft.as_deref()
+                && parse_decimal(text, decimals) != Some(*value)
+            {
+                draft.set(None);
+                on_valid.emit(true);
+            }
+        });
+    }
 
     let set = {
         let draft = draft.clone();
         let on_change = props.on_change.clone();
+        let on_valid = props.on_valid.clone();
         let value = props.value;
         Callback::from(move |n: i64| {
             draft.set(None);
-            if n != value {
+            on_valid.emit(true);
+            if n != value || mixed {
                 on_change.emit(n);
             }
         })
@@ -136,19 +296,53 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let commit = {
         let draft = draft.clone();
         let set = set.clone();
-        Callback::from(move |()| match draft.as_deref().and_then(parse_number) {
-            Some(n) => set.emit(n.clamp(min, max)),
-            None => draft.set(None),
+        let on_valid = props.on_valid.clone();
+        Callback::from(move |()| {
+            let Some(text) = draft.as_deref() else {
+                return;
+            };
+            let typed = parse_decimal(text, decimals);
+
+            if strict {
+                match typed.filter(|n| (min..=max).contains(n)) {
+                    // Told as it was typed, when it was a number within.
+                    Some(_) if live => {
+                        draft.set(None);
+                        on_valid.emit(true);
+                    }
+                    Some(n) => set.emit(n),
+                    None => {}
+                }
+            } else {
+                match typed {
+                    Some(n) => set.emit(n.clamp(min, max)),
+                    None => draft.set(None),
+                }
+            }
         })
     };
 
     let oninput = {
         let draft = draft.clone();
         let on_change = props.on_change.clone();
-        let (value, live) = (props.value, props.live);
+        let on_valid = props.on_valid.clone();
+        let on_empty = props.on_empty.clone();
+        let value = props.value;
         Callback::from(move |e: InputEvent| {
             let text = e.target_unchecked_into::<HtmlInputElement>().value();
-            if let Some(n) = live_value(live, &text, value, min, max) {
+
+            if let Some(on_empty) = on_empty.as_ref().filter(|_| text.trim().is_empty()) {
+                draft.set(None);
+                on_valid.emit(true);
+                if !mixed {
+                    on_empty.emit(());
+                }
+                return;
+            }
+
+            let within = parse_decimal(&text, decimals).filter(|n| (min..=max).contains(n));
+            on_valid.emit(within.is_some());
+            if let Some(n) = live_value(live, &text, value, decimals, min, max) {
                 on_change.emit(n);
             }
             draft.set(Some(text));
@@ -159,49 +353,105 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let onfocus = Callback::from(|e: FocusEvent| {
         e.target_unchecked_into::<HtmlInputElement>().select();
     });
-    let base = step_base(draft.as_deref(), props.value, min, max);
-    let onkeydown = {
+
+    // What a step starts from: what is typed, which a strict stepper takes
+    // as it is (a step from outside lands on the nearest bound).
+    let base = if strict {
+        typed
+    } else {
+        Some(step_base(draft.as_deref(), props.value, decimals, min, max))
+    };
+    let step = {
         let set = set.clone();
-        let commit = commit.clone();
-        let (value, step) = (base, props.step);
-        Callback::from(move |e: KeyboardEvent| {
-            if e.key() == "Enter" {
-                commit.emit(());
-            } else if let Some(n) = key_value(&e.key(), value, step, min, max) {
-                e.prevent_default();
-                set.emit(n);
+        let draft = draft.clone();
+        let on_step = props.on_step.clone();
+        Callback::from(move |(by, snap): (i64, i64)| {
+            let Some(base) = base else {
+                return;
+            };
+
+            if base < min {
+                set.emit(min);
+            } else if base > max {
+                set.emit(max);
+            } else if let Some(on_step) = &on_step {
+                draft.set(None);
+                on_step.emit((by, snap));
+            } else {
+                set.emit(step_by(base, by, snap, min, max));
             }
         })
     };
-    let button = |dir: i64, glyph: Glyph, label: &AttrValue, at_bound: bool| {
+    let snap = props.snap.unwrap_or(props.step);
+    let onkeydown = {
         let set = set.clone();
-        let (value, step) = (base, props.step);
-        let onclick = Callback::from(move |_: MouseEvent| {
-            set.emit(step_from(value, dir, 1, step, min, max));
-        });
+        let step = step.clone();
+        let commit = commit.clone();
+        let (by, arrow, on_step) = (props.step, props.arrow, props.on_step.is_some());
+        Callback::from(move |e: KeyboardEvent| {
+            let key = e.key();
+
+            if key == "Enter" {
+                commit.emit(());
+            } else if let Some(by_snap) = key_step(&key, by, snap, arrow) {
+                e.prevent_default();
+                step.emit(by_snap);
+            } else if !on_step && (key == "Home" || key == "End") && base.is_some() {
+                e.prevent_default();
+                set.emit(if key == "End" { max } else { min });
+            }
+        })
+    };
+    // Outside its bounds it steps back onto the nearest.
+    let button = |dir: i64, glyph: Glyph, label: &AttrValue, suffix: &str, may: bool| {
+        let step = step.clone();
+        let by = dir * props.step;
+        let can = !props.disabled
+            && base.is_some_and(|n| if dir < 0 { n > min } else { n < max })
+            && (may || !typed_ok);
+        let onclick = Callback::from(move |_: MouseEvent| step.emit((by, snap)));
         html! {
             <button type="button" class={class::STEPPER_BUTTON} tabindex="-1"
-                aria-label={label.clone()} disabled={props.disabled || at_bound} {onclick}>
+                aria-label={label.clone()} data-tip={label.clone()}
+                data-testid={props.testid.as_ref().map(|id| format!("{id}-{suffix}"))}
+                disabled={!can} {onclick}>
                 <Icon {glyph} />
             </button>
         }
     };
+    let invalid = props.invalid || !typed_ok;
 
-    html! {
+    let stepper = html! {
         <span class={classes!(
-            stepper(props.size, props.invalid || !typed_ok, props.disabled, props.busy),
+            stepper(props.size, invalid, props.disabled, props.busy),
             props.class.clone()
         )} role="group" aria-busy={props.busy.then_some("true")}
             style={format!("--stepper-chars: {chars}")}>
-            { button(-1, Glyph::Minus, &less_label, props.value <= min) }
-            <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0).then_some(class::ZERO))}
-                id={props.id.clone()} type="text" inputmode="numeric" autocomplete="off"
+            { button(-1, Glyph::Minus, &less_label, "less", props.can_less) }
+            <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0 && !mixed).then_some(class::ZERO))}
+                id={props.id.clone()} type="text" role="spinbutton" autocomplete="off"
+                inputmode={if min < 0 { "text" } else if decimals > 0 { "decimal" } else { "numeric" }}
                 value={shown} aria-label={props.label.clone()}
-                aria-invalid={(props.invalid || !typed_ok).then_some("true")}
+                placeholder={props.placeholder.clone().filter(|_| mixed)}
+                aria-valuenow={typed.map(|n| format_number(n, decimals, 0))}
+                aria-valuemin={format_number(min, decimals, 0)}
+                aria-valuemax={format_number(max, decimals, 0)}
+                aria-invalid={invalid.then_some("true")}
+                data-autofocus={props.autofocus.then_some("")}
                 disabled={props.disabled} data-testid={props.testid.clone()}
                 {oninput} {onchange} {onblur} {onfocus} {onkeydown} />
-            { button(1, Glyph::Plus, &more_label, props.value >= max) }
+            { button(1, Glyph::Plus, &more_label, "more", props.can_more) }
         </span>
+    };
+
+    match &props.unit {
+        Some(unit) => html! {
+            <span class={class::STEPPER_FIELD}>
+                { stepper }
+                <span class={class::STEPPER_UNIT}>{ unit.clone() }</span>
+            </span>
+        },
+        None => stepper,
     }
 }
 
@@ -228,6 +478,10 @@ mod tests {
             min: 0,
             max: 100,
             step: 1,
+            snap: None,
+            arrow: None,
+            decimals: 0,
+            pad: 0,
             label: "Count".into(),
             less_label: None,
             more_label: None,
@@ -237,6 +491,16 @@ mod tests {
             disabled: false,
             busy: false,
             live: false,
+            strict: false,
+            on_valid: Callback::noop(),
+            on_step: None,
+            can_less: true,
+            can_more: true,
+            mixed: false,
+            placeholder: None,
+            on_empty: None,
+            autofocus: false,
+            unit: None,
             class: Classes::new(),
             testid: None,
         }
@@ -290,19 +554,19 @@ mod tests {
 
     #[test]
     fn a_live_stepper_reports_numbers_within_its_bounds_as_typed() {
-        assert_eq!(live_value(true, "12", 7, 0, 100), Some(12));
-        assert_eq!(live_value(true, "7", 7, 0, 100), None);
-        assert_eq!(live_value(true, "150", 7, 0, 100), None);
-        assert_eq!(live_value(true, "", 7, 0, 100), None);
-        assert_eq!(live_value(false, "12", 7, 0, 100), None);
+        assert_eq!(live_value(true, "12", 7, 0, 0, 100), Some(12));
+        assert_eq!(live_value(true, "7", 7, 0, 0, 100), None);
+        assert_eq!(live_value(true, "150", 7, 0, 0, 100), None);
+        assert_eq!(live_value(true, "", 7, 0, 0, 100), None);
+        assert_eq!(live_value(false, "12", 7, 0, 0, 100), None);
     }
 
     #[test]
     fn a_step_starts_from_what_is_typed() {
-        assert_eq!(step_base(Some("3"), 0, 0, 100), 3);
-        assert_eq!(step_base(Some("150"), 0, 0, 100), 100);
-        assert_eq!(step_base(Some("x"), 7, 0, 100), 7);
-        assert_eq!(step_base(None, 7, 0, 100), 7);
+        assert_eq!(step_base(Some("3"), 0, 0, 0, 100), 3);
+        assert_eq!(step_base(Some("150"), 0, 0, 0, 100), 100);
+        assert_eq!(step_base(Some("x"), 7, 0, 0, 100), 7);
+        assert_eq!(step_base(None, 7, 0, 0, 100), 7);
     }
 
     #[test]
@@ -349,5 +613,67 @@ mod tests {
             ..props(5)
         });
         assert_eq!(off.matches("disabled=\"disabled\"").count(), 3, "{off}");
+    }
+
+    #[test]
+    fn numbers_are_written_and_read_with_their_decimals() {
+        assert_eq!(format_number(12, 0, 0), "12");
+        assert_eq!(format_number(3, 0, 2), "03");
+        assert_eq!(format_number(150, 2, 0), "1.5");
+        assert_eq!(format_number(5, 2, 0), "0.05");
+        assert_eq!(format_number(-200, 2, 0), "-2");
+
+        assert_eq!(parse_decimal("1.5", 2), Some(150));
+        assert_eq!(parse_decimal("1,25", 2), Some(125));
+        assert_eq!(parse_decimal("1.", 2), Some(100));
+        assert_eq!(parse_decimal(".5", 2), Some(50));
+        assert_eq!(parse_decimal("1.5", 0), None);
+        assert_eq!(parse_decimal("1.", 0), None);
+        assert_eq!(parse_decimal("1.234", 2), None);
+        assert_eq!(parse_decimal("x", 0), None);
+        assert_eq!(parse_decimal("-", 0), None);
+    }
+
+    #[test]
+    fn steps_snap_in_their_direction() {
+        assert_eq!(step_by(3, 5, 5, 0, 100), 5);
+        assert_eq!(step_by(7, -5, 5, 0, 100), 5);
+        assert_eq!(step_by(-3, -5, 5, -100, 100), -5);
+        assert_eq!(step_by(98, 5, 5, 0, 100), 100);
+        assert_eq!(key_step("ArrowUp", 5, 5, None), Some((5, 5)));
+        assert_eq!(key_step("PageDown", 5, 5, Some(1)), Some((-10, 1)));
+        assert_eq!(key_step("Home", 5, 5, None), None);
+    }
+
+    #[test]
+    fn a_unit_wraps_the_box_and_the_buttons_carry_the_test_id() {
+        let html = render(StepperProps {
+            unit: Some("ft".into()),
+            testid: Some("reach".into()),
+            ..props(5)
+        });
+        assert!(html.contains(class::STEPPER_FIELD), "{html}");
+        assert!(html.contains("data-testid=\"reach-less\""), "{html}");
+        assert!(html.contains("data-testid=\"reach-more\""), "{html}");
+    }
+
+    #[test]
+    fn a_mixed_stepper_shows_its_placeholder_in_place_of_a_number() {
+        let html = render(StepperProps {
+            mixed: true,
+            placeholder: Some("mixed".into()),
+            ..props(5)
+        });
+        assert!(html.contains("placeholder=\"mixed\""), "{html}");
+        assert!(html.contains("value=\"\""), "{html}");
+    }
+
+    #[test]
+    fn can_less_and_can_more_disable_the_buttons() {
+        let html = render(StepperProps {
+            can_less: false,
+            ..props(5)
+        });
+        assert_eq!(html.matches("disabled=\"disabled\"").count(), 1, "{html}");
     }
 }
