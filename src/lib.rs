@@ -1321,8 +1321,10 @@
 //!
 //! An empty state's look is configured by `$empty-state-padding`, `-edge` (a border), `-radius`,
 //! `-compact-radius`, `-icon-size`, `-icon-fill`, `-icon-ink`, `-icon-box` (width and height) and
-//! `-icon-radius`, `-title-size` (`--text-md`) and `-title-ink`
-//! (`--text`) (README, "Configuration"); with the edge, radius and a round filled icon it is a dashed card.
+//! `-icon-radius`, `-title-size` (`--text-md`), `-title-ink`
+//! (`--text`), `-title-weight` (600), `-hint-max-width` and `-icon-gap` (a margin below the icon); in a compact one
+//! `-compact-title-size`, `-compact-title-weight`, `-compact-title-ink`, `-compact-icon-box`, `-compact-icon-fill`,
+//! `-compact-icon-ink` and `-compact-justify`, each following the plain one while unset (README, "Configuration"); with the edge, radius and a round filled icon it is a dashed card.
 //!
 //! A notice's look is configured by `$notice-padding`, `-gap`, `-radius`, `-fill`, `-edge`, `-align`,
 //! `-min-height`, `-body-padding`, `-line-height`, `-icon-height`, `-icon-ink` and `-danger-ink`

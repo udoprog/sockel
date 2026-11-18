@@ -384,6 +384,16 @@ $empty-state-icon-box: null !default;
 $empty-state-icon-radius: null !default;
 $empty-state-title-size: var(--text-md) !default;
 $empty-state-title-ink: var(--text) !default;
+$empty-state-title-weight: 600 !default;
+$empty-state-compact-title-size: null !default;
+$empty-state-compact-title-weight: null !default;
+$empty-state-compact-title-ink: null !default;
+$empty-state-compact-icon-box: null !default;
+$empty-state-compact-icon-fill: null !default;
+$empty-state-compact-icon-ink: null !default;
+$empty-state-compact-justify: null !default;
+$empty-state-hint-max-width: null !default;
+$empty-state-icon-gap: null !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
 // weight, and its cause's font and size (`null`: none, or inherited).
 $error-box-padding: var(--space-4) !default;

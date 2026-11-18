@@ -140,6 +140,10 @@ fn empty_state_settings() {
     assert!(css.contains("width: 3rem;"));
     assert!(css.contains("border-radius: 50%;"));
     assert!(css.contains("color: inherit;"));
+    assert!(css.contains(".sockel-empty-state.sockel-compact .sockel-empty-state-title {"));
+    assert!(css.contains("font-size: 13px;"));
+    assert!(css.contains("max-width: 31rem;"));
+    assert!(!defaults.contains(".sockel-empty-state.sockel-compact .sockel-empty-state-title {"));
     assert!(css.contains("font-size: var(--text-lg);"));
     assert!(defaults.contains("font-size: var(--text-md);"));
 }

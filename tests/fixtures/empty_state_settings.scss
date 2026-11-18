@@ -6,6 +6,10 @@
     $empty-state-icon-box: 3rem,
     $empty-state-icon-radius: 50%,
     $empty-state-title-size: var(--text-lg),
-    $empty-state-title-ink: inherit
+    $empty-state-title-ink: inherit,
+    $empty-state-title-weight: 500,
+    $empty-state-compact-title-size: 13px,
+    $empty-state-compact-icon-box: 1rem,
+    $empty-state-hint-max-width: 31rem
 );
 @use "../../style/notices";
