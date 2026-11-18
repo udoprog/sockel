@@ -605,6 +605,9 @@ fn rects(list: &Element, count: usize) -> Vec<DomRect> {
 
 struct Drag {
     id: i32,
+    /// What takes the pointer once the press moves past `SLOP`; a press
+    /// that never does keeps its click.
+    handle: HtmlElement,
     from: usize,
     /// Held by the row itself, which has no handle (`body_drag`): the row
     /// hears the pointer.
@@ -1233,13 +1236,13 @@ impl Ctx {
         };
         e.prevent_default();
         let _ = handle.focus();
-        let _ = handle.set_pointer_capture(e.pointer_id());
         let ticker = scroller.is_some().then(|| {
             let ctx = self.clone();
             Ticker::start(30, move || ctx.tick())
         });
         let drag = Drag {
             id: e.pointer_id(),
+            handle: handle.clone(),
             from: self.index,
             by_row,
             over: None,
@@ -1343,6 +1346,9 @@ impl Ctx {
         mark_over(drag, over);
         let from = drag.from;
         let started = !drag.active;
+        if started {
+            let _ = drag.handle.set_pointer_capture(drag.id);
+        }
         drag.active = true;
         if started || live.lift.is_none_or(|l| l.to != to) {
             live.lift = Some(Lift {
