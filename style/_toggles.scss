@@ -10,9 +10,15 @@
 //   moves by transform; `.sockel-on` is its state, `[aria-busy]` puts a
 //   spinner in the thumb.
 // - `.sockel-choice`: a segmented pick-one group. Its options share one
-//   width, that of the widest; `.sockel-stretch` fills the container,
+//   width, that of the widest (`$choice-columns: auto`: each its own), and
+//   the group's height whatever an app's button rule says;
+//   `.sockel-stretch` fills the container,
 //   `.sockel-fixed` gives each `--choice-width`. `.sockel-small` is the
-//   small control height. Parts: `-option`, `-icon`, `-label`.
+//   small control height. `.sockel-stacked` puts one option to a row across
+//   the container, each at least the group's height, labels wrapping, the
+//   rule between them across; `.sockel-stack-narrow` does so below
+//   `$choice-stack-breakpoint`. Parts: `-option` (`.sockel-icon` when its
+//   icon is alone), `-icon`, `-label`.
 // - `.sockel-chip`: a filter toggle (`aria-pressed`) of a label and an
 //   optional count (`-count`, two figures wide, `.sockel-zero` dims it).
 //   `.sockel-chip-list` wraps chips and keeps one row's height when empty.
@@ -174,12 +180,49 @@
     overflow-wrap: anywhere;
 }
 
+// One option to a row: each at least `--choice-height`, its label wrapping,
+// the rule between options along their tops.
+@mixin -stacked {
+    display: grid;
+    grid-auto-flow: row;
+    width: 100%;
+    height: auto;
+
+    > .sockel-choice-option {
+        justify-content: flex-start;
+        min-height: var(--choice-height);
+        padding-block: var(--space-1);
+        line-height: inherit;
+        text-align: start;
+
+        @if base.$choice-divider {
+            + .sockel-choice-option {
+                border-inline-start-color: transparent;
+                border-block-start-color: base.$choice-divider;
+            }
+        }
+
+        > .sockel-choice-label {
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+@if base.$choice-align-self {
+    :where(.sockel-choice) {
+        align-self: base.$choice-align-self;
+    }
+}
+
 .sockel-choice {
-    --choice-height: var(--control-height);
+    --choice-height: #{base.$choice-height};
 
     display: inline-grid;
     grid-auto-flow: column;
-    grid-auto-columns: 1fr;
+    grid-auto-columns: base.$choice-columns;
     box-sizing: border-box;
     max-width: 100%;
     height: var(--choice-height);
@@ -189,6 +232,15 @@
     @include base.reserved-border(var(--field-border));
     border-radius: base.$choice-radius;
     background: base.$choice-fill;
+    @if base.$choice-font-size {
+        font-size: base.$choice-font-size;
+    }
+
+    @if base.$choice-focus-edge {
+        &:focus-within {
+            border-color: base.$choice-focus-edge;
+        }
+    }
 
     &.sockel-small {
         --choice-height: var(--control-height-small);
@@ -201,6 +253,16 @@
 
     &.sockel-fixed {
         grid-auto-columns: var(--choice-width);
+    }
+
+    &.sockel-stacked {
+        @include -stacked;
+    }
+
+    &.sockel-stack-narrow {
+        @include base.below(base.$choice-stack-breakpoint) {
+            @include -stacked;
+        }
     }
 
     &.sockel-invalid {
@@ -216,9 +278,10 @@
     display: inline-flex;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: base.$choice-gap;
     box-sizing: border-box;
     min-width: 0;
+    min-height: 0;
     margin: 0;
     padding-block: 0;
     padding-inline: base.$choice-padding;
@@ -227,9 +290,6 @@
     background: transparent;
     color: base.$choice-ink;
     font: inherit;
-    @if base.$choice-font-size {
-        font-size: base.$choice-font-size;
-    }
     line-height: 1;
     cursor: pointer;
 
@@ -241,6 +301,16 @@
 
     &:hover:not(:disabled):not([aria-checked="true"]) {
         background: base.$choice-hover-fill;
+        @if base.$choice-hover-ink {
+            color: base.$choice-hover-ink;
+        }
+    }
+
+    @if base.$choice-icon-width {
+        &.sockel-icon {
+            min-width: base.$choice-icon-width;
+            padding-inline: 0;
+        }
     }
 
     @include base.focus-ring;

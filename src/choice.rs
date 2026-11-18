@@ -17,6 +17,29 @@ pub enum ChoiceFit {
     Fixed,
 }
 
+/// Whether a [`Choice`]'s options sit in a row or one under the other.
+#[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
+pub enum ChoiceStack {
+    #[default]
+    Never,
+    /// One option to a row, across the container, labels wrapping
+    /// (`STACKED`).
+    Always,
+    /// Stacked below `$choice-stack-breakpoint`, a row from it up
+    /// (`STACK_NARROW`).
+    Narrow,
+}
+
+impl ChoiceStack {
+    pub fn class(self) -> Option<&'static str> {
+        match self {
+            ChoiceStack::Never => None,
+            ChoiceStack::Always => Some(class::STACKED),
+            ChoiceStack::Narrow => Some(class::STACK_NARROW),
+        }
+    }
+}
+
 /// One option of a [`Choice`].
 #[derive(Clone, Debug, PartialEq)]
 pub struct ChoiceOption {
@@ -98,7 +121,14 @@ pub struct ChoiceProps {
     /// The selected option's value; none selected when it matches no option.
     #[prop_or_default]
     pub value: Option<AttrValue>,
-    /// Called with the newly selected value, by click or arrow key.
+    /// Pick several (`role="group"` of checkboxes): the selected values,
+    /// `value` unused. Each option is a tab stop and the arrows do nothing.
+    #[prop_or_default]
+    pub multiple: bool,
+    #[prop_or_default]
+    pub values: Vec<AttrValue>,
+    /// Called with the newly selected value, by click or arrow key; with
+    /// `multiple`, with the value clicked, for the app to toggle.
     pub on_change: Callback<AttrValue>,
     /// What is being chosen (`aria-label` of the group).
     pub label: AttrValue,
@@ -108,6 +138,8 @@ pub struct ChoiceProps {
     pub labelled_by: Option<AttrValue>,
     #[prop_or_default]
     pub fit: ChoiceFit,
+    #[prop_or_default]
+    pub stack: ChoiceStack,
     /// The small control height.
     #[prop_or_default]
     pub small: bool,
@@ -139,6 +171,15 @@ fn disabled(options: &[ChoiceOption]) -> Vec<bool> {
     options.iter().map(|o| o.disabled).collect()
 }
 
+/// Whether `option` is selected: `value`'s, or with `multiple` one of `values`.
+fn selected(props: &ChoiceProps, option: &ChoiceOption) -> bool {
+    if props.multiple {
+        props.values.contains(&option.value)
+    } else {
+        props.value.as_ref() == Some(&option.value)
+    }
+}
+
 fn roving(options: &[ChoiceOption], value: Option<&AttrValue>) -> Option<usize> {
     let selected = options.iter().position(|o| Some(&o.value) == value);
     roving::stop(&disabled(options), selected)
@@ -146,17 +187,19 @@ fn roving(options: &[ChoiceOption], value: Option<&AttrValue>) -> Option<usize> 
 
 /// A segmented pick-one group (`role="radiogroup"`): options of one width
 /// whatever is selected, the selected one marked by its background alone.
-/// One tab stop; arrows, Home and End move the selection and focus.
+/// One tab stop; arrows, Home and End move the selection and focus. With
+/// `multiple`, a group of checkboxes, each its own tab stop.
 #[function_component]
 pub fn Choice(props: &ChoiceProps) -> Html {
     let stop = roving(&props.options, props.value.as_ref());
+    let multiple = props.multiple;
 
     let onkeydown = {
         let options = props.options.clone();
         let on_change = props.on_change.clone();
         let disabled = props.disabled;
         Callback::from(move |e: KeyboardEvent| {
-            if disabled {
+            if disabled || multiple {
                 return;
             }
             let off = self::disabled(&options);
@@ -167,7 +210,8 @@ pub fn Choice(props: &ChoiceProps) -> Html {
     };
 
     html! {
-        <div role="radiogroup" class={classes!(choice(props.fit, props.small, props.invalid, props.disabled), props.class.clone())}
+        <div role={if multiple { "group" } else { "radiogroup" }}
+            class={classes!(choice(props.fit, props.small, props.invalid, props.disabled), props.stack.class(), props.class.clone())}
             aria-label={props.labelled_by.is_none().then(|| props.label.clone())}
             aria-labelledby={props.labelled_by.clone()}
             aria-invalid={props.invalid.then_some("true")}
@@ -175,20 +219,21 @@ pub fn Choice(props: &ChoiceProps) -> Html {
             data-testid={props.testid.clone()}
             {onkeydown}>
             { for props.options.iter().enumerate().map(|(i, option)| {
-                let selected = props.value.as_ref() == Some(&option.value);
+                let selected = selected(props, option);
+                let tabindex = if multiple || stop == Some(i) { "0" } else { "-1" };
                 let onclick = {
                     let on_change = props.on_change.clone();
                     let value = option.value.clone();
                     Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
                 };
                 let mut button = html! {
-                    <button type="button" role="radio" class={classes!(class::CHOICE_OPTION, option.class.clone())}
+                    <button type="button" role={if multiple { "checkbox" } else { "radio" }} class={classes!(class::CHOICE_OPTION, option.icon_only.then_some(class::ICON), option.class.clone())}
                         data-testid={option.testid.clone()}
                         data-tip={option.tip.clone()}
                         aria-checked={selected.to_string()}
                         aria-label={option.icon_only.then(|| option.label.clone())}
                         title={(option.icon_only && option.tip.is_none()).then(|| option.label.clone())}
-                        tabindex={if stop == Some(i) { "0" } else { "-1" }}
+                        {tabindex}
                         disabled={props.disabled || option.disabled}
                         {onclick}>
                         { for option.icon.clone().map(|icon| html! {
@@ -230,15 +275,19 @@ mod tests {
     }
 
     fn render(value: Option<&str>, options: Vec<ChoiceOption>) -> String {
+        render_props(yew::props!(ChoiceProps {
+            options: options,
+            value: value.map(AttrValue::from),
+            on_change: Callback::noop(),
+            label: "Pick"
+        }))
+    }
+
+    fn render_props(props: ChoiceProps) -> String {
         futures::executor::block_on(
-            yew::LocalServerRenderer::<Choice>::with_props(yew::props!(ChoiceProps {
-                options: options,
-                value: value.map(AttrValue::from),
-                on_change: Callback::noop(),
-                label: "Pick"
-            }))
-            .hydratable(false)
-            .render(),
+            yew::LocalServerRenderer::<Choice>::with_props(props)
+                .hydratable(false)
+                .render(),
         )
     }
 
@@ -313,6 +362,36 @@ mod tests {
         let o = vec![ChoiceOption::new("a", "Grid").icon_only(html! { "#" })];
         let html = render(Some("a"), o);
         assert!(html.contains("aria-label=\"Grid\""), "{html}");
+        assert!(html.contains(class::ICON), "{html}");
         assert!(!html.contains(class::CHOICE_LABEL), "{html}");
+    }
+
+    #[test]
+    fn stacking_is_its_class() {
+        assert_eq!(ChoiceStack::Never.class(), None);
+        assert_eq!(ChoiceStack::Always.class(), Some(class::STACKED));
+        assert_eq!(ChoiceStack::Narrow.class(), Some(class::STACK_NARROW));
+        let html = render_props(yew::props!(ChoiceProps {
+            options: options(),
+            on_change: Callback::noop(),
+            label: "Pick",
+            stack: ChoiceStack::Always
+        }));
+        assert!(html.contains(class::STACKED), "{html}");
+    }
+
+    #[test]
+    fn multiple_is_a_group_of_checkboxes_each_a_tab_stop() {
+        let html = render_props(yew::props!(ChoiceProps {
+            options: options(),
+            on_change: Callback::noop(),
+            label: "Pick",
+            multiple: true,
+            values: vec![AttrValue::from("a"), AttrValue::from("c")]
+        }));
+        assert!(html.contains("role=\"group\""), "{html}");
+        assert_eq!(html.matches("role=\"checkbox\"").count(), 3, "{html}");
+        assert_eq!(html.matches("aria-checked=\"true\"").count(), 2, "{html}");
+        assert_eq!(html.matches("tabindex=\"0\"").count(), 3, "{html}");
     }
 }

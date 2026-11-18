@@ -1,4 +1,12 @@
 @use "../../style/index" with (
+    $choice-height: var(--control-height-small),
+    $choice-hover-ink: var(--text),
+    $choice-stack-breakpoint: "medium",
+    $choice-columns: auto,
+    $choice-align-self: center,
+    $choice-gap: var(--space-1),
+    $choice-icon-width: var(--control-height-small),
+    $choice-focus-edge: var(--accent),
     $choice-fill: var(--bg),
     $choice-radius: var(--radius-sm),
     $choice-inset: 0,

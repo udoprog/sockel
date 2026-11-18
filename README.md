@@ -500,7 +500,9 @@ source for the value. The module must emit no CSS.
 | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |
 | `$choice-fill`, `$choice-radius`, `$choice-inset`, `$choice-padding` | `var(--surface)`, `var(--radius-md)`, `var(--nest-inset)`, `var(--space-3)` (a choice's ground, radius, inset and an option's inline padding) |
 | `$choice-ink`, `$choice-font-size`, `$choice-divider` | `var(--text)`, `null`, `null` (an option's ink and size, and the colour of the rule between options; `null`: inherited, none) |
-| `$choice-hover-fill`, `$choice-selected-fill`, `$choice-selected-ink` | `color-mix(in srgb, var(--accent) 12%, transparent)`, `var(--accent)`, `var(--on-accent)` |
+| `$choice-hover-fill`, `$choice-hover-ink`, `$choice-selected-fill`, `$choice-selected-ink` | `color-mix(in srgb, var(--accent) 12%, transparent)`, `null` (as at rest), `var(--accent)`, `var(--on-accent)` |
+| `$choice-height`, `$choice-stack-breakpoint` | `var(--control-height)`, `"phone"` (a choice's height, a stacked option's least, and where a `Narrow` one stacks) |
+| `$choice-columns`, `$choice-align-self`, `$choice-gap`, `$choice-icon-width`, `$choice-focus-edge` | `1fr`, `null`, `var(--space-2)`, `null`, `null` (the options' columns, `auto` each its own width; the group's `align-self` at no specificity; an option's icon-to-label gap; an icon-only option's least width, unpadded (`ICON`); the group's border while it holds the focus) |
 | `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 | `$filter-width` | `10.5rem` |
 | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
@@ -658,8 +660,8 @@ fn main() {
   all in the same box.
 - [`Checkbox`] (`.checkbox`) and [`Switch`] (`.switch`): an on or off
   toggle in a box of a fixed size.
-- [`Choice`] (`.choice`): a segmented pick-one group, its options of one
-  width; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
+- [`Choice`] (`.choice`): a segmented pick-one (or pick-several) group,
+  its options of one width, in a row or stacked; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
   chips with a count.
 - [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
   [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
@@ -875,11 +877,16 @@ and the control has no text of its own. Every component takes `class`.
   [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`, `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
   name; `labelled_by`: the id of the element that names it), `fit` ([`ChoiceFit`]: `Equal`, `Stretch` to fill the container
-  (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `small` (`SMALL`),
+  (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `stack`
+  ([`ChoiceStack`]: `Never`, `Always` one option to a row across the
+  container, labels wrapping (`STACKED`), `Narrow` so below
+  `$choice-stack-breakpoint` (`STACK_NARROW`)), `small` (`SMALL`),
   `invalid`, `disabled`; `choice(fit, small, invalid, disabled)`. Roving
   tabindex: the selected option, or the first enabled, is the one tab
   stop; the arrows (with wrap), Home and End select and focus the next
-  enabled option.
+  enabled option. `multiple` with `values` picks several: a `group` of
+  `checkbox` options, each a tab stop, `on_change` given the value
+  clicked for the app to toggle.
 - [`ChipToggle`] (`.sockel-chip`) and [`ChipList`] (`.sockel-chip-list`):
   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
@@ -889,7 +896,8 @@ Size guarantees: the checkbox box, the switch's track and thumb, and a
 chip's height are tokens (`--check-size`, `--switch-width` and
 `--switch-height`, `--control-height-small`), so no state, hover or
 focus changes them (borders are reserved, focus is an outline). A
-choice's options all take the width of the widest (or the container's, or
+choice's options all take the width of the widest (or each its own with
+`$choice-columns: auto`, or the container's, or
 `--choice-width`), whichever is selected, and its height is the control
 height; the selected one changes background and colour only, through the
 `current` mixin, which now also matches `aria-checked="true"` and

@@ -272,4 +272,15 @@ fn choice_settings() {
     assert!(css.contains("color: var(--muted);"));
     assert!(css.contains("background: color-mix(in srgb, var(--accent) 22%, transparent);"));
     assert!(css.contains("padding: 0;"));
+    assert!(defaults.contains("--choice-height: var(--control-height);\n  display: inline-grid;"));
+    assert!(!defaults.contains("border-block-start-color: var(--border);"));
+    assert!(css.contains("--choice-height: var(--control-height-small);\n  display: inline-grid;"));
+    assert!(css.contains("transparent);\n  color: var(--text);"));
+    assert!(css.contains("border-block-start-color: var(--border);"));
+    assert!(css.contains("@media (width < 48rem) {\n  .sockel-choice.sockel-stack-narrow {"));
+    assert!(!defaults.contains(":where(.sockel-choice)"));
+    assert!(css.contains(":where(.sockel-choice) {\n  align-self: center;"));
+    assert!(css.contains("grid-auto-columns: auto;"));
+    assert!(css.contains(".sockel-choice-option.sockel-icon {\n  min-width: var(--control-height-small);\n  padding-inline: 0;"));
+    assert!(css.contains(".sockel-choice:focus-within {\n  border-color: var(--accent);"));
 }

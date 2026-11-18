@@ -385,9 +385,23 @@ $switch-fill: var(--surface) !default;
 $switch-on-thumb: var(--on-accent) !default;
 $switch-thumb-inset: null !default;
 $choice-width: 6rem !default;
-// A choice's look: the group's ground, radius and inset, an option's inline
-// padding, ink and font size (`null`: inherited), the rule between options
-// (`null`: none), the hover fill and the selected option's fill and ink.
+// A choice's look: the group's height, ground, radius and inset, an
+// option's inline padding, ink and font size (`null`: inherited), the rule
+// between options (`null`: none), the hover fill and ink (`null`: as at
+// rest), the selected option's fill and ink, and the breakpoint below which
+// a `.sockel-stack-narrow` choice is stacked.
+$choice-height: var(--control-height) !default;
+// A choice's option columns: `1fr` all as wide as the widest, `auto` each
+// its own width.
+$choice-columns: 1fr !default;
+// A choice's `align-self` in a flex or grid parent (`null`: unset), at no
+// specificity, so a class (`.sockel-self-start`) wins; and the gap between an
+// option's icon and label.
+$choice-align-self: null !default;
+$choice-gap: var(--space-2) !default;
+// An icon-only option's least width, its padding none (`null`: its icon
+// and the padding).
+$choice-icon-width: null !default;
 $choice-fill: var(--surface) !default;
 $choice-radius: var(--radius-md) !default;
 $choice-inset: var(--nest-inset) !default;
@@ -396,8 +410,13 @@ $choice-ink: var(--text) !default;
 $choice-font-size: null !default;
 $choice-divider: null !default;
 $choice-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
+$choice-hover-ink: null !default;
+// The group's border while one of its options has the focus (`null`: as
+// at rest).
+$choice-focus-edge: null !default;
 $choice-selected-fill: var(--accent) !default;
 $choice-selected-ink: var(--on-accent) !default;
+$choice-stack-breakpoint: "phone" !default;
 $filter-width: 10.5rem !default;
 $picker-rows: 6 !default;
 $picker-popup-width: var(--menu-width-wide) !default;
