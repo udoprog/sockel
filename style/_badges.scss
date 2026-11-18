@@ -158,8 +158,8 @@
 
     &.sockel-corner {
         position: absolute;
-        inset-block-start: 0;
-        inset-inline-end: 0;
+        inset-block-start: var(--corner-top, 0);
+        inset-inline-end: var(--corner-end, 0);
         min-width: var(--corner-size);
         height: var(--corner-size);
         padding-inline: var(--space-1);

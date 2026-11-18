@@ -252,6 +252,7 @@ fn badge_settings() {
     assert!(defaults.contains("height: var(--mark-height);"));
     assert!(!defaults.contains(":not(.sockel-solid)"));
     assert!(defaults.contains("transform: translate(50%, -50%);"));
+    assert!(defaults.contains("inset-block-start: var(--corner-top, 0);"));
     let css = compile(&sass, "tests/fixtures/badge_settings.scss");
     assert!(css.contains("height: 1.375rem;"));
     assert!(css.contains("--tone: var(--text);"));
