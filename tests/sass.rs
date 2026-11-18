@@ -123,6 +123,18 @@ fn error_box_settings() {
 }
 
 #[test]
+fn notice_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("min-height: calc(var(--control-height-small) + 2 * var(--space-2)"));
+    assert!(defaults.contains("line-height: 1.4;"));
+    let css = compile(&sass, "tests/fixtures/notice_settings.scss");
+    assert!(!css.contains("min-height: calc(var(--control-height-small) + 2 * var(--space-2)"));
+    assert!(!css.contains("line-height: 1.4;"));
+    assert!(css.contains("min-height: 0;"));
+}
+
+#[test]
 fn drag_handle_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

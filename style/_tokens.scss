@@ -313,6 +313,22 @@ $drag-handle-phone-size: null !default;
 $drag-handle-radius: var(--radius-xs) !default;
 $drag-handle-hover-fill: color-mix(in srgb, var(--text) 6%, transparent) !default;
 $drag-handle-compact-size: 1rem !default;
+// A Notice's padding, gap, corners, fill, edge colour, the way its parts
+// line up on the cross axis, its least height, its text's padding above and
+// below, the text's line height and its icon's height. The defaults centre
+// a line in one small control's height; a project that lets the text set
+// the height sets `-min-height`, `-body-padding`, `-line-height` and
+// `-icon-height` to `0`, `0`, `inherit` and `auto`.
+$notice-padding: var(--space-2) var(--space-3) !default;
+$notice-gap: var(--space-2) !default;
+$notice-radius: var(--radius-md) !default;
+$notice-fill: color-mix(in srgb, var(--tone) 10%, var(--surface)) !default;
+$notice-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
+$notice-align: flex-start !default;
+$notice-min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px)) !default;
+$notice-body-padding: calc((var(--control-height-small) - 1lh) / 2) !default;
+$notice-line-height: 1.4 !default;
+$notice-icon-height: var(--control-height-small) !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
 // weight, and its cause's font and size (`null`: none, or inherited).
 $error-box-padding: var(--space-4) !default;

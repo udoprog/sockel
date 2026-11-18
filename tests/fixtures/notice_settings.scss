@@ -1,0 +1,8 @@
+// A project whose notices let their text set the height.
+@use "../../style/tokens" with (
+    $notice-min-height: 0,
+    $notice-body-padding: 0,
+    $notice-line-height: inherit,
+    $notice-icon-height: auto
+);
+@use "../../style/notices";
