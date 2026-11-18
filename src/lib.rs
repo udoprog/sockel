@@ -207,6 +207,8 @@
 //! `SOCKEL_STYLE` is sockel's style directory, which `compile()` hands the
 //! package's crates. `.dynamic(["app-tone-*"])` allows classes built at runtime
 //! (a trailing `*` is a prefix) and `.foreign([...])` ones a dependency writes.
+//! Give it the `foreign`, `dynamic` and `with` calls of `build.rs`, so it
+//! checks the stylesheet the app builds.
 //! A class counts as written when a source names its constant
 //! (`class::SIDEBAR`) or the class in a string literal; comments and each
 //! item marked `#[cfg(test)]` (a test module, function or `use`) do not count. The test fails on a dead class
@@ -278,6 +280,8 @@
 //! 5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
 //!    `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
 //!    css={STYLESHEET} />` once at the root.
+//!    The stylesheet it linked (`style/main.scss`) becomes the style
+//!    directory's `_index.scss`.
 //!
 //! `sockel-build` compiles with [sasso], a Rust port of dart-sass, and its
 //! CSS matches dart-sass's. A block's declarations written after a nested
