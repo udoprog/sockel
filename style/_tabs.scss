@@ -100,7 +100,8 @@
     display: flex;
     width: fit-content;
     max-width: 100%;
-    min-height: 0;
+    // A scroll container in a flex column would otherwise shrink below its tabs.
+    min-height: min-content;
     border-radius: var(--radius-sm);
     background: color-mix(in srgb, var(--text) 7%, transparent);
     box-shadow: none;
