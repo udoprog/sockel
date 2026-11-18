@@ -442,9 +442,10 @@
     @include base.focus-ring;
 }
 
-// Under the chip, so an app's own icon rule does not outweigh the size.
+// The cross's drawing, under the chip, so an app's own icon rule (its
+// IconSet's svg in the glyph) does not outweigh the size.
 @if base.$chip-remove-glyph-size != null {
-    .sockel-chip > .sockel-chip-remove > * {
+    .sockel-chip > .sockel-chip-remove svg {
         width: base.$chip-remove-glyph-size;
         height: base.$chip-remove-glyph-size;
     }
