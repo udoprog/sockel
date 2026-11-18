@@ -461,6 +461,10 @@ $choice-focus-edge: null !default;
 $choice-selected-fill: var(--accent) !default;
 $choice-selected-ink: var(--on-accent) !default;
 $choice-stack-breakpoint: "phone" !default;
+// A tab's icon-to-label gap, and whether its icon stays below the phone
+// breakpoint.
+$tab-gap: var(--space-2) !default;
+$tab-phone-icons: false !default;
 $filter-width: 10.5rem !default;
 $picker-rows: 6 !default;
 $picker-popup-width: var(--menu-width-wide) !default;

@@ -1,6 +1,6 @@
 use yew::prelude::*;
 
-use sockel::{Glyph, Icon, NavItem, NavList, SubTabs, TabItem, Tabs, nav_list, tabs};
+use sockel::{Glyph, Icon, LinkTabs, NavItem, NavList, SubTabs, TabItem, Tabs, nav_list, tabs};
 
 use crate::class;
 use crate::code::{El, snippet};
@@ -26,6 +26,9 @@ pub fn TabsPage() -> Html {
     let icons = use_state(|| false);
     let disabled = use_state(|| false);
     let small = use_state(|| false);
+    let segmented = use_state(|| false);
+    let fill = use_state(|| false);
+    let links = use_state(|| false);
 
     let controls = html! {
         <>
@@ -35,13 +38,25 @@ pub fn TabsPage() -> Html {
             <Toggle label="icons" value={*icons} on_change={bind(&icons)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="small" value={*small} on_change={bind(&small)} />
+            <Toggle label="segmented" value={*segmented} on_change={bind(&segmented)} />
+            <Toggle label="fill" value={*fill} on_change={bind(&fill)} />
+            <Toggle label="links" value={*links} on_change={bind(&links)} />
         </>
     };
 
     let items: Vec<TabItem> = (0..*count)
         .map(|n| {
-            let item = TabItem::new(format!("tab-{n}"), label(*text, "Tab", n))
+            let mut item = TabItem::new(format!("tab-{n}"), label(*text, "Tab", n))
                 .disabled(*disabled && n == 1);
+            if *links {
+                let selected = selected.clone();
+                item = item
+                    .href("#tabs")
+                    .onclick(Callback::from(move |e: MouseEvent| {
+                        e.prevent_default();
+                        selected.set(n);
+                    }));
+            }
             if *icons {
                 item.icon(html! { <Icon glyph={glyph(n)} /> })
             } else {
@@ -64,6 +79,11 @@ pub fn TabsPage() -> Html {
 
     let mut lets = vec!["let tabs = vec![".to_owned()];
     lets.extend((0..(*count).min(3)).map(|n| {
+        let link = if *links {
+            ".href(\"#tabs\").onclick(on_click)"
+        } else {
+            ""
+        };
         let then = match (*icons, *disabled && n == 1) {
             (true, true) => {
                 format!(
@@ -79,7 +99,7 @@ pub fn TabsPage() -> Html {
             (false, false) => String::new(),
         };
         format!(
-            "    TabItem::new(\"tab-{n}\", {:?}){then},",
+            "    TabItem::new(\"tab-{n}\", {:?}){link}{then},",
             label(*text, "Tab", n)
         )
     }));
@@ -87,14 +107,20 @@ pub fn TabsPage() -> Html {
         lets.push(format!("    // … {} more", *count - 3));
     }
     lets.push("];".to_owned());
-    let code = snippet(
-        &lets,
+    let el = if *links {
+        El::new("LinkTabs")
+            .expr("tabs", "tabs")
+            .expr("value", format!("Some(\"tab-{current}\".into())"))
+            .text("label", "Sections")
+            .flag("small", *small)
+    } else {
         El::new(if *small { "SubTabs" } else { "Tabs" })
             .expr("tabs", "tabs")
             .expr("value", format!("Some(\"tab-{current}\".into())"))
             .text("label", "Sections")
-            .expr("on_change", "on_change"),
-    );
+            .expr("on_change", "on_change")
+    };
+    let code = snippet(&lets, el.flag("segmented", *segmented).flag("fill", *fill));
 
     let value = (*count > 0).then(|| AttrValue::from(format!("tab-{current}")));
     html! {
@@ -102,10 +128,15 @@ pub fn TabsPage() -> Html {
             <code class={class::CLASS_CALL}>
                 { format!("tabs(small) → \"{}\"", tabs(*small).to_string()) }
             </code>
-            if *small {
-                <SubTabs tabs={items} {value} label="Sections" {on_change} />
+            if *links {
+                <LinkTabs tabs={items} {value} label="Sections" small={*small}
+                    segmented={*segmented} fill={*fill} />
+            } else if *small {
+                <SubTabs tabs={items} {value} label="Sections" {on_change}
+                    segmented={*segmented} fill={*fill} />
             } else {
-                <Tabs tabs={items} {value} label="Sections" {on_change} />
+                <Tabs tabs={items} {value} label="Sections" {on_change}
+                    segmented={*segmented} fill={*fill} />
             }
             <span class={class::CONTROL_LABEL}>{ "Tab to it, then the arrow keys, Home and End." }</span>
         </Demo>

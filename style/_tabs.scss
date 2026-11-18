@@ -9,12 +9,16 @@
 // - `.sockel-tab`: a button of `--tab-height`; the selected one
 //   (`aria-selected`) takes the accent colour and an underline of
 //   `--tab-underline` drawn by an inset shadow, so the box is the same.
-//   Parts: `-icon` (hidden below the phone breakpoint), `-label`.
-//   `.sockel-invalid` (`aria-invalid`) shows the tab in `--danger`.
+//   Parts: `-icon` (hidden below the phone breakpoint unless
+//   `$tab-phone-icons`), `-label`, `$tab-gap` apart.
+//   `.sockel-invalid` (`aria-invalid`) shows the tab in `--danger`. A link
+//   tab (LinkTabs) is the same, `aria-current="page"` its selected state.
 // - `.sockel-segmented` on a `.sockel-tabs`: the tabs sit in a tinted pill,
 //   as wide as they are, and the selected one is a raised segment of the
 //   surface colour rather than an underline; the tabs are the small
 //   control height.
+// - `.sockel-fill` on a `.sockel-tabs`: the list spans its container and
+//   its tabs share the width equally, with little inline padding.
 // - `.sockel-nav-list`: a `nav` of a column of `.sockel-nav-item`s (links
 //   or buttons, in `.sockel-nav-list-items`); the current one
 //   (`aria-current`) takes the accent colour and a tint. Parts: `-icon`,
@@ -45,7 +49,7 @@
     flex: none;
     align-items: center;
     justify-content: center;
-    gap: var(--space-2);
+    gap: base.$tab-gap;
     box-sizing: border-box;
     height: var(--tab-height);
     // A host's own button rule must not grow a tab past --tab-height.
@@ -61,10 +65,11 @@
     color: var(--muted);
     font: inherit;
     line-height: 1;
+    text-decoration: none;
     white-space: nowrap;
     cursor: pointer;
 
-    &:hover:not(:disabled) {
+    &:hover:not(:disabled, [aria-disabled="true"]) {
         background: color-mix(in srgb, var(--accent) 12%, transparent);
     }
 
@@ -76,11 +81,13 @@
 
     @include base.current(color);
 
-    &[aria-selected="true"] {
+    &[aria-selected="true"],
+    &[aria-current="page"] {
         box-shadow: inset 0 calc(-1 * var(--tab-underline)) 0 var(--accent);
     }
 
-    &:disabled {
+    &:disabled,
+    &[aria-disabled="true"] {
         opacity: 0.5;
         cursor: not-allowed;
     }
@@ -89,7 +96,8 @@
 .sockel-tab.sockel-invalid {
     color: var(--danger);
 
-    &[aria-selected="true"] {
+    &[aria-selected="true"],
+    &[aria-current="page"] {
         box-shadow: inset 0 calc(-1 * var(--tab-underline)) 0 var(--danger);
     }
 }
@@ -112,7 +120,8 @@
         border-radius: var(--radius-inner, var(--radius-sm));
         font-size: var(--text-sm);
 
-        &[aria-selected="true"] {
+        &[aria-selected="true"],
+        &[aria-current="page"] {
             background: var(--surface);
             box-shadow: var(--shadow-1);
             color: var(--text);
@@ -124,10 +133,22 @@
     }
 }
 
+.sockel-tabs.sockel-fill {
+    width: 100%;
+
+    > .sockel-tab {
+        flex: 1 1 0;
+        padding-inline: var(--space-1);
+    }
+}
+
 .sockel-tab-icon {
     display: inline-flex;
     flex: none;
-    @include base.desktop-only;
+
+    @if not base.$tab-phone-icons {
+        @include base.desktop-only;
+    }
 }
 
 .sockel-tab-label {

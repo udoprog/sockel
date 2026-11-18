@@ -1879,13 +1879,21 @@ pub const PAGES: &[Page] = &[
         title: "Tabs",
         group: Group::Navigation,
         about: "A tab list: the selected tab is marked by its colour and an underline inside its box, and tabs past the width scroll sideways. Tab to it, then use the arrow keys.",
-        covers: &["Tabs", "SubTabs", "TabsProps", "TabItem", "tabs"],
+        covers: &[
+            "Tabs",
+            "SubTabs",
+            "LinkTabs",
+            "LinkTabsProps",
+            "TabsProps",
+            "TabItem",
+            "tabs",
+        ],
         render: || html! { <tabs::TabsPage /> },
         holds: &[
             hold(
                 sockel::class::TABS,
                 Size::Height,
-                Across::Except(&["small"]),
+                Across::Except(&["small", "segmented"]),
             ),
             hold(
                 sockel::class::TAB,

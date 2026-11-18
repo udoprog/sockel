@@ -1,4 +1,4 @@
-//! Tabs and SubTabs (`style/_tabs.scss`).
+//! Tabs, SubTabs and LinkTabs (`style/_tabs.scss`).
 
 use crate::class;
 use crate::roving::{self, Arrows};
@@ -28,6 +28,11 @@ pub struct TabItem {
     /// The tab's content is refused (`aria-invalid`), and the tab shows it
     /// in `--danger`.
     pub invalid: bool,
+    /// The address a [`LinkTabs`] tab links to.
+    pub href: Option<AttrValue>,
+    /// Called on a click of a [`LinkTabs`] tab, before the browser follows
+    /// it (an app's router prevents that and shows the page in place).
+    pub onclick: Option<Callback<MouseEvent>>,
 }
 
 impl TabItem {
@@ -43,6 +48,8 @@ impl TabItem {
             content: None,
             after: None,
             invalid: false,
+            href: None,
+            onclick: None,
         }
     }
 
@@ -85,6 +92,16 @@ impl TabItem {
         self.invalid = invalid;
         self
     }
+
+    pub fn href(mut self, href: impl Into<AttrValue>) -> Self {
+        self.href = Some(href.into());
+        self
+    }
+
+    pub fn onclick(mut self, onclick: Callback<MouseEvent>) -> Self {
+        self.onclick = Some(onclick);
+        self
+    }
 }
 
 #[derive(Properties, PartialEq)]
@@ -105,11 +122,68 @@ pub struct TabsProps {
     /// raised segment, instead of an underline.
     #[prop_or_default]
     pub segmented: bool,
+    /// The list spans its container and the tabs share its width equally.
+    #[prop_or_default]
+    pub fill: bool,
+}
+
+/// The props of [`LinkTabs`].
+#[derive(Properties, PartialEq)]
+pub struct LinkTabsProps {
+    #[prop_or_default]
+    pub class: Classes,
+    /// The tabs, each with its `href`.
+    pub tabs: Vec<TabItem>,
+    /// The current tab's value (`aria-current="page"`).
+    #[prop_or_default]
+    pub value: Option<AttrValue>,
+    /// Where the tabs lead (`aria-label` of the `nav`).
+    pub label: AttrValue,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    #[prop_or_default]
+    pub segmented: bool,
+    #[prop_or_default]
+    pub fill: bool,
+    /// At the small control height, as [`SubTabs`].
+    #[prop_or_default]
+    pub small: bool,
 }
 
 /// A tab list's classes: `tabs`, and `small` for the smaller variant.
 pub fn tabs(small: bool) -> Classes {
     classes!(class::TABS, small.then_some(class::SMALL))
+}
+
+fn list(small: bool, segmented: bool, fill: bool, class: &Classes) -> Classes {
+    classes!(
+        tabs(small),
+        segmented.then_some(class::SEGMENTED),
+        fill.then_some(class::FILL),
+        class.clone()
+    )
+}
+
+fn face(tab: &TabItem) -> Html {
+    html! {
+        <>
+            { for tab.icon.clone().map(|icon| html! {
+                <span class={class::TAB_ICON} aria-hidden="true">{ icon }</span>
+            }) }
+            <span class={class::TAB_LABEL}>
+                { match &tab.content {
+                    Some(content) => content.clone(),
+                    None => html! { { tab.label.clone() } },
+                } }
+            </span>
+        </>
+    }
+}
+
+fn name(tab: &TabItem) -> Option<AttrValue> {
+    tab.tip
+        .clone()
+        .or_else(|| tab.content.as_ref().map(|_| tab.label.clone()))
 }
 
 fn disabled(tabs: &[TabItem]) -> Vec<bool> {
@@ -136,7 +210,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
     };
 
     html! {
-        <div role="tablist" class={classes!(tabs(small), props.segmented.then_some(class::SEGMENTED), props.class.clone())}
+        <div role="tablist" class={list(small, props.segmented, props.fill, &props.class)}
             aria-label={props.label.clone()}
             data-testid={props.testid.clone()}
             {onkeydown}>
@@ -152,21 +226,14 @@ fn render(props: &TabsProps, small: bool) -> Html {
                     <button type="button" role="tab" class={classes!(class::TAB, tab.invalid.then_some(class::INVALID), tab.class.clone())}
                         aria-selected={selected.to_string()}
                         aria-invalid={tab.invalid.then_some("true")}
-                        aria-label={tab.tip.clone().or_else(|| tab.content.as_ref().map(|_| tab.label.clone()))}
+                        aria-label={name(tab)}
                         data-tip={tab.tip.clone()}
                         data-testid={tab.testid.clone()}
+                        data-value={tab.value.clone()}
                         tabindex={if stop == Some(i) { "0" } else { "-1" }}
                         disabled={tab.disabled}
                         {onclick}>
-                        { for tab.icon.clone().map(|icon| html! {
-                            <span class={class::TAB_ICON} aria-hidden="true">{ icon }</span>
-                        }) }
-                        <span class={class::TAB_LABEL}>
-                            { match &tab.content {
-                                Some(content) => content.clone(),
-                                None => html! { { tab.label.clone() } },
-                            } }
-                        </span>
+                        { face(tab) }
                     </button>
                     { for tab.after.clone() }
                     </>
@@ -189,6 +256,41 @@ pub fn Tabs(props: &TabsProps) -> Html {
 #[function_component]
 pub fn SubTabs(props: &TabsProps) -> Html {
     render(props, true)
+}
+
+/// Tabs that are links to pages, drawn as [`Tabs`]: a `nav` of links, the
+/// current one `aria-current="page"`. Each link is a tab stop of its own and
+/// the arrows are the page's, as for any links. A disabled tab has no
+/// `href` (`aria-disabled`).
+#[function_component]
+pub fn LinkTabs(props: &LinkTabsProps) -> Html {
+    html! {
+        <nav class={list(props.small, props.segmented, props.fill, &props.class)}
+            aria-label={props.label.clone()}
+            data-testid={props.testid.clone()}>
+            { for props.tabs.iter().map(|tab| {
+                let current = props.value.as_ref() == Some(&tab.value);
+                let onclick = tab.onclick.clone().filter(|_| !tab.disabled);
+                html! {
+                    <>
+                    <a class={classes!(class::TAB, tab.invalid.then_some(class::INVALID), tab.class.clone())}
+                        href={tab.href.clone().filter(|_| !tab.disabled)}
+                        aria-current={current.then_some("page")}
+                        aria-disabled={tab.disabled.then_some("true")}
+                        aria-invalid={tab.invalid.then_some("true")}
+                        aria-label={name(tab)}
+                        data-tip={tab.tip.clone()}
+                        data-testid={tab.testid.clone()}
+                        data-value={tab.value.clone()}
+                        {onclick}>
+                        { face(tab) }
+                    </a>
+                    { for tab.after.clone() }
+                    </>
+                }
+            }) }
+        </nav>
+    }
 }
 
 #[cfg(test)]
@@ -304,6 +406,58 @@ mod tests {
         p.segmented = true;
         let html = html_of::<Tabs>(p);
         assert!(html.contains(class::SEGMENTED), "{html}");
+    }
+
+    #[test]
+    fn a_tab_names_its_value_and_fill_is_a_class() {
+        let html = html_of::<Tabs>(props(Some("a"), items()));
+        assert!(html.contains("data-value=\"b\""), "{html}");
+        assert!(!html.contains(class::FILL), "{html}");
+        let mut p = props(Some("a"), items());
+        p.fill = true;
+        assert!(html_of::<Tabs>(p).contains(class::FILL));
+    }
+
+    fn links(value: Option<&str>) -> String {
+        let tabs = vec![
+            TabItem::new("a", "A").href("/a").testid("tab-a"),
+            TabItem::new("b", "B").href("/b"),
+            TabItem::new("c", "C").href("/c").disabled(true),
+        ];
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<LinkTabs>::with_props(yew::props!(LinkTabsProps {
+                tabs: tabs,
+                value: value.map(AttrValue::from),
+                label: "Pages",
+                segmented: true
+            }))
+            .hydratable(false)
+            .render(),
+        )
+    }
+
+    #[test]
+    fn link_tabs_are_links_the_current_one_aria_current() {
+        let html = links(Some("b"));
+        assert!(html.starts_with("<nav"), "{html}");
+        assert!(!html.contains("role=\"tablist\""), "{html}");
+        assert!(!html.contains("tabindex"), "{html}");
+        assert!(html.contains(class::SEGMENTED), "{html}");
+        assert_eq!(html.matches("aria-current=\"page\"").count(), 1, "{html}");
+        assert!(
+            html.find("aria-current") > html.find("href=\"/b\""),
+            "{html}"
+        );
+        assert!(html.contains("data-testid=\"tab-a\""), "{html}");
+        assert_eq!(links(None).matches("aria-current").count(), 0);
+    }
+
+    #[test]
+    fn a_disabled_link_tab_has_no_href() {
+        let html = links(None);
+        assert_eq!(html.matches("href=").count(), 2, "{html}");
+        assert!(!html.contains("/c"), "{html}");
+        assert_eq!(html.matches("aria-disabled=\"true\"").count(), 1, "{html}");
     }
 
     #[test]

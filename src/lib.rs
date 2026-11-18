@@ -354,7 +354,7 @@
 //! | `skeleton` | `icons`, `media` | [`Skeleton`], [`Spinner`] | 7.4 KB |
 //! | `stepper` | `input` | [`Stepper`] | 11.2 KB |
 //! | `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
-//! | `tabs` | | [`Tabs`], [`SubTabs`], [`NavList`] | 6.9 KB |
+//! | `tabs` | | [`Tabs`], [`SubTabs`], [`LinkTabs`], [`NavList`] | 6.9 KB |
 //! | `toast` | `badge`, `button`, `overlay` | [`ToastHost`], [`Toast`], [`SaveBar`] | 34.1 KB |
 //! | `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
 //! | `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
@@ -496,6 +496,7 @@
 //! | `$choice-hover-fill`, `$choice-hover-ink`, `$choice-selected-fill`, `$choice-selected-ink` | `color-mix(in srgb, var(--accent) 12%, transparent)`, `null` (as at rest), `var(--accent)`, `var(--on-accent)` |
 //! | `$choice-height`, `$choice-stack-breakpoint` | `var(--control-height)`, `"phone"` (a choice's height, a stacked option's least, and where a `Narrow` one stacks) |
 //! | `$choice-columns`, `$choice-align-self`, `$choice-gap`, `$choice-icon-width`, `$choice-focus-edge` | `1fr`, `null`, `var(--space-2)`, `null`, `null` (the options' columns, `auto` each its own width; the group's `align-self` at no specificity; an option's icon-to-label gap; an icon-only option's least width, unpadded (`ICON`); the group's border while it holds the focus) |
+//! | `$tab-gap`, `$tab-phone-icons` | `var(--space-2)`, `false` (a tab's icon-to-label gap, and whether its icon stays below the phone breakpoint) |
 //! | `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 //! | `$filter-width` | `10.5rem` |
 //! | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
@@ -920,16 +921,26 @@
 //!   tab's own such as a remove cross; it is not a tab and the arrows skip it)
 //!   and `invalid(bool)` (`aria-invalid` and the tab in `--danger`).
 //!   `segmented` on the list sets the tabs in a tinted pill with the selected
-//!   one a raised segment (`SEGMENTED`) instead of an underline. Roving tabindex: the
+//!   one a raised segment (`SEGMENTED`) instead of an underline. `fill`
+//!   spans the container, the tabs sharing its width equally (`FILL`). Every
+//!   tab carries its `value` as `data-value`. Roving tabindex: the
 //!   selected tab, or the first enabled, is the one tab stop; Left and Right
 //!   (with wrap), Home and End select and focus the next enabled tab, from
 //!   the focused one. Up and Down are left to the page. The selected
 //!   tab takes the accent colour and an underline of `--tab-underline` drawn
-//!   as an inset shadow. Icons are hidden below the phone breakpoint. Tabs
+//!   as an inset shadow. Icons are hidden below the phone breakpoint
+//!   (`$tab-phone-icons` keeps them). Tabs
 //!   past the width scroll sideways with the scrollbar hidden and the edge
 //!   that has hidden tabs faded (the `scroll-fade` mixin, shared with
 //!   [`Toolbar`]); no tab is hidden or reflowed.
 //! - [`SubTabs`]: the same props, at the small control height (`SMALL`).
+//! - [`LinkTabs`]: tabs that lead to pages, drawn as [`Tabs`]: a `nav` of
+//!   links, each `TabItem` with its `.href(url)` and an `.onclick(callback)`
+//!   run before the browser follows it (an app's router prevents that and
+//!   shows the page in place). `value` is the current tab
+//!   (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`
+//!   and `fill` as for [`Tabs`]. Each link is a tab stop and the arrows are
+//!   the page's; a disabled one has no `href` (`aria-disabled`).
 //! - [`NavList`] (`.sockel-nav-list`): a `nav` of a column of [`NavItem`]s
 //!   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
 //!   link with an `href` and a button without. `value` is the current entry
@@ -3081,7 +3092,7 @@ pub use table::{
     table_cell, table_cell_part, table_frame, table_mode, table_wrap,
 };
 #[cfg(feature = "tabs")]
-pub use tabs::{SubTabs, TabItem, Tabs, TabsProps, tabs};
+pub use tabs::{LinkTabs, LinkTabsProps, SubTabs, TabItem, Tabs, TabsProps, tabs};
 #[cfg(feature = "toast")]
 pub use toast::{TOAST_MS, Toast, ToastHost, ToastHostProps, ToastProps, toast, toast_host};
 #[cfg(feature = "tooltip")]
