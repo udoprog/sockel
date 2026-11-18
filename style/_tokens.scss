@@ -317,7 +317,11 @@ $skeleton-phone-height: null !default;
 // A pager's gap, its buttons' corners, ink, type size (`null`: inherited),
 // hover fill and ink (`null`: as at rest), the current page's fill and ink,
 // the chevrons' ink (`null`: the button's), and its controls' height below
-// the phone breakpoint (`null`: as above it).
+// the phone breakpoint (`null`: as above it). `$pager-button-height` is a
+// button's and gap's height (default the control height); `$pager-current-edge`
+// the current page's edge colour (`null`: the ordinary edge);
+// `$pager-range-text` and `$pager-range-ink` the range text's size (`null`:
+// inherited) and ink.
 $pager-gap: var(--space-1) !default;
 $pager-button-radius: var(--radius-sm) !default;
 $pager-button-ink: var(--text) !default;
@@ -328,6 +332,10 @@ $pager-current-fill: var(--accent) !default;
 $pager-current-ink: var(--on-accent) !default;
 $pager-step-ink: null !default;
 $pager-phone-height: null !default;
+$pager-button-height: var(--control-height) !default;
+$pager-current-edge: null !default;
+$pager-range-text: null !default;
+$pager-range-ink: var(--muted) !default;
 // A summary pager's padding (`null`: none), for one that ends a list or
 // table and lines up with its rows.
 $pager-summary-padding: null !default;

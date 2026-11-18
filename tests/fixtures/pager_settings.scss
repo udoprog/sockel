@@ -1,0 +1,8 @@
+// A project whose pager buttons are 32px high, the current page keeps an
+// accent edge, and the range text is small.
+@use "../../style/tokens" with (
+    $pager-button-height: 32px,
+    $pager-current-edge: red,
+    $pager-range-text: 13px,
+);
+@use "../../style/pager";

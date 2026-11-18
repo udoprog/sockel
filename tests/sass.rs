@@ -167,6 +167,17 @@ fn notice_settings() {
 }
 
 #[test]
+fn pager_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("height: var(--control-height);\n  margin: 0;"));
+    let css = compile(&sass, "tests/fixtures/pager_settings.scss");
+    assert!(css.contains("height: 32px;\n  margin: 0;"));
+    assert!(css.contains("border-color: red;"));
+    assert!(css.contains("font-size: 13px;"));
+}
+
+#[test]
 fn carried_rows_are_dimmed() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

@@ -70,7 +70,7 @@
     justify-content: center;
     box-sizing: border-box;
     width: var(--pager-button-width);
-    height: var(--control-height);
+    height: base.$pager-button-height;
     margin: 0;
     padding: 0;
     @include base.reserved-border;
@@ -93,6 +93,10 @@
         background: base.$pager-current-fill;
         color: base.$pager-current-ink;
         cursor: default;
+
+        @if base.$pager-current-edge {
+            border-color: base.$pager-current-edge;
+        }
     }
 
     &:disabled {
@@ -117,7 +121,7 @@
     justify-content: center;
     box-sizing: border-box;
     width: var(--pager-button-width);
-    height: var(--control-height);
+    height: base.$pager-button-height;
     color: var(--muted);
 }
 
@@ -177,7 +181,8 @@
 }
 
 .sockel-pager-range {
-    color: var(--muted);
+    color: base.$pager-range-ink;
+    font-size: base.$pager-range-text;
 }
 
 .sockel-pager-group {
