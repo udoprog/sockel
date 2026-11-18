@@ -37,6 +37,10 @@
         color: var(--text);
 
         @include base.tones;
+
+        &.sockel-danger {
+            color: base.$notice-danger-ink;
+        }
     }
 
     .sockel-notice-icon {

@@ -1282,7 +1282,7 @@ and actions (its children). `compact` (`COMPACT`) is one row for a list or a
 table. `empty_state(compact)` gives the classes.
 
 A notice's look is configured by `$notice-padding`, `-gap`, `-radius`, `-fill`, `-edge`, `-align`,
-`-min-height`, `-body-padding`, `-line-height`, `-icon-height` and `-icon-ink` (README, "Configuration"); `0`, `0`,
+`-min-height`, `-body-padding`, `-line-height`, `-icon-height`, `-icon-ink` and `-danger-ink` (README, "Configuration"); `0`, `0`,
 `inherit` and `auto` for the last four let the text set the height.
 
 Every one takes `class` and `testid`. Parts: `NOTICE_ICON`, `NOTICE_BODY`,
