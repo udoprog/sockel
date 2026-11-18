@@ -343,6 +343,10 @@ pub struct DragHandleProps {
     /// A tooltip, for apps whose buttons all carry one.
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// The app's own tooltip (`data-tip`), for apps that style it in place
+    /// of the native `title`.
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     #[prop_or_default]
     pub onpointerdown: Callback<PointerEvent>,
     #[prop_or_default]
@@ -369,7 +373,7 @@ pub fn DragHandle(props: &DragHandleProps) -> Html {
     html! {
         <button type="button" class={classes!(drag_handle(props.lifted), props.class.clone())}
             aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-            title={props.title.clone()} disabled={props.disabled} data-testid={props.testid.clone()}
+            title={props.title.clone()} data-tip={props.tip.clone()} disabled={props.disabled} data-testid={props.testid.clone()}
             onpointerdown={props.onpointerdown.clone()} onpointermove={props.onpointermove.clone()}
             onpointerup={props.onpointerup.clone()} onpointercancel={props.onpointercancel.clone()}
             onkeydown={props.onkeydown.clone()} onblur={props.onblur.clone()}>
@@ -496,6 +500,10 @@ pub struct ReorderProps {
     /// Each handle's name is its tooltip too.
     #[prop_or_default]
     pub titles: bool,
+    /// Each handle's name is its `data-tip` tooltip too, the attribute an
+    /// app's own tooltips read.
+    #[prop_or_default]
+    pub tips: bool,
     /// A mouse or pen drags a row from anywhere on it that is off its
     /// controls, not only by the handle; a finger still only by the handle.
     /// A control marked `data-reorder-surface` (the button that picks the
@@ -698,7 +706,7 @@ struct Live {
     status: String,
     /// The key of a row just moved and the keys before the move: its
     /// handle is focused wherever the app's new order puts it.
-    focus: Option<(AttrValue, Vec<AttrValue>)>,
+    focus: Option<(AttrValue, Vec<AttrValue>, usize)>,
     /// The keys as last rendered.
     keys: Vec<AttrValue>,
     /// The aim last told `on_aim`.
@@ -858,14 +866,28 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         let grid = props.grid;
         use_effect(move || {
             let pending = live.borrow().focus.clone();
-            if let Some((key, before)) = pending
-                && keys != before
-            {
-                live.borrow_mut().focus = None;
-                if let Some(at) = keys.iter().position(|k| *k == key)
-                    && let Some(handle) = handle_at(&list, at)
-                {
-                    let _ = handle.focus();
+            if let Some((key, before, to)) = pending {
+                if keys != before {
+                    live.borrow_mut().focus = None;
+                    if let Some(at) = keys.iter().position(|k| *k == key)
+                        && let Some(handle) = handle_at(&list, at)
+                    {
+                        let _ = handle.focus();
+                    }
+                } else if let Some(window) = web_sys::window() {
+                    // Keys that never change (an app keying rows by index)
+                    // move no element: once the app has had its say, focus
+                    // the handle where the row went.
+                    let live = live.clone();
+                    let list = list.clone();
+                    let end = Closure::once_into_js(move || {
+                        if live.borrow_mut().focus.take().is_some()
+                            && let Some(handle) = handle_at(&list, to)
+                        {
+                            let _ = handle.focus();
+                        }
+                    });
+                    let _ = window.set_timeout_with_callback(end.unchecked_ref());
                 }
             }
             if let Some(list) = list.cast::<Element>() {
@@ -913,6 +935,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         disabled: props.disabled,
         hint: (*hint_id).clone(),
         titles: props.titles,
+        tips: props.tips,
     };
     let marks = |index: usize, fixed: bool| {
         let carries = lift.is_some_and(|l| l.from != index && carried[l.from]);
@@ -1012,6 +1035,7 @@ struct Grip {
     disabled: bool,
     hint: AttrValue,
     titles: bool,
+    tips: bool,
 }
 
 impl PartialEq for Grip {
@@ -1028,8 +1052,8 @@ impl PartialEq for Grip {
             && (a.body, a.auto, a.grid, a.disabled, a.fixed)
                 == (b.body, b.auto, b.grid, b.disabled, b.fixed)
             && (&a.name, &a.key) == (&b.name, &b.key)
-            && (self.lifted, self.disabled, self.titles)
-                == (other.lifted, other.disabled, other.titles)
+            && (self.lifted, self.disabled, self.titles, self.tips)
+                == (other.lifted, other.disabled, other.titles, other.tips)
             && self.hint == other.hint
     }
 }
@@ -1045,7 +1069,7 @@ impl Grip {
         })
         .into();
         html! {
-            <DragHandle label={label.clone()} title={self.titles.then_some(label)}
+            <DragHandle label={label.clone()} title={self.titles.then(|| label.clone())} tip={self.tips.then_some(label)}
                 lifted={self.lifted} disabled={self.disabled}
                 describedby={self.hint.clone()} {class} {testid}
                 onpointerdown={ctx.clone().pointer_down()} onpointermove={ctx.clone().pointer_move()}
@@ -1124,11 +1148,11 @@ impl Ctx {
             if carried_moves(&self.carried, at) {
                 let rows = (0..self.count).filter(|i| self.carried[*i]).collect();
                 self.on_move_picked.emit((rows, at));
-                self.live.borrow_mut().focus = Some((self.key.clone(), before));
+                self.live.borrow_mut().focus = Some((self.key.clone(), before, at));
             }
         } else if to != self.index {
             self.on_move.emit((self.index, to));
-            self.live.borrow_mut().focus = Some((self.key.clone(), before));
+            self.live.borrow_mut().focus = Some((self.key.clone(), before, to));
         }
         let (position, count) = place(&self.stays, self.index, to);
         self.announce(ReorderText::Dropped {
