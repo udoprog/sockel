@@ -7,7 +7,7 @@ use yew::prelude::*;
 pub struct EmptyStateProps {
     #[prop_or_default]
     pub class: Classes,
-    /// What there is none of.
+    /// What there is none of; left out when empty (the hint alone then says it).
     pub title: AttrValue,
     #[prop_or_default]
     pub icon: Option<Html>,
@@ -39,7 +39,9 @@ pub fn EmptyState(props: &EmptyStateProps) -> Html {
             if let Some(icon) = &props.icon {
                 <span class={class::EMPTY_STATE_ICON} aria-hidden="true">{ icon.clone() }</span>
             }
-            <p class={class::EMPTY_STATE_TITLE}>{ props.title.clone() }</p>
+            if !props.title.is_empty() {
+                <p class={class::EMPTY_STATE_TITLE}>{ props.title.clone() }</p>
+            }
             if let Some(hint) = &props.hint {
                 <p class={class::EMPTY_STATE_HINT}>{ hint.clone() }</p>
             }
