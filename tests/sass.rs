@@ -148,6 +148,13 @@ fn notice_settings() {
 }
 
 #[test]
+fn carried_rows_are_dimmed() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains(".sockel-reorder-row.sockel-carried {\n  opacity: 0.5;\n}"));
+}
+
+#[test]
 fn drag_handle_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");

@@ -1678,8 +1678,9 @@
 //! element itself (`.sockel-reorder-row` plus its `class`), a direct child of
 //! the `.sockel-reorder` element, which `class` lays out; the hint and the
 //! status follow the rows there. A `ReorderHandle` outside a `Reorder`
-//! renders nothing. An item also takes `current` (`aria-current`) and
-//! `onclick`, `oncontextmenu`, `onmouseenter`, `onmouseleave` for the row
+//! renders nothing. An item also takes `current` (`aria-current`), `data`
+//! (more `data-*` attributes, `("data-shape", value)`) and `onclick`,
+//! `ondblclick`, `oncontextmenu`, `onmouseenter`, `onmouseleave` for the row
 //! element; a real drag never ends in a click on it (the click after a drag
 //! is swallowed at the window).
 //!
@@ -1698,6 +1699,15 @@
 //! - `on_aim`: where a lifted row aims, `Some((from, to))` as `on_move` would
 //!   report it, each time that changes, and `None` once it is set down (to
 //!   say on the row what a drop there does).
+//! - `picked` (an item) and `on_move_picked`: rows picked together move
+//!   together. With several picked, a picked row lifted carries the other
+//!   picked rows that are not `fixed`: they stay where they lie, dimmed
+//!   (`CARRIED`), until the drop, and `on_move_picked((rows, to))` reports
+//!   the move in place of `on_move`, `rows` their indices in order and `to`
+//!   an index in the list without them: apply it with `move_items(&mut list,
+//!   &rows, to)`. A drop where they already lie together reports nothing, and
+//!   the arrows step past the gaps that would leave them as they are. A row
+//!   lifted alone (not picked, or the only one) is `on_move`'s.
 //!
 //! - `quick_keys`: the arrows move a focused handle's row at once, as Alt and
 //!   an arrow do, for apps whose handles did so; Space and Enter still lift.
@@ -1706,10 +1716,13 @@
 //! - `body_drag`: a mouse or pen also drags a row from anywhere on it off its
 //!   controls (a button, input, link, label or role widget in it does not
 //!   start a drag); a finger still only by the handle, so the list scrolls
-//!   under it. The keyboard works as ever on the handle. The row wears
-//!   `REORDER_GRAB` (a grab cursor). A row with no `ReorderHandle` in it
-//!   is dragged by itself: by a mouse or pen only, and not by the keyboard
-//!   (give it another way to move, such as a menu of places).
+//!   under it. A control marked `data-reorder-surface` (a button that picks
+//!   the row, covering most of it) counts as off them: a drag starts on it
+//!   too, and it is clicked when not dragged. The keyboard works as ever on
+//!   the handle. The row wears `REORDER_GRAB` (a grab cursor). A row with no
+//!   `ReorderHandle` in it is dragged by itself: by a mouse or pen only, and
+//!   not by the keyboard (give it another way to move, such as a menu of
+//!   places).
 //! - `auto_scroll`: while a row is dragged near the top or bottom edge of
 //!   what scrolls the list (the nearest `overflow-y: auto|scroll` ancestor,
 //!   else the page) that scrolls, faster the nearer the edge
@@ -1749,7 +1762,8 @@
 //!   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
 //!   `testid`, `title`. Helpers: `reorder_row(index, lift)`,
 //!   `drag_handle(lifted)`, `drag_target(middles, from, top, bottom)`,
-//!   `landing(from, slot)`, `slot_at(middles, y)`, `key_target(key, to, count)`.
+//!   `landing(from, slot)`, `slot_at(middles, y)`, `key_target(key, to, count)`,
+//!   `move_item(list, from, to)`, `move_items(list, rows, to)`.
 //!
 //! Size guarantees: nothing reflows during a drag. The rows are measured once
 //! at the press; the lifted row moves by a transform (`--reorder-shift`) and
@@ -1761,11 +1775,12 @@
 //! `$drag-handle-size`, `$drag-handle-phone-size` (`null`: as above the
 //! phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`,
 //! `$drag-handle-compact-size` (a handle with `COMPACT`, as its
-//! `ReorderHandle`'s `class`: only as big as its glyph, `1rem`). An app's
+//! `ReorderHandle`'s `class`: only as big as its glyph, `1rem`),
+//! `$reorder-carried-opacity` (a `CARRIED` row's, `0.5`). An app's
 //! blanket button `min-height` or `min-width` does not stretch a handle. New
 //! classes:
 //! `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
-//! `DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`. New partial: `_reorder.scss`. New tokens: none.
+//! `DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`, `CARRIED`. New partial: `_reorder.scss`. New tokens: none.
 //!
 //! <br>
 //!
@@ -1778,8 +1793,8 @@
 //! side; `focusable`, each row taking focus on a tap; `class`; `testid`) wherever a list is, at any depth, each holding
 //! [`ReorderItem`]s whose grip is a [`ReorderTreeHandle`] (`class`,
 //! `testid`). A list is laid out by its `class`; its items are its direct
-//! children, with their `current` and handlers (a click a drag ends in is
-//! not their click); `fixed` and `lifted_only` are `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
+//! children, with their `current`, `data` and handlers (a click a drag ends in is
+//! not their click); `fixed`, `lifted_only` and `picked` are `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
 //! [`ReorderSpot`] (`list`, `index`), `to.index` an index in its list
 //! without the row (as `move_item` takes within one list).
 //! `accepts: Callback<ReorderTreeMove, bool>` refuses the places a row may
@@ -3069,7 +3084,7 @@ pub use popover::{
 pub use reorder::{
     DragHandle, DragHandleProps, Reorder, ReorderHandle, ReorderHandleProps, ReorderItem,
     ReorderItemProps, ReorderProps, ReorderRow, ReorderText, drag_handle, drag_target, edge_step,
-    grid_target, key_target, landing, move_item, reorder_row, reorder_text, slot_at,
+    grid_target, key_target, landing, move_item, move_items, reorder_row, reorder_text, slot_at,
 };
 #[cfg(feature = "reorder")]
 pub use reorder_tree::{

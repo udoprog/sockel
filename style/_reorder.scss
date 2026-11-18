@@ -12,6 +12,8 @@
 //   `.sockel-reorder-tiled` (`grid`) moves the marks to its sides and the
 //   lifted row by `--reorder-shift-x` as well. A `lifted_only` row is
 //   `hidden` until a row is lifted, whatever display its own class gives.
+//   `.sockel-carried` is a picked row the lifted one carries, dimmed where
+//   it lies until the drop.
 // - `.sockel-drag-handle`: the grip button. `.sockel-lifted` while its row
 //   is; `.sockel-compact` is only as big as its glyph, for a row whose grip
 //   sits in a line of text.
@@ -39,6 +41,10 @@
             0 0 0 var(--space-px) var(--accent),
             var(--shadow-1);
         transform: translate(var(--reorder-shift-x), var(--reorder-shift));
+    }
+
+    &.sockel-carried {
+        opacity: base.$reorder-carried-opacity;
     }
 
     &.sockel-drop-before {

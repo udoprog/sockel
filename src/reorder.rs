@@ -31,6 +31,9 @@ const DROP_OVER: &str = "data-drop-over";
 /// What a press on is not a drag of the row: its own controls.
 const CONTROLS: &str = "button, input, a, textarea, select, label, [contenteditable], \
     [role=button], [role=checkbox], [role=radio], [role=switch], [role=slider], [role=menuitem]";
+/// A control the row drags by all the same (`body_drag`), such as the
+/// button that picks it.
+const SURFACE: &str = "data-reorder-surface";
 
 /// One row of a [`Reorder`].
 #[derive(Clone, PartialEq)]
@@ -218,6 +221,79 @@ pub fn move_item<T>(list: &mut Vec<T>, from: usize, to: usize) {
     }
 }
 
+/// Moves the rows at `rows` (indices in `list`, in order) together to `to`, an
+/// index in the list without them, as [`Reorder`]'s `on_move_picked` reports
+/// it.
+pub fn move_items<T>(list: &mut Vec<T>, rows: &[usize], to: usize) {
+    let mut moved = Vec::new();
+    let mut rest = Vec::new();
+    for (at, item) in std::mem::take(list).into_iter().enumerate() {
+        if rows.contains(&at) {
+            moved.push(item);
+        } else {
+            rest.push(item);
+        }
+    }
+    let to = to.min(rest.len());
+    list.extend(rest.drain(..to));
+    list.append(&mut moved);
+    list.append(&mut rest);
+}
+
+/// Where the rows `carried` with the row lifted from `from` land when it
+/// aims at `to` (an index in the list without it): an index in the list
+/// without any of them.
+fn carried_landing(carried: &[bool], from: usize, to: usize) -> usize {
+    (0..carried.len())
+        .filter(|i| *i != from)
+        .take(to)
+        .filter(|i| !carried[*i])
+        .count()
+}
+
+/// Whether the rows `carried` landing at `to` (an index in the list without
+/// them) change the order: not when they already lie together there.
+fn carried_moves(carried: &[bool], to: usize) -> bool {
+    let rows: Vec<usize> = (0..carried.len()).filter(|i| carried[*i]).collect();
+    let together = rows.windows(2).all(|w| w[1] == w[0] + 1);
+    !(together && rows.first() == Some(&to))
+}
+
+/// Where `key` aims a row lifted from `from` that carries the rows `carried`
+/// (none: it moves alone), aiming at `to` among `count` rows: past every gap
+/// where the carried rows would land as they do from `to`.
+fn carried_target(
+    carried: &[bool],
+    from: usize,
+    key: &str,
+    to: usize,
+    count: usize,
+) -> Option<usize> {
+    let mut at = key_target(key, to, count)?;
+    if !carried.get(from).copied().unwrap_or_default() {
+        return Some(at);
+    }
+    let was = carried_landing(carried, from, to);
+    while carried_landing(carried, from, at) == was {
+        let next = key_target(key, at, count)?;
+        if next == at {
+            break;
+        }
+        at = next;
+    }
+    Some(at)
+}
+
+/// Adds the `data` attributes to `html`'s element.
+pub(crate) fn with_data(mut html: Html, data: &[(&'static str, AttrValue)]) -> Html {
+    if let Html::VTag(tag) = &mut html {
+        for (name, value) in data {
+            Rc::make_mut(tag).add_attribute(name, value.clone());
+        }
+    }
+    html
+}
+
 /// Where a lifted row aims after `key`, from `to` among `count` rows.
 pub fn key_target(key: &str, to: usize, count: usize) -> Option<usize> {
     let last = count.checked_sub(1)?;
@@ -321,13 +397,23 @@ pub struct ReorderItemProps {
     /// The list's current row (`aria-current`).
     #[prop_or_default]
     pub current: bool,
+    /// Picked with others: a picked row lifted carries every other picked
+    /// row that is not `fixed` (`CARRIED`, where it lies until the drop), and
+    /// `on_move_picked` reports their move. A [`Reorder`]'s alone.
+    #[prop_or_default]
+    pub picked: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// More `data-*` attributes (`("data-shape", ..)`) the app's code reads.
+    #[prop_or_default]
+    pub data: Vec<(&'static str, AttrValue)>,
     /// Never the click a drag of it ends in.
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub ondblclick: Callback<MouseEvent>,
     #[prop_or_default]
     pub oncontextmenu: Callback<MouseEvent>,
     #[prop_or_default]
@@ -342,14 +428,16 @@ pub struct ReorderItemProps {
 /// `<div>` of its children.
 #[function_component]
 pub fn ReorderItem(props: &ReorderItemProps) -> Html {
-    html! {
+    let row = html! {
         <div class={props.class.clone()} data-testid={props.testid.clone()}
             aria-current={props.current.then_some("true")}
-            onclick={props.onclick.clone()} oncontextmenu={props.oncontextmenu.clone()}
+            onclick={props.onclick.clone()} ondblclick={props.ondblclick.clone()}
+            oncontextmenu={props.oncontextmenu.clone()}
             onmouseenter={props.onmouseenter.clone()} onmouseleave={props.onmouseleave.clone()}>
             { props.children.clone() }
         </div>
-    }
+    };
+    with_data(row, &props.data)
 }
 
 #[derive(Properties, PartialEq)]
@@ -383,6 +471,12 @@ pub struct ReorderProps {
     /// A row moved from `from` to `to`, an index in the list without it:
     /// apply it with [`move_item`].
     pub on_move: Callback<(usize, usize)>,
+    /// Picked rows ([`ReorderItemProps::picked`]) moved together, one of
+    /// several lifted: their indices in order and `to`, an index in the list
+    /// without them; apply it with [`move_items`]. A row lifted alone is
+    /// `on_move`'s.
+    #[prop_or_default]
+    pub on_move_picked: Callback<(Vec<usize>, usize)>,
     /// The texts, overriding the catalog's.
     #[prop_or_default]
     pub text: Option<Callback<ReorderText, String>>,
@@ -401,6 +495,8 @@ pub struct ReorderProps {
     pub titles: bool,
     /// A mouse or pen drags a row from anywhere on it that is off its
     /// controls, not only by the handle; a finger still only by the handle.
+    /// A control marked `data-reorder-surface` (the button that picks the
+    /// row) drags it too, and is clicked when not dragged.
     #[prop_or_default]
     pub body_drag: bool,
     /// A dragged row near the top or bottom edge of what scrolls the list
@@ -723,6 +819,20 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     } else {
         vec![false; count].into()
     };
+    // The rows a picked row lifted carries: none unless several are picked.
+    let mut carried: Vec<bool> = if items {
+        props
+            .children
+            .iter()
+            .map(|c| c.props.picked && !c.props.fixed)
+            .collect()
+    } else {
+        vec![false; count]
+    };
+    if carried.iter().filter(|c| **c).count() < 2 {
+        carried.fill(false);
+    }
+    let carried: Rc<[bool]> = carried.into();
     live.borrow_mut().keys = keys.clone();
 
     {
@@ -769,10 +879,12 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             list: list.clone(),
             on_move: props.on_move.clone(),
             on_drop_page: props.on_drop_page.clone(),
+            on_move_picked: props.on_move_picked.clone(),
             say: say.clone(),
             index,
             count,
             stays: stays.clone(),
+            carried: carried.clone(),
             name,
             key: keys[index].clone(),
             quick: props.quick_keys,
@@ -788,8 +900,10 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         titles: props.titles,
     };
     let marks = |index: usize, fixed: bool| {
+        let carries = lift.is_some_and(|l| l.from != index && carried[l.from]);
         classes!(
             reorder_row(index, lift.map(|l| (l.from, l.to))),
+            (carries && carried[index]).then_some(class::CARRIED),
             (props.body_drag && !fixed).then_some(class::REORDER_GRAB),
             props.grid.then_some(class::REORDER_TILED)
         )
@@ -817,15 +931,19 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 let onpointerup = grip.ctx.clone().row_only(grip.ctx.clone().pointer_up());
                 let onpointercancel = grip.ctx.clone().row_only(grip.ctx.clone().pointer_cancel());
                 let onclick = item.onclick.clone();
+                let row = html! {
+                    <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
+                        hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
+                        {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
+                        {onclick} ondblclick={item.ondblclick.clone()}
+                        oncontextmenu={item.oncontextmenu.clone()}
+                        onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
+                        { item.children.clone() }
+                    </div>
+                };
                 html! {
                     <ContextProvider<Grip> key={item.id.to_string()} context={grip}>
-                        <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
-                            hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
-                            {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
-                            {onclick} oncontextmenu={item.oncontextmenu.clone()}
-                            onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
-                            { item.children.clone() }
-                        </div>
+                        { with_data(row, &item.data) }
                     </ContextProvider<Grip>>
                 }
             })
@@ -885,8 +1003,10 @@ impl PartialEq for Grip {
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
             && a.on_drop_page == b.on_drop_page
+            && a.on_move_picked == b.on_move_picked
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
             && a.stays == b.stays
+            && a.carried == b.carried
             && (a.body, a.auto, a.grid, a.disabled, a.fixed)
                 == (b.body, b.auto, b.grid, b.disabled, b.fixed)
             && (&a.name, &a.key) == (&b.name, &b.key)
@@ -925,11 +1045,15 @@ struct Ctx {
     list: NodeRef,
     on_move: Callback<(usize, usize)>,
     on_drop_page: Option<Callback<(usize, AttrValue)>>,
+    on_move_picked: Callback<(Vec<usize>, usize)>,
     say: Rc<dyn Fn(ReorderText) -> String>,
     index: usize,
     count: usize,
     /// Which rows are fixed, by index.
     stays: Rc<[bool]>,
+    /// Which rows a picked row lifted carries, by index; none unless several
+    /// are picked.
+    carried: Rc<[bool]>,
     name: AttrValue,
     key: AttrValue,
     /// The arrows move at once (`quick_keys`).
@@ -976,8 +1100,15 @@ impl Ctx {
 
     /// Ends a lift at `to`: the one place the order changes.
     fn drop_at(&self, to: usize) {
-        if to != self.index {
-            let before = self.live.borrow().keys.clone();
+        let before = self.live.borrow().keys.clone();
+        if self.carried[self.index] {
+            let at = carried_landing(&self.carried, self.index, to);
+            if carried_moves(&self.carried, at) {
+                let rows = (0..self.count).filter(|i| self.carried[*i]).collect();
+                self.on_move_picked.emit((rows, at));
+                self.live.borrow_mut().focus = Some((self.key.clone(), before));
+            }
+        } else if to != self.index {
             self.on_move.emit((self.index, to));
             self.live.borrow_mut().focus = Some((self.key.clone(), before));
         }
@@ -1062,7 +1193,7 @@ impl Ctx {
                 .closest(CONTROLS)
                 .ok()
                 .flatten()
-                .is_some_and(|c| row.contains(Some(&c)))
+                .is_some_and(|c| row.contains(Some(&c)) && !c.has_attribute(SURFACE))
             {
                 return;
             }
@@ -1286,7 +1417,9 @@ impl Ctx {
                     } else if key == "Escape" {
                         e.prevent_default();
                         self.cancel();
-                    } else if let Some(to) = key_target(&key, lift.to, self.count) {
+                    } else if let Some(to) =
+                        carried_target(&self.carried, self.index, &key, lift.to, self.count)
+                    {
                         e.prevent_default();
                         self.live.borrow_mut().lift = Some(Lift { to, ..lift });
                         self.announce(self.moving(to));
@@ -1305,7 +1438,9 @@ impl Ctx {
                 }
                 None if (e.alt_key() || self.quick) && (key == "ArrowUp" || key == "ArrowDown") => {
                     e.prevent_default();
-                    if let Some(to) = key_target(&key, self.index, self.count) {
+                    if let Some(to) =
+                        carried_target(&self.carried, self.index, &key, self.index, self.count)
+                    {
                         self.drop_at(to);
                     }
                 }
@@ -1407,6 +1542,52 @@ mod tests {
         // A row without a box is never passed.
         let middles = [16.0, 64.0, f64::NAN];
         assert_eq!(drag_target(&middles, 0, 200.0, 232.0), 1);
+    }
+
+    #[test]
+    fn picked_rows_move_together() {
+        for (rows, to, order) in [
+            (&[1, 3][..], 0, ["b", "d", "a", "c", "e"]),
+            (&[1, 3][..], 3, ["a", "c", "e", "b", "d"]),
+            (&[0, 4][..], 1, ["b", "a", "e", "c", "d"]),
+            (&[2, 3][..], 9, ["a", "b", "e", "c", "d"]),
+        ] {
+            let mut list = vec!["a", "b", "c", "d", "e"];
+            move_items(&mut list, rows, to);
+            assert_eq!(list, order, "{rows:?} to {to}");
+        }
+    }
+
+    #[test]
+    fn carried_rows_land_among_the_rows_left() {
+        // Rows 1 and 3 picked, 3 lifted.
+        let carried = [false, true, false, true, false];
+        // Aimed before row 0, between 1 and 2, and at the end.
+        assert_eq!(carried_landing(&carried, 3, 0), 0);
+        assert_eq!(carried_landing(&carried, 3, 2), 1);
+        assert_eq!(carried_landing(&carried, 3, 4), 3);
+        // Where row 3 lies: they gather under row 2.
+        assert_eq!(carried_landing(&carried, 3, 3), 2);
+        assert!(carried_moves(&carried, 2));
+        // Lying together at 1, landing there moves nothing.
+        let together = [false, true, true, false];
+        assert!(!carried_moves(&together, 1));
+        assert!(carried_moves(&together, 0));
+        assert!(carried_moves(&together, 2));
+    }
+
+    #[test]
+    fn keys_step_carried_rows_past_the_gaps_that_move_nothing() {
+        // Rows 2 and 3 picked, 3 focused: up passes 2, which goes with it,
+        // and lands over row 1.
+        let carried = [false, false, true, true, false];
+        assert_eq!(carried_target(&carried, 3, "ArrowUp", 3, 5), Some(1));
+        assert_eq!(carried_landing(&carried, 3, 1), 1);
+        assert_eq!(carried_target(&carried, 3, "ArrowDown", 3, 5), Some(4));
+        // From the top, up stays.
+        assert_eq!(carried_target(&carried, 3, "ArrowUp", 0, 5), Some(0));
+        // Alone, a row steps one place.
+        assert_eq!(carried_target(&[false; 5], 3, "ArrowUp", 3, 5), Some(2));
     }
 
     #[test]

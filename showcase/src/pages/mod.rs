@@ -1226,6 +1226,7 @@ pub const PAGES: &[Page] = &[
             "landing",
             "slot_at",
             "move_item",
+            "move_items",
             "key_target",
         ],
         render: || html! { <reorder::ReorderPage /> },

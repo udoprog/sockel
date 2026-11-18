@@ -10,7 +10,7 @@ use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
-use crate::reorder::{ReorderItem, ReorderText, phrase, scrolled, scroller_of};
+use crate::reorder::{ReorderItem, ReorderText, phrase, scrolled, scroller_of, with_data};
 use crate::tooltip::next_id;
 use crate::{DragHandle, class, slot_at};
 
@@ -331,14 +331,17 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                     }
                 })
             };
+            let row = html! {
+                <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
+                    tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
+                    {onclick} ondblclick={item.ondblclick.clone()} oncontextmenu={item.oncontextmenu.clone()}
+                    onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
+                    { item.children.clone() }
+                </div>
+            };
             html! {
                 <ContextProvider<TreeGrip> key={item.id.to_string()} context={grip}>
-                    <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
-                        tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
-                        {onclick} oncontextmenu={item.oncontextmenu.clone()}
-                        onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
-                        { item.children.clone() }
-                    </div>
+                    { with_data(row, &item.data) }
                 </ContextProvider<TreeGrip>>
             }
         })

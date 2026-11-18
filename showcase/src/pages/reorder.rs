@@ -6,7 +6,7 @@ use yew::prelude::*;
 use sockel::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
     ReorderRow, ReorderText, drag_handle, drag_target, edge_step, grid_target, key_target, landing,
-    move_item, reorder_row, slot_at,
+    move_item, move_items, reorder_row, slot_at,
 };
 
 use crate::class;
@@ -135,6 +135,7 @@ pub fn ReorderPage() -> Html {
     let body_drag = use_state(|| false);
     let auto_scroll = use_state(|| false);
     let grid = use_state(|| false);
+    let picked = use_state(|| false);
     let keys = use_state(|| 0usize);
     let order = use_state(|| (0..NAMES.len()).collect::<Vec<_>>());
     let said = use_state(String::new);
@@ -152,6 +153,15 @@ pub fn ReorderPage() -> Html {
             order.set(next);
         })
     };
+    // Bravo and Delta picked: lifting either carries the other.
+    let on_move_picked = {
+        let order = order.clone();
+        Callback::from(move |(rows, to): (Vec<usize>, usize)| {
+            let mut next = (*order).clone();
+            move_items(&mut next, &rows, to);
+            order.set(next);
+        })
+    };
     let phrases = use_phrases_with(&sockel::phrasebookcatalog01::L10N);
     let text_cb = {
         let said = said.clone();
@@ -163,8 +173,10 @@ pub fn ReorderPage() -> Html {
             words
         })
     };
-    // A grid is the children mode's: the rows are tiles the page lays out.
-    let as_items = *children || *grid;
+    // A grid is the children mode's: the rows are tiles the page lays out,
+    // as are rows picked together.
+    let as_items = *children || *grid || *picked;
+    let picks = |name: &str| *picked && matches!(name, "Bravo" | "Delta");
     let rows: Vec<ReorderRow> = order
         .iter()
         .filter(|i| **i < *count)
@@ -203,6 +215,7 @@ pub fn ReorderPage() -> Html {
             <Toggle label="body_drag" value={*body_drag} on_change={bind(&body_drag)} />
             <Toggle label="auto_scroll" value={*auto_scroll} on_change={bind(&auto_scroll)} />
             <Toggle label="grid" value={*grid} on_change={bind(&grid)} />
+            <Toggle label="picked" value={*picked} on_change={bind(&picked)} />
         </>
     };
     let grid_on = *grid;
@@ -214,6 +227,7 @@ pub fn ReorderPage() -> Html {
     let reorder = El::new("Reorder")
         .expr_if(!as_items, "rows", "rows.clone()")
         .expr("on_move", "on_move.clone()")
+        .expr_if(*picked, "on_move_picked", "on_move_picked.clone()")
         .flag("divided", *divided && !as_items)
         .flag("boxed", *boxed && !as_items)
         .flag("disabled", *disabled)
@@ -243,11 +257,12 @@ pub fn ReorderPage() -> Html {
             } else if as_items {
                 // The app's own rows, its handle placed in them.
                 <div class={scroll_box}>
-                <Reorder {on_move} text={text_cb} disabled={*disabled} quick_keys={*quick_keys}
+                <Reorder {on_move} {on_move_picked} text={text_cb} disabled={*disabled} quick_keys={*quick_keys}
                     titles={*titles} body_drag={*body_drag} auto_scroll={*auto_scroll} grid={*grid}
                     class={items_class}>
                     { for rows.iter().map(|row| html_nested! {
-                        <ReorderItem id={row.key.clone()} name={row.name.clone()} class={classes!(class::REORDER_ITEM, grid_on.then_some(class::REORDER_TILE))}>
+                        <ReorderItem id={row.key.clone()} name={row.name.clone()} picked={picks(&row.key)}
+                            class={classes!(class::REORDER_ITEM, grid_on.then_some(class::REORDER_TILE))}>
                             <ReorderHandle />
                             <strong>{ row.name.clone() }</strong>
                             if let Some(detail) = &row.detail {
