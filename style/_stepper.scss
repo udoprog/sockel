@@ -5,7 +5,8 @@
 //   (`.sockel-invalid`, `.sockel-disabled`, `.sockel-busy`) and the focus
 //   ring; it only drops that box's stretch and padding. Its width is its
 //   buttons and the number's room (`fit-content`, so a flex column or a
-//   grid cell does not stretch it either).
+//   grid cell does not stretch it either, nor a row squeeze it past its
+//   parts).
 // - `.sockel-stepper-control`: the number, `--stepper-chars` wide in `ch`
 //   (the digits of the longest of min and max, set by the component), its
 //   figures of one width, so the box holds from min to max;
@@ -18,7 +19,22 @@
 // - `$stepper-edge`, `$stepper-ground` and `$stepper-shadow` restyle the
 //   box at rest (`null`: the field's edge and ground, no shadow); hover,
 //   invalid and focus still mark it as on any field.
-// - `.sockel-stepper-button`: a square of the box's height.
+// - `$stepper-hover-edge` and `$stepper-focus-edge` (`null`: a field's) mark
+//   hover and focus by the edge, and `$stepper-focus-ring: false` leaves the
+//   ring out; invalid still wins. `$stepper-coarse-size` sets the box's height
+//   and the buttons' width on a coarse pointer, `$stepper-text-size` its
+//   text at every size.
+// - `.sockel-stepper-button`: a square of the box's height
+//   (`$stepper-button-width` sets its width), its ink on hover
+//   `$stepper-button-hover-ink`, its fill `$stepper-button-hover-fill`;
+//   `$stepper-button-ends: true` squares the corners that meet the number.
+// - `$stepper-divider`: a line each side of the number, and
+//   `$stepper-number-padding` its room inside them.
+// - `.sockel-fill`: the box (and the field around it, with `unit`) as wide as
+//   its container, the number taking what is left; in a row it takes a
+//   share of the room.
+// - `.sockel-faint`: the number in `--muted`, for a default standing in for
+//   a value; `$stepper-faint-style` sets its font style and the placeholder's.
 // - `.sockel-stepper-field` (with `unit`): the box and its unit
 //   (`.sockel-stepper-unit`, muted) as one control on one line.
 
@@ -28,6 +44,7 @@
     display: inline-flex;
     gap: 0;
     width: fit-content;
+    min-width: fit-content;
     max-width: 100%;
     padding-inline: 0;
     background: base.$stepper-ground;
@@ -42,16 +59,86 @@
     flex: none;
     box-sizing: content-box;
     width: calc(var(--stepper-chars) * 1ch);
-    padding-inline: var(--space-2);
+    padding-inline: base.$stepper-number-padding;
     min-height: 0;
     text-align: center;
     font-weight: base.$stepper-number-weight;
     @include base.numeric;
 
+    @if base.$stepper-divider {
+        border-inline: var(--space-px) solid base.$stepper-divider;
+    }
+
     &.sockel-zero {
         color: base.$stepper-zero-ink;
         font-weight: base.$stepper-zero-weight;
     }
+
+    @if base.$stepper-faint-style {
+        &::placeholder {
+            font-style: base.$stepper-faint-style;
+        }
+    }
+}
+
+@if base.$stepper-hover-edge {
+    .sockel-stepper:hover {
+        --input-edge: #{base.$stepper-hover-edge};
+    }
+}
+
+@if base.$stepper-focus-edge {
+    .sockel-stepper:focus-within {
+        --input-edge: #{base.$stepper-focus-edge};
+    }
+}
+
+@if not base.$stepper-focus-ring {
+    .sockel-stepper:focus-within {
+        outline: none;
+    }
+}
+
+@if base.$stepper-hover-edge or base.$stepper-focus-edge {
+    .sockel-stepper.sockel-invalid {
+        --input-edge: var(--danger);
+    }
+}
+
+// The class twice, so they win over the sizes' text and height.
+@if base.$stepper-text-size {
+    .sockel-stepper.sockel-stepper {
+        font-size: base.$stepper-text-size;
+    }
+}
+
+@if base.$stepper-coarse-size {
+    @media (pointer: coarse) {
+        .sockel-stepper.sockel-stepper {
+            --input-height: #{base.$stepper-coarse-size};
+        }
+
+        .sockel-stepper-button.sockel-stepper-button {
+            width: base.$stepper-coarse-size;
+        }
+    }
+}
+
+.sockel-stepper.sockel-fill,
+.sockel-stepper-field.sockel-fill {
+    flex: 1 1 auto;
+    width: 100%;
+    min-width: 0;
+}
+
+.sockel-stepper.sockel-fill > .sockel-stepper-control {
+    flex: 1 1 auto;
+    min-width: 0;
+}
+
+.sockel-stepper.sockel-faint > .sockel-stepper-control {
+    color: var(--muted);
+    font-style: base.$stepper-faint-style;
 }
 
 .sockel-stepper.sockel-touch {
@@ -73,7 +160,11 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
-    width: var(--input-height);
+    @if base.$stepper-button-width {
+        width: base.$stepper-button-width;
+    } @else {
+        width: var(--input-height);
+    }
     height: 100%;
     min-height: 0;
     margin: 0;
@@ -86,7 +177,8 @@
     cursor: pointer;
 
     &:hover:not(:disabled) {
-        color: var(--accent);
+        color: base.$stepper-button-hover-ink;
+        background: base.$stepper-button-hover-fill;
     }
 
     &:disabled {
@@ -95,6 +187,26 @@
     }
 
     @include base.focus-ring;
+}
+
+// The buttons fill the box's ends: their outer corners follow its own,
+// inside its edge.
+@if base.$stepper-button-ends {
+    $corner: calc(var(--radius-inner, var(--radius-sm)) - var(--space-px));
+
+    .sockel-stepper-button {
+        border-radius: 0;
+
+        &:first-child {
+            border-start-start-radius: $corner;
+            border-end-start-radius: $corner;
+        }
+
+        &:last-child {
+            border-start-end-radius: $corner;
+            border-end-end-radius: $corner;
+        }
+    }
 }
 
 .sockel-stepper-field {

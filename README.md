@@ -1120,19 +1120,25 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   is no number goes back). What is typed outside `min..=max` is marked invalid
   until committed. The buttons are out of the tab order. Helpers: `stepper(size,
   invalid, disabled, busy)`, `step_from`, `step_by`, `key_value`, `key_step`,
-  `parse_number`, `parse_decimal`, `format_number`.
+  `parse_number`, `parse_decimal`, `format_number`, `step_within`.
   Further props, all off or unset by default: `snap` (the multiples the
   buttons and arrows land on, `step` when unset), `arrow` (how far the
   arrow keys step, onto no multiple), `decimals` (the value's last digits
   are after the point; `1.5` is 150 at 2) and `pad` (the fewest digits
-  before it), `strict` (what is typed outside the bounds is never clamped
-  or dropped: it stays marked, a step from it lands on the nearest bound),
+  before it), `strict` (nothing is clamped: what is typed outside the
+  bounds stays marked, a step from it lands on the nearest bound, and a
+  step that would pass a bound is refused),
   `on_valid(bool)` (whether what is typed is a number within the bounds),
   `on_step((by, snap))` (takes the steps instead, for an owner whose step
   carries into other fields) with `can_less` and `can_more`, `mixed` with
   `placeholder` (no number shown) and `on_empty` (an emptied field tells
-  this instead of being marked), `autofocus` (`data-autofocus`) and `unit`
-  (text after the box, in `.sockel-stepper-field`). The buttons carry the
+  this instead of being marked), `autofocus` (`data-autofocus`), `unit`
+  (text after the box, in `.sockel-stepper-field`; with `unit_apart` an
+  item of its own after the box, for a grid with a column of units),
+  `fill` (as wide as its container, `.sockel-fill`), `faint` (a default
+  standing in for the value, the number in `--muted`, `.sockel-faint`),
+  `text` (shown in place of the number, read-only, as `aria-valuetext`:
+  a length written "4 h 30 min") and `chars` (the number's room). The buttons carry the
   `testid` with `-less` and `-more`, and a `data-tip` of their name.
 - [`SecretInput`] (`.sockel-input-box`): a password field with show or hide,
   copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
@@ -1150,7 +1156,7 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
 Size guarantees: the Stepper's number has the room of the longest of `min`
 and `max` in `ch` with `numeric` figures, so its box is the same from the
 least value to the most (and its own width in a flex column or a grid cell,
-not stretched to it), the buttons only disabled at a bound; the number wears `.sockel-zero`
+not stretched to it, nor squeezed past its parts in a row unless `fill`), the buttons only disabled at a bound; the number wears `.sockel-zero`
 (`ZERO`) at 0, and the settings `$stepper-number-weight`,
 `$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
 text) restyle the number and the zero, and `$stepper-touch-number-size`,
@@ -1158,7 +1164,18 @@ text) restyle the number and the zero, and `$stepper-touch-number-size`,
 other sizes') the touch size's number and glyphs, and `$stepper-edge`,
 `$stepper-ground` and `$stepper-shadow` (`null`: the field's edge and
 ground, no shadow) the box at rest, for a stepper that reads as a raised
-control; the
+control. `$stepper-button-width` (`null`: a square), `$stepper-button-hover-ink`
+(`--accent`), `$stepper-button-hover-fill` (`null`) and
+`$stepper-button-ends` (`false`; `true` squares the buttons' inner corners
+and rounds the outer ones with the box) restyle the buttons,
+`$stepper-divider` (`null`) draws a line each side of the number and
+`$stepper-number-padding` (`--space-2`) is its room inside them,
+`$stepper-hover-edge` and `$stepper-focus-edge` (`null`: a field's) and
+`$stepper-focus-ring` (`true`) mark hover and focus,
+`$stepper-coarse-size` (`null`) sets the box's height and the buttons'
+width on a coarse pointer, `$stepper-text-size` (`null`: a field's) its
+text at every size, and `$stepper-faint-style` (`null`) the font
+style of a faint number and the placeholder; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
 `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `STEPPER_FIELD`, `STEPPER_UNIT`, `INPUT_ACTION`. New glyphs

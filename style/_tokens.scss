@@ -198,6 +198,31 @@ $stepper-touch-glyph-size: null !default;
 $stepper-edge: null !default;
 $stepper-ground: null !default;
 $stepper-shadow: null !default;
+// A Stepper's buttons: their width (`null`: the box's height, a square),
+// their ink and fill on hover (`null`: no fill), and whether they fill the
+// box's ends (`true`: outer corners following the box's, inner ones square,
+// for a hover fill that meets the edge).
+$stepper-button-width: null !default;
+$stepper-button-hover-ink: var(--accent) !default;
+$stepper-button-hover-fill: null !default;
+$stepper-button-ends: false !default;
+// A line each side of the number (`null`: none), and its padding inside it.
+$stepper-divider: null !default;
+$stepper-number-padding: var(--space-2) !default;
+// The box's edge on hover and while it has the focus (`null`: a field's),
+// and whether the focus ring is drawn (`false`: the focus edge alone).
+$stepper-hover-edge: null !default;
+$stepper-focus-edge: null !default;
+$stepper-focus-ring: true !default;
+// The box's height and its buttons' width on a coarse pointer (`null`: as
+// on a fine one), for steps a finger can hit.
+$stepper-coarse-size: null !default;
+// The box's text size, every size alike (`null`: a field's; `inherit`: its
+// container's, as a number in running text).
+$stepper-text-size: null !default;
+// The font style of a faint number (`.sockel-faint`) and of the
+// placeholder (`null`: upright).
+$stepper-faint-style: null !default;
 // A Disclosure's row height (`var(--touch-height)` gives a finger room),
 // and its title's ink (`null`: the text's).
 $disclosure-row-height: var(--control-height) !default;

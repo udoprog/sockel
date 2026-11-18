@@ -296,3 +296,23 @@ fn choice_settings() {
     assert!(css.contains(".sockel-choice-option.sockel-icon {\n  min-width: var(--control-height-small);\n  padding-inline: 0;"));
     assert!(css.contains(".sockel-choice:focus-within {\n  border-color: var(--accent);"));
 }
+
+#[test]
+fn stepper_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(!defaults.contains("@media (pointer: coarse)"));
+    assert!(!defaults.contains(".sockel-stepper:focus-within"));
+    assert!(defaults.contains(".sockel-stepper.sockel-fill"));
+    let css = compile(&sass, "tests/fixtures/stepper_settings.scss");
+    assert!(css.contains("width: 1.75rem;"));
+    assert!(css.contains("background: color-mix(in srgb, var(--text) 7%, transparent);"));
+    assert!(css.contains("border-inline: var(--space-px) solid var(--border);"));
+    assert!(css.contains(
+        "border-start-start-radius: calc(var(--radius-inner, var(--radius-sm)) - var(--space-px));"
+    ));
+    assert!(css.contains(".sockel-stepper:focus-within {\n  outline: none;"));
+    assert!(css.contains(".sockel-stepper.sockel-stepper {\n    --input-height: 2.75rem;"));
+    assert!(css.contains("::placeholder {\n  font-style: italic;"));
+    assert!(css.contains(".sockel-stepper.sockel-stepper {\n  font-size: inherit;"));
+}

@@ -103,6 +103,13 @@ pub fn step_by(value: i64, delta: i64, snap: i64, min: i64, max: i64) -> i64 {
     next.clamp(min, max.max(min))
 }
 
+/// As [`step_by`], but a step that would pass a bound is refused (`None`)
+/// rather than stopped at it.
+pub fn step_within(value: i64, delta: i64, snap: i64, min: i64, max: i64) -> Option<i64> {
+    let next = step_by(value, delta, snap, i64::MIN, i64::MAX);
+    (min..=max).contains(&next).then_some(next)
+}
+
 /// The number a `live` stepper reports as `text` is typed: one within
 /// `min..=max` other than `value`; nothing when not `live`.
 fn live_value(live: bool, text: &str, value: i64, decimals: u8, min: i64, max: i64) -> Option<i64> {
@@ -190,9 +197,10 @@ pub struct StepperProps {
     /// it is committed; the typed text stays until then.
     #[prop_or_default]
     pub live: bool,
-    /// What is typed outside the bounds, or no number, is never clamped or
-    /// dropped when committed: it stays, marked, until it is a number
-    /// within them, and a step from it lands on the nearest bound.
+    /// Nothing is clamped: what is typed outside the bounds, or no number,
+    /// stays, marked, until it is a number within them (a step from it
+    /// lands on the nearest bound), and a step that would pass a bound is
+    /// refused.
     #[prop_or_default]
     pub strict: bool,
     /// Whether what is typed is a number within `min..=max`, told as it
@@ -227,6 +235,27 @@ pub struct StepperProps {
     /// line as part of the control (`.sockel-stepper-field`).
     #[prop_or_default]
     pub unit: Option<AttrValue>,
+    /// The unit follows the box as an item of its own, not wrapped with it
+    /// in `.sockel-stepper-field`, for a grid with a column of units.
+    #[prop_or_default]
+    pub unit_apart: bool,
+    /// As wide as its container, the number taking the room
+    /// (`.sockel-fill`).
+    #[prop_or_default]
+    pub fill: bool,
+    /// A default stands in for the value: the number is quieter
+    /// (`.sockel-faint`).
+    #[prop_or_default]
+    pub faint: bool,
+    /// Shown in place of the number, which is then stepped and never typed,
+    /// as a length written "4 h 30 min" (`aria-valuetext`).
+    #[prop_or_default]
+    pub text: Option<AttrValue>,
+    /// The number's room in characters, for a `text` whose longest the
+    /// stepper cannot tell (the longest of `min`, `max` and `placeholder`
+    /// when unset).
+    #[prop_or_default]
+    pub chars: Option<u8>,
     #[prop_or_default]
     pub class: Classes,
     /// The number's test id; the buttons have it with `-less` and `-more`.
@@ -250,12 +279,18 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let (decimals, pad) = (props.decimals, props.pad);
     let (strict, live, mixed) = (props.strict, props.live, props.mixed);
     let figures = |n: i64| format_number(n, decimals, pad).len();
-    let chars = props
-        .placeholder
-        .iter()
-        .map(|p| p.chars().count())
-        .fold(figures(min).max(figures(max)), usize::max);
+    let chars = props.chars.map_or_else(
+        || {
+            props
+                .placeholder
+                .iter()
+                .map(|p| p.chars().count())
+                .fold(figures(min).max(figures(max)), usize::max)
+        },
+        usize::from,
+    );
     let shown = match draft.as_deref() {
+        _ if props.text.is_some() => props.text.as_deref().unwrap_or_default().to_owned(),
         Some(draft) => draft.to_owned(),
         None if mixed => String::new(),
         None => format_number(props.value, decimals, pad),
@@ -377,8 +412,10 @@ pub fn Stepper(props: &StepperProps) -> Html {
             } else if let Some(on_step) = &on_step {
                 draft.set(None);
                 on_step.emit((by, snap));
-            } else {
+            } else if !strict {
                 set.emit(step_by(base, by, snap, min, max));
+            } else if let Some(next) = step_within(base, by, snap, min, max) {
+                set.emit(next);
             }
         })
     };
@@ -424,6 +461,8 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let stepper = html! {
         <span class={classes!(
             stepper(props.size, invalid, props.disabled, props.busy),
+            props.fill.then_some(class::FILL),
+            props.faint.then_some(class::FAINT),
             props.class.clone()
         )} role="group" aria-busy={props.busy.then_some("true")}
             style={format!("--stepper-chars: {chars}")}>
@@ -433,6 +472,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
                 inputmode={if min < 0 { "text" } else if decimals > 0 { "decimal" } else { "numeric" }}
                 value={shown} aria-label={props.label.clone()}
                 placeholder={props.placeholder.clone().filter(|_| mixed)}
+                readonly={props.text.is_some()} aria-valuetext={props.text.clone()}
                 aria-valuenow={typed.map(|n| format_number(n, decimals, 0))}
                 aria-valuemin={format_number(min, decimals, 0)}
                 aria-valuemax={format_number(max, decimals, 0)}
@@ -445,8 +485,14 @@ pub fn Stepper(props: &StepperProps) -> Html {
     };
 
     match &props.unit {
+        Some(unit) if props.unit_apart => html! {
+            <>
+                { stepper }
+                <span class={class::STEPPER_UNIT}>{ unit.clone() }</span>
+            </>
+        },
         Some(unit) => html! {
-            <span class={class::STEPPER_FIELD}>
+            <span class={classes!(class::STEPPER_FIELD, props.fill.then_some(class::FILL))}>
                 { stepper }
                 <span class={class::STEPPER_UNIT}>{ unit.clone() }</span>
             </span>
@@ -501,6 +547,11 @@ mod tests {
             on_empty: None,
             autofocus: false,
             unit: None,
+            unit_apart: false,
+            fill: false,
+            faint: false,
+            text: None,
+            chars: None,
             class: Classes::new(),
             testid: None,
         }
@@ -666,6 +717,50 @@ mod tests {
         });
         assert!(html.contains("placeholder=\"mixed\""), "{html}");
         assert!(html.contains("value=\"\""), "{html}");
+    }
+
+    #[test]
+    fn a_step_within_refuses_to_pass_a_bound() {
+        assert_eq!(step_within(3, 1, 1, 1, 10), Some(4));
+        assert_eq!(step_within(7, -5, 5, 0, 100), Some(5));
+        assert_eq!(step_within(98, 5, 5, 0, 100), Some(100));
+        assert_eq!(step_within(97, 5, 1, 0, 100), None);
+        assert_eq!(step_within(1, -1, 1, 1, 10), None);
+        assert_eq!(step_within(10, 1, 1, 1, 10), None);
+    }
+
+    #[test]
+    fn a_text_stands_in_for_the_number_read_only() {
+        let html = render(StepperProps {
+            text: Some("4 h 30 min".into()),
+            chars: Some(11),
+            ..props(270)
+        });
+        assert!(html.contains("value=\"4 h 30 min\""), "{html}");
+        assert!(html.contains("aria-valuetext=\"4 h 30 min\""), "{html}");
+        assert!(html.contains("readonly"), "{html}");
+        assert!(html.contains("--stepper-chars: 11"), "{html}");
+    }
+
+    #[test]
+    fn fill_faint_and_a_unit_apart_are_on_the_box() {
+        let html = render(StepperProps {
+            unit: Some("ft".into()),
+            unit_apart: true,
+            fill: true,
+            faint: true,
+            ..props(5)
+        });
+        assert!(!html.contains(class::STEPPER_FIELD), "{html}");
+        assert!(html.contains(class::STEPPER_UNIT), "{html}");
+        assert!(html.contains(class::FILL), "{html}");
+        assert!(html.contains(class::FAINT), "{html}");
+        let field = render(StepperProps {
+            unit: Some("ft".into()),
+            fill: true,
+            ..props(5)
+        });
+        assert_eq!(field.matches(class::FILL).count(), 2, "{field}");
     }
 
     #[test]

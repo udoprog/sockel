@@ -1,0 +1,14 @@
+@use "../../style/index" with (
+    $stepper-button-width: 1.75rem,
+    $stepper-button-hover-ink: var(--text),
+    $stepper-button-hover-fill: color-mix(in srgb, var(--text) 7%, transparent),
+    $stepper-button-ends: true,
+    $stepper-divider: var(--border),
+    $stepper-number-padding: 0,
+    $stepper-hover-edge: var(--field-border),
+    $stepper-focus-edge: var(--accent),
+    $stepper-focus-ring: false,
+    $stepper-coarse-size: 2.75rem,
+    $stepper-text-size: inherit,
+    $stepper-faint-style: italic
+);

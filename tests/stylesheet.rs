@@ -31,6 +31,7 @@ fn a_stepper_keeps_its_width_in_a_stretching_parent() {
         .and_then(|r| r.split('}').next())
         .expect("a .sockel-stepper rule");
     assert!(rule.contains("width: fit-content;"), "{rule}");
+    assert!(rule.contains("min-width: fit-content;"), "{rule}");
 }
 
 #[test]
