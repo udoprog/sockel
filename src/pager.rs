@@ -128,6 +128,22 @@ pub struct PagerProps {
     /// The `nav` element, for an app that scrolls to what it pages.
     #[prop_or_default]
     pub nav_ref: NodeRef,
+    /// Which items the page shows ("1–25 of 80"), at the row's start, the
+    /// buttons at its end (`RANGED`); the row wraps in a narrow container.
+    #[prop_or_default]
+    pub range: Option<AttrValue>,
+    /// Instead of the numbers and the first and last page: "3 / 35" between
+    /// previous and next, for a menu or drop-down too narrow for a row of
+    /// numbers. The value is the accessible name of that text ("Page 3 of
+    /// 35"), in the app's words.
+    #[prop_or_default]
+    pub compact: Option<AttrValue>,
+    /// Makes the number of each page but the current a drop target: called
+    /// with the page, counted from 0, it gives the value of the button's
+    /// `data-sort-page` attribute, for the list being reordered by dragging
+    /// to read where a row was let go.
+    #[prop_or_default]
+    pub drop_page: Option<Callback<usize, AttrValue>>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -194,7 +210,12 @@ pub fn Pager(props: &PagerProps) -> Html {
         }
     };
 
-    let numbers = pager_slots(pages, page, props.slots)
+    let slots = if props.compact.is_none() {
+        pager_slots(pages, page, props.slots)
+    } else {
+        Vec::new()
+    };
+    let numbers = slots
         .into_iter()
         .map(|slot| match slot {
             Slot::Gap => html! { <span class={class::PAGER_GAP} aria-hidden="true">{ "…" }</span> },
@@ -206,6 +227,7 @@ pub fn Pager(props: &PagerProps) -> Html {
                         title={props.titles.then(|| label.clone())}
                         aria-label={label}
                         aria-current={current.then_some("page")}
+                        data-sort-page={props.drop_page.as_ref().filter(|_| !current).map(|f| f.emit(n))}
                         disabled={blocked}
                         onclick={if current { Callback::noop() } else { go(n) }}>
                         { n + 1 }
@@ -214,20 +236,38 @@ pub fn Pager(props: &PagerProps) -> Html {
             }
         });
 
+    let at = props.compact.as_ref().map(|name| {
+        html! {
+            <span class={class::PAGER_AT} aria-label={name.clone()}>{ format!("{} / {pages}", page + 1) }</span>
+        }
+    });
+    let edges = props.edges && at.is_none();
+    let buttons = html! {
+        <>
+            if edges {
+                { step(&first_label, false, 0, page == 0, true) }
+            }
+            { step(&previous_label, false, page.saturating_sub(1), page == 0, false) }
+            { for at }
+            { for numbers }
+            { step(&next_label, true, (page + 1).min(pages - 1), page + 1 >= pages, false) }
+            if edges {
+                { step(&last_label, true, pages - 1, page + 1 >= pages, true) }
+            }
+        </>
+    };
+
     html! {
-        <nav class={classes!(pager(props.disabled, props.busy), props.class.clone())}
+        <nav class={classes!(pager(props.disabled, props.busy), props.range.is_some().then_some(class::RANGED), props.class.clone())}
             aria-label={nav_label} aria-busy={props.busy.then_some("true")}
             style={format!("--pager-chars: {}", pages.to_string().len())}
             ref={props.nav_ref.clone()}
             data-testid={props.testid.clone()}>
-            if props.edges {
-                { step(&first_label, false, 0, page == 0, true) }
-            }
-            { step(&previous_label, false, page.saturating_sub(1), page == 0, false) }
-            { for numbers }
-            { step(&next_label, true, (page + 1).min(pages - 1), page + 1 >= pages, false) }
-            if props.edges {
-                { step(&last_label, true, pages - 1, page + 1 >= pages, true) }
+            if let Some(range) = &props.range {
+                <span class={class::PAGER_RANGE}>{ range.clone() }</span>
+                <span class={class::PAGER_GROUP}>{ buttons }</span>
+            } else {
+                { buttons }
             }
         </nav>
     }
@@ -456,6 +496,34 @@ mod tests {
         assert!(!html.contains(class::PAGER_GAP), "{html}");
         // Its two buttons are as wide as a page button.
         assert!(html.contains("--pager-chars: 1"), "{html}");
+    }
+
+    #[test]
+    fn a_range_compact_and_drop_targets() {
+        let html = render(yew::props!(PagerProps {
+            page: 1,
+            pages: 35,
+            on_page: Callback::noop(),
+            range: Some(AttrValue::from("26–50 of 840")),
+            compact: Some(AttrValue::from("Page 2 of 35")),
+        }));
+        assert!(html.contains("26–50 of 840"), "{html}");
+        assert!(html.contains(">2 / 35<"), "{html}");
+        assert!(html.contains("aria-label=\"Page 2 of 35\""), "{html}");
+        assert!(!html.contains("First page"), "{html}");
+        assert_eq!(html.matches("<button").count(), 2, "{html}");
+
+        let html = render(yew::props!(PagerProps {
+            page: 0,
+            pages: 3,
+            on_page: Callback::noop(),
+            drop_page: Some(Callback::from(|p: usize| AttrValue::from(
+                (p * 25).to_string()
+            ))),
+        }));
+        assert!(html.contains("data-sort-page=\"25\""), "{html}");
+        assert!(html.contains("data-sort-page=\"50\""), "{html}");
+        assert!(!html.contains("data-sort-page=\"0\""), "{html}");
     }
 
     #[test]

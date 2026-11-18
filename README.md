@@ -2002,6 +2002,17 @@ one that ends a list or table and lines up with its rows. `nav_ref` is the
 `nav` element, for an app that scrolls to what it
 pages. Parts: `PAGER_STATUS`, `PAGER_SHOWN`, `PAGER_POSITION`, `PAGER_STEPS`.
 
+`range: Option<AttrValue>` puts text ("1–25 of 80") at the row's start and the
+buttons, in `PAGER_GROUP`, at its end (`RANGED`, `PAGER_RANGE`); the two wrap in a
+narrow container. `compact: Option<AttrValue>` (the accessible name of the
+text, "Page 3 of 35") replaces the numbers and the first and last page with
+"3 / 35" (`PAGER_AT`) between previous and next, for a menu too narrow for
+numbers. `drop_page: Option<Callback<usize, AttrValue>>` gives each numbered
+page but the current one a `data-sort-page` attribute, the callback's value
+for that page, for a list reordered by dragging to read where a row was let
+go; while one is held over it, the list sets `data-drop-over` on it and it
+takes the accent.
+
 [`Disclosure`] is a summary row that toggles its body: `title`, `summary` (what
 it holds, beside the title while shut), `actions` (controls at the row's end,
 outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`

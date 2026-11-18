@@ -20,6 +20,14 @@
 //   (`.sockel-pager-steps`); `$pager-summary-padding` pads it (`null`:
 //   none).
 
+// - `.sockel-pager.sockel-ranged`: the range text (`.sockel-pager-range`,
+//   muted) at the start, the buttons (`.sockel-pager-group`) at the end; the
+//   two wrap in a narrow container.
+// - `.sockel-pager-at`: "3 / 35" in a compact pager, between previous and
+//   next.
+// - A numbered button with `data-sort-page` is a drop target: while a row is
+//   dragged over it, the list sets its `data-drop-over` attribute, it takes the accent.
+
 @use "tokens" as base;
 
 .sockel-pager {
@@ -161,4 +169,32 @@
         flex: none;
         gap: base.$pager-gap;
     }
+}
+
+.sockel-pager.sockel-ranged {
+    flex-wrap: wrap;
+    justify-content: space-between;
+}
+
+.sockel-pager-range {
+    color: var(--muted);
+}
+
+.sockel-pager-group {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+    gap: base.$pager-gap;
+    max-width: 100%;
+}
+
+.sockel-pager-at {
+    min-width: 3.5rem;
+    color: var(--muted);
+    text-align: center;
+}
+
+.sockel-pager-button[data-sort-page][data-drop-over] {
+    border-color: var(--accent);
+    background: color-mix(in srgb, var(--accent) 18%, transparent);
 }
