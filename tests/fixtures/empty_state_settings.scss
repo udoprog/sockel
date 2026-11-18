@@ -4,6 +4,9 @@
     $empty-state-radius: 12px,
     $empty-state-icon-fill: rgba(1, 2, 3, 0.1),
     $empty-state-icon-box: 3rem,
-    $empty-state-icon-radius: 50%
+    $empty-state-icon-radius: 50%,
+    $empty-state-ink: inherit,
+    $empty-state-title-size: var(--text-lg),
+    $empty-state-title-ink: inherit
 );
 @use "../../style/notices";

@@ -183,7 +183,7 @@
         padding: base.$empty-state-padding;
         border: base.$empty-state-edge;
         border-radius: base.$empty-state-radius;
-        color: var(--muted);
+        color: base.$empty-state-ink;
         text-align: center;
 
         &.sockel-compact {
@@ -197,6 +197,7 @@
             padding: 0 var(--space-3);
             overflow: hidden;
             border-radius: base.$empty-state-compact-radius;
+            color: base.$empty-state-compact-ink;
             text-align: start;
         }
     }
@@ -227,8 +228,8 @@
 
     .sockel-empty-state-title {
         flex: 0 1 auto;
-        color: var(--text);
-        font-size: var(--text-md);
+        color: base.$empty-state-title-ink;
+        font-size: base.$empty-state-title-size;
         font-weight: 600;
     }
 
