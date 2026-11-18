@@ -24,7 +24,7 @@
 //   also a link, button or item (`.sockel-static`, no pointer or hover) led by an
 //   avatar (`-media`, in the round start: `.sockel-lead-media`) or an icon
 //   (`-icon`, `.sockel-lead-icon`), an item removable by a cross
-//   (`-remove`).
+//   (`-remove`). `--chip-media-display: none` on the chip hides its media.
 //   `.sockel-chip-list` wraps chips and keeps one row's height when empty.
 // - `.sockel-disabled` and `.sockel-invalid` on a checkbox, switch or
 //   choice: dimmed, or the border in `--danger`.
@@ -411,7 +411,13 @@
     @include base.truncate;
 }
 
-.sockel-chip-media,
+// `--chip-media-display: none` on a chip (an app's modifier, perhaps in a
+// container query) takes its media away.
+.sockel-chip-media {
+    display: var(--chip-media-display, inline-flex);
+    flex: none;
+}
+
 .sockel-chip-icon {
     display: inline-flex;
     flex: none;

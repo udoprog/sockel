@@ -35,6 +35,10 @@ pub struct NoticeProps {
     /// accent); a warning or an error always is.
     #[prop_or_default]
     pub alert: bool,
+    /// Announce it as a status though its tone is a warning or an error (a
+    /// caution that does not stop anything). Over `alert`.
+    #[prop_or_default]
+    pub status: bool,
     /// The text.
     #[prop_or_default]
     pub children: Html,
@@ -53,10 +57,12 @@ pub fn notice(tone: Tone) -> Classes {
 pub fn Notice(props: &NoticeProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let role = match props.tone {
+        _ if props.status => "status",
         Tone::Warning | Tone::Danger => "alert",
         _ if props.alert => "alert",
         _ => "status",
     };
+    let close_label = label(&phrases, &props.close_label, "sockel-notice-dismiss");
 
     html! {
         <div class={classes!(notice(props.tone), props.class.clone())} {role}
@@ -72,7 +78,7 @@ pub fn Notice(props: &NoticeProps) -> Html {
                 <span class={class::NOTICE_CLOSE}>
                     <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
                         icon={html! { <Icon glyph={Glyph::Close} /> }}
-                        label={label(&phrases, &props.close_label, "sockel-notice-dismiss")} onclick={onclose.clone()} />
+                        label={close_label.clone()} tip={close_label} onclick={onclose.clone()} />
                 </span>
             }
         </div>
@@ -121,6 +127,7 @@ mod tests {
             testid: None,
             id: None,
             alert: false,
+            status: false,
             children: html! { "Saved" },
         }
     }
@@ -137,5 +144,11 @@ mod tests {
         });
         assert!(html.contains("role=\"alert\""), "{html}");
         assert!(html.contains("id=\"why\""), "{html}");
+        let html = render(NoticeProps {
+            tone: Tone::Warning,
+            status: true,
+            ..props()
+        });
+        assert!(html.contains("role=\"status\""), "{html}");
     }
 }
