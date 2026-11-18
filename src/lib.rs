@@ -458,6 +458,10 @@
 //! "sockel" with (...)`, since sockel compiles first. The rules keep reading
 //! the custom properties, so a page can still override them at runtime.
 //!
+//! A value can name the app's own Sass variables: `with_module("style/_vars.scss",
+//! "v")` loads that module first, so `.with("text-sm", "v.$font-sm")` keeps one
+//! source for the value. The module must emit no CSS.
+//!
 //! | Variable | Default |
 //! | --- | --- |
 //! | `$text-3xs`, `$text-2xs`, `$text-xs`, `$text-sm` | `0.625rem`, `0.6875rem`, `0.75rem`, `0.8125rem` |
@@ -2450,6 +2454,7 @@
 //! | `card` | `.sockel-card` |
 //! | `field`, `field-label` | `.sockel-field`, `.sockel-field-label` |
 //! | `input`, `input-box` | `.sockel-input`; `input-box` is the box every text field shares (border, fill, sizes) |
+//! | `native-select` | `.sockel-native-select` (with `input`, a native `<select>`) |
 //! | `button($variant: secondary)` | `.sockel-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
 //! | `table-base`, `table-head-cell`, `table-cell`, `table-row-hover` | a table's (see Table) |
 //!
