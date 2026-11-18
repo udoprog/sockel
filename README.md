@@ -826,6 +826,8 @@ icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare 
   classes for an element that cannot be the component.
 - `role` gives it another role (`menuitemradio`, `switch`), `checked` its
   `aria-checked`, and `current` its `aria-current` (`page`, `step`).
+  `autofocus` marks it `data-autofocus`, the control a dialog or popover
+  focuses when it opens.
 
 Size guarantees: the height is the size's token, whatever the label (one
 line, cut with an ellipsis; the button never grows past its container) and

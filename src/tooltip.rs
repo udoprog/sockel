@@ -455,6 +455,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         tip: None,
         label: props.label.clone(),
         testid: props.testid.clone(),
+        autofocus: false,
         role: None,
         checked: None,
         current: None,

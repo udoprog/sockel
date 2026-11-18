@@ -101,6 +101,10 @@ pub struct ButtonProps {
     pub label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Takes the focus when a dialog or popover opens on it
+    /// (`data-autofocus`, which those look for).
+    #[prop_or_default]
+    pub autofocus: bool,
     /// A role other than a button's, such as `menuitemradio` or `switch`.
     #[prop_or_default]
     pub role: Option<AttrValue>,
@@ -225,6 +229,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
+                data-autofocus={props.autofocus.then_some("")}
                 role={props.role.clone()}
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
@@ -248,6 +253,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-tip={props.tip.clone()}
                 aria-label={props.label.clone()}
                 data-testid={props.testid.clone()}
+                data-autofocus={props.autofocus.then_some("")}
                 role={props.role.clone()}
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
@@ -301,6 +307,7 @@ mod tests {
             tip: None,
             label: None,
             testid: None,
+            autofocus: false,
             role: None,
             checked: None,
             current: None,
@@ -416,6 +423,16 @@ mod tests {
         ] {
             assert!(html.contains(attr), "{attr}: {html}");
         }
+    }
+
+    #[test]
+    fn autofocus_marks_the_button_for_a_dialog() {
+        let html = render(ButtonProps {
+            autofocus: true,
+            ..props()
+        });
+        assert!(html.contains("data-autofocus"), "{html}");
+        assert!(!render(props()).contains("data-autofocus"));
     }
 
     #[test]
