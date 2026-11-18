@@ -1716,6 +1716,7 @@ is swallowed at the window).
 - `quick_keys`: the arrows move a focused handle's row at once, as Alt and
   an arrow do, for apps whose handles did so; Space and Enter still lift.
 - `titles`: each handle's name is its tooltip too (`DragHandle`'s new
+- `tips`: each handle's name is its `data-tip` too (`DragHandle`'s `tip`), for apps whose tooltips read that attribute. A keyboard-moved row's handle is focused at the row's new place even when the app's keys did not change (index keys).
   `title`).
 - `body_drag`: a mouse or pen also drags a row from anywhere on it off its
   controls (a button, input, link, label or role widget in it does not
