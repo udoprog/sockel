@@ -205,6 +205,7 @@ pub fn ReorderPage() -> Html {
             <Toggle label="grid" value={*grid} on_change={bind(&grid)} />
         </>
     };
+    let grid_on = *grid;
     let items_class = if *grid {
         class::REORDER_TILES
     } else {
@@ -246,7 +247,7 @@ pub fn ReorderPage() -> Html {
                     titles={*titles} body_drag={*body_drag} auto_scroll={*auto_scroll} grid={*grid}
                     class={items_class}>
                     { for rows.iter().map(|row| html_nested! {
-                        <ReorderItem id={row.key.clone()} name={row.name.clone()} class={class::REORDER_ITEM}>
+                        <ReorderItem id={row.key.clone()} name={row.name.clone()} class={classes!(class::REORDER_ITEM, grid_on.then_some(class::REORDER_TILE))}>
                             <ReorderHandle />
                             <strong>{ row.name.clone() }</strong>
                             if let Some(detail) = &row.detail {
