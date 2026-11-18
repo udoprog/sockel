@@ -33,7 +33,7 @@
 .sockel-pager {
     --pager-button-width: max(
         var(--control-height),
-        calc(var(--pager-chars) * 1ch + 2 * var(--space-2) + 2 * var(--space-px))
+        calc(var(--pager-chars) * 1ch + 2 * #{base.$pager-button-padding} + 2 * var(--space-px))
     );
 
     display: flex;
@@ -71,6 +71,7 @@
     box-sizing: border-box;
     width: var(--pager-button-width);
     height: base.$pager-button-height;
+    min-height: 0;
     margin: 0;
     padding: 0;
     @include base.reserved-border;

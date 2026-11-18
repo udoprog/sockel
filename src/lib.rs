@@ -488,7 +488,7 @@
 //! | `$skeleton-duration` | `1.4s` |
 //! | `$pager-gap`, `$pager-button-radius`, `$pager-button-ink`, `$pager-button-text` | `var(--space-1)`, `var(--radius-sm)`, `var(--text)`, `null` (inherited) (a pager's gap and its buttons' corners, ink and size) |
 //! | `$pager-button-hover-fill`, `$pager-button-hover-ink`, `$pager-current-fill`, `$pager-current-ink`, `$pager-step-ink`, `$pager-phone-height` | 12% of `--accent`, `null` (as at rest), `var(--accent)`, `var(--on-accent)`, `null` (the button's), `null` (a button's hover, the current page's fill and ink, the chevrons' ink, and the controls' height below the phone breakpoint) |
-//! | `$pager-button-height`, `$pager-current-edge`, `$pager-range-text` | `var(--control-height)`, `null` (the ordinary edge), `null` (inherited) (a pager button's and gap's height, the current page's edge colour, the range text's size) |
+//! | `$pager-button-height`, `$pager-button-padding`, `$pager-current-edge`, `$pager-range-text` | `var(--control-height)`, `var(--space-2)`, `null` (the ordinary edge), `null` (inherited) (a pager button's and gap's height, the room either side of its number, the current page's edge colour, the range text's size) |
 //! | `$skeleton-fill`, `$skeleton-edge`, `$skeleton-radius` | 8% of `--text` over `--surface`, `null` (none), `var(--radius-sm)` (a skeleton's fill, the 1px line inside its edge and its corners) |
 //! | `$skeleton-line-height`, `$skeleton-line-inset`, `$skeleton-phone-height` | `1lh`, `null` (a fifth of a line), `null` (a line's height and the transparent inset that thins it; a block's height below the phone breakpoint) |
 //! | `$check-size`, `$switch-width`, `$switch-height`, `$choice-width` | `1.25rem`, `2.5rem`, `1.5rem`, `6rem` |

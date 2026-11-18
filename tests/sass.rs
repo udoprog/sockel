@@ -170,9 +170,10 @@ fn notice_settings() {
 fn pager_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
-    assert!(defaults.contains("height: var(--control-height);\n  margin: 0;"));
+    assert!(defaults.contains("height: var(--control-height);\n  min-height: 0;\n  margin: 0;"));
     let css = compile(&sass, "tests/fixtures/pager_settings.scss");
-    assert!(css.contains("height: 32px;\n  margin: 0;"));
+    assert!(css.contains("height: 32px;\n  min-height: 0;\n  margin: 0;"));
+    assert!(css.contains("2 * 4px"));
     assert!(css.contains("border-color: red;"));
     assert!(css.contains("font-size: 13px;"));
 }

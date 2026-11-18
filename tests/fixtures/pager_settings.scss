@@ -2,6 +2,7 @@
 // accent edge, and the range text is small.
 @use "../../style/tokens" with (
     $pager-button-height: 32px,
+    $pager-button-padding: 4px,
     $pager-current-edge: red,
     $pager-range-text: 13px,
 );
