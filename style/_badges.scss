@@ -164,7 +164,7 @@
         height: var(--corner-size);
         padding-inline: var(--space-1);
         font-size: var(--text-3xs);
-        transform: translate(50%, -50%);
+        transform: base.$corner-transform;
     }
 }
 
