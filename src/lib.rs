@@ -1904,9 +1904,23 @@
 //! its room (`TABLE_BULK`, one height) is always kept, and `bulk_active` shows
 //! it, so selecting rows moves nothing; `IDLE` hides it. `numeric` on a cell
 //! (`NUMERIC`) sets figures of one width, to the end. `table(fixed)`,
-//! `table_wrap(sticky)`, `table_bulk(idle)` and `table_cell(head, numeric, cut)`
-//! give the classes. Parts: `TABLE_FRAME`, `TABLE_WRAP`, `TABLE_ROW`,
+//! `table_wrap(sticky)`, `table_bulk(idle)`, `table_cell(head, numeric, cut)`,
+//! `table_mode(cards, foot, top)` and `table_cell_part(wrap, title, actions,
+//! hidden)` give the classes. Parts: `TABLE_FRAME`, `TABLE_WRAP`, `TABLE_ROW`,
 //! `TABLE_CELL`, `TABLE_HEAD_CELL`, `TABLE_EMPTY`.
+//!
+//! `cards` turns the table into cards below the phone breakpoint (`CARDS`):
+//! the head is for a screen reader only, each row is a card with its first
+//! cell on a line of its own, the others wrapped after it, and empty cells
+//! gone. On a cell, `title` (`TITLE`) bolds that first line (in cards), `actions`
+//! (`ACTIONS`) puts the row's actions to the end, at a card's top right (the
+//! room kept is `--table-card-actions`, 5rem; a row with none sets 0rem), and
+//! `wrap` (`WRAP`) wraps its text with room for it. `foot` (`FOOT`) puts a
+//! card's actions on a line under it instead. `top` (`TOP`) tops the cells.
+//! `flagged` on a row (`FLAGGED`) marks its start edge in `--danger`. A
+//! heading cell takes `hidden` (`VISUALLY_HIDDEN`, for a screen reader only),
+//! `colspan`, and `scope`; a `scope` on a cell that is not a `head` makes it a
+//! row's heading (`th`) looking like its neighbours.
 //!
 //! `SortHeader` is a heading cell with a button: `label`, `direction`
 //! (`Option<SortDirection>`; `aria-sort` is `ascending`, `descending` or
@@ -2889,7 +2903,7 @@ pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
 #[cfg(feature = "table")]
 pub use table::{
     Table, TableCell, TableCellProps, TableProps, TableRow, TableRowProps, table, table_bulk,
-    table_cell, table_wrap,
+    table_cell, table_cell_part, table_mode, table_wrap,
 };
 #[cfg(feature = "tabs")]
 pub use tabs::{SubTabs, TabItem, Tabs, TabsProps, tabs};

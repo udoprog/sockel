@@ -1255,6 +1255,8 @@ pub const PAGES: &[Page] = &[
             "table_wrap",
             "table_bulk",
             "table_cell",
+            "table_cell_part",
+            "table_mode",
         ],
         render: || html! { <tables::TablePage /> },
         holds: &[

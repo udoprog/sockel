@@ -5,7 +5,7 @@ use crate::class;
 use sockel::{
     Button, ButtonSize, ButtonVariant, EmptyState, ErrorBox, Glyph, Icon, SortDirection,
     SortHeader, Table, TableCell, TableRow, next_sort, sort_header, sort_mark, table, table_bulk,
-    table_cell, table_wrap,
+    table_cell, table_cell_part, table_mode, table_wrap,
 };
 
 use crate::code::{El, each, snippet, text_node};
@@ -109,6 +109,10 @@ pub fn TablePage() -> Html {
     let bulk = use_state(|| true);
     let picked = use_state(|| false);
     let disabled = use_state(|| false);
+    let cards = use_state(|| true);
+    let foot = use_state(|| false);
+    let top = use_state(|| false);
+    let flagged = use_state(|| true);
     let sort = use_state(|| None::<(Column, SortDirection)>);
 
     let controls = html! {
@@ -122,6 +126,10 @@ pub fn TablePage() -> Html {
             <Toggle label="bulk" value={*bulk} on_change={bind(&bulk)} />
             <Toggle label="Picked" value={*picked} on_change={bind(&picked)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
+            <Toggle label="cards" value={*cards} on_change={bind(&cards)} />
+            <Toggle label="foot" value={*foot} on_change={bind(&foot)} />
+            <Toggle label="top" value={*top} on_change={bind(&top)} />
+            <Toggle label="flagged" value={*flagged} on_change={bind(&flagged)} />
         </>
     };
 
@@ -133,17 +141,22 @@ pub fn TablePage() -> Html {
             <SortHeader label="Size" numeric=true first={SortDirection::Descending}
                 direction={direction_of(*sort, Column::Size)} disabled={*disabled}
                 onsort={press(&sort, Column::Size)} />
+            <TableCell head=true hidden=true>{ "Actions" }</TableCell>
         </>
     };
 
     let rows: Html = sorted(data(*count, *name), *sort)
         .into_iter()
-        .map(|(name, kind, size)| {
+        .enumerate()
+        .map(|(n, (name, kind, size))| {
             html! {
-                <TableRow>
-                    <TableCell cut=true>{ name }</TableCell>
+                <TableRow flagged={*flagged && n == 1}>
+                    <TableCell cut=true title=true>{ name }</TableCell>
                     <TableCell cut=true>{ kind }</TableCell>
                     <TableCell numeric=true>{ size }</TableCell>
+                    <TableCell actions=true width="6rem">
+                        <Button size={ButtonSize::Small}>{ "Open" }</Button>
+                    </TableCell>
                 </TableRow>
             }
         })
@@ -174,7 +187,7 @@ pub fn TablePage() -> Html {
         &[],
         El::new("Table")
             .expr("head", "html! { <>{ headings }</> }")
-            .expr_if(*count == 0 || *shown_state != Shown::Rows, "columns", "3")
+            .expr_if(*count == 0 || *shown_state != Shown::Rows, "columns", "4")
             .expr_if(
                 *count == 0 || *shown_state != Shown::Rows,
                 "empty",
@@ -182,22 +195,28 @@ pub fn TablePage() -> Html {
             )
             .flag("fixed", *fixed)
             .flag("sticky", *sticky)
+            .flag("cards", *cards)
+            .flag("foot", *foot)
+            .flag("top", *top)
             .expr_if(*bulk, "bulk", "Some(html! { { bulk_actions } })")
             .flag("bulk_active", *bulk && *picked)
             .child(
                 El::new("TableRow")
+                    .flag("flagged", *flagged)
                     .line(format!(
-                        "<TableCell cut=true>{}</TableCell>",
+                        "<TableCell cut=true title=true>{}</TableCell>",
                         text_node(&name.of("Item 1"))
                     ))
-                    .line("<TableCell numeric=true>{ size }</TableCell>"),
+                    .line("<TableCell numeric=true>{ size }</TableCell>")
+                    .line("<TableCell actions=true>{ actions }</TableCell>"),
             )
             .line(each("rows", "row", *count, "row")),
     );
 
     html! {
         <Demo {controls} {code}>
-            <Table head={head} columns={3} fixed={*fixed} sticky={*sticky}
+            <Table head={head} columns={4} fixed={*fixed} sticky={*sticky}
+                cards={*cards} foot={*foot} top={*top}
                 bulk={bulk_bar} bulk_active={*bulk && *picked} {empty} label="Items">
                 { rows }
             </Table>
@@ -206,6 +225,8 @@ pub fn TablePage() -> Html {
             { shown("table_wrap(sticky)", &table_wrap(*sticky)) }
             { shown("table_bulk(idle)", &table_bulk(!*picked)) }
             { shown("table_cell(head, numeric, cut)", &table_cell(false, true, true)) }
+            { shown("table_mode(cards, foot, top)", &table_mode(*cards, *foot, *top)) }
+            { shown("table_cell_part(wrap, title, actions, hidden)", &table_cell_part(false, true, true, false)) }
         </Demo>
     }
 }

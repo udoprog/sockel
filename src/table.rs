@@ -17,6 +17,17 @@ pub struct TableProps {
     /// Holds the head while the rows scroll, past `--table-max-height`.
     #[prop_or_default]
     pub sticky: bool,
+    /// Below the phone breakpoint a row is a card: the head is for a screen
+    /// reader only, the first cell on a line of its own, empty cells gone,
+    /// and a cell with `actions` at the top right.
+    #[prop_or_default]
+    pub cards: bool,
+    /// With `cards`, the `actions` cell goes on a line under the row instead.
+    #[prop_or_default]
+    pub foot: bool,
+    /// Tops the cells, for rows whose text runs on.
+    #[prop_or_default]
+    pub top: bool,
     /// The bulk actions above the table. Given, its room is always kept.
     #[prop_or_default]
     pub bulk: Option<Html>,
@@ -41,6 +52,16 @@ pub struct TableProps {
 /// A table's classes: `fixed` for columns sized by the first row.
 pub fn table(fixed: bool) -> Classes {
     classes!(class::TABLE, fixed.then_some(class::FIXED))
+}
+
+/// A table's mode classes: `cards` (phone cards), `foot` (their actions under
+/// the row), `top` (cells at the top).
+pub fn table_mode(cards: bool, foot: bool, top: bool) -> Classes {
+    classes!(
+        cards.then_some(class::CARDS),
+        foot.then_some(class::FOOT),
+        top.then_some(class::TOP)
+    )
 }
 
 /// A table wrap's classes: a scroll area, `sticky` capped in height.
@@ -72,7 +93,7 @@ pub fn Table(props: &TableProps) -> Html {
                 <div class={table_bulk(!props.bulk_active)} role="status">{ bulk.clone() }</div>
             }
             <div class={table_wrap(props.sticky)}>
-                <table class={table(props.fixed)} aria-label={props.label.clone()}>
+                <table class={classes!(table(props.fixed), table_mode(props.cards, props.foot, props.top))} aria-label={props.label.clone()}>
                     <thead><tr>{ props.head.clone() }</tr></thead>
                     <tbody>{ rows }</tbody>
                 </table>
@@ -83,6 +104,9 @@ pub fn Table(props: &TableProps) -> Html {
 
 #[derive(Properties, PartialEq)]
 pub struct TableRowProps {
+    /// Marks the row's start edge in the danger colour.
+    #[prop_or_default]
+    pub flagged: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -96,7 +120,11 @@ pub struct TableRowProps {
 #[function_component]
 pub fn TableRow(props: &TableRowProps) -> Html {
     html! {
-        <tr class={classes!(class::TABLE_ROW, props.class.clone())} data-testid={props.testid.clone()}>
+        <tr class={classes!(
+            class::TABLE_ROW,
+            props.flagged.then_some(class::FLAGGED),
+            props.class.clone()
+        )} data-testid={props.testid.clone()}>
             { props.children.clone() }
         </tr>
     }
@@ -110,6 +138,26 @@ pub struct TableCellProps {
     /// Figures of one width, to the end.
     #[prop_or_default]
     pub numeric: bool,
+    /// Wraps its text, with room for it.
+    #[prop_or_default]
+    pub wrap: bool,
+    /// A card's first line, in bold (with `cards`).
+    #[prop_or_default]
+    pub title: bool,
+    /// A row's actions, to the end; at a card's top right (`cards`).
+    #[prop_or_default]
+    pub actions: bool,
+    /// A heading for a screen reader only.
+    #[prop_or_default]
+    pub hidden: bool,
+    /// The cells it spans.
+    #[prop_or_default]
+    pub colspan: Option<usize>,
+    /// What a heading heads (`col` by default). Given on a cell that is not a
+    /// `head`, it is a row's heading: a `th` with a cell's look (`row`,
+    /// `colgroup`).
+    #[prop_or_default]
+    pub scope: Option<AttrValue>,
     /// One line, cut with an ellipsis; only holds a width in a `fixed` table.
     #[prop_or_default]
     pub cut: bool,
@@ -137,22 +185,41 @@ pub fn table_cell(head: bool, numeric: bool, cut: bool) -> Classes {
     )
 }
 
+/// A cell's extra classes: `wrap`, `title`, `actions`, and `hidden` (a heading
+/// for a screen reader only).
+pub fn table_cell_part(wrap: bool, title: bool, actions: bool, hidden: bool) -> Classes {
+    classes!(
+        wrap.then_some(class::WRAP),
+        title.then_some(class::TITLE),
+        actions.then_some(class::ACTIONS),
+        hidden.then_some(class::VISUALLY_HIDDEN)
+    )
+}
+
 /// A cell of a row, or a heading (`head`) of the table's head.
 #[function_component]
 pub fn TableCell(props: &TableCellProps) -> Html {
     let class = classes!(
         table_cell(props.head, props.numeric, props.cut),
+        table_cell_part(props.wrap, props.title, props.actions, props.hidden),
         props.class.clone()
     );
     let style = props.width.as_ref().map(|w| format!("width: {w}"));
 
+    let colspan = props.colspan.map(|n| n.to_string());
+
     if props.head {
+        let scope = props.scope.clone().unwrap_or(AttrValue::Static("col"));
         html! {
-            <th {class} {style} scope="col" data-testid={props.testid.clone()}>{ props.children.clone() }</th>
+            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</th>
+        }
+    } else if let Some(scope) = props.scope.clone() {
+        html! {
+            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</th>
         }
     } else {
         html! {
-            <td {class} {style} data-testid={props.testid.clone()}>{ props.children.clone() }</td>
+            <td {class} {style} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</td>
         }
     }
 }
@@ -181,6 +248,29 @@ mod tests {
     fn an_idle_bulk_bar_keeps_its_room() {
         assert_eq!(names(table_bulk(false)), [class::TABLE_BULK]);
         assert_eq!(names(table_bulk(true)), [class::TABLE_BULK, class::IDLE]);
+    }
+
+    #[test]
+    fn modes_are_modifiers() {
+        assert!(names(table_mode(false, false, false)).is_empty());
+        assert_eq!(
+            names(table_mode(true, true, true)),
+            [class::CARDS, class::FOOT, class::TOP]
+        );
+    }
+
+    #[test]
+    fn a_cell_has_its_parts_by_modifier() {
+        assert!(names(table_cell_part(false, false, false, false)).is_empty());
+        assert_eq!(
+            names(table_cell_part(true, true, true, true)),
+            [
+                class::WRAP,
+                class::TITLE,
+                class::ACTIONS,
+                class::VISUALLY_HIDDEN
+            ]
+        );
     }
 
     #[test]
