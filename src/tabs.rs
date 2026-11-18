@@ -19,6 +19,9 @@ pub struct TabItem {
     /// A tip (`data-tip`) that also names the tab (`aria-label`): for a tab
     /// whose label is an icon.
     pub tip: Option<AttrValue>,
+    /// Markup for the label where text is not enough (a flag, a mark); the
+    /// `label` is then the tab's accessible name. Not hidden on a phone.
+    pub content: Option<Html>,
     /// Markup right after the tab, in the tab list: a control that belongs
     /// to the tab (a remove cross), not itself a tab.
     pub after: Option<Html>,
@@ -34,6 +37,7 @@ impl TabItem {
             class: Classes::new(),
             testid: None,
             tip: None,
+            content: None,
             after: None,
         }
     }
@@ -60,6 +64,11 @@ impl TabItem {
 
     pub fn tip(mut self, tip: impl Into<AttrValue>) -> Self {
         self.tip = Some(tip.into());
+        self
+    }
+
+    pub fn content(mut self, content: Html) -> Self {
+        self.content = Some(content);
         self
     }
 
@@ -129,7 +138,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
                     <>
                     <button type="button" role="tab" class={classes!(class::TAB, tab.class.clone())}
                         aria-selected={selected.to_string()}
-                        aria-label={tab.tip.clone()}
+                        aria-label={tab.tip.clone().or_else(|| tab.content.as_ref().map(|_| tab.label.clone()))}
                         data-tip={tab.tip.clone()}
                         data-testid={tab.testid.clone()}
                         tabindex={if stop == Some(i) { "0" } else { "-1" }}
@@ -138,7 +147,12 @@ fn render(props: &TabsProps, small: bool) -> Html {
                         { for tab.icon.clone().map(|icon| html! {
                             <span class={class::TAB_ICON} aria-hidden="true">{ icon }</span>
                         }) }
-                        <span class={class::TAB_LABEL}>{ tab.label.clone() }</span>
+                        <span class={class::TAB_LABEL}>
+                            { match &tab.content {
+                                Some(content) => content.clone(),
+                                None => html! { { tab.label.clone() } },
+                            } }
+                        </span>
                     </button>
                     { for tab.after.clone() }
                     </>
@@ -253,6 +267,7 @@ mod tests {
                 .testid("tab-a")
                 .tip("Tip A")
                 .class("mine")
+                .content(html! { <b>{ "Rich" }</b> })
                 .after(html! { <i class="cross" /> }),
         ];
         let html = html_of::<Tabs>(props(Some("a"), t));
@@ -260,6 +275,7 @@ mod tests {
         assert!(html.contains("data-tip=\"Tip A\""), "{html}");
         assert!(html.contains("aria-label=\"Tip A\""), "{html}");
         assert!(html.contains("mine"), "{html}");
+        assert!(html.contains("<b>Rich</b>"), "{html}");
         assert!(html.find("cross") > html.find("</button>"), "{html}");
     }
 

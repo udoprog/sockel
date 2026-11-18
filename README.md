@@ -901,7 +901,8 @@ changes no box. Every component takes `class`.
   `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
   (the list's name); `tabs(small)` gives its classes. A `TabItem` also
   takes `class`, `testid`, `tip` (`data-tip` and the tab's `aria-label`, for
-  an icon-only tab) and `after` (markup right after the tab in the list, for
+  an icon-only tab), `content` (markup for the label, such as a flag with
+  a name, where text is not enough; `label` is then its `aria-label`) and `after` (markup right after the tab in the list, for
   a control of the tab's own such as a remove cross; it is not a tab and the
   arrows skip it). Roving tabindex: the
   selected tab, or the first enabled, is the one tab stop; Left and Right
