@@ -356,7 +356,7 @@
 //! | `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
 //! | `tabs` | | [`Tabs`], [`SubTabs`], [`LinkTabs`], [`NavList`] | 6.9 KB |
 //! | `toast` | `badge`, `button`, `overlay` | [`ToastHost`], [`Toast`], [`SaveBar`] | 34.1 KB |
-//! | `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
+//! | `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`Chip`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
 //! | `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
 //!
 //! "CSS alone" is `STYLESHEET` with only that feature and what it brings in;
@@ -497,6 +497,10 @@
 //! | `$choice-height`, `$choice-stack-breakpoint` | `var(--control-height)`, `"phone"` (a choice's height, a stacked option's least, and where a `Narrow` one stacks) |
 //! | `$choice-columns`, `$choice-align-self`, `$choice-gap`, `$choice-icon-width`, `$choice-focus-edge` | `1fr`, `null`, `var(--space-2)`, `null`, `null` (the options' columns, `auto` each its own width; the group's `align-self` at no specificity; an option's icon-to-label gap; an icon-only option's least width, unpadded (`ICON`); the group's border while it holds the focus) |
 //! | `$tab-gap`, `$tab-phone-icons` | `var(--space-2)`, `false` (a tab's icon-to-label gap, and whether its icon stays below the phone breakpoint) |
+//! | `$chip-height`, `$chip-padding-block`, `$chip-padding`, `$chip-gap`, `$chip-font-size`, `$chip-line-height` | `var(--control-height-small)`, `0`, `var(--space-3)`, `var(--space-2)`, `var(--text-sm)`, `1` (a chip's height, `auto` as its content; its block and inline padding, gap, size, `inherit` its parent's, and line height) |
+//! | `$chip-media-inset`, `$chip-icon-inset` | `var(--space-1)`, `null` (how far a chip's avatar and its icon sit from its start edge; `null` keeps the padding) |
+//! | `$chip-on-edge`, `$chip-on-fill`, `$chip-on-ink` | `var(--accent)`, `var(--accent)`, `var(--on-accent)` (an on toggle chip's edge, fill and ink) |
+//! | `$chip-remove-glyph-size` | `null` (the size of an item chip's remove cross; `null` keeps the glyph's own) |
 //! | `$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset` | `var(--surface)`, `var(--on-accent)`, `null` (a switch's track fill while off, its thumb's colour while on, and the thumb's distance from the track's outer edge; `null` keeps two `--space-px`) |
 //! | `$filter-width` | `10.5rem` |
 //! | `$field-label-width`, `$field-message-line`, `$field-error-lines` | `12rem`, `1rem`, `1` |
@@ -656,7 +660,8 @@
 //!   toggle in a box of a fixed size.
 //! - [`Choice`] (`.choice`): a segmented pick-one (or pick-several) group,
 //!   its options of one width, in a row or stacked; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
-//!   chips with a count.
+//!   chips with a count; [`Chip`] (`.chip`): a link, button or removable
+//!   item led by an avatar or an icon.
 //! - [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
 //!   [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
 //!   line that can keep its room.
@@ -890,6 +895,19 @@
 //!   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
 //!   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
 //!   label; a list takes `label` and the chips as children.
+//! - [`Chip`] (`.sockel-chip`): a chip that is not a toggle, in the same
+//!   box. `href` makes it a link, `on_click` a button (with `href`, the
+//!   link's click, for an app's router), neither an item (`STATIC`, no
+//!   pointer and no hover edge). `media` leads it in its round start (`CHIP_MEDIA`, an avatar
+//!   or a portrait `$chip-media-inset` from the edge, `LEAD_MEDIA`), `icon`
+//!   leads its label (`CHIP_ICON`, muted, `LEAD_ICON`: `$chip-icon-inset`
+//!   from the edge when set), `after` follows the label and is never cut with
+//!   it (a number, a badge); `on_remove` gives an item a cross
+//!   (`CHIP_REMOVE`, `Glyph::Close`, named and tipped by `remove_label`,
+//!   `sockel-chip-remove-label` by default; `remove_testid`), never a link or a
+//!   button. `tip` (`data-tip`), `style` (custom properties for the app's
+//!   class), `data` (more `data-*`), `disabled`, `testid`, children as the
+//!   label; `chip(still, media, icon)` gives its classes.
 //!
 //! Size guarantees: the checkbox box, the switch's track and thumb, and a
 //! chip's height are tokens (`--check-size`, `--switch-width` and
@@ -2941,7 +2959,9 @@ pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
 #[cfg(feature = "toggles")]
 pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
 #[cfg(feature = "toggles")]
-pub use chip::{ChipList, ChipListProps, ChipToggle, ChipToggleProps, chip_count};
+pub use chip::{
+    Chip, ChipList, ChipListProps, ChipProps, ChipToggle, ChipToggleProps, chip, chip_count,
+};
 #[cfg(feature = "toggles")]
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, ChoiceStack, choice};
 #[cfg(feature = "color-select")]

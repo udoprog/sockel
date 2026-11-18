@@ -3,8 +3,8 @@ use yew::prelude::*;
 use crate::class;
 
 use sockel::{
-    Checkbox, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster, Glyph, Icon, Stack,
-    Switch, checkbox, chip_count, choice, switch,
+    Avatar, Checkbox, Chip, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster, Glyph,
+    Icon, Stack, Switch, checkbox, chip, chip_count, choice, switch,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -330,6 +330,93 @@ pub fn ChipPage() -> Html {
                         { format!("{} on", on.iter().take(*chips).filter(|o| **o).count()) }
                     </span>
                 </Cluster>
+            </Stack>
+        </Demo>
+    }
+}
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Form {
+    Item,
+    Link,
+    Button,
+}
+
+const FORMS: &[(&str, Form)] = &[
+    ("Item", Form::Item),
+    ("Link", Form::Link),
+    ("Button", Form::Button),
+];
+
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Lead {
+    None,
+    Media,
+    Icon,
+}
+
+const LEADS: &[(&str, Lead)] = &[
+    ("None", Lead::None),
+    ("Avatar (media)", Lead::Media),
+    ("Icon", Lead::Icon),
+];
+
+#[function_component]
+pub fn ChipItemPage() -> Html {
+    let form = use_state(|| Form::Item);
+    let lead = use_state(|| Lead::Media);
+    let text = use_state(|| Text::Short);
+    let removable = use_state(|| true);
+    let removed = use_state(|| 0u32);
+
+    let controls = html! {
+        <>
+            <Select<Form> label="Form" options={FORMS} value={*form} on_change={bind(&form)} />
+            <Select<Lead> label="Lead" options={LEADS} value={*lead} on_change={bind(&lead)} />
+            <Select<Text> label="Label" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
+            <Toggle label="removable" value={*removable} on_change={bind(&removable)} />
+        </>
+    };
+
+    let label = text.of("Ada Lovelace");
+    let media = (*lead == Lead::Media)
+        .then(|| html! { <Avatar name="Ada Lovelace" class={class::CHIP_AVATAR} /> });
+    let icon = (*lead == Lead::Icon).then(|| html! { <Icon glyph={Glyph::Search} /> });
+    let href = (*form == Form::Link).then(|| AttrValue::from("#chip-item"));
+    let on_click = (*form == Form::Button).then(|| Callback::from(|_: MouseEvent| ()));
+    let on_remove = (*removable && *form == Form::Item).then(|| {
+        let removed = removed.clone();
+        Callback::from(move |_: MouseEvent| removed.set(*removed + 1))
+    });
+
+    let (still, led, iconed) = (*form == Form::Item, media.is_some(), icon.is_some());
+    let code = El::new("Chip")
+        .text_if(*form == Form::Link, "href", "#chip-item")
+        .expr_if(*form == Form::Button, "on_click", "on_click")
+        .expr_if(
+            *lead == Lead::Media,
+            "media",
+            "html! { <Avatar name=\"Ada Lovelace\" /> }",
+        )
+        .expr_if(*lead == Lead::Icon, "icon", "html! { <Icon .. /> }")
+        .expr_if(on_remove.is_some(), "on_remove", "on_remove")
+        .line(text_node(&label));
+    let code = snippet(&[], code);
+
+    html! {
+        <Demo {controls} {code}>
+            <Stack>
+                <code class={class::CLASS_CALL}>
+                    { format!(
+                        "chip({}, {}, {}) → \"{}\"",
+                        still, led, iconed,
+                        chip(still, led, iconed).to_string()
+                    ) }
+                </code>
+                <ChipList label="People">
+                    <Chip {href} {on_click} {media} {icon} {on_remove}>{ label }</Chip>
+                </ChipList>
+                <span class={class::CONTROL_LABEL}>{ format!("{} removed", *removed) }</span>
             </Stack>
         </Demo>
     }

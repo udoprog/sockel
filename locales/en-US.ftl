@@ -38,6 +38,7 @@ sockel-secret-input-hide = Hide
 sockel-secret-input-copy = Copy
 sockel-secret-input-clear = Clear
 sockel-search-field-clear = Clear
+sockel-chip-remove-label = Remove
 sockel-filter-picker-all = All
 sockel-stepper-decrease = Decrease
 sockel-stepper-increase = Increase

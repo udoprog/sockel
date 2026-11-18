@@ -283,6 +283,15 @@ pub const PAGES: &[Page] = &[
         ],
     },
     Page {
+        id: "chip-item",
+        title: "Chip",
+        group: Group::Inputs,
+        about: "A chip that is not a toggle: a link, a button or an item, led by an avatar or an icon, an item removable by its cross. Its height holds whatever it holds.",
+        covers: &["Chip", "ChipProps", "chip"],
+        render: || html! { <toggles::ChipItemPage /> },
+        holds: &[hold(sockel::class::CHIP, Size::Height, Across::All)],
+    },
+    Page {
         id: "field",
         title: "Field",
         group: Group::Inputs,

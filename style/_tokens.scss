@@ -466,6 +466,24 @@ $choice-stack-breakpoint: "phone" !default;
 // breakpoint.
 $tab-gap: var(--space-2) !default;
 $tab-phone-icons: false !default;
+// A chip's look (ChipToggle and Chip): its height (`auto`: as its content,
+// with `$chip-padding-block`), padding, gap, font size (`inherit`: its
+// parent's) and line height; how far a leading avatar sits from its start
+// edge and an icon (`null`: at the padding); and an on toggle's edge, fill
+// and ink.
+$chip-height: var(--control-height-small) !default;
+$chip-padding-block: 0 !default;
+$chip-padding: var(--space-3) !default;
+$chip-gap: var(--space-2) !default;
+$chip-font-size: var(--text-sm) !default;
+$chip-line-height: 1 !default;
+$chip-media-inset: var(--space-1) !default;
+$chip-icon-inset: null !default;
+$chip-on-edge: var(--accent) !default;
+$chip-on-fill: var(--accent) !default;
+$chip-on-ink: var(--on-accent) !default;
+// The size of an item chip's remove cross (`null`: the glyph's own).
+$chip-remove-glyph-size: null !default;
 $filter-width: 10.5rem !default;
 $picker-rows: 6 !default;
 $picker-popup-width: var(--menu-width-wide) !default;

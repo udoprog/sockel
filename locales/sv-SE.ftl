@@ -38,6 +38,7 @@ sockel-secret-input-hide = Dölj
 sockel-secret-input-copy = Kopiera
 sockel-secret-input-clear = Rensa
 sockel-search-field-clear = Rensa
+sockel-chip-remove-label = Ta bort
 sockel-filter-picker-all = Alla
 sockel-stepper-decrease = Minska
 sockel-stepper-increase = Öka

@@ -135,6 +135,11 @@ body {
     font-size: var(--text-sm);
 }
 
+// An avatar sized to a chip's media: its height less twice the inset.
+.showcase-chip-avatar {
+    --size: calc(var(--control-height-small) - 2 * var(--space-1));
+}
+
 // The component shown twice: the narrow frame can be dragged wider at
 // its corner, so a layout's wrapping can be watched as it happens.
 .showcase-frames {
