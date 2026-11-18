@@ -479,6 +479,8 @@
 //! | `$control-height`, `$control-height-small` | `2.25rem`, `1.75rem` |
 //! | `$mark-height`, `$touch-height` | `1.5rem`, `2.75rem` |
 //! | `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
+//! | `$badge-height`, `$badge-neutral-tone`, `$badge-tint` | `var(--mark-height)`, `var(--muted)`, `null` (a badge's height, the ink of a neutral one, and the percentage of its tone a toned, unfilled badge is filled with and its edge tinted by; `null`: no fill, the edge as a neutral's) |
+//! | `$count-height`, `$count-padding` | `var(--mark-height)`, `var(--space-2)` (a count's height and inline padding, which its least width includes) |
 //! | `$glyph-size` | `1em` |
 //! | `$glyph-phone-size` | `null` (`--glyph-size` below the phone breakpoint; `null` keeps `$glyph-size`) |
 //! | `$skeleton-duration` | `1.4s` |

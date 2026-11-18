@@ -363,6 +363,14 @@ $mark-height: 1.5rem !default;
 $touch-height: 2.75rem !default;
 $dot-size: 0.5rem !default;
 $corner-size: 1.125rem !default;
+// A badge's height and the ink of its neutral tone, the edge-and-fill tint a
+// toned badge takes (`null`: none; a percentage fills it with its tone and
+// tints its edge), and a count's height and inline padding.
+$badge-height: var(--mark-height) !default;
+$badge-neutral-tone: var(--muted) !default;
+$badge-tint: null !default;
+$count-height: var(--mark-height) !default;
+$count-padding: var(--space-2) !default;
 $glyph-size: 1em !default;
 // The glyph box below the phone breakpoint (`null`: as above it).
 $glyph-phone-size: null !default;

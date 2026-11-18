@@ -1,0 +1,7 @@
+@use "../../style/index" with (
+    $badge-height: 1.375rem,
+    $badge-neutral-tone: var(--text),
+    $badge-tint: 12%,
+    $count-height: 1.375rem,
+    $count-padding: 0.25rem
+);

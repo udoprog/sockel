@@ -244,3 +244,16 @@ fn an_unknown_part_is_an_error() {
     let Some(sass) = sass() else { return };
     assert!(fails(&sass, "tests/fixtures/omit_unknown.scss").contains("no part layout.toolbars"));
 }
+
+#[test]
+fn badge_settings() {
+    let Some(sass) = sass() else { return };
+    let defaults = compile(&sass, "style/_index.scss");
+    assert!(defaults.contains("height: var(--mark-height);"));
+    assert!(!defaults.contains(":not(.sockel-solid)"));
+    let css = compile(&sass, "tests/fixtures/badge_settings.scss");
+    assert!(css.contains("height: 1.375rem;"));
+    assert!(css.contains("--tone: var(--text);"));
+    assert!(css.contains("background: color-mix(in srgb, var(--tone) 12%, transparent);"));
+    assert!(css.contains("calc((var(--count-digits) + 1) * 1ch + 2 * 0.25rem)"));
+}
