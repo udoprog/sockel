@@ -107,6 +107,9 @@ pub struct TableRowProps {
     /// Marks the row's start edge in the danger colour.
     #[prop_or_default]
     pub flagged: bool,
+    /// What the row stands for (`data-value`), for a test or script to find it by.
+    #[prop_or_default]
+    pub value: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -124,7 +127,7 @@ pub fn TableRow(props: &TableRowProps) -> Html {
             class::TABLE_ROW,
             props.flagged.then_some(class::FLAGGED),
             props.class.clone()
-        )} data-testid={props.testid.clone()}>
+        )} data-testid={props.testid.clone()} data-value={props.value.clone()}>
             { props.children.clone() }
         </tr>
     }
@@ -164,6 +167,9 @@ pub struct TableCellProps {
     /// The column's width (any CSS length), for a `fixed` table's first row.
     #[prop_or_default]
     pub width: Option<AttrValue>,
+    /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -211,15 +217,15 @@ pub fn TableCell(props: &TableCellProps) -> Html {
     if props.head {
         let scope = props.scope.clone().unwrap_or(AttrValue::Static("col"));
         html! {
-            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</th>
+            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
         }
     } else if let Some(scope) = props.scope.clone() {
         html! {
-            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</th>
+            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
         }
     } else {
         html! {
-            <td {class} {style} {colspan} data-testid={props.testid.clone()}>{ props.children.clone() }</td>
+            <td {class} {style} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</td>
         }
     }
 }

@@ -1921,6 +1921,8 @@
 //! heading cell takes `hidden` (`VISUALLY_HIDDEN`, for a screen reader only),
 //! `colspan`, and `scope`; a `scope` on a cell that is not a `head` makes it a
 //! row's heading (`th`) looking like its neighbours.
+//! A row takes `value` (`data-value`, for a test or script to find the row by) and a
+//! cell `tip` (`data-tip`).
 //!
 //! `SortHeader` is a heading cell with a button: `label`, `direction`
 //! (`Option<SortDirection>`; `aria-sort` is `ascending`, `descending` or
