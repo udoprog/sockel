@@ -868,10 +868,16 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             let pending = live.borrow().focus.clone();
             if let Some((key, before, to)) = pending {
                 if keys != before {
-                    live.borrow_mut().focus = None;
-                    if let Some(at) = keys.iter().position(|k| *k == key)
-                        && let Some(handle) = handle_at(&list, at)
-                    {
+                    let handle = keys
+                        .iter()
+                        .position(|k| *k == key)
+                        .and_then(|at| handle_at(&list, at));
+                    // A disabled handle (the app busy with the move) takes no
+                    // focus: keep it pending for the render that enables it.
+                    if handle.as_ref().is_none_or(|h| !h.has_attribute("disabled")) {
+                        live.borrow_mut().focus = None;
+                    }
+                    if let Some(handle) = handle {
                         let _ = handle.focus();
                     }
                 } else if let Some(window) = web_sys::window() {
@@ -881,9 +887,11 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                     let live = live.clone();
                     let list = list.clone();
                     let end = Closure::once_into_js(move || {
-                        if live.borrow_mut().focus.take().is_some()
-                            && let Some(handle) = handle_at(&list, to)
+                        if let Some(handle) = handle_at(&list, to)
+                            && live.borrow().focus.is_some()
+                            && !handle.has_attribute("disabled")
                         {
+                            live.borrow_mut().focus = None;
                             let _ = handle.focus();
                         }
                     });
