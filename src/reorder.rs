@@ -402,6 +402,9 @@ pub struct ReorderItemProps {
     /// `on_move_picked` reports their move. A [`Reorder`]'s alone.
     #[prop_or_default]
     pub picked: bool,
+    /// The row's `role` (`row` in a table).
+    #[prop_or_default]
+    pub role: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -429,7 +432,7 @@ pub struct ReorderItemProps {
 #[function_component]
 pub fn ReorderItem(props: &ReorderItemProps) -> Html {
     let row = html! {
-        <div class={props.class.clone()} data-testid={props.testid.clone()}
+        <div class={props.class.clone()} data-testid={props.testid.clone()} role={props.role.clone()}
             aria-current={props.current.then_some("true")}
             onclick={props.onclick.clone()} ondblclick={props.ondblclick.clone()}
             oncontextmenu={props.oncontextmenu.clone()}
@@ -520,6 +523,14 @@ pub struct ReorderProps {
     /// no row is marked.
     #[prop_or_default]
     pub on_drop_page: Option<Callback<(usize, AttrValue)>>,
+    /// The children mode's list element wears this `role` (`rowgroup` for a
+    /// table's body, whose rows wear `role="row"`).
+    #[prop_or_default]
+    pub role: Option<AttrValue>,
+    /// The children mode's list ends with this, after the rows: the tile
+    /// that adds one in a strip, which is not a row and never moves.
+    #[prop_or_default]
+    pub tail: Html,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -937,6 +948,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 let onclick = item.onclick.clone();
                 let row = html! {
                     <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
+                        role={item.role.clone()}
                         hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
                         {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
                         {onclick} ondblclick={item.ondblclick.clone()}
@@ -956,8 +968,10 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         // The rows are the list's first children, the hint and the status
         // after them.
         return html! {
-            <div ref={list.clone()} class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}>
+            <div ref={list.clone()} class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}
+                role={props.role.clone()}>
                 { rows }
+                { props.tail.clone() }
                 { status }
             </div>
         };

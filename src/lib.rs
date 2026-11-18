@@ -1748,6 +1748,10 @@
 //!   attribute's value, in place of `on_move`. While a row is held over
 //!   one, the place wears `data-drop-over` (the Pager's accent) and no row
 //!   is marked.
+//! - `role` (on `Reorder` and an item) and `tail`: in the children mode the
+//!   list and a row wear the `role` (a table's body `rowgroup`, its rows
+//!   `row`), and `tail` follows the rows inside the list, before the hint:
+//!   the tile that adds one in a strip, never a row and never moved.
 //!
 //! - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
 //!   follows the pointer, kept within the list. It passes a row once its top
