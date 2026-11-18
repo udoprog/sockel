@@ -42,6 +42,9 @@
     justify-content: center;
     gap: base.$pager-gap;
     max-width: 100%;
+    @if base.$pager-padding-top {
+        padding-top: base.$pager-padding-top;
+    }
     @include base.numeric;
 
     @if base.$pager-phone-height {

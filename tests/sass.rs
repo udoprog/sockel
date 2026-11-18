@@ -175,6 +175,7 @@ fn pager_settings() {
     assert!(css.contains("height: 32px;\n  min-height: 0;\n  margin: 0;"));
     assert!(css.contains("2 * 4px"));
     assert!(css.contains("max(\n      32px,\n"));
+    assert!(css.contains("padding-top: 8px;"));
     assert!(css.contains("border-color: red;"));
     assert!(css.contains("font-size: 13px;"));
 }

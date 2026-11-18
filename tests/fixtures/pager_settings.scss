@@ -3,6 +3,7 @@
 @use "../../style/tokens" with (
     $pager-button-height: 32px,
     $pager-button-padding: 4px,
+    $pager-padding-top: 8px,
     $pager-current-edge: red,
     $pager-range-text: 13px,
 );
