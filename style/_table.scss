@@ -57,6 +57,13 @@
         .sockel-table-row:last-child > .sockel-table-cell {
             border-bottom-color: transparent;
         }
+
+        // A card is the row itself, which carries the line.
+        @include base.below("phone") {
+            .sockel-table.sockel-cards .sockel-table-row:last-child {
+                border-bottom-color: transparent;
+            }
+        }
     }
 }
 
