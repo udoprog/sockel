@@ -1108,7 +1108,21 @@ one size are one height. New tokens: none. New partial: `_inputs.scss`.
   bounds, Enter or leaving the field commits what is typed (clamped; text that
   is no number goes back). What is typed outside `min..=max` is marked invalid
   until committed. The buttons are out of the tab order. Helpers: `stepper(size,
-  invalid, disabled, busy)`, `step_from`, `key_value`, `parse_number`.
+  invalid, disabled, busy)`, `step_from`, `step_by`, `key_value`, `key_step`,
+  `parse_number`, `parse_decimal`, `format_number`.
+  Further props, all off or unset by default: `snap` (the multiples the
+  buttons and arrows land on, `step` when unset), `arrow` (how far the
+  arrow keys step, onto no multiple), `decimals` (the value's last digits
+  are after the point; `1.5` is 150 at 2) and `pad` (the fewest digits
+  before it), `strict` (what is typed outside the bounds is never clamped
+  or dropped: it stays marked, a step from it lands on the nearest bound),
+  `on_valid(bool)` (whether what is typed is a number within the bounds),
+  `on_step((by, snap))` (takes the steps instead, for an owner whose step
+  carries into other fields) with `can_less` and `can_more`, `mixed` with
+  `placeholder` (no number shown) and `on_empty` (an emptied field tells
+  this instead of being marked), `autofocus` (`data-autofocus`) and `unit`
+  (text after the box, in `.sockel-stepper-field`). The buttons carry the
+  `testid` with `-less` and `-more`, and a `data-tip` of their name.
 - [`SecretInput`] (`.sockel-input-box`): a password field with show or hide,
   copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
@@ -1136,7 +1150,7 @@ ground, no shadow) the box at rest, for a stepper that reads as a raised
 control; the
 SecretInput's box is the container's width, dots or text, and its three slots
 are always laid out (hidden, not removed, while empty). New classes:
-`STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `INPUT_ACTION`. New glyphs
+`STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `STEPPER_FIELD`, `STEPPER_UNIT`, `INPUT_ACTION`. New glyphs
 `Eye`, `EyeOff` and `Copy`. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
 set per Stepper).
 
