@@ -260,6 +260,11 @@ $row-list-item-height: var(--control-height) !default;
 $row-list-item-padding: 0 var(--space-3) !default;
 $row-list-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
 $row-list-name-wrap: false !default;
+// A row's main part: its vertical padding and the gap between its lines
+// (`null`: none), and its name's least height (`null`: none).
+$row-list-main-padding: var(--space-1) !default;
+$row-list-main-gap: null !default;
+$row-list-name-height: null !default;
 
 // A pick row's least height, padding, gap, corners, type and hover fill,
 // and its detail's ink and size; `null` leaves the type inherited.

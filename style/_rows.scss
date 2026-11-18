@@ -108,12 +108,14 @@ $name-break: normal;
     flex: 1 1 var(--row-main-basis);
     flex-direction: column;
     min-width: 0;
-    padding-block: var(--space-1);
+    gap: base.$row-list-main-gap;
+    padding-block: base.$row-list-main-padding;
 }
 
 .sockel-row-list-name {
     @include base.truncate;
 
+    min-height: base.$row-list-name-height;
     font-weight: 600;
     overflow-wrap: var(--row-name-break);
     white-space: var(--row-name-wrap);
