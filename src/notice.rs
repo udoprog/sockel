@@ -28,6 +28,13 @@ pub struct NoticeProps {
     pub action: Option<Html>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The element's id, for `aria-describedby` and the like.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
+    /// Announce it as an alert whatever its tone (a failure drawn in the
+    /// accent); a warning or an error always is.
+    #[prop_or_default]
+    pub alert: bool,
     /// The text.
     #[prop_or_default]
     pub children: Html,
@@ -41,18 +48,19 @@ pub fn notice(tone: Tone) -> Classes {
 /// An inline message: an optional icon, the text, an optional action and
 /// close button. One line high at least, so closing the button's room is
 /// not a change of height; closing the notice itself collapses its space.
-/// A warning or an error is announced as an alert, the others as a status.
+/// A warning or an error (or any with `alert`) is announced as an alert, the others as a status.
 #[function_component]
 pub fn Notice(props: &NoticeProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let role = match props.tone {
         Tone::Warning | Tone::Danger => "alert",
+        _ if props.alert => "alert",
         _ => "status",
     };
 
     html! {
         <div class={classes!(notice(props.tone), props.class.clone())} {role}
-            data-testid={props.testid.clone()}>
+            id={props.id.clone()} data-testid={props.testid.clone()}>
             if let Some(icon) = &props.icon {
                 <span class={class::NOTICE_ICON}>{ icon.clone() }</span>
             }
@@ -92,5 +100,42 @@ mod tests {
             [class::NOTICE, class::WARNING]
         );
         assert_eq!(names(notice(Tone::Danger)), [class::NOTICE, class::DANGER]);
+    }
+
+    fn render(props: NoticeProps) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<Notice>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    fn props() -> NoticeProps {
+        NoticeProps {
+            class: Classes::new(),
+            tone: Tone::Accent,
+            icon: None,
+            onclose: None,
+            close_label: None,
+            action: None,
+            testid: None,
+            id: None,
+            alert: false,
+            children: html! { "Saved" },
+        }
+    }
+
+    #[test]
+    fn alert_and_id_are_opt_in() {
+        let html = render(props());
+        assert!(html.contains("role=\"status\""), "{html}");
+        assert!(!html.contains("id="), "{html}");
+        let html = render(NoticeProps {
+            alert: true,
+            id: Some("why".into()),
+            ..props()
+        });
+        assert!(html.contains("role=\"alert\""), "{html}");
+        assert!(html.contains("id=\"why\""), "{html}");
     }
 }

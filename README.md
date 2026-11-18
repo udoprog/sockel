@@ -1293,7 +1293,8 @@ see above), coloured from `--accent`, `--success`, `--warning` or
 (`close_label`, an override of the catalog's word, names it). The notice does not remove itself: the
 app stops rendering it, and the space it held collapses at once, which is
 intended. A `Warning` or `Danger` notice has `role="alert"`, the others
-`role="status"`. `notice(tone)` gives the classes.
+`role="status"`, unless `alert` is set (a failure drawn in the accent). `id` sets the
+element's id (for `aria-describedby`). `notice(tone)` gives the classes.
 
 [`ErrorBox`] is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
 technical text, cut to three lines, whole in its `title` attribute) or
