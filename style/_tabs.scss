@@ -10,6 +10,11 @@
 //   (`aria-selected`) takes the accent colour and an underline of
 //   `--tab-underline` drawn by an inset shadow, so the box is the same.
 //   Parts: `-icon` (hidden below the phone breakpoint), `-label`.
+//   `.sockel-invalid` (`aria-invalid`) shows the tab in `--danger`.
+// - `.sockel-segmented` on a `.sockel-tabs`: the tabs sit in a tinted pill,
+//   as wide as they are, and the selected one is a raised segment of the
+//   surface colour rather than an underline; the tabs are the small
+//   control height.
 // - `.sockel-nav-list`: a `nav` of a column of `.sockel-nav-item`s (links
 //   or buttons, in `.sockel-nav-list-items`); the current one
 //   (`aria-current`) takes the accent colour and a tint. Parts: `-icon`,
@@ -75,6 +80,43 @@
     &:disabled {
         opacity: 0.5;
         cursor: not-allowed;
+    }
+}
+
+.sockel-tab.sockel-invalid {
+    color: var(--danger);
+
+    &[aria-selected="true"] {
+        box-shadow: inset 0 calc(-1 * var(--tab-underline)) 0 var(--danger);
+    }
+}
+
+.sockel-tabs.sockel-segmented {
+    --tab-height: var(--control-height-small);
+
+    display: flex;
+    width: fit-content;
+    max-width: 100%;
+    min-height: 0;
+    border-radius: var(--radius-sm);
+    background: color-mix(in srgb, var(--text) 7%, transparent);
+    box-shadow: none;
+    gap: var(--nest-inset);
+    @include base.nests(var(--radius-sm), 0px);
+
+    > .sockel-tab {
+        border-radius: var(--radius-inner, var(--radius-sm));
+        font-size: var(--text-sm);
+
+        &[aria-selected="true"] {
+            background: var(--surface);
+            box-shadow: var(--shadow-1);
+            color: var(--text);
+        }
+
+        &.sockel-invalid {
+            color: var(--danger);
+        }
     }
 }
 

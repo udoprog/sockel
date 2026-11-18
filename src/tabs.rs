@@ -25,6 +25,9 @@ pub struct TabItem {
     /// Markup right after the tab, in the tab list: a control that belongs
     /// to the tab (a remove cross), not itself a tab.
     pub after: Option<Html>,
+    /// The tab's content is refused (`aria-invalid`), and the tab shows it
+    /// in `--danger`.
+    pub invalid: bool,
 }
 
 impl TabItem {
@@ -39,6 +42,7 @@ impl TabItem {
             tip: None,
             content: None,
             after: None,
+            invalid: false,
         }
     }
 
@@ -76,6 +80,11 @@ impl TabItem {
         self.after = Some(after);
         self
     }
+
+    pub fn invalid(mut self, invalid: bool) -> Self {
+        self.invalid = invalid;
+        self
+    }
 }
 
 #[derive(Properties, PartialEq)]
@@ -92,6 +101,10 @@ pub struct TabsProps {
     pub label: AttrValue,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Segmented: the tabs sit in a tinted pill and the selected one is a
+    /// raised segment, instead of an underline.
+    #[prop_or_default]
+    pub segmented: bool,
 }
 
 /// A tab list's classes: `tabs`, and `small` for the smaller variant.
@@ -123,7 +136,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
     };
 
     html! {
-        <div role="tablist" class={classes!(tabs(small), props.class.clone())}
+        <div role="tablist" class={classes!(tabs(small), props.segmented.then_some(class::SEGMENTED), props.class.clone())}
             aria-label={props.label.clone()}
             data-testid={props.testid.clone()}
             {onkeydown}>
@@ -136,8 +149,9 @@ fn render(props: &TabsProps, small: bool) -> Html {
                 };
                 html! {
                     <>
-                    <button type="button" role="tab" class={classes!(class::TAB, tab.class.clone())}
+                    <button type="button" role="tab" class={classes!(class::TAB, tab.invalid.then_some(class::INVALID), tab.class.clone())}
                         aria-selected={selected.to_string()}
+                        aria-invalid={tab.invalid.then_some("true")}
                         aria-label={tab.tip.clone().or_else(|| tab.content.as_ref().map(|_| tab.label.clone()))}
                         data-tip={tab.tip.clone()}
                         data-testid={tab.testid.clone()}
@@ -277,6 +291,19 @@ mod tests {
         assert!(html.contains("mine"), "{html}");
         assert!(html.contains("<b>Rich</b>"), "{html}");
         assert!(html.find("data-after") > html.find("</button>"), "{html}");
+    }
+
+    #[test]
+    fn an_invalid_tab_is_aria_invalid_and_segmented_is_a_class() {
+        let t = vec![TabItem::new("a", "A").invalid(true), TabItem::new("b", "B")];
+        let html = html_of::<Tabs>(props(Some("b"), t));
+        assert_eq!(html.matches("aria-invalid=\"true\"").count(), 1, "{html}");
+        assert!(html.contains(class::INVALID), "{html}");
+        assert!(!html.contains(class::SEGMENTED), "{html}");
+        let mut p = props(Some("a"), items());
+        p.segmented = true;
+        let html = html_of::<Tabs>(p);
+        assert!(html.contains(class::SEGMENTED), "{html}");
     }
 
     #[test]
