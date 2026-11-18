@@ -44,35 +44,7 @@
 @if base.emits("inputs.native-select") {
     // After `.sockel-input`, so its chevron and room win over the field's.
     .sockel-native-select {
-        width: max-content;
-        max-width: 100%;
-        // Beside other items in a row it gives way to them, as the bare
-        // input's `flex: none` would not.
-        flex-shrink: 1;
-        appearance: none;
-        cursor: pointer;
-        padding-inline-end: 1.75rem;
-        background-image:
-            linear-gradient(45deg, transparent 50%, var(--muted) 50%),
-            linear-gradient(135deg, var(--muted) 50%, transparent 50%);
-        background-position:
-            calc(100% - 1rem) 55%,
-            calc(100% - 0.6875rem) 55%;
-        background-size: 5px 5px;
-        background-repeat: no-repeat;
-
-        &.sockel-fill {
-            width: 100%;
-        }
-
-        &:disabled {
-            cursor: not-allowed;
-        }
-
-        > option {
-            background-color: var(--surface);
-            color: var(--text);
-        }
+        @include base.native-select;
     }
 }
 

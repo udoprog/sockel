@@ -2440,6 +2440,7 @@ sockel's own: `.auth-card { @include p.card; }`.
 | `card` | `.sockel-card` |
 | `field`, `field-label` | `.sockel-field`, `.sockel-field-label` |
 | `input`, `input-box` | `.sockel-input`; `input-box` is the box every text field shares (border, fill, sizes) |
+| `native-select` | `.sockel-native-select` (with `input`, a native `<select>`) |
 | `button($variant: secondary)` | `.sockel-button` with its states; `button-variant($variant)` is a variant's colours alone (`primary`, `ghost`, `quiet`, `danger`, `success`) |
 | `table-base`, `table-head-cell`, `table-cell`, `table-row-hover` | a table's (see Table) |
 
