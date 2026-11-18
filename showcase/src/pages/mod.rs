@@ -482,8 +482,12 @@ pub const PAGES: &[Page] = &[
             "StepperProps",
             "stepper",
             "step_from",
+            "step_by",
             "key_value",
+            "key_step",
             "parse_number",
+            "parse_decimal",
+            "format_number",
         ],
         render: || html! { <steppers::StepperPage /> },
         holds: &[

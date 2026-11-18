@@ -1,6 +1,8 @@
 use yew::prelude::*;
 
-use sockel::{InputSize, SecretInput, Stepper, stepper};
+use sockel::{
+    InputSize, SecretInput, Stepper, format_number, key_step, parse_decimal, step_by, stepper,
+};
 
 use crate::class;
 use crate::code::{El, snippet};
@@ -63,6 +65,14 @@ pub fn StepperPage() -> Html {
             <Stepper value={clamped} on_change={bind(&value)} min={0} max={*max} step={*step}
                 label="Copies" size={*size} invalid={*invalid} disabled={*disabled} busy={*busy} live={*live} />
             { shown("stepper(size, invalid, disabled, busy)", &stepper(*size, *invalid, *disabled, *busy)) }
+            <code class={class::CLASS_CALL}>
+                { format!("format_number(1250, 2, 3) → \"{}\"; parse_decimal(\"12,5\", 2) → {:?}",
+                    format_number(1250, 2, 3), parse_decimal("12,5", 2)) }
+            </code>
+            <code class={class::CLASS_CALL}>
+                { format!("step_by(value, step, step, 0, max) → {}; key_step(\"PageUp\", step, step, None) → {:?}",
+                    step_by(clamped, *step, *step, 0, *max), key_step("PageUp", *step, *step, None)) }
+            </code>
             <p class={class::CONTROL_LABEL}>{ format!("Value {clamped}") }</p>
         </Demo>
     }
