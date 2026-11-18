@@ -12,6 +12,16 @@ pub struct TabItem {
     /// An icon the app supplies, before the label; hidden on a phone.
     pub icon: Option<Html>,
     pub disabled: bool,
+    /// Extra classes on the tab.
+    pub class: Classes,
+    /// The tab's `data-testid`.
+    pub testid: Option<AttrValue>,
+    /// A tip (`data-tip`) that also names the tab (`aria-label`): for a tab
+    /// whose label is an icon.
+    pub tip: Option<AttrValue>,
+    /// Markup right after the tab, in the tab list: a control that belongs
+    /// to the tab (a remove cross), not itself a tab.
+    pub after: Option<Html>,
 }
 
 impl TabItem {
@@ -21,6 +31,10 @@ impl TabItem {
             label: label.into(),
             icon: None,
             disabled: false,
+            class: Classes::new(),
+            testid: None,
+            tip: None,
+            after: None,
         }
     }
 
@@ -31,6 +45,26 @@ impl TabItem {
 
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
+        self
+    }
+
+    pub fn class(mut self, class: impl Into<Classes>) -> Self {
+        self.class = class.into();
+        self
+    }
+
+    pub fn testid(mut self, testid: impl Into<AttrValue>) -> Self {
+        self.testid = Some(testid.into());
+        self
+    }
+
+    pub fn tip(mut self, tip: impl Into<AttrValue>) -> Self {
+        self.tip = Some(tip.into());
+        self
+    }
+
+    pub fn after(mut self, after: Html) -> Self {
+        self.after = Some(after);
         self
     }
 }
@@ -92,8 +126,12 @@ fn render(props: &TabsProps, small: bool) -> Html {
                     Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
                 };
                 html! {
-                    <button type="button" role="tab" class={class::TAB}
+                    <>
+                    <button type="button" role="tab" class={classes!(class::TAB, tab.class.clone())}
                         aria-selected={selected.to_string()}
+                        aria-label={tab.tip.clone()}
+                        data-tip={tab.tip.clone()}
+                        data-testid={tab.testid.clone()}
                         tabindex={if stop == Some(i) { "0" } else { "-1" }}
                         disabled={tab.disabled}
                         {onclick}>
@@ -102,6 +140,8 @@ fn render(props: &TabsProps, small: bool) -> Html {
                         }) }
                         <span class={class::TAB_LABEL}>{ tab.label.clone() }</span>
                     </button>
+                    { for tab.after.clone() }
+                    </>
                 }
             }) }
         </div>
@@ -204,6 +244,23 @@ mod tests {
         assert_eq!(html.matches("tabindex=\"0\"").count(), 1, "{html}");
         assert!(html.find("tabindex=\"0\"") > html.find("aria-selected=\"false\""));
         assert!(html.contains("role=\"tablist\""), "{html}");
+    }
+
+    #[test]
+    fn a_tab_takes_a_testid_tip_class_and_markup_after() {
+        let t = vec![
+            TabItem::new("a", "A")
+                .testid("tab-a")
+                .tip("Tip A")
+                .class("mine")
+                .after(html! { <i class="cross" /> }),
+        ];
+        let html = html_of::<Tabs>(props(Some("a"), t));
+        assert!(html.contains("data-testid=\"tab-a\""), "{html}");
+        assert!(html.contains("data-tip=\"Tip A\""), "{html}");
+        assert!(html.contains("aria-label=\"Tip A\""), "{html}");
+        assert!(html.contains("mine"), "{html}");
+        assert!(html.find("cross") > html.find("</button>"), "{html}");
     }
 
     #[test]
