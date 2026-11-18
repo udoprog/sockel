@@ -1318,7 +1318,7 @@ table. `empty_state(compact)` gives the classes.
 
 An empty state's look is configured by `$empty-state-padding`, `-edge` (a border), `-radius`,
 `-compact-radius`, `-icon-size`, `-icon-fill`, `-icon-ink`, `-icon-box` (width and height) and
-`-icon-radius`, `-ink` (muted), `-compact-ink` (muted), `-title-size` (`--text-md`) and `-title-ink`
+`-icon-radius`, `-title-size` (`--text-md`) and `-title-ink`
 (`--text`) (README, "Configuration"); with the edge, radius and a round filled icon it is a dashed card.
 
 A notice's look is configured by `$notice-padding`, `-gap`, `-radius`, `-fill`, `-edge`, `-align`,

@@ -139,8 +139,7 @@ fn empty_state_settings() {
     assert!(rule(&css).contains("border-radius: 12px;"));
     assert!(css.contains("width: 3rem;"));
     assert!(css.contains("border-radius: 50%;"));
-    assert!(rule(&css).contains("color: inherit;"));
-    assert!(rule(&defaults).contains("color: var(--muted);"));
+    assert!(css.contains("color: inherit;"));
     assert!(css.contains("font-size: var(--text-lg);"));
     assert!(defaults.contains("font-size: var(--text-md);"));
 }

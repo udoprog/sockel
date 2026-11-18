@@ -183,7 +183,7 @@
         padding: base.$empty-state-padding;
         border: base.$empty-state-edge;
         border-radius: base.$empty-state-radius;
-        color: base.$empty-state-ink;
+        color: var(--muted);
         text-align: center;
 
         &.sockel-compact {
@@ -197,7 +197,6 @@
             padding: 0 var(--space-3);
             overflow: hidden;
             border-radius: base.$empty-state-compact-radius;
-            color: base.$empty-state-compact-ink;
             text-align: start;
         }
     }
