@@ -465,6 +465,10 @@ the same call configures sockel's own stylesheet. Local Sass cannot `@use
 "sockel" with (...)`, since sockel compiles first. The rules keep reading
 the custom properties, so a page can still override them at runtime.
 
+A value can name the app's own Sass variables: `with_module("style/_vars.scss",
+"v")` loads that module first, so `.with("text-sm", "v.$font-sm")` keeps one
+source for the value. The module must emit no CSS.
+
 | Variable | Default |
 | --- | --- |
 | `$text-3xs`, `$text-2xs`, `$text-xs`, `$text-sm` | `0.625rem`, `0.6875rem`, `0.75rem`, `0.8125rem` |

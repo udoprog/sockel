@@ -380,6 +380,7 @@ pub struct Config {
     local: Option<PathBuf>,
     prefix: Option<String>,
     with: Vec<(String, String)>,
+    modules: Vec<(PathBuf, String)>,
     features: Option<Vec<String>>,
     foreign: Vec<String>,
     layer: Option<String>,
@@ -447,6 +448,15 @@ impl Config {
         self
     }
 
+    /// Loads a local Sass module before sockel (`@use "path" as namespace`),
+    /// so [`Config::with`]'s values can name its variables (`v.$font-sm`)
+    /// instead of restating them. The module must emit no CSS. A relative
+    /// `path` is taken from the current directory, as [`Config::local`]'s.
+    pub fn with_module(mut self, path: impl Into<PathBuf>, namespace: impl Into<String>) -> Self {
+        self.modules.push((path.into(), namespace.into()));
+        self
+    }
+
     /// Builds sockel's CSS from only these [`FEATURES`] (each with the
     /// features it depends on already in), instead of all of them, and
     /// leaves out the [`FEATURE_PARTS`] none of them reads. Without it, the
@@ -507,7 +517,7 @@ impl Config {
         Ok(Some(lines.map(|line| format!("{line}\n")).collect()))
     }
 
-    fn sockel_use(&self, enabled: Option<&[String]>) -> String {
+    fn sockel_use(&self, enabled: Option<&[String]>) -> Result<String, Error> {
         let on =
             |feature: &&str| enabled.is_none_or(|enabled| enabled.iter().any(|e| e == *feature));
         let folded: Vec<_> = FEATURE_PARTS
@@ -522,6 +532,10 @@ impl Config {
             .map(|(name, value)| format!("${name}: {value}"))
             .collect();
         let mut head = String::new();
+        for (path, namespace) in &self.modules {
+            let path = sass_string(&std::path::absolute(path)?);
+            head.push_str(&format!("@use \"{path}\" as {namespace};\n"));
+        }
         if !folded.is_empty() {
             let folded = format!("({},)", folded.join(", "));
             let omit = match self.with.iter().rfind(|(name, _)| name == "omit") {
@@ -534,9 +548,12 @@ impl Config {
             pairs.push(format!("$omit: {omit}"));
         }
         if pairs.is_empty() {
-            return format!("{head}@use \"sockel\";\n");
+            return Ok(format!("{head}@use \"sockel\";\n"));
         }
-        format!("{head}@use \"sockel\" with ({});\n", pairs.join(", "))
+        Ok(format!(
+            "{head}@use \"sockel\" with ({});\n",
+            pairs.join(", ")
+        ))
     }
 
     /// Every class of sockel's enabled features, nothing omitted.
@@ -598,7 +615,7 @@ impl Config {
             style,
         };
         let options = sasso::Options::new().with_importer(&sources);
-        let sockel_use = self.sockel_use(enabled.as_deref());
+        let sockel_use = self.sockel_use(enabled.as_deref())?;
         let sockel_css = sasso::compile(&sockel_use, &options)?;
         let hooks = sasso::compile(HOOKS_PROBE, &options)?;
         let mut sockel_classes = class_names(&sockel_css);
@@ -889,6 +906,30 @@ mod tests {
             );
             assert!(output.css.contains("--radius-lg: 12px"));
             assert!(!output.css.contains("--text-md: 0.875rem"));
+            assert_eq!(output.sockel_classes, plain.sockel_classes);
+        }
+    }
+
+    #[test]
+    fn names_a_local_module_in_token_values() {
+        let plain = sockel().build().unwrap();
+        let config = sockel()
+            .with_module(fixture("tests/module/_vars.scss"), "v")
+            .with("text-md", "v.$text-md");
+        for output in [
+            config.build().unwrap(),
+            config
+                .clone()
+                .local(fixture("fixture/style"))
+                .prefix("fixture-")
+                .build()
+                .unwrap(),
+        ] {
+            assert!(
+                output.css.contains("--text-md: 1.0625rem"),
+                "{}",
+                output.css
+            );
             assert_eq!(output.sockel_classes, plain.sockel_classes);
         }
     }
