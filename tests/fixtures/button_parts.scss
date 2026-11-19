@@ -1,0 +1,16 @@
+// A project whose blanket button rule centres, lets shrink and rounds, and
+// dims a disabled clear.
+@use "../../style/tokens" with (
+    $button-min-width: 0,
+    $button-part-justify: center,
+    $button-part-min-width: 0,
+    $button-part-radius: 8px,
+    $input-clear-min-height: 36px,
+    $input-clear-disabled-opacity: 0.5,
+    $input-clear-disabled-cursor: default,
+);
+@use "../../style/toggles";
+@use "../../style/inputs";
+@use "../../style/menu";
+@use "../../style/stepper";
+@use "../../style/buttons";

@@ -167,6 +167,12 @@
     box-sizing: border-box;
     width: var(--mark-height);
     height: var(--mark-height);
+    @if base.$button-part-min-width {
+        min-width: base.$button-part-min-width;
+    }
+    @if base.$input-clear-min-height {
+        min-height: base.$input-clear-min-height;
+    }
     margin: 0;
     padding: 0;
     border: 0;
@@ -182,6 +188,13 @@
 
     &.sockel-empty {
         visibility: hidden;
+    }
+
+    @if base.$input-clear-disabled-opacity or base.$input-clear-disabled-cursor {
+        &:disabled {
+            opacity: base.$input-clear-disabled-opacity;
+            cursor: base.$input-clear-disabled-cursor;
+        }
     }
 
     @include base.focus-ring;

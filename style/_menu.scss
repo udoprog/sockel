@@ -109,6 +109,7 @@
 
 .sockel-menu-item {
     @include item;
+    @include base.button-part;
     gap: base.$menu-item-gap;
     min-height: base.$menu-item-height;
     padding: base.$menu-item-padding;

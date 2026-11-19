@@ -160,6 +160,9 @@
     align-items: center;
     justify-content: center;
     box-sizing: border-box;
+    @if base.$button-part-min-width {
+        min-width: base.$button-part-min-width;
+    }
     @if base.$stepper-button-width {
         width: base.$stepper-button-width;
     } @else {

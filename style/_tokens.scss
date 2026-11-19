@@ -145,6 +145,20 @@ $button-icon-offset: null !default;
 $button-phone-height: null !default;
 // A disabled button's cursor.
 $button-disabled-cursor: not-allowed !default;
+// A button's least width, under `--button-min-width` (`auto`: its content's).
+$button-min-width: auto !default;
+// What a switch, a chip's cross, a field's clear and action, a picker's face,
+// a menu item and a stepper's step take from an app's blanket button rule
+// when it has one (`null`: nothing is set, the browser's own): their
+// justify-content, least width and corner radius (a switch's and a cross's).
+$button-part-justify: null !default;
+$button-part-min-width: null !default;
+$button-part-radius: null !default;
+// A field's clear and action: its least height, and the opacity and cursor
+// when disabled (`null`: none).
+$input-clear-min-height: null !default;
+$input-clear-disabled-opacity: null !default;
+$input-clear-disabled-cursor: null !default;
 // A dialog's padding (the head's start, the body's sides and bottom, the
 // foot's sides), that padding below `$sheet-breakpoint` (`null`: the
 // same), the gap between its body's children (`null`: the body is a plain
@@ -1224,6 +1238,21 @@ $-button-variants: (
     }
 }
 
+// The base of a button that is not `.sockel-button` (a switch, a cross, a
+// clear, a face, a menu item, a step): the `$button-part-*` settings, first in
+// its rule so its own declarations win.
+@mixin button-part($radius: false) {
+    @if $button-part-justify {
+        justify-content: $button-part-justify;
+    }
+    @if $button-part-min-width {
+        min-width: $button-part-min-width;
+    }
+    @if $radius and $button-part-radius {
+        border-radius: $button-part-radius;
+    }
+}
+
 // `.sockel-button`, the plain one; pass a variant for another. Its states
 // (hover, focus, `aria-pressed`, `aria-busy`, disabled) come with it. A
 // button's content is laid out by the app's markup, as a row with a gap.
@@ -1243,6 +1272,7 @@ $-button-variants: (
     height: var(--control-height);
     // Its height is its size's, under an app's own button min-height.
     min-height: 0;
+    min-width: var(--button-min-width, #{$button-min-width});
     margin: 0;
     padding-block: 0;
     padding-inline: var(--button-pad-x, #{$button-padding});
