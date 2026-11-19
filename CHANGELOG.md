@@ -5,6 +5,14 @@ All notable changes to sockel and sockel-build. The format follows
 
 ## [Unreleased]
 
+### Changed
+
+- A pill button's text on hover is 45% tone and 55% `--text` (the new
+  `$pill-button-hover-ink`), so it reads at 4.5:1 or more on the deeper hover
+  tint too.
+
+## [0.2.2] - 2026-11-19
+
 ### Added
 
 - An optional app colour, `--selection`: the ground of a `NavList`'s current

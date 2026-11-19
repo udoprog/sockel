@@ -531,6 +531,9 @@ $corner-size: 1.125rem !default;
 // A pill's text: its tone mixed toward the app's text, so it reads at 4.5:1
 // on the pill's own tint of that tone.
 $pill-ink: color-mix(in srgb, var(--tone) 70%, var(--text)) !default;
+// A pill button's text on hover, mixed further toward the app's text, so it
+// reads at 4.5:1 on the hover's deeper tint.
+$pill-button-hover-ink: color-mix(in srgb, var(--tone) 45%, var(--text)) !default;
 // A badge's height and the ink of its neutral tone, the edge-and-fill tint a
 // toned badge takes (`null`: none; a percentage fills it with its tone and
 // tints its edge), and a count's height and inline padding.

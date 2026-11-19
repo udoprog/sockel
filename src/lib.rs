@@ -587,6 +587,7 @@
 //! | `$dot-size`, `$corner-size` | `0.5rem`, `1.125rem` |
 //! | `$badge-height`, `$badge-neutral-tone`, `$badge-tint` | `var(--mark-height)`, `var(--muted)`, `null` (a badge's height, the ink of a neutral one, and the percentage of its tone a toned, unfilled badge is filled with and its edge tinted by; `null`: no fill, the edge as a neutral's) |
 //! | `$pill-ink` | `color-mix(in srgb, var(--tone) 70%, var(--text))` (a pill's text, its tone mixed toward `--text` so it reads at 4.5:1 on the pill's tint; `var(--tone)` paints it in the tone itself) |
+//! | `$pill-button-hover-ink` | `color-mix(in srgb, var(--tone) 45%, var(--text))` (a pill button's text on hover, mixed further toward `--text` so it reads at 4.5:1 on the hover's 20% tint) |
 //! | `--corner-top`, `--corner-end` | `0` each, set on a corner badge (its offset from its parent's top end corner; not a token, so a class of the app's may set it without out-ranking `.sockel-corner`) |
 //! | `$corner-transform` | `translate(50%, -50%)` (how a corner badge sits on its parent's top end corner: centred on it; `none` lays it inside) |
 //! | `$count-height`, `$count-padding` | `var(--mark-height)`, `var(--space-2)` (a count's height and inline padding, which its least width includes) |

@@ -11,7 +11,8 @@
 //
 // - `.sockel-pill`: a tinted label of `--mark-height`, its text `$pill-ink`,
 //   led by a dot in its tone; `.sockel-plain` has no dot,
-//   `.sockel-pill-button` is a button (the hover changes its fill only).
+//   `.sockel-pill-button` is a button (the hover deepens its fill, its text
+//   `$pill-button-hover-ink`).
 //   `-label` is its text, cut with an ellipsis.
 // - `.sockel-badge`: a bordered short text at least as wide as tall;
 //   `.sockel-solid` fills it, `.sockel-corner` lays a small one over the
@@ -89,6 +90,7 @@
 
             &:hover:not(:disabled) {
                 background: color-mix(in srgb, var(--tone) 20%, transparent);
+                color: base.$pill-button-hover-ink;
             }
 
             @include base.focus-ring;
