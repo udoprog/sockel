@@ -706,7 +706,7 @@ pub const PAGES: &[Page] = &[
         id: "search-select",
         title: "SearchSelect",
         group: Group::Pickers,
-        about: "A text field filtering a listbox of options under it, in groups, with details: filtered here, or loaded elsewhere with results for an older query ignored (a loading row stands in). The list is one width and --picker-rows rows high, loading, loaded or empty.",
+        about: "A text field filtering a listbox of options under it, in groups, with details: filtered here, or loaded elsewhere with results for an older query ignored (a loading row stands in). The list is one width and --picker-rows rows high, loading, loaded or empty. Off by default: a more-results row for paged results, a new-value row and free text.",
         covers: &[
             "SearchSelect",
             "SearchSelectProps",
@@ -715,6 +715,8 @@ pub const PAGES: &[Page] = &[
             "listed",
             "search_matches",
             "search_select",
+            "offers_new",
+            "search_select_row",
         ],
         render: || html! { <pickers::SearchSelectPage /> },
         holds: &[

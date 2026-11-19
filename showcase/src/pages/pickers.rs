@@ -93,7 +93,13 @@ struct SearchSettings {
     fill: bool,
     invalid: bool,
     disabled: bool,
+    paged: bool,
+    create: bool,
+    free_text: bool,
 }
+
+/// How many local matches a page of the paged sample lists.
+const SEARCH_PAGE: usize = 4;
 
 #[derive(Properties, PartialEq)]
 struct SearchSampleProps {
@@ -106,13 +112,28 @@ struct SearchSampleProps {
 fn SearchSample(props: &SearchSampleProps) -> Html {
     let s = props.settings;
     let id = use_control_id();
-    let all = fruit(s.text);
+    // Values created from the field, after the fruit.
+    let created = use_state(Vec::<String>::new);
+    let mut all = fruit(s.text);
+    let first_created = all.len();
+    all.extend(
+        created
+            .iter()
+            .enumerate()
+            .map(|(i, name)| SearchOption::new(first_created + i, name.clone()).group("Added")),
+    );
+    // Free text given, standing in for a chosen fruit.
+    let free = use_state(|| None::<String>);
+    // The query and how many of its matches are listed, when paged.
+    let paging = use_state(|| (String::new(), SEARCH_PAGE));
     // The latest query asked for, and the answer last kept.
     let asked = use_mut_ref(String::new);
     let answer = use_state(|| (String::new(), all.clone()));
     let on_search = {
         let (asked, answer, all) = (asked.clone(), answer.clone(), all.clone());
+        let paging = paging.clone();
         Callback::from(move |query: String| {
+            paging.set((query.clone(), SEARCH_PAGE));
             if s.source != Source::Remote {
                 return;
             }
@@ -130,7 +151,15 @@ fn SearchSample(props: &SearchSampleProps) -> Html {
             });
         })
     };
+    let paged = s.paged && s.source == Source::Local;
     let (options, answers, busy, filter) = match s.source {
+        Source::Local if paged => {
+            let found: Vec<_> = search_matches(&all, &paging.0)
+                .into_iter()
+                .map(|i| all[i].clone())
+                .collect();
+            (found, None, false, false)
+        }
         Source::Local => (all, None, false, true),
         Source::Remote => {
             let (q, found) = (*answer).clone();
@@ -141,6 +170,42 @@ fn SearchSample(props: &SearchSampleProps) -> Html {
         Source::Stale => (all, Some(AttrValue::Static("an older query")), true, false),
         Source::Empty => (Vec::new(), None, false, true),
     };
+    let (options, more) = if paged {
+        let limit = paging.1;
+        let more = options.len() > limit;
+        (options.into_iter().take(limit).collect(), more)
+    } else {
+        (options, false)
+    };
+    let on_more = {
+        let paging = paging.clone();
+        Callback::from(move |()| {
+            let (query, limit) = (*paging).clone();
+            paging.set((query, limit + SEARCH_PAGE));
+        })
+    };
+    let on_change = {
+        let (free, on_change) = (free.clone(), props.on_change.clone());
+        Callback::from(move |v| {
+            free.set(None);
+            on_change.emit(v);
+        })
+    };
+    let on_create = s.create.then(|| {
+        let (created, on_change) = (created.clone(), on_change.clone());
+        Callback::from(move |name: String| {
+            let mut next = (*created).clone();
+            next.push(name);
+            on_change.emit(first_created + next.len() - 1);
+            created.set(next);
+        })
+    });
+    let on_text = {
+        let free = free.clone();
+        Callback::from(move |text: String| free.set(Some(text)))
+    };
+    let value = if free.is_some() { None } else { props.value };
+    let text = (*free).clone().map(AttrValue::from);
     let error = s
         .invalid
         .then(|| html! { "Pick a fruit that is in season." });
@@ -149,13 +214,14 @@ fn SearchSample(props: &SearchSampleProps) -> Html {
         <Stack>
             <Field id={id.clone()} label={html! { "Fruit" }} error={error} reserve_error=true
                 disabled={s.disabled} busy={busy}>
-                <SearchSelect<usize> id={id.clone()} {options} value={props.value}
-                    on_change={props.on_change.clone()} {on_search} {filter} {answers} {busy}
+                <SearchSelect<usize> id={id.clone()} {options} {value}
+                    {on_change} {on_search} {filter} {answers} {busy} {more} {on_more}
+                    {on_create} free_text={s.free_text} {on_text} {text}
                     label="Search fruit" size={s.size} fill={s.fill} invalid={s.invalid}
                     disabled={s.disabled} describedby={field_describedby(&id, false, s.invalid)}
                     testid="search-select" />
             </Field>
-            <p class={class::SAMPLE}>{ "Type to filter; the list keeps its width and height loading, loaded or empty. Arrows, PageUp and PageDown move; Enter picks; Escape closes." }</p>
+            <p class={class::SAMPLE}>{ "Type to filter; the list keeps its width and height loading, loaded or empty. Arrows, PageUp and PageDown move; Enter picks; Escape closes. Paged lists four matches at a time; new value offers what is typed; free text keeps it." }</p>
         </Stack>
     }
 }
@@ -169,6 +235,9 @@ pub fn SearchSelectPage() -> Html {
         fill: false,
         invalid: false,
         disabled: false,
+        paged: false,
+        create: false,
+        free_text: false,
     });
     let value = use_state(|| Some(3usize));
     let s = *settings;
@@ -202,6 +271,9 @@ pub fn SearchSelectPage() -> Html {
             <Toggle label="fill" value={s.fill} on_change={set(|s, on| s.fill = on)} />
             <Toggle label="invalid" value={s.invalid} on_change={set(|s, on| s.invalid = on)} />
             <Toggle label="disabled" value={s.disabled} on_change={set(|s, on| s.disabled = on)} />
+            <Toggle label="paged (local)" value={s.paged} on_change={set(|s, on| s.paged = on)} />
+            <Toggle label="new value" value={s.create} on_change={set(|s, on| s.create = on)} />
+            <Toggle label="free text" value={s.free_text} on_change={set(|s, on| s.free_text = on)} />
         </>
     };
 
@@ -230,7 +302,13 @@ pub fn SearchSelectPage() -> Html {
             .variant("size", s.size)
             .flag("fill", s.fill)
             .flag("invalid", s.invalid)
-            .flag("disabled", s.disabled),
+            .flag("disabled", s.disabled)
+            .expr_if(s.paged && s.source == Source::Local, "more", "has_more")
+            .expr_if(s.paged && s.source == Source::Local, "on_more", "next_page")
+            .expr_if(s.create, "on_create", "add_fruit")
+            .flag("free_text", s.free_text)
+            .expr_if(s.free_text, "on_text", "set_text")
+            .expr_if(s.free_text, "text", "text"),
     );
 
     html! {

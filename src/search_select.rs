@@ -104,6 +104,29 @@ pub fn listed<T>(
     })
 }
 
+/// Whether `query` may be offered as a new value: it is not blank and no
+/// option's label is it, ignoring case and surrounding space.
+pub fn offers_new<T>(options: &[SearchOption<T>], query: &str) -> bool {
+    let needle = query.trim().to_lowercase();
+    !needle.is_empty()
+        && !options
+            .iter()
+            .any(|o| o.label.trim().to_lowercase() == needle)
+}
+
+/// A row after the options: `SEARCH_SELECT_CREATE` (a new value) or
+/// `SEARCH_SELECT_MORE` (more results), on the listbox option's classes.
+pub fn search_select_row(active: bool, more: bool) -> Classes {
+    classes!(
+        listbox_option(active),
+        if more {
+            class::SEARCH_SELECT_MORE
+        } else {
+            class::SEARCH_SELECT_CREATE
+        }
+    )
+}
+
 /// The field's classes: the input box's, `search-select` and `fill`.
 pub fn search_select(
     size: InputSize,
@@ -170,6 +193,33 @@ pub struct SearchSelectProps<T: PartialEq + 'static> {
     /// The input's test id; the list's is it suffixed `-options`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// There are more results than listed: a more-results row ends the
+    /// list, calling `on_more`, for paged server results.
+    #[prop_or_default]
+    pub more: bool,
+    #[prop_or_default]
+    pub on_more: Callback<()>,
+    /// The more-results row's words (the app's phrasebook).
+    #[prop_or_default]
+    pub more_label: Option<AttrValue>,
+    /// Offers what is typed as a new value, in a row after the options,
+    /// while no option's label is it ([`offers_new`]).
+    #[prop_or_default]
+    pub on_create: Option<Callback<String>>,
+    /// The new-value row's words before the typed text.
+    #[prop_or_default]
+    pub create_label: Option<AttrValue>,
+    /// Free text: no option is active until the arrows move, and Enter
+    /// without one, Tab or a press outside give the typed text to
+    /// `on_text`. Escape still gives the field back what is chosen.
+    #[prop_or_default]
+    pub free_text: bool,
+    #[prop_or_default]
+    pub on_text: Callback<String>,
+    /// Shown in the field while `value` is none of the options: free text
+    /// given earlier.
+    #[prop_or_default]
+    pub text: Option<AttrValue>,
 }
 
 /// The WAI-ARIA editable combobox with list autocomplete: typing filters
@@ -195,7 +245,13 @@ where
 
     let on_dismiss = {
         let (open, query) = (open.clone(), query.clone());
-        Callback::from(move |_: Dismiss| {
+        let on_text = props.free_text.then(|| props.on_text.clone());
+        Callback::from(move |why: Dismiss| {
+            if why == Dismiss::Outside
+                && let (Some(on_text), Some(typed)) = (&on_text, &*query)
+            {
+                on_text.emit(typed.clone());
+            }
             open.set(false);
             query.set(None);
         })
@@ -239,23 +295,49 @@ where
         Listed::Options(rows) => rows.clone(),
         Listed::Loading => Vec::new(),
     };
-    let pickable: Vec<usize> = rows
+    // The rows after the options take the indices past them.
+    let (create_row, more_row) = (options.len(), options.len() + 1);
+    let loaded = matches!(shown, Listed::Options(_));
+    let creating = loaded && props.on_create.is_some() && offers_new(options, &typed);
+    let more = loaded && props.more;
+    let mut pickable: Vec<usize> = rows
         .iter()
         .copied()
         .filter(|&i| !options[i].disabled)
         .collect();
+    pickable.extend(creating.then_some(create_row));
+    pickable.extend((more && !props.busy).then_some(more_row));
     if *open {
-        state.borrow_mut().settle(&pickable);
+        let mut state = state.borrow_mut();
+        if !props.free_text {
+            state.settle(&pickable);
+        } else if state.active().is_some_and(|a| !pickable.contains(&a)) {
+            state.set(None);
+        }
     }
     let active = (*open).then(|| state.borrow().active()).flatten();
 
     let pick = {
         let (open, query, on_change) = (open.clone(), query.clone(), props.on_change.clone());
+        let (on_create, on_more) = (props.on_create.clone(), props.on_more.clone());
         let values: Vec<(T, bool)> = options
             .iter()
             .map(|o| (o.value.clone(), o.disabled))
             .collect();
+        let typed = typed.clone();
         move |i: usize| {
+            if i == more_row {
+                on_more.emit(());
+                return;
+            }
+            if i == create_row
+                && let Some(on_create) = &on_create
+            {
+                open.set(false);
+                query.set(None);
+                on_create.emit(typed.trim().to_owned());
+                return;
+            }
             let Some((value, false)) = values.get(i) else {
                 return;
             };
@@ -282,6 +364,9 @@ where
         let (is_open, state, redraw) = (*open, state.clone(), redraw.clone());
         let (open, pick, pickable) = (open.clone(), pick.clone(), pickable.clone());
         let on_dismiss = on_dismiss.clone();
+        let free_text = props
+            .free_text
+            .then(|| (props.on_text.clone(), query.clone()));
         Callback::from(move |e: KeyboardEvent| {
             let key = e.key();
             if !is_open {
@@ -294,6 +379,16 @@ where
             }
             match key.as_str() {
                 "Tab" => on_dismiss.emit(Dismiss::Outside),
+                "Enter" if free_text.is_some() && state.borrow().active().is_none() => {
+                    e.prevent_default();
+                    if let Some((on_text, query)) = &free_text {
+                        if let Some(typed) = &**query {
+                            on_text.emit(typed.clone());
+                        }
+                        query.set(None);
+                    }
+                    open.set(false);
+                }
                 // Home, End and Space edit the text.
                 "ArrowDown" | "ArrowUp" | "PageDown" | "PageUp" | "Enter" => {
                     e.prevent_default();
@@ -323,7 +418,7 @@ where
     let text = match (&*query, current) {
         (Some(typed), _) => AttrValue::from(typed.clone()),
         (None, Some(i)) => options[i].label.clone(),
-        (None, None) => AttrValue::default(),
+        (None, None) => props.text.clone().unwrap_or_default(),
     };
     let glyph = if props.busy {
         Glyph::Spinner
@@ -332,15 +427,12 @@ where
     };
 
     let popup = (*open).then(|| {
-        let option = |i: usize| {
-            let o = &options[i];
-            let selected = current == Some(i);
-            let is_active = active == Some(i);
+        let handlers = |i: usize, disabled: bool| {
             let onclick = {
                 let pick = pick.clone();
                 Callback::from(move |_: MouseEvent| pick(i))
             };
-            let onmousemove = (!is_active && !o.disabled).then(|| {
+            let onmousemove = (active != Some(i) && !disabled).then(|| {
                 let (state, redraw) = (state.clone(), redraw.clone());
                 Callback::from(move |_: MouseEvent| {
                     if state.borrow_mut().hover(i) {
@@ -348,8 +440,14 @@ where
                     }
                 })
             });
+            (onclick, onmousemove)
+        };
+        let option = |i: usize| {
+            let o = &options[i];
+            let selected = current == Some(i);
+            let (onclick, onmousemove) = handlers(i, o.disabled);
             html! {
-                <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
+                <div id={option_id(&id, i)} role="option" class={listbox_option(active == Some(i))}
                     aria-selected={selected.to_string()}
                     aria-disabled={o.disabled.then_some("true")} {onclick} {onmousemove}>
                     <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
@@ -396,6 +494,39 @@ where
                 }) }
             },
         };
+        let extra = |i: usize, glyph: Glyph, words: Html, disabled: bool| {
+            let (onclick, onmousemove) = handlers(i, disabled);
+            html! {
+                <div id={option_id(&id, i)} role="option"
+                    class={search_select_row(active == Some(i), i == more_row)}
+                    aria-selected="false" aria-disabled={disabled.then_some("true")}
+                    {onclick} {onmousemove}>
+                    <span class={class::LISTBOX_OPTION_MARK} aria-hidden="true">
+                        <Icon {glyph} />
+                    </span>
+                    <span class={class::LISTBOX_OPTION_LABEL}>{ words }</span>
+                </div>
+            }
+        };
+        let create = creating.then(|| {
+            let words = html! {
+                <>
+                    { label(&phrases, &props.create_label, "sockel-search-select-new") }
+                    { " " }
+                    <q class={class::SEARCH_SELECT_TYPED}>{ typed.trim().to_owned() }</q>
+                </>
+            };
+            extra(create_row, Glyph::Plus, words, false)
+        });
+        let more = more.then(|| {
+            let glyph = if props.busy { Glyph::Spinner } else { Glyph::ChevronDown };
+            let words = html! { label(&phrases, &props.more_label, "sockel-search-select-more-results") };
+            extra(more_row, glyph, words, props.busy)
+        });
+        let body = match (&shown, &create) {
+            (Listed::Options(rows), Some(_)) if rows.is_empty() => Html::default(),
+            _ => body,
+        };
         let onmousedown = Callback::from(|e: MouseEvent| e.prevent_default());
         let anchor_width = field
             .cast::<web_sys::HtmlElement>()
@@ -417,6 +548,8 @@ where
                 {style} {onmousedown}
                 data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
                 { body }
+                { create.unwrap_or_default() }
+                { more.unwrap_or_default() }
             </div>
         })
     });
@@ -536,6 +669,31 @@ mod tests {
     }
 
     #[test]
+    fn rows_after_the_options_are_listbox_options_with_a_part() {
+        assert_eq!(
+            names(search_select_row(false, false)),
+            [class::LISTBOX_OPTION, class::SEARCH_SELECT_CREATE]
+        );
+        assert_eq!(
+            names(search_select_row(true, true)),
+            [
+                class::LISTBOX_OPTION,
+                class::ACTIVE,
+                class::SEARCH_SELECT_MORE
+            ]
+        );
+    }
+
+    #[test]
+    fn a_new_value_is_offered_unless_blank_or_a_label() {
+        let options = fruit();
+        assert!(offers_new(&options, "Kiwi"));
+        assert!(offers_new(&options, "app"));
+        assert!(!offers_new(&options, " apple "));
+        assert!(!offers_new(&options, "  "));
+    }
+
+    #[test]
     fn groups_are_runs_of_adjacent_options() {
         let options = fruit();
         let runs = groups(&options, &[0, 1, 2]);
@@ -562,5 +720,22 @@ mod tests {
         assert!(html.contains("aria-expanded=\"false\""), "{html}");
         assert!(html.contains("value=\"Cherry\""), "{html}");
         assert!(!html.contains("role=\"listbox\""), "{html}");
+    }
+
+    #[test]
+    fn free_text_given_earlier_shows_with_no_option_chosen() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<SearchSelect<u32>>::with_props(yew::props!(
+                SearchSelectProps<u32> {
+                    options: fruit(),
+                    label: AttrValue::Static("Fruit"),
+                    free_text: true,
+                    text: Some(AttrValue::Static("Kiwi")),
+                }
+            ))
+            .hydratable(false)
+            .render(),
+        );
+        assert!(html.contains("value=\"Kiwi\""), "{html}");
     }
 }

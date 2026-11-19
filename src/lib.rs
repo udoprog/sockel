@@ -908,7 +908,8 @@
 //!   custom colour, on the select pattern.
 //! - [`SearchSelect`] (`.search-select`): a text field filtering a
 //!   [`Listbox`] of options in groups, loaded here or elsewhere, the list
-//!   one width and `--picker-rows` high, loading or not.
+//!   one width and `--picker-rows` high, loading or not; optionally a
+//!   more-results row, a new-value row and free text.
 //! - [`FilterPicker`] (`.filter-picker`): a list's filter button,
 //!   `--filter-width` wide, the first choice and a reserved count of the
 //!   rest, opening a multi-select listbox.
@@ -2933,6 +2934,15 @@
 //!   `empty_label` (the app's words), `id`, `describedby`, `size`, `fill`
 //!   (`FILL`), `invalid`, `disabled`, `autofocus`, `class`, `testid` (the
 //!   list's is it suffixed `-options`).
+//! - Off by default: `more` with `on_more` (a more-results row ending the
+//!   list, for paged server results; muted with a spinner while `busy`,
+//!   `more_label`), `on_create: Option<Callback<String>>` (a new-value row
+//!   after the options offering the trimmed text typed while
+//!   `offers_new(options, query)`: not blank and no label, ignoring case;
+//!   `create_label`), `free_text` with `on_text` (no option is active until
+//!   the arrows move; Enter without one, Tab or a press outside give the
+//!   typed text, Escape still reverts) and `text` (shown while `value` is
+//!   none of the options).
 //!
 //! `listed(options, query, answers, busy, filter)` says what an open list shows
 //! (`Listed::Loading` or `Listed::Options(indices)`), `search_select(size,
@@ -2942,7 +2952,10 @@
 //! Escape, Tab or a press outside close it and give the field back what is
 //! chosen. Typing makes the first match active. Parts:
 //! `SEARCH_SELECT_LIST`, `SEARCH_SELECT_GROUP` with `SEARCH_SELECT_HEADING`,
-//! `SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row).
+//! `SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row),
+//! and the rows after the options, `search_select_row(active, more)`:
+//! `SEARCH_SELECT_CREATE` (in the accent, the text in `SEARCH_SELECT_TYPED`)
+//! and `SEARCH_SELECT_MORE` (muted).
 //!
 //! `FilterPicker<T>` is a list's filter, for a [`LibraryToolbar`]: a button
 //! (`BUTTON`, `FILTER_PICKER`, `ON` while anything is chosen) saying `all`, or
@@ -3679,7 +3692,8 @@ pub use save_bar::{SaveBar, SaveBarProps, UnloadGuard, save_bar, unsaved, use_un
 pub use seam::{Seam, SeamAxis, SeamProps, seam};
 #[cfg(feature = "search-select")]
 pub use search_select::{
-    Listed, SearchOption, SearchSelect, SearchSelectProps, listed, search_matches, search_select,
+    Listed, SearchOption, SearchSelect, SearchSelectProps, listed, offers_new, search_matches,
+    search_select, search_select_row,
 };
 #[cfg(feature = "input")]
 pub use secret_input::{REVEAL_MS, Reveal, SecretInput, SecretInputProps};

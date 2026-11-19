@@ -18,6 +18,8 @@ props with `yew::props!`, which fills them in:
 - `DialogProps`: `close_variant`, `onkeydown`.
 - `ErrorBoxProps`: `id`.
 - `ReorderItemProps`: `disabled`.
+- `SearchSelectProps`: `more`, `on_more`, `more_label`, `on_create`,
+  `create_label`, `free_text`, `on_text`, `text`.
 
 ### Added
 
@@ -42,6 +44,13 @@ props with `yew::props!`, which fills them in:
   whose own overlays sit at z-index 1000 or more sets it above them (say
   `--layer-host: 1100`), and every sockel popover, menu, list, dialog, toast
   and tooltip shows over the app's, in their own order.
+- SearchSelect, all off by default: `more` and `on_more` (a more-results
+  row ending the list, for paged server results; `more_label`),
+  `on_create` (a new-value row offering what is typed while no label is it,
+  `offers_new`; `create_label`), and `free_text` with `on_text` and `text`
+  (Enter without an active option, Tab or a press outside give the typed
+  text). New classes `.sockel-search-select-create`, `-typed`, `-more` and
+  `search_select_row`; phrases `sockel-search-select-new`, `-more-results`.
 
 ### Changed
 
