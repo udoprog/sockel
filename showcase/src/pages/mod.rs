@@ -1403,6 +1403,7 @@ pub const PAGES: &[Page] = &[
             "grid_target",
             "reorder_row",
             "reorder_text",
+            "use_reorder_text",
             "landing",
             "slot_at",
             "move_item",

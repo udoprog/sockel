@@ -33,7 +33,9 @@ props with `yew::props!`, which fills them in:
 `ReorderText` is `#[non_exhaustive]` and has new variants (`LiftedCarrying`,
 `MovingBeside`, `DroppedBeside`, `DroppedCarrying`, `DroppedOnPage`), so a
 `text` callback that matches it no longer compiles: add a last arm falling
-back to the catalog's text, `_ => sockel::reorder_text(&text)`.
+back to the app's own text: `let fallback = sockel::use_reorder_text();` in the
+component, then `_ => fallback.emit(t)` (`sockel::reorder_text(&t)` is the
+English only).
 
 `Reorder`: a picked row carrying others is no longer let go on a page
 (`on_drop_page`, which reported only the lifted row); set
@@ -46,6 +48,9 @@ instead.
 
 ### Added
 
+- `use_reorder_text()` (hook) returns a `Callback<ReorderText, String>` saying
+  any `ReorderText` in the app's language, the fallback arm of a `text`
+  override. `reorder_text` stays the English catalog text.
 - `Tabs`, `SubTabs` and `LinkTabs` take `stacked`: a phone's bottom bar, each
   tab's icon over its one-line, truncated label, the tabs of equal width
   across the container and none changing size when selected. Off by default;

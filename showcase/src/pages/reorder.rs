@@ -6,7 +6,7 @@ use yew::prelude::*;
 use sockel::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
     ReorderRow, ReorderText, drag_handle, drag_target, edge_step, grid_target, key_target, landing,
-    move_item, move_items, reorder_row, reorder_text, slot_at,
+    move_item, move_items, reorder_row, slot_at, use_reorder_text,
 };
 
 use crate::class;
@@ -17,9 +17,9 @@ const NAMES: &[&str] = &[
     "Alpha", "Bravo", "Charlie", "Delta", "Echo", "Foxtrot", "Golf", "Hotel",
 ];
 
-/// What `reorder_text` says, in the provided language: the text callback
+/// What `use_reorder_text` says, in the provided language: the text callback
 /// overrides sockel's own words, so the page looks up the same messages.
-fn say(phrases: &Phrases, text: &ReorderText) -> String {
+fn say(phrases: &Phrases, fallback: &Callback<ReorderText, String>, text: &ReorderText) -> String {
     let (id, name, place) = match text {
         ReorderText::Handle { name } => ("sockel-reorder-handle", Some(name), None),
         ReorderText::Hint => ("sockel-reorder-hint", None, None),
@@ -60,7 +60,7 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
             Some((*position, *count)),
         ),
         // Kinds this page does not translate: sockel's own words.
-        _ => return reorder_text(text),
+        _ => return fallback.emit(text.clone()),
     };
     let mut args = Args::new();
     if let Some(name) = name {
@@ -184,10 +184,11 @@ pub fn ReorderPage() -> Html {
         })
     };
     let phrases = use_phrases_with(&sockel::phrasebookcatalog01::L10N);
+    let fallback = use_reorder_text();
     let text_cb = {
         let said = said.clone();
         Callback::from(move |t: ReorderText| {
-            let words = say(&phrases, &t);
+            let words = say(&phrases, &fallback, &t);
             if !matches!(t, ReorderText::Handle { .. } | ReorderText::Hint) {
                 said.set(words.clone());
             }

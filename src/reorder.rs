@@ -71,7 +71,8 @@ impl ReorderRow {
 /// What a [`Reorder`] says: a handle's name, its hint and the
 /// announcements. Positions count from 1; `carried` counts the other picked
 /// rows that go with the lifted one. New kinds may be added: an app's
-/// `text` falls back to [`reorder_text`] for the ones it does not know.
+/// `text` falls back to [`use_reorder_text`] (the app's language) for the ones
+/// it does not know.
 #[derive(Clone, Debug, PartialEq)]
 #[non_exhaustive]
 pub enum ReorderText {
@@ -136,9 +137,28 @@ pub enum ReorderText {
     },
 }
 
-/// The catalog's English text of a [`ReorderText`].
+/// The catalog's English text of a [`ReorderText`], whatever language the app
+/// is in. In a component use [`use_reorder_text`] for the app's own.
 pub fn reorder_text(text: &ReorderText) -> String {
     phrase(&Phrases::from_catalog(&L10N), text)
+}
+
+/// The text of a [`ReorderText`] in the app's language, as [`Reorder`] says it
+/// without a `text`. Call it in the component that builds the `text`
+/// callback, and end that callback with it for the kinds it does not
+/// override:
+///
+/// ```ignore
+/// let fallback = use_reorder_text();
+/// let text = Callback::from(move |t: ReorderText| match t {
+///     ReorderText::Hint => "Press space to lift".to_string(),
+///     _ => fallback.emit(t),
+/// });
+/// ```
+#[hook]
+pub fn use_reorder_text() -> Callback<ReorderText, String> {
+    let phrases = use_phrases_with(&L10N);
+    Callback::from(move |t: ReorderText| phrase(&phrases, &t))
 }
 
 /// [`phrase`] for a row in a named list (a
@@ -2052,6 +2072,58 @@ mod tests {
         assert_eq!(beside(&[false, false, false], 0, 1), None);
         // From another list: every row stays where it is.
         assert_eq!(beside(&[false, true], usize::MAX, 2), Some(1));
+    }
+
+    #[derive(Properties, PartialEq)]
+    struct Said {
+        phrases: Option<Phrases>,
+    }
+
+    #[function_component]
+    fn Say(_: &Said) -> Html {
+        let say = use_reorder_text();
+        html! { <p>{ say.emit(ReorderText::Cancelled { name: "Alfa".into(), position: 2, count: 5 }) }</p> }
+    }
+
+    #[function_component]
+    fn Provided(props: &Said) -> Html {
+        match &props.phrases {
+            Some(phrases) => html! {
+                <ContextProvider<Phrases> context={phrases.clone()}><Say phrases={None} /></ContextProvider<Phrases>>
+            },
+            None => html! { <Say phrases={None} /> },
+        }
+    }
+
+    fn said(phrases: Option<Phrases>) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<Provided>::with_props(Said { phrases })
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn the_fallback_hook_reads_the_provided_language_else_english() {
+        use phrasebook02::{Lang, Phrasebook};
+
+        let sv = Lang::new("sv-SE");
+        let book = Phrasebook::builder()
+            .language(Lang::EN_US, "English")
+            .language(sv, "Svenska")
+            .catalog(&L10N)
+            .build();
+        let text = said(Some(book.phrases(sv)));
+        assert!(text.contains("Alfa tillbaka på plats 2 av 5"), "{text}");
+        let text = said(None);
+        assert!(
+            text.contains(&reorder_text(&ReorderText::Cancelled {
+                name: "Alfa".into(),
+                position: 2,
+                count: 5
+            })),
+            "{text}"
+        );
     }
 
     #[test]
