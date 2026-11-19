@@ -1388,6 +1388,49 @@ mod tests {
     }
 
     #[test]
+    fn a_menu_separator_heading_and_note_take_their_look_from_settings() {
+        let plain = sockel().build().unwrap();
+        let note = declarations(&plain.css, ".sockel-menu-note");
+        assert_eq!(note.iter().filter(|l| l.starts_with("padding")).count(), 1);
+        let tuned = sockel()
+            .with("menu-separator-margin", "2px")
+            .with("menu-separator-edge", "var(--rule)")
+            .with("menu-heading-padding", "8px 12px 2px")
+            .with("menu-heading-text", "11px")
+            .with("menu-heading-ink", "var(--label)")
+            .with("menu-heading-weight", "700")
+            .with("menu-note-padding", "4px 12px")
+            .with("menu-note-text", "12px")
+            .with("menu-note-ink", "var(--hint)")
+            .build()
+            .unwrap();
+        for (selector, lines) in [
+            (
+                ".sockel-menu-separator",
+                &["margin-block: 2px", "border-top-color: var(--rule)"][..],
+            ),
+            (
+                ".sockel-menu-heading",
+                &[
+                    "padding: 8px 12px 2px",
+                    "font-size: 11px",
+                    "color: var(--label)",
+                    "font-weight: 700",
+                ],
+            ),
+            (
+                ".sockel-menu-note",
+                &["padding: 4px 12px", "font-size: 12px", "color: var(--hint)"],
+            ),
+        ] {
+            let found = declarations(&tuned.css, selector);
+            for line in lines {
+                assert!(found.contains(&line.to_string()), "{line} in {found:?}");
+            }
+        }
+    }
+
+    #[test]
     fn a_pager_takes_its_look_from_settings() {
         let tuned = sockel()
             .with("pager-gap", "2px")

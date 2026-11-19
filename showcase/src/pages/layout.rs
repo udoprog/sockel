@@ -4,7 +4,7 @@ use crate::class;
 
 use sockel::{
     Align, Card, Cluster, Gap, Inset, Justify, Stack, TextInput, Toolbar, ToolbarSpacer, card,
-    cluster, stack, stack_with, toolbar,
+    cluster, cluster_with, stack, stack_with, toolbar,
 };
 
 use crate::code::{El, each, snippet, text_node};
@@ -297,7 +297,23 @@ pub fn ClassesPage() -> Html {
     } else {
         (stack(*gap), format!("stack(Gap::{:?})", *gap))
     };
-    let cluster = cluster(*gap, *justify, *align, *wrap, *inline);
+    let (cluster, cluster_call) = if *flush {
+        (
+            cluster_with(*gap, *justify, *align, *wrap, *inline, false, true),
+            format!(
+                "cluster_with(Gap::{:?}, Justify::{:?}, Align::{:?}, {}, {}, false, true)",
+                *gap, *justify, *align, *wrap, *inline
+            ),
+        )
+    } else {
+        (
+            cluster(*gap, *justify, *align, *wrap, *inline),
+            format!(
+                "cluster(Gap::{:?}, Justify::{:?}, Align::{:?}, {}, {})",
+                *gap, *justify, *align, *wrap, *inline
+            ),
+        )
+    };
     let toolbar = toolbar(*boxed);
     let card = card(*inset, *link);
     let shown = |call: &str, classes: &Classes| {
@@ -307,10 +323,7 @@ pub fn ClassesPage() -> Html {
     let code = snippet(
         &[
             format!("let stack = {stack_call};"),
-            format!(
-                "let cluster = cluster(Gap::{:?}, Justify::{:?}, Align::{:?}, {}, {});",
-                *gap, *justify, *align, *wrap, *inline
-            ),
+            format!("let cluster = {cluster_call};"),
             format!("let toolbar = toolbar({});", *boxed),
             format!("let card = card(Inset::{:?}, {});", *inset, *link),
         ],
@@ -329,7 +342,7 @@ pub fn ClassesPage() -> Html {
             <Stack gap={Gap::Loose}>
                 { shown(if *flush { "stack_with(gap, flush)" } else { "stack(gap)" }, &stack) }
                 <ul class={classes!(stack, sockel::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, false, false) }</ul>
-                { shown("cluster(gap, justify, align, wrap, inline)", &cluster) }
+                { shown(if *flush { "cluster_with(gap, justify, align, wrap, inline, lines, flush)" } else { "cluster(gap, justify, align, wrap, inline)" }, &cluster) }
                 <ul class={classes!(cluster, sockel::class::PLAIN_LIST, class::OUTLINED)}>{ samples("ul", 3, Text::Short, true, false) }</ul>
                 { shown("toolbar(boxed)", &toolbar) }
                 <nav class={toolbar} aria-label="Toolbar classes">

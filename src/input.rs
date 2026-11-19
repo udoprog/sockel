@@ -199,7 +199,9 @@ pub struct TextInputProps {
     /// Waiting on something (`aria-busy`, a progress cursor).
     #[prop_or_default]
     pub busy: bool,
-    /// Takes the focus when its dialog or form opens (`data-autofocus`).
+    /// Takes the focus on mount; inside a dialog or popover
+    /// (`[role=dialog]`) it is instead the one they focus as they open
+    /// (`data-autofocus`).
     #[prop_or_default]
     pub autofocus: bool,
     #[prop_or_default]
@@ -208,6 +210,17 @@ pub struct TextInputProps {
     pub testid: Option<AttrValue>,
     #[prop_or_default]
     pub node_ref: NodeRef,
+}
+
+/// Focuses `node` unless a dialog or popover holds it, which focuses its
+/// `data-autofocus` element itself once it is open and placed.
+fn focus_unless_in_dialog(node: &NodeRef) {
+    let Some(input) = node.cast::<web_sys::HtmlElement>() else {
+        return;
+    };
+    if input.closest("[role=dialog]").ok().flatten().is_none() {
+        _ = input.focus();
+    }
 }
 
 fn value_of(e: &InputEvent) -> String {
@@ -225,6 +238,15 @@ pub fn TextInput(props: &TextInputProps) -> Html {
         .reform(|e: Event| e.target_unchecked_into::<HtmlInputElement>().value());
     let aria_invalid = props.invalid.then_some("true");
     let aria_busy = props.busy.then_some("true");
+    {
+        let node = props.node_ref.clone();
+        let autofocus = props.autofocus;
+        use_effect_with((), move |_| {
+            if autofocus {
+                focus_unless_in_dialog(&node);
+            }
+        });
+    }
 
     macro_rules! field {
         ($class:expr) => {

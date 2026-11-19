@@ -78,6 +78,20 @@ impl PagerSummary {
     }
 }
 
+/// The numbers of a summary pager whose words come from the catalog:
+/// `total` items, `size` to a page.
+#[derive(Clone, Copy, Debug, PartialEq, Eq)]
+pub struct PagerCounts {
+    pub total: usize,
+    pub size: usize,
+}
+
+impl PagerCounts {
+    pub fn new(total: usize, size: usize) -> Self {
+        Self { total, size }
+    }
+}
+
 #[derive(Properties, PartialEq)]
 pub struct PagerProps {
     /// The current page, counted from 0.
@@ -125,6 +139,10 @@ pub struct PagerProps {
     /// so previous goes back to the last page.
     #[prop_or_default]
     pub summary: Option<PagerSummary>,
+    /// A summary pager in the catalog's words ("51–100 of 312", "Page 2 of
+    /// 7"), from the counts and `page`; `summary` wins when both are given.
+    #[prop_or_default]
+    pub counts: Option<PagerCounts>,
     /// The `nav` element, for an app that scrolls to what it pages.
     #[prop_or_default]
     pub nav_ref: NodeRef,
@@ -184,6 +202,23 @@ pub fn Pager(props: &PagerProps) -> Html {
     };
     if let Some(summary) = &props.summary {
         return summary_pager(props, summary, &nav_label, &previous_label, &next_label);
+    }
+    if let Some(counts) = props.counts {
+        let size = counts.size.max(1);
+        let total = counts.total;
+        let start = (props.page * size + 1).min(total);
+        let end = ((props.page + 1) * size).min(total);
+        let summary = PagerSummary::new(
+            phrases.msg(
+                "sockel-pager-counts-shown",
+                &args([("start", start), ("end", end), ("total", total)]),
+            ),
+            phrases.msg(
+                "sockel-pager-counts-position",
+                &args([("page", props.page + 1), ("pages", props.pages.max(1))]),
+            ),
+        );
+        return summary_pager(props, &summary, &nav_label, &previous_label, &next_label);
     }
 
     let pages = props.pages.max(1);
@@ -496,6 +531,36 @@ mod tests {
         assert!(!html.contains(class::PAGER_GAP), "{html}");
         // Its two buttons are as wide as a page button.
         assert!(html.contains("--pager-chars: 1"), "{html}");
+    }
+
+    #[test]
+    fn counts_word_the_summary_from_the_catalog() {
+        let html = render(yew::props!(PagerProps {
+            page: 1,
+            pages: 7,
+            on_page: Callback::noop(),
+            counts: Some(PagerCounts::new(312, 50)),
+        }));
+        assert!(html.contains("51–100 of 312"), "{html}");
+        assert!(html.contains("Page 2 of 7"), "{html}");
+        assert!(html.contains(class::SUMMARY), "{html}");
+
+        let html = render(yew::props!(PagerProps {
+            page: 0,
+            pages: 1,
+            on_page: Callback::noop(),
+            counts: Some(PagerCounts::new(0, 50)),
+        }));
+        assert!(html.contains("0–0 of 0"), "{html}");
+
+        let html = render(yew::props!(PagerProps {
+            page: 1,
+            pages: 7,
+            on_page: Callback::noop(),
+            summary: Some(PagerSummary::new("Given", "Here")),
+            counts: Some(PagerCounts::new(312, 50)),
+        }));
+        assert!(html.contains("Given") && !html.contains("of 312"), "{html}");
     }
 
     #[test]

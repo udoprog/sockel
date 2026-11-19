@@ -28,6 +28,7 @@ props with `yew::props!`, which fills them in:
   `trailing` (`None`), which breaks a struct literal of it; build options
   with `PickerOption::new`.
 - `TabsProps`, `LinkTabsProps`: `stacked`.
+- `PagerProps`: `counts`.
 
 `ReorderText` is `#[non_exhaustive]` and has new variants (`LiftedCarrying`,
 `MovingBeside`, `DroppedBeside`, `DroppedCarrying`, `DroppedOnPage`), so a
@@ -106,9 +107,26 @@ instead.
   `$card-button-fill` (a secondary `Button`'s fill on a `Card`; `var(--surface)`),
   `Card`'s `gap` prop (the card as a `Stack`) and `.sockel-in-row` (`class::IN_ROW`):
   a `TextInput` or its box taking the room left in a row, no `sockel-grow` wrapper.
+- `cluster_with(gap, justify, align, wrap, inline, lines, flush)` is exported,
+  beside `stack_with`.
+- Pager: `counts: Option<PagerCounts>` (`PagerCounts::new(total, size)`)
+  makes a summary pager whose two lines come from the catalog,
+  `sockel-pager-counts-shown` ("51–100 of 312") and
+  `sockel-pager-counts-position` ("Page 2 of 7"); a `summary` given beside it
+  wins.
+- `MenuPopup`: a menu's list for an opener the app renders itself, open while
+  `open`, placed beside `anchor` or at a viewport point `at`, closed through
+  `on_dismiss`; it holds the same items, headings, separators and notes as a
+  `Menu`.
+- Settings for a menu's parts, `null` by default so nothing changes:
+  `$menu-separator-margin`, `$menu-separator-edge`, `$menu-heading-padding`,
+  `-text`, `-ink`, `-weight`, `$menu-note-padding`, `-text`, `-ink`.
 
 ### Changed
 
+- TextInput's `autofocus` focuses the input on mount. Inside a dialog or
+  popover (`[role=dialog]`) it stays the `data-autofocus` mark they focus as
+  they open, as before; elsewhere it used to do nothing.
 - A `PageHead` title has a size of its own, `--page-title-size`; unset (the
   default) it keeps the browser's heading size (`revert`), so output is the
   same until an app sets `$page-title-size`. A secondary button's fill reads

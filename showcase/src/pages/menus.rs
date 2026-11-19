@@ -4,8 +4,8 @@ use crate::class;
 
 use sockel::{
     Button, ButtonSize, ButtonVariant, Cluster, ContextMenu, DataTips, Dialog, Glyph, Icon, Menu,
-    MenuCheck, MenuHeading, MenuItem, MenuNote, MenuRadio, MenuSeparator, MenuWidth, RowAction,
-    RowActions, SplitButton, Stack, TextInput,
+    MenuCheck, MenuHeading, MenuItem, MenuNote, MenuPopup, MenuRadio, MenuSeparator, MenuWidth,
+    RowAction, RowActions, SplitButton, Stack, TextInput,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -425,6 +425,60 @@ pub fn ContextMenuPage() -> Html {
                 items={html! { <SampleItems items={*items} text={*text} disabled=true /> }}>
                 <p class={class::SAMPLE}>{ "Right-click here, or press and hold on a touch screen: the menu opens at the pointer." }</p>
             </ContextMenu>
+        </Demo>
+    }
+}
+
+#[function_component]
+pub fn MenuPopupPage() -> Html {
+    let width = use_state(MenuWidth::default);
+    let items = use_state(|| Items::Actions);
+    let at_pointer = use_state(|| false);
+    let open = use_state(|| None::<Option<(i32, i32)>>);
+    let anchor = use_node_ref();
+
+    let controls = html! {
+        <>
+            <Select<MenuWidth> label="width" options={WIDTHS} value={*width} on_change={bind(&width)} />
+            <Select<Items> label="Items" options={ITEMS} value={*items} on_change={bind(&items)} />
+            <Toggle label="at (the press's point)" value={*at_pointer} on_change={bind(&at_pointer)} />
+        </>
+    };
+    let code = snippet(
+        &[],
+        El::new("MenuPopup")
+            .expr("anchor", "anchor.clone()")
+            .expr_if(*at_pointer, "at", "Some((x, y))")
+            .expr("open", "*open")
+            .expr("on_dismiss", "close")
+            .variant("width", *width)
+            .line("<MenuHeading>{ \"Edit\" }</MenuHeading>")
+            .line("<MenuItem onclick={copy}>{ \"Copy\" }</MenuItem>")
+            .line("<MenuSeparator />")
+            .line("<MenuNote>{ \"Follows the grid\" }</MenuNote>"),
+    );
+    let onclick = {
+        let (open, at_pointer) = (open.clone(), *at_pointer);
+        Callback::from(move |e: MouseEvent| {
+            let at = at_pointer.then(|| (e.client_x(), e.client_y()));
+            open.set(if open.is_some() { None } else { Some(at) });
+        })
+    };
+    let on_dismiss = {
+        let open = open.clone();
+        Callback::from(move |_| open.set(None))
+    };
+
+    html! {
+        <Demo {controls} {code}>
+            <Button node_ref={anchor.clone()} expanded={Some(open.is_some())} {onclick}
+                testid="menu-popup-opener">
+                { "The app's own opener" }
+            </Button>
+            <MenuPopup {anchor} at={open.flatten()} open={open.is_some()} {on_dismiss}
+                width={*width} label="Popup" testid="menu-popup">
+                <SampleItems items={*items} text={Text::Short} disabled=true />
+            </MenuPopup>
         </Demo>
     }
 }

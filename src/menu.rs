@@ -1252,6 +1252,85 @@ pub fn ContextMenu(props: &ContextMenuProps) -> Html {
     }
 }
 
+#[derive(Properties, PartialEq)]
+pub struct MenuPopupProps {
+    /// The element it opens beside, the app's own (a toolbar slot, a cell).
+    #[prop_or_default]
+    pub anchor: NodeRef,
+    /// A point in viewport coordinates it opens at instead, as a
+    /// [`ContextMenu`] does at the pointer.
+    #[prop_or_default]
+    pub at: Option<(i32, i32)>,
+    pub open: bool,
+    /// The owner closes it.
+    pub on_dismiss: Callback<Dismiss>,
+    #[prop_or_default]
+    pub side: Side,
+    #[prop_or(PopoverAlign::Start)]
+    pub align: PopoverAlign,
+    /// A selector: keep it inside the anchor's closest ancestor matching
+    /// it, not the viewport alone.
+    #[prop_or_default]
+    pub within: Option<AttrValue>,
+    #[prop_or_default]
+    pub width: MenuWidth,
+    #[prop_or_default]
+    pub tight: bool,
+    #[prop_or_default]
+    pub sheet: bool,
+    /// The menu's accessible name.
+    #[prop_or_default]
+    pub label: Option<AttrValue>,
+    #[prop_or_default]
+    pub keep_mounted: bool,
+    #[prop_or_default]
+    pub class: Classes,
+    #[prop_or_default]
+    pub testid: Option<AttrValue>,
+    pub children: Html,
+}
+
+/// A [`Menu`]'s list for an opener the app renders itself: open while
+/// `open`, beside `anchor` or at `at`. A pick gives focus back to the anchor.
+#[function_component]
+pub fn MenuPopup(props: &MenuPopupProps) -> Html {
+    let overlays = use_overlays();
+    let point = use_node_ref();
+    let back = {
+        let anchor = props.anchor.clone();
+        Callback::from(move |()| {
+            if let Some(anchor) = anchor.cast::<HtmlElement>() {
+                focus_quietly(&anchor);
+            }
+        })
+    };
+    let (anchor, point_span) = match props.at {
+        Some((x, y)) => (
+            point.clone(),
+            props.open.then(|| {
+                overlays.portal(html! {
+                    <span ref={point} class={class::MENU_POINT}
+                        style={format!("--menu-x: {x}px; --menu-y: {y}px;")} aria-hidden="true"></span>
+                })
+            }),
+        ),
+        None => (props.anchor.clone(), None),
+    };
+
+    html! {
+        <>
+            { for point_span }
+            <MenuList {anchor} open={props.open} on_dismiss={props.on_dismiss.clone()} {back}
+                side={props.side} align={props.align} within={props.within.clone()}
+                width={props.width} tight={props.tight} sheet={props.sheet}
+                label={props.label.clone()} class={props.class.clone()}
+                testid={props.testid.clone()} keep_mounted={props.keep_mounted}>
+                { props.children.clone() }
+            </MenuList>
+        </>
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -1266,6 +1345,34 @@ mod tests {
                 .hydratable(false)
                 .render(),
         )
+    }
+
+    #[test]
+    fn a_popup_is_a_menu_only_while_open() {
+        let popup = |open| {
+            render::<MenuPopup>(yew::props!(MenuPopupProps {
+                open,
+                on_dismiss: Callback::noop(),
+                label: Some(AttrValue::from("Grid")),
+                children: html! {
+                    <>
+                        <MenuHeading>{ "Snap" }</MenuHeading>
+                        <MenuItem>{ "Beats" }</MenuItem>
+                        <MenuSeparator />
+                        <MenuNote>{ "Follows the grid" }</MenuNote>
+                    </>
+                },
+            }))
+        };
+        assert!(!popup(false).contains("role=\"menu\""));
+        let html = popup(true);
+        assert!(
+            html.contains("role=\"menu\"") && html.contains("aria-label=\"Grid\""),
+            "{html}"
+        );
+        for part in [class::MENU_HEADING, class::MENU_SEPARATOR, class::MENU_NOTE] {
+            assert!(html.contains(part), "{part} in {html}");
+        }
     }
 
     #[test]

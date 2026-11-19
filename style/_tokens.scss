@@ -304,6 +304,18 @@ $menu-item-edge: null !default;
 $menu-radius: null !default;
 $menu-item-phone-height: null !default;
 $menu-item-mark-ink: null !default;
+// A menu's parts: a separator's block margin and rule colour (`null`:
+// `var(--space-1)`, `--border`), a heading's and a note's padding, font
+// size and ink, and a heading's weight (`null` keeps each part's own).
+$menu-separator-margin: null !default;
+$menu-separator-edge: null !default;
+$menu-heading-padding: null !default;
+$menu-heading-text: null !default;
+$menu-heading-ink: null !default;
+$menu-heading-weight: null !default;
+$menu-note-padding: null !default;
+$menu-note-text: null !default;
+$menu-note-ink: null !default;
 // A popover's corners, the edges its sheet keeps and its body's
 // `scrollbar-gutter` (as the dialog's).
 $popover-radius: var(--radius-md) !default;

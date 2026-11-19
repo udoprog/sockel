@@ -424,10 +424,10 @@
 //! | `loadable` | `notice`, `skeleton` | [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) | 22.2 KB |
 //! | `log-view` | `button` | [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html), [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) | 14.6 KB |
 //! | `media` | `icons` | [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html), [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) | 5.6 KB |
-//! | `menu` | `button`, `icons`, `overlay` | [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html), [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html), [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html), [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html) | 31.1 KB |
+//! | `menu` | `button`, `icons`, `overlay` | [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html), [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html), [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html), [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html), [`MenuPopup`](https://docs.rs/sockel/latest/sockel/struct.MenuPopup.html) | 31.1 KB |
 //! | `notice` | `badge`, `button` | [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html), [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html), [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) | 21.9 KB |
 //! | `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html), [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) | 25.7 KB |
-//! | `pager` | `icons` | [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html), [`PagerSummary`](https://docs.rs/sockel/latest/sockel/struct.PagerSummary.html) | 6.5 KB |
+//! | `pager` | `icons` | [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html), [`PagerSummary`](https://docs.rs/sockel/latest/sockel/struct.PagerSummary.html), [`PagerCounts`](https://docs.rs/sockel/latest/sockel/struct.PagerCounts.html) | 6.5 KB |
 //! | `panel` | | [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) | 4.8 KB |
 //! | `picker` | `overlay`, `pager`, `select` | [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html), [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html), [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html), [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html), [`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) | 50.9 KB |
 //! | `property-list` | `button`, `input` | [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html), [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html), [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) | 21.4 KB |
@@ -646,6 +646,9 @@
 //! | `$menu-radius` | `null` (a menu's corners; `null` keeps `--radius-md`) |
 //! | `$menu-item-phone-height` | `null` (a menu row's least height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
 //! | `$menu-item-mark-ink` | `null` (a check's or radio's mark; `null` keeps `--accent`, `currentColor` draws it as the row's text) |
+//! | `$menu-separator-margin`, `$menu-separator-edge` | `null` each (a [`MenuSeparator`](https://docs.rs/sockel/latest/sockel/struct.MenuSeparator.html)'s block margin and rule colour; `null` keeps `var(--space-1)` and `--border`) |
+//! | `$menu-heading-padding`, `$menu-heading-text`, `$menu-heading-ink`, `$menu-heading-weight` | `null` each (a [`MenuHeading`](https://docs.rs/sockel/latest/sockel/struct.MenuHeading.html)'s padding, font size, colour and weight; `null` keeps `var(--space-1) var(--space-3) 0`, `--text-xs`, `--muted`, 600) |
+//! | `$menu-note-padding`, `$menu-note-text`, `$menu-note-ink` | `null` each (a [`MenuNote`](https://docs.rs/sockel/latest/sockel/struct.MenuNote.html)'s padding, font size and colour; `null` keeps `var(--space-2) var(--space-3)`, `--text-sm`, `--muted`) |
 //! | `$input-hover-edge` | `var(--accent)` (a text field's edge on hover: `.sockel-input`, `.sockel-textarea`, `.sockel-input-box`) |
 //! | `$input-focus-edge` | `null` (its edge while focused; `null` keeps the edge it has) |
 //! | `$input-ring-offset` | `null` (its focus ring's offset; `null` keeps `--focus-ring-offset`, a negative one draws the ring over the edge) |
@@ -1020,8 +1023,9 @@
 //! (`sockel::class::PLAIN_LIST` is added for it), so it lays out exactly as a
 //! `div` would; put `li`s in it. `stack(gap)` and `stack_with(gap, flush)` give a stack's
 //! classes to an element that cannot be the component (a `<form>` with its
-//! own handlers); they return the same classes for any tag, so a list built
-//! from them adds `PLAIN_LIST` itself.
+//! own handlers), as `cluster(gap, justify, align, wrap, inline)` and
+//! `cluster_with(.., lines, flush)` give a cluster's; they return the same
+//! classes for any tag, so a list built from them adds `PLAIN_LIST` itself.
 //!
 //! A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
 //! blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
@@ -1289,8 +1293,9 @@
 //!   (a touch keyboard's kind and enter key), `autocomplete` and `spellcheck`
 //!   (`Option<bool>`; each set only when given),
 //!   `placeholder`, `label` (the accessible name without a `Field`),
-//!   `readonly`,
-//!   `required`, `autofocus`, `node_ref`. With a `unit` (Html, `aria-hidden`)
+//!   `readonly`, `required`, `autofocus` (focused on mount; inside a
+//!   [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) or popover, `data-autofocus`, which they focus as they
+//!   open), `node_ref`. With a `unit` (Html, `aria-hidden`)
 //!   the input sits in a box (`INPUT_BOX`) with the unit after the text inside
 //!   the field; the box takes the border and the focus ring, so the unit is
 //!   part of the field's box and the text keeps its start.
@@ -2538,7 +2543,7 @@
 //!
 //! <br>
 //!
-//! ## Menu, RowActions, SplitButton and ContextMenu
+//! ## Menu, RowActions, SplitButton, ContextMenu and MenuPopup
 //!
 //! [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html) is a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) (`aria-haspopup="menu"`, `aria-expanded`) opening a
 //! list of actions (`role="menu"`, `sockel::class::MENU`) beside it in the
@@ -2630,6 +2635,14 @@
 //! touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
 //! had it when it opened (Tab then moves on from there). `width`, `tight`, `within`, `label`, `disabled` (the browser's
 //! menu instead), `on_toggle`, `class`, `testid`.
+//!
+//! [`MenuPopup`](https://docs.rs/sockel/latest/sockel/struct.MenuPopup.html) is a `Menu`'s list for an opener the app renders itself:
+//! `open` and `on_dismiss: Callback<Dismiss>` (the owner closes it), placed
+//! beside `anchor` (a `NodeRef`) or at `at` (a viewport point, as a
+//! `ContextMenu` opens), `side`, `align` (`Start` by default), `within`,
+//! `width`, `tight`, `sheet`, `label`, `keep_mounted`, `class`, `testid`. Its
+//! children are the items, and its keys are a `Menu`'s; a pick gives focus
+//! back to the anchor.
 //!
 //! Size guarantees: the opener is a `Button`, so open and closed are the same
 //! box (only `aria-expanded` changes). The list is fixed in a layer that lays
@@ -2726,7 +2739,10 @@
 //! such as "1–50 of 312" and "Page 1 of 7"), in a polite live region, then previous and next at the row's
 //! end. A page past the last stays as given there, so previous leads back to the
 //! last page. The setting `$pager-summary-padding` (`null`: none) pads it, for
-//! one that ends a list or table and lines up with its rows. `nav_ref` is the
+//! one that ends a list or table and lines up with its rows. `counts:
+//! Option<PagerCounts>` (`PagerCounts::new(total, size)`) words the same two
+//! lines from the catalog (`sockel-pager-counts-shown`,
+//! `sockel-pager-counts-position`) instead; a `summary` wins over it. `nav_ref` is the
 //! `nav` element, for an app that scrolls to what it
 //! pages. Parts: `PAGER_STATUS`, `PAGER_SHOWN`, `PAGER_POSITION`, `PAGER_STEPS`.
 //!
@@ -3713,7 +3729,7 @@ pub use lanes::{Lane, LaneProps, Lanes, LanesProps, lanes};
 pub use layout::{
     Align, Card, CardProps, Cluster, ClusterProps, Gap, Inset, Justify, Stack, StackProps, Toolbar,
     ToolbarPart, ToolbarPartProps, ToolbarProps, ToolbarSpacer, ToolbarSpacerProps, card, cluster,
-    stack, stack_with, tool_band, toolbar, toolbar_part,
+    cluster_with, stack, stack_with, tool_band, toolbar, toolbar_part,
 };
 #[cfg(feature = "library-toolbar")]
 pub use library_toolbar::{LibraryToolbar, LibraryToolbarProps};
@@ -3733,9 +3749,9 @@ pub use log_view::{
 #[cfg(feature = "menu")]
 pub use menu::{
     ContextMenu, ContextMenuProps, Menu, MenuCheck, MenuCheckProps, MenuHeading, MenuItem,
-    MenuItemProps, MenuNote, MenuPartProps, MenuProps, MenuRadio, MenuRadioProps, MenuSeparator,
-    MenuWidth, RowAction, RowActions, RowActionsProps, SplitButton, SplitButtonProps, menu,
-    menu_item,
+    MenuItemProps, MenuNote, MenuPartProps, MenuPopup, MenuPopupProps, MenuProps, MenuRadio,
+    MenuRadioProps, MenuSeparator, MenuWidth, RowAction, RowActions, RowActionsProps, SplitButton,
+    SplitButtonProps, menu, menu_item,
 };
 #[cfg(feature = "tabs")]
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
@@ -3750,7 +3766,8 @@ pub use overlay::{
 };
 #[cfg(feature = "pager")]
 pub use pager::{
-    MIN_SLOTS, Pager, PagerProps, PagerSummary, Slot, page_count, pager, pager_button, pager_slots,
+    MIN_SLOTS, Pager, PagerCounts, PagerProps, PagerSummary, Slot, page_count, pager, pager_button,
+    pager_slots,
 };
 #[cfg(feature = "panel")]
 pub use panel::{Panel, PanelGround, PanelProps, panel};
