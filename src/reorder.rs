@@ -491,7 +491,7 @@ pub fn drag_handle(lifted: bool) -> Classes {
     classes!(class::DRAG_HANDLE, lifted.then_some(class::LIFTED))
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct DragHandleProps {
     /// The handle's accessible name ("Move Alpha").
     pub label: AttrValue,
@@ -548,7 +548,7 @@ pub fn DragHandle(props: &DragHandleProps) -> Html {
 
 /// One row of a [`Reorder`] in its children mode: the row's own element,
 /// holding whatever the app renders, a [`ReorderHandle`] somewhere in it.
-#[derive(Clone, Properties, PartialEq)]
+#[derive(Clone, Default, Properties, PartialEq)]
 pub struct ReorderItemProps {
     /// Stable across moves, so the row keeps its element (and focus).
     pub id: AttrValue,
@@ -618,7 +618,7 @@ pub fn ReorderItem(props: &ReorderItemProps) -> Html {
     with_data(row, &props.data)
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReorderHandleProps {
     #[prop_or_default]
     pub class: Classes,
@@ -636,7 +636,7 @@ pub fn ReorderHandle(props: &ReorderHandleProps) -> Html {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReorderProps {
     /// The rows, each a [`RowListItem`] with its handle at the start.
     #[prop_or_default]

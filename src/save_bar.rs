@@ -132,6 +132,28 @@ pub struct SaveBarProps {
     pub children: Html,
 }
 
+impl Default for SaveBarProps {
+    fn default() -> Self {
+        Self {
+            dirty: Default::default(),
+            busy: Default::default(),
+            disabled: Default::default(),
+            label: Default::default(),
+            save_label: Default::default(),
+            discard_label: Default::default(),
+            status: Default::default(),
+            onsave: Default::default(),
+            ondiscard: Default::default(),
+            submit: Default::default(),
+            guard: ::yew::html::IntoPropValue::into_prop_value(true),
+            sticky: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A save bar's classes: `idle` while nothing is unsaved.
 pub fn save_bar(idle: bool, sticky: bool) -> Classes {
     classes!(

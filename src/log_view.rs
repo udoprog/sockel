@@ -32,7 +32,7 @@ pub fn log_view(following: bool) -> Classes {
     classes!(class::LOG_VIEW, following.then_some(class::FOLLOWING))
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct LogViewProps {
     /// How many rows it holds (or any count that grows as rows come), so
     /// the rows that come while it is away from its end are counted.
@@ -184,7 +184,7 @@ pub fn LogView(props: &LogViewProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct LogGroupProps {
     /// Its row while folded and its head while open.
     pub summary: Html,

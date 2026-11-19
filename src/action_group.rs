@@ -4,7 +4,7 @@ use crate::class;
 use crate::testid::with_testid;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ActionGroupProps {
     /// At the end of its row, or of its own line.
     #[prop_or_default]

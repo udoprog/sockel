@@ -240,6 +240,20 @@ pub struct TooltipProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for TooltipProps {
+    fn default() -> Self {
+        Self {
+            anchor: Default::default(),
+            text: Default::default(),
+            side: ::yew::html::IntoPropValue::into_prop_value(Side::Above),
+            delay: ::yew::html::IntoPropValue::into_prop_value(TOOLTIP_DELAY),
+            id: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A tooltip's classes: `tooltip`, and `placed` once it has been measured.
 pub fn tooltip(placed: bool) -> Classes {
     classes!(class::TOOLTIP, placed.then_some(class::PLACED))
@@ -329,6 +343,21 @@ pub struct HoverCardProps {
     pub children: Html,
 }
 
+impl Default for HoverCardProps {
+    fn default() -> Self {
+        Self {
+            anchor: Default::default(),
+            side: Default::default(),
+            align: Default::default(),
+            delay: ::yew::html::IntoPropValue::into_prop_value(HOVER_CARD_DELAY),
+            title: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A hover card's classes: a `popover`, `hover-card`, and `placed` once
 /// measured.
 pub fn hover_card(placed: bool) -> Classes {
@@ -382,7 +411,7 @@ pub fn HoverCard(props: &HoverCardProps) -> Html {
     ))
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReasonButtonProps {
     #[prop_or_default]
     pub class: Classes,

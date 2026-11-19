@@ -5,6 +5,13 @@ All notable changes to sockel and sockel-build. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- Every props struct except `ImageProps` implements `Default` (its `#[prop_or]`
+  values, otherwise the empty value), so apps can write `..Default::default()`
+  and later new props stay non-breaking. The crate docs recommend `html!` and
+  `yew::props!` for building props.
+
 ## [0.2.1] - 2026-11-19
 
 ### Changed

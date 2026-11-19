@@ -45,6 +45,24 @@ pub struct NoticeProps {
     pub children: Html,
 }
 
+impl Default for NoticeProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            tone: ::yew::html::IntoPropValue::into_prop_value(Tone::Accent),
+            icon: Default::default(),
+            onclose: Default::default(),
+            close_label: Default::default(),
+            action: Default::default(),
+            testid: Default::default(),
+            id: Default::default(),
+            alert: Default::default(),
+            status: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A notice's classes: `notice` and its tone.
 pub fn notice(tone: Tone) -> Classes {
     classes!(class::NOTICE, tone.class())

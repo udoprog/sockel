@@ -40,7 +40,7 @@ pub fn next_sort(current: Option<SortDirection>, first: SortDirection) -> Option
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct SortHeaderProps {
     pub label: AttrValue,
     /// How the column is sorted, if it is.

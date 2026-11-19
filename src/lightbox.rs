@@ -85,7 +85,7 @@ pub fn lightbox(zoomed: bool) -> Classes {
     classes!(class::LIGHTBOX, zoomed.then_some(class::ZOOMED))
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct LightboxProps {
     pub items: Vec<LightboxItem>,
     /// The image shown; closed while `None`.

@@ -166,7 +166,7 @@ pub fn overlay_host(classes: Classes) -> Classes {
     classes!(class::OVERLAY_HOST, classes)
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct OverlayHostProps {
     /// On the host element.
     #[prop_or_default]

@@ -20,7 +20,7 @@ pub fn property_list(boxed: bool) -> Classes {
     classes!(class::PROPERTY_LIST, boxed.then_some(class::BOXED))
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct PropertyListProps {
     /// What the list describes, for assistive technology.
     #[prop_or_default]
@@ -56,7 +56,7 @@ pub fn PropertyList(props: &PropertyListProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct PropertyRowProps {
     /// The property's name.
     pub label: AttrValue,
@@ -139,7 +139,7 @@ pub fn inline_edit(empty: bool, multiline: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct InlineEditProps {
     pub value: AttrValue,
     /// Told the new text when an edit commits with a change; not told of an

@@ -114,7 +114,7 @@ impl TabItem {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct TabsProps {
     #[prop_or_default]
     pub class: Classes,
@@ -142,7 +142,7 @@ pub struct TabsProps {
 }
 
 /// The props of [`LinkTabs`].
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct LinkTabsProps {
     #[prop_or_default]
     pub class: Classes,

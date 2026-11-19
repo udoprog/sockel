@@ -114,7 +114,7 @@ impl ChoiceOption {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ChoiceProps {
     #[prop_or_default]
     pub class: Classes,

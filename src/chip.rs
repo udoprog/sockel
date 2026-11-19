@@ -18,7 +18,7 @@ pub fn chip(still: bool, media: bool, icon: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ChipProps {
     #[prop_or_default]
     pub class: Classes,
@@ -132,7 +132,7 @@ pub fn Chip(props: &ChipProps) -> Html {
     node
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ChipToggleProps {
     #[prop_or_default]
     pub class: Classes,
@@ -182,7 +182,7 @@ pub fn ChipToggle(props: &ChipToggleProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ChipListProps {
     #[prop_or_default]
     pub class: Classes,

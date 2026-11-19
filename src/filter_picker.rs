@@ -77,6 +77,21 @@ pub struct FilterPickerProps<T: PartialEq + 'static> {
     pub testid: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for FilterPickerProps<T> {
+    fn default() -> Self {
+        Self {
+            choices: Default::default(),
+            chosen: Default::default(),
+            on_change: Default::default(),
+            label: Default::default(),
+            all: Default::default(),
+            disabled: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A button `--filter-width` wide saying what is chosen (the first, and a
 /// count of the rest in a reserved slot), so choosing never resizes it.
 /// It opens a multi-select listbox: an option for all, then a checkable

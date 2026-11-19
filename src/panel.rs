@@ -34,7 +34,7 @@ pub fn panel(ground: PanelGround, line: bool, centered: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct PanelProps {
     #[prop_or_default]
     pub ground: PanelGround,

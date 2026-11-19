@@ -16,7 +16,7 @@ pub enum FieldInputs {
     Stack,
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct FieldProps {
     /// The control's `id`, which the label's `for` names; the control in
     /// `children` takes it. With `group`, the field's own.
@@ -178,7 +178,7 @@ pub fn Field(props: &FieldProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct FormRowsProps {
     /// Fixes the label column at `--field-label-width` (on a wide
     /// screen), so every section's controls start on one line.
@@ -224,7 +224,7 @@ pub fn FormRow(props: &FieldProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct FieldsetProps {
     /// The group's title.
     pub legend: Html,
@@ -255,7 +255,7 @@ pub fn Fieldset(props: &FieldsetProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct FieldCheckProps {
     /// The text after the checkbox.
     pub label: Html,

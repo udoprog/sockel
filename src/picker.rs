@@ -256,6 +256,34 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     pub testid: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for ChoiceListProps<T> {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            multi: Default::default(),
+            chosen: Default::default(),
+            on_pick: Default::default(),
+            label: Default::default(),
+            always_search: Default::default(),
+            search_label: Default::default(),
+            empty_label: Default::default(),
+            clear_label: Default::default(),
+            detail_below: Default::default(),
+            autofocus: Default::default(),
+            on_search: Default::default(),
+            busy: Default::default(),
+            busy_label: Default::default(),
+            filter: Default::default(),
+            page_size: Default::default(),
+            tab_cycles: Default::default(),
+            rows: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// Options in a listbox `--picker-rows` rows high, under a search field
 /// when there are more than a few (or `always_search`). Focus stays in the
 /// field (or on the list, without one), naming the active option with
@@ -570,7 +598,7 @@ where
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ChoicePopupProps {
     /// The opener it sits below, which the app renders.
     pub anchor: NodeRef,
@@ -788,6 +816,41 @@ pub struct PickerProps<T: PartialEq + 'static> {
     pub list_testid: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for PickerProps<T> {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            on_change: Default::default(),
+            label: Default::default(),
+            placeholder: Default::default(),
+            variant: Default::default(),
+            fill: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            always_search: Default::default(),
+            search_label: Default::default(),
+            empty_label: Default::default(),
+            clear_label: Default::default(),
+            detail_below: Default::default(),
+            id: Default::default(),
+            describedby: Default::default(),
+            title: Default::default(),
+            fold: Default::default(),
+            on_search: Default::default(),
+            page_size: Default::default(),
+            busy: Default::default(),
+            busy_label: Default::default(),
+            filter: Default::default(),
+            sheet: Default::default(),
+            close_label: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            list_testid: Default::default(),
+        }
+    }
+}
+
 /// The list's test id: `list` or the opener's suffixed `-list`.
 fn list_testid(testid: &Option<AttrValue>, list: &Option<AttrValue>) -> Option<AttrValue> {
     list.clone().or_else(|| {
@@ -992,6 +1055,47 @@ pub struct PickerMenuProps<T: PartialEq + 'static> {
     pub list_testid: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for PickerMenuProps<T> {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            multi: Default::default(),
+            chosen: Default::default(),
+            on_pick: Default::default(),
+            open: Default::default(),
+            on_toggle: Default::default(),
+            align: Default::default(),
+            tip: Default::default(),
+            head: Default::default(),
+            children: Default::default(),
+            text: Default::default(),
+            icon: Default::default(),
+            chevron: Default::default(),
+            label: Default::default(),
+            variant: Default::default(),
+            size: Default::default(),
+            disabled: Default::default(),
+            always_search: Default::default(),
+            search_label: Default::default(),
+            empty_label: Default::default(),
+            clear_label: Default::default(),
+            detail_below: Default::default(),
+            on_search: Default::default(),
+            page_size: Default::default(),
+            tab_cycles: Default::default(),
+            rows: Default::default(),
+            width: Default::default(),
+            fold: Default::default(),
+            field: Default::default(),
+            fill: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            list_testid: Default::default(),
+        }
+    }
+}
+
 /// A [`Button`] for an action that takes an option (adding one), opening a
 /// [`ChoiceList`] as a [`Picker`] does; a pick closes it, unless `multi`.
 #[function_component]
@@ -1129,6 +1233,28 @@ pub struct PickerDialogProps<T: PartialEq + 'static> {
     /// The dialog's test id; the list's is it suffixed `-list`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+}
+
+impl<T: PartialEq + 'static> Default for PickerDialogProps<T> {
+    fn default() -> Self {
+        Self {
+            open: Default::default(),
+            on_dismiss: Default::default(),
+            title: Default::default(),
+            options: Default::default(),
+            value: Default::default(),
+            multi: Default::default(),
+            chosen: Default::default(),
+            on_pick: Default::default(),
+            search_label: Default::default(),
+            empty_label: Default::default(),
+            clear_label: Default::default(),
+            size: Default::default(),
+            actions: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
 }
 
 /// The searchable picker shell for a large set (languages, countries): a

@@ -908,6 +908,16 @@
 //!
 //! <br>
 //!
+//! ## Building props
+//!
+//! Build a component's props with `html!` or `yew::props!`, which fill in
+//! every prop you leave out. Nearly every props struct also implements
+//! `Default`, so a struct literal written as `Props { label: .., ..Default::default() }`
+//! keeps compiling when a release adds a prop. A required prop is the empty
+//! value under `Default` (an empty label, a no-op callback), so name the ones
+//! the component needs. `ImageProps` has no `Default`: its `ratio` has no
+//! sensible default.
+//!
 //! ## Showcase
 //!
 //! The [showcase](https://udoprog.github.io/sockel/) is a page per component,
@@ -1328,3 +1338,35 @@ pub use tooltip::{
     DataTips, HOVER_CARD_DELAY, HoverCard, HoverCardProps, ReasonButton, ReasonButtonProps,
     TOOLTIP_DELAY, Tooltip, TooltipProps, hover_card, reason_text, tooltip,
 };
+
+#[cfg(test)]
+mod props_default {
+    use super::*;
+    use yew::prelude::*;
+
+    #[test]
+    fn default_matches_html_defaults() {
+        assert!(yew::props!(CardGridProps {}) == CardGridProps::default());
+        assert_eq!(CardGridProps::default().tag, "ul");
+    }
+
+    #[test]
+    fn struct_update_fills_the_rest() {
+        let built = AvatarProps {
+            name: AttrValue::from("Ada"),
+            ..Default::default()
+        };
+        assert!(built == yew::props!(AvatarProps { name: "Ada" }));
+        assert!(built.lazy);
+
+        let wide = CardGridProps {
+            size: GridSize::Wide,
+            ..Default::default()
+        };
+        assert!(
+            wide == yew::props!(CardGridProps {
+                size: GridSize::Wide
+            })
+        );
+    }
+}

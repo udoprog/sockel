@@ -4,7 +4,7 @@ use crate::class;
 use crate::testid::with_testid;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq, Clone)]
+#[derive(Properties, Default, PartialEq, Clone)]
 pub struct HeadProps {
     /// The title's content: text, or formatted names and spans.
     pub title: Html,

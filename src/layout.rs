@@ -202,6 +202,19 @@ pub struct StackProps {
     pub children: Html,
 }
 
+impl Default for StackProps {
+    fn default() -> Self {
+        Self {
+            gap: Default::default(),
+            flush: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("div"),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A list tag drops the browser's bullets, margin and padding.
 fn list_reset(tag: &str) -> Option<&'static str> {
     matches!(tag, "ul" | "ol").then_some(class::PLAIN_LIST)
@@ -249,6 +262,24 @@ pub struct ClusterProps {
     pub children: Html,
 }
 
+impl Default for ClusterProps {
+    fn default() -> Self {
+        Self {
+            gap: Default::default(),
+            justify: Default::default(),
+            align: Default::default(),
+            nowrap: Default::default(),
+            inline: Default::default(),
+            lines: Default::default(),
+            flush: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("div"),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 #[function_component]
 pub fn Cluster(props: &ClusterProps) -> Html {
     let classes = cluster_with(
@@ -271,7 +302,7 @@ pub fn Cluster(props: &ClusterProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ToolbarProps {
     /// A bar of its own, bordered on the surface.
     #[prop_or_default]
@@ -317,7 +348,7 @@ pub fn Toolbar(props: &ToolbarProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ToolbarSpacerProps {
     #[prop_or_default]
     pub class: Classes,
@@ -331,7 +362,7 @@ pub fn ToolbarSpacer(props: &ToolbarSpacerProps) -> Html {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ToolbarPartProps {
     /// Ruled off from the part before it, from the phone breakpoint up.
     #[prop_or_default]
@@ -373,6 +404,19 @@ pub struct CardProps {
     pub testid: Option<AttrValue>,
     #[prop_or_default]
     pub children: Html,
+}
+
+impl Default for CardProps {
+    fn default() -> Self {
+        Self {
+            inset: Default::default(),
+            gap: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("div"),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
 }
 
 /// A card holding content; a card that is a link takes [`card`]'s classes

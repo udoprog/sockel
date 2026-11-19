@@ -122,7 +122,7 @@ pub fn group_classes(detached: &[bool]) -> Vec<Classes> {
         .collect()
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct InputGroupProps {
     #[prop_or_default]
     pub class: Classes,
@@ -138,7 +138,7 @@ pub fn InputGroup(props: &InputGroupProps) -> Html {
     html! { <div class={classes!(class::INPUT_GROUP, props.class.clone())} role="group">{ props.children.clone() }</div> }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct TextInputProps {
     pub value: AttrValue,
     /// Each edit, with the new text.
@@ -334,6 +334,34 @@ pub struct TextareaProps {
     pub on_drop: Callback<DragEvent>,
 }
 
+impl Default for TextareaProps {
+    fn default() -> Self {
+        Self {
+            value: Default::default(),
+            on_input: Default::default(),
+            on_change: Default::default(),
+            id: Default::default(),
+            name: Default::default(),
+            size: Default::default(),
+            rows: ::yew::html::IntoPropValue::into_prop_value(3),
+            placeholder: Default::default(),
+            label: Default::default(),
+            describedby: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            readonly: Default::default(),
+            required: Default::default(),
+            busy: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            node_ref: Default::default(),
+            on_keydown: Default::default(),
+            on_paste: Default::default(),
+            on_drop: Default::default(),
+        }
+    }
+}
+
 /// Lines of text: as high as its `rows`, resized only vertically by the
 /// user, and the same border and focus ring as a [`TextInput`].
 #[function_component]
@@ -426,6 +454,36 @@ pub struct SearchFieldProps {
     pub on_focus: Option<Callback<FocusEvent>>,
     #[prop_or_default]
     pub on_blur: Option<Callback<FocusEvent>>,
+}
+
+impl Default for SearchFieldProps {
+    fn default() -> Self {
+        Self {
+            value: Default::default(),
+            on_input: Default::default(),
+            label: Default::default(),
+            clear_label: Default::default(),
+            id: Default::default(),
+            size: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            autofocus: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            input_ref: Default::default(),
+            on_keydown: Default::default(),
+            escape_clears: ::yew::html::IntoPropValue::into_prop_value(true),
+            controls: Default::default(),
+            activedescendant: Default::default(),
+            expanded: Default::default(),
+            placeholder: Default::default(),
+            title: Default::default(),
+            keyshortcuts: Default::default(),
+            on_focus: Default::default(),
+            on_blur: Default::default(),
+        }
+    }
 }
 
 /// A search icon, the text and a button that clears it. The icon's and the

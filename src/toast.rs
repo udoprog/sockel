@@ -14,7 +14,7 @@ use yew::prelude::*;
 /// How long a toast shows, in milliseconds, unless told otherwise.
 pub const TOAST_MS: u32 = 8000;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ToastHostProps {
     #[prop_or_default]
     pub class: Classes,
@@ -94,6 +94,26 @@ pub struct ToastProps {
     /// The text.
     #[prop_or_default]
     pub children: Html,
+}
+
+impl Default for ToastProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            tone: ::yew::html::IntoPropValue::into_prop_value(Tone::Accent),
+            icon: Default::default(),
+            action: Default::default(),
+            onaction: Default::default(),
+            action_icon: Default::default(),
+            action_testid: Default::default(),
+            ondismiss: Default::default(),
+            duration: ::yew::html::IntoPropValue::into_prop_value(TOAST_MS),
+            shortcut: Default::default(),
+            close_label: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
 }
 
 /// A toast's classes: `toast` and its tone.

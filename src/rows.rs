@@ -23,6 +23,19 @@ pub struct RowListProps {
     pub children: Html,
 }
 
+impl Default for RowListProps {
+    fn default() -> Self {
+        Self {
+            divided: Default::default(),
+            boxed: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("ul"),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A row list's classes: `divided` draws lines between rows, `boxed` a surface.
 pub fn row_list(divided: bool, boxed: bool) -> Classes {
     classes!(
@@ -72,6 +85,22 @@ pub struct RowListItemProps {
     pub children: Html,
 }
 
+impl Default for RowListItemProps {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            detail: Default::default(),
+            start: Default::default(),
+            top: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("li"),
+            class: Default::default(),
+            testid: Default::default(),
+            onpointerdown: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A row list item's classes: `top` for a tall row.
 pub fn row_list_item(top: bool) -> Classes {
     classes!(class::ROW_LIST_ITEM, top.then_some(class::TOP))
@@ -102,7 +131,7 @@ pub fn RowListItem(props: &RowListItemProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct PickRowProps {
     pub name: Html,
     #[prop_or_default]

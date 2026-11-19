@@ -167,7 +167,7 @@ impl PartialEq for Tree {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReorderTreeProps {
     /// A row moved: from where to where.
     pub on_move: Callback<ReorderTreeMove>,
@@ -301,7 +301,7 @@ fn handle_of(root: &NodeRef, key: &str) -> Option<HtmlElement> {
         .ok()
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReorderListProps {
     /// The list's name in the tree's moves, unique within it.
     pub id: AttrValue,
@@ -448,7 +448,7 @@ struct TreeGrip {
     disabled: bool,
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ReorderTreeHandleProps {
     #[prop_or_default]
     pub class: Classes,

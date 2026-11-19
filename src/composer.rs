@@ -142,6 +142,32 @@ pub struct ComposerProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for ComposerProps {
+    fn default() -> Self {
+        Self {
+            on_send: Default::default(),
+            draft_key: Default::default(),
+            label: Default::default(),
+            placeholder: Default::default(),
+            enter_sends: ::yew::html::IntoPropValue::into_prop_value(true),
+            attachments: Default::default(),
+            accept: Default::default(),
+            max_size: Default::default(),
+            on_refused: Default::default(),
+            on_input: Default::default(),
+            on_keydown: Default::default(),
+            send_icon: Default::default(),
+            send_label: Default::default(),
+            attach_label: Default::default(),
+            actions: Default::default(),
+            busy: Default::default(),
+            disabled: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// The text a composer sends: `text` without blank lines at its ends.
 pub fn composed(text: &str) -> String {
     text.trim_matches(|c: char| c == '\n' || c == '\r')

@@ -95,6 +95,25 @@ pub struct SeamProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for SeamProps {
+    fn default() -> Self {
+        Self {
+            start: Default::default(),
+            end: Default::default(),
+            at: Default::default(),
+            on_change: Default::default(),
+            on_settle: Default::default(),
+            axis: Default::default(),
+            min: ::yew::html::IntoPropValue::into_prop_value(0.0),
+            max: ::yew::html::IntoPropValue::into_prop_value(1.0),
+            reset: ::yew::html::IntoPropValue::into_prop_value(0.5),
+            label: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A length in pixels from a computed style (`"128px"`).
 fn pixels(value: &str) -> f64 {
     value.trim_end_matches("px").parse().unwrap_or(0.0)

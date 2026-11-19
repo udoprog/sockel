@@ -169,6 +169,36 @@ pub struct PagerProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for PagerProps {
+    fn default() -> Self {
+        Self {
+            page: Default::default(),
+            pages: Default::default(),
+            on_page: Default::default(),
+            slots: ::yew::html::IntoPropValue::into_prop_value(7),
+            edges: ::yew::html::IntoPropValue::into_prop_value(true),
+            phone_steps: ::yew::html::IntoPropValue::into_prop_value(true),
+            titles: Default::default(),
+            label: Default::default(),
+            first_label: Default::default(),
+            previous_label: Default::default(),
+            next_label: Default::default(),
+            last_label: Default::default(),
+            page_label: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            summary: Default::default(),
+            counts: Default::default(),
+            nav_ref: Default::default(),
+            range: Default::default(),
+            compact: Default::default(),
+            drop_page: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A pager's classes: `pager`, `disabled` and `busy`.
 pub fn pager(disabled: bool, busy: bool) -> Classes {
     classes!(

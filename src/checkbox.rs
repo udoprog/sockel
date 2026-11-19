@@ -5,7 +5,7 @@ use crate::{Glyph, Icon, class};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct CheckboxProps {
     #[prop_or_default]
     pub class: Classes,

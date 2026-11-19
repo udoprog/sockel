@@ -306,7 +306,7 @@ pub fn time(style: TimeStyle, end: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct TimeProps {
     /// The moment, in seconds since the epoch.
     pub at: i64,

@@ -233,6 +233,36 @@ pub struct SelectProps<T: PartialEq + 'static> {
     pub close_label: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for SelectProps<T> {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            on_change: Default::default(),
+            placeholder: Default::default(),
+            label: Default::default(),
+            id: Default::default(),
+            describedby: Default::default(),
+            size: Default::default(),
+            width: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            filter_from: Default::default(),
+            filter_label: Default::default(),
+            no_match: Default::default(),
+            multiple: Default::default(),
+            values: Default::default(),
+            on_change_values: Default::default(),
+            summary: Default::default(),
+            sheet: Default::default(),
+            close_label: Default::default(),
+        }
+    }
+}
+
 /// The indexes of the options picked: `values` with `multiple`, else the
 /// one holding `value`.
 pub fn picked<T: PartialEq>(

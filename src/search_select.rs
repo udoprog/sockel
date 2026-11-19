@@ -223,6 +223,40 @@ pub struct SearchSelectProps<T: PartialEq + 'static> {
     pub text: Option<AttrValue>,
 }
 
+impl<T: PartialEq + 'static> Default for SearchSelectProps<T> {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            on_change: Default::default(),
+            on_search: Default::default(),
+            filter: ::yew::html::IntoPropValue::into_prop_value(true),
+            answers: Default::default(),
+            busy: Default::default(),
+            label: Default::default(),
+            loading_label: Default::default(),
+            empty_label: Default::default(),
+            id: Default::default(),
+            describedby: Default::default(),
+            size: Default::default(),
+            fill: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            autofocus: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            more: Default::default(),
+            on_more: Default::default(),
+            more_label: Default::default(),
+            on_create: Default::default(),
+            create_label: Default::default(),
+            free_text: Default::default(),
+            on_text: Default::default(),
+            text: Default::default(),
+        }
+    }
+}
+
 /// The WAI-ARIA editable combobox with list autocomplete: typing filters
 /// the options in a listbox under the field, which keeps the focus. The
 /// arrows, PageUp and PageDown move, Enter picks, Escape and Tab close.

@@ -284,6 +284,48 @@ pub struct StepperProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for StepperProps {
+    fn default() -> Self {
+        Self {
+            value: Default::default(),
+            on_change: Default::default(),
+            min: Default::default(),
+            max: Default::default(),
+            step: ::yew::html::IntoPropValue::into_prop_value(1),
+            snap: Default::default(),
+            arrow: Default::default(),
+            decimals: Default::default(),
+            pad: Default::default(),
+            label: Default::default(),
+            less_label: Default::default(),
+            more_label: Default::default(),
+            id: Default::default(),
+            size: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            live: Default::default(),
+            strict: Default::default(),
+            on_valid: Default::default(),
+            on_step: Default::default(),
+            can_less: ::yew::html::IntoPropValue::into_prop_value(true),
+            can_more: ::yew::html::IntoPropValue::into_prop_value(true),
+            mixed: Default::default(),
+            placeholder: Default::default(),
+            on_empty: Default::default(),
+            autofocus: Default::default(),
+            unit: Default::default(),
+            unit_apart: Default::default(),
+            fill: Default::default(),
+            faint: Default::default(),
+            text: Default::default(),
+            chars: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A number between a minus and a plus button, in one box. What is typed is
 /// kept while it is no number within the bounds (marked invalid) and
 /// clamped when committed (unless `strict`); the buttons are out of the tab

@@ -4,7 +4,7 @@ use crate::testid::with_testid;
 use crate::{button::is_empty, class};
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct EmptyStateProps {
     #[prop_or_default]
     pub class: Classes,

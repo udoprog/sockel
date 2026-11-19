@@ -121,6 +121,33 @@ pub struct SecretInputProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for SecretInputProps {
+    fn default() -> Self {
+        Self {
+            value: Default::default(),
+            on_input: Default::default(),
+            commit: Default::default(),
+            titles: Default::default(),
+            label: Default::default(),
+            on_copy: Default::default(),
+            show_label: Default::default(),
+            hide_label: Default::default(),
+            copy_label: Default::default(),
+            clear_label: Default::default(),
+            placeholder: Default::default(),
+            reveal_ms: ::yew::html::IntoPropValue::into_prop_value(REVEAL_MS),
+            id: Default::default(),
+            size: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            autofocus: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A password field with three slots after the text: show or hide (the
 /// secret hides itself after `reveal_ms`, and when cleared), copy and
 /// clear. The text, the slots and the box keep their size whether the

@@ -603,7 +603,7 @@ pub fn kbd() -> Classes {
     classes!(class::KBD)
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct KbdProps {
     /// The chord, as [`Chord::parse`] reads it.
     pub keys: AttrValue,
@@ -635,7 +635,7 @@ pub fn Kbd(props: &KbdProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ShortcutHelpProps {
     pub open: bool,
     /// Asked to close it (the owner sets `open` to false).

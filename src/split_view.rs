@@ -39,6 +39,23 @@ pub struct SplitViewProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for SplitViewProps {
+    fn default() -> Self {
+        Self {
+            list: Default::default(),
+            detail: Default::default(),
+            empty: Default::default(),
+            at: ::yew::html::IntoPropValue::into_prop_value(0.4),
+            on_settle: Default::default(),
+            min: ::yew::html::IntoPropValue::into_prop_value(0.2),
+            max: ::yew::html::IntoPropValue::into_prop_value(0.8),
+            label: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A split view's classes; `open` while a detail is.
 pub fn split_view(open: bool) -> Classes {
     classes!(class::SPLIT_VIEW, open.then_some(class::OPEN))

@@ -43,7 +43,7 @@ impl NavItem {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct NavListProps {
     #[prop_or_default]
     pub class: Classes,

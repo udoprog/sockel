@@ -55,6 +55,28 @@ pub struct TableProps {
     pub children: Html,
 }
 
+impl Default for TableProps {
+    fn default() -> Self {
+        Self {
+            head: Default::default(),
+            columns: ::yew::html::IntoPropValue::into_prop_value(1),
+            fixed: Default::default(),
+            sticky: Default::default(),
+            cards: Default::default(),
+            foot: Default::default(),
+            top: Default::default(),
+            framed: Default::default(),
+            bulk: Default::default(),
+            bulk_active: Default::default(),
+            empty: Default::default(),
+            label: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A table's classes: `fixed` for columns sized by the first row.
 pub fn table(fixed: bool) -> Classes {
     classes!(class::TABLE, fixed.then_some(class::FIXED))
@@ -116,7 +138,7 @@ pub fn Table(props: &TableProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct TableRowProps {
     /// Marks the row's start edge in the danger colour.
     #[prop_or_default]
@@ -150,7 +172,7 @@ pub fn TableRow(props: &TableRowProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct TableCellProps {
     /// A heading cell (`th`).
     #[prop_or_default]

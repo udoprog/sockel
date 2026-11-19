@@ -32,7 +32,7 @@ pub enum ButtonSize {
     Touch,
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ButtonProps {
     #[prop_or_default]
     pub class: Classes,

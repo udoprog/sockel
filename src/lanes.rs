@@ -33,6 +33,22 @@ pub struct LanesProps {
     pub children: ChildrenWithProps<Lane>,
 }
 
+impl Default for LanesProps {
+    fn default() -> Self {
+        Self {
+            on_move: Default::default(),
+            accepts: Default::default(),
+            text: Default::default(),
+            disabled: Default::default(),
+            body_drag: ::yew::html::IntoPropValue::into_prop_value(true),
+            tips: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// The lanes' classes.
 pub fn lanes() -> Classes {
     classes!(class::LANES)
@@ -62,7 +78,7 @@ pub fn Lanes(props: &LanesProps) -> Html {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct LaneProps {
     /// The lane in the moves, unique among the lanes.
     pub id: AttrValue,

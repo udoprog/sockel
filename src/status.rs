@@ -16,7 +16,7 @@ pub fn status_label(tone: Tone, as_pill: bool) -> Classes {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct StatusLabelProps {
     #[prop_or_default]
     pub class: Classes,

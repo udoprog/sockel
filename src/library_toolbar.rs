@@ -3,7 +3,7 @@
 use crate::{SearchField, class};
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq, Clone)]
+#[derive(Properties, Default, PartialEq, Clone)]
 pub struct LibraryToolbarProps {
     /// The search field's text.
     pub value: AttrValue,

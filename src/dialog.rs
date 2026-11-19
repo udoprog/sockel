@@ -108,6 +108,32 @@ pub struct DialogProps {
     pub children: Html,
 }
 
+impl Default for DialogProps {
+    fn default() -> Self {
+        Self {
+            open: Default::default(),
+            on_dismiss: Default::default(),
+            title: Default::default(),
+            icon: Default::default(),
+            size: Default::default(),
+            dismiss: Default::default(),
+            flush: Default::default(),
+            sheet: ::yew::html::IntoPropValue::into_prop_value(true),
+            close_label: Default::default(),
+            close_size: ::yew::html::IntoPropValue::into_prop_value(ButtonSize::Small),
+            close_variant: ::yew::html::IntoPropValue::into_prop_value(ButtonVariant::Quiet),
+            close_testid: Default::default(),
+            head_actions: Default::default(),
+            actions: Default::default(),
+            actions_start: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            onkeydown: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A dialog's classes: `dialog`, `wide` and `tall` as its size says, and
 /// `sheet` when it becomes one on a phone.
 pub fn dialog(size: DialogSize, sheet: bool) -> Classes {

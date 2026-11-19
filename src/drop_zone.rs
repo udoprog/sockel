@@ -232,7 +232,7 @@ impl Drop for WindowListener {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct DropZoneProps {
     #[prop_or_default]
     pub class: Classes,

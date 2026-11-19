@@ -44,7 +44,7 @@ fn ensure_styles(host: &impl StyleHost, css: Option<&str>) {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct StylesProps {
     /// The app's own stylesheet from sockel-build, which holds sockel's
     /// CSS; without it, [`STYLESHEET`].

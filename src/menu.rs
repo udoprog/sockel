@@ -462,6 +462,38 @@ pub struct MenuProps {
     pub children: Html,
 }
 
+impl Default for MenuProps {
+    fn default() -> Self {
+        Self {
+            text: Default::default(),
+            icon: Default::default(),
+            chevron: Default::default(),
+            label: Default::default(),
+            variant: Default::default(),
+            size: Default::default(),
+            opener_class: Default::default(),
+            tip: Default::default(),
+            title: Default::default(),
+            on_click: Default::default(),
+            pressed: Default::default(),
+            width: Default::default(),
+            tight: Default::default(),
+            sheet: Default::default(),
+            side: Default::default(),
+            align: ::yew::html::IntoPropValue::into_prop_value(PopoverAlign::End),
+            within: Default::default(),
+            disabled: Default::default(),
+            open: Default::default(),
+            on_toggle: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            opener_testid: Default::default(),
+            keep_mounted: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A button opening a list of actions beside it in the overlay layer. A
 /// pick, Tab, Escape or a press outside closes it, and all but the press
 /// give focus back to the opener (Tab then moves on from it); the arrows,
@@ -559,7 +591,7 @@ pub fn Menu(props: &MenuProps) -> Html {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct MenuItemProps {
     /// Its icon, which the app supplies, in a fixed box.
     #[prop_or_default]
@@ -742,7 +774,7 @@ pub fn MenuItem(props: &MenuItemProps) -> Html {
     .render()
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct MenuCheckProps {
     pub checked: bool,
     /// Told the new state; the menu stays open.
@@ -820,7 +852,7 @@ pub fn MenuCheck(props: &MenuCheckProps) -> Html {
     .render()
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct MenuRadioProps {
     pub checked: bool,
     /// Picked; the menu closes, unless `stay`.
@@ -869,7 +901,7 @@ pub fn MenuRadio(props: &MenuRadioProps) -> Html {
     .render()
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct MenuPartProps {
     #[prop_or_default]
     pub class: Classes,
@@ -968,7 +1000,7 @@ impl RowAction {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct RowActionsProps {
     #[prop_or_default]
     pub actions: Vec<RowAction>,
@@ -1080,6 +1112,25 @@ pub struct SplitButtonProps {
     pub children: Html,
 }
 
+impl Default for SplitButtonProps {
+    fn default() -> Self {
+        Self {
+            text: Default::default(),
+            onclick: Default::default(),
+            variant: ::yew::html::IntoPropValue::into_prop_value(ButtonVariant::Primary),
+            size: Default::default(),
+            icon: Default::default(),
+            menu_label: Default::default(),
+            width: Default::default(),
+            busy: Default::default(),
+            disabled: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A main action joined to a menu of its variants: one control, the two
 /// parts sharing a height and a border.
 #[function_component]
@@ -1104,7 +1155,7 @@ pub fn SplitButton(props: &SplitButtonProps) -> Html {
     }
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ContextMenuProps {
     /// The menu's items.
     pub items: Html,
@@ -1303,6 +1354,28 @@ pub struct MenuPopupProps {
     #[prop_or_default]
     pub testid: Option<AttrValue>,
     pub children: Html,
+}
+
+impl Default for MenuPopupProps {
+    fn default() -> Self {
+        Self {
+            anchor: Default::default(),
+            at: Default::default(),
+            open: Default::default(),
+            on_dismiss: Default::default(),
+            side: Default::default(),
+            align: ::yew::html::IntoPropValue::into_prop_value(PopoverAlign::Start),
+            within: Default::default(),
+            width: Default::default(),
+            tight: Default::default(),
+            sheet: Default::default(),
+            label: Default::default(),
+            keep_mounted: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
 }
 
 /// A [`Menu`]'s list for an opener the app renders itself: open while

@@ -226,6 +226,19 @@ pub struct AvatarProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for AvatarProps {
+    fn default() -> Self {
+        Self {
+            name: Default::default(),
+            src: Default::default(),
+            size: Default::default(),
+            lazy: ::yew::html::IntoPropValue::into_prop_value(true),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A round portrait of a fixed size, its initials behind the picture.
 #[function_component]
 pub fn Avatar(props: &AvatarProps) -> Html {

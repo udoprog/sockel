@@ -128,6 +128,28 @@ pub struct ConfirmProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for ConfirmProps {
+    fn default() -> Self {
+        Self {
+            open: Default::default(),
+            title: Default::default(),
+            explanation: Default::default(),
+            details: Default::default(),
+            accept: Default::default(),
+            cancel_label: Default::default(),
+            icon: Default::default(),
+            danger: ::yew::html::IntoPropValue::into_prop_value(true),
+            busy: Default::default(),
+            accept_disabled: Default::default(),
+            error: Default::default(),
+            on_accept: Default::default(),
+            on_cancel: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A [`Dialog`] asking before an action: the explanation, then Cancel and the
 /// accepting button pinned below. Cancel has the focus when accepting
 /// destroys something. Escape, the close button and the scrim cancel, unless
@@ -217,6 +239,34 @@ pub struct ConfirmPopoverProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+}
+
+impl Default for ConfirmPopoverProps {
+    fn default() -> Self {
+        Self {
+            anchor: Default::default(),
+            anchor_element: Default::default(),
+            open: Default::default(),
+            title: Default::default(),
+            explanation: Default::default(),
+            details: Default::default(),
+            accept: Default::default(),
+            cancel_label: Default::default(),
+            icon: Default::default(),
+            danger: ::yew::html::IntoPropValue::into_prop_value(true),
+            busy: Default::default(),
+            accept_disabled: Default::default(),
+            error: Default::default(),
+            side: Default::default(),
+            align: Default::default(),
+            compact: Default::default(),
+            explanation_icon: Default::default(),
+            on_accept: Default::default(),
+            on_cancel: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
 }
 
 /// A confirm popover's classes: `compact` for one as wide as what it says.
@@ -348,6 +398,32 @@ pub struct ConfirmButtonProps {
     pub children: Html,
 }
 
+impl Default for ConfirmButtonProps {
+    fn default() -> Self {
+        Self {
+            variant: Default::default(),
+            size: Default::default(),
+            icon: Default::default(),
+            busy: Default::default(),
+            disabled: Default::default(),
+            title: Default::default(),
+            explanation: Default::default(),
+            details: Default::default(),
+            accept: Default::default(),
+            cancel_label: Default::default(),
+            accept_icon: Default::default(),
+            danger: ::yew::html::IntoPropValue::into_prop_value(true),
+            accept_disabled: Default::default(),
+            side: Default::default(),
+            align: Default::default(),
+            on_accept: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A [`Button`] that asks in a [`ConfirmPopover`] beside it before it acts:
 /// the button keeps its box whether the popover is open or not.
 #[function_component]
@@ -427,6 +503,28 @@ pub struct ConfirmInlineProps {
     /// The button's label.
     #[prop_or_default]
     pub children: Html,
+}
+
+impl Default for ConfirmInlineProps {
+    fn default() -> Self {
+        Self {
+            variant: Default::default(),
+            size: Default::default(),
+            icon: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            asking: Default::default(),
+            on_ask: Default::default(),
+            question: Default::default(),
+            no_label: Default::default(),
+            yes_label: Default::default(),
+            danger: ::yew::html::IntoPropValue::into_prop_value(true),
+            on_accept: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
 }
 
 /// The classes of the wrapper, and of a part that is `away`.

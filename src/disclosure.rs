@@ -4,7 +4,7 @@ use crate::testid::with_testid;
 use crate::{Glyph, HeadLevel, Icon, class};
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct DisclosureProps {
     pub title: Html,
     /// What the section holds, beside the title while it is shut.

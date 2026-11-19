@@ -4,7 +4,7 @@ use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct SpinnerProps {
     #[prop_or_default]
     pub class: Classes,

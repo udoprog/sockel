@@ -4,7 +4,7 @@ use crate::class;
 use crate::testid::with_testid;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct SelectionBarProps {
     /// How many are picked; none leaves the bar's room, empty.
     pub count: usize,
@@ -51,7 +51,7 @@ pub fn SelectionBar(props: &SelectionBarProps) -> Html {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ActionRowProps {
     /// Over the end of the row it stands in, invisible and inert until the
     /// row is hovered or has focus.

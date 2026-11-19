@@ -955,6 +955,38 @@ pub struct PopoverProps {
     pub children: Html,
 }
 
+impl Default for PopoverProps {
+    fn default() -> Self {
+        Self {
+            anchor: Default::default(),
+            anchor_element: Default::default(),
+            open: Default::default(),
+            on_dismiss: Default::default(),
+            side: Default::default(),
+            align: Default::default(),
+            fit: Default::default(),
+            within: Default::default(),
+            sheet: ::yew::html::IntoPropValue::into_prop_value(true),
+            head: ::yew::html::IntoPropValue::into_prop_value(true),
+            trap: Default::default(),
+            flush: Default::default(),
+            match_anchor: Default::default(),
+            keep_focus: Default::default(),
+            title: Default::default(),
+            close_label: Default::default(),
+            focus: Default::default(),
+            focus_first: Default::default(),
+            on_placed: Default::default(),
+            role: ::yew::html::IntoPropValue::into_prop_value(AttrValue::Static("dialog")),
+            class: Default::default(),
+            testid: Default::default(),
+            on_pointer_enter: Default::default(),
+            on_pointer_leave: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// What `focus_first` focuses in `surface`: an `[autofocus]` or
 /// `[data-autofocus]` element, else the body's first control, else the
 /// surface itself.

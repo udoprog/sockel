@@ -163,6 +163,29 @@ pub struct ColorSelectProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for ColorSelectProps {
+    fn default() -> Self {
+        Self {
+            options: Default::default(),
+            value: Default::default(),
+            on_change: Default::default(),
+            placeholder: Default::default(),
+            custom: Default::default(),
+            columns: ::yew::html::IntoPropValue::into_prop_value(6),
+            label: Default::default(),
+            id: Default::default(),
+            describedby: Default::default(),
+            size: Default::default(),
+            width: Default::default(),
+            invalid: Default::default(),
+            disabled: Default::default(),
+            busy: Default::default(),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 fn swatch(value: &str, none: bool) -> Html {
     let style = (!none).then(|| format!("--swatch: {value};"));
     html! { <span class={color_swatch(none)} aria-hidden="true" {style} /> }

@@ -4,7 +4,7 @@ use crate::class;
 use crate::testid::with_testid;
 use yew::prelude::*;
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct IconButtonProps {
     /// The button's other classes (`primary`, `ghost`, `danger`, `icon`
     /// for an icon alone, ...).

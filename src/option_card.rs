@@ -14,7 +14,7 @@ pub enum OptionCardKind {
     Checkbox,
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct OptionCardProps {
     #[prop_or_default]
     pub kind: OptionCardKind,

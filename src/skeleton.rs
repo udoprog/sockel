@@ -34,6 +34,18 @@ pub struct SkeletonProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for SkeletonProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            shape: Default::default(),
+            count: ::yew::html::IntoPropValue::into_prop_value(1),
+            width: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A skeleton's classes: `skeleton`, its shape, and `short` for a line that
 /// ends a paragraph.
 pub fn skeleton(shape: SkeletonShape, short: bool) -> Classes {

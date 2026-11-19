@@ -7,7 +7,7 @@ use yew::prelude::*;
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Button, ButtonSize, ButtonVariant, Glyph, Icon, class};
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct ErrorBoxProps {
     #[prop_or_default]
     pub class: Classes,

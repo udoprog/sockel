@@ -31,6 +31,18 @@ pub struct CardGridProps {
     pub children: Html,
 }
 
+impl Default for CardGridProps {
+    fn default() -> Self {
+        Self {
+            size: Default::default(),
+            tag: ::yew::html::IntoPropValue::into_prop_value("ul"),
+            class: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// A card grid's classes.
 pub fn card_grid(size: GridSize) -> Classes {
     let size = match size {

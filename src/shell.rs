@@ -7,7 +7,7 @@ use yew::prelude::*;
 
 use crate::{Count, class};
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct AppShellProps {
     /// What begins the top bar: a back button, the title, a switcher.
     #[prop_or_default]
@@ -122,6 +122,20 @@ pub struct BottomNavProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+}
+
+impl Default for BottomNavProps {
+    fn default() -> Self {
+        Self {
+            items: Default::default(),
+            value: Default::default(),
+            on_select: Default::default(),
+            label: Default::default(),
+            max: ::yew::html::IntoPropValue::into_prop_value(99),
+            class: Default::default(),
+            testid: Default::default(),
+        }
+    }
 }
 
 /// A bottom navigation's classes.

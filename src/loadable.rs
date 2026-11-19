@@ -102,6 +102,27 @@ pub struct LoadableProps {
     pub children: Html,
 }
 
+impl Default for LoadableProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            state: Default::default(),
+            rows: ::yew::html::IntoPropValue::into_prop_value(3),
+            placeholder: Default::default(),
+            label: Default::default(),
+            empty: Default::default(),
+            empty_title: Default::default(),
+            empty_delay: ::yew::html::IntoPropValue::into_prop_value(250),
+            error: Default::default(),
+            error_cause: Default::default(),
+            onretry: Default::default(),
+            retrying: Default::default(),
+            testid: Default::default(),
+            children: Default::default(),
+        }
+    }
+}
+
 /// One box for content that loads: a placeholder while loading, the content
 /// when ready, an empty state or an error. While it loads again the box is
 /// at least as high as when it last settled, and at least `rows` rows high

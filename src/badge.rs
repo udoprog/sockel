@@ -48,7 +48,7 @@ pub fn pill(tone: Tone, plain: bool, button: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct PillProps {
     #[prop_or_default]
     pub class: Classes,
@@ -108,7 +108,7 @@ pub fn badge(tone: Tone, solid: bool, corner: bool) -> Classes {
     )
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct BadgeProps {
     #[prop_or_default]
     pub class: Classes,
@@ -160,6 +160,18 @@ pub struct DotProps {
     pub testid: Option<AttrValue>,
 }
 
+impl Default for DotProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            tone: Default::default(),
+            on: ::yew::html::IntoPropValue::into_prop_value(true),
+            label: Default::default(),
+            testid: Default::default(),
+        }
+    }
+}
+
 /// A small status circle of `--dot-size`, filled or a ring in the same box.
 #[function_component]
 pub fn Dot(props: &DotProps) -> Html {
@@ -208,6 +220,18 @@ pub struct CountProps {
     pub hide_zero: bool,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+}
+
+impl Default for CountProps {
+    fn default() -> Self {
+        Self {
+            class: Default::default(),
+            value: Default::default(),
+            max: ::yew::html::IntoPropValue::into_prop_value(99),
+            hide_zero: Default::default(),
+            testid: Default::default(),
+        }
+    }
 }
 
 /// A figure on a soft fill, its width reserved for `max`'s digits.

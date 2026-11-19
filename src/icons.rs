@@ -172,7 +172,7 @@ fn missing(name: &str) -> Html {
     html! {}
 }
 
-#[derive(Properties, PartialEq)]
+#[derive(Properties, Default, PartialEq)]
 pub struct IconProps {
     /// One of sockel's glyphs; `name` is used when it is not set.
     #[prop_or_default]
