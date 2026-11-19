@@ -971,6 +971,7 @@ Each entry names a component and its class without the `sockel-` prefix
 Where a component cannot be used (the element is another component's),
 the class functions ([`stack`](https://docs.rs/sockel/latest/sockel/fn.stack.html), [`cluster`](https://docs.rs/sockel/latest/sockel/fn.cluster.html), [`toolbar`](https://docs.rs/sockel/latest/sockel/fn.toolbar.html), [`card`](https://docs.rs/sockel/latest/sockel/fn.card.html), ...) give
 the same classes.
+
 <br>
 
 ## Button
