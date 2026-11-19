@@ -229,59 +229,61 @@
     padding: 0;
 }
 
-.sockel-sort-header {
-    @include base.table-head-cell;
+@if base.emits("table.sort-header") {
+    .sockel-sort-header {
+        @include base.table-head-cell;
 
-    padding: 0;
+        padding: 0;
 
-    &.sockel-numeric {
-        text-align: end;
-    }
-}
-
-.sockel-sort-header-button {
-    display: flex;
-    align-items: center;
-    gap: var(--space-1);
-    box-sizing: border-box;
-    width: 100%;
-    height: 100%;
-    margin: 0;
-    padding: 0 var(--space-3);
-    @include base.reserved-border;
-    background: transparent;
-    color: inherit;
-    font: inherit;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-        color: var(--text);
+        &.sockel-numeric {
+            text-align: end;
+        }
     }
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .sockel-sort-header-button {
+        display: flex;
+        align-items: center;
+        gap: var(--space-1);
+        box-sizing: border-box;
+        width: 100%;
+        height: 100%;
+        margin: 0;
+        padding: 0 var(--space-3);
+        @include base.reserved-border;
+        background: transparent;
+        color: inherit;
+        font: inherit;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            color: var(--text);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        &:focus-visible {
+            outline: var(--focus-ring-width) solid var(--focus-ring-color);
+            outline-offset: calc(-1 * var(--focus-ring-width));
+        }
+
+        &.sockel-numeric {
+            justify-content: flex-end;
+        }
     }
 
-    &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--focus-ring-color);
-        outline-offset: calc(-1 * var(--focus-ring-width));
+    .sockel-sort-header-label {
+        @include base.truncate;
     }
 
-    &.sockel-numeric {
-        justify-content: flex-end;
-    }
-}
+    .sockel-sort-header-mark {
+        display: inline-flex;
+        flex: none;
 
-.sockel-sort-header-label {
-    @include base.truncate;
-}
-
-.sockel-sort-header-mark {
-    display: inline-flex;
-    flex: none;
-
-    &.sockel-idle {
-        visibility: hidden;
+        &.sockel-idle {
+            visibility: hidden;
+        }
     }
 }

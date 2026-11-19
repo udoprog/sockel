@@ -287,3 +287,66 @@ fn feature_sizes() {
     }
     println!("full {}", sockel().build().unwrap().css.len());
 }
+
+/// The most bytes the full stylesheet may compress to: 115,773 when the
+/// budget was set, and about 5% over.
+const BUDGET: usize = 121_500;
+
+/// The stylesheet `@use "sockel/index"` gives, compressed, with `$omit` set.
+fn compressed(omit: &[&str]) -> usize {
+    let sources = test_sources();
+    let options = sasso::Options::new()
+        .with_importer(&sources)
+        .with_style(sasso::OutputStyle::Compressed);
+    let omit = omit
+        .iter()
+        .map(|part| format!("\"{part}\""))
+        .collect::<Vec<_>>()
+        .join(", ");
+    let omit = if omit.is_empty() { omit } else { omit + "," };
+    let source =
+        format!("@use \"sockel/tokens\" with ($omit: ({omit}));\n@use \"sockel/index\";\n");
+    sasso::compile(&source, &options).unwrap().len()
+}
+
+/// The full stylesheet, every part emitted, stays within [`BUDGET`]. A part
+/// that grows it past the limit is made omittable (`$omit`), or the limit is
+/// raised on purpose, here.
+#[test]
+fn the_full_stylesheet_is_within_its_budget() {
+    let size = compressed(&[]);
+    assert!(
+        size <= BUDGET,
+        "the full stylesheet is {size} bytes compressed, over the budget of {BUDGET}; \
+         make what grew omittable (`$omit`), or raise BUDGET in \
+         sockel-build/src/features.rs on purpose"
+    );
+}
+
+/// Prints the stylesheet's size with every part and with a typical app's
+/// `$omit`, for the changelog.
+#[test]
+#[ignore = "prints sizes"]
+fn omit_sizes() {
+    let omit = [
+        "badges.count",
+        "badges.dot",
+        "badges.pill",
+        "badges.status",
+        "tabs.segmented",
+        "tabs.fill",
+        "tabs.stacked",
+        "tabs.nav",
+        "table.sort-header",
+        "shell.bottom-nav",
+        "property-list.inline-edit",
+        "rows.action-row",
+        "rows.pick-row",
+        "rows.selection-bar",
+    ];
+    println!("full {}", compressed(&[]));
+    println!("omitting {}", compressed(&omit));
+    for part in omit {
+        println!("{part} {}", compressed(&[part]));
+    }
+}

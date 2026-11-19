@@ -773,6 +773,12 @@
 //! | notices | `notices.notice` ([`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html)), `notices.empty-state` ([`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html)), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 //! | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`), `pager.ranged` (the range text and button group), `pager.compact` (the compact pager's "3 / 35"), `pager.drop` (a page button as a drop target, `drop_page`) |
 //! | popover | `popover.match-anchor` |
+//! | badges | `badges.pill` (`Pill`, `StatusLabel`'s pill, `pill-label`), `badges.dot`, `badges.count`, `badges.status` (`StatusLabel`'s label, spinner and text) |
+//! | tabs | `tabs.segmented`, `tabs.fill`, `tabs.stacked` (the stacked tabs and their icon and label), `tabs.nav` (`NavList`) |
+//! | table | `table.sort-header` (`SortHeader`) |
+//! | shell | `shell.bottom-nav` (`BottomNav`) |
+//! | property-list | `property-list.inline-edit` (`InlineEdit`) |
+//! | rows | `rows.pick-row` (`PickRow`), `rows.selection-bar` (`SelectionBar`), `rows.action-row` (`ActionRow`) |
 //! | select | `select.filter` (the filter field and no-match text, `filter_from`), `select.sheet` (the phone sheet, `sheet`) |
 //! | disclosure | `disclosure.heading` (the heading, `level`), `disclosure.detail` (the muted `summary`) |
 //! | confirm | `confirm.inline` |

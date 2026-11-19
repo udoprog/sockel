@@ -134,110 +134,114 @@ $name-break: normal;
     font-size: var(--text-sm);
 }
 
-.sockel-pick-row {
-    --pick-fill: transparent;
+@if base.emits("rows.pick-row") {
+    .sockel-pick-row {
+        --pick-fill: transparent;
 
-    display: flex;
-    align-items: center;
-    gap: base.$pick-row-gap;
-    box-sizing: border-box;
-    width: 100%;
-    min-width: 0;
-    min-height: base.$pick-row-height;
-    margin: 0;
-    padding: base.$pick-row-padding;
-    @include base.reserved-border;
-    border-radius: base.$pick-row-radius;
-    background: var(--pick-fill);
-    color: inherit;
-    font: inherit;
-    font-size: base.$pick-row-text;
-    text-align: start;
-    cursor: pointer;
+        display: flex;
+        align-items: center;
+        gap: base.$pick-row-gap;
+        box-sizing: border-box;
+        width: 100%;
+        min-width: 0;
+        min-height: base.$pick-row-height;
+        margin: 0;
+        padding: base.$pick-row-padding;
+        @include base.reserved-border;
+        border-radius: base.$pick-row-radius;
+        background: var(--pick-fill);
+        color: inherit;
+        font: inherit;
+        font-size: base.$pick-row-text;
+        text-align: start;
+        cursor: pointer;
 
-    &:hover:not(:disabled) {
-        --pick-fill: #{base.$pick-row-hover-fill};
+        &:hover:not(:disabled) {
+            --pick-fill: #{base.$pick-row-hover-fill};
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        @include base.current;
+
+        &:focus-visible {
+            outline: var(--focus-ring-width) solid var(--focus-ring-color);
+            outline-offset: calc(-1 * var(--focus-ring-width));
+        }
     }
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .sockel-pick-row-mark {
+        display: inline-flex;
+        flex: none;
+        align-items: center;
     }
 
-    @include base.current;
+    .sockel-pick-row-name {
+        @include base.truncate;
 
-    &:focus-visible {
-        outline: var(--focus-ring-width) solid var(--focus-ring-color);
-        outline-offset: calc(-1 * var(--focus-ring-width));
-    }
-}
-
-.sockel-pick-row-mark {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-}
-
-.sockel-pick-row-name {
-    @include base.truncate;
-
-    flex: 1 1 auto;
-}
-
-.sockel-pick-row-detail {
-    @include base.truncate;
-
-    // Follows the row's colour, so a chosen row's detail stays readable.
-    color: base.$pick-row-detail-ink;
-    font-size: base.$pick-row-detail-text;
-}
-
-.sockel-selection-bar {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    box-sizing: border-box;
-    min-width: 0;
-    min-height: base.$selection-bar-min-height;
-    margin: base.$selection-bar-margin;
-    padding: base.$selection-bar-padding;
-    border-top: base.$selection-bar-rule;
-    border-radius: base.$selection-bar-radius;
-    background: base.$selection-bar-ground;
-    font-size: base.$selection-bar-text;
-
-    &.sockel-inset {
-        margin: base.$selection-bar-inset-margin;
-        padding-inline: base.$selection-bar-inset-padding;
+        flex: 1 1 auto;
     }
 
-    &.sockel-idle {
-        visibility: hidden;
-    }
+    .sockel-pick-row-detail {
+        @include base.truncate;
 
-    &.sockel-sticky {
-        position: sticky;
-        bottom: 0;
-        z-index: var(--layer-sticky);
-        background: var(--surface);
+        // Follows the row's colour, so a chosen row's detail stays readable.
+        color: base.$pick-row-detail-ink;
+        font-size: base.$pick-row-detail-text;
     }
 }
 
-.sockel-selection-bar-count {
-    @include base.numeric;
-    @include base.truncate;
+@if base.emits("rows.selection-bar") {
+    .sockel-selection-bar {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        box-sizing: border-box;
+        min-width: 0;
+        min-height: base.$selection-bar-min-height;
+        margin: base.$selection-bar-margin;
+        padding: base.$selection-bar-padding;
+        border-top: base.$selection-bar-rule;
+        border-radius: base.$selection-bar-radius;
+        background: base.$selection-bar-ground;
+        font-size: base.$selection-bar-text;
 
-    flex: 1 1 auto;
-    padding-inline-start: base.$selection-bar-count-padding;
-    color: base.$selection-bar-count-ink;
-    font-weight: base.$selection-bar-count-weight;
+        &.sockel-inset {
+            margin: base.$selection-bar-inset-margin;
+            padding-inline: base.$selection-bar-inset-padding;
+        }
 
-    // Only the room the actions leave, wrapping in it, so they keep theirs.
-    @if base.$selection-bar-count-wrap {
-        flex: 1 1 0;
-        min-width: min-content;
-        overflow: visible;
-        white-space: normal;
+        &.sockel-idle {
+            visibility: hidden;
+        }
+
+        &.sockel-sticky {
+            position: sticky;
+            bottom: 0;
+            z-index: var(--layer-sticky);
+            background: var(--surface);
+        }
+    }
+
+    .sockel-selection-bar-count {
+        @include base.numeric;
+        @include base.truncate;
+
+        flex: 1 1 auto;
+        padding-inline-start: base.$selection-bar-count-padding;
+        color: base.$selection-bar-count-ink;
+        font-weight: base.$selection-bar-count-weight;
+
+        // Only the room the actions leave, wrapping in it, so they keep theirs.
+        @if base.$selection-bar-count-wrap {
+            flex: 1 1 0;
+            min-width: min-content;
+            overflow: visible;
+            white-space: normal;
+        }
     }
 }
 
@@ -267,36 +271,38 @@ $name-break: normal;
     }
 }
 
-.sockel-action-row {
-    display: flex;
-    flex-wrap: wrap;
-    align-items: center;
-    gap: var(--space-2);
-    min-width: 0;
+@if base.emits("rows.action-row") {
+    .sockel-action-row {
+        display: flex;
+        flex-wrap: wrap;
+        align-items: center;
+        gap: var(--space-2);
+        min-width: 0;
 
-    &.sockel-nowrap {
-        flex: none;
-        flex-wrap: nowrap;
-    }
+        &.sockel-nowrap {
+            flex: none;
+            flex-wrap: nowrap;
+        }
 
-    &.sockel-overlay {
-        position: absolute;
-        inset-block: 0;
-        inset-inline-end: 0;
-        flex-wrap: nowrap;
-        gap: var(--space-1);
-        padding-inline: var(--action-overlay-padding);
-        border-radius: var(--action-overlay-radius);
-        background:
-            linear-gradient(var(--overlay-tint, transparent), var(--overlay-tint, transparent)),
-            var(--surface);
-        opacity: var(--overlay-opacity, 0);
-        pointer-events: var(--overlay-events, none);
+        &.sockel-overlay {
+            position: absolute;
+            inset-block: 0;
+            inset-inline-end: 0;
+            flex-wrap: nowrap;
+            gap: var(--space-1);
+            padding-inline: var(--action-overlay-padding);
+            border-radius: var(--action-overlay-radius);
+            background:
+                linear-gradient(var(--overlay-tint, transparent), var(--overlay-tint, transparent)),
+                var(--surface);
+            opacity: var(--overlay-opacity, 0);
+            pointer-events: var(--overlay-events, none);
 
-        // Keyboard focus reaches the controls in it, so it shows itself.
-        &:focus-within {
-            opacity: 1;
-            pointer-events: auto;
+            // Keyboard focus reaches the controls in it, so it shows itself.
+            &:focus-within {
+                opacity: 1;
+                pointer-events: auto;
+            }
         }
     }
 }

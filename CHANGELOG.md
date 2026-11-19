@@ -12,6 +12,15 @@ All notable changes to sockel and sockel-build. The format follows
   and later new props stay non-breaking. The crate docs recommend `html!` and
   `yew::props!` for building props.
 
+- Finer `$omit` parts, so an app leaves out more of a component it renders:
+  `badges.pill`, `badges.dot`, `badges.count`, `badges.status`, `tabs.segmented`,
+  `tabs.fill`, `tabs.stacked`, `tabs.nav`, `table.sort-header`, `shell.bottom-nav`,
+  `property-list.inline-edit`, `rows.pick-row`, `rows.selection-bar` and
+  `rows.action-row`. Omitting all of them takes the compressed stylesheet from
+  115.8 KB to 102.5 KB; the default output is unchanged.
+- A size budget: sockel-build's test `the_full_stylesheet_is_within_its_budget`
+  fails when the full stylesheet, compressed, passes 121,500 bytes.
+
 ## [0.2.1] - 2026-11-19
 
 ### Changed

@@ -111,73 +111,79 @@
     }
 }
 
-.sockel-tabs.sockel-segmented {
-    --tab-height: var(--control-height-small);
+@if base.emits("tabs.segmented") {
+    .sockel-tabs.sockel-segmented {
+        --tab-height: var(--control-height-small);
 
-    display: flex;
-    width: fit-content;
-    max-width: 100%;
-    // A scroll container in a flex column would otherwise shrink below its tabs.
-    min-height: min-content;
-    border-radius: var(--radius-sm);
-    background: color-mix(in srgb, var(--text) 7%, transparent);
-    box-shadow: none;
-    gap: var(--nest-inset);
-    @include base.nests(var(--radius-sm), 0px);
+        display: flex;
+        width: fit-content;
+        max-width: 100%;
+        // A scroll container in a flex column would otherwise shrink below its tabs.
+        min-height: min-content;
+        border-radius: var(--radius-sm);
+        background: color-mix(in srgb, var(--text) 7%, transparent);
+        box-shadow: none;
+        gap: var(--nest-inset);
+        @include base.nests(var(--radius-sm), 0px);
 
-    > .sockel-tab {
-        border-radius: var(--radius-inner, var(--radius-sm));
-        font-size: var(--text-sm);
+        > .sockel-tab {
+            border-radius: var(--radius-inner, var(--radius-sm));
+            font-size: var(--text-sm);
 
-        &[aria-selected="true"],
-        &[aria-current="page"] {
-            background: var(--surface);
-            box-shadow: var(--shadow-1);
-            color: var(--text);
-        }
+            &[aria-selected="true"],
+            &[aria-current="page"] {
+                background: var(--surface);
+                box-shadow: var(--shadow-1);
+                color: var(--text);
+            }
 
-        &.sockel-invalid {
-            color: var(--danger);
+            &.sockel-invalid {
+                color: var(--danger);
+            }
         }
     }
 }
 
-.sockel-tabs.sockel-fill {
-    width: 100%;
+@if base.emits("tabs.fill") {
+    .sockel-tabs.sockel-fill {
+        width: 100%;
 
-    > .sockel-tab {
+        > .sockel-tab {
+            flex: 1 1 0;
+            padding-inline: var(--space-1);
+        }
+    }
+}
+
+@if base.emits("tabs.stacked") {
+    .sockel-tabs.sockel-stacked {
+        --tab-height: auto;
+
+        width: 100%;
+        gap: 0;
+    }
+
+    .sockel-tab.sockel-stacked {
         flex: 1 1 0;
+        flex-direction: column;
+        height: auto;
+        min-height: var(--control-height);
+        gap: base.$tab-bar-gap;
+        padding-block: var(--space-2);
         padding-inline: var(--space-1);
+        font-size: var(--text-sm);
     }
-}
 
-.sockel-tabs.sockel-stacked {
-    --tab-height: auto;
+    .sockel-tab-icon.sockel-stacked {
+        display: inline-flex;
+        font-size: base.$tab-bar-icon-size;
+    }
 
-    width: 100%;
-    gap: 0;
-}
-
-.sockel-tab.sockel-stacked {
-    flex: 1 1 0;
-    flex-direction: column;
-    height: auto;
-    min-height: var(--control-height);
-    gap: base.$tab-bar-gap;
-    padding-block: var(--space-2);
-    padding-inline: var(--space-1);
-    font-size: var(--text-sm);
-}
-
-.sockel-tab-icon.sockel-stacked {
-    display: inline-flex;
-    font-size: base.$tab-bar-icon-size;
-}
-
-.sockel-tab-label.sockel-stacked {
-    display: block;
-    max-width: 100%;
-    @include base.truncate;
+    .sockel-tab-label.sockel-stacked {
+        display: block;
+        max-width: 100%;
+        @include base.truncate;
+    }
 }
 
 .sockel-tab-icon {
@@ -206,62 +212,64 @@
     }
 }
 
-.sockel-nav-list {
-    display: block;
-    min-width: 0;
-}
-
-.sockel-nav-list-items {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-1);
-    margin: 0;
-    padding: 0;
-    list-style: none;
-}
-
-.sockel-nav-item {
-    display: flex;
-    align-items: center;
-    gap: var(--space-2);
-    box-sizing: border-box;
-    width: 100%;
-    min-height: var(--control-height);
-    margin: 0;
-    padding-block: 0;
-    padding-inline: var(--space-3);
-    @include base.reserved-border;
-    border-radius: var(--radius-sm);
-    background: transparent;
-    color: var(--text);
-    font: inherit;
-    line-height: 1;
-    text-align: start;
-    text-decoration: none;
-    cursor: pointer;
-
-    &:hover:not(:disabled) {
-        background: color-mix(in srgb, var(--accent) 12%, transparent);
+@if base.emits("tabs.nav") {
+    .sockel-nav-list {
+        display: block;
+        min-width: 0;
     }
 
-    @include base.focus-ring;
-    @include base.current(color);
-
-    &[aria-current]:not([aria-current="false"]) {
-        background: color-mix(in srgb, var(--accent) 16%, transparent);
+    .sockel-nav-list-items {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-1);
+        margin: 0;
+        padding: 0;
+        list-style: none;
     }
 
-    &:disabled {
-        opacity: 0.5;
-        cursor: not-allowed;
+    .sockel-nav-item {
+        display: flex;
+        align-items: center;
+        gap: var(--space-2);
+        box-sizing: border-box;
+        width: 100%;
+        min-height: var(--control-height);
+        margin: 0;
+        padding-block: 0;
+        padding-inline: var(--space-3);
+        @include base.reserved-border;
+        border-radius: var(--radius-sm);
+        background: transparent;
+        color: var(--text);
+        font: inherit;
+        line-height: 1;
+        text-align: start;
+        text-decoration: none;
+        cursor: pointer;
+
+        &:hover:not(:disabled) {
+            background: color-mix(in srgb, var(--accent) 12%, transparent);
+        }
+
+        @include base.focus-ring;
+        @include base.current(color);
+
+        &[aria-current]:not([aria-current="false"]) {
+            background: color-mix(in srgb, var(--accent) 16%, transparent);
+        }
+
+        &:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
     }
-}
 
-.sockel-nav-icon {
-    display: inline-flex;
-    flex: none;
-}
+    .sockel-nav-icon {
+        display: inline-flex;
+        flex: none;
+    }
 
-.sockel-nav-label {
-    @include base.truncate;
+    .sockel-nav-label {
+        @include base.truncate;
+    }
 }

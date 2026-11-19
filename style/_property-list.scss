@@ -94,63 +94,65 @@
     }
 }
 
-.sockel-inline-edit {
-    display: flex;
-    align-items: center;
-    color: var(--text);
-    text-align: start;
-    cursor: text;
+@if base.emits("property-list.inline-edit") {
+    .sockel-inline-edit {
+        display: flex;
+        align-items: center;
+        color: var(--text);
+        text-align: start;
+        cursor: text;
 
-    &.sockel-empty {
-        color: var(--muted);
+        &.sockel-empty {
+            color: var(--muted);
+        }
+
+        &.sockel-busy {
+            cursor: progress;
+            opacity: 0.7;
+        }
+
+        &:disabled {
+            cursor: default;
+        }
+
+        &.sockel-multiline {
+            align-items: flex-start;
+            height: auto;
+            min-height: var(--input-height);
+            padding-block: calc((var(--input-height) - 1lh) / 2 - var(--space-px));
+        }
     }
 
-    &.sockel-busy {
-        cursor: progress;
-        opacity: 0.7;
+    .sockel-inline-edit-text {
+        @include base.truncate;
+        flex: 1 1 auto;
+
+        .sockel-multiline > & {
+            overflow: visible;
+            white-space: pre-wrap;
+            overflow-wrap: anywhere;
+        }
     }
 
-    &:disabled {
-        cursor: default;
-    }
-
-    &.sockel-multiline {
-        align-items: flex-start;
-        height: auto;
-        min-height: var(--input-height);
-        padding-block: calc((var(--input-height) - 1lh) / 2 - var(--space-px));
-    }
-}
-
-.sockel-inline-edit-text {
-    @include base.truncate;
-    flex: 1 1 auto;
-
-    .sockel-multiline > & {
-        overflow: visible;
-        white-space: pre-wrap;
-        overflow-wrap: anywhere;
-    }
-}
-
-.sockel-inline-edit-field {
-    width: 100%;
-}
-
-.sockel-inline-edit-editor {
-    display: flex;
-    flex-direction: column;
-    gap: var(--space-2);
-    min-width: 0;
-
-    > .sockel-textarea {
+    .sockel-inline-edit-field {
         width: 100%;
-        resize: vertical;
     }
-}
 
-.sockel-inline-edit-actions {
-    display: flex;
-    justify-content: flex-end;
-    gap: var(--space-2);
+    .sockel-inline-edit-editor {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+        min-width: 0;
+
+        > .sockel-textarea {
+            width: 100%;
+            resize: vertical;
+        }
+    }
+
+    .sockel-inline-edit-actions {
+        display: flex;
+        justify-content: flex-end;
+        gap: var(--space-2);
+    }
 }
