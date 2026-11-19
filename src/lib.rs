@@ -924,6 +924,8 @@
 //! the component needs. `ImageProps` has no `Default`: its `ratio` has no
 //! sensible default.
 //!
+//! <br>
+//!
 //! ## Showcase
 //!
 //! The [showcase](https://udoprog.github.io/sockel/) is a page per component,

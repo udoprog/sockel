@@ -11,7 +11,6 @@ All notable changes to sockel and sockel-build. The format follows
   values, otherwise the empty value), so apps can write `..Default::default()`
   and later new props stay non-breaking. The crate docs recommend `html!` and
   `yew::props!` for building props.
-
 - Finer `$omit` parts, so an app leaves out more of a component it renders:
   `badges.pill`, `badges.dot`, `badges.count`, `badges.status`, `tabs.segmented`,
   `tabs.fill`, `tabs.stacked`, `tabs.nav`, `table.sort-header`, `shell.bottom-nav`,
