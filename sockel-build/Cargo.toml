@@ -6,6 +6,7 @@ edition = "2024"
 description = "Builds sockel's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
 documentation = "https://docs.rs/sockel"
 readme = "README.md"
+homepage = "https://udoprog.github.io/sockel/"
 repository = "https://github.com/udoprog/sockel"
 license = "MIT OR Apache-2.0"
 keywords = ["build", "css", "sass", "yew"]

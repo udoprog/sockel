@@ -6,6 +6,7 @@ edition = "2024"
 description = "Yew components that keep their size as their content and state change, each shipped with its Sass, so an app's pages never jitter."
 documentation = "https://docs.rs/sockel"
 readme = "README.md"
+homepage = "https://udoprog.github.io/sockel/"
 repository = "https://github.com/udoprog/sockel"
 license = "MIT OR Apache-2.0"
 keywords = ["components", "css", "ui", "wasm", "yew"]

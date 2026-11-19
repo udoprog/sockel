@@ -156,6 +156,8 @@ instead.
 
 ### Changed
 
+- The crate docs and READMEs point to the [showcase](https://udoprog.github.io/sockel/)
+  instead of describing each component, and every link in them is absolute.
 - An `$omit` naming a part its feature already leaves out is an error, in
   `sockel-build` and in the Sass given `$features`. `Usage::assert_clean`
   (and `Report::is_clean`) now fail on a written class the build omits, so a
