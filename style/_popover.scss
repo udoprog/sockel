@@ -101,18 +101,7 @@
 
 @include base.below(base.$sheet-breakpoint) {
     .sockel-popover.sockel-sheet {
-        top: auto;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        width: auto;
-        max-width: none;
-        max-height: var(--popover-sheet-height);
-        border-bottom-color: transparent;
-        @if base.$popover-sheet-edge == top {
-            border-width: var(--space-px) 0 0;
-        }
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        @include base.sheet;
         padding-bottom: env(safe-area-inset-bottom);
     }
 
@@ -121,10 +110,6 @@
     }
 
     .sockel-popover-scrim {
-        position: fixed;
-        inset: 0;
-        z-index: var(--layer-overlay);
-        display: block;
-        background: var(--scrim);
+        @include base.sheet-scrim;
     }
 }

@@ -113,17 +113,9 @@
 
 @include base.below(base.$sheet-breakpoint) {
     .sockel-select-sheet {
-        top: auto;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        width: auto;
-        min-width: 0;
-        max-width: none;
-        max-height: var(--popover-sheet-height);
-        overflow: hidden;
-        border-bottom-color: transparent;
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        @include base.sheet($min-width: true, $edge: false) {
+            overflow: hidden;
+        }
         padding-top: var(--nest-inset);
         padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
 
@@ -151,10 +143,6 @@
     }
 
     .sockel-select-scrim {
-        position: fixed;
-        inset: 0;
-        z-index: var(--layer-overlay);
-        display: block;
-        background: var(--scrim);
+        @include base.sheet-scrim;
     }
 }

@@ -98,6 +98,38 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
     @return map.get($breakpoints, $name);
 }
 
+// A popup as a sheet from the bottom: full width, `--popover-sheet-height`
+// tall at most, radius-lg top corners, and (`$popover-sheet-edge: top`, with
+// `$edge`) only its top edge bordered. `$min-width` clears the popup's own
+// least width; the content lands between the size and the corners.
+@mixin sheet($min-width: false, $edge: true) {
+    top: auto;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    width: auto;
+    @if $min-width {
+        min-width: 0;
+    }
+    max-width: none;
+    max-height: var(--popover-sheet-height);
+    @content;
+    border-bottom-color: transparent;
+    @if $edge and $popover-sheet-edge == top {
+        border-width: var(--space-px) 0 0;
+    }
+    border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+}
+
+// The scrim behind a sheet: the whole window, over the page, under the sheet.
+@mixin sheet-scrim {
+    position: fixed;
+    inset: 0;
+    z-index: var(--layer-overlay);
+    display: block;
+    background: var(--scrim);
+}
+
 // Below a breakpoint and from it up: never both, at the breakpoint's own
 // width.
 @mixin below($name) {

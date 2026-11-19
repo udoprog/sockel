@@ -115,19 +115,7 @@
 
 @include base.below(base.$sheet-breakpoint) {
     .sockel-picker-popup.sockel-sheet {
-        top: auto;
-        right: 0;
-        bottom: 0;
-        left: 0;
-        width: auto;
-        min-width: 0;
-        max-width: none;
-        max-height: var(--popover-sheet-height);
-        border-bottom-color: transparent;
-        @if base.$popover-sheet-edge == top {
-            border-width: var(--space-px) 0 0;
-        }
-        border-radius: var(--radius-lg) var(--radius-lg) 0 0;
+        @include base.sheet($min-width: true);
         padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
     }
 
@@ -141,11 +129,7 @@
     }
 
     .sockel-picker-scrim {
-        position: fixed;
-        inset: 0;
-        z-index: var(--layer-overlay);
-        display: block;
-        background: var(--scrim);
+        @include base.sheet-scrim;
     }
 }
 
