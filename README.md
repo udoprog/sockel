@@ -504,7 +504,7 @@ with a more specific selector:
 Breakpoints and most component settings are Sass-only, with no custom
 property: `$breakpoints` and every `-breakpoint`, `$badge-*`, `$button-*`,
 `$card-padding*`, `$chip-*`, `$choice-*` (but `$choice-width`),
-`$confirm-gap`, `$corner-transform`, `$count-*`, `$dialog-*` (but its
+`$confirm-*`, `$corner-transform`, `$count-*`, `$dialog-*` (but its
 widths, heights and top), `$disclosure-*`, `$drag-handle-*`, `$drop-*` (but
 `-min-height`, `-tint`, `-tint-over`), `$empty-state-*`, `$error-box-*`,
 `$glyph-phone-size`, `$input-*`, `$listbox-*`, `$menu-*` (but the widths and
@@ -618,6 +618,7 @@ must emit no CSS.
 | `$popover-radius`, `$popover-sheet-edge` | `var(--radius-md)`, `all` (a popover's corners; the edges its sheet keeps, as `$dialog-sheet-edge`) |
 | `$popover-scroll-gutter` | `stable` (the body keeps its scrollbar's room, so a popover is as wide scrolling or not; `auto` gives it to the content until it scrolls) |
 | `$confirm-gap` | `var(--space-3)` (between what a confirm says and its buttons) |
+| `$confirm-scroll-gutter` | `auto` (a confirm's body has a scrollbar gutter only where it scrolls; `stable` keeps the popover's) |
 | `$focus-ring-color`, `$focus-ring-width`, `$focus-ring-offset` | `var(--accent)`, `2px`, `2px` |
 | `$tooltip-max-width` | `24rem` |
 | `$picker-popup-width` | `var(--menu-width-wide)` (a Picker's or PickerMenu's list's least width; never measured from its text) |
@@ -2388,7 +2389,8 @@ the compact parts `CONFIRM_LINE`, `CONFIRM_PAIR`, `CONFIRM_NO` and
 `CONFIRM_YES`, `CONFIRM_INLINE` with
 its parts `CONFIRM_IDLE` (the button) and `CONFIRM_ASK` (No and Yes), and
 `AWAY` on the part not shown; `confirm_inline(part, away)` gives them.
-Setting: `$confirm-gap` (between what it says and its buttons).
+Settings: `$confirm-gap` (between what it says and its buttons) and
+`$confirm-scroll-gutter` (the body's `scrollbar-gutter`, `auto`).
 
 Size guarantees: `ConfirmInline` lays the button and the No and Yes in one
 grid cell and hides (`visibility`) the one not shown, so its box is the same
