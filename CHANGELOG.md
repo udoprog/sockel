@@ -112,8 +112,8 @@ instead.
 - A `PageHead` title has a size of its own, `--page-title-size`; unset (the
   default) it keeps the browser's heading size (`revert`), so output is the
   same until an app sets `$page-title-size`. A secondary button's fill reads
-  `--button-surface` (set on `.sockel-card`, `$card-button-fill`), the same
-  colour by default.
+  `--button-surface` (set on `.sockel-card` and by `p.card`,
+  `$card-button-fill`), the same colour by default.
 - ConfirmPopover's body has a scrollbar gutter only where it scrolls: it
   never does, so it no longer shows a 10px gutter on its right. Output
   changes for every confirm; a new `$confirm-scroll-gutter` (`auto`) sets it

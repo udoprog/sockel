@@ -1237,6 +1237,8 @@ $-feature-parts: (
     background: var(--surface);
     box-shadow: var(--shadow-1);
     color: var(--text);
+    // The fill of a secondary button on a card (`$card-button-fill`).
+    --button-surface: #{$card-button-fill};
 }
 
 // `.sockel-field`: a label, its control, a hint and an error, stacked.

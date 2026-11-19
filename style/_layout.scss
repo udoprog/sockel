@@ -318,8 +318,6 @@ $-gaps: (
 
 .sockel-card {
     @include base.card;
-    // The fill of a secondary button on a card (`$card-button-fill`).
-    --button-surface: #{base.$card-button-fill};
 
     @if base.emits("layout.card-compact") {
         &.sockel-compact {
