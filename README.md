@@ -2225,7 +2225,9 @@ is swallowed at the window).
   and a drop on a page says which (`DroppedOnPage`). Without it they are
   the catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
   `reorder_text` gives their English. `ReorderText` is
-  `#[non_exhaustive]`: a `text` callback ends in `_ => reorder_text(&t)`.
+  `#[non_exhaustive]`: a `text` callback ends in
+  `_ => fallback.emit(t)`, `fallback` being [`use_reorder_text`](https://docs.rs/sockel/latest/sockel/fn.use_reorder_text.html)'s callback
+  (the app's language; `reorder_text(&t)` is the English).
 - `DragHandle` is the grip alone (the [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html)'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
   `testid`, `title`. Helpers: `reorder_row(index, lift)`,
@@ -3384,8 +3386,8 @@ let book = Phrasebook::builder()
   `Some(..)` or `.as_deref()`. [`ConfirmRequest`](https://docs.rs/sockel/latest/sockel/struct.ConfirmRequest.html)'s `accept` and `cancel_label`
   are `Option` too, and `ConfirmRequest::new` leaves them `None`.
 - [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s announcements are `sockel-reorder-*` messages with the
-  position and count as numbers; `text` overrides them, and
-  `reorder_text` returns the catalog's English.
+  position and count as numbers; `text` overrides them, [`use_reorder_text`](https://docs.rs/sockel/latest/sockel/fn.use_reorder_text.html)
+  returns them in the app's language and `reorder_text` the catalog's English.
 
 sockel's own rule: no user-visible text as a literal in a component. Every
 word comes from the catalog, with numbers passed as numbers so the language
