@@ -699,10 +699,12 @@ fn use_placement(
                             }
                             return;
                         }
-                        // Its natural height, whatever max-height cuts it to.
+                        // Its natural height, whatever max-height cuts it to,
+                        // with its border (scroll_height leaves it out).
+                        let border = f64::from(pop.offset_height() - pop.client_height());
                         let size = (
                             f64::from(pop.offset_width()),
-                            f64::from(pop.scroll_height()),
+                            f64::from(pop.scroll_height()) + border,
                         );
                         let kept = last.get().map(|l| l.side);
                         let next = place_kept(Rect::of(&at), size, bounds, side, align, fit, kept);
@@ -1545,6 +1547,16 @@ mod tests {
         assert!(!html.contains(class::POPOVER_SCRIM), "{html}");
         assert!(!html.contains(class::POPOVER_HEAD), "{html}");
         assert!(html.contains(">Body</div>"), "{html}");
+    }
+
+    #[test]
+    fn the_sheets_head_and_its_close_come_before_the_body_in_tab_order() {
+        let html = render(true, true, Some("Filters"));
+        let (head, body) = (
+            html.find(class::POPOVER_HEAD),
+            html.find(class::POPOVER_BODY),
+        );
+        assert!(head.is_some() && head < body, "{html}");
     }
 
     #[test]

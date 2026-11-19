@@ -72,6 +72,10 @@ back to the catalog's text, `_ => sockel::reorder_text(&text)`.
 
 ### Changed
 
+- ConfirmPopover's body has a scrollbar gutter only where it scrolls: it
+  never does, so it no longer shows a 10px gutter on its right. Output
+  changes for every confirm; a new `$confirm-scroll-gutter` (`auto`) sets it
+  and `stable` keeps the popover's. `$popover-scroll-gutter` stays `stable`.
 - sockel-build: `Config::with(token, "null")` is a build error naming the
   token. Sass treats a null configuration as unset, so the call always left
   the default in place; a build that passed it now fails. Drop the call, leave
@@ -80,6 +84,9 @@ back to the catalog's text, `_ => sockel::reorder_text(&text)`.
 
 ### Fixed
 
+- `use_placement` measures a popover's height with its border, so a
+  bordered surface against a viewport edge keeps `EDGE` clear instead of
+  ending 2px past it.
 - `Reorder` with `body_drag`: a press let go outside the window before it
   became a drag no longer leaves a drag that the next pointer move over the
   row would start without a button held.

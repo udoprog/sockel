@@ -279,6 +279,9 @@ $popover-sheet-edge: all !default;
 $popover-scroll-gutter: stable !default;
 // The room between what a confirm says and its buttons.
 $confirm-gap: var(--space-3) !default;
+// A confirm popover's body never scrolls: `auto` gives it a gutter only
+// where it does (`stable` keeps the popover's).
+$confirm-scroll-gutter: auto !default;
 
 // A selection bar's ground, the rule above it, its padding, least height,
 // corners, outer margin and type, an inset one's side padding and margin,

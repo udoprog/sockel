@@ -8,7 +8,8 @@
 //   corners that meet squared, overlapping by the border.
 // - `.sockel-confirm-popover`: a popover `--popover-max-width` wide, so what
 //   it says never changes its width (a sheet on a phone is full width);
-//   `.sockel-compact` is as wide as what it says, up to the viewport.
+//   `.sockel-compact` is as wide as what it says, up to the viewport. Its
+//   body has a scrollbar gutter only where it scrolls (`$confirm-scroll-gutter`).
 // - `.sockel-confirm-inline`: the button and its No and Yes in one grid
 //   cell, so the box is as wide as the wider and as high as the button
 //   whichever shows. `-idle` is the button and `-ask` the No and Yes;
@@ -63,6 +64,7 @@
 }
 
 .sockel-confirm-popover {
+    --popover-scroll-gutter: #{base.$confirm-scroll-gutter};
     width: var(--popover-max-width);
 }
 

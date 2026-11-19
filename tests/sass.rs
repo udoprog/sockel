@@ -103,6 +103,12 @@ fn popover_and_confirm_settings() {
     assert!(css.contains("gap: 1rem;"));
     assert!(css.contains("scrollbar-gutter: stable;\n  scrollbar-gutter: auto;"));
     assert!(!defaults.contains("scrollbar-gutter: auto;\n  flex: 1 1 auto;"));
+    // The popover keeps `stable`; only a confirm's body is given `auto`.
+    assert!(defaults.contains("scrollbar-gutter: var(--popover-scroll-gutter, stable);"));
+    assert!(defaults.contains("--popover-scroll-gutter: auto;"));
+    assert!(css.contains("--popover-scroll-gutter: auto;"));
+    let kept = compile(&sass, "tests/fixtures/confirm_gutter_stable.scss");
+    assert!(kept.contains("--popover-scroll-gutter: stable;"));
     assert!(
         css.contains("border-bottom-color: transparent;\n    border-width: var(--space-px) 0 0;")
     );

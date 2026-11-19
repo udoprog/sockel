@@ -69,9 +69,11 @@
 
 .sockel-popover-body {
     @include base.scroll-area;
+    // A popover that never scrolls (a confirm) sets `--popover-scroll-gutter`.
     @if base.$popover-scroll-gutter != stable {
         scrollbar-gutter: base.$popover-scroll-gutter;
     }
+    scrollbar-gutter: var(--popover-scroll-gutter, #{base.$popover-scroll-gutter});
     flex: 1 1 auto;
     padding: base.$popover-padding;
 

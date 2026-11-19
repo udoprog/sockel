@@ -1,0 +1,6 @@
+// A project whose confirms keep the popover's gutter.
+@use "../../style/tokens" with (
+    $confirm-scroll-gutter: stable
+);
+@use "../../style/popover";
+@use "../../style/confirm";
