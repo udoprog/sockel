@@ -9,8 +9,10 @@
 //   small control height. `.sockel-stacked` puts one option to a row across
 //   the container, each at least the group's height, labels wrapping, the
 //   rule between them across; `.sockel-stack-narrow` does so below
-//   `$choice-stack-breakpoint`. Parts: `-option` (`.sockel-icon` when its
-//   icon is alone), `-icon`, `-label`.
+//   `$choice-stack-breakpoint`. Below the phone breakpoint every option is at
+//   least the group's height (a tap target, the group growing by its inset)
+//   and a label wraps rather than being cut. Parts: `-option`
+//   (`.sockel-icon` when its icon is alone), `-icon`, `-label`.
 // - `.sockel-disabled` and `.sockel-invalid`: dimmed, or the border in
 //   `--danger`.
 
@@ -37,6 +39,25 @@
                 border-block-start-color: base.$choice-divider;
             }
         }
+
+        > .sockel-choice-label {
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+// On a phone: the group grows around options of the full height, and a label
+// wraps rather than being cut off.
+@mixin -phone {
+    height: auto;
+
+    > .sockel-choice-option {
+        min-height: var(--choice-height);
+        padding-block: var(--space-1);
+        line-height: inherit;
 
         > .sockel-choice-label {
             overflow: visible;
@@ -89,6 +110,10 @@
 
     &.sockel-fixed {
         grid-auto-columns: var(--choice-width);
+    }
+
+    @include base.below("phone") {
+        @include -phone;
     }
 
     &.sockel-stacked {

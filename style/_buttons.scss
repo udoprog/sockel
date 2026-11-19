@@ -76,6 +76,7 @@
     &.sockel-small {
         --button-height: var(--control-height-small);
         height: var(--button-height);
+        min-width: var(--button-min-width, #{base.$button-small-min-width});
         padding-inline: var(--button-pad-x, #{base.$button-padding-small});
         font-size: base.$button-text-small;
     }

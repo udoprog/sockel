@@ -23,6 +23,16 @@ All notable changes to sockel and sockel-build. The format follows
 - A size budget: sockel-build's test `the_full_stylesheet_is_within_its_budget`
   fails when the full stylesheet, compressed, passes 121,500 bytes.
 
+### Fixed
+
+- On a phone, a `Choice`'s options are at least the group's height (the group
+  grows by its inset) and a label wraps instead of being cut off.
+- A `.sockel-small` button is at least as wide as it is tall, through the new
+  `$button-small-min-width` (`var(--button-height)`; `auto` restores the old
+  width), so a short label stays a tap target.
+- A control wearing `.sockel-split-view-back` shows a back arrow before its
+  label.
+
 ## [0.2.1] - 2026-11-19
 
 ### Changed

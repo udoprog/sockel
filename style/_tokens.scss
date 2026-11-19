@@ -182,6 +182,9 @@ $button-phone-height: null !default;
 $button-disabled-cursor: not-allowed !default;
 // A button's least width, under `--button-min-width` (`auto`: its content's).
 $button-min-width: auto !default;
+// A small button's least width (`var(--button-height)`: a square at least, so
+// a short label such as "All" stays a tap target; `auto`: its content's).
+$button-small-min-width: var(--button-height) !default;
 // What a switch, a chip's cross, a field's clear and action, a picker's face,
 // a menu item and a stepper's step take from an app's blanket button rule
 // when it has one (`null`: nothing is set, the browser's own): their

@@ -152,7 +152,7 @@ pub fn SplitViewPage() -> Html {
             <div class={class::SAMPLE}>
                 if *back {
                     <button type="button" class={classes!(class::BUTTON, sockel::class::SPLIT_VIEW_BACK)}
-                        onclick={close}>{ "← Back" }</button>
+                        onclick={close}>{ "Back" }</button>
                 }
                 <p>{ text.of(&format!("Item {} in detail", n + 1)) }</p>
             </div>

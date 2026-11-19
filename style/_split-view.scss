@@ -8,7 +8,8 @@
 //   column without its divider, showing the detail pane while open and the
 //   list pane otherwise; the other stays mounted, `display: none`.
 // - `.sockel-split-view-back`: for the app's back control in the detail,
-//   shown only while the panes are one at a time.
+//   shown only while the panes are one at a time, a back arrow before its
+//   label.
 //
 // Settings: `$split-view-breakpoint` ("tablet").
 
@@ -26,6 +27,21 @@ $-from: "(width >= #{base.breakpoint(base.$split-view-breakpoint)})";
 
 .sockel-split-view-seam {
     height: 100%;
+}
+
+// The arrow, a chevron in the text's colour.
+.sockel-split-view-back::before {
+    content: "";
+    flex: none;
+    display: inline-block;
+    box-sizing: border-box;
+    width: 0.5em;
+    height: 0.5em;
+    margin-inline: 0.2em var(--space-2);
+    border-style: solid;
+    border-color: currentColor;
+    border-width: 0 0 var(--space-0) var(--space-0);
+    transform: rotate(45deg);
 }
 
 // From the breakpoint up only, so below it the control keeps its own display.
