@@ -1595,7 +1595,7 @@ adds another (`j` or `ArrowDown`). A symbol such as `?` matches whatever
 Shift it took to type it. Its `label` is what the help lists, under its
 `group`.
 
-```rust,ignore
+```rust
 use_shortcut(Shortcut::new("?", "Show shortcuts").always(), open_help);
 use_shortcut(Shortcut::new("j", "Next row").or("ArrowDown").group("Rows"), next);
 use_shortcut(Shortcut::new("Mod+Enter", "Save").layer("edit").in_fields(), save);
@@ -2098,6 +2098,8 @@ Added for lanes, each off by default:
   (`sockel-reorder-lifted-in`, `-moving-in`, `-dropped-in`,
   `-cancelled-in`: "Moved Alpha to Done, 2 of 5"); a tree with `text`
   says what `text` gives, which is not told the list.
+
+<br>
 
 ### Lanes
 

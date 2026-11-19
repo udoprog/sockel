@@ -2108,6 +2108,8 @@
 //!   `-cancelled-in`: "Moved Alpha to Done, 2 of 5"); a tree with `text`
 //!   says what `text` gives, which is not told the list.
 //!
+//! <br>
+//!
 //! ### Lanes
 //!
 //! [`Lanes`] is lists side by side, a board's columns (`.sockel-lanes`, on a
