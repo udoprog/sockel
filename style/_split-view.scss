@@ -1,0 +1,61 @@
+// SplitView (src/split_view.rs): a list and its detail on a seam, one at a
+// time when narrow.
+//
+// - `.sockel-split-view`: the container (`container: sockel-split-view /
+//   inline-size`), as high as its parent; `.sockel-open` while a detail is.
+// - `.sockel-split-view-seam`: its Seam, filling it. Below
+//   `$split-view-breakpoint` of the split view's own width the seam is one
+//   column without its divider, showing the detail pane while open and the
+//   list pane otherwise; the other stays mounted, `display: none`.
+// - `.sockel-split-view-back`: for the app's back control in the detail,
+//   shown only while the panes are one at a time.
+//
+// Settings: `$split-view-breakpoint` ("tablet").
+
+@use "tokens" as base;
+
+$-below: "(width < #{base.breakpoint(base.$split-view-breakpoint)})";
+$-from: "(width >= #{base.breakpoint(base.$split-view-breakpoint)})";
+
+.sockel-split-view {
+    container: sockel-split-view / inline-size;
+    height: 100%;
+    min-width: 0;
+    min-height: 0;
+}
+
+.sockel-split-view-seam {
+    height: 100%;
+}
+
+// From the breakpoint up only, so below it the control keeps its own display.
+@container sockel-split-view #{$-from} {
+    .sockel-split-view-back {
+        display: none;
+    }
+}
+
+@container sockel-split-view #{$-below} {
+    .sockel-split-view-seam {
+        grid-template-columns: minmax(0, 1fr);
+
+        > .sockel-seam-grip,
+        > .sockel-seam-pane:last-child {
+            display: none;
+        }
+
+        > .sockel-seam-pane {
+            min-width: 0;
+        }
+    }
+
+    .sockel-split-view.sockel-open > .sockel-split-view-seam {
+        > .sockel-seam-pane:first-child {
+            display: none;
+        }
+
+        > .sockel-seam-pane:last-child {
+            display: block;
+        }
+    }
+}

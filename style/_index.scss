@@ -22,6 +22,7 @@
 @use "disclosure";
 @use "panel";
 @use "seam";
+@use "split-view";
 @use "rows";
 @use "reorder";
 @use "stepper";
@@ -38,4 +39,5 @@
 @use "search-select";
 @use "filter-picker";
 @use "picker";
+@use "shell";
 @use "utilities";

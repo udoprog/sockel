@@ -1,0 +1,211 @@
+// AppShell and BottomNav (src/shell.rs): an app's frame and its sections.
+//
+// - `.sockel-app-shell`: the frame's container (`container: sockel-app-shell
+//   / inline-size`), `--app-shell-height` high (`100dvh`).
+// - `.sockel-app-shell-frame`: a grid of the bar's `-start`, the `-nav` and
+//   the bar's `-end` in one row `--app-shell-bar-height` (3rem) high at
+//   least, over the `-main`, which scrolls. The `-bar` (a `header`) is
+//   `display: contents`, its row's ground the frame's `::before`
+//   (`--app-shell-bar-ground`, `--surface`, ruled off below). Below
+//   `$app-shell-breakpoint` of the shell's own width the nav leaves the bar
+//   for a row under the main, on the same ground and ruled off above, its
+//   bottom padding the window's safe area.
+// - `.sockel-bottom-nav`: a `nav` of `.sockel-bottom-nav-item`s (links or
+//   buttons, in `-items`, each in an `-entry`), the current one
+//   (`aria-current`) in the accent colour and underlined in the bar, in the
+//   accent colour on a tint at the bottom. Parts: `-icon`, `-label`,
+//   `-count` (a Count, beside the label in the bar, on the icon's corner at
+//   the bottom). At the bottom the items share the row evenly, each
+//   `--touch-height` at least, the icon over the label.
+//
+// Settings: `$app-shell-breakpoint` ("phone"). Tokens, set by an app where
+// it wants (they have defaults here, so nothing is added to `:root`):
+// `--app-shell-height`, `--app-shell-bar-height`, `--app-shell-bar-ground`.
+
+@use "tokens" as base;
+
+$-below: "(width < #{base.breakpoint(base.$app-shell-breakpoint)})";
+
+.sockel-app-shell {
+    container: sockel-app-shell / inline-size;
+    height: var(--app-shell-height, 100dvh);
+    min-height: 0;
+    overflow: hidden;
+}
+
+.sockel-app-shell-frame {
+    position: relative;
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    grid-template-rows: minmax(var(--app-shell-bar-height, 3rem), auto) minmax(0, 1fr);
+    grid-template-areas:
+        "start nav end"
+        "main main main";
+    height: 100%;
+
+    // The bar's ground: one row behind start, nav and end.
+    &::before {
+        content: "";
+        grid-row: 1;
+        grid-column: 1 / -1;
+        background: var(--app-shell-bar-ground, var(--surface));
+        box-shadow: inset 0 calc(-1 * var(--space-px)) 0 var(--border);
+    }
+}
+
+.sockel-app-shell-bar {
+    display: contents;
+}
+
+.sockel-app-shell-start,
+.sockel-app-shell-end,
+.sockel-app-shell-nav {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-width: 0;
+    // Over the bar's ground, which is laid out first in the same row.
+    z-index: 0;
+}
+
+.sockel-app-shell-start {
+    grid-area: start;
+    padding-inline-start: var(--page-gutter, var(--space-3));
+}
+
+.sockel-app-shell-end {
+    grid-area: end;
+    justify-content: flex-end;
+    padding-inline-end: var(--page-gutter, var(--space-3));
+}
+
+.sockel-app-shell-nav {
+    grid-area: nav;
+    padding-inline: var(--space-3);
+}
+
+.sockel-app-shell-main {
+    grid-area: main;
+    min-width: 0;
+}
+
+@container sockel-app-shell #{$-below} {
+    .sockel-app-shell-frame {
+        grid-template-columns: minmax(0, 1fr) auto;
+        grid-template-rows: minmax(var(--app-shell-bar-height, 3rem), auto) minmax(0, 1fr) auto;
+        grid-template-areas:
+            "start end"
+            "main main"
+            "nav nav";
+    }
+
+    .sockel-app-shell-nav {
+        display: block;
+        padding: 0 0 env(safe-area-inset-bottom, 0);
+        background: var(--app-shell-bar-ground, var(--surface));
+        box-shadow: inset 0 var(--space-px) 0 var(--border);
+    }
+}
+
+.sockel-bottom-nav {
+    display: block;
+    min-width: 0;
+}
+
+.sockel-bottom-nav-items {
+    display: flex;
+    align-items: stretch;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sockel-bottom-nav-entry {
+    display: flex;
+    min-width: 0;
+}
+
+.sockel-bottom-nav-item {
+    position: relative;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: var(--control-height);
+    margin: 0;
+    padding-block: 0;
+    padding-inline: var(--space-3);
+    @include base.reserved-border;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    text-decoration: none;
+    cursor: pointer;
+    @include base.focus-ring;
+
+    &:hover {
+        color: var(--text);
+    }
+
+    @include base.current(color);
+    @include base.current(underline);
+}
+
+.sockel-bottom-nav-icon {
+    display: inline-flex;
+    flex: none;
+
+    &:empty {
+        display: none;
+    }
+}
+
+.sockel-bottom-nav-label {
+    @include base.truncate;
+}
+
+.sockel-bottom-nav-count {
+    flex: none;
+}
+
+@container sockel-app-shell #{$-below} {
+    .sockel-bottom-nav-items {
+        gap: 0;
+    }
+
+    .sockel-bottom-nav-entry {
+        flex: 1 1 0;
+    }
+
+    .sockel-bottom-nav-item {
+        flex: 1 1 0;
+        flex-direction: column;
+        justify-content: center;
+        gap: var(--space-0);
+        min-height: var(--touch-height);
+        padding-block: var(--space-1);
+        padding-inline: var(--space-1);
+        border-radius: 0;
+        font-size: var(--text-xs);
+        text-decoration: none;
+
+        &[aria-current]:not([aria-current="false"]) {
+            text-decoration: none;
+            background: color-mix(in srgb, var(--accent) 10%, transparent);
+        }
+    }
+
+    .sockel-bottom-nav-label {
+        max-width: 100%;
+    }
+
+    // On the icon's top end corner, off the flow, so the item's box holds.
+    .sockel-bottom-nav-count {
+        position: absolute;
+        inset-block-start: var(--space-0);
+        inset-inline-start: calc(50% + var(--space-2));
+    }
+}

@@ -623,6 +623,10 @@ $action-overlay-padding: var(--space-3) var(--space-2) !default;
 $visibility-breakpoint: "phone" !default;
 // The breakpoint below which a popover is a sheet from the bottom.
 $sheet-breakpoint: "phone" !default;
+// The breakpoints, of their own width, below which an AppShell's navigation
+// is a bar at the bottom and a SplitView shows one pane.
+$app-shell-breakpoint: "phone" !default;
+$split-view-breakpoint: "tablet" !default;
 
 // A text field's edge on hover and while focused (`null`: as at rest), its
 // focus ring's offset (`null`: `--focus-ring-offset`; a negative one draws

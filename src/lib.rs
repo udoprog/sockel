@@ -351,7 +351,9 @@
 //! | `search-select` | `select` | [`SearchSelect`] | 45.1 KB |
 //! | `seam` | | [`Seam`] | 5.2 KB |
 //! | `select` | `input`, `menu`, `tooltip` | [`Select`], [`Listbox`] | 43.9 KB |
+//! | `shell` | `badge` | [`AppShell`], [`BottomNav`] | 13.9 KB |
 //! | `skeleton` | `icons`, `media` | [`Skeleton`], [`Spinner`] | 7.4 KB |
+//! | `split-view` | `seam` | [`SplitView`] | 6.0 KB |
 //! | `stepper` | `input` | [`Stepper`] | 11.2 KB |
 //! | `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
 //! | `tabs` | | [`Tabs`], [`SubTabs`], [`LinkTabs`], [`NavList`] | 6.9 KB |
@@ -731,6 +733,13 @@
 //! - [`Seam`] (`.seam`): two panes and the divider dragged between them, each
 //!   pane keeping its least size.
 //! - [`use_width`]: an element's width, at most once a frame.
+//! - [`AppShell`] (`.app-shell`): an app's frame, a top bar over a page that
+//!   scrolls on its own, its section navigation in the bar when wide and a bar
+//!   at the bottom when narrow; [`BottomNav`] (`.bottom-nav`): those sections,
+//!   the current one marked by `aria-current`, each with a count.
+//! - [`SplitView`] (`.split-view`): a list and the detail opened from it on a
+//!   [`Seam`] when wide, one at a time when narrow, the app's route saying
+//!   what is open.
 //! - [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
 //!   an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
 //!   navigation, the current entry marked by `aria-current`.
@@ -2672,6 +2681,68 @@
 //!
 //! <br>
 //!
+//! ## AppShell, BottomNav and SplitView
+//!
+//! **AppShell** is an app's frame (`.sockel-app-shell`), `--app-shell-height`
+//! high (`100dvh`): a top bar of `start` (a back button, the title, a
+//! switcher), `nav` and `end` (status, an actions menu), at least
+//! `--app-shell-bar-height` (3rem) on `--app-shell-bar-ground` (`--surface`)
+//! with a rule under it, over its `children`, the page (a `main` that
+//! scrolls on its own, so the bar and the navigation never move). Below
+//! `$app-shell-breakpoint` (`phone`) of the shell's own width (a container
+//! query, so a shell in a narrow frame acts as on a phone) the bar holds
+//! `start` and `end` alone and `nav` is a bar at the bottom, ruled off above,
+//! clear of the window's safe area. The one `nav` element moves by the grid
+//! alone, so nothing re-renders as the width changes and focus stays put.
+//! The three tokens have their defaults in the rules, so an app sets them
+//! where it wants and nothing is added to `:root`. `app_shell()` gives its
+//! class.
+//!
+//! **BottomNav** is the sections (`.sockel-bottom-nav`, a `nav` named by
+//! `label`): `items` are [`BottomNavItem`]s
+//! (`BottomNavItem::new(value, label)`, `.icon(html)`, `.href(url)`,
+//! `.count(n)`), `value` the current one (`aria-current="page"`), `on_select`
+//! told a section's value when pressed (a link's too, for an app's router),
+//! and `max` the largest count shown whole (99). The current section is
+//! marked by colour and an underline in the bar, and by colour on a tint at
+//! the bottom, never by weight. In the bar the sections sit in a line, icon,
+//! label and count; at the bottom they share the row evenly, each
+//! `--touch-height` at least, the icon over the label and the [`Count`] on
+//! the icon's corner, off the flow. A count of none is hidden and keeps its
+//! box (`hide_zero`), so the first arrival moves nothing. Outside an
+//! AppShell it is always the line. `bottom_nav()` gives its class.
+//!
+//! **SplitView** is a list and the detail opened from it
+//! (`.sockel-split-view`, `.sockel-open` while one is): `list`, `detail`
+//! (`Option<Html>`, from the app's route: `None` while nothing is open) and
+//! `empty`, what the detail pane holds beside the list while nothing is
+//! open. From `$split-view-breakpoint` (`tablet`) of its own width (a
+//! container query) they sit side by side on a [`Seam`]
+//! (`.sockel-split-view-seam`): `at` is where the list's share starts (0.4)
+//! and whenever it changes, a drag or a key moves it from there and
+//! `on_settle` reports where it settled, for the app to keep; `min` and
+//! `max` (0.2, 0.8) bound it and `label` names the divider. Below the
+//! breakpoint one pane shows, the detail while one is open and the list
+//! otherwise, without the divider. Both panes stay mounted, so the list
+//! keeps its scroll while a detail covers it, and back is the app's (or the
+//! browser's): a control in the detail wearing `class::SPLIT_VIEW_BACK`
+//! shows only while the panes are one at a time. Give the split view a
+//! height (it fills its parent). `split_view(open)` gives its classes.
+//!
+//! Size guarantees: the bar's row and the bottom bar keep their height
+//! whatever the page holds and whichever section is current; a count
+//! arriving or going changes no section's box; opening a detail changes
+//! which pane shows, never the panes' boxes, and the divider keeps
+//! `--seam-grip`. Settings: `$app-shell-breakpoint`, `$split-view-breakpoint`.
+//! New classes: `APP_SHELL`, `APP_SHELL_FRAME`, `APP_SHELL_BAR`,
+//! `APP_SHELL_START`, `APP_SHELL_END`, `APP_SHELL_NAV`, `APP_SHELL_MAIN`,
+//! `BOTTOM_NAV`, `BOTTOM_NAV_ITEMS`, `BOTTOM_NAV_ENTRY`, `BOTTOM_NAV_ITEM`,
+//! `BOTTOM_NAV_ICON`, `BOTTOM_NAV_LABEL`, `BOTTOM_NAV_COUNT`, `SPLIT_VIEW`,
+//! `SPLIT_VIEW_SEAM`, `SPLIT_VIEW_BACK`. New partials: `_shell.scss`,
+//! `_split-view.scss`. New tokens: `--app-shell-height`,
+//! `--app-shell-bar-height`, `--app-shell-bar-ground` (defaults in the rules).
+//!
+//! <br>
 //! ## Against jitter: mixins and utilities
 //!
 //! The shared rules every component builds on, so nothing changes size as its
@@ -2965,6 +3036,8 @@ mod secret_input;
 mod select;
 #[cfg(feature = "rows")]
 mod selection;
+#[cfg(feature = "shell")]
+mod shell;
 mod size;
 #[cfg(feature = "skeleton")]
 mod skeleton;
@@ -2972,6 +3045,8 @@ mod skeleton;
 mod sort_header;
 #[cfg(feature = "skeleton")]
 mod spinner;
+#[cfg(feature = "split-view")]
+mod split_view;
 #[cfg(feature = "badge")]
 mod status;
 #[cfg(feature = "stepper")]
@@ -3133,6 +3208,10 @@ pub use select::{
 pub use selection::{
     ActionRow, ActionRowProps, SelectionBar, SelectionBarProps, action_row, selection_bar,
 };
+#[cfg(feature = "shell")]
+pub use shell::{
+    AppShell, AppShellProps, BottomNav, BottomNavItem, BottomNavProps, app_shell, bottom_nav,
+};
 pub use size::use_width;
 #[cfg(feature = "skeleton")]
 pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
@@ -3142,6 +3221,8 @@ pub use sort_header::{
 };
 #[cfg(feature = "skeleton")]
 pub use spinner::{Spinner, SpinnerProps};
+#[cfg(feature = "split-view")]
+pub use split_view::{SplitView, SplitViewProps, split_view};
 #[cfg(feature = "badge")]
 pub use status::{StatusLabel, StatusLabelProps, status_label};
 #[cfg(feature = "stepper")]

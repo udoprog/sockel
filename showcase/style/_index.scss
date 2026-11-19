@@ -327,6 +327,18 @@ body {
     outline: var(--space-px) dashed var(--border);
 }
 
+// The app shell and split view pages' boxes (pages/shell.rs): a frame's
+// height for a shell, a split view's height.
+.showcase-shell-box {
+    --app-shell-height: 22rem;
+    outline: var(--space-px) dashed var(--border);
+}
+
+.showcase-split-box {
+    height: 18rem;
+    outline: var(--space-px) dashed var(--border);
+}
+
 // The badge page's positioned parent for a corner badge (pages/badges.rs).
 .showcase-anchor {
     position: relative;

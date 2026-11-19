@@ -26,6 +26,7 @@ mod reorder;
 mod reorder_tree;
 mod rows;
 mod select;
+mod shell;
 mod steppers;
 mod structures;
 mod styles;
@@ -1503,6 +1504,47 @@ pub const PAGES: &[Page] = &[
                 sockel::class::SEAM_PANE,
                 Size::Width,
                 Across::Only(&["Text", "focus", "click"]),
+            ),
+        ],
+    },
+    Page {
+        id: "split-view",
+        title: "SplitView",
+        group: Group::Layout,
+        about: "A list and the detail opened from it: side by side on a Seam from the tablet breakpoint of its own width (a container query), one pane at a time below it, the detail while one is open. Both panes stay mounted, so the list keeps its scroll; a control wearing SPLIT_VIEW_BACK shows only while the panes are one at a time. Widen the narrow frame past 64rem, or view the page on a wide window, to see both panes.",
+        covers: &["SplitView", "SplitViewProps", "split_view"],
+        render: || html! { <shell::SplitViewPage /> },
+        holds: &[
+            hold(sockel::class::SPLIT_VIEW, Size::Box, Across::All),
+            hold(
+                sockel::class::SEAM_GRIP,
+                Size::Both,
+                Across::Except(&["at"]),
+            ),
+        ],
+    },
+    Page {
+        id: "app-shell",
+        title: "AppShell and BottomNav",
+        group: Group::Navigation,
+        about: "An app's frame: a top bar of start, nav and end over a page that scrolls on its own. Below the phone breakpoint of the shell's own width (a container query) the navigation leaves the bar for a bar at the bottom, the sections sharing it evenly, icon over label, the count on the icon's corner. The current section is marked by colour, never weight; a count of none keeps its box.",
+        covers: &[
+            "AppShell",
+            "AppShellProps",
+            "BottomNav",
+            "BottomNavItem",
+            "BottomNavProps",
+            "app_shell",
+            "bottom_nav",
+        ],
+        render: || html! { <shell::AppShellPage /> },
+        holds: &[
+            hold(sockel::class::APP_SHELL, Size::Box, Across::All),
+            hold(sockel::class::APP_SHELL_NAV, Size::Height, Across::All),
+            hold(
+                sockel::class::BOTTOM_NAV_ITEM,
+                Size::Both,
+                Across::Only(&["current", "inbox count", "focus", "click"]),
             ),
         ],
     },
