@@ -1041,6 +1041,13 @@ A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
 blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
 to the reading column (`--page-reading`), as a long entry's text.
 
+`REVEAL` (`.sockel-reveal`) on a part of a container that has `REVEAL_HOST` keeps the part
+invisible and inert until the container is hovered or has focus inside, its room kept
+(unlike an overlay [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), which lies over the row); a touch screen shows it.
+`MENU_ROW` on a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) makes it a start-aligned row of a dropdown.
+`$head-trail-separator` (`"\203A"`) is the mark after each crumb of a head's trail, and
+`$head-trail-mark` (unset) a mask image such as a `url(...)` drawn in its place.
+
 `SHRINK` (`.sockel-shrink`) lets a column in a row, or a grid item, be narrower than its
 content (`min-width: 0`, as a `Stack` and a `Cluster` are). `LEAST` on a
 [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) or a [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) makes its size a least height, not a fixed one.
