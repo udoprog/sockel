@@ -34,6 +34,17 @@ props with `yew::props!`, which fills them in:
 - `ReorderTree` honours a `ReorderItem`'s `fixed` (no handle, stays put, not
   counted in the positions announced) and `lifted_only` (shown only while a
   row is lifted), as `Reorder` does.
+- sockel-build's docs show one `Config` shared by `build.rs` and the
+  `Usage` guard: a `style.rs` that both `include!`, the guard adding
+  `.style(env!("SOCKEL_STYLE"))`.
+
+### Changed
+
+- sockel-build: `Config::with(token, "null")` is a build error naming the
+  token. Sass treats a null configuration as unset, so the call always left
+  the default in place; a build that passed it now fails. Drop the call, leave
+  the part out with `$omit`, or give a real value. The error is an
+  `Error::Io` of kind `InvalidInput`, so `Error` keeps its variants.
 
 ### Fixed
 

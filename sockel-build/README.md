@@ -119,3 +119,51 @@ fn every_styled_class_is_written() {
 source names its constant (`class::SIDEBAR`) or the class in a string
 literal; comments and `#[cfg(test)]` items do not count. The test fails on
 a dead class and on an allowed pattern that matches no class.
+
+<br>
+
+## One Config for the build and the guard
+
+So the guard checks the stylesheet the app builds, define the [`Config`]
+once, in a file beside `build.rs` (`style.rs`):
+
+```rust
+fn style() -> sockel_build::Config {
+    sockel_build::Config::new()
+        .local("style/")
+        .prefix("app-")
+        .foreign(["auth-*"])
+        .with("radius-lg", "12px")
+}
+```
+
+`build.rs` includes and compiles it:
+
+```rust
+include!("style.rs");
+
+fn main() {
+    style().compile();
+}
+```
+
+and the guard includes it as well, adding sockel's style directory, which
+only `build.rs` is told:
+
+```rust
+use sockel_build::Usage;
+
+include!("../style.rs");
+
+#[test]
+fn every_styled_class_is_written() {
+    Usage::new()
+        .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
+        .assert_clean(&style().style(env!("SOCKEL_STYLE")));
+}
+```
+
+A relative path in it (`style/`) is the package root's in both, where Cargo
+runs build scripts and tests. [`FEATURES_VAR`] is set only in `build.rs`,
+so the guard builds all of sockel's features unless the Config names them
+with [`Config::features`].

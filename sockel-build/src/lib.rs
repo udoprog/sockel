@@ -115,6 +115,54 @@
 //! source names its constant (`class::SIDEBAR`) or the class in a string
 //! literal; comments and `#[cfg(test)]` items do not count. The test fails on
 //! a dead class and on an allowed pattern that matches no class.
+//!
+//! <br>
+//!
+//! ## One Config for the build and the guard
+//!
+//! So the guard checks the stylesheet the app builds, define the [`Config`]
+//! once, in a file beside `build.rs` (`style.rs`):
+//!
+//! ```no_run
+//! fn style() -> sockel_build::Config {
+//!     sockel_build::Config::new()
+//!         .local("style/")
+//!         .prefix("app-")
+//!         .foreign(["auth-*"])
+//!         .with("radius-lg", "12px")
+//! }
+//! ```
+//!
+//! `build.rs` includes and compiles it:
+//!
+//! ```ignore
+//! include!("style.rs");
+//!
+//! fn main() {
+//!     style().compile();
+//! }
+//! ```
+//!
+//! and the guard includes it as well, adding sockel's style directory, which
+//! only `build.rs` is told:
+//!
+//! ```ignore
+//! use sockel_build::Usage;
+//!
+//! include!("../style.rs");
+//!
+//! #[test]
+//! fn every_styled_class_is_written() {
+//!     Usage::new()
+//!         .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
+//!         .assert_clean(&style().style(env!("SOCKEL_STYLE")));
+//! }
+//! ```
+//!
+//! A relative path in it (`style/`) is the package root's in both, where Cargo
+//! runs build scripts and tests. [`FEATURES_VAR`] is set only in `build.rs`,
+//! so the guard builds all of sockel's features unless the Config names them
+//! with [`Config::features`].
 
 use std::collections::BTreeMap;
 use std::fmt;
@@ -453,7 +501,8 @@ impl Config {
 
     /// Sets a sockel token (`"text-md"` or `"$text-md"`) to a Sass value
     /// (`"1.0625rem"`), as `@use "sockel" with (...)` would. Only values
-    /// change; the classes stay the same.
+    /// change; the classes stay the same. `"null"` is a build error: Sass
+    /// reads it as unset, so the default would stay.
     pub fn with(mut self, variable: impl AsRef<str>, value: impl Into<String>) -> Self {
         let name = variable.as_ref().trim_start_matches('$').to_owned();
         self.with.push((name, value.into()));
@@ -530,6 +579,16 @@ impl Config {
     }
 
     fn sockel_use(&self, enabled: Option<&[String]>) -> Result<String, Error> {
+        if let Some((name, _)) = self.with.iter().find(|(_, value)| value.trim() == "null") {
+            return Err(Error::Io(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!(
+                    "Config::with(\"{name}\", \"null\") has no effect: Sass treats a null \
+                     configuration as unset, so ${name} keeps its default; leave the part \
+                     out with $omit, or give a real value"
+                ),
+            )));
+        }
         let on =
             |feature: &&str| enabled.is_none_or(|enabled| enabled.iter().any(|e| e == *feature));
         let folded: Vec<_> = FEATURE_PARTS
@@ -920,6 +979,18 @@ mod tests {
             assert!(!output.css.contains("--text-md: 0.875rem"));
             assert_eq!(output.sockel_classes, plain.sockel_classes);
         }
+    }
+
+    #[test]
+    fn rejects_a_null_token_value() {
+        let error = sockel()
+            .with("text-md", "1rem")
+            .with("$card-border-width", " null ")
+            .build()
+            .unwrap_err();
+        let message = error.to_string();
+        assert!(message.contains("$card-border-width"), "{message}");
+        assert!(message.contains("$omit"), "{message}");
     }
 
     #[test]
