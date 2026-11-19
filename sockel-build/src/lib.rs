@@ -126,6 +126,11 @@
 //! write on purpose is allowed with [`Usage::unprefixed`]; one a
 //! [`Usage::dynamic`] pattern covers needs nothing.
 //!
+//! It fails as well on a sockel class the build leaves out (`$omit`) that a
+//! source writes, unless the local styles define it. Sockel's own components
+//! that emit an omitted class are not seen: check those against the parts table
+//! in [sockel's docs](https://docs.rs/sockel/latest/sockel/#leaving-parts-out).
+//!
 //! [`Usage::one_file_per_component`] also fails on a class with a top-level
 //! rule in more than one local Sass file, so a component's rules stay in its
 //! own file.
@@ -616,6 +621,20 @@ impl Config {
             .filter(|(_, features)| !features.iter().any(on))
             .map(|(part, _)| format!("\"{part}\""))
             .collect();
+        if let Some((_, value)) = self.with.iter().rfind(|(name, _)| name == "omit")
+            && let Some(part) = FEATURE_PARTS
+                .iter()
+                .filter(|(_, features)| !features.iter().any(on))
+                .map(|(part, _)| *part)
+                .find(|part| {
+                    value.contains(&format!("\"{part}\"")) || value.contains(&format!("'{part}'"))
+                })
+        {
+            return Err(Error::Io(io::Error::new(
+                io::ErrorKind::InvalidInput,
+                format!("$omit: {part} is already left out, its feature is off"),
+            )));
+        }
         let mut pairs: Vec<_> = self
             .with
             .iter()
@@ -699,6 +718,12 @@ impl Config {
     }
 
     pub fn build(&self) -> Result<Output, Error> {
+        Ok(self.build_with(false)?.0)
+    }
+
+    /// [`Config::build`], and with `omitted` the sockel classes the build
+    /// leaves out that the app's local Sass does not style itself.
+    pub(crate) fn build_with(&self, omitted: bool) -> Result<(Output, Vec<String>), Error> {
         let enabled = self.enabled();
         let style = self.style_dir()?;
         let sources = Sources {
@@ -715,11 +740,17 @@ impl Config {
         sockel_classes.dedup();
 
         let Some(dir) = &self.local else {
-            return Ok(Output {
+            let omitted = if omitted {
+                Self::left_out(&options, &sockel_classes, &[])?
+            } else {
+                Vec::new()
+            };
+            let output = Output {
                 css: self.layered(&sockel_css),
                 sockel_classes,
                 local_classes: Vec::new(),
-            });
+            };
+            return Ok((output, omitted));
         };
         let prefix = self.prefix.as_deref().ok_or(Error::NoPrefix)?;
         let index = local_index(dir)?;
@@ -731,7 +762,8 @@ impl Config {
         let css = format!("{}{local_css}", self.layered(&sockel_css));
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
-        for class in class_names(local_css) {
+        let local_all = class_names(local_css);
+        for class in local_all.iter().cloned() {
             if sockel_classes.binary_search(&class).is_ok()
                 || self.foreign.iter().any(|pattern| matches(pattern, &class))
             {
@@ -756,11 +788,29 @@ impl Config {
                 prefix: prefix.to_owned(),
             });
         }
-        Ok(Output {
+        let omitted = if omitted {
+            Self::left_out(&options, &sockel_classes, &local_all)?
+        } else {
+            Vec::new()
+        };
+        let output = Output {
             css,
             sockel_classes,
             local_classes,
-        })
+        };
+        Ok((output, omitted))
+    }
+
+    /// The classes of sockel's enabled features that the build omits and
+    /// `styled` does not define.
+    fn left_out(
+        options: &sasso::Options<'_>,
+        built: &[String],
+        styled: &[String],
+    ) -> Result<Vec<String>, Error> {
+        let mut all = Self::all_classes(options)?;
+        all.retain(|class| built.binary_search(class).is_err() && !styled.contains(class));
+        Ok(all)
     }
 
     /// Builds and writes `style.css` (the whole stylesheet) and `classes.rs`:
@@ -1763,6 +1813,22 @@ mod tests {
         }
         assert!(lean.css.len() < plain.css.len());
         assert!(sockel().with("omit", r#"("seam")"#).build().is_err());
+    }
+
+    #[test]
+    fn an_omit_of_a_part_its_feature_left_out_is_an_error() {
+        let config = sockel()
+            .features(["button"])
+            .with("omit", r#"("tokens.seam",)"#);
+        let error = config.build().unwrap_err();
+        assert!(error.to_string().contains("tokens.seam"), "{error}");
+        assert!(
+            sockel()
+                .features(["button", "seam"])
+                .with("omit", r#"("tokens.seam",)"#)
+                .build()
+                .is_ok()
+        );
     }
 
     #[test]

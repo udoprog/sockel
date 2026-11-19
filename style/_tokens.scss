@@ -767,6 +767,23 @@ $-feature-parts: (
     "tokens.tooltip": ("tooltip",),
 );
 
+// An `$omit` naming a part its feature already leaves out is a mistake.
+@each $part in $omit {
+    @if $features != null and map.has-key($-feature-parts, $part) {
+        $on: false;
+
+        @each $feature in map.get($-feature-parts, $part) {
+            @if map.has-key($features, $feature) {
+                $on: true;
+            }
+        }
+
+        @if not $on {
+            @error "$omit: #{$part} is already left out, its feature is off";
+        }
+    }
+}
+
 // Whether `$part` is emitted: not named in `$omit`, and with `$features`
 // set, a part a feature owns only while one of its features is on.
 @function emits($part) {

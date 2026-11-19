@@ -48,6 +48,9 @@ instead.
 
 ### Added
 
+- sockel-build: `Report::omitted`, the sockel classes the build leaves out
+  (by `$omit` or a feature) that a source writes, as a literal or
+  `sockel::class::NAME`, unless the local styles define them.
 - `use_reorder_text()` (hook) returns a `Callback<ReorderText, String>` saying
   any `ReorderText` in the app's language, the fallback arm of a `text`
   override. `reorder_text` stays the English catalog text.
@@ -139,6 +142,11 @@ instead.
 
 ### Changed
 
+- An `$omit` naming a part its feature already leaves out is an error, in
+  `sockel-build` and in the Sass given `$features`. `Usage::assert_clean`
+  (and `Report::is_clean`) now fail on a written class the build omits, so a
+  build that passed may report `omitted: .sockel-...`: keep the part, or
+  stop writing the class.
 - TextInput's `autofocus` focuses the input on mount. Inside a dialog or
   popover (`[role=dialog]`) it stays the `data-autofocus` mark they focus as
   they open, as before; elsewhere it used to do nothing.

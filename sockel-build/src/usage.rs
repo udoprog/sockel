@@ -63,7 +63,7 @@ impl Usage {
     /// local ones, or sockel's own without local styles. With
     /// `STYLE_INVENTORY=PATH` set, also writes `class<TAB>uses` lines to `PATH`.
     pub fn report(&self, config: &Config) -> Result<Report, Error> {
-        let output = config.build()?;
+        let (output, omitted) = config.build_with(true)?;
         let (classes, prefix) = match (&config.local, &config.prefix) {
             (Some(_), Some(prefix)) => (output.local_classes, prefix.as_str()),
             _ => (output.sockel_classes, "sockel-"),
@@ -130,7 +130,19 @@ impl Usage {
             .filter(|pattern| !uses.keys().any(|class| matches(pattern, class)))
             .cloned()
             .collect();
+        let omitted: BTreeMap<String, usize> = omitted
+            .into_iter()
+            .filter_map(|class| {
+                let constant = class.strip_prefix("sockel-").map(const_name).transpose();
+                let named = constant.ok().flatten().map_or(0, |name| {
+                    text.matches(&format!("sockel::class::{name}")).count()
+                });
+                let count = named + literals.get(&class).copied().unwrap_or(0);
+                (count > 0).then_some((class, count))
+            })
+            .collect();
         let report = Report {
+            omitted,
             dead: uses
                 .iter()
                 .filter(|(class, count)| **count == 0 && !allowed(class))
@@ -181,6 +193,10 @@ pub struct Report {
     pub uses: BTreeMap<String, usize>,
     /// Classes written once.
     pub single_use: Vec<String>,
+    /// Sockel classes the build leaves out (`$omit`, a feature) that the
+    /// sources write (a literal, or `sockel::class::NAME` in full), with the
+    /// number of times. Components of sockel's own that emit one are not seen.
+    pub omitted: BTreeMap<String, usize>,
     /// Classes never written and not allowed.
     pub dead: Vec<String>,
     /// Allowed patterns matching no styled class.
@@ -196,6 +212,7 @@ pub struct Report {
 impl Report {
     pub fn is_clean(&self) -> bool {
         self.dead.is_empty()
+            && self.omitted.is_empty()
             && self.stale.is_empty()
             && self.unprefixed.is_empty()
             && self.split.is_empty()
@@ -213,6 +230,12 @@ impl fmt::Display for Report {
         )?;
         for class in &self.dead {
             writeln!(f, "dead: .{class} is styled and written by no source")?;
+        }
+        for class in self.omitted.keys() {
+            writeln!(
+                f,
+                "omitted: .{class} is written by a source, and the build leaves it out"
+            )?;
         }
         for pattern in &self.stale {
             writeln!(f, "stale: allowed `{pattern}` matches no styled class")?;
@@ -771,6 +794,24 @@ mod tests {
         let mut known = Helpers::new();
         helpers(&code, &mut known);
         assert_eq!(bare_words(&code, &known), ["in-call", "in-arm", "in-attr"]);
+    }
+
+    #[test]
+    fn finds_a_written_class_the_build_omits() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/omits");
+        let usage = Usage::new().source(&dir);
+        let kept = usage.report(&crate::sockel()).unwrap();
+        assert!(kept.omitted.is_empty());
+        let config = crate::sockel().with("omit", r#"("heads.label",)"#);
+        let report = usage.report(&config).unwrap();
+        assert_eq!(
+            report.omitted,
+            BTreeMap::from([("sockel-label".to_owned(), 1)])
+        );
+        assert!(!report.is_clean());
+        assert!(report.to_string().contains("omitted: .sockel-label"));
+        let styled = config.local(dir.join("../omitted")).prefix("fixture-");
+        assert!(usage.report(&styled).unwrap().omitted.is_empty());
     }
 
     #[test]
