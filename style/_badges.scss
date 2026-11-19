@@ -9,10 +9,10 @@
 // `fit-content` wide, so a stretching parent (a column flex, a grid cell)
 // does not widen them.
 //
-// - `.sockel-pill`: a tinted label of `--mark-height`, led by a dot in its
-//   tone; `.sockel-plain` has no dot, `.sockel-pill-button` is a button (the
-//   hover changes its fill only). `-label` is its text, cut with an
-//   ellipsis.
+// - `.sockel-pill`: a tinted label of `--mark-height`, its text `$pill-ink`,
+//   led by a dot in its tone; `.sockel-plain` has no dot,
+//   `.sockel-pill-button` is a button (the hover changes its fill only).
+//   `-label` is its text, cut with an ellipsis.
 // - `.sockel-badge`: a bordered short text at least as wide as tall;
 //   `.sockel-solid` fills it, `.sockel-corner` lays a small one over the
 //   top end corner of its positioned parent.
@@ -46,7 +46,7 @@
         @include base.reserved-border;
         border-radius: var(--radius-pill);
         background: color-mix(in srgb, var(--tone) 12%, transparent);
-        color: var(--tone);
+        color: base.$pill-ink;
         font: inherit;
         font-size: var(--text-xs);
         font-weight: 600;
@@ -61,7 +61,7 @@
             width: var(--dot-size);
             height: var(--dot-size);
             border-radius: var(--radius-pill);
-            background: currentcolor;
+            background: var(--tone);
         }
 
         &.sockel-plain::before {

@@ -26,6 +26,12 @@ All notable changes to sockel and sockel-build. The format follows
 - A size budget: sockel-build's test `the_full_stylesheet_is_within_its_budget`
   fails when the full stylesheet, compressed, passes 121,500 bytes.
 
+### Changed
+
+- A `Pill`'s text is its tone mixed 70% toward `--text` (the new `$pill-ink`),
+  so every tone reads at 4.5:1 or more on the pill's tint; its dot keeps the
+  tone itself.
+
 ### Fixed
 
 - On a phone, a `Choice`'s options are at least the group's height (the group
