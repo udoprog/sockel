@@ -95,6 +95,10 @@ struct Settings {
     paged: bool,
     detail_below: bool,
     chevron: bool,
+    trailing: bool,
+    busy: bool,
+    filter: bool,
+    sheet: bool,
 }
 
 impl Settings {
@@ -103,7 +107,17 @@ impl Settings {
     }
 
     fn options(&self) -> Vec<PickerOption<usize>> {
-        languages(self.count, self.text, self.icons, true, self.marked)
+        let options = languages(self.count, self.text, self.icons, true, self.marked);
+        if !self.trailing {
+            return options;
+        }
+        options
+            .into_iter()
+            .map(|o| {
+                let origin = if o.value < 9 { "Nordic" } else { "Europe" };
+                o.trailing(html! { origin })
+            })
+            .collect()
     }
 }
 
@@ -118,12 +132,31 @@ struct SampleProps {
 fn PickerSample(props: &SampleProps) -> Html {
     let s = props.settings;
     let id = use_control_id();
+    let nordic = use_state_eq(|| false);
     let error = s.invalid.then(|| html! { "Pick a language you read." });
+    let mut options = s.options();
+    let filter = if s.filter {
+        if *nordic {
+            options.truncate(9);
+        }
+        let onclick = {
+            let nordic = nordic.clone();
+            Callback::from(move |_: MouseEvent| nordic.set(!*nordic))
+        };
+        html! {
+            <Button size={ButtonSize::Small} selected={*nordic} {onclick} testid="picker-nordic">
+                { "Nordic only" }
+            </Button>
+        }
+    } else {
+        Html::default()
+    };
     html! {
         <Stack>
             <Field id={id.clone()} label={html! { "Language" }} error={error} reserve_error=true
                 disabled={s.disabled}>
-                <sockel::Picker<usize> id={id.clone()} options={s.options()} page_size={s.page_size()}
+                <sockel::Picker<usize> id={id.clone()} {options} page_size={s.page_size()}
+                    busy={s.busy} {filter} sheet={s.sheet}
                     value={props.value} on_change={props.on_change.clone()}
                     label="Language" placeholder="Choose a language" variant={s.variant}
                     fill={s.fill} invalid={s.invalid} disabled={s.disabled}
@@ -164,6 +197,10 @@ fn settings_controls(settings: &UseStateHandle<Settings>) -> Html {
             <Toggle label="page_size 10" value={s.paged} on_change={set(|s, on| s.paged = on)} />
             <Toggle label="marked (English (Sweden))" value={s.marked} on_change={set(|s, on| s.marked = on)} />
             <Toggle label="detail_below" value={s.detail_below} on_change={set(|s, on| s.detail_below = on)} />
+            <Toggle label="trailing (Picker)" value={s.trailing} on_change={set(|s, on| s.trailing = on)} />
+            <Toggle label="busy (Picker)" value={s.busy} on_change={set(|s, on| s.busy = on)} />
+            <Toggle label="filter (Picker)" value={s.filter} on_change={set(|s, on| s.filter = on)} />
+            <Toggle label="sheet (Picker, on a phone)" value={s.sheet} on_change={set(|s, on| s.sheet = on)} />
             <Toggle label="chevron (PickerMenu, with an icon)" value={s.chevron} on_change={set(|s, on| s.chevron = on)} />
             <Toggle label="fill" value={s.fill} on_change={set(|s, on| s.fill = on)} />
             <Toggle label="invalid" value={s.invalid} on_change={set(|s, on| s.invalid = on)} />
@@ -186,6 +223,10 @@ fn initial() -> Settings {
         paged: false,
         detail_below: false,
         chevron: false,
+        trailing: false,
+        busy: false,
+        filter: false,
+        sheet: false,
     }
 }
 
@@ -208,6 +249,13 @@ pub fn PickerPage() -> Html {
             .flag("always_search", s.always_search)
             .expr_if(s.paged, "page_size", "Some(10)")
             .flag("detail_below", s.detail_below)
+            .flag("busy", s.busy)
+            .expr_if(
+                s.filter,
+                "filter",
+                "html! { <Button ..>{ \"Nordic only\" }</Button> }",
+            )
+            .flag("sheet", s.sheet)
             .flag("fill", s.fill)
             .flag("invalid", s.invalid)
             .flag("disabled", s.disabled),

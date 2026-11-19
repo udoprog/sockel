@@ -29,6 +29,9 @@ pub struct PickerOption<T> {
     pub icon: Option<Html>,
     /// At the row's end: a tag or badge the app supplies.
     pub badge: Option<Html>,
+    /// At the row's end before the badge, muted, sharing the room with the
+    /// label: what tells a row apart (its origin, an id).
+    pub trailing: Option<Html>,
     /// More words it is found by, not shown, such as a language's codes.
     pub keywords: Option<AttrValue>,
     pub disabled: bool,
@@ -49,6 +52,7 @@ impl<T> PickerOption<T> {
             detail: None,
             icon: None,
             badge: None,
+            trailing: None,
             keywords: None,
             disabled: false,
             marked: false,
@@ -74,6 +78,13 @@ impl<T> PickerOption<T> {
     pub fn badge(self, badge: Html) -> Self {
         Self {
             badge: Some(badge),
+            ..self
+        }
+    }
+
+    pub fn trailing(self, trailing: Html) -> Self {
+        Self {
+            trailing: Some(trailing),
             ..self
         }
     }
@@ -213,6 +224,17 @@ pub struct ChoiceListProps<T: PartialEq + 'static> {
     /// options the app finds by it (marked `found`).
     #[prop_or_default]
     pub on_search: Callback<String>,
+    /// The app is searching for the query: a spinner in the search field
+    /// and `aria-busy` on the list, which says `busy_label` while nothing
+    /// is listed.
+    #[prop_or_default]
+    pub busy: bool,
+    #[prop_or_default]
+    pub busy_label: Option<AttrValue>,
+    /// Under the search field, such as a filter by kind
+    /// (`CHOICE_LIST_FILTER`).
+    #[prop_or_default]
+    pub filter: Html,
     /// Lists that many matches at a time, with a [`Pager`] under them;
     /// it opens on the current option's page.
     #[prop_or_default]
@@ -482,7 +504,14 @@ where
                         <span class={class::CHOICE_LIST_DETAIL}>{ detail.clone() }</span>
                     }
                 }
-                if let Some(badge) = &o.badge {
+                if let Some(trailing) = &o.trailing {
+                    <span class={class::CHOICE_LIST_TRAILING}>
+                        { trailing.clone() }
+                        if let Some(badge) = &o.badge {
+                            <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
+                        }
+                    </span>
+                } else if let Some(badge) = &o.badge {
                     <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
                 }
             </div>
@@ -499,12 +528,16 @@ where
                 <SearchField class={class::CHOICE_LIST_SEARCH} value={AttrValue::from((*query).clone())}
                     {on_input} label={search_label} clear_label={props.clear_label.clone()}
                     controls={AttrValue::from(list_id.clone())} activedescendant={active_id.clone().map(AttrValue::from)}
-                    autofocus={props.autofocus} on_keydown={onkeydown.clone()}
+                    autofocus={props.autofocus} on_keydown={onkeydown.clone()} busy={props.busy}
                     testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-search")))} />
+            }
+            if props.filter != Html::default() {
+                <div class={class::CHOICE_LIST_FILTER}>{ props.filter.clone() }</div>
             }
             <div id={list_id.clone()} role="listbox" class={class::CHOICE_LIST_OPTIONS}
                 aria-label={props.label.clone()}
                 aria-multiselectable={props.multi.then_some("true")}
+                aria-busy={props.busy.then_some("true")}
                 tabindex={(!searchable).then_some("0")}
                 aria-activedescendant={(!searchable).then_some(active_id).flatten()}
                 style={match (searchable, props.rows) {
@@ -514,7 +547,9 @@ where
                 }}
                 data-autofocus={(props.autofocus && !searchable).then_some("")}
                 onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
-                if shown.is_empty() {
+                if shown.is_empty() && props.busy {
+                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.busy_label, "sockel-picker-searching") }</div>
+                } else if shown.is_empty() {
                     <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "sockel-picker-empty") }</div>
                 } else {
                     { for shown.iter().copied().map(option) }
@@ -543,6 +578,18 @@ pub struct ChoicePopupProps {
     /// `var(--menu-width-wide)`.
     #[prop_or_default]
     pub width: Option<AttrValue>,
+    /// Below the phone breakpoint, a sheet from the bottom over a scrim
+    /// (`SHEET`, `PICKER_SCRIM`), headed by `title` and a close button
+    /// (`PICKER_POPUP_HEAD`); its search field is not focused there, so the
+    /// keyboard does not cover it. Off by default.
+    #[prop_or_default]
+    pub sheet: bool,
+    /// The sheet's heading.
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
+    /// The sheet's close button's accessible name (the catalog's when none).
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     /// Suffixed `-popup`.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
@@ -555,8 +602,10 @@ pub struct ChoicePopupProps {
 /// focused once placed, and Tab closes it and moves on from `anchor`.
 #[function_component]
 pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
+    let phrases = use_phrases_with(&L10N);
     let overlays = use_overlays();
     let popup = use_node_ref();
+    let head = use_node_ref();
     let (placed, escape) = crate::popover::use_popover_keyed(
         props.open,
         props.anchor.clone(),
@@ -567,12 +616,22 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
         props.on_dismiss.clone(),
     );
     {
-        let popup = popup.clone();
+        let (popup, head) = (popup.clone(), head.clone());
         use_effect_with(placed.is_some(), move |&placed| {
+            // On a sheet the popup itself, so the keyboard stays down.
+            let sheet = head
+                .cast::<HtmlElement>()
+                .is_some_and(|h| h.offset_height() > 0);
             let target = placed
                 .then(|| popup.cast::<Element>())
                 .flatten()
-                .and_then(|p| p.query_selector("[data-autofocus]").ok().flatten())
+                .and_then(|p| {
+                    if sheet {
+                        Some(p)
+                    } else {
+                        p.query_selector("[data-autofocus]").ok().flatten()
+                    }
+                })
                 .and_then(|e| wasm_bindgen::JsCast::dyn_into::<HtmlElement>(e).ok());
             if let Some(target) = target {
                 _ = target.focus();
@@ -609,12 +668,43 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
         }
         style
     });
+    let sheet_head = props.sheet.then(|| {
+        let close = {
+            let (on_dismiss, anchor) = (props.on_dismiss.clone(), props.anchor.clone());
+            Callback::from(move |_: MouseEvent| {
+                if let Some(anchor) = anchor.cast::<HtmlElement>() {
+                    _ = anchor.focus();
+                }
+                on_dismiss.emit(Dismiss::Close);
+            })
+        };
+        html! {
+            <div ref={head} class={class::PICKER_POPUP_HEAD}>
+                <span class={class::PICKER_POPUP_TITLE}>{ props.title.clone() }</span>
+                <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                    icon={html! { <Icon glyph={Glyph::Close} /> }}
+                    label={label(&phrases, &props.close_label, "sockel-picker-close")} onclick={close} />
+            </div>
+        }
+    });
     overlays.portal(html! {
-        <div ref={popup} class={classes!(class::PICKER_POPUP, placed.is_some().then_some(class::PLACED))}
-            {style} onkeydown={escape.after(onkeydown)}
-            data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-popup")))}>
-            { props.children.clone() }
-        </div>
+        <>
+            if props.sheet {
+                <div class={class::PICKER_SCRIM} aria-hidden="true"></div>
+            }
+            <div ref={popup}
+                class={classes!(
+                    class::PICKER_POPUP,
+                    props.sheet.then_some(class::SHEET),
+                    placed.is_some().then_some(class::PLACED)
+                )}
+                {style} onkeydown={escape.after(onkeydown)} tabindex={props.sheet.then_some("-1")}
+                aria-label={props.sheet.then(|| props.title.clone()).flatten()}
+                data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-popup")))}>
+                { for sheet_head }
+                { props.children.clone() }
+            </div>
+        </>
     })
 }
 
@@ -670,6 +760,20 @@ pub struct PickerProps<T: PartialEq + 'static> {
     /// See [`ChoiceListProps::page_size`].
     #[prop_or_default]
     pub page_size: Option<usize>,
+    /// See [`ChoiceListProps::busy`].
+    #[prop_or_default]
+    pub busy: bool,
+    #[prop_or_default]
+    pub busy_label: Option<AttrValue>,
+    /// See [`ChoiceListProps::filter`].
+    #[prop_or_default]
+    pub filter: Html,
+    /// A sheet on a phone, headed by `label`: see [`ChoicePopupProps::sheet`].
+    #[prop_or_default]
+    pub sheet: bool,
+    /// The sheet's close button's accessible name.
+    #[prop_or_default]
+    pub close_label: Option<AttrValue>,
     #[prop_or_default]
     pub class: Classes,
     /// The field's test id; the popup's is it suffixed `-popup`, the
@@ -772,12 +876,14 @@ where
                     <Icon glyph={Glyph::ChevronDown} />
                 </span>
             </button>
-            <ChoicePopup anchor={face} open={*open} {on_dismiss} testid={props.testid.clone()}>
+            <ChoicePopup anchor={face} open={*open} {on_dismiss} testid={props.testid.clone()}
+                sheet={props.sheet} title={Some(props.label.clone())} close_label={props.close_label.clone()}>
                 <ChoiceList<T> options={props.options.clone()} value={props.value.clone()} {on_pick}
                     label={props.label.clone()} always_search={props.always_search}
                     search_label={props.search_label.clone()} empty_label={props.empty_label.clone()}
                     clear_label={props.clear_label.clone()} detail_below={props.detail_below}
                     autofocus=true on_search={props.on_search.clone()} page_size={props.page_size}
+                    busy={props.busy} busy_label={props.busy_label.clone()} filter={props.filter.clone()}
                     testid={list_testid(&props.testid, &props.list_testid)} />
             </ChoicePopup>
         </>
@@ -1281,6 +1387,88 @@ mod tests {
             assert!(html.contains(part), "{part}: {html}");
         }
         assert!(!html.contains(class::BUTTON_CONTENT), "{html}");
+    }
+
+    #[test]
+    fn trailing_content_ends_the_row_with_its_badge() {
+        let mut options = languages();
+        options[0] = options[0]
+            .clone()
+            .trailing(html! { "origin" })
+            .badge(html! { "new" });
+        options[1] = options[1].clone().badge(html! { "old" });
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options,
+            label: AttrValue::Static("Language"),
+        }));
+        assert_eq!(
+            html.matches(class::CHOICE_LIST_TRAILING).count(),
+            1,
+            "{html}"
+        );
+        assert!(
+            html.contains(&format!(
+                "<span class=\"{}\">origin<span class=\"{}\">new</span></span>",
+                class::CHOICE_LIST_TRAILING,
+                class::CHOICE_LIST_BADGE
+            )),
+            "{html}"
+        );
+        assert_eq!(html.matches(class::CHOICE_LIST_BADGE).count(), 2, "{html}");
+    }
+
+    #[test]
+    fn a_busy_list_says_it_is_searching_with_its_filter_under_the_field() {
+        let html = render(yew::props!(ChoiceListProps<u32> {
+            options: Vec::new(),
+            always_search: true,
+            busy: true,
+            filter: html! { <button>{ "Units" }</button> },
+            label: AttrValue::Static("Records"),
+        }));
+        assert!(html.contains("aria-busy=\"true\""), "{html}");
+        assert!(html.contains(">Searching<"), "{html}");
+        assert!(html.contains(class::CHOICE_LIST_FILTER), "{html}");
+        let idle = render(yew::props!(ChoiceListProps<u32> {
+            options: Vec::new(),
+            always_search: true,
+            label: AttrValue::Static("Records"),
+        }));
+        assert!(!idle.contains("aria-busy"), "{idle}");
+        assert!(idle.contains(">No matches<"), "{idle}");
+        assert!(!idle.contains(class::CHOICE_LIST_FILTER), "{idle}");
+    }
+
+    #[test]
+    fn a_sheet_popup_has_its_scrim_head_and_modifier() {
+        let render = |sheet: bool| {
+            futures::executor::block_on(
+                yew::LocalServerRenderer::<ChoicePopup>::with_props(yew::props!(
+                    ChoicePopupProps {
+                        anchor: NodeRef::default(),
+                        open: true,
+                        on_dismiss: Callback::noop(),
+                        sheet,
+                        title: Some(AttrValue::Static("Language")),
+                        children: html! { <p>{ "list" }</p> },
+                    }
+                ))
+                .hydratable(false)
+                .render(),
+            )
+        };
+        let html = render(true);
+        assert!(
+            html.contains(&format!("\"{} {}\"", class::PICKER_POPUP, class::SHEET)),
+            "{html}"
+        );
+        assert!(html.contains(class::PICKER_SCRIM), "{html}");
+        assert!(html.contains(class::PICKER_POPUP_HEAD), "{html}");
+        assert!(html.contains(">Language<"), "{html}");
+        let html = render(false);
+        assert!(!html.contains(class::SHEET), "{html}");
+        assert!(!html.contains(class::PICKER_SCRIM), "{html}");
+        assert!(!html.contains(class::PICKER_POPUP_HEAD), "{html}");
     }
 
     #[test]

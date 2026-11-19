@@ -21,6 +21,11 @@ props with `yew::props!`, which fills them in:
 - `SearchSelectProps`: `more`, `on_more`, `more_label`, `on_create`,
   `create_label`, `free_text`, `on_text`, `text`.
 - `ReorderProps`: `on_drop_page_picked`.
+- `PickerProps`: `busy`, `busy_label`, `filter`, `sheet`, `close_label`;
+  `ChoiceListProps`: `busy`, `busy_label`, `filter`; `ChoicePopupProps`:
+  `sheet`, `title`, `close_label`. `PickerOption` gains the public field
+  `trailing` (`None`), which breaks a struct literal of it; build options
+  with `PickerOption::new`.
 
 `ReorderText` is `#[non_exhaustive]` and has new variants (`LiftedCarrying`,
 `MovingBeside`, `DroppedBeside`, `DroppedCarrying`, `DroppedOnPage`), so a
@@ -45,7 +50,6 @@ instead.
   `-dropped-page-carrying`, and the `-in` forms of the first four.
 - `Reorder`'s `on_drop_page_picked`: picked rows lifted together and let go on
   a page, reported as `(rows, value)`.
-
 - Button: `selected` (the pressed look for a current choice, without
   `aria-pressed`), `link` (a text link look) and the mouse and pointer events
   `onmouseenter`, `onmouseleave`, `onpointerdown`, `onmousedown`, `onauxclick`.
@@ -81,6 +85,16 @@ instead.
   (Enter without an active option, Tab or a press outside give the typed
   text). New classes `.sockel-search-select-create`, `-typed`, `-more` and
   `search_select_row`; phrases `sockel-search-select-new`, `-more-results`.
+- Picker and ChoiceList, all off by default: `busy` for a server search
+  (`on_search`) still on its way (a spinner in the search field,
+  `aria-busy` on the list, `busy_label` while nothing is listed), `filter`
+  (the app's control under the search field, `.sockel-choice-list-filter`),
+  `PickerOption::trailing` (muted row-end content before the badge,
+  `.sockel-choice-list-trailing`), and `sheet` with `close_label` (a sheet
+  from the bottom on a phone, headed by the label, as ChoicePopup's new
+  `sheet`, `title` and `close_label`: `.sockel-picker-popup.sockel-sheet`,
+  `-popup-head`, `-popup-title`, `.sockel-picker-scrim`). Phrases
+  `sockel-picker-searching`, `sockel-picker-close`.
 
 ### Changed
 
