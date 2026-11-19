@@ -1,9 +1,15 @@
 [package]
 name = "sockel-build"
 version = "0.1.0"
+authors = ["John-John Tedro <udoprog@tedro.se>"]
 edition = "2024"
 description = "Builds sockel's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
+documentation = "https://docs.rs/sockel"
+readme = "README.md"
+repository = "https://github.com/udoprog/sockel"
 license = "MIT OR Apache-2.0"
+keywords = ["build", "css", "sass", "yew"]
+categories = ["development-tools::build-utils", "web-programming"]
 include = ["/src"]
 
 [dependencies]

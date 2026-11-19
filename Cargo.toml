@@ -1,10 +1,15 @@
 [package]
 name = "sockel"
 version = "0.1.0"
+authors = ["John-John Tedro <udoprog@tedro.se>"]
 edition = "2024"
 description = "Opinionated layout primitives and components for Yew apps that keep their size as their content changes."
+documentation = "https://docs.rs/sockel"
 readme = "README.md"
+repository = "https://github.com/udoprog/sockel"
 license = "MIT OR Apache-2.0"
+keywords = ["components", "css", "ui", "wasm", "yew"]
+categories = ["gui", "wasm", "web-programming"]
 include = ["/build.rs", "/locales", "/src", "/style", "/README.md", "/CHANGELOG.md"]
 links = "sockel"
 
