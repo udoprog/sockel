@@ -3044,7 +3044,11 @@ option's `-option`, the pager's `-pager`). Under a search field no option
 starts active (unless `tab_cycles`): ArrowDown goes to the first, ArrowUp
 to the last, Enter picks the first match, and the current option is
 scrolled into view. `on_search` is told the query as it changes (and
-blank when the list mounts), for options the app finds by it. `page_size`
+blank when the list mounts), for options the app finds by it; `busy` says
+the app is still searching (a spinner in the field, `aria-busy` on the
+list, `busy_label` or Searching while nothing is listed). `filter` is
+the app's own control under the search field (`CHOICE_LIST_FILTER`), such
+as a filter by kind. `page_size`
 lists that many matches at a time with a [`Pager`] under them
 (`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
 a new query goes back to the first. `tab_cycles` makes Tab and Shift+Tab
@@ -3056,7 +3060,9 @@ closes on it as on a mouse pick.
 
 `PickerOption::new(value, label)` with `.detail(..)` (muted after the
 label, searched), `.icon(html)` (a slot kept on every row once any option
-has one), `.badge(html)` (at the row's end), `.keywords(..)` (searched, not
+has one), `.badge(html)` (at the row's end), `.trailing(html)` (muted at
+the row's end before the badge, sharing the room with the label:
+`CHOICE_LIST_TRAILING`), `.keywords(..)` (searched, not
 shown), `.disabled(..)`, `.marked(..)` (checked beside the current one,
 such as those already chosen), `.found(..)` (the app's answer to the
 query: listed whatever it reads like) and `.data_value(..)` (the value as
@@ -3077,7 +3083,10 @@ opens it. Props: `options`, `value`, `on_change`, `label` (the
 accessible name, followed by the current option's label), `placeholder`,
 `variant` (`PickerVariant::Field` or `Small`, `SMALL`), `fill` (`FILL`),
 `invalid`, `disabled`, `always_search`, `search_label`, `empty_label`,
-`on_search`, `page_size`, `clear_label`, `detail_below`, `id`, `describedby`, `title` (the field's
+`on_search`, `busy`, `busy_label`, `filter`, `page_size`, `clear_label`, `detail_below`,
+`sheet` (below the phone breakpoint the list is a sheet from the bottom,
+headed by `label` and a close button named `close_label`, as
+[`ChoicePopup`]'s), `id`, `describedby`, `title` (the field's
 tooltip), `fold` (the current option's icon alone below the phone
 breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's is it suffixed `-popup`, the
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
@@ -3099,7 +3108,11 @@ opener the app renders (a `Button` with `node_ref`, a chip, a face): props
 outside; a pick is the owner's to close on), `align` ([`PopoverAlign`],
 default `Start`), `width` (its least width in place of
 `$picker-popup-width`, a length such as `var(--menu-width-wide)`; the
-`--picker-popup-width` custom property), `testid` (suffixed `-popup`) and its children, a
+`--picker-popup-width` custom property), `sheet` with `title` and
+`close_label` (below `$sheet-breakpoint` a sheet from the bottom, `SHEET`,
+over `PICKER_SCRIM`, headed by `PICKER_POPUP_HEAD` with
+`PICKER_POPUP_TITLE` and a close button; the popup itself takes the
+focus there, so the keyboard does not cover it), `testid` (suffixed `-popup`) and its children, a
 `ChoiceList` with `autofocus` and any note or action beside it, which it
 focuses once placed. Tab closes it and moves on from the opener.
 
