@@ -118,7 +118,7 @@ pub fn dialog(size: DialogSize, sheet: bool) -> Classes {
 const FOCUSABLE: &str = "button:not(:disabled):not([tabindex='-1']), \
          input:not(:disabled):not([type=hidden]):not([tabindex='-1']), \
          select:not(:disabled):not([tabindex='-1']), textarea:not(:disabled):not([tabindex='-1']), \
-         a[href]:not([tabindex='-1']), [tabindex]:not([tabindex='-1'])";
+         a[href]:not([tabindex='-1']), summary:not([tabindex='-1']), [tabindex]:not([tabindex='-1'])";
 
 /// The enabled controls in `root` that Tab reaches, in order.
 pub(crate) fn focusable(root: &Element) -> Vec<HtmlElement> {
@@ -131,8 +131,34 @@ pub(crate) fn focusable(root: &Element) -> Vec<HtmlElement> {
         .collect()
 }
 
+/// Where Tab goes to stay in a dialog, if the browser's own move would leave it.
+#[derive(Debug, PartialEq, Eq)]
+enum Wrap {
+    First,
+    Last,
+}
+
+/// The panel itself holding the focus (a dialog with no control at open) counts
+/// as before the first control, as does anything outside it.
+fn wrap_target(
+    shift: bool,
+    at_first: bool,
+    at_last: bool,
+    inside: bool,
+    at_root: bool,
+) -> Option<Wrap> {
+    let before_first = !inside || at_root;
+    if shift && (at_first || before_first) {
+        Some(Wrap::Last)
+    } else if !shift && (at_last || before_first) {
+        Some(Wrap::First)
+    } else {
+        None
+    }
+}
+
 /// Keeps Tab inside `root`: from its last control to its first, and Shift+Tab
-/// the other way; from outside it, into it.
+/// the other way; from outside it or from `root` itself, into it.
 pub(crate) fn wrap_tab(root: &Element, e: &web_sys::KeyboardEvent) {
     let all = focusable(root);
     let (Some(first), Some(last)) = (all.first(), all.last()) else {
@@ -140,14 +166,18 @@ pub(crate) fn wrap_tab(root: &Element, e: &web_sys::KeyboardEvent) {
         return;
     };
     let active = root.owner_document().and_then(|d| d.active_element());
-    let at = |el: &HtmlElement| active.as_ref().is_some_and(|a| el.is_same_node(Some(a)));
+    let at = |el: &Element| active.as_ref().is_some_and(|a| el.is_same_node(Some(a)));
     let inside = active.as_ref().is_some_and(|a| root.contains(Some(a)));
-    if e.shift_key() && (at(first) || !inside) {
-        e.prevent_default();
-        focus(last);
-    } else if !e.shift_key() && (at(last) || !inside) {
-        e.prevent_default();
-        focus(first);
+    match wrap_target(e.shift_key(), at(first), at(last), inside, at(root)) {
+        Some(Wrap::Last) => {
+            e.prevent_default();
+            focus(last);
+        }
+        Some(Wrap::First) => {
+            e.prevent_default();
+            focus(first);
+        }
+        None => {}
     }
 }
 
@@ -438,6 +468,38 @@ mod tests {
             FOCUSABLE.split(", ").all(|c| c.contains("[tabindex='-1']")),
             "{FOCUSABLE}"
         );
+    }
+
+    #[test]
+    fn focusable_reaches_a_summary() {
+        assert!(FOCUSABLE.contains("summary:not([tabindex='-1'])"));
+    }
+
+    #[test]
+    fn the_panel_itself_is_before_the_first_control() {
+        // (shift, at_first, at_last, inside, at_root)
+        assert_eq!(
+            wrap_target(true, false, false, true, true),
+            Some(Wrap::Last)
+        );
+        assert_eq!(
+            wrap_target(false, false, false, true, true),
+            Some(Wrap::First)
+        );
+        assert_eq!(
+            wrap_target(true, false, false, false, false),
+            Some(Wrap::Last)
+        );
+        assert_eq!(
+            wrap_target(false, false, true, true, false),
+            Some(Wrap::First)
+        );
+        assert_eq!(
+            wrap_target(true, true, false, true, false),
+            Some(Wrap::Last)
+        );
+        assert_eq!(wrap_target(true, false, false, true, false), None);
+        assert_eq!(wrap_target(false, false, false, true, false), None);
     }
 
     #[test]
