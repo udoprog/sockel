@@ -5,7 +5,6 @@ edition = "2024"
 description = "Builds sockel's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
 license = "MIT OR Apache-2.0"
 include = ["/src"]
-publish = false
 
 [dependencies]
 sasso = { version = "=0.21.0", default-features = false }

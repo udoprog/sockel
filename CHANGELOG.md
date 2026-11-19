@@ -3,7 +3,7 @@
 All notable changes to sockel and sockel-build. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
-## [0.1.0] - Unreleased
+## [0.1.0] - 2026-11-19
 
 First release. It covers what changed for the apps that adopted plinth
 (characterize, army, territory, track, livemix). Commits in parentheses.
@@ -65,6 +65,16 @@ Props built with `html!` are unaffected. A struct literal needs the new fields:
 - livemix: `PanelProps` (`small`), `DialogProps` (`head_actions`),
   `PopoverProps`, `MenuProps`, `ContextMenuProps` (`within`), `PopoverProps` (`fit`).
 - `CheckboxProps`, `SwitchProps` (`tip`, 916bf3a1).
+- `TextareaProps` (`node_ref`, `on_keydown`, `on_paste`, `on_drop`),
+  `TextInputProps` (`autocomplete`, `spellcheck`), `ConfirmProps`,
+  `ConfirmPopoverProps`, `ConfirmButtonProps` (`accept_disabled`) (211120b4).
+
+### Added
+
+- `OptionCard` (`toggles` feature): a radio or checkbox drawn as a card with a
+  label and a description line (211120b4).
+- `InputKind::Number` and `InputKind::DateTime` (`datetime-local`); a `match`
+  over `InputKind` needs the new arms (211120b4).
 
 ### Behaviour changes
 
@@ -78,7 +88,8 @@ Props built with `html!` are unaffected. A struct literal needs the new fields:
   control (790896ce); popovers keep their side (b8bf9e9f).
 - Link menu items no longer get the button base (3ec9ebd3).
 - Stepper: parts min-height 0 (5c37e11a), width fit-content (8fc6c366), a step
-  starts from the typed number (e8277b94).
+  starts from the typed number (e8277b94); a width with decimals counts every
+  decimal place, trailing zeros included (65762cf9).
 - Select with `filter_from`: typing on the open face goes into the filter (6c1e087e).
 - ChoiceList: no row is active under a search field (cd924f67).
 - `.sockel-grow` and `.sockel-push-end` beat a one-class app rule (918170b1).
