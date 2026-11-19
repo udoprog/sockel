@@ -3454,11 +3454,11 @@ Translations page).
 `showcase/` is an interactive gallery of every component: a page for
 each, with controls for its props and its content, shown in a narrow
 frame (drag its corner to widen it) beside a wide one. Run it with
-[trunk]:
+[trug]:
 
 ```sh
 cd showcase
-trunk serve --port 8095 --open
+trug serve --port 8095
 ```
 
 Pick a free port. The showcase dogfoods sockel: its page controls and
@@ -3466,11 +3466,10 @@ its Theme picker are sockel's own [`Select`](https://docs.rs/sockel/latest/socke
 it. Neither the showcase nor sockel's components render a native
 `<select>`, whose open list the OS draws outside sockel's tokens.
 
-The showcase's stylesheet is also built with [trug] (`cargo install trug`,
-or point `TRUG` at a binary) by a trunk `post_build` hook,
-`showcase/scripts/trug-css.sh`, which builds the CSS with trug and
-fails if it differs from the CSS `showcase/build.rs` wrote to
-`target/showcase-css/`. Without trug on `PATH` the hook skips the check.
+After a build, `showcase/scripts/trug-css.sh` also builds the
+stylesheet with `trug css` (trug on `PATH`, or point `TRUG` at a
+binary) and fails if it differs from the CSS `showcase/build.rs` wrote
+to `target/showcase-css/`. Without trug the script skips the check.
 
 A new component lands with its showcase page: add it to
 `PAGES` in `showcase/src/pages/mod.rs`, listing the names it covers, or
@@ -3521,10 +3520,9 @@ cargo clippy --target wasm32-unknown-unknown --workspace -- -D warnings
 cargo test --workspace
 bash scripts/check-features.sh
 bash scripts/check-packaged.sh
-(cd showcase && trunk build)
+(cd showcase && trug build && sh scripts/trug-css.sh)
 ```
 
 [Yew]: https://yew.rs
 [sasso]: https://crates.io/crates/sasso
-[trunk]: https://trunkrs.dev
 [trug]: https://crates.io/crates/trug

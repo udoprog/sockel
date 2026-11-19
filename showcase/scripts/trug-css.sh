@@ -1,5 +1,5 @@
 #!/bin/sh
-# Trunk post_build hook: builds the stylesheet with `trug css` (on PATH, or $TRUG)
+# Run after `trug build`: builds the stylesheet with `trug css` (on PATH, or $TRUG)
 # and checks it against the one build.rs wrote. Without trug the check is skipped.
 set -e
 cd "$(dirname "$0")/.."

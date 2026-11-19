@@ -6,7 +6,7 @@ fn main() {
         .prefix("showcase-")
         .compile();
 
-    // Where the trunk post_build hook (scripts/trug-css.sh) finds this build's CSS.
+    // Where scripts/trug-css.sh finds this build's CSS.
     let out = Path::new(&env::var("OUT_DIR").unwrap()).join("style.css");
     let known = Path::new("../target/showcase-css/style.css");
     fs::create_dir_all(known.parent().unwrap()).unwrap();
