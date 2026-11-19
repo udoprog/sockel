@@ -405,59 +405,61 @@ member wants more gets the union.
 
 | Feature | Brings in | Gives | CSS alone |
 | --- | --- | --- | --- |
-| `action-group` | | [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) | 3.7 KB |
-| `badge` | `icons` | [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html), [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) | 9.6 KB |
-| `button` | `icons`, `skeleton` | [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html), [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) | 11.9 KB |
-| `card-grid` | | [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) | 4.1 KB |
+| `action-group` | | [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) | 3.8 KB |
+| `badge` | `icons` | [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html), [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) | 9.7 KB |
+| `button` | `icons`, `skeleton` | [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html), [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) | 13.4 KB |
+| `card-grid` | | [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) | 4.2 KB |
 | `checkbox` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`OptionCard`](https://docs.rs/sockel/latest/sockel/struct.OptionCard.html) | 6.6 KB |
 | `chip` | `icons` | [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 6.6 KB |
-| `choice` | | [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) | 6.7 KB |
-| `color-select` | `select` | [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) | 48.1 KB |
-| `composer` | `drop-zone`, `input` | [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) | 22.4 KB |
-| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html), [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html), [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html), [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html), [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) | 37.0 KB |
-| `disclosure` | `head`, `icons` | [`Disclosure`](https://docs.rs/sockel/latest/sockel/struct.Disclosure.html) | 15.2 KB |
-| `drop-zone` | `button` | [`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html) | 14.3 KB |
-| `field` | | [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html), [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html), [`FormRows`](https://docs.rs/sockel/latest/sockel/struct.FormRows.html), [`Fieldset`](https://docs.rs/sockel/latest/sockel/struct.Fieldset.html), [`FieldCheck`](https://docs.rs/sockel/latest/sockel/struct.FieldCheck.html), [`FieldInputs`](https://docs.rs/sockel/latest/sockel/enum.FieldInputs.html) | 6.3 KB |
-| `head` | `layout` | [`Head`](https://docs.rs/sockel/latest/sockel/enum.Head.html), [`PageHead`](https://docs.rs/sockel/latest/sockel/struct.PageHead.html), [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html) | 12.8 KB |
+| `choice` | | [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) | 6.8 KB |
+| `color-select` | `select` | [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) | 49.9 KB |
+| `composer` | `drop-zone`, `input` | [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) | 23.4 KB |
+| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html), [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html), [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html), [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html), [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) | 39.1 KB |
+| `disclosure` | `head`, `icons` | [`Disclosure`](https://docs.rs/sockel/latest/sockel/struct.Disclosure.html) | 15.8 KB |
+| `drop-zone` | `button` | [`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html) | 15.7 KB |
+| `field` | | [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html), [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html), [`FormRows`](https://docs.rs/sockel/latest/sockel/struct.FormRows.html), [`Fieldset`](https://docs.rs/sockel/latest/sockel/struct.Fieldset.html), [`FieldCheck`](https://docs.rs/sockel/latest/sockel/struct.FieldCheck.html), [`FieldInputs`](https://docs.rs/sockel/latest/sockel/enum.FieldInputs.html) | 6.4 KB |
+| `head` | `layout` | [`Head`](https://docs.rs/sockel/latest/sockel/enum.Head.html), [`PageHead`](https://docs.rs/sockel/latest/sockel/struct.PageHead.html), [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html) | 13.0 KB |
 | `icons` | | [`Icon`](https://docs.rs/sockel/latest/sockel/struct.Icon.html), [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html), [`Glyph`](https://docs.rs/sockel/latest/sockel/enum.Glyph.html) | 4.0 KB |
-| `input` | `icons` | [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html), [`Textarea`](https://docs.rs/sockel/latest/sockel/struct.Textarea.html), [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html), [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html), [`SecretInput`](https://docs.rs/sockel/latest/sockel/struct.SecretInput.html) | 10.2 KB |
-| `lanes` | `badge`, `reorder` | [`Lanes`](https://docs.rs/sockel/latest/sockel/struct.Lanes.html), [`Lane`](https://docs.rs/sockel/latest/sockel/struct.Lane.html) | 42.8 KB |
-| `layout` | | [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html), [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html), [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html), [`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html), [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) | 9.0 KB |
-| `library-toolbar` | `input`, `layout` | [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html) | 15.8 KB |
-| `lightbox` | `overlay` | [`Lightbox`](https://docs.rs/sockel/latest/sockel/struct.Lightbox.html) | 28.0 KB |
-| `loadable` | `notice`, `skeleton` | [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) | 22.2 KB |
-| `log-view` | `button` | [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html), [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) | 14.6 KB |
-| `media` | `icons` | [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html), [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) | 5.6 KB |
-| `menu` | `button`, `icons`, `overlay` | [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html), [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html), [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html), [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html), [`MenuPopup`](https://docs.rs/sockel/latest/sockel/struct.MenuPopup.html) | 31.1 KB |
-| `notice` | `badge`, `button` | [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html), [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html), [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) | 21.9 KB |
-| `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html), [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) | 25.7 KB |
-| `pager` | `icons` | [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html), [`PagerSummary`](https://docs.rs/sockel/latest/sockel/struct.PagerSummary.html), [`PagerCounts`](https://docs.rs/sockel/latest/sockel/struct.PagerCounts.html) | 6.5 KB |
-| `panel` | | [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) | 4.8 KB |
-| `picker` | `overlay`, `pager`, `select` | [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html), [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html), [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html), [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html), [`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) | 50.9 KB |
-| `property-list` | `button`, `input` | [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html), [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html), [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) | 21.4 KB |
-| `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html), [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) | 33.3 KB |
-| `rows` | `button` | [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html), [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html), [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) | 16.9 KB |
-| `search-select` | `select` | [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) | 45.1 KB |
-| `save-bar` | `button` | [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 13.8 KB |
-| `seam` | | [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) | 5.2 KB |
-| `select` | `input`, `menu`, `tooltip` | [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) | 43.9 KB |
-| `shell` | `badge` | [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html), [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) | 13.9 KB |
-| `shortcuts` | `overlay` | [`use_shortcut`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut.html), [`use_shortcut_layer`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_layer.html), [`ShortcutHelp`](https://docs.rs/sockel/latest/sockel/struct.ShortcutHelp.html), [`Kbd`](https://docs.rs/sockel/latest/sockel/struct.Kbd.html), [`Chord`](https://docs.rs/sockel/latest/sockel/struct.Chord.html) | 27.8 KB |
-| `skeleton` | `icons`, `media` | [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html), [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) | 7.4 KB |
-| `split-view` | `seam` | [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) | 6.0 KB |
-| `stepper` | `input` | [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) | 11.2 KB |
+| `input` | `icons` | [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html), [`Textarea`](https://docs.rs/sockel/latest/sockel/struct.Textarea.html), [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html), [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html), [`SecretInput`](https://docs.rs/sockel/latest/sockel/struct.SecretInput.html) | 10.5 KB |
+| `lanes` | `badge`, `reorder` | [`Lanes`](https://docs.rs/sockel/latest/sockel/struct.Lanes.html), [`Lane`](https://docs.rs/sockel/latest/sockel/struct.Lane.html) | 44.4 KB |
+| `layout` | | [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html), [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html), [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html), [`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html), [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) | 9.1 KB |
+| `library-toolbar` | `input`, `layout` | [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html) | 16.2 KB |
+| `lightbox` | `overlay` | [`Lightbox`](https://docs.rs/sockel/latest/sockel/struct.Lightbox.html) | 29.1 KB |
+| `loadable` | `notice`, `skeleton` | [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) | 24.0 KB |
+| `log-view` | `button` | [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html), [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) | 15.4 KB |
+| `media` | `icons` | [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html), [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) | 5.7 KB |
+| `menu` | `button`, `icons`, `overlay` | [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html), [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html), [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html), [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html), [`MenuPopup`](https://docs.rs/sockel/latest/sockel/struct.MenuPopup.html) | 32.8 KB |
+| `notice` | `badge`, `button` | [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html), [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html), [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) | 23.7 KB |
+| `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html), [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) | 27.5 KB |
+| `pager` | `icons` | [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html), [`PagerSummary`](https://docs.rs/sockel/latest/sockel/struct.PagerSummary.html), [`PagerCounts`](https://docs.rs/sockel/latest/sockel/struct.PagerCounts.html) | 6.9 KB |
+| `panel` | | [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) | 4.9 KB |
+| `picker` | `overlay`, `pager`, `select` | [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html), [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html), [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html), [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html), [`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) | 54.5 KB |
+| `property-list` | `button`, `input` | [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html), [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html), [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) | 22.8 KB |
+| `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html), [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) | 36.4 KB |
+| `rows` | `button` | [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html), [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html), [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) | 18.9 KB |
+| `search-select` | `select` | [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) | 47.0 KB |
+| `save-bar` | `button` | [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 14.2 KB |
+| `seam` | | [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) | 5.3 KB |
+| `select` | `input`, `menu`, `tooltip` | [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) | 45.7 KB |
+| `shell` | `badge` | [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html), [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) | 14.2 KB |
+| `shortcuts` | `overlay` | [`use_shortcut`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut.html), [`use_shortcut_layer`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_layer.html), [`ShortcutHelp`](https://docs.rs/sockel/latest/sockel/struct.ShortcutHelp.html), [`Kbd`](https://docs.rs/sockel/latest/sockel/struct.Kbd.html), [`Chord`](https://docs.rs/sockel/latest/sockel/struct.Chord.html) | 29.0 KB |
+| `skeleton` | `icons`, `media` | [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html), [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) | 7.5 KB |
+| `split-view` | `seam` | [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) | 6.1 KB |
+| `stepper` | `input` | [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) | 12.1 KB |
 | `switch` | `icons` | [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html) | 6.0 KB |
-| `table` | `icons` | [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html), [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html) | 7.1 KB |
-| `tabs` | | [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html), [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html), [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html), [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) | 6.9 KB |
-| `time` | | [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html), [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) | 3.7 KB |
-| `toast` | `save-bar`, `toasts` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 35.3 KB |
-| `toasts` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) | 34.4 KB |
+| `table` | `icons` | [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html), [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html) | 10.5 KB |
+| `tabs` | | [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html), [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html), [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html), [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) | 9.1 KB |
+| `time` | | [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html), [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) | 3.8 KB |
+| `toast` | `save-bar`, `toasts` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 35.8 KB |
+| `toasts` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) | 35.0 KB |
 | `toggles` | `checkbox`, `chip`, `choice`, `switch` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 14.2 KB |
-| `tooltip` | `overlay` | [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html), [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html), [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) | 26.8 KB |
+| `tooltip` | `overlay` | [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html), [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html), [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) | 28.6 KB |
 
 "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
-with none it is 3.4 KB, and with `full` 134 KB. Each feature builds alone,
+with none it is 3.4 KB, and with `full` 135 KB. Each feature builds alone,
 and its CSS holds no other feature's rules.
+`scripts/feature-sizes.sh` in the repository measures every row and rewrites the
+column and these figures in place; run it when the styles change.
 
 <br>
 
