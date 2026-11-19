@@ -5,6 +5,20 @@ All notable changes to sockel and sockel-build. The format follows
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-11-19
+
+### Changed
+
+- The crate docs and READMEs point to the [showcase](https://udoprog.github.io/sockel/)
+  instead of describing each component, and every link in them is absolute.
+
+### Fixed
+
+- The getting-started and Choosing features blocks require sockel and
+  sockel-build `0.2`, not `0.1`.
+
+## [0.2.0] - 2026-11-19
+
 ### Breaking
 
 New public prop fields break struct literals of these props (none derives
@@ -156,8 +170,6 @@ instead.
 
 ### Changed
 
-- The crate docs and READMEs point to the [showcase](https://udoprog.github.io/sockel/)
-  instead of describing each component, and every link in them is absolute.
 - An `$omit` naming a part its feature already leaves out is an error, in
   `sockel-build` and in the Sass given `$features`. `Usage::assert_clean`
   (and `Report::is_clean`) now fail on a written class the build omits, so a
@@ -212,8 +224,6 @@ instead.
 
 ### Fixed
 
-- The getting-started and Choosing features blocks require sockel and
-  sockel-build `0.2`, not `0.1`.
 - `use_placement` measures a popover's height with its border, so a
   bordered surface against a viewport edge keeps `EDGE` clear instead of
   ending 2px past it.
