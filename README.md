@@ -777,6 +777,29 @@ fn main() {
 
 <br>
 
+## The test-id attribute
+
+Every component takes a `testid` prop and writes it to `data-testid`. An
+app whose tests read another attribute sets `SOCKEL_TEST_ID_ATTR` when it
+builds, in `.cargo/config.toml`:
+
+```toml
+[env]
+SOCKEL_TEST_ID_ATTR = "data-test"
+```
+
+sockel reads it at compile time, so one app builds with one name, and a
+change to it rebuilds sockel. The name is checked at compile time: letters,
+digits, `_`, `:`, `.` and `-`, not starting with a digit, `.` or `-`. Unset,
+the attribute is `data-testid`, as before (its place among a tag's attributes may differ). The
+attribute is on the element when it mounts, and the props and their names
+(`testid`, `opener_testid`, ...) do not change. Only the components'
+elements move; an element the app writes itself keeps what it writes. See
+[`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html) for
+the host element, which takes it too.
+
+<br>
+
 ## Components
 
 Each entry names a component and its class without the `sockel-` prefix
