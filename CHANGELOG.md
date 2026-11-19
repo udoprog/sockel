@@ -17,6 +17,7 @@ props with `yew::props!`, which fills them in:
 - `MenuProps`: `chevron`.
 - `DialogProps`: `close_variant`, `onkeydown`.
 - `ErrorBoxProps`: `id`.
+- `ReorderItemProps`: `disabled`.
 
 ### Added
 
@@ -27,6 +28,18 @@ props with `yew::props!`, which fills them in:
 - Dialog: `close_variant` (the close button's variant, `Quiet` by default) and
   `onkeydown`.
 - ErrorBox: `id`.
+- `ReorderItem`'s `disabled`: a row that cannot be lifted (its handle is
+  disabled, it is not carried with picked rows, no body drag), counted and
+  landed beside as any other, in `Reorder` and `ReorderTree`.
+- `ReorderTree` honours a `ReorderItem`'s `fixed` (no handle, stays put, not
+  counted in the positions announced) and `lifted_only` (shown only while a
+  row is lifted), as `Reorder` does.
+
+### Fixed
+
+- `Reorder` with `body_drag`: a press let go outside the window before it
+  became a drag no longer leaves a drag that the next pointer move over the
+  row would start without a button held.
 
 ## [0.1.0] - 2026-11-19
 

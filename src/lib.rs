@@ -2083,6 +2083,9 @@
 //!   It is always among the children, so the indices do not change when it
 //!   shows; a drag measures it once it shows. Put it last, so no row moves
 //!   when it does.
+//! - `disabled` (an item): the row cannot be lifted (its handle is
+//!   disabled, a press on it starts no drag, it is not carried with picked
+//!   rows), but it is counted and the others land beside it.
 //! - `on_aim`: where a lifted row aims, `Some((from, to))` as `on_move` would
 //!   report it, each time that changes, and `None` once it is set down (to
 //!   say on the row what a drop there does).
@@ -2189,7 +2192,8 @@
 //! [`ReorderItem`]s whose grip is a [`ReorderTreeHandle`] (`class`,
 //! `testid`). A list is laid out by its `class`; its items are its direct
 //! children, with their `current`, `data` and handlers (a click a drag ends in is
-//! not their click); `fixed`, `lifted_only` and `picked` are `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
+//! not their click); `fixed`, `lifted_only` and `disabled` work as in
+//! `Reorder`, `picked` is `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
 //! [`ReorderSpot`] (`list`, `index`), `to.index` an index in its list
 //! without the row (as `move_item` takes within one list).
 //! `accepts: Callback<ReorderTreeMove, bool>` refuses the places a row may

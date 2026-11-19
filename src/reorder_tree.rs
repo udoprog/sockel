@@ -11,7 +11,7 @@ use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
 use crate::reorder::{
-    CONTROLS, ReorderItem, ReorderText, SURFACE, phrase, phrase_in, scrolled, scroller_of,
+    CONTROLS, ReorderItem, ReorderText, SURFACE, phrase, phrase_in, place, scrolled, scroller_of,
     with_data,
 };
 use crate::tooltip::next_id;
@@ -21,6 +21,8 @@ const SLOP: f64 = 4.0;
 const LIST: &str = "data-reorder-list";
 /// A list's `name`, which the announcements placing a row in it say.
 const LIST_NAME: &str = "data-reorder-list-name";
+/// A row that stays put, which the positions announced do not count.
+const FIXED: &str = "data-reorder-fixed";
 
 /// A row's place: the list it is in (a [`ReorderList`]'s `id`) and its
 /// index there.
@@ -316,9 +318,10 @@ pub struct ReorderListProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
-    /// The rows, each with a [`ReorderTreeHandle`] in it. An item's
-    /// `current` and handlers are the row's; `fixed` and `lifted_only` are
-    /// [`Reorder`](crate::Reorder)'s alone.
+    /// The rows, each with a [`ReorderTreeHandle`] in it, as in
+    /// [`Reorder`](crate::Reorder): a `fixed` row has no handle and stays,
+    /// a `lifted_only` one shows only while a row is lifted, a `disabled`
+    /// one cannot be lifted; `picked` is `Reorder`'s alone.
     #[prop_or_default]
     pub children: ChildrenWithProps<ReorderItem>,
 }
@@ -331,16 +334,17 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
         return html! { <div class={props.class.clone()}>{ for props.children.iter() }</div> };
     };
     let len = props.children.len();
-    let (lifted, aim) = {
+    let (lifted, aim, lifting) = {
         let live = tree.live.borrow();
         let lift = live.lift.as_ref();
+        let lifting = lift.is_some();
         let lifted = lift
             .filter(|l| l.from.list == props.id)
             .map(|l| l.from.index);
         let aim = lift
             .filter(|l| l.aim.list == props.id && !l.aim.stays(&l.from))
             .map(|l| l.aim.slot);
-        (lifted, aim)
+        (lifted, aim, lifting)
     };
     let rows: Html = props
         .children
@@ -352,7 +356,8 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
             if props.across {
                 classes.push(class::REORDER_TILED);
             }
-            if tree.body_drag {
+            let still = item.fixed || item.disabled || tree.disabled;
+            if tree.body_drag && !still {
                 classes.push(class::REORDER_GRAB);
             }
             if lifted == Some(index) {
@@ -372,6 +377,8 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                 key: item.id.clone(),
                 name: item.name.clone(),
                 lifted: lifted == Some(index),
+                fixed: item.fixed,
+                disabled: item.disabled,
             };
             let body = tree.body_drag.then(|| {
                 let (down, moved, up, cancel) = (grip.clone(), grip.clone(), grip.clone(), grip.clone());
@@ -397,6 +404,7 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
             };
             let row = html! {
                 <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
+                    data-reorder-fixed={item.fixed.then_some("")} hidden={item.lifted_only && !lifting}
                     tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
                     {onclick} ondblclick={item.ondblclick.clone()} oncontextmenu={item.oncontextmenu.clone()}
                     {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
@@ -428,6 +436,9 @@ struct TreeGrip {
     key: AttrValue,
     name: AttrValue,
     lifted: bool,
+    /// The row stays put and has no handle ([`ReorderItemProps::fixed`](crate::ReorderItemProps::fixed)).
+    fixed: bool,
+    disabled: bool,
 }
 
 #[derive(Properties, PartialEq)]
@@ -442,7 +453,7 @@ pub struct ReorderTreeHandleProps {
 /// nothing outside one.
 #[function_component]
 pub fn ReorderTreeHandle(props: &ReorderTreeHandleProps) -> Html {
-    let Some(grip) = use_context::<TreeGrip>() else {
+    let Some(grip) = use_context::<TreeGrip>().filter(|g| !g.fixed) else {
         return Html::default();
     };
     let tree = &grip.tree;
@@ -458,7 +469,7 @@ pub fn ReorderTreeHandle(props: &ReorderTreeHandleProps) -> Html {
     let blur = grip.clone();
     html! {
         <DragHandle label={label.clone()} title={tree.titles.then(|| label.clone())} tip={tree.tips.then_some(label)}
-            lifted={grip.lifted} disabled={tree.disabled}
+            lifted={grip.lifted} disabled={tree.disabled || grip.disabled}
             describedby={tree.hint.clone()} class={props.class.clone()} testid={props.testid.clone()}
             onpointerdown={Callback::from(move |e| down.pointer_down(e))}
             onpointermove={Callback::from(move |e: PointerEvent| moved.pointer_move(&e))}
@@ -556,14 +567,19 @@ impl TreeGrip {
         }
     }
 
+    /// The row's position landing at `aim`, from 1, and how many rows move
+    /// in that list: fixed rows are not counted.
     fn place_text(&self, aim: &Aim, lists: &[(Element, AttrValue, TreeList)]) -> (usize, usize) {
-        let len = lists
+        let stays = lists
             .iter()
             .find(|(_, id, _)| *id == aim.list)
-            .map_or(0, |(_, _, l)| l.len);
-        let same = aim.list == self.spot.list;
-        let count = if same { len } else { len + 1 };
-        (aim.landing(&self.spot).index + 1, count)
+            .map_or_else(Vec::new, |(el, _, _)| fixed_rows(el));
+        tree_place(&stays, aim.list == self.spot.list, &self.spot, aim)
+    }
+
+    /// Whether the row may be lifted at all.
+    fn still(&self) -> bool {
+        self.tree.disabled || self.fixed || self.disabled
     }
 
     fn set_aim(&self, aim: Aim, pointer: bool) {
@@ -657,14 +673,15 @@ impl TreeGrip {
                 .cast::<Element>()
                 .map(|r| lists_of(&r))
                 .unwrap_or_default();
-            let count = lists
-                .iter()
-                .find(|(_, id, _)| *id == self.spot.list)
-                .map_or(0, |(_, _, l)| l.len);
+            let here = Aim {
+                list: self.spot.list.clone(),
+                slot: self.spot.index,
+            };
+            let (position, count) = self.place_text(&here, &lists);
             self.announce(
                 ReorderText::Cancelled {
                     name: self.name.clone(),
-                    position: self.spot.index + 1,
+                    position,
                     count,
                 },
                 &self.spot.list,
@@ -674,7 +691,7 @@ impl TreeGrip {
     }
 
     fn pointer_down(&self, e: PointerEvent) {
-        if e.button() != 0 || self.tree.disabled || self.tree.live.borrow().lift.is_some() {
+        if e.button() != 0 || self.still() || self.tree.live.borrow().lift.is_some() {
             return;
         }
         let Some(handle) = e
@@ -699,7 +716,7 @@ impl TreeGrip {
         if !self.tree.body_drag
             || e.button() != 0
             || e.pointer_type() == "touch"
-            || self.tree.disabled
+            || self.still()
             || self.tree.live.borrow().lift.is_some()
         {
             return;
@@ -806,7 +823,11 @@ impl TreeGrip {
                 .filter_map(|i| rows.item(i))
                 .map(|r| {
                     let rect = r.get_bounding_client_rect();
-                    if across {
+                    // A row without a box (lifted_only, not yet shown) is
+                    // passed by no pointer.
+                    if rect.width() == 0.0 && rect.height() == 0.0 {
+                        f64::NAN
+                    } else if across {
                         rect.left() + rect.width() / 2.0
                     } else {
                         rect.top() + rect.height() / 2.0
@@ -928,7 +949,7 @@ impl TreeGrip {
                     self.set_aim(next, false);
                 }
             }
-            None if self.tree.disabled => {}
+            None if self.still() => {}
             None if key == " " || key == "Enter" => {
                 e.prevent_default();
                 self.set_aim(here, false);
@@ -960,6 +981,28 @@ impl TreeGrip {
         if lift {
             self.cancel();
         }
+    }
+}
+
+/// The fixed rows of a list's element, by index.
+fn fixed_rows(list: &Element) -> Vec<bool> {
+    let rows = list.children();
+    (0..rows.length())
+        .filter_map(|i| rows.item(i))
+        .map(|r| r.has_attribute(FIXED))
+        .collect()
+}
+
+/// Where a row from `from` lands at `aim` among the rows of that list that
+/// move (`stays` its fixed rows), from 1, and how many move there with it:
+/// `same` when the list is the row's own.
+fn tree_place(stays: &[bool], same: bool, from: &ReorderSpot, aim: &Aim) -> (usize, usize) {
+    let to = aim.landing(from).index;
+    if same {
+        place(stays, from.index, to)
+    } else {
+        let (position, count) = place(stays, usize::MAX, to);
+        (position, count + 1)
     }
 }
 
@@ -1087,6 +1130,27 @@ mod tests {
             },
         ];
         assert_eq!(tree_slots(&lists), [(0, 0), (1, 0), (0, 1)]);
+    }
+
+    #[test]
+    fn positions_count_only_the_rows_that_move() {
+        let from = ReorderSpot {
+            list: "a".into(),
+            index: 2,
+        };
+        let aim = |list: &'static str, slot| Aim {
+            list: list.into(),
+            slot,
+        };
+        // A heading first: the row lifted from 2 is 2 of 3 in its list.
+        let stays = [true, false, false, false];
+        assert_eq!(tree_place(&stays, true, &from, &aim("a", 2)), (2, 3));
+        assert_eq!(tree_place(&stays, true, &from, &aim("a", 0)), (1, 3));
+        assert_eq!(tree_place(&stays, true, &from, &aim("a", 4)), (3, 3));
+        // Into another list with a heading: one more row moves there.
+        let stays = [true, false];
+        assert_eq!(tree_place(&stays, false, &from, &aim("b", 2)), (2, 2));
+        assert_eq!(tree_place(&stays, false, &from, &aim("b", 1)), (1, 2));
     }
 
     #[test]

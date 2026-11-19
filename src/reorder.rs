@@ -239,7 +239,7 @@ pub fn edge_step(y: f64, top: f64, bottom: f64) -> f64 {
 
 /// Where a row lifted from `from` lands at `to` among the rows that move,
 /// from 1, and how many move: fixed rows (`stays`) are not counted.
-fn place(stays: &[bool], from: usize, to: usize) -> (usize, usize) {
+pub(crate) fn place(stays: &[bool], from: usize, to: usize) -> (usize, usize) {
     let before = (0..stays.len())
         .filter(|i| *i != from)
         .take(to)
@@ -317,6 +317,12 @@ fn carried_target(
         at = next;
     }
     Some(at)
+}
+
+/// Whether a press not yet a drag has ended unheard: the primary button
+/// is no longer held (`buttons`) as the pointer moves.
+fn stale_press(active: bool, buttons: u16) -> bool {
+    !active && buttons & 1 == 0
 }
 
 /// Adds the `data` attributes to `html`'s element.
@@ -433,6 +439,10 @@ pub struct ReorderItemProps {
     /// at the list's end); best last, so no row moves when it shows.
     #[prop_or_default]
     pub lifted_only: bool,
+    /// The row cannot be lifted (its handle is disabled and it is not
+    /// carried), but it is counted and the others land beside it.
+    #[prop_or_default]
+    pub disabled: bool,
     /// The list's current row (`aria-current`).
     #[prop_or_default]
     pub current: bool,
@@ -882,7 +892,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         props
             .children
             .iter()
-            .map(|c| c.props.picked && !c.props.fixed)
+            .map(|c| c.props.picked && !c.props.fixed && !c.props.disabled)
             .collect()
     } else {
         vec![false; count]
@@ -952,7 +962,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         live.borrow_mut().lift = None;
     }
     let lift = live.borrow().lift;
-    let grip = |index: usize, name: AttrValue, fixed: bool| Grip {
+    let grip = |index: usize, name: AttrValue, fixed: bool, disabled: bool| Grip {
         ctx: Ctx {
             live: live.clone(),
             redraw: redraw.clone(),
@@ -971,21 +981,21 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             body: props.body_drag,
             auto: props.auto_scroll,
             grid: props.grid,
-            disabled: props.disabled,
+            disabled: props.disabled || disabled,
             fixed,
         },
         lifted: lift.is_some_and(|l| l.from == index),
-        disabled: props.disabled,
+        disabled: props.disabled || disabled,
         hint: (*hint_id).clone(),
         titles: props.titles,
         tips: props.tips,
     };
-    let marks = |index: usize, fixed: bool| {
+    let marks = |index: usize, still: bool| {
         let carries = lift.is_some_and(|l| l.from != index && carried[l.from]);
         classes!(
             reorder_row(index, lift.map(|l| (l.from, l.to))),
             (carries && carried[index]).then_some(class::CARRIED),
-            (props.body_drag && !fixed).then_some(class::REORDER_GRAB),
+            (props.body_drag && !still).then_some(class::REORDER_GRAB),
             props.grid.then_some(class::REORDER_TILED)
         )
     };
@@ -1005,7 +1015,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             .enumerate()
             .map(|(index, item)| {
                 let item = &item.props;
-                let grip = grip(index, item.name.clone(), item.fixed);
+                let grip = grip(index, item.name.clone(), item.fixed, item.disabled);
                 let onpointerdown = grip.ctx.clone().body_down();
                 // A row without a handle hears its own drag.
                 let onpointermove = grip.ctx.clone().row_only(grip.ctx.clone().pointer_move());
@@ -1013,7 +1023,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 let onpointercancel = grip.ctx.clone().row_only(grip.ctx.clone().pointer_cancel());
                 let onclick = item.onclick.clone();
                 let row = html! {
-                    <div class={classes!(marks(index, item.fixed), item.class.clone())} data-testid={item.testid.clone()}
+                    <div class={classes!(marks(index, item.fixed || item.disabled), item.class.clone())} data-testid={item.testid.clone()}
                         role={item.role.clone()}
                         hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
                         {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
@@ -1048,7 +1058,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         .iter()
         .enumerate()
         .map(|(index, row)| {
-            let grip = grip(index, row.name.clone(), false);
+            let grip = grip(index, row.name.clone(), false, false);
             let onpointerdown = grip.ctx.clone().body_down();
             let handle = grip.handle(Classes::new(), None);
             html! {
@@ -1379,13 +1389,20 @@ impl Ctx {
 
     fn pointer_move(self) -> Callback<PointerEvent> {
         Callback::from(move |e: PointerEvent| {
-            let ours = self
+            let (ours, stale) = self
                 .live
                 .borrow()
                 .drag
                 .as_ref()
-                .is_some_and(|d| d.id == e.pointer_id());
-            if ours {
+                .filter(|d| d.id == e.pointer_id())
+                .map_or((false, false), |d| {
+                    (true, stale_press(d.active, e.buttons()))
+                });
+            if stale {
+                // A body press let go where the row never heard it (outside
+                // the window) before it became a drag.
+                self.live.borrow_mut().drag = None;
+            } else if ours {
                 self.drag_to((f64::from(e.client_x()), f64::from(e.client_y())));
             }
         })
@@ -1720,6 +1737,14 @@ mod tests {
         assert_eq!(edge_step(120.0, 100.0, 500.0), -STEP / 2.0);
         assert_eq!(edge_step(500.0, 100.0, 500.0), STEP);
         assert_eq!(edge_step(480.0, 100.0, 500.0), STEP / 2.0);
+    }
+
+    #[test]
+    fn a_press_let_go_unheard_is_dropped_on_the_next_move() {
+        assert!(stale_press(false, 0));
+        assert!(!stale_press(false, 1));
+        // A drag holds the pointer, so it always hears the release.
+        assert!(!stale_press(true, 0));
     }
 
     #[test]
