@@ -7,6 +7,9 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Added
 
+- An optional app colour, `--selection`: the ground of a `NavList`'s current
+  item and a menu's current page, under their accent text. An app that sets
+  none keeps today's accent tint.
 - `Table` takes `stacked`: with `cards`, each cell after the first is a
   field, its label over its value, two to a line (`.sockel-stacked` on the
   table).

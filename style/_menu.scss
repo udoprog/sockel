@@ -133,7 +133,7 @@
     @if base.emits("menu.current") {
         // The page shown, in a menu of links: by ground and its label's ink.
         &[aria-current="page"] {
-            background: color-mix(in srgb, var(--accent) 14%, transparent);
+            background: var(--selection, color-mix(in srgb, var(--accent) 14%, transparent));
 
             .sockel-menu-item-label {
                 color: var(--accent);

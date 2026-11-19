@@ -490,6 +490,7 @@
 //! | `--panel-tint-text` | `--text` | a tint `Panel`'s text |
 //! | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 //! | `--menu-item-icon-ink` | `currentColor` | a menu row's icon (an accent beside two-line rows, say) |
+//! | `--selection` | 16% of `--accent` in a `NavList`, 14% in a menu (unset: optional) | the current row's ground under its accent text (a `NavList`'s current item, a menu's current page) |
 //!
 //! The status hues are mixed toward `--text`, so they keep their contrast on a
 //! light and a dark background alike. The defaults are computed on `:root`: an

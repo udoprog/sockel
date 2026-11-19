@@ -30,7 +30,8 @@
 //   same inset shadow, so no tab changes size when selected.
 // - `.sockel-nav-list`: a `nav` of a column of `.sockel-nav-item`s (links
 //   or buttons, in `.sockel-nav-list-items`); the current one
-//   (`aria-current`) takes the accent colour and a tint. Parts: `-icon`,
+//   (`aria-current`) takes the accent colour on `--selection` (a tint of
+//   the accent when the app sets none). Parts: `-icon`,
 //   `-label`.
 
 @use "tokens" as base;
@@ -255,7 +256,7 @@
         @include base.current(color);
 
         &[aria-current]:not([aria-current="false"]) {
-            background: color-mix(in srgb, var(--accent) 16%, transparent);
+            background: var(--selection, color-mix(in srgb, var(--accent) 16%, transparent));
         }
 
         &:disabled {
