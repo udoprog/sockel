@@ -90,6 +90,26 @@ pub fn format_number(value: i64, decimals: u8, pad: u8) -> String {
     format!("{whole}.{}", part.trim_end_matches('0'))
 }
 
+/// The characters the box of a stepper must hold for the bounds `min` and
+/// `max`: the sign, the integer digits of the wider bound (at least `pad`),
+/// and the separator with every one of `decimals` places, whatever trailing
+/// zeros `format_number` leaves out. With no decimals, the longest of the
+/// two as `format_number` writes them.
+pub fn number_width(min: i64, max: i64, decimals: u8, pad: u8) -> usize {
+    let scale = 10_i64.pow(u32::from(decimals));
+    let one = |n: i64| {
+        let whole = (n / scale) * scale;
+        let sign = usize::from(n < 0 && whole == 0);
+        sign + format_number(whole, decimals, pad).len()
+    };
+    let places = if decimals == 0 {
+        0
+    } else {
+        1 + usize::from(decimals)
+    };
+    one(min).max(one(max)) + places
+}
+
 /// `value` moved by `delta` onto the nearest multiple of `snap` in that
 /// direction, within `min..=max`: from 7, +5 onto 5s is 10 and -5 is 5.
 pub fn step_by(value: i64, delta: i64, snap: i64, min: i64, max: i64) -> i64 {
@@ -267,7 +287,7 @@ pub struct StepperProps {
 /// kept while it is no number within the bounds (marked invalid) and
 /// clamped when committed (unless `strict`); the buttons are out of the tab
 /// order since the arrow keys step it. The number's room is that of the
-/// longest of `min` and `max` in figures of one width, so the box does not
+/// longest of `min` and `max` in figures of one width (with every decimal place counted), so the box does not
 /// change from the least value to the most.
 #[function_component]
 pub fn Stepper(props: &StepperProps) -> Html {
@@ -278,14 +298,13 @@ pub fn Stepper(props: &StepperProps) -> Html {
     let (min, max) = (props.min, props.max.max(props.min));
     let (decimals, pad) = (props.decimals, props.pad);
     let (strict, live, mixed) = (props.strict, props.live, props.mixed);
-    let figures = |n: i64| format_number(n, decimals, pad).len();
     let chars = props.chars.map_or_else(
         || {
             props
                 .placeholder
                 .iter()
                 .map(|p| p.chars().count())
-                .fold(figures(min).max(figures(max)), usize::max)
+                .fold(number_width(min, max, decimals, pad), usize::max)
         },
         usize::from,
     );
@@ -664,6 +683,20 @@ mod tests {
             ..props(5)
         });
         assert_eq!(off.matches("disabled=\"disabled\"").count(), 3, "{off}");
+    }
+
+    #[test]
+    fn width_counts_every_decimal_place() {
+        let wide = |n, decimals| format_number(n, decimals, 0).len();
+        assert_eq!(number_width(0, 100, 2, 0), 4);
+        assert!(number_width(0, 100, 2, 0) >= wide(7, 2));
+        assert!(number_width(0, 100, 2, 0) >= wide(100, 2).max("1.00".len()));
+        assert_eq!(number_width(0, 10_000, 2, 0), 6);
+        assert_eq!(number_width(-50, 50, 2, 0), 5);
+        assert_eq!(number_width(-50, 50, 1, 0), 4);
+        assert_eq!(number_width(0, 100, 0, 0), 3);
+        assert_eq!(number_width(-5, 120, 0, 0), 3);
+        assert_eq!(number_width(1, 12, 0, 3), 3);
     }
 
     #[test]
