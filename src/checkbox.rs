@@ -25,6 +25,9 @@ pub struct CheckboxProps {
     pub label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// A tip for [`DataTips`](crate::DataTips) (`data-tip` on the label).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     /// The text beside the box.
     #[prop_or_default]
     pub children: Html,
@@ -61,7 +64,7 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
     let has_text = props.children != html! {};
 
     html! {
-        <label class={classes!(checkbox(props.disabled), props.class.clone())}>
+        <label class={classes!(checkbox(props.disabled), props.class.clone())} data-tip={props.tip.clone()}>
             <span class={class::CHECKBOX_MARK}>
                 <input type="checkbox" class={class::CHECKBOX_INPUT} ref={input}
                     checked={props.checked} disabled={props.disabled}
@@ -97,6 +100,9 @@ pub struct SwitchProps {
     pub label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// A tip for [`DataTips`](crate::DataTips) (`data-tip`).
+    #[prop_or_default]
+    pub tip: Option<AttrValue>,
     /// The text beside the switch.
     #[prop_or_default]
     pub children: Html,
@@ -135,6 +141,7 @@ pub fn Switch(props: &SwitchProps) -> Html {
             aria-label={props.label.clone()}
             disabled={props.disabled}
             data-testid={props.testid.clone()}
+            data-tip={props.tip.clone()}
             {onclick}>
             <span class={class::SWITCH_TRACK}>
                 <span class={class::SWITCH_THUMB}>
@@ -188,6 +195,25 @@ mod tests {
         assert!(html.contains("aria-checked=\"true\""), "{html}");
         assert!(html.contains("aria-busy=\"true\""), "{html}");
         assert!(html.contains(class::SPIN), "{html}");
+    }
+
+    #[test]
+    fn a_tip_is_data_tip_only_when_set() {
+        let checkbox = |tip: Option<&'static str>| {
+            render::<Checkbox>(yew::props!(CheckboxProps {
+                checked: false,
+                tip: tip.map(AttrValue::from),
+                on_change: Callback::noop()
+            }))
+        };
+        assert!(!checkbox(None).contains("data-tip"));
+        assert!(checkbox(Some("Pin")).contains("data-tip=\"Pin\""));
+        let switch = render::<Switch>(yew::props!(SwitchProps {
+            on: false,
+            tip: AttrValue::from("Live"),
+            on_change: Callback::noop()
+        }));
+        assert!(switch.contains("data-tip=\"Live\""), "{switch}");
     }
 
     #[test]

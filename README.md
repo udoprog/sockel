@@ -12,7 +12,9 @@ Each component comes with its Sass under `style/`, and its variants are
 modifier classes set by props, so the markup and the styles stay in step.
 
 sockel was called plinth until 2026-11-17, and its history starts as
-`crates/plinth` in characterize.
+`crates/plinth` in characterize. Every `plinth-` name became `sockel-`:
+classes, custom properties, and the phrase ids an app's `.ftl` overrides
+(`plinth-dialog-close` is `sockel-dialog-close`).
 
 [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
 app with Sass of its own builds it with sockel-build after sockel's, into
@@ -76,6 +78,10 @@ workspace):
 sockel = { path = "../sockel" }
 sockel-build = { path = "../sockel/sockel-build" }
 ```
+
+The paths are relative to that `Cargo.toml`. Where they do not resolve (a git
+worktree of the app), the same `[patch.crates-io]` with absolute paths can go
+in an untracked `.cargo/config.toml` instead.
 
 The dependency lines stay as above, and dropping the patch later switches to
 the registry. Nothing else names the checkout.
@@ -278,12 +284,21 @@ and `@use "../../sockel/style/..."`) moves to the getting-started setup:
 3. **The prefix.** Every class the app's Sass defines must start with one
    prefix (`army-`), given to `Config::prefix`. Rename the app's classes in
    the Sass and the markup together; a rule that refines a sockel class
-   (`.sockel-card.army-sidebar`) keeps sockel's part as it is.
+   (`.sockel-card.army-sidebar`) keeps sockel's part as it is. A class that
+   already starts with the prefix keeps its name (no `army-army-band`). A
+   rename by search and replace also reaches strings that are not classes
+   (ARIA roles, `data-testid` values), and tests' selectors (CSS, XPath
+   `@class`, JS) need the prefix too.
 4. **Class literals.** Add the `mod class` above and replace the app's
    class strings in Rust with its constants (`"army-sidebar"` becomes
    `class::SIDEBAR`, `classes!("sockel-card", "army-sidebar")` becomes
    `classes!(sockel::class::CARD, class::SIDEBAR)`). A misspelt or removed
    class then fails to compile, and the dead-class test finds the rest.
+   Class names also travel through props, builders, match arms, `format!`
+   and `Option` or tuple values; look there too. A constant's value is the
+   prefixed class, so a string also used for something else (a test id)
+   needs its own literal. Until every constant is used, `#[allow(dead_code)]`
+   on `mod class` keeps `-D warnings` passing.
 5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
    `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
    css={STYLESHEET} />` once at the root.
@@ -477,6 +492,9 @@ The `$` is optional and the value is any Sass expression. Without `.local`,
 the same call configures sockel's own stylesheet. Local Sass cannot `@use
 "sockel" with (...)`, since sockel compiles first. The rules keep reading
 the custom properties, so a page can still override them at runtime.
+`"null"` sets nothing for a token whose default is not `null` (Sass's
+`!default` takes `null` as unset); turn one off with a CSS value (`auto`,
+`inherit`, `0`).
 
 A value can name the app's own Sass variables: `with_module("style/_vars.scss",
 "v")` loads that module first, so `.with("text-sm", "v.$font-sm")` keeps one
@@ -722,7 +740,8 @@ fn main() {
   until the drop, each step announced.
 - [`ReorderTree`] with [`ReorderList`]s at any depth (their rows'
   grip a [`ReorderTreeHandle`]): rows moved within and between nested
-  lists, into a list and out of it by keyboard too.- [`Lanes`] (`.lanes`) with [`Lane`]s: lists side by side, a board's
+  lists, into a list and out of it by keyboard too.
+- [`Lanes`] (`.lanes`) with [`Lane`]s: lists side by side, a board's
   columns, whose rows move within and between them by a drag or by
   keyboard (Left and Right to the lane beside), each step announced with
   the lane's name.
@@ -767,7 +786,8 @@ fn main() {
   its filters or a short form, as a column or a line, tinted or bare.
 - [`Seam`] (`.seam`): two panes and the divider dragged between them, each
   pane keeping its least size.
-- [`use_width`]: an element's width, at most once a frame.- [`AppShell`] (`.app-shell`): an app's frame, a top bar over a page that
+- [`use_width`]: an element's width, at most once a frame.
+- [`AppShell`] (`.app-shell`): an app's frame, a top bar over a page that
   scrolls on its own, its section navigation in the bar when wide and a bar
   at the bottom when narrow; [`BottomNav`] (`.bottom-nav`): those sections,
   the current one marked by `aria-current`, each with a count.
@@ -919,12 +939,13 @@ and the control has no text of its own. Every component takes `class`.
   `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
   `checked`, `indeterminate` (set as the input's DOM property, drawn as a
   minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
-  children as its text. `checkbox(disabled)` gives its classes.
+  `tip` (`data-tip` on its label), children as its text.
+  `checkbox(disabled)` gives its classes.
 - [`Switch`] (`.sockel-switch`): a `<button role="switch">`, its track
   `--switch-width` by `--switch-height` and its thumb moved by transform.
   `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
-  `disabled`, `invalid` (`INVALID`), `on_change(bool)`; `switch(on,
-  invalid)` gives its classes.
+  `disabled`, `invalid` (`INVALID`), `on_change(bool)`, `tip`
+  (`data-tip`); `switch(on, invalid)` gives its classes.
 - [`Choice`] (`.sockel-choice`): a segmented pick-one `radiogroup` of
   [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`, `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
@@ -1941,8 +1962,11 @@ is swallowed at the window).
 - `quick_keys`: the arrows move a focused handle's row at once, as Alt and
   an arrow do, for apps whose handles did so; Space and Enter still lift.
 - `titles`: each handle's name is its tooltip too (`DragHandle`'s new
-- `tips`: each handle's name is its `data-tip` too (`DragHandle`'s `tip`), for apps whose tooltips read that attribute. A keyboard-moved row's handle is focused at the row's new place even when the app's keys did not change (index keys).
   `title`).
+- `tips`: each handle's name is its `data-tip` too (`DragHandle`'s `tip`),
+  for apps whose tooltips read that attribute. A keyboard-moved row's
+  handle is focused at the row's new place even when the app's keys did
+  not change (index keys).
 - `body_drag`: a mouse or pen also drags a row from anywhere on it off its
   controls (a button, input, link, label or role widget in it does not
   start a drag); a finger still only by the handle, so the list scrolls
@@ -2057,6 +2081,7 @@ inside itself. `text`, `disabled`, `titles`, `class` and `testid` are
 Size guarantees as [`Reorder`]'s: nothing reflows until the drop, the
 lifted row moving by a transform and the marks being inset box shadows.
 New class: `DROP_INSIDE`. New tokens: none.
+
 Added for lanes, each off by default:
 
 - `side_by_side` (on `ReorderTree`): its outermost lists sit side by side.
@@ -3005,7 +3030,9 @@ New classes: `APP_SHELL`, `APP_SHELL_FRAME`, `APP_SHELL_BAR`,
 `_split-view.scss`. New tokens: `--app-shell-height`,
 `--app-shell-bar-height`, `--app-shell-bar-ground` (defaults in the rules).
 
-<br>## Against jitter: mixins and utilities
+<br>
+
+## Against jitter: mixins and utilities
 
 The shared rules every component builds on, so nothing changes size as its
 state or content changes. Each is a mixin (`@use "sockel" as p;` then

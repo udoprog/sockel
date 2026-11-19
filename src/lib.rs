@@ -5,7 +5,9 @@
 //! modifier classes set by props, so the markup and the styles stay in step.
 //!
 //! sockel was called plinth until 2026-11-17, and its history starts as
-//! `crates/plinth` in characterize.
+//! `crates/plinth` in characterize. Every `plinth-` name became `sockel-`:
+//! classes, custom properties, and the phrase ids an app's `.ftl` overrides
+//! (`plinth-dialog-close` is `sockel-dialog-close`).
 //!
 //! [`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
 //! app with Sass of its own builds it with sockel-build after sockel's, into
@@ -69,6 +71,10 @@
 //! sockel = { path = "../sockel" }
 //! sockel-build = { path = "../sockel/sockel-build" }
 //! ```
+//!
+//! The paths are relative to that `Cargo.toml`. Where they do not resolve (a git
+//! worktree of the app), the same `[patch.crates-io]` with absolute paths can go
+//! in an untracked `.cargo/config.toml` instead.
 //!
 //! The dependency lines stay as above, and dropping the patch later switches to
 //! the registry. Nothing else names the checkout.
@@ -271,12 +277,21 @@
 //! 3. **The prefix.** Every class the app's Sass defines must start with one
 //!    prefix (`army-`), given to `Config::prefix`. Rename the app's classes in
 //!    the Sass and the markup together; a rule that refines a sockel class
-//!    (`.sockel-card.army-sidebar`) keeps sockel's part as it is.
+//!    (`.sockel-card.army-sidebar`) keeps sockel's part as it is. A class that
+//!    already starts with the prefix keeps its name (no `army-army-band`). A
+//!    rename by search and replace also reaches strings that are not classes
+//!    (ARIA roles, `data-testid` values), and tests' selectors (CSS, XPath
+//!    `@class`, JS) need the prefix too.
 //! 4. **Class literals.** Add the `mod class` above and replace the app's
 //!    class strings in Rust with its constants (`"army-sidebar"` becomes
 //!    `class::SIDEBAR`, `classes!("sockel-card", "army-sidebar")` becomes
 //!    `classes!(sockel::class::CARD, class::SIDEBAR)`). A misspelt or removed
 //!    class then fails to compile, and the dead-class test finds the rest.
+//!    Class names also travel through props, builders, match arms, `format!`
+//!    and `Option` or tuple values; look there too. A constant's value is the
+//!    prefixed class, so a string also used for something else (a test id)
+//!    needs its own literal. Until every constant is used, `#[allow(dead_code)]`
+//!    on `mod class` keeps `-D warnings` passing.
 //! 5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
 //!    `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
 //!    css={STYLESHEET} />` once at the root.
@@ -470,6 +485,9 @@
 //! the same call configures sockel's own stylesheet. Local Sass cannot `@use
 //! "sockel" with (...)`, since sockel compiles first. The rules keep reading
 //! the custom properties, so a page can still override them at runtime.
+//! `"null"` sets nothing for a token whose default is not `null` (Sass's
+//! `!default` takes `null` as unset); turn one off with a CSS value (`auto`,
+//! `inherit`, `0`).
 //!
 //! A value can name the app's own Sass variables: `with_module("style/_vars.scss",
 //! "v")` loads that module first, so `.with("text-sm", "v.$font-sm")` keeps one
@@ -859,6 +877,8 @@
 //!   classes for an element that cannot be the component.
 //! - `role` gives it another role (`menuitemradio`, `switch`), `checked` its
 //!   `aria-checked`, and `current` its `aria-current` (`page`, `step`).
+//!   `autofocus` marks it `data-autofocus`, the control a dialog or popover
+//!   focuses when it opens.
 //!
 //! Size guarantees: the height is the size's token, whatever the label (one
 //! line, cut with an ellipsis; the button never grows past its container) and
@@ -912,12 +932,13 @@
 //!   `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
 //!   `checked`, `indeterminate` (set as the input's DOM property, drawn as a
 //!   minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
-//!   children as its text. `checkbox(disabled)` gives its classes.
+//!   `tip` (`data-tip` on its label), children as its text.
+//!   `checkbox(disabled)` gives its classes.
 //! - [`Switch`] (`.sockel-switch`): a `<button role="switch">`, its track
 //!   `--switch-width` by `--switch-height` and its thumb moved by transform.
 //!   `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
-//!   `disabled`, `invalid` (`INVALID`), `on_change(bool)`; `switch(on,
-//!   invalid)` gives its classes.
+//!   `disabled`, `invalid` (`INVALID`), `on_change(bool)`, `tip`
+//!   (`data-tip`); `switch(on, invalid)` gives its classes.
 //! - [`Choice`] (`.sockel-choice`): a segmented pick-one `radiogroup` of
 //!   [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
 //!   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`, `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
@@ -1951,6 +1972,10 @@
 //!   an arrow do, for apps whose handles did so; Space and Enter still lift.
 //! - `titles`: each handle's name is its tooltip too (`DragHandle`'s new
 //!   `title`).
+//! - `tips`: each handle's name is its `data-tip` too (`DragHandle`'s `tip`),
+//!   for apps whose tooltips read that attribute. A keyboard-moved row's
+//!   handle is focused at the row's new place even when the app's keys did
+//!   not change (index keys).
 //! - `body_drag`: a mouse or pen also drags a row from anywhere on it off its
 //!   controls (a button, input, link, label or role widget in it does not
 //!   start a drag); a finger still only by the handle, so the list scrolls
@@ -3020,6 +3045,7 @@
 //! `--app-shell-bar-height`, `--app-shell-bar-ground` (defaults in the rules).
 //!
 //! <br>
+//!
 //! ## Against jitter: mixins and utilities
 //!
 //! The shared rules every component builds on, so nothing changes size as its
