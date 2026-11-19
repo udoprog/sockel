@@ -124,7 +124,7 @@ with (...)` (see [Configuration](https://docs.rs/sockel/latest/sockel/#configura
 Every class the app's Sass defines must be sockel's or start with the app's
 prefix (`app-`), or the build fails, so the two never collide. Classes a
 dependency's markup writes (a sign-in form the app styles) are the exception:
-`Config::foreign(["auth-*"])` lets the app style them unprefixed (a trailing
+`.foreign(["auth-*"])` on the Config lets the app style them unprefixed (a trailing
 `*` is a prefix), and they get no constant.
 
 The stylesheet is sockel's CSS, then the app's, so an app rule as specific as
@@ -134,17 +134,28 @@ misspelt `sockel-` class is still an error.
 
 <br>
 
-### `build.rs`
+### `style.rs` and `build.rs`
 
-At the package root:
+At the package root, one file defines the
+[`Config`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html), so the build and the guard below share it:
 
-<!-- check: build.rs -->
+<!-- check: style.rs -->
 ```rust
-fn main() {
+fn style() -> sockel_build::Config {
     sockel_build::Config::new()
         .local("style/")
         .prefix("app-")
-        .compile();
+}
+```
+
+`build.rs` includes it and compiles:
+
+<!-- check: build.rs -->
+```rust
+include!("style.rs");
+
+fn main() {
+    style().compile();
 }
 ```
 
@@ -235,26 +246,24 @@ A class the Sass defines and no Rust writes is dead weight.
 
 <!-- check: tests/style_classes.rs -->
 ```rust
-use sockel_build::{Config, Usage};
+use sockel_build::Usage;
+
+include!("../style.rs");
 
 #[test]
 fn every_styled_class_is_written() {
     Usage::new()
         .source(concat!(env!("CARGO_MANIFEST_DIR"), "/src"))
-        .assert_clean(
-            &Config::new()
-                .style(env!("SOCKEL_STYLE"))
-                .local("style/")
-                .prefix("app-"),
-        );
+        .assert_clean(&style().style(env!("SOCKEL_STYLE")));
 }
 ```
 
 `SOCKEL_STYLE` is sockel's style directory, which `compile()` hands the
-package's crates. Give `Config` the same `foreign`, `dynamic` and `with` calls
-as `build.rs`, so it checks the stylesheet the app builds;
-`.dynamic(["app-tone-*"])` allows classes built at runtime (a trailing `*` is
-a prefix).
+package's crates and only `build.rs` is told. The guard includes the same
+`style.rs`, so it checks the stylesheet the app builds (see [One Config for
+the build and the guard](https://docs.rs/sockel-build/latest/sockel_build/#one-config-for-the-build-and-the-guard));
+`.dynamic(["app-tone-*"])` in it allows classes built at runtime (a trailing
+`*` is a prefix).
 
 A class counts as written when a source names its constant (`class::SIDEBAR`)
 or the class in a string literal; comments and items marked `#[cfg(test)]` do
@@ -330,7 +339,7 @@ and `@use "../../sockel/style/..."`) moves to the
    `sockel-build` compiles sockel's CSS first, with the app's features. A
    partial that needs sockel's mixins or token functions writes
    `@use "sockel" as p;` and calls `p.below(...)` and the like. A `with (...)` on the old `@use` moves to
-   `Config::with` in `build.rs` (see [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)).
+   `Config::with` in `style.rs` (see [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)).
 3. **The prefix.** Every class the app's Sass defines must start with one
    prefix (`app-`), given to `Config::prefix`. Rename the app's classes in
    the Sass and the markup together; a rule that refines a sockel class
