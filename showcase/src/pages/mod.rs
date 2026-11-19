@@ -11,6 +11,7 @@ mod foundations;
 mod heads;
 mod icons;
 mod inputs;
+mod lanes;
 mod layout;
 mod library;
 mod loading;
@@ -1203,6 +1204,22 @@ pub const PAGES: &[Page] = &[
             Size::Box,
             Across::Only(&["disabled", "titles", "focus", "click"]),
         )],
+    },
+    Page {
+        id: "lanes",
+        title: "Lanes",
+        group: Group::Lists,
+        about: "Lists side by side, a board's columns, on ReorderTree: drag a card from anywhere on it with a mouse (body_drag), or by its handle with a finger. On a focused handle Space lifts, Up and Down move within the lane, Left and Right to the lane beside at the same place, Space drops, Escape cancels; Alt and an arrow moves at once. Each step is announced with the lane's name. The lanes scroll together, their heads held at the top; in a narrow frame each lane is nearly its width and snaps.",
+        covers: &["Lanes", "LanesProps", "Lane", "LaneProps", "lanes"],
+        render: || html! { <lanes::LanesPage /> },
+        holds: &[
+            hold(sockel::class::LANES, Size::Box, Across::All),
+            hold(
+                sockel::class::LANE_HEAD,
+                Size::Height,
+                Across::Except(&["Text"]),
+            ),
+        ],
     },
     Page {
         id: "reorder",

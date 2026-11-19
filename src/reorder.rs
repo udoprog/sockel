@@ -29,11 +29,11 @@ const DROP_PAGE: &str = "data-sort-page";
 const DROP_OVER: &str = "data-drop-over";
 
 /// What a press on is not a drag of the row: its own controls.
-const CONTROLS: &str = "button, input, a, textarea, select, label, [contenteditable], \
+pub(crate) const CONTROLS: &str = "button, input, a, textarea, select, label, [contenteditable], \
     [role=button], [role=checkbox], [role=radio], [role=switch], [role=slider], [role=menuitem]";
 /// A control the row drags by all the same (`body_drag`), such as the
 /// button that picks it.
-const SURFACE: &str = "data-reorder-surface";
+pub(crate) const SURFACE: &str = "data-reorder-surface";
 
 /// One row of a [`Reorder`].
 #[derive(Clone, PartialEq)]
@@ -101,6 +101,41 @@ pub enum ReorderText {
 /// The catalog's English text of a [`ReorderText`].
 pub fn reorder_text(text: &ReorderText) -> String {
     phrase(&Phrases::from_catalog(&L10N), text)
+}
+
+/// [`phrase`] for a row in a named list (a
+/// [`ReorderList`](crate::ReorderList)'s `name`): the announcements that
+/// place it say the list's name too.
+pub(crate) fn phrase_in(phrases: &Phrases, text: &ReorderText, list: &str) -> String {
+    let (id, name, position, count) = match text {
+        ReorderText::Lifted {
+            name,
+            position,
+            count,
+        } => ("sockel-reorder-lifted-in", name, position, count),
+        ReorderText::Moving {
+            name,
+            position,
+            count,
+        } => ("sockel-reorder-moving-in", name, position, count),
+        ReorderText::Dropped {
+            name,
+            position,
+            count,
+        } => ("sockel-reorder-dropped-in", name, position, count),
+        ReorderText::Cancelled {
+            name,
+            position,
+            count,
+        } => ("sockel-reorder-cancelled-in", name, position, count),
+        ReorderText::Handle { .. } | ReorderText::Hint => return phrase(phrases, text),
+    };
+    let mut args = Args::new();
+    args.set("name", name.as_str())
+        .set("list", list)
+        .set("position", *position)
+        .set("count", *count);
+    phrases.msg(id, &args)
 }
 
 pub(crate) fn phrase(phrases: &Phrases, text: &ReorderText) -> String {

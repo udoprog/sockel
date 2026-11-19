@@ -28,6 +28,7 @@ filter-picker = "picker"
 heads = "head"
 icons = "icons"
 inputs = "input"
+lanes = "lanes"
 layout = "layout"
 listbox = "select"
 media = "media"
@@ -54,7 +55,7 @@ tooltip = "tooltip"
 
 [features]
 default = ["full"]
-full = ["action-group", "badge", "button", "card-grid", "color-select", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "layout", "library-toolbar", "loadable", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "reorder", "rows", "search-select", "seam", "select", "shell", "skeleton", "split-view", "stepper", "table", "tabs", "toast", "toggles", "tooltip"]
+full = ["action-group", "badge", "button", "card-grid", "color-select", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "lanes", "layout", "library-toolbar", "loadable", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "reorder", "rows", "search-select", "seam", "select", "shell", "skeleton", "split-view", "stepper", "table", "tabs", "toast", "toggles", "tooltip"]
 action-group = []
 badge = ["icons"]
 button = ["icons", "skeleton"]
@@ -67,6 +68,7 @@ field = []
 head = ["layout"]
 icons = []
 input = ["icons"]
+lanes = ["badge", "reorder"]
 layout = []
 library-toolbar = ["input", "layout"]
 loadable = ["notice", "skeleton"]

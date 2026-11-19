@@ -10,12 +10,17 @@ use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
-use crate::reorder::{ReorderItem, ReorderText, phrase, scrolled, scroller_of, with_data};
+use crate::reorder::{
+    CONTROLS, ReorderItem, ReorderText, SURFACE, phrase, phrase_in, scrolled, scroller_of,
+    with_data,
+};
 use crate::tooltip::next_id;
 use crate::{DragHandle, class, slot_at};
 
 const SLOP: f64 = 4.0;
 const LIST: &str = "data-reorder-list";
+/// A list's `name`, which the announcements placing a row in it say.
+const LIST_NAME: &str = "data-reorder-list-name";
 
 /// A row's place: the list it is in (a [`ReorderList`]'s `id`) and its
 /// index there.
@@ -107,6 +112,9 @@ struct Drag {
     row: Element,
     active: bool,
     scroller: Option<Element>,
+    /// Held by the row itself (`body_drag`, a row without a handle), so the
+    /// row hears the pointer, not a handle.
+    by_row: bool,
 }
 
 #[derive(Default)]
@@ -120,6 +128,9 @@ struct Live {
     dragged: bool,
 }
 
+/// The catalog's text of a row placed in a named list.
+type SayIn = Rc<dyn Fn(ReorderText, &str) -> String>;
+
 /// What a [`ReorderTree`]'s lists and handles share.
 #[derive(Clone)]
 struct Tree {
@@ -130,10 +141,15 @@ struct Tree {
     on_move: Callback<ReorderTreeMove>,
     accepts: Option<Callback<ReorderTreeMove, bool>>,
     say: Rc<dyn Fn(ReorderText) -> String>,
+    /// The catalog's text for a row placed in a named list; `None` when
+    /// the app gives `text`.
+    say_in: Option<SayIn>,
     hint: AttrValue,
     disabled: bool,
     titles: bool,
     tips: bool,
+    side_by_side: bool,
+    body_drag: bool,
 }
 
 impl PartialEq for Tree {
@@ -144,6 +160,7 @@ impl PartialEq for Tree {
             && self.on_move == other.on_move
             && self.accepts == other.accepts
             && (self.disabled, self.titles, self.tips) == (other.disabled, other.titles, other.tips)
+            && (self.side_by_side, self.body_drag) == (other.side_by_side, other.body_drag)
     }
 }
 
@@ -167,6 +184,16 @@ pub struct ReorderTreeProps {
     /// app's own tooltips read.
     #[prop_or_default]
     pub tips: bool,
+    /// The outermost lists sit side by side (lanes, columns): Left and
+    /// Right move a lifted row to the list beside, at the same position or
+    /// its end, and Up, Down, Home and End stay within its list.
+    #[prop_or_default]
+    pub side_by_side: bool,
+    /// A mouse or pen also drags a row from anywhere on it off its
+    /// controls (as [`Reorder`](crate::Reorder)'s `body_drag`), a finger
+    /// only by the handle; a row without a handle is dragged by itself.
+    #[prop_or_default]
+    pub body_drag: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -191,6 +218,13 @@ pub fn ReorderTree(props: &ReorderTreeProps) -> Html {
     let root = use_node_ref();
     let hint = use_state(|| next_id("reorder-hint"));
     let phrases = use_phrases_with(&L10N);
+    let say_in: Option<SayIn> = match &props.text {
+        Some(_) => None,
+        None => {
+            let phrases = phrases.clone();
+            Some(Rc::new(move |t, list| phrase_in(&phrases, &t, list)))
+        }
+    };
     let say: Rc<dyn Fn(ReorderText) -> String> = match &props.text {
         Some(text) => {
             let text = text.clone();
@@ -225,10 +259,13 @@ pub fn ReorderTree(props: &ReorderTreeProps) -> Html {
         on_move: props.on_move.clone(),
         accepts: props.accepts.clone(),
         say: say.clone(),
+        say_in,
         hint: (*hint).clone(),
         disabled: props.disabled,
         titles: props.titles,
         tips: props.tips,
+        side_by_side: props.side_by_side,
+        body_drag: props.body_drag,
     };
 
     html! {
@@ -262,6 +299,11 @@ fn handle_of(root: &NodeRef, key: &str) -> Option<HtmlElement> {
 pub struct ReorderListProps {
     /// The list's name in the tree's moves, unique within it.
     pub id: AttrValue,
+    /// What the list is called (its `aria-label`): the announcements that
+    /// place a row in it say it ("Moved Alpha to Done, 2 of 5"), unless the
+    /// tree's `text` is given.
+    #[prop_or_default]
+    pub name: Option<AttrValue>,
     /// The rows sit side by side: the drop is marked at a row's side and
     /// a drag aims by the pointer's position across.
     #[prop_or_default]
@@ -310,6 +352,9 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
             if props.across {
                 classes.push(class::REORDER_TILED);
             }
+            if tree.body_drag {
+                classes.push(class::REORDER_GRAB);
+            }
             if lifted == Some(index) {
                 classes.push(class::LIFTED);
             }
@@ -328,6 +373,19 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                 name: item.name.clone(),
                 lifted: lifted == Some(index),
             };
+            let body = tree.body_drag.then(|| {
+                let (down, moved, up, cancel) = (grip.clone(), grip.clone(), grip.clone(), grip.clone());
+                (
+                    Callback::from(move |e: PointerEvent| down.body_down(e)),
+                    Callback::from(move |e: PointerEvent| if moved.by_row() { moved.pointer_move(&e) }),
+                    Callback::from(move |e: PointerEvent| if up.by_row() { up.pointer_up(&e) }),
+                    Callback::from(move |_: PointerEvent| if cancel.by_row() { cancel.cancel() }),
+                )
+            });
+            let (onpointerdown, onpointermove, onpointerup, onpointercancel) = match body {
+                Some((down, moved, up, cancel)) => (Some(down), Some(moved), Some(up), Some(cancel)),
+                None => (None, None, None, None),
+            };
             let onclick = {
                 let live = tree.live.clone();
                 let onclick = item.onclick.clone();
@@ -341,6 +399,7 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                 <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
                     tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
                     {onclick} ondblclick={item.ondblclick.clone()} oncontextmenu={item.oncontextmenu.clone()}
+                    {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
                     onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
                     { item.children.clone() }
                 </div>
@@ -355,7 +414,8 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
     let inside = (len == 0 && aim == Some(0)).then_some(class::DROP_INSIDE);
     html! {
         <div class={classes!(props.class.clone(), inside)} data-testid={props.testid.clone()}
-            data-reorder-list={props.id.clone()} data-reorder-across={props.across.then_some("")}>
+            data-reorder-list={props.id.clone()} data-reorder-across={props.across.then_some("")}
+            data-reorder-list-name={props.name.clone()} aria-label={props.name.clone()}>
             { rows }
         </div>
     }
@@ -442,8 +502,31 @@ fn lists_of(root: &Element) -> Vec<(Element, AttrValue, TreeList)> {
 }
 
 impl TreeGrip {
-    fn announce(&self, text: ReorderText) {
-        self.tree.live.borrow_mut().status = (self.tree.say)(text);
+    /// Whether the row is held by itself, not by its handle.
+    fn by_row(&self) -> bool {
+        self.tree
+            .live
+            .borrow()
+            .drag
+            .as_ref()
+            .is_some_and(|d| d.by_row)
+    }
+
+    /// Says `text` of the row placed in `list`, naming the list when it
+    /// has a name and the catalog speaks.
+    fn announce(&self, text: ReorderText, list: &AttrValue) {
+        let named = self.tree.say_in.as_ref().zip(self.list_name(list));
+        self.tree.live.borrow_mut().status = match named {
+            Some((say_in, name)) => say_in(text, &name),
+            None => (self.tree.say)(text),
+        };
+    }
+
+    fn list_name(&self, list: &AttrValue) -> Option<String> {
+        let root = self.tree.root.cast::<Element>()?;
+        root.query_selector(&format!("[{LIST}=\"{}\"]", list.replace('"', "\\\"")))
+            .ok()??
+            .get_attribute(LIST_NAME)
     }
 
     fn row(&self) -> Option<Element> {
@@ -484,6 +567,7 @@ impl TreeGrip {
     }
 
     fn set_aim(&self, aim: Aim, pointer: bool) {
+        let list = aim.list.clone();
         let root = self.tree.root.cast::<Element>();
         let lists = root.as_ref().map(lists_of).unwrap_or_default();
         let at = |aim: &Aim| self.place_text(aim, &lists);
@@ -512,7 +596,7 @@ impl TreeGrip {
             first
         };
         let name = self.name.clone();
-        self.announce(if first {
+        let text = if first {
             ReorderText::Lifted {
                 name,
                 position,
@@ -524,7 +608,10 @@ impl TreeGrip {
                 position,
                 count,
             }
-        });
+        };
+        // Lifted, it is still where it lies, whatever a drag first aims at.
+        let list = if first { self.spot.list.clone() } else { list };
+        self.announce(text, &list);
         self.tree.bump.emit(());
     }
 
@@ -547,11 +634,14 @@ impl TreeGrip {
             });
             self.tree.live.borrow_mut().focus = Some(lift.key.clone());
         }
-        self.announce(ReorderText::Dropped {
-            name: lift.name,
-            position,
-            count,
-        });
+        self.announce(
+            ReorderText::Dropped {
+                name: lift.name,
+                position,
+                count,
+            },
+            &lift.aim.list,
+        );
         self.tree.bump.emit(());
     }
 
@@ -571,11 +661,14 @@ impl TreeGrip {
                 .iter()
                 .find(|(_, id, _)| *id == self.spot.list)
                 .map_or(0, |(_, _, l)| l.len);
-            self.announce(ReorderText::Cancelled {
-                name: self.name.clone(),
-                position: self.spot.index + 1,
-                count,
-            });
+            self.announce(
+                ReorderText::Cancelled {
+                    name: self.name.clone(),
+                    position: self.spot.index + 1,
+                    count,
+                },
+                &self.spot.list,
+            );
         }
         self.tree.bump.emit(());
     }
@@ -596,6 +689,51 @@ impl TreeGrip {
         else {
             return;
         };
+        self.begin(&e, &handle, false);
+    }
+
+    /// A press on the row off its handle and controls (`body_drag`), by a
+    /// mouse or pen: the row's handle takes the pointer, or the row itself
+    /// when it has none.
+    fn body_down(&self, e: PointerEvent) {
+        if !self.tree.body_drag
+            || e.button() != 0
+            || e.pointer_type() == "touch"
+            || self.tree.disabled
+            || self.tree.live.borrow().lift.is_some()
+        {
+            return;
+        }
+        let Some(target) = e.target().and_then(|t| t.dyn_into::<Element>().ok()) else {
+            return;
+        };
+        let Some(row) = self.row() else {
+            return;
+        };
+        let handle_class = format!(".{}", class::DRAG_HANDLE);
+        // A press in a portal (a menu the row opened) bubbles through the
+        // row in Yew without being in its element; one on the handle is the
+        // handle's.
+        if !row.contains(Some(&target)) || target.closest(&handle_class).ok().flatten().is_some() {
+            return;
+        }
+        if target
+            .closest(CONTROLS)
+            .ok()
+            .flatten()
+            .is_some_and(|c| row.contains(Some(&c)) && !c.has_attribute(SURFACE))
+        {
+            return;
+        }
+        let handle = row.query_selector(&handle_class).ok().flatten();
+        let by_row = handle.is_none();
+        let Ok(handle) = handle.unwrap_or(row).dyn_into::<HtmlElement>() else {
+            return;
+        };
+        self.begin(&e, &handle, by_row);
+    }
+
+    fn begin(&self, e: &PointerEvent, handle: &HtmlElement, by_row: bool) {
         let Some(row) = self.row() else {
             return;
         };
@@ -611,6 +749,7 @@ impl TreeGrip {
             row,
             active: false,
             scroller,
+            by_row,
         });
     }
 
@@ -745,6 +884,9 @@ impl TreeGrip {
     fn step(&self, aim: &Aim, key: &str) -> Option<Aim> {
         let (steps, at) = self.steps(aim);
         let at = at?;
+        if self.tree.side_by_side {
+            return lane_step(&steps, at, key);
+        }
         match key {
             "ArrowUp" | "ArrowLeft" => at.checked_sub(1).map(|i| steps[i].clone()),
             "ArrowDown" | "ArrowRight" => steps.get(at + 1).cloned(),
@@ -821,6 +963,42 @@ impl TreeGrip {
     }
 }
 
+/// `TreeGrip::step` for lists side by side: Up and Down, Home and
+/// End within the list aimed at, Left and Right to the list beside it
+/// that takes the row, at the same position or that list's end.
+fn lane_step(steps: &[Aim], at: usize, key: &str) -> Option<Aim> {
+    let aim = &steps[at];
+    let within: Vec<&Aim> = steps.iter().filter(|a| a.list == aim.list).collect();
+    let here = within.iter().position(|a| *a == aim)?;
+    let across = |forward: bool| {
+        let mut lists: Vec<&AttrValue> = Vec::new();
+        for step in steps {
+            if lists.last() != Some(&&step.list) && !lists.contains(&&step.list) {
+                lists.push(&step.list);
+            }
+        }
+        let index = lists.iter().position(|l| **l == aim.list)?;
+        let next = if forward {
+            lists.get(index + 1)?
+        } else {
+            lists.get(index.checked_sub(1)?)?
+        };
+        let places: Vec<&Aim> = steps.iter().filter(|a| a.list == **next).collect();
+        places
+            .get(here.min(places.len().saturating_sub(1)))
+            .map(|a| (*a).clone())
+    };
+    match key {
+        "ArrowUp" => here.checked_sub(1).map(|i| within[i].clone()),
+        "ArrowDown" => within.get(here + 1).map(|a| (*a).clone()),
+        "Home" => within.first().map(|a| (*a).clone()),
+        "End" => within.last().map(|a| (*a).clone()),
+        "ArrowLeft" => across(false),
+        "ArrowRight" => across(true),
+        _ => None,
+    }
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -835,10 +1013,13 @@ mod tests {
             on_move: Callback::noop(),
             accepts: None,
             say: Rc::new(|_| String::new()),
+            say_in: None,
             hint: AttrValue::default(),
             disabled: false,
             titles: false,
             tips,
+            side_by_side: false,
+            body_drag: false,
         };
         let live = tree(false);
         let same = Tree {
@@ -846,6 +1027,32 @@ mod tests {
             ..live.clone()
         };
         assert!(live != same);
+    }
+
+    #[test]
+    fn lanes_step_within_a_lane_and_across_at_the_same_place() {
+        let aim = |list: &'static str, slot| Aim {
+            list: list.into(),
+            slot,
+        };
+        // A row lifted from a[1] of a: [x, row, y]; b: [p]; c: [].
+        let steps = [
+            aim("a", 0),
+            aim("a", 1),
+            aim("a", 3),
+            aim("b", 0),
+            aim("b", 1),
+            aim("c", 0),
+        ];
+        assert_eq!(lane_step(&steps, 1, "ArrowDown"), Some(aim("a", 3)));
+        assert_eq!(lane_step(&steps, 2, "ArrowDown"), None);
+        assert_eq!(lane_step(&steps, 1, "ArrowRight"), Some(aim("b", 1)));
+        assert_eq!(lane_step(&steps, 2, "ArrowRight"), Some(aim("b", 1)));
+        assert_eq!(lane_step(&steps, 3, "ArrowRight"), Some(aim("c", 0)));
+        assert_eq!(lane_step(&steps, 5, "ArrowRight"), None);
+        assert_eq!(lane_step(&steps, 4, "ArrowLeft"), Some(aim("a", 1)));
+        assert_eq!(lane_step(&steps, 0, "ArrowLeft"), None);
+        assert_eq!(lane_step(&steps, 0, "End"), Some(aim("a", 3)));
     }
 
     #[test]

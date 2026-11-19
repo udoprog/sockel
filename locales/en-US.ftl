@@ -49,3 +49,7 @@ sockel-reorder-lifted = { $name } lifted, position { $position } of { $count }
 sockel-reorder-moving = { $name }, position { $position } of { $count }
 sockel-reorder-dropped = Moved { $name } to { $position } of { $count }
 sockel-reorder-cancelled = { $name } back at position { $position } of { $count }
+sockel-reorder-lifted-in = { $name } lifted, { $list }, position { $position } of { $count }
+sockel-reorder-moving-in = { $name }, { $list }, position { $position } of { $count }
+sockel-reorder-dropped-in = Moved { $name } to { $list }, { $position } of { $count }
+sockel-reorder-cancelled-in = { $name } back in { $list }, position { $position } of { $count }

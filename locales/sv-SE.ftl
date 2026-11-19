@@ -49,3 +49,7 @@ sockel-reorder-lifted = { $name } lyft, plats { $position } av { $count }
 sockel-reorder-moving = { $name }, plats { $position } av { $count }
 sockel-reorder-dropped = Flyttade { $name } till plats { $position } av { $count }
 sockel-reorder-cancelled = { $name } tillbaka på plats { $position } av { $count }
+sockel-reorder-lifted-in = { $name } lyft, { $list }, plats { $position } av { $count }
+sockel-reorder-moving-in = { $name }, { $list }, plats { $position } av { $count }
+sockel-reorder-dropped-in = Flyttade { $name } till { $list }, { $position } av { $count }
+sockel-reorder-cancelled-in = { $name } tillbaka i { $list }, plats { $position } av { $count }

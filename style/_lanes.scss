@@ -1,0 +1,138 @@
+// Lanes and Lane (src/lanes.rs): lists side by side on a ReorderTree.
+//
+// - `.sockel-lanes` (with `.sockel-reorder`): the container (`container:
+//   sockel-lanes / inline-size`), as high as its parent.
+// - `.sockel-lanes-track`: the one area the lanes scroll in, both ways, so a
+//   dragged row stays in it whichever lane it crosses; a grid of the lanes
+//   in a row `--lanes-gap` apart, each as tall as the tallest or the area. Below
+//   `$lanes-breakpoint` of the lanes' own width each lane is
+//   `--lanes-phone-width` (88%) of the area and snaps to its start.
+// - `.sockel-lane`: a column `--lane-width` (18rem) wide on `--lane-ground`
+//   (a hint of the text over the background), `--radius-md` round. Parts:
+//   `-head` (held at the area's top on the lane's ground: `-title`, cut;
+//   `-count`; `-end`), `-body` (the drop area, filling the lane: `-rows`,
+//   a column `--space-2` apart, and `-empty` over it while it has none),
+//   `-foot` (left out while empty).
+//
+// Settings: `$lanes-breakpoint` ("phone"). Tokens with their defaults in the
+// rules: `--lane-width`, `--lane-ground`, `--lanes-gap`,
+// `--lanes-phone-width`.
+
+@use "tokens" as base;
+
+$-below: "(width < #{base.breakpoint(base.$lanes-breakpoint)})";
+
+.sockel-lanes {
+    container: sockel-lanes / inline-size;
+    height: 100%;
+    min-height: 0;
+}
+
+.sockel-lanes-track {
+    display: grid;
+    grid-auto-flow: column;
+    grid-auto-columns: var(--lane-width, 18rem);
+    // At least the area's height, else the tallest lane's: every lane is
+    // as tall, so its whole column is a place to drop.
+    grid-template-rows: minmax(100%, max-content);
+    gap: var(--lanes-gap, var(--space-3));
+    box-sizing: border-box;
+    height: 100%;
+    overflow: auto;
+    padding-block-end: var(--space-2);
+}
+
+.sockel-lane {
+    display: flex;
+    flex-direction: column;
+    box-sizing: border-box;
+    min-width: 0;
+    border-radius: var(--radius-md);
+    background: var(--lane-ground, color-mix(in srgb, var(--text) 4%, var(--bg)));
+}
+
+.sockel-lane-head {
+    position: sticky;
+    top: 0;
+    z-index: 1;
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    box-sizing: border-box;
+    min-height: var(--control-height);
+    padding: var(--space-1) var(--space-2) var(--space-1) var(--space-3);
+    border-radius: var(--radius-md) var(--radius-md) 0 0;
+    background: inherit;
+}
+
+.sockel-lane-title {
+    flex: 0 1 auto;
+    min-width: 0;
+    font-weight: 600;
+    @include base.truncate;
+}
+
+.sockel-lane-count {
+    flex: none;
+}
+
+.sockel-lane-end {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+    margin-inline-start: auto;
+}
+
+.sockel-lane-body {
+    position: relative;
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    min-height: var(--touch-height);
+}
+
+.sockel-lane-rows {
+    display: flex;
+    flex: 1 0 auto;
+    flex-direction: column;
+    gap: var(--space-2);
+    padding: var(--space-1) var(--space-2) var(--space-2);
+    border-radius: var(--radius-sm);
+
+    &.sockel-drop-inside {
+        box-shadow: inset 0 0 0 var(--space-0) var(--accent);
+    }
+}
+
+// Over the empty drop area, off the flow, so the drop still lands on the
+// list under it.
+.sockel-lane-empty {
+    position: absolute;
+    inset: var(--space-1) var(--space-2) auto;
+    color: var(--muted);
+    pointer-events: none;
+}
+
+.sockel-lane-foot {
+    padding: 0 var(--space-2) var(--space-2);
+
+    &:empty {
+        display: none;
+    }
+}
+
+@container sockel-lanes #{$-below} {
+    .sockel-lanes-track {
+        scroll-snap-type: x mandatory;
+        scroll-padding-inline: var(--space-2);
+    }
+
+    .sockel-lanes-track {
+        grid-auto-columns: var(--lanes-phone-width, 88%);
+    }
+
+    .sockel-lane {
+        scroll-snap-align: start;
+    }
+}

@@ -627,6 +627,8 @@ $sheet-breakpoint: "phone" !default;
 // is a bar at the bottom and a SplitView shows one pane.
 $app-shell-breakpoint: "phone" !default;
 $split-view-breakpoint: "tablet" !default;
+// The breakpoint, of their own width, below which Lanes snap one at a time.
+$lanes-breakpoint: "phone" !default;
 
 // A text field's edge on hover and while focused (`null`: as at rest), its
 // focus ring's offset (`null`: `--focus-ring-offset`; a negative one draws

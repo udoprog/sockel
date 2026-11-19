@@ -339,6 +339,22 @@ body {
     outline: var(--space-px) dashed var(--border);
 }
 
+// The lanes page's box and its cards (pages/lanes.rs).
+.showcase-lanes-box {
+    height: 20rem;
+    outline: var(--space-px) dashed var(--border);
+}
+
+.showcase-lane-card {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    padding: var(--space-2);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    box-shadow: var(--shadow-1);
+}
+
 // The badge page's positioned parent for a corner badge (pages/badges.rs).
 .showcase-anchor {
     position: relative;

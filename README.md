@@ -343,7 +343,7 @@ member wants more gets the union.
 | `head` | `layout` | [`Head`], [`PageHead`], [`SectionHead`] | 12.8 KB |
 | `icons` | | [`Icon`], [`IconSet`], [`Glyph`] | 4.0 KB |
 | `input` | `icons` | [`TextInput`], [`Textarea`], [`SearchField`], [`InputGroup`], [`SecretInput`] | 10.2 KB |
-| `layout` | | [`Stack`], [`Cluster`], [`Card`], [`Inset`], [`Toolbar`] | 9.0 KB |
+| `lanes` | `badge`, `reorder` | [`Lanes`], [`Lane`] | 42.8 KB || `layout` | | [`Stack`], [`Cluster`], [`Card`], [`Inset`], [`Toolbar`] | 9.0 KB |
 | `library-toolbar` | `input`, `layout` | [`LibraryToolbar`] | 15.8 KB |
 | `loadable` | `notice`, `skeleton` | [`Loadable`] | 22.2 KB |
 | `media` | `icons` | [`Image`], [`Avatar`] | 5.6 KB |
@@ -713,7 +713,10 @@ fn main() {
   until the drop, each step announced.
 - [`ReorderTree`] with [`ReorderList`]s at any depth (their rows'
   grip a [`ReorderTreeHandle`]): rows moved within and between nested
-  lists, into a list and out of it by keyboard too.
+  lists, into a list and out of it by keyboard too.- [`Lanes`] (`.lanes`) with [`Lane`]s: lists side by side, a board's
+  columns, whose rows move within and between them by a drag or by
+  keyboard (Left and Right to the lane beside), each step announced with
+  the lane's name.
 - [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
   [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
   have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
@@ -1841,6 +1844,65 @@ inside itself. `text`, `disabled`, `titles`, `class` and `testid` are
 Size guarantees as [`Reorder`]'s: nothing reflows until the drop, the
 lifted row moving by a transform and the marks being inset box shadows.
 New class: `DROP_INSIDE`. New tokens: none.
+Added for lanes, each off by default:
+
+- `side_by_side` (on `ReorderTree`): its outermost lists sit side by side.
+  On a lifted row Up and Down, Home and End stay within the list it aims
+  at; Left and Right go to the list beside that takes it, at the same
+  position or that list's end (Alt and an arrow moves at once, as ever).
+- `body_drag` (on `ReorderTree`): a mouse or pen also drags a row from
+  anywhere on it off its controls, as [`Reorder`]'s `body_drag` (a control
+  marked `data-reorder-surface` counts as off them); a finger still only by
+  the handle. The rows wear `REORDER_GRAB`; a row without a
+  `ReorderTreeHandle` is dragged by itself.
+- `name` (on `ReorderList`): what the list is called, its `aria-label`.
+  With one, the catalog's announcements placing a row there say it
+  (`sockel-reorder-lifted-in`, `-moving-in`, `-dropped-in`,
+  `-cancelled-in`: "Moved Alpha to Done, 2 of 5"); a tree with `text`
+  says what `text` gives, which is not told the list.
+
+### Lanes
+
+[`Lanes`] is lists side by side, a board's columns (`.sockel-lanes`, on a
+[`ReorderTree`] with `side_by_side`): its children are [`Lane`]s (`id`,
+unique among them; `name`, its head and its name for assistive technology
+and the announcements; `count`, the head's [`Count`], the rows' when
+`None`; `end`, what ends the head, a menu or an add button; `empty`, what
+shows over its drop area while it has no rows; `foot`, what follows the
+rows; `current`; `class`; `testid`), each holding [`ReorderItem`]s with a
+[`ReorderTreeHandle`] in each. `on_move(ReorderTreeMove)` reports a move,
+its `list`s the lanes' ids and `to.index` counted without the row, as
+[`ReorderTree`]'s; `accepts`, `text`, `disabled` and `tips` are its too.
+`body_drag` is on by default: a mouse or pen drags a card from anywhere on
+it off its controls, a finger by its handle, so the lanes still scroll
+under a finger.
+
+- Keyboard, on a focused handle: Space or Enter lifts, Up and Down move
+  within the lane, Left and Right to the lane beside at the same place (or
+  its end), lanes that refuse the row (`accepts`) skipped; Space or Enter
+  drops, Escape cancels; Alt and an arrow moves at once. Focus follows the
+  moved row, and the browser scrolls it into view.
+- Each step is announced with the lane's name ("Alpha, Review, position 1
+  of 1"; "Moved Alpha to Review, 1 of 1").
+- The lanes scroll together in one area (`.sockel-lanes-track`), both
+  ways, so a dragged row stays in it whichever lane it crosses; each
+  lane's head (`.sockel-lane-head`: `-title`, cut, `-count`, `-end`) is held
+  at the area's top. The lanes are a grid row, each `--lane-width` (18rem)
+  wide on `--lane-ground` and as tall as the tallest or the area, so a
+  lane's whole column is a place to drop; an empty one aimed at wears
+  `DROP_INSIDE`. Below `$lanes-breakpoint` (`phone`) of their own width (a
+  container query) each lane is `--lanes-phone-width` (88%) of the area
+  and snaps to its start, the next one showing at the edge. `--lanes-gap`
+  sets the gap. The tokens have their defaults in the rules. `lanes()`
+  gives its class.
+
+Size guarantees as [`ReorderTree`]'s: nothing reflows until the drop, the
+lifted row moving by a transform and the marks being inset box shadows; a
+lane's head keeps its height whatever its count. New classes: `LANES`,
+`LANES_TRACK`, `LANE`, `LANE_HEAD`, `LANE_TITLE`, `LANE_COUNT`, `LANE_END`,
+`LANE_BODY`, `LANE_ROWS`, `LANE_EMPTY`, `LANE_FOOT`. New partial:
+`_lanes.scss`. New tokens: `--lane-width`, `--lane-ground`, `--lanes-gap`,
+`--lanes-phone-width` (defaults in the rules).
 
 <br>
 

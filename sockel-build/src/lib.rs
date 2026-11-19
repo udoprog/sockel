@@ -160,6 +160,7 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("head", &["heads"]),
     ("icons", &["icons"]),
     ("input", &["inputs"]),
+    ("lanes", &["lanes"]),
     ("layout", &["layout"]),
     ("library-toolbar", &[]),
     ("loadable", &[]),
