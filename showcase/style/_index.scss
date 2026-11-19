@@ -609,3 +609,31 @@ body {
     max-height: 12rem;
     overflow-y: auto;
 }
+
+// The lightbox page's thumbnails and the log view page's box
+// (pages/conversation.rs).
+.showcase-thumbs {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(6rem, 1fr));
+    gap: var(--space-2);
+}
+
+.showcase-thumb {
+    display: block;
+    padding: 0;
+    border: 0;
+    background: none;
+    cursor: zoom-in;
+}
+
+.showcase-log-box {
+    height: 16rem;
+    border: var(--space-px) solid var(--border);
+    border-radius: var(--radius-md);
+}
+
+.showcase-log-row {
+    margin: 0;
+    padding: var(--space-1) var(--space-2);
+    font-size: var(--text-sm);
+}

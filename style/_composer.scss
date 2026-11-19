@@ -1,0 +1,74 @@
+// Composer (src/composer.rs): a message's box at a conversation's foot.
+//
+// - `.sockel-composer`: the files attached (`-files`, each `-file` with its
+//   name, `-file-name`, and a remove button) above the bar (`-bar`): the
+//   field (`-field`), from one line to `--composer-max-height` (`12rem`)
+//   tall, then scrolling, and its actions (`-actions`, Send last as
+//   `-send`) at the bar's end, at the foot of a field that grows.
+
+@use "tokens" as base;
+
+.sockel-composer {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+
+    > .sockel-drop-zone {
+        display: flex;
+        flex-direction: column;
+        gap: var(--space-2);
+    }
+}
+
+.sockel-composer-bar {
+    display: flex;
+    align-items: flex-end;
+    gap: var(--space-2);
+    min-width: 0;
+}
+
+.sockel-composer-field {
+    flex: 1 1 auto;
+    min-width: 0;
+    min-height: var(--control-height);
+    max-height: var(--composer-max-height, 12rem);
+    overflow-y: auto;
+    resize: none;
+}
+
+.sockel-composer-actions {
+    display: flex;
+    flex: none;
+    align-items: center;
+    gap: var(--space-1);
+}
+
+.sockel-composer-files {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+}
+
+.sockel-composer-file {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-1);
+    max-width: 100%;
+    padding-inline-start: var(--space-2);
+    border: var(--space-px) solid var(--border);
+    border-radius: var(--radius-sm);
+    background: var(--surface);
+    font-size: var(--text-sm);
+}
+
+.sockel-composer-file-name {
+    @include base.truncate;
+}
+
+.sockel-composer-send {
+    flex: none;
+}

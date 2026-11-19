@@ -1,0 +1,112 @@
+// LogView and LogGroup (src/log_view.rs): an append-only scroll that
+// follows its end, and runs of rows folded to one.
+//
+// - `.sockel-log-view`: fills its container's height; its scroll
+//   (`-scroll`) holds the rows (`-rows`), and the jump to the latest
+//   (`-jump`) floats over its foot, so its coming moves no row.
+//   `.sockel-following` while it keeps to its end.
+// - `.sockel-log-group`: a head (`-head`: its mark, `-mark`, turned while
+//   `.sockel-open`; `-summary`; `-count`) and its rows (`-rows`) while open.
+
+@use "tokens" as base;
+
+.sockel-log-view {
+    position: relative;
+    display: flex;
+    flex-direction: column;
+    height: 100%;
+    min-height: 0;
+}
+
+.sockel-log-view-scroll {
+    @include base.scroll-area;
+    flex: 1 1 auto;
+    outline-offset: calc(-1 * var(--focus-ring-width));
+}
+
+.sockel-log-view-scroll:focus-visible {
+    outline: var(--focus-ring-width) solid var(--focus-ring-color);
+}
+
+// While following, the browser's own scroll anchoring stands aside: the
+// view keeps to its end itself.
+.sockel-log-view.sockel-following > .sockel-log-view-scroll {
+    overflow-anchor: none;
+}
+
+.sockel-log-view-rows {
+    display: flow-root;
+    min-width: 0;
+}
+
+.sockel-log-view-jump {
+    position: absolute;
+    inset-inline: 0;
+    inset-block-end: var(--space-3);
+    display: flex;
+    justify-content: center;
+    pointer-events: none;
+
+    &[hidden] {
+        display: none;
+    }
+
+    > * {
+        pointer-events: auto;
+        box-shadow: var(--shadow-1);
+    }
+}
+
+.sockel-log-group {
+    min-width: 0;
+}
+
+.sockel-log-group-head {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: 100%;
+    min-height: var(--log-group-height, var(--control-height-small));
+    margin: 0;
+    padding: 0 var(--space-2);
+    border: 0;
+    border-radius: var(--radius-sm);
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    font-size: var(--text-sm);
+    text-align: start;
+    cursor: pointer;
+
+    &:hover {
+        background: var(--surface-raised);
+        color: var(--text);
+    }
+
+    @include base.focus-ring;
+}
+
+.sockel-log-group-mark {
+    display: inline-flex;
+    flex: none;
+    transition: transform 0.12s;
+
+    .sockel-log-group.sockel-open > .sockel-log-group-head > & {
+        transform: rotate(90deg);
+    }
+}
+
+.sockel-log-group-summary {
+    @include base.truncate;
+    flex: 1 1 auto;
+}
+
+.sockel-log-group-count {
+    @include base.numeric;
+    flex: none;
+}
+
+.sockel-log-group-rows {
+    min-width: 0;
+    padding-inline-start: var(--space-5);
+}

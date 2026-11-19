@@ -3,6 +3,7 @@ mod badges;
 mod buttons;
 mod color_select;
 mod confirms;
+mod conversation;
 mod dialog;
 mod disclosures;
 mod drops;
@@ -1005,6 +1006,61 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
             ),
         ],
+    },
+    Page {
+        id: "lightbox",
+        title: "Lightbox",
+        group: Group::Media,
+        about: "A full-screen viewer of a set of images: previous and next (the arrows, a swipe), zoom (+, -, 0, a double-click) with a pan by scrolling, the place in the set and a caption, each band keeping its height. Escape closes it, and the page behind holds still.",
+        covers: &[
+            "Lightbox",
+            "LightboxProps",
+            "LightboxItem",
+            "LightboxKey",
+            "LIGHTBOX_ZOOMS",
+            "lightbox",
+            "lightbox_key",
+            "swipe_step",
+        ],
+        render: || html! { <conversation::LightboxPage /> },
+        holds: &[hold(sockel::class::IMAGE, Size::Box, Across::All)],
+    },
+    Page {
+        id: "log-view",
+        title: "LogView and LogGroup",
+        group: Group::Lists,
+        about: "An append-only scroll that keeps to its end as rows come and grow, until the reader scrolls away; then it holds still and a Jump to latest button, counting the rows since, floats over its foot. LogGroup folds a run of rows to one. The app renders the rows.",
+        covers: &[
+            "LogView",
+            "LogViewProps",
+            "LogGroup",
+            "LogGroupProps",
+            "LOG_END_SLOP",
+            "at_end",
+            "log_view",
+            "log_group",
+        ],
+        render: || html! { <conversation::LogViewPage /> },
+        holds: &[hold(sockel::class::LOG_VIEW, Size::Box, Across::All)],
+    },
+    Page {
+        id: "composer",
+        title: "Composer",
+        group: Group::Inputs,
+        about: "A message's box: a textarea growing from one line, Enter sends and Shift or Alt+Enter is a newline (or Ctrl/Cmd+Enter sends), files dropped, pasted or attached, and a draft kept per key across unmounting.",
+        covers: &[
+            "Composer",
+            "ComposerProps",
+            "ComposerMessage",
+            "ComposeKey",
+            "compose_key",
+            "composed",
+            "composer",
+            "composer_draft",
+            "set_composer_draft",
+        ],
+        render: || html! { <conversation::ComposerPage /> },
+        holds: &[hold(sockel::class::COMPOSER, Size::Width, Across::All)],
     },
     Page {
         id: "property-list",

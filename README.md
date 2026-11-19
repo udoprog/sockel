@@ -336,6 +336,7 @@ member wants more gets the union.
 | `button` | `icons`, `skeleton` | [`Button`], [`IconButton`] | 11.9 KB |
 | `card-grid` | | [`CardGrid`] | 4.1 KB |
 | `color-select` | `select` | [`ColorSelect`] | 48.1 KB |
+| `composer` | `drop-zone`, `input` | [`Composer`] | 22.4 KB |
 | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`], [`ConfirmPopover`], [`ConfirmButton`], [`ConfirmInline`], [`ConfirmHost`] | 37.0 KB |
 | `disclosure` | `head`, `icons` | [`Disclosure`] | 15.2 KB |
 | `drop-zone` | `button` | [`DropZone`] | 14.3 KB |
@@ -346,7 +347,9 @@ member wants more gets the union.
 | `lanes` | `badge`, `reorder` | [`Lanes`], [`Lane`] | 42.8 KB |
 | `layout` | | [`Stack`], [`Cluster`], [`Card`], [`Inset`], [`Toolbar`] | 9.0 KB |
 | `library-toolbar` | `input`, `layout` | [`LibraryToolbar`] | 15.8 KB |
+| `lightbox` | `overlay` | [`Lightbox`] | 28.0 KB |
 | `loadable` | `notice`, `skeleton` | [`Loadable`] | 22.2 KB |
+| `log-view` | `button` | [`LogView`], [`LogGroup`] | 14.6 KB |
 | `media` | `icons` | [`Image`], [`Avatar`] | 5.6 KB |
 | `menu` | `button`, `icons`, `overlay` | [`Menu`], [`RowActions`], [`SplitButton`], [`ContextMenu`] | 31.1 KB |
 | `notice` | `badge`, `button` | [`Notice`], [`ErrorBox`], [`EmptyState`] | 21.9 KB |
@@ -373,7 +376,7 @@ member wants more gets the union.
 | `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
 
 "CSS alone" is `STYLESHEET` with only that feature and what it brings in;
-with none it is 3.4 KB, and with `full` 103 KB. `scripts/check-features.sh`
+with none it is 3.4 KB, and with `full` 130 KB. `scripts/check-features.sh`
 checks that each feature builds alone and that its CSS holds no other
 feature's rules.
 
@@ -734,6 +737,13 @@ fn main() {
   previous, numbers with gaps, next and last, so it keeps its width from
   the first page to the last; [`Disclosure`] (`.disclosure`): a summary
   row that toggles its body, one height shut or open.
+- [`Lightbox`] (`.lightbox`): a full-screen viewer of a set of images,
+  previous and next, zoom and a pan by scrolling.
+- [`LogView`] (`.log-view`): an append-only scroll that keeps to its end
+  until the reader scrolls away, with a jump back to the latest;
+  [`LogGroup`] (`.log-group`): a run of its rows folded to one.
+- [`Composer`] (`.composer`): a message's growing box, Enter to send,
+  attachments and a draft kept per key.
 - [`PropertyList`] (`.property-list`) with [`PropertyRow`]s: an entity's
   fields as label and value rows, its fields reading as text until the
   pointer or focus is on them; [`InlineEdit`] (`.inline-edit`): a value
@@ -1420,6 +1430,79 @@ container, still in the flow. Its save button is busy in its own box.
 
 <br>
 
+## Lightbox
+
+[`Lightbox`] shows `items` ([`LightboxItem`]: `src`, `alt`, a `caption`
+and an `href` to the original) one at a time over the window while `index`
+is `Some`; the owner keeps `index`, sets it from `on_index` and clears it on
+`on_close`. It is three bands on `--lightbox-ground` in `--lightbox-text`:
+a head with the place in the set ("2 of 5", announced) and the tools
+(zoom out, zoom in, the original, Close), the stage with the image fitted
+to it, and a foot with previous, the caption (at most two lines) and next.
+Each band keeps its height whatever it holds, so stepping moves nothing but
+the image (`.sockel-lightbox`, `-head`, `-position`, `-tools`, `-stage`,
+`-image`, `-foot`, `-caption`, `-back`).
+
+The arrow keys and a sideways swipe step ([`swipe_step`]); `+`, `-` and
+`0` zoom through [`LIGHTBOX_ZOOMS`] and fit again, as a double-click
+toggles; zoomed (`.sockel-zoomed`), the stage scrolls to pan the image and
+the arrows scroll it rather than step ([`lightbox_key`]). Escape and Close
+ask to close it; it is on the overlays' stack, so one opened over it closes
+first, the page behind holds still while it is open, and focus returns to
+where it was. `lightbox(zoomed)` gives its classes.
+
+<br>
+
+## LogView and LogGroup
+
+[`LogView`] is a scroll of rows the app renders (`role="log"`,
+`.sockel-log-view`, `-scroll`, `-rows`), filling its container's height. It
+keeps to its end as rows come and as they grow (an image loading, a group
+opening), until the reader scrolls more than [`LOG_END_SLOP`] (24 px) away
+from it ([`at_end`]); then it holds still, and a "Jump to latest" button
+floats over its foot (`-jump`) without moving a row, counting the rows that
+came since ("3 new") from `count`, which the app passes as its number of
+rows. The button, or a scroll back to the end, follows again;
+`on_follow` tells each change (`.sockel-following` while it follows).
+`live` announces new rows (`aria-live="polite"`), off by default.
+
+[`LogGroup`] folds a run of rows to one: its head is a button
+(`aria-expanded`) with a mark that turns, the `summary` and a `count`, and
+its rows render only while open (`.sockel-log-group`, `-head`, `-mark`,
+`-summary`, `-count`, `-rows`, `.sockel-open`). It keeps its own state from
+`default_open`, or follows `open` when the owner sets it (to fold or unfold
+them all); `on_toggle` tells each toggle. `log_view(following)` and
+`log_group(open)` give the classes.
+
+<br>
+
+## Composer
+
+[`Composer`] is a message's box at a conversation's foot
+(`.sockel-composer`): a textarea that grows with its text from one line to
+`--composer-max-height` (`12rem`), then scrolls (`-bar`, `-field`), and its
+actions at its end (`actions`, then Send, `-actions`, `-send`). Enter sends
+and Shift or Alt+Enter is a newline (keyboards and terminals differ, so
+both); `enter_sends: false` makes Enter a newline and Ctrl or Cmd+Enter
+send ([`compose_key`]). `on_send` gets a [`ComposerMessage`] (the text
+without blank lines at its ends, [`composed`], and the files), and the
+composer empties; nothing is sent while there is neither. `busy` holds Send
+busy while a message goes. `send_icon` gives Send an icon, shown alone
+below the phone breakpoint.
+
+`attachments` makes it a [`DropZone`]: files dropped, pasted or picked
+with Attach (`accept`, `max_size`, `on_refused`) are listed above the bar,
+each with its name and a remove button (`-files`, `-file`, `-file-name`),
+and go with the message.
+
+`draft_key` keeps its text per key (a conversation's id) across
+unmounting and between keys, in the page's memory: [`composer_draft`]
+reads one and [`set_composer_draft`] sets or drops one, for an app that
+keeps drafts longer itself. `on_input` tells each edit and `on_keydown`
+each press before the composer acts on it; a press the app prevents is
+left to it (Up in an empty box). `composer(busy)` gives its classes.
+
+<br>
 ## PropertyList, PropertyRow and InlineEdit
 
 [`PropertyList`] is an entity's fields as label and value rows (a `<dl>`,

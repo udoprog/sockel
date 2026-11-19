@@ -1,0 +1,89 @@
+// Lightbox (src/lightbox.rs): a full-screen viewer of a set of images.
+//
+// - `.sockel-lightbox`: fixed over the window on `--lightbox-ground`
+//   (`rgb(0 0 0 / 0.94)`) in `--lightbox-text` (`#fff`), a head
+//   (`-head`: the place in the set, `-position`, and the tools, `-tools`),
+//   the stage (`-stage`) and a foot (`-foot`: previous, the caption,
+//   `-caption`, next). Each band keeps its height whatever it holds.
+// - `-stage`: the image (`-image`) fitted to it; `.sockel-zoomed` sets the
+//   image wider than the screen and the stage scrolls to pan it.
+// - `-back`: the previous button, its chevron turned to point back.
+
+@use "tokens" as base;
+
+.sockel-lightbox {
+    position: fixed;
+    inset: 0;
+    z-index: var(--layer-overlay);
+    display: grid;
+    grid-template-rows: auto minmax(0, 1fr) auto;
+    background: var(--lightbox-ground, rgb(0 0 0 / 0.94));
+    color: var(--lightbox-text, #fff);
+    outline: 0;
+    // Its buttons read on the dark ground.
+    --text: var(--lightbox-text, #fff);
+    --muted: rgb(255 255 255 / 0.7);
+    --surface-raised: rgb(255 255 255 / 0.12);
+    --border: rgb(255 255 255 / 0.3);
+}
+
+.sockel-lightbox-head,
+.sockel-lightbox-foot {
+    display: flex;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height);
+    padding: var(--space-2) var(--space-3);
+}
+
+.sockel-lightbox-position {
+    @include base.numeric;
+    flex: 1 1 auto;
+    font-size: var(--text-sm);
+}
+
+.sockel-lightbox-tools {
+    display: flex;
+    flex: none;
+    gap: var(--space-1);
+}
+
+.sockel-lightbox-stage {
+    @include base.scroll-area;
+    display: grid;
+    place-items: center;
+    touch-action: pan-x pan-y pinch-zoom;
+}
+
+.sockel-lightbox-image {
+    display: block;
+    max-inline-size: 100%;
+    max-block-size: 100%;
+    object-fit: contain;
+    user-select: none;
+    cursor: zoom-in;
+}
+
+.sockel-lightbox.sockel-zoomed {
+    .sockel-lightbox-stage {
+        place-items: start;
+    }
+
+    .sockel-lightbox-image {
+        max-inline-size: none;
+        max-block-size: none;
+        margin: auto;
+        cursor: zoom-out;
+    }
+}
+
+.sockel-lightbox-caption {
+    @include base.clamp(2);
+    flex: 1 1 auto;
+    font-size: var(--text-sm);
+    text-align: center;
+}
+
+.sockel-lightbox-back .sockel-glyph {
+    transform: scaleX(-1);
+}
