@@ -133,6 +133,7 @@ struct Tree {
     hint: AttrValue,
     disabled: bool,
     titles: bool,
+    tips: bool,
 }
 
 impl PartialEq for Tree {
@@ -142,7 +143,7 @@ impl PartialEq for Tree {
             && self.version == other.version
             && self.on_move == other.on_move
             && self.accepts == other.accepts
-            && (self.disabled, self.titles) == (other.disabled, other.titles)
+            && (self.disabled, self.titles, self.tips) == (other.disabled, other.titles, other.tips)
     }
 }
 
@@ -162,6 +163,10 @@ pub struct ReorderTreeProps {
     /// Each handle's name is its tooltip too.
     #[prop_or_default]
     pub titles: bool,
+    /// Each handle's name is its `data-tip` tooltip too, the attribute an
+    /// app's own tooltips read.
+    #[prop_or_default]
+    pub tips: bool,
     #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
@@ -223,6 +228,7 @@ pub fn ReorderTree(props: &ReorderTreeProps) -> Html {
         hint: (*hint).clone(),
         disabled: props.disabled,
         titles: props.titles,
+        tips: props.tips,
     };
 
     html! {
@@ -391,7 +397,7 @@ pub fn ReorderTreeHandle(props: &ReorderTreeHandleProps) -> Html {
     let key = grip.clone();
     let blur = grip.clone();
     html! {
-        <DragHandle label={label.clone()} title={tree.titles.then_some(label)}
+        <DragHandle label={label.clone()} title={tree.titles.then(|| label.clone())} tip={tree.tips.then_some(label)}
             lifted={grip.lifted} disabled={tree.disabled}
             describedby={tree.hint.clone()} class={props.class.clone()} testid={props.testid.clone()}
             onpointerdown={Callback::from(move |e| down.pointer_down(e))}
@@ -818,6 +824,29 @@ impl TreeGrip {
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_tree_rerenders_its_handles_when_tips_change() {
+        let tree = |tips| Tree {
+            live: Rc::default(),
+            version: 0,
+            bump: Callback::noop(),
+            root: NodeRef::default(),
+            on_move: Callback::noop(),
+            accepts: None,
+            say: Rc::new(|_| String::new()),
+            hint: AttrValue::default(),
+            disabled: false,
+            titles: false,
+            tips,
+        };
+        let live = tree(false);
+        let same = Tree {
+            tips: true,
+            ..live.clone()
+        };
+        assert!(live != same);
+    }
 
     #[test]
     fn the_slots_step_into_a_nested_list_and_out() {
