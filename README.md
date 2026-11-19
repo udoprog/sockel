@@ -731,6 +731,10 @@ it does not render is left out by its feature (see
 [Choosing features](https://docs.rs/sockel/latest/sockel/#choosing-features)), with the `tokens.*` part only it
 reads, and Loadable's `skeleton.loadable`.
 
+A part its feature already leaves out is an error too, in `sockel-build` and
+in the Sass given `$features`. `sockel_build::Usage` reports an omitted class
+the app's own sources write.
+
 Sass compiled with [trug] instead loads the tokens with the build's
 features, and the same parts follow them:
 
