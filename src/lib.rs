@@ -2688,7 +2688,9 @@
 //! switcher), `nav` and `end` (status, an actions menu), at least
 //! `--app-shell-bar-height` (3rem) on `--app-shell-bar-ground` (`--surface`)
 //! with a rule under it, over its `children`, the page (a `main` that
-//! scrolls on its own, so the bar and the navigation never move). Below
+//! scrolls on its own, so the bar and the navigation never move). In the
+//! bar `nav` is centred between `start` and `end`, which share the rest
+//! evenly, so a title of another width moves no section. Below
 //! `$app-shell-breakpoint` (`phone`) of the shell's own width (a container
 //! query, so a shell in a narrow frame acts as on a phone) the bar holds
 //! `start` and `end` alone and `nav` is a bar at the bottom, ruled off above,
@@ -2707,8 +2709,8 @@
 //! marked by colour and an underline in the bar, and by colour on a tint at
 //! the bottom, never by weight. In the bar the sections sit in a line, icon,
 //! label and count; at the bottom they share the row evenly, each
-//! `--touch-height` at least, the icon over the label and the [`Count`] on
-//! the icon's corner, off the flow. A count of none is hidden and keeps its
+//! `--touch-height` at least, the icon over the label and the [`Count`] a
+//! small accent mark (`--corner-size`) on the icon's corner, off the flow. A count of none is hidden and keeps its
 //! box (`hide_zero`), so the first arrival moves nothing. Outside an
 //! AppShell it is always the line. `bottom_nav()` gives its class.
 //!

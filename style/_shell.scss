@@ -2,8 +2,8 @@
 //
 // - `.sockel-app-shell`: the frame's container (`container: sockel-app-shell
 //   / inline-size`), `--app-shell-height` high (`100dvh`).
-// - `.sockel-app-shell-frame`: a grid of the bar's `-start`, the `-nav` and
-//   the bar's `-end` in one row `--app-shell-bar-height` (3rem) high at
+// - `.sockel-app-shell-frame`: a grid of the bar's `-start`, the `-nav`
+//   (centred between two equal sides) and the bar's `-end` in one row `--app-shell-bar-height` (3rem) high at
 //   least, over the `-main`, which scrolls. The `-bar` (a `header`) is
 //   `display: contents`, its row's ground the frame's `::before`
 //   (`--app-shell-bar-ground`, `--surface`, ruled off below). Below
@@ -14,8 +14,8 @@
 //   buttons, in `-items`, each in an `-entry`), the current one
 //   (`aria-current`) in the accent colour and underlined in the bar, in the
 //   accent colour on a tint at the bottom. Parts: `-icon`, `-label`,
-//   `-count` (a Count, beside the label in the bar, on the icon's corner at
-//   the bottom). At the bottom the items share the row evenly, each
+//   `-count` (a Count, beside the label in the bar, a small accent mark
+//   `--corner-size` high on the icon's corner at the bottom). At the bottom the items share the row evenly, each
 //   `--touch-height` at least, the icon over the label.
 //
 // Settings: `$app-shell-breakpoint` ("phone"). Tokens, set by an app where
@@ -36,7 +36,9 @@ $-below: "(width < #{base.breakpoint(base.$app-shell-breakpoint)})";
 .sockel-app-shell-frame {
     position: relative;
     display: grid;
-    grid-template-columns: auto minmax(0, 1fr) auto;
+    // The nav centred between two equal sides, so a title of another
+    // width moves no section.
+    grid-template-columns: minmax(0, 1fr) auto minmax(0, 1fr);
     grid-template-rows: minmax(var(--app-shell-bar-height, 3rem), auto) minmax(0, 1fr);
     grid-template-areas:
         "start nav end"
@@ -202,10 +204,17 @@ $-below: "(width < #{base.breakpoint(base.$app-shell-breakpoint)})";
         max-width: 100%;
     }
 
-    // On the icon's top end corner, off the flow, so the item's box holds.
+    // A small accent mark on the icon's top end corner, off the flow, so
+    // the item's box holds and the label stays clear.
     .sockel-bottom-nav-count {
         position: absolute;
         inset-block-start: var(--space-0);
-        inset-inline-start: calc(50% + var(--space-2));
+        inset-inline-start: calc(50% + var(--space-1));
+        min-width: var(--corner-size);
+        height: var(--corner-size);
+        padding-inline: var(--space-0);
+        background: var(--accent);
+        color: var(--on-accent);
+        font-size: var(--text-3xs);
     }
 }
