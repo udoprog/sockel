@@ -210,6 +210,8 @@ instead.
 
 ### Fixed
 
+- The getting-started and Choosing features blocks require sockel and
+  sockel-build `0.2`, not `0.1`.
 - `use_placement` measures a popover's height with its border, so a
   bordered surface against a viewport edge keeps `EDGE` clear instead of
   ending 2px past it.

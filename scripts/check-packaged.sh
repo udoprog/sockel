@@ -63,7 +63,11 @@ const STYLESHEET: &str = include_str!(concat!(env!("OUT_DIR"), "/style.css"));
 
 #[test]
 fn builds_from_the_packages() {
-    assert!(env!("SOCKEL_STYLE").contains("/target/package-check/crates/sockel/"));
+    assert!(
+        env!("SOCKEL_STYLE").contains("/target/package-check/crates/sockel/"),
+        "sockel came from the registry, not the package: does the README's \
+         version requirement admit the crate's version?"
+    );
     assert!(STYLESHEET.starts_with(sockel::STYLESHEET));
     assert!(STYLESHEET.contains(".sockel-stack {"));
     assert!(STYLESHEET.contains(".app-sidebar {"));
