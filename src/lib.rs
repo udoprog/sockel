@@ -921,41 +921,47 @@
 //!
 //! ## Button
 //!
-//! [`Button`] is a `<button>`, or with `href` an `<a>` styled as one. Its label
-//! is its children; `icon` is the app's icon (`trailing` puts it after the
-//! label); `chevron` ends it in a chevron after the label, beside a leading
-//! icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare `<button>`.
+//! [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) is the app's button: one height per size whatever its label,
+//! variant or state. It is a `<button>`, or with `href` an `<a>` styled as one.
+//! Its label is its children; `icon` is the app's icon (`trailing` puts it
+//! after the label); `chevron` ends it in a chevron, as a menu's opener.
+//! sockel styles only `.sockel-button`, never a bare `<button>`.
 //!
-//! - `variant` ([`ButtonVariant`]): `Secondary` (the plain button, the
+//! - `variant` ([`ButtonVariant`](https://docs.rs/sockel/latest/sockel/enum.ButtonVariant.html)): `Secondary` (the plain button, the
 //!   default), `Primary` (`sockel::class::PRIMARY`), `Ghost` (`GHOST`, no
 //!   fill), `Quiet` (`QUIET`, no fill or border until hovered), `Danger`
 //!   (`DANGER`; with `Ghost`, passed as `class`, it is the quiet destructive
 //!   button: no edge, danger ink, a danger tint on hover; configured as
-//!   `ghost-danger` in `$button-colours`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
-//!   padding or height of its own, for an opener whose content is its face,
-//!   such as a swatch; the focus outline kept).
+//!   `ghost-danger` in `$button-colours`), `Success` (`SUCCESS`), `Bare`
+//!   (`BARE`, no fill, edge, padding or height of its own, for an opener whose
+//!   content is its face, such as a swatch; the focus outline kept).
 //! - `selected` (`SELECTED`): the pressed look for the current choice of a
 //!   set, without `aria-pressed` (pair it with `current` or `checked`); `link`
 //!   (`LINK`): a text link, no fill, edge, height or padding, in the accent.
 //! - Events beside `onclick` and `onkeydown`: `onmouseenter`, `onmouseleave`,
 //!   `onpointerdown`, `onmousedown`, `onauxclick`; `form` submits a form
 //!   the button stands outside of.
-//! - `size` ([`ButtonSize`]): `Regular` (`--control-height`), `Small` (`SMALL`,
+//! - `size` ([`ButtonSize`](https://docs.rs/sockel/latest/sockel/enum.ButtonSize.html)): `Regular` (`--control-height`), `Small` (`SMALL`,
 //!   `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
 //! - An icon without a label is the icon alone (`ICON`), square, named by
 //!   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
 //!   alone below the phone breakpoint, its label kept for a screen reader;
-//!   `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `wide` (`WIDE`) makes an icon-only button as wide as a regular control is high whatever its size; `form`, `hidden`, `tabindex` (`-1` takes it out of the tab order, as a roving group's unselected members) and `data` (more `data-*` attributes) are attributes;
 //!   `fold_wide` (`FOLD_WIDE`) the other way round, the icon alone from the
-//!   phone breakpoint up.
+//!   phone breakpoint up. `spread` (`SPREAD`) spans the container with the
+//!   icon and label at its two ends (both needed); `wide` (`WIDE`) makes an
+//!   icon-only button as wide as a regular control is high, whatever its size.
+//! - `hidden`, `tabindex` (`-1` takes it out of the tab order, as a roving
+//!   group's unselected members) and `data` (more `data-*` attributes) are
+//!   attributes.
 //! - `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and
 //!   border colour. `busy` sets `aria-busy`, keeps the label in the DOM and
 //!   lays the IconSet's spinner over it; a busy button ignores clicks.
 //!   `disabled` disables a button; a disabled link loses its `href` and gets
 //!   `aria-disabled="true"`.
-//! - `submit`, `onclick`, `onkeydown`, `title`, `testid` as on [`IconButton`]; `tip` is its
-//!   tooltip for [`DataTips`] (`data-tip`); `class` adds the app's classes. `button(variant, size, icon_only, fold)` gives the
-//!   classes for an element that cannot be the component.
+//! - `submit`, `onclick`, `onkeydown`, `title`, `testid` as on [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html);
+//!   `tip` is its tooltip for [`DataTips`](https://docs.rs/sockel/latest/sockel/struct.DataTips.html) (`data-tip`); `class` adds the
+//!   app's classes. `button(variant, size, icon_only, fold)` gives the classes
+//!   for an element that cannot be the component.
 //! - `role` gives it another role (`menuitemradio`, `switch`), `checked` its
 //!   `aria-checked`, and `current` its `aria-current` (`page`, `step`).
 //!   `autofocus` marks it `data-autofocus`, the control a dialog or popover
@@ -967,15 +973,14 @@
 //! The border is always there (`reserved-border`), so hover, pressed and the
 //! variants change colours only; focus is an outline. Hover lights the border
 //! (`hover-edge`) and, when `$button-colours` gives them, the fill
-//! (`hover-fill`) and ink (`hover-ink`); pressed takes `pressed-fill`, `pressed-ink` and
-//! `pressed-edge`, by default the accent's border over a tint of the fill. Pressed never changes
-//! the font weight. Busy hides the icon and label with `visibility`, so the
+//! (`hover-fill`) and ink (`hover-ink`); pressed takes `pressed-fill`,
+//! `pressed-ink` and `pressed-edge`, by default the accent's border over a tint
+//! of the fill. Pressed never changes the font weight. Busy hides the icon and label with `visibility`, so the
 //! box keeps their width. Fold swaps at a fixed breakpoint, and the icon's
 //! box does not change with it.
 //!
-//! `IconButton` stays as it was, for an app that styles its own buttons (its
-//! children are the icon and label together); a new button should be a
-//! `Button`.
+//! [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) is the unstyled button, for an app that styles its own (its
+//! children are the icon and label together); prefer `Button` for new ones.
 //! Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
 //! `testid`, it takes `dialog: Some(open)` (`aria-haspopup="dialog"` and
 //! `aria-expanded`), `haspopup` (the popup alone), `pressed: Some(on)`
@@ -987,15 +992,17 @@
 //!
 //! ## Stack, Cluster and Card
 //!
-//! [`Stack`] takes `gap` ([`Gap`]) and `flush`; [`Cluster`] takes `gap`,
-//! `justify` ([`Justify`]), `align` ([`Align`]), `nowrap`, `inline`, `lines`
-//! and `flush`; [`Card`] takes `inset` ([`Inset`]).
+//! The layout primitives: [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) is a column, [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) a row that
+//! wraps, [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) a bordered box, all spaced from the tokens.
 //!
-//! [`Stack`] and [`Cluster`] (and [`Card`]) take a `tag` (`div` by default). A list
+//! [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) takes `gap` ([`Gap`](https://docs.rs/sockel/latest/sockel/enum.Gap.html)) and `flush`; [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) takes `gap`,
+//! `justify` ([`Justify`](https://docs.rs/sockel/latest/sockel/enum.Justify.html)), `align` ([`Align`](https://docs.rs/sockel/latest/sockel/enum.Align.html)), `nowrap`, `inline`, `lines`
+//! and `flush`; [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) takes `inset` ([`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html)).
+//!
+//! [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) and [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) (and [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html)) take a `tag` (`div` by default). A list
 //! tag, `ul` or `ol`, renders with no bullets, margin or padding
 //! (`sockel::class::PLAIN_LIST` is added for it), so it lays out exactly as a
-//! `div` would; put `li`s in it. An app that adds `PLAIN_LIST` itself keeps
-//! working. `stack(gap)` and `stack_with(gap, flush)` give a stack's
+//! `div` would; put `li`s in it. `stack(gap)` and `stack_with(gap, flush)` give a stack's
 //! classes to an element that cannot be the component (a `<form>` with its
 //! own handlers); they return the same classes for any tag, so a list built
 //! from them adds `PLAIN_LIST` itself.
@@ -1008,47 +1015,49 @@
 //!
 //! ## ActionGroup and Toolbar
 //!
-//! [`ActionGroup`] holds the buttons ending a form, a panel or a section, the
+//! [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) holds the buttons ending a form, a panel or a section, the
 //! primary first, `--space-2` apart, wrapping. `end` puts it at its row's end
 //! (`.sockel-end`), `quiet` sets quiet icon actions `--space-1` apart
 //! (`.sockel-quiet`), `nowrap` keeps one line. `action_group(end, quiet, wrap)`
 //! gives its classes.
 //!
-//! [`Toolbar`] is one line of controls, `--space-1` apart (`gap` sets
+//! [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) is one line of controls, `--space-1` apart (`gap` sets
 //! another), with a `label` for assistive technology. It never wraps: when
 //! it runs out of room it scrolls sideways, its scrollbar hidden and the edge
 //! with hidden controls faded, so its height stays one control's. `boxed`
 //! draws it as a bar of its own, bordered on `--surface` (`.sockel-boxed`).
-//! A [`ToolbarSpacer`] pushes the controls after it to
+//! A [`ToolbarSpacer`](https://docs.rs/sockel/latest/sockel/struct.ToolbarSpacer.html) pushes the controls after it to
 //! the end. `band`, `chrome` and `search` make it a band that wraps instead
-//! (see [ToolBand](#toolband-panel-seam-and-use_width)).
+//! (see [ToolBand](https://docs.rs/sockel/latest/sockel/#toolband-panel-seam-and-use_width)).
 //!
 //! <br>
 //!
 //! ## Checkbox, Switch, Choice and chips
 //!
-//! All four mark a state by colour and background, never by weight, and
-//! draw it in a box of a fixed size. A [`Field`] supplies a label, hint and
+//! Controls for a yes or no and a pick from a few. Each marks its state by
+//! colour and background, never by weight, in a box of a fixed size. A [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) supplies a label, hint and
 //! error; give the control `label` (an `aria-label`) when the field names it
 //! and the control has no text of its own. Every component takes `class`.
 //!
-//! - [`Checkbox`] (`.sockel-checkbox`): a native checkbox drawn in a
+//! - [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html) (`.sockel-checkbox`): a native checkbox drawn in a
 //!   `--check-size` box with the IconSet's `Check` (or `Minus`) over it.
 //!   `checked`, `indeterminate` (set as the input's DOM property, drawn as a
 //!   minus), `disabled`, `invalid` (`aria-invalid`), `on_change(bool)`,
 //!   `tip` (`data-tip` on its label), children as its text.
 //!   `checkbox(disabled)` gives its classes.
-//! - [`Switch`] (`.sockel-switch`): a `<button role="switch">`, its track
+//! - [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html) (`.sockel-switch`): a `<button role="switch">`, its track
 //!   `--switch-width` by `--switch-height` and its thumb moved by transform.
 //!   `on` (`ON`), `busy` (a spinner in the thumb, clicks ignored),
 //!   `disabled`, `invalid` (`INVALID`), `on_change(bool)`, `tip`
 //!   (`data-tip`); `switch(on, invalid)` gives its classes.
-//! - [`Choice`] (`.sockel-choice`): a segmented pick-one `radiogroup` of
-//!   [`ChoiceOption`]s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
-//!   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`, `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
-//!   name; `labelled_by`: the id of the element that names it), `fit` ([`ChoiceFit`]: `Equal`, `Stretch` to fill the container
-//!   (`STRETCH`), `Fixed` at `--choice-width` (`FIXED`)), `stack`
-//!   ([`ChoiceStack`]: `Never`, `Always` one option to a row across the
+//! - [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) (`.sockel-choice`): a segmented pick-one `radiogroup` of
+//!   [`ChoiceOption`](https://docs.rs/sockel/latest/sockel/struct.ChoiceOption.html)s (`new(value, label)`, `.icon(html)`, `.icon_only(html)`,
+//!   `.disabled(bool)`, `.testid(..)`, `.tip(..)` (`data-tip`), `.class(..)`,
+//!   `.data("data-x", ..)`). `value`, `on_change(value)`, `label` (the group's
+//!   name; `labelled_by`: the id of the element that names it), `fit`
+//!   ([`ChoiceFit`](https://docs.rs/sockel/latest/sockel/enum.ChoiceFit.html): `Equal`, `Stretch` to fill the container (`STRETCH`),
+//!   `Fixed` at `--choice-width` (`FIXED`)), `stack`
+//!   ([`ChoiceStack`](https://docs.rs/sockel/latest/sockel/enum.ChoiceStack.html): `Never`, `Always` one option to a row across the
 //!   container, labels wrapping (`STACKED`), `Narrow` so below
 //!   `$choice-stack-breakpoint` (`STACK_NARROW`)), `small` (`SMALL`),
 //!   `invalid`, `disabled`; `choice(fit, small, invalid, disabled)`. Roving
@@ -1057,23 +1066,24 @@
 //!   enabled option. `multiple` with `values` picks several: a `group` of
 //!   `checkbox` options, each a tab stop, `on_change` given the value
 //!   clicked for the app to toggle.
-//! - [`OptionCard`] (`.sockel-option-card`): a radio or checkbox drawn as a
-//!   card, `kind` ([`OptionCardKind`]: `Radio`, the mark round with a dot
+//! - [`OptionCard`](https://docs.rs/sockel/latest/sockel/struct.OptionCard.html) (`.sockel-option-card`): a radio or checkbox drawn as a
+//!   card, `kind` ([`OptionCardKind`](https://docs.rs/sockel/latest/sockel/enum.OptionCardKind.html): `Radio`, the mark round with a dot
 //!   (`RADIO` on `CHECKBOX_INPUT`), or `Checkbox`, the checkbox's mark),
 //!   `checked` (`ON`), `name` (radios sharing one are a group), `value`,
 //!   `on_change(bool)`, `label` (`OPTION_CARD_LABEL`), `description` (a
 //!   `--muted` line, `OPTION_CARD_DESCRIPTION`), `disabled`, `invalid`,
 //!   `testid`; `option_card(checked, disabled, invalid)` gives its classes.
 //!   Checked, hover and focus change colours only.
-//! - [`ChipToggle`] (`.sockel-chip`) and [`ChipList`] (`.sockel-chip-list`):
+//! - [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) (`.sockel-chip`) and [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html) (`.sockel-chip-list`):
 //!   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
 //!   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
 //!   label; a list takes `label` and the chips as children.
-//! - [`Chip`] (`.sockel-chip`): a chip that is not a toggle, in the same
+//! - [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html) (`.sockel-chip`): a chip that is not a toggle, in the same
 //!   box. `href` makes it a link, `on_click` a button (with `href`, the
 //!   link's click, for an app's router), neither an item (`STATIC`, no
-//!   pointer and no hover edge). `media` leads it in its round start (`CHIP_MEDIA`, an avatar
-//!   or a portrait `$chip-media-inset` from the edge, `LEAD_MEDIA`), `icon`
+//!   pointer and no hover edge). `media` leads it in its round start
+//!   (`CHIP_MEDIA`, an avatar or a portrait `$chip-media-inset` from the edge,
+//!   `LEAD_MEDIA`), `icon`
 //!   leads its label (`CHIP_ICON`, muted, `LEAD_ICON`: `$chip-icon-inset`
 //!   from the edge when set), `after` follows the label and is never cut with
 //!   it (a number, a badge); `on_remove` gives an item a cross
@@ -1091,21 +1101,21 @@
 //! `$choice-columns: auto`, or the container's, or
 //! `--choice-width`), whichever is selected, and its height is the control
 //! height; the selected one changes background and colour only, through the
-//! `current` mixin, which now also matches `aria-checked="true"` and
+//! `current` mixin, which also matches `aria-checked="true"` and
 //! `aria-pressed="true"`. A chip's count has room for two figures (tabular);
 //! a list is at least one chip high, so an empty list does not collapse and
-//! grow when chips arrive. New tokens: `$check-size`, `$switch-width`,
-//! `$switch-height`, `$choice-width`.
+//! grow when chips arrive. The sizes are set by `$check-size`, `$switch-width`,
+//! `$switch-height` and `$choice-width`.
 //!
 //! <br>
 //!
 //! ## Tabs, SubTabs and NavList
 //!
-//! The current tab or entry is marked by colour, background or an inset
-//! shadow, never by weight, through the `current` mixin, so selecting one
+//! Ways between the views of a page and between pages. The current tab or
+//! entry is marked by colour, background or an inset shadow, never by weight, through the `current` mixin, so selecting one
 //! changes no box. Every component takes `class`.
 //!
-//! - [`Tabs`] (`.sockel-tabs`): a `tablist` of [`TabItem`]s (`new(value, label)`,
+//! - [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html) (`.sockel-tabs`): a `tablist` of [`TabItem`](https://docs.rs/sockel/latest/sockel/struct.TabItem.html)s (`new(value, label)`,
 //!   `.icon(html)`, `.disabled(bool)`). `value`, `on_change(value)`, `label`
 //!   (the list's name); `tabs(small)` gives its classes. A `TabItem` also
 //!   takes `class`, `testid`, `tip` (`data-tip` and the tab's `aria-label`, for
@@ -1128,16 +1138,16 @@
 //!   (`$tab-phone-icons` keeps them). Tabs
 //!   past the width scroll sideways with the scrollbar hidden and the edge
 //!   that has hidden tabs faded (the `scroll-fade` mixin, shared with
-//!   [`Toolbar`]); no tab is hidden or reflowed.
-//! - [`SubTabs`]: the same props, at the small control height (`SMALL`).
-//! - [`LinkTabs`]: tabs that lead to pages, drawn as [`Tabs`]: a `nav` of
+//!   [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html)); no tab is hidden or reflowed.
+//! - [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html): the same props, at the small control height (`SMALL`).
+//! - [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html): tabs that lead to pages, drawn as [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html): a `nav` of
 //!   links, each `TabItem` with its `.href(url)` and an `.onclick(callback)`
 //!   run before the browser follows it (an app's router prevents that and
 //!   shows the page in place). `value` is the current tab
 //!   (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`
-//!   and `fill` as for [`Tabs`]. Each link is a tab stop and the arrows are
+//!   and `fill` as for [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html). Each link is a tab stop and the arrows are
 //!   the page's; a disabled one has no `href` (`aria-disabled`).
-//! - [`NavList`] (`.sockel-nav-list`): a `nav` of a column of [`NavItem`]s
+//! - [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) (`.sockel-nav-list`): a `nav` of a column of [`NavItem`](https://docs.rs/sockel/latest/sockel/struct.NavItem.html)s
 //!   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
 //!   link with an `href` and a button without. `value` is the current entry
 //!   (`aria-current="page"`; colour and a tint), `on_select(value)`, `label`;
@@ -1147,16 +1157,16 @@
 //! small one) and as wide as its content whichever is selected; the underline
 //! is a shadow, hover and focus add no border (focus is an inset outline). An
 //! empty tab list keeps its height. A nav entry is at least the control
-//! height with a reserved border, so the current one keeps its box. New
-//! tokens: `--tab-height` and `--tab-underline` (custom properties on
-//! `.sockel-tabs`); new mixin `scroll-fade`.
+//! height with a reserved border, so the current one keeps its box. Tokens:
+//! `--tab-height` and `--tab-underline` (custom properties on `.sockel-tabs`);
+//! the fade is the `scroll-fade` mixin.
 //!
 //! <br>
 //!
 //! ## Field and FormRows
 //!
-//! [`Field`] is a label, the control (its `children`), a hint and an error,
-//! stacked. `id` is the control's `id`, which the label's `for` names; the
+//! [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) gives any control its label, hint and error, stacked, with the
+//! ids that tie them together. `id` is the control's `id`, which the label's `for` names; the
 //! control takes `aria-describedby={field_describedby(&id, has_hint,
 //! has_error)}`, which names the hint's and the error's ids (`{id}-hint`,
 //! `{id}-error`). sockel has no input of its own here, so the control is the
@@ -1167,7 +1177,8 @@
 //!   sets `required` itself).
 //! - `disabled` mutes the field (`sockel::class::DISABLED`) and `busy` sets
 //!   `aria-busy` with a progress cursor (`BUSY`); neither changes the box.
-//!   `class`, `testid` as elsewhere. `field(disabled, busy)` gives the classes.
+//!   `class`, `testid` as elsewhere. `field(disabled, busy)` gives the
+//!   classes.
 //! - `group` makes the field a group (`role="group"`) named by its label,
 //!   which is then text with the id `{id}-label` rather than a `<label for>`:
 //!   for several controls, or one with no `id` (a list, an editor, a value
@@ -1182,13 +1193,13 @@
 //!   `--field-error-lines` (1) is cut with an ellipsis. Without it the error
 //!   appears under the control and pushes what follows down.
 //!
-//! [`FormRows`] is a grid of [`FormRow`]s (the same props as `Field`) sharing one
-//! label column: as wide as the widest label up to half the grid, or with
-//! `wide_labels` (`WIDE_LABELS`) `--field-label-width` (12rem) so every section's
-//! controls start on one line. Below the phone breakpoint the label sits above
-//! its control. [`Fieldset`] is a `<fieldset>` with a `legend` and an optional
-//! `hint`; [`FieldCheck`] is a checkbox (its `children`) with its `label` after it,
-//! as high as an input.
+//! [`FormRows`](https://docs.rs/sockel/latest/sockel/struct.FormRows.html) is a grid of [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html)s (the same props as `Field`) sharing
+//! one label column: as wide as the widest label up to half the grid, or with
+//! `wide_labels` (`WIDE_LABELS`) `--field-label-width` (12rem) so every
+//! section's controls start on one line. Below the phone breakpoint the label
+//! sits above its control. [`Fieldset`](https://docs.rs/sockel/latest/sockel/struct.Fieldset.html) is a `<fieldset>` with a `legend` and
+//! an optional `hint`; [`FieldCheck`](https://docs.rs/sockel/latest/sockel/struct.FieldCheck.html) is a checkbox (its `children`) with its
+//! `label` after it, as high as an input.
 //!
 //! Size guarantees: with `reserve_error` the field's height does not change
 //! when an error appears, nor does anything else (disabled, busy, focus,
@@ -1202,32 +1213,32 @@
 //!
 //! Short marks whose box is fixed, so a state, a figure or a word changing does
 //! not move what is around them. Every component takes `class` and `testid`.
-//! [`Tone`] (`Neutral`, `Accent`, `Success`, `Warning`, `Danger`, `Busy`, `Unset`)
-//! is the one tone vocabulary, also [`Notice`]'s: a modifier (`ACCENT`, `SUCCESS`,
-//! `WARNING`, `DANGER`, `BUSY`, `UNSET`; neutral has none) that only sets
+//! [`Tone`](https://docs.rs/sockel/latest/sockel/enum.Tone.html) (`Neutral`, `Accent`, `Success`, `Warning`, `Danger`, `Busy`,
+//! `Unset`) is the one tone vocabulary, also [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html)'s: a modifier
+//! (`ACCENT`, `SUCCESS`, `WARNING`, `DANGER`, `BUSY`, `UNSET`; neutral has none) that only sets
 //! `--tone`, from `--accent`, `--success`, `--warning` and `--danger`.
 //!
-//! - [`Pill`] (`.sockel-pill`): a tinted label `--mark-height` tall, led by a dot
-//!   of `--dot-size` in its tone. `tone`, `plain` (`PLAIN`, no dot), `on_click`
+//! - [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html) (`.sockel-pill`): a tinted label `--mark-height` tall, led by a
+//!   dot of `--dot-size` in its tone. `tone`, `plain` (`PLAIN`, no dot), `on_click`
 //!   (makes it a `<button>`, `PILL_BUTTON`; hover changes its fill only),
 //!   `disabled`, children as the label, cut with an ellipsis in a narrow
 //!   container. `pill(tone, plain, button)` gives its classes.
-//! - [`Badge`] (`.sockel-badge`): a bordered short text, `--mark-height` tall and
-//!   at least as wide. `tone`, `solid` (`SOLID`, filled, the accent by
+//! - [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html) (`.sockel-badge`): a bordered short text, `--mark-height` tall
+//!   and at least as wide. `tone`, `solid` (`SOLID`, filled, the accent by
 //!   default), `corner` (`CORNER`, `--corner-size`, over the top end corner of
 //!   its positioned parent by transform, so it takes no room);
 //!   `badge(tone, solid, corner)`.
-//! - [`Dot`] (`.sockel-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off is an
-//!   empty ring in the same box), `label` (its accessible name; without one it
-//!   is decoration); `dot(tone, on)`.
-//! - [`Count`] (`.sockel-count`): a figure on a soft fill. `value`, `max` (99:
+//! - [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html) (`.sockel-dot`): a `--dot-size` circle. `tone`, `on` (`ON`; off
+//!   is an empty ring in the same box), `label` (its accessible name; without
+//!   one it is decoration); `dot(tone, on)`.
+//! - [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html) (`.sockel-count`): a figure on a soft fill. `value`, `max` (99:
 //!   above it the count reads `99+`), `hide_zero` (`HIDDEN`: `visibility`, so
 //!   the box stays; a zero shown is dimmed by `ZERO`). Its `min-width` is the
 //!   digits of `max` and one more for the `+`, in tabular figures, so the
 //!   count holds across `0..=max+1` and a hidden one does not move its
 //!   neighbours. The figure is `value.to_string()`; koine has no number
 //!   formatting. `count(value, hide_zero)` and `count_text(value, max)`.
-//! - [`StatusLabel`] (`.sockel-status-label`, `role="status"`): `states` (the
+//! - [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) (`.sockel-status-label`, `role="status"`): `states` (the
 //!   text of every state), `current` (an index, or none), `tone`, `spinner`
 //!   (reserves the slot), `busy` (spins in it), `pill`. Every state's text sits
 //!   in one grid cell and the others are `HIDDEN` (and `aria-hidden`), so the
@@ -1235,7 +1246,7 @@
 //!   resize it. The spinner slot is a `--glyph-size` square that is there
 //!   whether busy or not. `status_label(tone, pill)`.
 //!
-//! Sizes: the height is `--mark-height` whatever the tone, hover or text; only
+//! Size guarantees: the height is `--mark-height` whatever the tone, hover or text; only
 //! a pill's, badge's or status label's own text sets its width. A busy dot
 //! pulses by opacity (still under `prefers-reduced-motion`).
 //!
@@ -1243,20 +1254,22 @@
 //!
 //! ## TextInput, Textarea, SearchField and InputGroup
 //!
-//! Text controls at a control's height. All take `class`, `size`
-//! ([`InputSize`]: `Regular` is `--control-height`, `Small` (`SMALL`) is
+//! Text controls at a control's height, whose box holds whatever is typed.
+//! All take `class`, `size`
+//! ([`InputSize`](https://docs.rs/sockel/latest/sockel/enum.InputSize.html): `Regular` is `--control-height`, `Small` (`SMALL`) is
 //! `--control-height-small`, `Touch` (`TOUCH`) is `--touch-height`; the height
 //! never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
 //! `disabled`, `busy` (`aria-busy`, progress cursor) and `testid`. Inside a
-//! [`Field`], pass the field's `id` and `describedby={field_describedby(..)}`.
+//! [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html), pass the field's `id` and `describedby={field_describedby(..)}`.
 //!
-//! - [`TextInput`] (`.sockel-input`): `value` and `on_input` (the new text), `on_change`,
-//!   `on_blur`, `on_keydown`, `kind` ([`InputKind`]: text, email, url, tel,
+//! - [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) (`.sockel-input`): `value` and `on_input` (the new text),
+//!   `on_change`, `on_blur`, `on_keydown`, `kind` ([`InputKind`](https://docs.rs/sockel/latest/sockel/enum.InputKind.html): text, email, url, tel,
 //!   `Number`, `DateTime` as `datetime-local`),
 //!   `maxlength`, `list` (a `<datalist>`'s id), `inputmode` and `enterkeyhint`
 //!   (a touch keyboard's kind and enter key), `autocomplete` and `spellcheck`
 //!   (`Option<bool>`; each set only when given),
-//!   `placeholder`, `label` (the accessible name without a `Field`), `readonly`,
+//!   `placeholder`, `label` (the accessible name without a `Field`),
+//!   `readonly`,
 //!   `required`, `autofocus`, `node_ref`. With a `unit` (Html, `aria-hidden`)
 //!   the input sits in a box (`INPUT_BOX`) with the unit after the text inside
 //!   the field; the box takes the border and the focus ring, so the unit is
@@ -1267,11 +1280,12 @@
 //!   its widest option, cut at its container, and in a row it shrinks to give
 //!   way to the items beside it; `fill` makes it its container's
 //!   width. Set `aria-invalid` with `invalid`, as on a bare input.
-//! - [`Textarea`] (`.sockel-textarea`): `rows` (default 3), at least `--input-height`
-//!   high, resized vertically by the user only. `node_ref` (to focus or
+//! - [`Textarea`](https://docs.rs/sockel/latest/sockel/struct.Textarea.html) (`.sockel-textarea`): `rows` (default 3), at least
+//!   `--input-height` high, resized vertically by the user only. `node_ref` (to focus or
 //!   autosize it), `on_keydown`, `on_paste` and `on_drop`.
-//! - [`SearchField`] (`.sockel-input-box`): a search icon, the text and a clear
-//!   button. `label` is the placeholder and the accessible name, `clear_label`
+//! - [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html) (`.sockel-input-box`): a search icon, the text and a
+//!   clear button. `label` is the placeholder and the accessible name,
+//!   `clear_label`
 //!   names the button, `busy` swaps the icon for a spinner in the same box.
 //!   Clearing (the button or escape) calls `on_input("")` and returns the focus
 //!   to the text. `input_ref` is the text input's ref; `on_keydown` sees each
@@ -1285,44 +1299,46 @@
 //!   option, and `expanded` (unset is shown) its `aria-expanded`. `placeholder`
 //!   replaces the label as the placeholder, `title` is the text's tooltip,
 //!   `keyshortcuts` its `aria-keyshortcuts`, and `on_focus`/`on_blur` see the
-//!   text's focus. [`LibraryToolbar`] is a `SearchField` (class `LIBRARY_SEARCH`)
-//!   and its filters, passing `input_ref` and `on_keydown` on; its `icon` prop is gone, the icon is the [`IconSet`]'s
-//!   search glyph.
-//! - [`InputGroup`] (`.sockel-input-group`): controls joined in a row. Give each
-//!   member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,
+//!   text's focus. [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html) is a `SearchField` (class
+//!   `LIBRARY_SEARCH`) and its filters, passing `input_ref` and `on_keydown`
+//!   on; its icon is the [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html)'s search glyph.
+//! - [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html) (`.sockel-input-group`): controls joined in a row. Give
+//!   each member `group_classes(&detached)[i]` as its `class`: `GROUP_FIRST`,
 //!   `GROUP_MIDDLE` or `GROUP_LAST` square the corners that join (a lone member
 //!   takes none), and `detached[i]` starts a new run after a `--space-2` gap
 //!   (`GROUP_DETACHED`). The members overlap by their one-pixel border, the
-//!   hovered or focused one on top. No rule uses `:has()`, a sibling selector
-//!   or `!important`. A `TextInput` in a group takes the room the buttons leave.
+//!   hovered or focused one on top. A `TextInput` in a group takes the room
+//!   the buttons leave.
 //! - Bare helpers: `input(size, invalid, busy)`, `input_box(size, invalid,
 //!   disabled, busy)`, `textarea(size, invalid, busy)`.
 //!
 //! Size guarantees: a field's box is the same empty or filled, long text or
 //! short (the text is cut with an ellipsis, never wrapped or widened); hover,
-//! focus and invalid change colours only (the border is reserved, the focus ring
-//! is an outline); the SearchField's icon and clear slot are always laid out, the
-//! button only hidden while empty, so typing moves nothing; a group's members of
-//! one size are one height. New tokens: none. New partial: `_inputs.scss`.
+//! focus and invalid change colours only (the border is reserved, the focus
+//! ring is an outline); the SearchField's icon and clear slot are always laid
+//! out, the button only hidden while empty, so typing moves nothing; a group's
+//! members of one size are one height.
 //!
 //! <br>
 //!
 //! ## Stepper and SecretInput
 //!
-//! - [`Stepper`] (`.sockel-stepper`, worn with `.sockel-input-box`): a number
-//!   between a minus and a plus button. `value`, `on_change(i64)`, `min`, `max`,
-//!   `step` (default 1), `label` (the number's accessible name), `less_label`
-//!   and `more_label` (overrides of the catalog's words), `id`, `size` ([`InputSize`]),
-//!   `invalid`, `disabled`, `busy`, `live` (report each number typed within the
-//!   bounds at once, not only when committed; off by default), `class`,
-//!   `testid`. The buttons step onto
-//!   multiples of `step` (7 by 5 goes to 10 or 5), from the number typed if it
-//!   is not yet committed, and stop at the bounds; the
-//!   arrow keys do the same, Page Up and Down ten steps, Home and End go to the
-//!   bounds, Enter or leaving the field commits what is typed (clamped; text that
-//!   is no number goes back). What is typed outside `min..=max` is marked invalid
-//!   until committed. The buttons are out of the tab order. Helpers: `stepper(size,
-//!   invalid, disabled, busy)`, `step_from`, `step_by`, `key_value`, `key_step`,
+//! Two fields with buttons of their own: a number to step, and a secret to
+//! show, copy or clear.
+//!
+//! - [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) (`.sockel-stepper`, worn with `.sockel-input-box`): a number
+//!   between a minus and a plus button. `value`, `on_change(i64)`, `min`,
+//!   `max`, `step` (default 1), `label` (the number's accessible name),
+//!   `less_label` and `more_label` (overrides of the catalog's words), `id`,
+//!   `size` ([`InputSize`](https://docs.rs/sockel/latest/sockel/enum.InputSize.html)), `invalid`, `disabled`, `busy`, `live` (report each
+//!   number typed within the bounds at once, not only when committed; off by
+//!   default), `class`, `testid`. The buttons step onto multiples of `step` (7
+//!   by 5 goes to 10 or 5), from the number typed if it is not yet committed,
+//!   and stop at the bounds; the arrow keys do the same, Page Up and Down ten
+//!   steps, Home and End go to the bounds, Enter or leaving the field commits
+//!   what is typed (clamped; text that is no number goes back). What is typed
+//!   outside `min..=max` is marked invalid until committed. The buttons are
+//!   out of the tab order. Helpers: `stepper(size, invalid, disabled, busy)`, `step_from`, `step_by`, `key_value`, `key_step`,
 //!   `parse_number`, `parse_decimal`, `format_number`, `step_within`.
 //!   Further props, all off or unset by default: `snap` (the multiples the
 //!   buttons and arrows land on, `step` when unset), `arrow` (how far the
@@ -1341,17 +1357,18 @@
 //!   `fill` (as wide as its container, `.sockel-fill`), `faint` (a default
 //!   standing in for the value, the number in `--muted`, `.sockel-faint`),
 //!   `text` (shown in place of the number, read-only, as `aria-valuetext`:
-//!   a length written "4 h 30 min") and `chars` (the number's room). The buttons carry the
-//!   `testid` with `-less` and `-more`, and a `data-tip` of their name.
-//! - [`SecretInput`] (`.sockel-input-box`): a password field with show or hide,
-//!   copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
+//!   a length written "4 h 30 min") and `chars` (the number's room). The
+//!   buttons carry the `testid` with `-less` and `-more`, and a `data-tip` of
+//!   their name.
+//! - [`SecretInput`](https://docs.rs/sockel/latest/sockel/struct.SecretInput.html) (`.sockel-input-box`): a password field with show or
+//!   hide, copy and clear slots (`.sockel-input-action`, the `INPUT_CLEAR` button's
 //!   look). `value`, `on_input`, `label`, `on_copy` (also writes the clipboard),
 //!   `show_label`, `hide_label`, `copy_label`,
-//!   `clear_label` (each an override of the catalog's word), `commit` (`on_input`
-//!   only for a finished edit, on leaving the field or Enter, and on clear: for a
-//!   value saved as it changes; the field and the slots follow what is typed
-//!   meanwhile), `titles` (each slot's name as its tooltip too),
-//!   `placeholder`, `reveal_ms` ([`REVEAL_MS`], 3000: a
+//!   `clear_label` (each an override of the catalog's word), `commit`
+//!   (`on_input` only for a finished edit, on leaving the field or Enter, and
+//!   on clear: for a value saved as it changes; the field and the slots follow
+//!   what is typed meanwhile), `titles` (each slot's name as its tooltip too),
+//!   `placeholder`, `reveal_ms` ([`REVEAL_MS`](https://docs.rs/sockel/latest/sockel/constant.REVEAL_MS.html), 3000: a
 //!   shown secret hides itself, showing again restarts the time; clearing
 //!   hides it), `id`, `size`, `invalid`, `disabled`, `busy`, `autofocus`,
 //!   `class`, `testid`. The strings are props; an app passes its own words.
@@ -1359,7 +1376,8 @@
 //! Size guarantees: the Stepper's number has the room of the longest of `min`
 //! and `max` in `ch` with `numeric` figures, so its box is the same from the
 //! least value to the most (and its own width in a flex column or a grid cell,
-//! not stretched to it, nor squeezed past its parts in a row unless `fill`), the buttons only disabled at a bound; the number wears `.sockel-zero`
+//! not stretched to it, nor squeezed past its parts in a row unless `fill`),
+//! the buttons only disabled at a bound. The number wears `.sockel-zero`
 //! (`ZERO`) at 0, and the settings `$stepper-number-weight`,
 //! `$stepper-zero-ink` and `$stepper-zero-weight` (all `null`: the field's
 //! text) restyle the number and the zero, and `$stepper-touch-number-size`,
@@ -1367,8 +1385,8 @@
 //! other sizes') the touch size's number and glyphs, and `$stepper-edge`,
 //! `$stepper-ground` and `$stepper-shadow` (`null`: the field's edge and
 //! ground, no shadow) the box at rest, for a stepper that reads as a raised
-//! control. `$stepper-button-width` (`null`: a square), `$stepper-button-hover-ink`
-//! (`--accent`), `$stepper-button-hover-fill` (`null`) and
+//! control. `$stepper-button-width` (`null`: a square),
+//! `$stepper-button-hover-ink` (`--accent`), `$stepper-button-hover-fill` (`null`) and
 //! `$stepper-button-ends` (`false`; `true` squares the buttons' inner corners
 //! and rounds the outer ones with the box) restyle the buttons,
 //! `$stepper-divider` (`null`) draws a line each side of the number and
@@ -1378,21 +1396,20 @@
 //! `$stepper-coarse-size` (`null`) sets the box's height and the buttons'
 //! width on a coarse pointer, `$stepper-text-size` (`null`: a field's) its
 //! text at every size, and `$stepper-faint-style` (`null`) the font
-//! style of a faint number and the placeholder; the
-//! SecretInput's box is the container's width, dots or text, and its three slots
-//! are always laid out (hidden, not removed, while empty). New classes:
-//! `STEPPER`, `STEPPER_CONTROL`, `STEPPER_BUTTON`, `STEPPER_FIELD`, `STEPPER_UNIT`, `INPUT_ACTION`. New glyphs
-//! `Eye`, `EyeOff` and `Copy`. New partial: `_stepper.scss`. New tokens: none (`--stepper-chars` is
-//! set per Stepper).
+//! style of a faint number and the placeholder. The SecretInput's box is the
+//! container's width, dots or text, and its three slots are always laid out
+//! (hidden, not removed, while empty). Parts: `STEPPER`, `STEPPER_CONTROL`,
+//! `STEPPER_BUTTON`, `STEPPER_FIELD`, `STEPPER_UNIT`, `INPUT_ACTION`.
 //!
 //! <br>
 //!
 //! ## Heads
 //!
-//! [`PageHead`] and [`SectionHead`] take one set of props ([`HeadProps`]):
+//! The title row of a page or a section, with its crumbs, help and actions.
+//! [`PageHead`](https://docs.rs/sockel/latest/sockel/struct.PageHead.html) and [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html) take one set of props ([`HeadProps`](https://docs.rs/sockel/latest/sockel/struct.HeadProps.html)):
 //!
-//! - `title` is Html; `icon` goes before its text in the heading, `subtitle` is a
-//!   muted line under the row, `crumbs` (a list of links) stack above it, and
+//! - `title` is Html; `icon` goes before its text in the heading, `subtitle`
+//!   is a muted line under the row, `crumbs` (a list of links) stack above it, and
 //!   `back` is the inline "back / title" crumb. Each is its own prop;
 //!   `crumbs_label` and `back_label` name the crumbs and the back link.
 //! - `testid` and `title_testid` reach the title, `head_testid` the head,
@@ -1401,9 +1418,9 @@
 //!   the `suffix`, so the heading's text and test id exclude the help button.
 //!   The group stays on one line: a long title wraps inside its own box, with
 //!   the help beside it.
-//! - `SectionHead` takes the modifiers `sockel::class::LABEL` (small-caps label),
-//!   `LIST` and `LIST` + `NESTED` (smaller titles) in `class`; `HEAD_END` pushes a
-//!   child to the row's end.
+//! - `SectionHead` takes the modifiers `sockel::class::LABEL` (small-caps
+//!   label), `LIST` and `LIST` + `NESTED` (smaller titles) in `class`;
+//!   `HEAD_END` pushes a child to the row's end.
 //! - A head is at least `--control-height` high, so actions coming and going
 //!   never move what follows; a `LABEL` head holds none and is its line's
 //!   height. Neither has outer margins, also when its class is on a heading
@@ -1417,19 +1434,20 @@
 //! ## Icons
 //!
 //! sockel's own chrome (a dialog's close, a select's chevron, a busy spinner)
-//! draws its icons from an [`IconSet`], and the app keeps its own icons in the same
-//! set. The set is opaque, built with a builder, so adding a glyph to sockel never
-//! breaks an adopter. [`Glyph`] (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`,
-//! `Check`, `Plus`, `Minus`, [`Spinner`], `Grip`, `Ellipsis`, `Search`, `Eye`,
-//! `EyeOff`, `Copy`) is `#[non_exhaustive]`: a `match` on it needs a wildcard. It is
-//! the one place sockel uses a context for something other than a runtime setting,
-//! and it carries icons only: classes never go through it.
+//! draws its icons from an [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html), so an app swaps them for its own, and
+//! keeps its own icons in the same set. The set is opaque, built with a
+//! builder, so a glyph added to sockel never breaks an app. [`Glyph`](https://docs.rs/sockel/latest/sockel/enum.Glyph.html)
+//! (`Close`, `ChevronDown`, `ChevronUp`, `ChevronRight`, `Check`, `Plus`,
+//! `Minus`, [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html), `Grip`, `Ellipsis`, `Search`, `Eye`, `EyeOff`, `Copy`)
+//! is `#[non_exhaustive]`: a `match` on it needs a wildcard. It is the one
+//! place sockel uses a context for something other than a runtime setting, and
+//! it carries icons only: classes never go through it.
 //!
-//! `IconSet::default()` holds nothing of its own: a glyph the app did not set is
-//! the built-in inline svg, built when it is first drawn, so an app that
-//! overrides a glyph does not build the built-in one. Without a provider sockel
-//! uses the default set, so it renders standalone. An app supplies its set once at
-//! its root:
+//! `IconSet::default()` holds nothing of its own: a glyph the app did not set
+//! is the built-in inline svg, built when it is first drawn, so an app that
+//! overrides a glyph does not build the built-in one. Without a provider
+//! sockel uses the default set, so it renders standalone. An app supplies its
+//! set once at its root:
 //!
 //! ```rust
 //! # use sockel::{Glyph, IconSet};
@@ -1456,13 +1474,14 @@
 //! `<Icon glyph={Glyph::Close} class=.../>` renders a glyph and `<Icon
 //! name="trash"/>` an app icon; `use_icon(glyph)`, `use_icon_named(name)` and
 //! `use_icons()` (`get`, `get_named`) return icons for a component of your own,
-//! and `icon(class, glyph)` gives the box's classes (`sockel::class::GLYPH`, plus
-//! `SPIN` for `Spinner`). A name the set lacks renders the same empty box, and a
-//! debug build warns in the console with the name. Cloning a set shares its icons.
+//! and `icon(class, glyph)` gives the box's classes (`sockel::class::GLYPH`,
+//! plus `SPIN` for `Spinner`). A name the set lacks renders the same empty
+//! box, and a debug build warns in the console with the name. Cloning a set
+//! shares its icons.
 //!
 //! Size guarantees: the glyph sits in a `.sockel-glyph` box of `--glyph-size`
-//! (`1em`, so it follows the text) square, `overflow: hidden`, and what fills it
-//! is stretched to it. A swapped set, whatever its icons' own width and height,
+//! (`1em`, so it follows the text) square, `overflow: hidden`, and what fills
+//! it is stretched to it. A swapped set, whatever its icons' own width and height,
 //! cannot change a control's size. Icons should draw in `currentColor`. The
 //! spinner's box turns (slower under `prefers-reduced-motion`); the set's
 //! spinner need not animate itself.
@@ -1471,45 +1490,55 @@
 //!
 //! ## Notice, ErrorBox and EmptyState
 //!
-//! [`Notice`] is an inline message. `tone` ([`Tone`], the accent by default;
-//! see above), coloured from `--accent`, `--success`, `--warning` or
-//! `--danger`; `Neutral` is muted. `icon` is the app's icon, before the text; `action` is Html
-//! (a link or button) after it; `onclose: Some(callback)` shows a close button
-//! (`close_label`, an override of the catalog's word, names it). The notice does not remove itself: the
-//! app stops rendering it, and the space it held collapses at once, which is
-//! intended. A `Warning` or `Danger` notice has `role="alert"`, the others
-//! `role="status"`, unless `alert` is set (a failure drawn in the accent). `id` sets the
-//! element's id (for `aria-describedby`). `notice(tone)` gives the classes.
+//! What a page says in place of, or beside, its content: a message, an error
+//! and nothing to show.
 //!
-//! [`ErrorBox`] is an error, in `--tone: var(--danger)`: `id`, `title`, the message (its children), `cause` (the
-//! technical text, cut to three lines, whole in its `title` attribute) or
-//! `causes` (a chain of them, most specific last: `ERROR_BOX_CAUSES`, a list
-//! of a line each, never cut) and `onretry` (a small button, `retry_label`; `retrying` makes it
-//! busy and ignore clicks). `icon` (the app's, before the text, in the tone) and
+//! [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html) is an inline message. `tone` ([`Tone`](https://docs.rs/sockel/latest/sockel/enum.Tone.html), the accent by default;
+//! see above), coloured from `--accent`, `--success`, `--warning` or
+//! `--danger`; `Neutral` is muted. `icon` is the app's icon, before the text;
+//! `action` is Html (a link or button) after it; `onclose: Some(callback)`
+//! shows a close button (`close_label`, an override of the catalog's word,
+//! names it). The notice does not remove itself: the app stops rendering it,
+//! and the space it held collapses at once, which is intended. A `Warning` or
+//! `Danger` notice has `role="alert"`, the others `role="status"`, unless
+//! `alert` is set (a failure drawn in the accent). `id` sets the element's id
+//! (for `aria-describedby`). `notice(tone)` gives the classes.
+//!
+//! [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html) is an error, in `--tone: var(--danger)`: `id`, `title`, the
+//! message (its children), `cause` (the technical text, cut to three lines,
+//! whole in its `title` attribute) or `causes` (a chain of them, most specific
+//! last: `ERROR_BOX_CAUSES`, a list of a line each, never cut) and `onretry`
+//! (a small button, `retry_label`; `retrying` makes it busy and ignore
+//! clicks). `icon` (the app's, before the text, in the tone) and
 //! `ondismiss: Some(callback)` (a quiet close button after it, named and
 //! tooltipped by `dismiss_label`; the box does not remove itself)
 //! flank the text (`FLANKED`, the text in `ERROR_BOX_BODY`). `error_box(flanked)`
 //! gives the classes. Its look is configured by `$error-box-padding`, `-gap`,
 //! `-fill`, `-edge`, `-shadow`, `-message-weight`, `-cause-font`,
-//! `-cause-text` and `-text-end` (the space under a flanked box's text)
-//! (README, "Configuration").
+//! `-cause-text` and `-text-end` (the space under a flanked box's text); see
+//! [Configuration](https://docs.rs/sockel/latest/sockel/#configuration).
 //!
-//! [`EmptyState`] is what stands where there is nothing: `title`, `icon`, `hint`
+//! [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) is what stands where there is nothing: `title`, `icon`, `hint`
 //! and actions (its children). `compact` (`COMPACT`) is one row for a list or a
 //! table. `empty_state(compact)` gives the classes.
 //!
-//! An empty state's look is configured by `$empty-state-padding`, `-edge` (a border), `-radius`,
-//! `-compact-radius`, `-icon-size`, `-icon-fill`, `-icon-ink`, `-icon-box` (width and height) and
-//! `-icon-radius`, `-title-size` (`--text-md`), `-title-ink`
-//! (`--text`), `-title-weight` (600), `-hint-max-width` and `-icon-gap` (a margin below the icon); in a compact one
-//! `-compact-title-size`, `-compact-title-weight`, `-compact-title-ink`, `-compact-icon-box`, `-compact-icon-fill`,
-//! `-compact-icon-ink` and `-compact-justify`, each following the plain one while unset (README, "Configuration"); with the edge, radius and a round filled icon it is a dashed card.
-//! `bare_icon` (`BARE` on the icon) drops its box, disc and gap for a picture of its own.
+//! An empty state's look is configured by `$empty-state-padding`, `-edge` (a
+//! border), `-radius`, `-compact-radius`, `-icon-size`, `-icon-fill`,
+//! `-icon-ink`, `-icon-box` (width and height), `-icon-radius`, `-title-size`
+//! (`--text-md`), `-title-ink` (`--text`), `-title-weight` (600),
+//! `-hint-max-width` and `-icon-gap` (a margin below the icon); in a compact
+//! one by `-compact-title-size`, `-compact-title-weight`, `-compact-title-ink`,
+//! `-compact-icon-box`, `-compact-icon-fill`, `-compact-icon-ink` and
+//! `-compact-justify`, each following the plain one while unset. With the
+//! edge, radius and a round filled icon it is a dashed card. `bare_icon`
+//! (`BARE` on the icon) drops its box, disc and gap for a picture of its own.
 //!
-//! A notice's look is configured by `$notice-padding`, `-gap`, `-radius`, `-fill`, `-edge`, `-align`,
-//! `-min-height`, `-body-padding`, `-line-height`, `-icon-height`, `-icon-ink` and `-danger-ink`
-//! (README, "Configuration"); `-min-height`, `-body-padding`, `-line-height` and `-icon-height` set to
-//! `0`, `0`, `inherit` and `auto` let the text set the height.
+//! A notice's look is configured by `$notice-padding`, `-gap`, `-radius`,
+//! `-fill`, `-edge`, `-align`, `-min-height`, `-body-padding`, `-line-height`,
+//! `-icon-height`, `-icon-ink` and `-danger-ink` (see
+//! [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)); `-min-height`, `-body-padding`,
+//! `-line-height` and `-icon-height` set to `0`, `0`, `inherit` and `auto` let
+//! the text set the height.
 //!
 //! Every one takes `class` and `testid`. Parts: `NOTICE_ICON`, `NOTICE_BODY`,
 //! `NOTICE_ACTION`, `NOTICE_CLOSE`, `ERROR_BOX_TITLE`, `ERROR_BOX_MESSAGE`,
@@ -1529,18 +1558,22 @@
 //!
 //! ## Toast, ToastHost and SaveBar
 //!
-//! [`ToastHost`] is where toasts stand: fixed over the window's bottom
+//! Messages that come and go without moving the page: toasts, and a form's
+//! bar of unsaved changes.
+//!
+//! [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html) is where toasts stand: fixed over the window's bottom
 //! (`--layer-toast`), centred, newest last, in an always-present polite live
-//! region. It renders in the overlay layer (see [`OverlayHost`]), wherever the
-//! app places it, so an open dialog never puts it out of reach. Fixed, it takes no room: a toast coming or going moves nothing.
+//! region. It renders in the overlay layer (see [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html)), wherever the
+//! app places it, so an open dialog never puts it out of reach. Fixed, it
+//! takes no room: a toast coming or going moves nothing.
 //! `raised` lifts it by `--toast-tray`, the height of a tray or bar the app
 //! keeps at the bottom (0 unless the app sets it on `:root`). `toast_host(raised)`
 //! gives the classes.
 //!
-//! [`Toast`] is one message: `tone` ([`Tone`], the accent by default), `icon`, the
-//! text (its children), `action` (a label such as "Undo") with `onaction`,
+//! [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) is one message: `tone` ([`Tone`](https://docs.rs/sockel/latest/sockel/enum.Tone.html), the accent by default), `icon`,
+//! the text (its children), `action` (a label such as "Undo") with `onaction`,
 //! `action_icon` and `action_testid` (both none by default),
-//! `ondismiss` (closed or timed out), `duration` (milliseconds, [`TOAST_MS`] =
+//! `ondismiss` (closed or timed out), `duration` (milliseconds, [`TOAST_MS`](https://docs.rs/sockel/latest/sockel/constant.TOAST_MS.html) =
 //! 8000; 0 keeps it until dismissed), `shortcut` (Ctrl or Cmd+Z takes the action
 //! while it shows, unless typing in a field) and `close_label`. The clock stops
 //! while the pointer is over the toast or focus is in it and starts afresh
@@ -1548,14 +1581,15 @@
 //! toast its own `key`. `toast(tone)` gives the classes. The app owns the list:
 //! it stops rendering a toast when `ondismiss` or `onaction` is called.
 //!
-//! [`SaveBar`] is a form's bar of unsaved changes: `dirty`, `busy` (the save
-//! button's spinner, clicks ignored), `disabled`, `label` (an override of the catalog's words),
+//! [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) is a form's bar of unsaved changes: `dirty`, `busy` (the save
+//! button's spinner, clicks ignored), `disabled`, `label` (an override of the
+//! catalog's words),
 //! `status` (how the last save went), `onsave`, `ondiscard` (shows Discard),
 //! `save_label`, `discard_label`, `submit` (Save submits the form it stands in),
 //! `sticky`, and children (further actions). While `dirty` it holds an
-//! [`UnloadGuard`], the browser's own prompt on closing or reloading the tab
-//! (`guard=false` leaves that to the app, which can call `use_unload_guard(active)`
-//! itself; `unsaved()` says whether any guard is held). `save_bar(idle, sticky)`
+//! [`UnloadGuard`](https://docs.rs/sockel/latest/sockel/struct.UnloadGuard.html), the browser's own prompt on closing or reloading the tab
+//! (`guard=false` leaves that to the app, which can call
+//! `use_unload_guard(active)` itself; `unsaved()` says whether any guard is held). `save_bar(idle, sticky)`
 //! gives the classes.
 //!
 //! Every one takes `class` and `testid`. Parts: `TOAST_ICON`, `TOAST_BODY`,
@@ -1565,16 +1599,18 @@
 //!
 //! Size guarantees: a toast is at least one small control plus its padding
 //! high, its text wrapping within `--toast-max-width` and the window. The
-//! `SaveBar` choice is to keep its room: it is always in the flow at one control
-//! plus padding high, hidden (`visibility`) while clean and not removed, so the
-//! form's first edit moves nothing; `sticky` keeps it at the bottom of the scroll
-//! container, still in the flow. Its save button is busy in its own box.
+//! `SaveBar` keeps its room: it is always in the flow at one control plus
+//! padding high, hidden (`visibility`) while clean and not removed, so the
+//! form's first edit moves nothing; `sticky` keeps it at the bottom of the
+//! scroll container, still in the flow. Its save button is busy in its own box.
 //!
 //! <br>
 //!
 //! ## Lightbox
 //!
-//! [`Lightbox`] shows `items` ([`LightboxItem`]: `src`, `alt`, a `caption`
+//! A gallery's pictures, one at a time over the window.
+//!
+//! [`Lightbox`](https://docs.rs/sockel/latest/sockel/struct.Lightbox.html) shows `items` ([`LightboxItem`](https://docs.rs/sockel/latest/sockel/struct.LightboxItem.html): `src`, `alt`, a `caption`
 //! and an `href` to the original) one at a time over the window while `index`
 //! is `Some`; the owner keeps `index`, sets it from `on_index` and clears it on
 //! `on_close`. It is three bands on `--lightbox-ground` in `--lightbox-text`:
@@ -1585,10 +1621,10 @@
 //! the image (`.sockel-lightbox`, `-head`, `-position`, `-tools`, `-stage`,
 //! `-image`, `-foot`, `-caption`, `-back`).
 //!
-//! The arrow keys and a sideways swipe step ([`swipe_step`]); `+`, `-` and
-//! `0` zoom through [`LIGHTBOX_ZOOMS`] and fit again, as a double-click
+//! The arrow keys and a sideways swipe step ([`swipe_step`](https://docs.rs/sockel/latest/sockel/fn.swipe_step.html)); `+`, `-` and
+//! `0` zoom through [`LIGHTBOX_ZOOMS`](https://docs.rs/sockel/latest/sockel/constant.LIGHTBOX_ZOOMS.html) and fit again, as a double-click
 //! toggles; zoomed (`.sockel-zoomed`), the stage scrolls to pan the image and
-//! the arrows scroll it rather than step ([`lightbox_key`]). Escape and Close
+//! the arrows scroll it rather than step ([`lightbox_key`](https://docs.rs/sockel/latest/sockel/fn.lightbox_key.html)). Escape and Close
 //! ask to close it; it is on the overlays' stack, so one opened over it closes
 //! first, the page behind holds still while it is open, and focus returns to
 //! where it was. `lightbox(zoomed)` gives its classes.
@@ -1597,18 +1633,22 @@
 //!
 //! ## LogView and LogGroup
 //!
-//! [`LogView`] is a scroll of rows the app renders (`role="log"`,
+//! A live log or chat that stays at its end while the reader follows it, and
+//! holds still when they scroll back.
+//!
+//! [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html) is a scroll of rows the app renders (`role="log"`,
 //! `.sockel-log-view`, `-scroll`, `-rows`), filling its container's height. It
 //! keeps to its end as rows come and as they grow (an image loading, a group
-//! opening), until the reader scrolls more than [`LOG_END_SLOP`] (24 px) away
-//! from it ([`at_end`]); then it holds still, and a "Jump to latest" button
+//! opening), until the reader scrolls more than [`LOG_END_SLOP`](https://docs.rs/sockel/latest/sockel/constant.LOG_END_SLOP.html) (24 px) away
+//! from it ([`at_end`](https://docs.rs/sockel/latest/sockel/fn.at_end.html)); then it holds still, and a "Jump to latest" button
 //! floats over its foot (`-jump`) without moving a row, counting the rows that
 //! came since ("3 new") from `count`, which the app passes as its number of
-//! rows (`jump_label` overrides its words). The button, or a scroll back to the end, follows again;
+//! rows (`jump_label` overrides its words). The button, or a scroll back to
+//! the end, follows again;
 //! `on_follow` tells each change (`.sockel-following` while it follows).
 //! `live` announces new rows (`aria-live="polite"`), off by default.
 //!
-//! [`LogGroup`] folds a run of rows to one: its head is a button
+//! [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) folds a run of rows to one: its head is a button
 //! (`aria-expanded`) with a mark that turns, the `summary` and a `count`, and
 //! its rows render only while open (`.sockel-log-group`, `-head`, `-mark`,
 //! `-summary`, `-count`, `-rows`, `.sockel-open`). It keeps its own state from
@@ -1620,51 +1660,56 @@
 //!
 //! ## Composer
 //!
-//! [`Composer`] is a message's box at a conversation's foot
+//! The box a conversation's next message is written in.
+//!
+//! [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) is a message's box at a conversation's foot
 //! (`.sockel-composer`): a textarea that grows with its text from one line to
 //! `--composer-max-height` (`12rem`), then scrolls (`-bar`, `-field`), and its
 //! actions at its end (`actions`, then Send, `-actions`, `-send`). Enter sends
 //! and Shift or Alt+Enter is a newline (keyboards and terminals differ, so
 //! both); `enter_sends: false` makes Enter a newline and Ctrl or Cmd+Enter
-//! send ([`compose_key`]). `on_send` gets a [`ComposerMessage`] (the text
-//! without blank lines at its ends, [`composed`], and the files), and the
+//! send ([`compose_key`](https://docs.rs/sockel/latest/sockel/fn.compose_key.html)). `on_send` gets a [`ComposerMessage`](https://docs.rs/sockel/latest/sockel/struct.ComposerMessage.html) (the text
+//! without blank lines at its ends, [`composed`](https://docs.rs/sockel/latest/sockel/fn.composed.html), and the files), and the
 //! composer empties; nothing is sent while there is neither. `busy` holds Send
 //! busy while a message goes. `send_label` and `attach_label` override the
 //! buttons' words. `send_icon` gives Send an icon, shown alone
 //! below the phone breakpoint.
 //!
-//! `attachments` makes it a [`DropZone`]: files dropped, pasted or picked
+//! `attachments` makes it a [`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html): files dropped, pasted or picked
 //! with Attach (`accept`, `max_size`, `on_refused`) are listed above the bar,
 //! each with its name and a remove button (`-files`, `-file`, `-file-name`),
 //! and go with the message.
 //!
 //! `draft_key` keeps its text per key (a conversation's id) across
-//! unmounting and between keys, in the page's memory: [`composer_draft`]
-//! reads one and [`set_composer_draft`] sets or drops one, for an app that
+//! unmounting and between keys, in the page's memory: [`composer_draft`](https://docs.rs/sockel/latest/sockel/fn.composer_draft.html)
+//! reads one and [`set_composer_draft`](https://docs.rs/sockel/latest/sockel/fn.set_composer_draft.html) sets or drops one, for an app that
 //! keeps drafts longer itself. `on_input` tells each edit and `on_keydown`
 //! each press before the composer acts on it; a press the app prevents is
 //! left to it (Up in an empty box). `composer(busy)` gives its classes.
 //!
 //! <br>
+//!
 //! ## PropertyList, PropertyRow and InlineEdit
 //!
-//! [`PropertyList`] is an entity's fields as label and value rows (a `<dl>`,
+//! A detail view's fields, read as text and edited in place.
+//!
+//! [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html) is an entity's fields as label and value rows (a `<dl>`,
 //! `.sockel-property-list`), the way a detail view shows and edits them: the
 //! labels in a column `--property-label-width` (`9rem`) wide
 //! (`--property-label-phone-width`, `6.5rem`, below the phone breakpoint) and
 //! each value beside its label at least `--control-height` tall, so a row
 //! keeps its height whether its value is read or edited. A field in a value
-//! (an [`InlineEdit`]'s face, a [`Picker`] or [`Select`] with `fill`) shows its
+//! (an [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html)'s face, a [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html) or [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html) with `fill`) shows its
 //! box only under the pointer or with focus, so the rows read as text; `boxed`
 //! shows the boxes at rest (`.sockel-boxed`). `label` names the list.
 //!
-//! [`PropertyRow`] is one `label` (`.sockel-property-label`) and its value
-//! (`.sockel-property-value`, the children): text, a mark, an [`InlineEdit`],
+//! [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html) is one `label` (`.sockel-property-label`) and its value
+//! (`.sockel-property-value`, the children): text, a mark, an [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html),
 //! or a picker or select, which commit on a pick. `hint` is a line under the
 //! value (`.sockel-property-hint`); `stacked` sets the label above the value
 //! across the row (a description, `.sockel-stacked`); `id` is the label's.
 //!
-//! [`InlineEdit`] is a `value` read as text in the input's own box (a
+//! [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) is a `value` read as text in the input's own box (a
 //! `<button>`, `.sockel-input.sockel-inline-edit`), named `label` with its
 //! value for assistive technology. Activated (a click, Enter or Space), it is
 //! replaced by a field of the same box with its text selected; Enter or a blur
@@ -1677,15 +1722,18 @@
 //! `placeholder` muted (`.sockel-empty`, the catalog's "None" when unset).
 //! `busy` shows the face as saving, `disabled` keeps it from editing, and
 //! `on_editing` tells when an edit starts and ends (to push a shortcut layer).
-//! [`edit_key`] is what a key does in its field; `property_list(boxed)`,
+//! [`edit_key`](https://docs.rs/sockel/latest/sockel/fn.edit_key.html) is what a key does in its field; `property_list(boxed)`,
 //! `property_row(stacked)` and `inline_edit(empty, multiline)` give the
 //! classes.
 //!
 //! <br>
+//!
 //! ## Time
 //!
-//! [`Time`] is a `<time>` saying `at` (seconds since the epoch) in a
-//! [`TimeStyle`]: `Ago` ("just now", "3m ago"; the default), `Since` ("5m"),
+//! Relative and absolute times that tick without moving their neighbours.
+//!
+//! [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html) is a `<time>` saying `at` (seconds since the epoch) in a
+//! [`TimeStyle`](https://docs.rs/sockel/latest/sockel/enum.TimeStyle.html): `Ago` ("just now", "3m ago"; the default), `Since` ("5m"),
 //! `Until` ("4m", then "now"), `Left` ("43m left", down to "0s left") or `At`
 //! (the local date and time, "2026-11-19 04:02"). Its words are the catalog's
 //! `sockel-time-*` messages, the count passed as `$n`, so a language says
@@ -1697,21 +1745,23 @@
 //! longer sets the widths. Its `title` is the local date and time unless given,
 //! and `datetime` the ISO instant.
 //!
-//! Every [`Time`] on the page shares one clock: each asks to be woken at the
-//! instant its own text next changes ([`time_next`]), and one `setTimeout` is
+//! Every [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html) on the page shares one clock: each asks to be woken at the
+//! instant its own text next changes ([`time_next`](https://docs.rs/sockel/latest/sockel/fn.time_next.html)), and one `setTimeout` is
 //! kept pointed at the earliest. A time reading "2h ago" is woken once an hour,
-//! and only it redraws. [`use_wake_at`] puts any component on the same clock.
+//! and only it redraws. [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) puts any component on the same clock.
 //! `now` fixes the time it is read at (a test, a server render), and then it is
-//! not woken. [`time_text`] gives the message and count without rendering,
-//! [`now_seconds`] the browser's clock, and `time(style, end)` the classes.
+//! not woken. [`time_text`](https://docs.rs/sockel/latest/sockel/fn.time_text.html) gives the message and count without rendering,
+//! [`now_seconds`](https://docs.rs/sockel/latest/sockel/fn.now_seconds.html) the browser's clock, and `time(style, end)` the classes.
 //!
 //! <br>
 //!
 //! ## Shortcuts, ShortcutHelp and Kbd
 //!
-//! [`use_shortcut`] binds a [`Shortcut`] to a callback while the calling
-//! component is mounted. A shortcut has one or more [`Chord`]s, read from text
-//! by [`Chord::parse`]: `"?"`, `"n"`, `"S"` (Shift and s), `"Mod+Enter"` (Ctrl,
+//! Keyboard shortcuts, the help that lists them, and keycaps to show them.
+//!
+//! [`use_shortcut`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut.html) binds a [`Shortcut`](https://docs.rs/sockel/latest/sockel/struct.Shortcut.html) to a callback while the calling
+//! component is mounted. A shortcut has one or more [`Chord`](https://docs.rs/sockel/latest/sockel/struct.Chord.html)s, read from text
+//! by [`Chord::parse`](https://docs.rs/sockel/latest/sockel/struct.Chord.html#method.parse): `"?"`, `"n"`, `"S"` (Shift and s), `"Mod+Enter"` (Ctrl,
 //! or Cmd on Apple platforms), `"Ctrl+Shift+k"`, `"Escape"`, `"Space"`; `or`
 //! adds another (`j` or `ArrowDown`). A symbol such as `?` matches whatever
 //! Shift it took to type it. Its `label` is what the help lists, under its
@@ -1725,11 +1775,11 @@
 //! ```
 //!
 //! - **Layers.** A shortcut without a `layer` is the page's base layer.
-//!   [`use_shortcut_layer`] makes a named layer active while its component is
+//!   [`use_shortcut_layer`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_layer.html) makes a named layer active while its component is
 //!   mounted and `active`; layers stack and the newest is active, so only its
-//!   shortcuts and the `always` ones apply. An open overlay (a [`Dialog`], a
-//!   [`Popover`]) holds the base layer and the `always` ones, while a layer
-//!   pushed from inside it keeps its own; [`shortcut_applies`] is the rule.
+//!   shortcuts and the `always` ones apply. An open overlay (a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html), a
+//!   [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html)) holds the base layer and the `always` ones, while a layer
+//!   pushed from inside it keeps its own; [`shortcut_applies`](https://docs.rs/sockel/latest/sockel/fn.shortcut_applies.html) is the rule.
 //! - **Typing.** A press in an input, a textarea, a select or an editable
 //!   element is left to it, unless the shortcut is `in_fields` (Mod+Enter,
 //!   Escape). A press already handled (`defaultPrevented`) or composing is
@@ -1740,55 +1790,60 @@
 //! - One listener on the document serves every shortcut while any is bound;
 //!   the registry is the page's, not a context's.
 //!
-//! [`ShortcutHelp`] is a [`Dialog`] (`open`, `on_dismiss`) listing the
+//! [`ShortcutHelp`](https://docs.rs/sockel/latest/sockel/struct.ShortcutHelp.html) is a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) (`open`, `on_dismiss`) listing the
 //! shortcuts that apply where it was opened, from the same registry, so it
 //! cannot drift from the keys: each chord's keycaps beside its label, ungrouped
 //! ones first, then each `group` under its heading
-//! (`.sockel-shortcut-help`, `-body`, `-group`, `-heading`, `-list`, `-row`, `-keys`,
-//! `-label`, `-empty`). [`use_shortcut_list`] is the same list, kept current,
+//! (`.sockel-shortcut-help`, `-body`, `-group`, `-heading`, `-list`, `-row`,
+//! `-keys`, `-label`, `-empty`). [`use_shortcut_list`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_list.html) is the same list, kept current,
 //! for an app's own help.
 //!
-//! [`Kbd`] draws a chord (`keys`, a [`Chord`]'s text) as keycaps: a `<kbd>`
+//! [`Kbd`](https://docs.rs/sockel/latest/sockel/struct.Kbd.html) draws a chord (`keys`, a [`Chord`](https://docs.rs/sockel/latest/sockel/struct.Chord.html)'s text) as keycaps: a `<kbd>`
 //! (`.sockel-kbd`) of `<kbd>`s (`.sockel-kbd-key`, at least `--kbd-size`,
 //! `1.5em`, on `--kbd-ground`), Apple's symbols there (⌘ ⇧ ⌥ ⌃) and the
 //! catalog's words elsewhere (`sockel-key-*`: Ctrl, Shift, Esc); a capital
 //! letter alone is drawn as itself. `decorative` hides it from assistive
 //! technology, for keys inside a control that names them in
-//! `aria-keyshortcuts` ([`Chord::aria`]). [`MenuItem`]'s `keys` (with this
+//! `aria-keyshortcuts` ([`Chord::aria`](https://docs.rs/sockel/latest/sockel/struct.Chord.html#method.aria)). [`MenuItem`](https://docs.rs/sockel/latest/sockel/struct.MenuItem.html)'s `keys` (with this
 //! feature) draws a chord at the row's end and sets its `aria-keyshortcuts`.
-//! [`is_apple`] tells the platform.
+//! [`is_apple`](https://docs.rs/sockel/latest/sockel/fn.is_apple.html) tells the platform.
 //!
 //! <br>
+//!
 //! ## Spinner, Skeleton and Loadable
 //!
-//! [`Spinner`] is a spinning glyph (`Glyph::Spinner` from the icon set) in the
-//! icon box: inline, `1em`, in the colour of the text around it. `label` makes
-//! it a `role="status"` with that name; without one it is decoration. [`Button`]'s
-//! busy mark is a `Spinner`.
+//! What stands in for content while it loads, in the box the content will
+//! have.
 //!
-//! [`Skeleton`] is a placeholder of the box its content will have. `shape`
-//! ([`SkeletonShape`]): `Line` (`LINE`, one line of the text around it, `1lh`),
+//! [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) is a spinning glyph (`Glyph::Spinner` from the icon set) in the
+//! icon box: inline, `1em`, in the colour of the text around it. `label` makes
+//! it a `role="status"` with that name; without one it is decoration.
+//! [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html)'s busy mark is a `Spinner`.
+//!
+//! [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html) is a placeholder of the box its content will have. `shape`
+//! ([`SkeletonShape`](https://docs.rs/sockel/latest/sockel/enum.SkeletonShape.html)): `Line` (`LINE`, one line of the text around it, `1lh`),
 //! `Block` (the default, `--control-height`, or `--skeleton-height`), `Row`
-//! (`ROW`, one [`RowListItem`] high) or `Image(Ratio)` (an [`Image`]'s ratio
+//! (`ROW`, one [`RowListItem`](https://docs.rs/sockel/latest/sockel/struct.RowListItem.html) high) or `Image(Ratio)` (an [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html)'s ratio
 //! classes, `POSTER` and the rest). `count` stacks several in a column
 //! (`SKELETON_GROUP`); the last of several lines is `SHORT`. A group reserves
-//! the 1px border a [`RowList`] does, so `count` skeleton rows are exactly as high
-//! as `count` one-line rows. It is `aria-hidden` and shimmers, still under
-//! `prefers-reduced-motion` (`--skeleton-duration`). `width` sets its width (each
-//! one's, with `count`), such as the length of the text it stands for.
+//! the 1px border a [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html) does, so `count` skeleton rows are exactly as
+//! high as `count` one-line rows. It is `aria-hidden` and shimmers, still
+//! under `prefers-reduced-motion` (`--skeleton-duration`). `width` sets its
+//! width (each one's, with `count`), such as the length of the text it stands for.
 //! `skeleton(shape, short)` gives the classes.
 //!
-//! [`Loadable`] is one box for content that loads. `state` ([`LoadState`]):
+//! [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) is one box for content that loads. `state` ([`LoadState`](https://docs.rs/sockel/latest/sockel/enum.LoadState.html)):
 //! `Loading` shows the placeholder (`placeholder`, or `rows` skeleton rows),
-//! `Ready` the children, `Empty` an [`EmptyState`] (`empty` replaces it,
-//! `empty_title` names it) and `Error` an [`ErrorBox`] (`error`, `error_cause`,
+//! `Ready` the children, `Empty` an [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) (`empty` replaces it,
+//! `empty_title` names it) and `Error` an [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html) (`error`, `error_cause`,
 //! `onretry`, `retrying`). The empty state waits `empty_delay` (250 ms) before
 //! it shows, the placeholder standing in, so it never flashes before data.
 //! While it loads it is `aria-busy` and a visually hidden `role="status"` reads
-//! `label` (an override of the catalog's word). Every one takes `class` and `testid`.
+//! `label` (an override of the catalog's word). Every one takes `class` and
+//! `testid`.
 //!
-//! Size guarantees: while loading, a `Loadable` is at least `rows` rows high the
-//! first time and at least the height it last had settled (ready, empty or
+//! Size guarantees: while loading, a `Loadable` is at least `rows` rows high
+//! the first time and at least the height it last had settled (ready, empty or
 //! error) afterwards, so loading to ready and ready to loading again move
 //! nothing when the placeholder has the content's rows. Once settled it is as
 //! high as its content, so a shorter list shrinks. An empty state or an error
@@ -1798,8 +1853,8 @@
 //!
 //! ## Image and Avatar
 //!
-//! [`Image`] is a picture in a box whose ratio is fixed before it loads, so the
-//! page does not shift as pictures arrive. Props:
+//! [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html) is a picture in a box whose ratio is fixed before it loads, so
+//! the page does not shift as pictures arrive. Props:
 //!
 //! - `ratio` (required; there is no default, so no image lacks a box):
 //!   `Ratio::Poster` (2/3), `Screenshot` (16/9), `Banner` (21/4), `Square`, or
@@ -1809,9 +1864,9 @@
 //!   `onload`, `onerror` and `testid`.
 //!
 //! Its modifiers are the ratio's classes (`POSTER`, `SCREENSHOT`, `BANNER`,
-//! `SQUARE`, `RATIO`) and its status's: `LOADING`, `ERROR`, `EMPTY` (no `src`) and
-//! `LOADED`. The status follows the `<img>`'s `load` and `error` events and starts
-//! over when `src` changes.
+//! `SQUARE`, `RATIO`) and its status's: `LOADING`, `ERROR`, `EMPTY` (no
+//! `src`) and `LOADED`. The status follows the `<img>`'s `load` and `error`
+//! events and starts over when `src` changes.
 //!
 //! Size guarantees: the box is `aspect-ratio` at the width it is given (the
 //! container's, unless `class` sets one), and the picture is laid over it with
@@ -1820,13 +1875,13 @@
 //! A picture of another shape is cropped, never stretched; the box never
 //! resizes.
 //!
-//! [`Avatar`] is a round portrait of a fixed size: `name` (its initials, the first
-//! letters of its first and last word, show behind the picture and are its
-//! accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by default,
-//! `Large`, `Huge`: the `--avatar-sm`, `-md`, `-lg` and `-xl` tokens), `lazy`,
-//! `class` and `testid`. The box is `--avatar-*` square whether the picture is
-//! loading, failed, missing or loaded. `initials(name)` is the same function for
-//! a place of your own.
+//! [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) is a round portrait of a fixed size: `name` (its initials, the
+//! first letters of its first and last word, show behind the picture and are
+//! its accessible name), `src`, `size` (`AvatarSize::Small`, `Medium` by
+//! default, `Large`, `Huge`: the `--avatar-sm`, `-md`, `-lg` and `-xl`
+//! tokens), `lazy`, `class` and `testid`. The box is `--avatar-*` square
+//! whether the picture is loading, failed, missing or loaded. `initials(name)`
+//! is the same function for a place of your own.
 //!
 //! <br>
 //!
@@ -1834,7 +1889,7 @@
 //!
 //! Popovers, menus, selects, tooltips, dialogs and toasts render in the overlay
 //! layer, a portal out of whatever scrolls or clips their owner. Its events
-//! still bubble through the owner. [`OverlayHost`] is optional and gives the app
+//! still bubble through the owner. [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html) is optional and gives the app
 //! its own layer:
 //!
 //! ```rust
@@ -1868,14 +1923,14 @@
 //! - Props: `class` (on the host element) and `testid`. `overlay_host(class)`
 //!   gives the classes.
 //!
-//! Without one, nothing changes from before: overlays go to `#sockel-overlay`
+//! Without one, overlays go to `#sockel-overlay`
 //! (`sockel::OVERLAY_ID`), made on first use as the last child of `<body>`,
 //! with one stack per thread. Because it is a body child, it does not inherit
 //! colours an app sets below `:root`. On the server there is no layer, and
 //! overlays render in place.
 //!
 //! For a component of your own, `use_overlays()` returns the nearest host's
-//! [`Overlays`] (or the fallback), and `.portal(html)` renders into it.
+//! [`Overlays`](https://docs.rs/sockel/latest/sockel/struct.Overlays.html) (or the fallback), and `.portal(html)` renders into it.
 //! `use_popover` already takes its place on the stack from it. An overlay the
 //! app draws itself (a full-screen panel, a drawer) joins the stack with
 //! `use_overlay(open, on_escape)`: while it is open, Escape calls `on_escape`
@@ -1883,15 +1938,16 @@
 //! from it closes first, and not when an element in it acted on Escape itself
 //! (by preventing the key's default). `Overlays::any_open()` says whether
 //! anything but a tip is open, for an app's own keyboard shortcuts to stand
-//! aside meanwhile. The free
-//! `overlay(html)` always uses the fallback layer, since a plain function
-//! cannot see a context. Prefer `use_overlays().portal(html)` in components.
+//! aside meanwhile. The free `overlay(html)` always uses the fallback layer,
+//! since a plain function cannot see a context. Prefer
+//! `use_overlays().portal(html)` in components.
 //!
 //! Every stacked overlay (popover, menu, list, hover card, dialog) is at
 //! `--layer-overlay`, and the one opened later is later in the host, so on top.
 //! Toasts and tooltips (`--layer-toast`, `--layer-tooltip`) stay above. Within
-//! this, ordering is by opening, not kind. An open dialog puts the page and the overlays opened before it out of
-//! reach (`inert`), but never the toast region: a toast's Undo over a dialog
+//! this, ordering is by opening, not kind. An open dialog puts the page and
+//! the overlays opened before it out of reach (`inert`), but never the toast
+//! region: a toast's Undo over a dialog
 //! still works, and it is still announced.
 //!
 //! <br>
