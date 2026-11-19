@@ -1,7 +1,7 @@
 //! A test helper for adopters: every class the project's styles define must
 //! be written by its sources.
 
-use std::collections::BTreeMap;
+use std::collections::{BTreeMap, BTreeSet};
 use std::fmt;
 use std::path::{Path, PathBuf};
 
@@ -18,6 +18,8 @@ pub struct Usage {
     sources: Vec<PathBuf>,
     dynamic: Vec<String>,
     foreign: Vec<String>,
+    unprefixed: Vec<String>,
+    one_file_per_component: bool,
 }
 
 impl Usage {
@@ -43,6 +45,20 @@ impl Usage {
         self
     }
 
+    /// Words a class-like literal writes that are not classes, though the
+    /// prefix and the word is a styled class (`"button"` beside `.app-button`).
+    pub fn unprefixed<S: Into<String>>(mut self, words: impl IntoIterator<Item = S>) -> Self {
+        self.unprefixed.extend(words.into_iter().map(Into::into));
+        self
+    }
+
+    /// Also fails when a class has a top-level rule in more than one local
+    /// Sass file: a component's rules live in its own file.
+    pub fn one_file_per_component(mut self) -> Self {
+        self.one_file_per_component = true;
+        self
+    }
+
     /// Counts how often the sources write each class `config` builds: the
     /// local ones, or sockel's own without local styles. With
     /// `STYLE_INVENTORY=PATH` set, also writes `class<TAB>uses` lines to `PATH`.
@@ -52,12 +68,42 @@ impl Usage {
             (Some(_), Some(prefix)) => (output.local_classes, prefix.as_str()),
             _ => (output.sockel_classes, "sockel-"),
         };
-        let mut text = String::new();
+        let stems: BTreeSet<&str> = classes
+            .iter()
+            .filter_map(|class| class.strip_prefix(prefix))
+            .filter(|stem| {
+                !self.unprefixed.iter().any(|pattern| matches(pattern, stem))
+                    && !self
+                        .dynamic
+                        .iter()
+                        .any(|pattern| matches(pattern, &format!("{prefix}{stem}")))
+                    && classes
+                        .binary_search_by(|class| class.as_str().cmp(stem))
+                        .is_err()
+            })
+            .collect();
+        let mut files = Vec::new();
+        let mut known = Helpers::new();
         for source in &self.sources {
             for file in rust_files(source)? {
-                text.push_str(&code(&std::fs::read_to_string(file)?));
-                text.push('\n');
+                let code = code(&std::fs::read_to_string(&file)?);
+                helpers(&code, &mut known);
+                files.push((file, code));
             }
+        }
+        let mut unprefixed = BTreeMap::<String, BTreeSet<PathBuf>>::new();
+        let mut text = String::new();
+        for (file, code) in files {
+            for word in bare_words(&code, &known) {
+                if stems.contains(word) {
+                    unprefixed
+                        .entry(word.to_owned())
+                        .or_default()
+                        .insert(file.clone());
+                }
+            }
+            text.push_str(&code);
+            text.push('\n');
         }
         let idents = count_words(&text.replace(|c: char| !c.is_alphanumeric() && c != '_', " "));
         let literals = count_words(&literals(&text));
@@ -96,6 +142,14 @@ impl Usage {
                 .map(|(class, _)| class.clone())
                 .collect(),
             stale,
+            unprefixed: unprefixed
+                .into_iter()
+                .map(|(word, files)| (word, files.into_iter().collect()))
+                .collect(),
+            split: match (&config.local, self.one_file_per_component) {
+                (Some(dir), true) => split_components(dir)?,
+                _ => BTreeMap::new(),
+            },
             uses,
         };
         if let Some(path) = std::env::var_os("STYLE_INVENTORY") {
@@ -121,6 +175,7 @@ impl Usage {
 
 /// What the sources write of the styled classes.
 #[derive(Clone, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub struct Report {
     /// Each styled class with the number of times the sources write it.
     pub uses: BTreeMap<String, usize>,
@@ -130,11 +185,20 @@ pub struct Report {
     pub dead: Vec<String>,
     /// Allowed patterns matching no styled class.
     pub stale: Vec<String>,
+    /// Words written in a class-like literal without the prefix their
+    /// class has, with the files writing them.
+    pub unprefixed: BTreeMap<String, Vec<PathBuf>>,
+    /// With [`Usage::one_file_per_component`], classes with a top-level
+    /// rule in more than one local Sass file, with those files.
+    pub split: BTreeMap<String, Vec<PathBuf>>,
 }
 
 impl Report {
     pub fn is_clean(&self) -> bool {
-        self.dead.is_empty() && self.stale.is_empty()
+        self.dead.is_empty()
+            && self.stale.is_empty()
+            && self.unprefixed.is_empty()
+            && self.split.is_empty()
     }
 }
 
@@ -153,8 +217,32 @@ impl fmt::Display for Report {
         for pattern in &self.stale {
             writeln!(f, "stale: allowed `{pattern}` matches no styled class")?;
         }
+        for (word, files) in &self.unprefixed {
+            writeln!(
+                f,
+                "unprefixed: \"{word}\" is written as a class without its prefix ({}); \
+                 name the class, or allow the word with Usage::unprefixed",
+                paths(files)
+            )?;
+        }
+        for (class, files) in &self.split {
+            writeln!(
+                f,
+                "split: .{class} has a rule of its own in {}; keep a component in its \
+                 file and add a modifier there",
+                paths(files)
+            )?;
+        }
         Ok(())
     }
+}
+
+fn paths(files: &[PathBuf]) -> String {
+    files
+        .iter()
+        .map(|file| file.display().to_string())
+        .collect::<Vec<_>>()
+        .join(", ")
 }
 
 pub(crate) fn matches(pattern: &str, class: &str) -> bool {
@@ -312,6 +400,292 @@ fn literals(code: &str) -> String {
     out
 }
 
+/// The words of [`code`]'s class-like literals: lowercase words and `{}`
+/// placeholders only, not an attribute's value (`type="button"`), a match
+/// pattern or a comparison. A word with a placeholder in it is left out.
+fn bare_words<'a>(code: &'a str, helpers: &Helpers) -> Vec<&'a str> {
+    let mut words = Vec::new();
+    let mut rest = code;
+    while let Some(start) = rest.find('\u{1}') {
+        let before = &code[..code.len() - rest.len() + start];
+        let after = &rest[start + 1..];
+        let Some(end) = after.find('\u{2}') else {
+            break;
+        };
+        let literal = &after[..end];
+        rest = &after[end + 1..];
+        if !class_position(before, rest, helpers) {
+            continue;
+        }
+        let parts: Vec<&str> = literal.split(' ').collect();
+        let class_like = |part: &&str| {
+            part.starts_with(|c: char| c.is_ascii_lowercase())
+                && part
+                    .chars()
+                    .all(|c| c.is_ascii_lowercase() || c.is_ascii_digit() || c == '-' || c == '_')
+        };
+        let placeholder = |part: &&str| part.starts_with('{') && part.ends_with('}');
+        if parts
+            .iter()
+            .all(|part| class_like(part) || placeholder(part))
+        {
+            words.extend(parts.into_iter().filter(class_like));
+        }
+    }
+    words
+}
+
+/// For each `fn` in the sources (a method's name led by `.`), which of its
+/// parameters past `self` are named for a class.
+type Helpers = BTreeMap<String, Vec<bool>>;
+
+fn helpers(code: &str, helpers: &mut Helpers) {
+    let mut rest = code;
+    while let Some(at) = rest.find("fn ") {
+        let before_ok = rest[..at]
+            .chars()
+            .next_back()
+            .is_none_or(|c| !(c.is_alphanumeric() || c == '_'));
+        rest = &rest[at + 3..];
+        let name_end = rest
+            .find(|c: char| !(c.is_alphanumeric() || c == '_'))
+            .unwrap_or(rest.len());
+        let name = &rest[..name_end];
+        let Some(open) = rest.find('(') else {
+            break;
+        };
+        if !before_ok || name.is_empty() || rest[name_end..open].contains([';', '{']) {
+            continue;
+        }
+        let mut depth = 0usize;
+        let mut params = Vec::new();
+        let mut start = open + 1;
+        for (i, c) in rest[open..].char_indices().map(|(i, c)| (open + i, c)) {
+            match c {
+                '(' | '[' | '<' => depth += 1,
+                '>' if rest[..i].ends_with('-') => {}
+                ')' | ']' | '>' => {
+                    depth = depth.saturating_sub(1);
+                    if depth == 0 {
+                        params.push(&rest[start..i]);
+                        break;
+                    }
+                }
+                ',' if depth == 1 => {
+                    params.push(&rest[start..i]);
+                    start = i + 1;
+                }
+                _ => {}
+            }
+        }
+        let is_self = |param: &str| {
+            param
+                .split(':')
+                .next()
+                .unwrap_or("")
+                .split(|c: char| !(c.is_alphanumeric() || c == '_'))
+                .any(|word| word == "self")
+        };
+        let method = params.first().is_some_and(|param| is_self(param));
+        let flags: Vec<bool> = params
+            .iter()
+            .map(|param| param.trim())
+            .filter(|param| !param.is_empty() && !is_self(param))
+            .map(|param| names_class(param.split(':').next().unwrap_or("")))
+            .collect();
+        let key = if method {
+            format!(".{name}")
+        } else {
+            name.to_owned()
+        };
+        let known = helpers.entry(key).or_default();
+        known.resize(known.len().max(flags.len()), false);
+        for (known, flag) in known.iter_mut().zip(flags) {
+            *known |= flag;
+        }
+    }
+}
+
+fn ident_before(head: &str) -> &str {
+    let head = head.trim_end().trim_end_matches('!');
+    let at = head
+        .rfind(|c: char| !(c.is_alphanumeric() || c == '_' || c == '-'))
+        .map_or(0, |at| at + 1);
+    &head[at..]
+}
+
+fn names_class(name: &str) -> bool {
+    name.to_ascii_lowercase().contains("class")
+}
+
+/// Whether the literal ending `before` sits in a class. Walking out of the
+/// groups around it, through `Some(..)`, tuples, slices and the arms of a
+/// `match` or `if`, it reaches an attribute, field, binding or macro named
+/// for a class, or a parameter of a source's own `fn` named for one. A
+/// tuple's element counts only when bound by a tuple pattern naming it.
+fn class_position(before: &str, after: &str, helpers: &Helpers) -> bool {
+    let after = after.trim_start();
+    if after.starts_with("=>") || after.starts_with("==") || after.starts_with("!=") {
+        return false;
+    }
+    let bytes = before.as_bytes();
+    let mut depth = 0usize;
+    let mut commas = 0usize;
+    let mut element = None;
+    let mut inside = false;
+    let mut i = bytes.len();
+    while i > 0 {
+        i -= 1;
+        let c = bytes[i];
+        match c {
+            2 => inside = true,
+            1 => inside = false,
+            _ if inside => {}
+            b')' | b']' | b'}' => depth += 1,
+            b'(' | b'[' | b'{' if depth > 0 => depth -= 1,
+            b',' if depth == 0 => commas += 1,
+            b'(' | b'[' => {
+                let head = before[..i].trim_end();
+                let name = ident_before(head);
+                if c == b'(' && name.is_empty() && element.is_none() {
+                    element = Some(commas);
+                }
+                let params = (c == b'(' && !name.is_empty() && !head.ends_with('!'))
+                    .then(|| {
+                        let callee = name.rsplit("::").next().unwrap_or(name);
+                        let method = head[..head.len() - name.len()].trim_end().ends_with('.');
+                        helpers.get(&if method {
+                            format!(".{callee}")
+                        } else {
+                            callee.to_owned()
+                        })
+                    })
+                    .flatten();
+                match params {
+                    Some(params) => return params.get(commas).copied().unwrap_or(false),
+                    None if names_class(name) => return true,
+                    None => {}
+                }
+                commas = 0;
+            }
+            b'{' => {
+                let head = before[..i].trim_end();
+                let statement = head
+                    .rfind([';', '{', '}'])
+                    .map_or(head, |at| &head[at + 1..]);
+                let branch = statement.trim() == "else"
+                    || statement
+                        .split(|c: char| !(c.is_alphanumeric() || c == '_'))
+                        .any(|word| word == "match" || word == "if");
+                if !branch && (!head.ends_with('=') || head.ends_with("==")) {
+                    return false;
+                }
+                commas = 0;
+            }
+            b';' if depth == 0 => return false,
+            b'=' | b':' if depth == 0 => {
+                let head = &before[..i];
+                let next = &before[i + 1..];
+                if c == b':' && (head.ends_with(':') || next.starts_with(':')) {
+                    continue;
+                }
+                if c == b'=' && next.starts_with('>') {
+                    continue;
+                }
+                if c == b'=' && (head.ends_with(['=', '!', '<', '>']) || next.starts_with('=')) {
+                    return false;
+                }
+                if c == b':' && commas > 0 {
+                    return false;
+                }
+                if names_class(ident_before(head)) {
+                    return true;
+                }
+                if c == b':' {
+                    return false;
+                }
+                let statement = head
+                    .rfind([';', '{', '}'])
+                    .map_or(head, |at| &head[at + 1..]);
+                let pattern = statement.split(':').next().unwrap_or(statement).trim();
+                let Some(pattern) = ["let", "const", "static"].iter().find_map(|word| {
+                    let rest = pattern
+                        .trim_start_matches("pub(crate)")
+                        .trim_start_matches("pub")
+                        .trim_start();
+                    rest.strip_prefix(word)
+                        .filter(|rest| rest.starts_with([' ', '(']))
+                }) else {
+                    return false;
+                };
+                let pattern = pattern.trim_start();
+                let pattern = pattern.strip_prefix("mut ").unwrap_or(pattern);
+                return match (pattern.strip_prefix('('), element) {
+                    (Some(tuple), Some(at)) => tuple
+                        .trim_end_matches(')')
+                        .split(',')
+                        .nth(at)
+                        .is_some_and(names_class),
+                    (None, Some(_)) => false,
+                    _ => names_class(pattern),
+                };
+            }
+            _ => {}
+        }
+    }
+    false
+}
+
+/// The classes with a top-level rule (`.name {`, or `.name,` in a list) in
+/// more than one Sass file under `dir`.
+fn split_components(dir: &Path) -> Result<BTreeMap<String, Vec<PathBuf>>, Error> {
+    let mut owners = BTreeMap::<String, Vec<PathBuf>>::new();
+    for file in crate::local_files(dir)? {
+        if !file.extension().is_some_and(|ext| ext == "scss") || !file.is_file() {
+            continue;
+        }
+        let text = sass_without_comments(&std::fs::read_to_string(&file)?);
+        let roots: BTreeSet<&str> = text
+            .lines()
+            .filter_map(|line| {
+                let name = line.strip_prefix('.')?;
+                let end = name
+                    .find(|c: char| !(c.is_alphanumeric() || c == '-' || c == '_'))
+                    .unwrap_or(name.len());
+                let rest = name[end..].trim_start();
+                (end > 0 && (rest.starts_with('{') || rest.starts_with(',')))
+                    .then_some(&name[..end])
+            })
+            .collect();
+        for class in roots {
+            owners
+                .entry(class.to_owned())
+                .or_default()
+                .push(file.clone());
+        }
+    }
+    owners.retain(|_, files| files.len() > 1);
+    Ok(owners)
+}
+
+/// Sass without `/* */` comments, and `//` ones after a space or at a
+/// line's start (never a URL's).
+fn sass_without_comments(text: &str) -> String {
+    let mut out = String::with_capacity(text.len());
+    let mut rest = text;
+    while let Some(c) = rest.chars().next() {
+        if let Some(after) = rest.strip_prefix("/*") {
+            rest = after.find("*/").map_or("", |end| &after[end + 2..]);
+        } else if rest.starts_with("//") && (out.is_empty() || out.ends_with(char::is_whitespace)) {
+            rest = rest.find('\n').map_or("", |end| &rest[end..]);
+        } else {
+            out.push(c);
+            rest = &rest[c.len_utf8()..];
+        }
+    }
+    out
+}
+
 #[cfg(test)]
 mod tests {
     use super::*;
@@ -356,6 +730,64 @@ mod tests {
         let (config, usage) = fixture();
         let usage = usage.dynamic(["usage-tone-*"]).foreign(["usage-dead"]);
         assert!(usage.report(&config).unwrap().is_clean());
+    }
+
+    #[test]
+    fn finds_class_words_written_without_the_prefix() {
+        let (config, usage) = fixture();
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/usage/renamed");
+        let usage = usage
+            .source(&dir)
+            .dynamic(["usage-tone-*"])
+            .foreign(["usage-dead"]);
+        let report = usage.report(&config).unwrap();
+        let file = dir.join("renamed.rs");
+        assert_eq!(
+            report.unprefixed,
+            BTreeMap::from(
+                ["dead", "live", "once"].map(|word| (word.to_owned(), vec![file.clone()]))
+            )
+        );
+        assert!(!report.is_clean());
+        assert!(
+            report
+                .to_string()
+                .contains("unprefixed: \"dead\" is written as a class without its prefix")
+        );
+        let usage = usage.unprefixed(["dead", "live", "once"]);
+        assert!(usage.report(&config).unwrap().is_clean());
+    }
+
+    #[test]
+    fn reads_class_positions_only() {
+        let source = "fn pill(class: &str, label: &str) {}\n\
+                      fn f() {\n\
+                      pill(\"in-call\", \"label\");\n\
+                      let (class, key) = match x { A => (\"in-arm\", \"key\") };\n\
+                      const TONE_CLASSES: &[(&str, &str)] = &[(\"label\", class::A)];\n\
+                      html! { <b class=\"in-attr\" type=\"button\" /> };\n\
+                      }\n";
+        let code = code(source);
+        let mut known = Helpers::new();
+        helpers(&code, &mut known);
+        assert_eq!(bare_words(&code, &known), ["in-call", "in-arm", "in-attr"]);
+    }
+
+    #[test]
+    fn finds_a_component_split_over_files_when_asked() {
+        let (config, usage) = fixture();
+        let usage = usage.dynamic(["usage-tone-*"]).foreign(["usage-dead"]);
+        assert!(usage.report(&config).unwrap().split.is_empty());
+        let report = usage.one_file_per_component().report(&config).unwrap();
+        let style = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/usage/style");
+        assert_eq!(
+            report.split,
+            BTreeMap::from([(
+                "usage-once".to_owned(),
+                vec![style.join("_index.scss"), style.join("_split.scss")]
+            )])
+        );
+        assert!(!report.is_clean());
     }
 
     #[test]

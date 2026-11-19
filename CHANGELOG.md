@@ -31,6 +31,11 @@ back to the catalog's text, `_ => sockel::reorder_text(&text)`.
 (`on_drop_page`, which reported only the lifted row); set
 `on_drop_page_picked` to take that drop, with every carried row.
 
+sockel-build's `Report` has the fields `unprefixed` and `split`, and is
+`#[non_exhaustive]` so later fields are not breaking. Code that built a
+`Report` or destructured it without `..` no longer compiles; read its fields
+instead.
+
 ### Added
 
 - `Reorder` and `ReorderTree` announce the fixed row a row lands next to,
@@ -48,6 +53,13 @@ back to the catalog's text, `_ => sockel::reorder_text(&text)`.
 - Dialog: `close_variant` (the close button's variant, `Quiet` by default) and
   `onkeydown`.
 - ErrorBox: `id`.
+- sockel-build: `Usage::one_file_per_component()` also fails on a class with
+  a top-level rule in more than one local Sass file (`Report::split`), the
+  check characterize kept beside its guard.
+- sockel-build: `Usage::unprefixed([...])` allows words a class position
+  writes on purpose (see Changed).
+- sockel-build's docs: a short prefix keeps the stylesheet smaller (each
+  local selector carries it; `characterize-` cost about 47 KB).
 - `ReorderItem`'s `disabled`: a row that cannot be lifted (its handle is
   disabled, it is not carried with picked rows, no body drag), counted and
   landed beside as any other, in `Reorder` and `ReorderTree`.
@@ -81,6 +93,15 @@ back to the catalog's text, `_ => sockel::reorder_text(&text)`.
   the default in place; a build that passed it now fails. Drop the call, leave
   the part out with `$omit`, or give a real value. The error is an
   `Error::Io` of kind `InvalidInput`, so `Error` keeps its variants.
+- sockel-build: `Usage` also fails on a class word written without its
+  prefix (`Report::unprefixed`): a literal word in a class position (a
+  `class` attribute, field or binding, `classes!`, or a parameter of the
+  sources' own `fn` named for a class, through `Some(..)`, tuples and
+  `match` arms) that is a styled class once prefixed, as `Some("button")`
+  beside `.app-button`. A guard that passed can fail. Write the constant
+  (`Some(class::BUTTON)`), or, for a word that is not a class there, allow
+  it with `Usage::unprefixed(["button"])`; a word a `dynamic` pattern
+  covers once prefixed is not reported.
 
 ### Fixed
 

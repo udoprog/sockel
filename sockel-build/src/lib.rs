@@ -47,7 +47,9 @@
 //! prefix (`app-`); one that does not is a build error. Classes a
 //! dependency's markup writes are allowed with [`Config::foreign`] (a trailing
 //! `*` is a prefix), and get no constant. Tokens are configured on the build
-//! with [`Config::with`], not `@use "sockel" with (...)`.
+//! with [`Config::with`], not `@use "sockel" with (...)`. The prefix is in
+//! every selector naming a local class, so a short one (`ch-` rather than
+//! `characterize-`) keeps the stylesheet smaller; the constants do not change.
 //!
 //! <br>
 //!
@@ -115,6 +117,18 @@
 //! source names its constant (`class::SIDEBAR`) or the class in a string
 //! literal; comments and `#[cfg(test)]` items do not count. The test fails on
 //! a dead class and on an allowed pattern that matches no class.
+//!
+//! It also fails on a class written without its prefix: a literal word that,
+//! prefixed, is a styled class (`"button"` beside `.app-button`), in a class
+//! position. That is a `class` attribute, field or binding, `classes!`, or a
+//! parameter of the sources' own `fn` named for a class, reached through
+//! `Some(..)`, tuples, slices and `match` or `if` arms. A word the sources
+//! write on purpose is allowed with [`Usage::unprefixed`]; one a
+//! [`Usage::dynamic`] pattern covers needs nothing.
+//!
+//! [`Usage::one_file_per_component`] also fails on a class with a top-level
+//! rule in more than one local Sass file, so a component's rules stay in its
+//! own file.
 //!
 //! <br>
 //!
