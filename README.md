@@ -5,52 +5,47 @@
 [<img alt="docs.rs" src="https://img.shields.io/badge/docs.rs-sockel-66c2a5?style=for-the-badge&logoColor=white&logo=data:image/svg+xml;base64,PHN2ZyByb2xlPSJpbWciIHhtbG5zPSJodHRwOi8vd3d3LnczLm9yZy8yMDAwL3N2ZyIgdmlld0JveD0iMCAwIDUxMiA1MTIiPjxwYXRoIGZpbGw9IiNmNWY1ZjUiIGQ9Ik00ODguNiAyNTAuMkwzOTIgMjE0VjEwNS41YzAtMTUtOS4zLTI4LjQtMjMuNC0zMy43bC0xMDAtMzcuNWMtOC4xLTMuMS0xNy4xLTMuMS0yNS4zIDBsLTEwMCAzNy41Yy0xNC4xIDUuMy0yMy40IDE4LjctMjMuNCAzMy43VjIxNGwtOTYuNiAzNi4yQzkuMyAyNTUuNSAwIDI2OC45IDAgMjgzLjlWMzk0YzAgMTMuNiA3LjcgMjYuMSAxOS45IDMyLjJsMTAwIDUwYzEwLjEgNS4xIDIyLjEgNS4xIDMyLjIgMGwxMDMuOS01MiAxMDMuOSA1MmMxMC4xIDUuMSAyMi4xIDUuMSAzMi4yIDBsMTAwLTUwYzEyLjItNi4xIDE5LjktMTguNiAxOS45LTMyLjJWMjgzLjljMC0xNS05LjMtMjguNC0yMy40LTMzLjd6TTM1OCAyMTQuOGwtODUgMzEuOXYtNjguMmw4NS0zN3Y3My4zek0xNTQgMTA0LjFsMTAyLTM4LjIgMTAyIDM4LjJ2LjZsLTEwMiA0MS40LTEwMi00MS40di0uNnptODQgMjkxLjFsLTg1IDQyLjV2LTc5LjFsODUtMzguOHY3NS40em0wLTExMmwtMTAyIDQxLjQtMTAyLTQxLjR2LS42bDEwMi0zOC4yIDEwMiAzOC4ydi42em0yNDAgMTEybC04NSA0Mi41di03OS4xbDg1LTM4Ljh2NzUuNHptMC0xMTJsLTEwMiA0MS40LTEwMi00MS40di0uNmwxMDItMzguMiAxMDIgMzguMnYuNnoiPjwvcGF0aD48L3N2Zz4K" height="20">](https://docs.rs/sockel)
 [<img alt="build status" src="https://img.shields.io/github/actions/workflow/status/udoprog/sockel/ci.yml?branch=main&style=for-the-badge" height="20">](https://github.com/udoprog/sockel/actions?query=branch%3Amain)
 
-Opinionated layout primitives and components for [Yew] apps, built so
-components keep their size and don't jitter as their content changes.
+[Yew] components that keep their size as their content and state change, so
+an app's pages never jitter.
 
-Each component comes with its Sass under `style/`, and its variants are
-modifier classes set by props, so the markup and the styles stay in step.
+A button turning busy, a count gaining a digit, a field showing its error, a
+menu opening: with sockel, none of them moves what stands around it. Each
+component reserves the room its widest state needs, and overlays sit in a
+layer of their own.
 
-sockel was called plinth until 2026-11-17, and its history starts as
-`crates/plinth` in characterize. Every `plinth-` name became `sockel-`:
-classes, custom properties, and the phrase ids an app's `.ftl` overrides
-(`plinth-dialog-close` is `sockel-dialog-close`).
-
-[`Styles`] adds the compiled stylesheet ([`STYLESHEET`]) to the page. An
-app with Sass of its own builds it with sockel-build after sockel's, into
-one stylesheet, and passes that to [`Styles`] (see
-[Getting started](#getting-started)).
-The colours are the app's: sockel reads `--bg`, `--surface`, `--text`,
-`--muted`, `--border`, `--accent` and `--shadow-1`, and derives
-overridable defaults for `--danger`, `--success`, `--warning`,
-`--on-accent`, `--surface-raised` and `--scrim` from them.
-
-Each component (or small family) is a Cargo feature that gates its Rust,
-its class constants and its CSS together; `full`, the default, has all.
-
-The utilities against jitter (`.sockel-numeric`, `.sockel-scroll-area`,
-`.sockel-truncate`, `.sockel-clamp-*`, `.sockel-visually-hidden`,
-`.sockel-phone-only`, `.sockel-desktop-only`, `.sockel-focus-ring`) are
-classes only, in [`class`]; their mixins are in
-[Against jitter](#against-jitter-mixins-and-utilities).
+- **Components with their styles.** Every component ships its Sass, and its
+  variants are modifier classes set by props, so markup and styles stay in
+  step. [`Styles`](https://docs.rs/sockel/latest/sockel/struct.Styles.html) mounts the compiled [`STYLESHEET`](https://docs.rs/sockel/latest/sockel/constant.STYLESHEET.html); `sockel-build` compiles
+  an app's own Sass after it into one stylesheet, with a Rust constant per
+  class, so a misspelt class does not compile.
+- **Only what the app renders.** Each component, or small family, is a Cargo
+  feature that gates its Rust, its class constants and its CSS together.
+  `full`, the default, has them all.
+- **The app's colours.** sockel brings no palette: it reads seven colour
+  tokens from the app and derives the rest, so it fits any theme, light or
+  dark. Its scales (space, type, radii, control heights) are tokens the app
+  can retune.
+- **Tools against jitter.** Classes in [`class`](https://docs.rs/sockel/latest/sockel/class/index.html) and Sass mixins for numerals
+  of one width, truncation, line clamps, scroll areas, focus rings and
+  phone- or desktop-only parts (see
+  [Against jitter](https://docs.rs/sockel/latest/sockel/#against-jitter-mixins-and-utilities)).
 
 <br>
 
 ## Getting started
 
-An app depends on `sockel` and builds its one stylesheet, sockel's CSS and
-the app's own Sass, with `sockel-build` in its `build.rs`. No Sass step
-runs anywhere else, and no path leads into sockel's checkout. The blocks
-below are the files of a complete app (`scripts/check-packaged.sh` builds
-them against sockel's packages).
+An app depends on `sockel` and builds one stylesheet, sockel's CSS and its
+own Sass, with `sockel-build` in its `build.rs`. No other Sass step runs, and
+no path leads into sockel's source. The blocks below are the files of a
+complete app.
 
 <br>
 
 ### Dependencies
 
 In the app's `Cargo.toml`, sockel with the features the app renders (see
-[Choosing features](#choosing-features); leave out `default-features` and
-`features` for all of them), and `sockel-build` to build and to test:
+[Choosing features](https://docs.rs/sockel/latest/sockel/#choosing-features); leave out `default-features` and
+`features` for all of them), and `sockel-build` to build and test:
 
 <!-- check: Cargo.toml -->
 ```toml
@@ -69,8 +64,8 @@ sockel-build = "0.1"
 
 ### Developing against a checkout
 
-sockel is not on a registry yet, so point both crates at a checkout once, in
-the `Cargo.toml` at the workspace root (the app's own, when it is not in a
+To work against a local checkout of sockel, patch both crates once in the
+`Cargo.toml` at the workspace root (the app's own, when it is not in a
 workspace):
 
 ```toml
@@ -80,11 +75,9 @@ sockel-build = { path = "../sockel/sockel-build" }
 ```
 
 The paths are relative to that `Cargo.toml`. Where they do not resolve (a git
-worktree of the app), the same `[patch.crates-io]` with absolute paths can go
-in an untracked `.cargo/config.toml` instead.
-
-The dependency lines stay as above, and dropping the patch later switches to
-the registry. Nothing else names the checkout.
+worktree of the app), put the same `[patch.crates-io]` with absolute paths in
+an untracked `.cargo/config.toml`. The dependency lines stay as they are, and
+removing the patch returns to the registry.
 
 <br>
 
@@ -123,22 +116,21 @@ mixins as `"sockel"`:
 }
 ```
 
-`"sockel"` is the `style/` of the sockel package the app builds against.
-It emits no second copy of sockel's CSS: sockel is compiled first in the
-same build. Configure sockel's tokens through the build instead of `@use
-"sockel" with (...)` (see [Configuration](#configuration)).
+`"sockel"` is the `style/` of the sockel package the app builds against. It
+emits no second copy of sockel's CSS, which is compiled first in the same
+build. Configure sockel's tokens through the build rather than `@use "sockel"
+with (...)` (see [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)).
 
-Every class the app's Sass defines that is not sockel's must start with the
-app's prefix (`app-`); one that does not is a build error, so the app's
-classes never collide with sockel's.
-Classes a dependency's markup writes (a sign-in form the app styles) are
-the exception: `Config::foreign(["auth-*"])` lets the app style them
-unprefixed (a trailing `*` is a prefix), and they get no constant.
+Every class the app's Sass defines must be sockel's or start with the app's
+prefix (`app-`), or the build fails, so the two never collide. Classes a
+dependency's markup writes (a sign-in form the app styles) are the exception:
+`Config::foreign(["auth-*"])` lets the app style them unprefixed (a trailing
+`*` is a prefix), and they get no constant.
 
-The stylesheet is sockel's CSS, then the app's, so an app rule as specific
-as sockel's wins. An app may also style a sockel class whose part its
-`$omit` leaves out (a label head it draws itself, with `heads.label`
-omitted); a misspelt `sockel-` class is still an error.
+The stylesheet is sockel's CSS, then the app's, so an app rule as specific as
+sockel's wins. An app may also style a sockel class whose part its `$omit`
+leaves out (a label head it draws itself, with `heads.label` omitted); a
+misspelt `sockel-` class is still an error.
 
 <br>
 
@@ -165,10 +157,10 @@ sockel's Sass changes.
 ### The class constants and the stylesheet
 
 `classes.rs` holds the app's classes, named without the prefix
-(`.app-sidebar` is `class::SIDEBAR`); sockel's stay `sockel::class::...`.
-Every sockel component takes a `class` prop, so pass the constants there,
-and a class the Sass does not define does not compile. The stylesheet is
-mounted once at the root with [`Styles`]'s `css`:
+(`.app-sidebar` is `class::SIDEBAR`); sockel's are in `sockel::class`. Every
+sockel component takes a `class` prop for them, and a class the Sass does not
+define does not compile. Mount the stylesheet once at the root with
+[`Styles`](https://docs.rs/sockel/latest/sockel/struct.Styles.html)'s `css`:
 
 <!-- check: src/main.rs -->
 ```rust
@@ -193,9 +185,9 @@ fn App() -> Html {
 }
 ```
 
-The app's icons and overlays come in at the same root: an [`IconSet`]
-provider (see [Icons](#icons)) and an [`OverlayHost`] (see
-[OverlayHost](#overlayhost)), which needs the `overlay` feature:
+The app's icons and overlays join at the same root: an [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html) provider
+(see [Icons](https://docs.rs/sockel/latest/sockel/#icons)) and an [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html) (see
+[OverlayHost](https://docs.rs/sockel/latest/sockel/#overlayhost)), from the `overlay` feature:
 
 <!-- check: src/main.rs -->
 ```rust
@@ -227,8 +219,8 @@ fn main() {
 
 ### No Sass elsewhere
 
-`index.html` links no stylesheet: no `<link data-trunk rel="scss">`, and no
-`[tools] sass` in `Trunk.toml`.
+`index.html` links no stylesheet (no `<link data-trunk rel="scss">`), and
+`Trunk.toml` has no `[tools] sass`:
 
 ```html
 <link data-trunk rel="rust" href="Cargo.toml" />
@@ -239,8 +231,7 @@ fn main() {
 ### A guard against dead classes
 
 A class the Sass defines and no Rust writes is dead weight.
-`sockel_build::Usage` finds them in a test, so an app needs no guard of its
-own:
+`sockel_build::Usage` finds them in a test:
 
 <!-- check: tests/style_classes.rs -->
 ```rust
@@ -260,44 +251,43 @@ fn every_styled_class_is_written() {
 ```
 
 `SOCKEL_STYLE` is sockel's style directory, which `compile()` hands the
-package's crates. `.dynamic(["app-tone-*"])` allows classes built at runtime
-(a trailing `*` is a prefix) and `.foreign([...])` ones a dependency writes.
-Give it the `foreign`, `dynamic` and `with` calls of `build.rs`, so it
-checks the stylesheet the app builds.
-A class counts as written when a source names its constant
-(`class::SIDEBAR`) or the class in a string literal; comments and each
-item marked `#[cfg(test)]` (a test module, function or `use`) do not count. The test fails on a dead class
-and on an allowed pattern that matches no class, and prints the class,
-single-use and dead counts. `STYLE_INVENTORY=PATH` also writes
-`class<TAB>uses` lines to `PATH`. sockel runs it on itself and on the
-showcase.
+package's crates. Give `Config` the same `foreign`, `dynamic` and `with` calls
+as `build.rs`, so it checks the stylesheet the app builds;
+`.dynamic(["app-tone-*"])` allows classes built at runtime (a trailing `*` is
+a prefix).
+
+A class counts as written when a source names its constant (`class::SIDEBAR`)
+or the class in a string literal; comments and items marked `#[cfg(test)]` do
+not count. The test fails on a dead class and on an allowed pattern that
+matches no class, and prints the class, single-use and dead counts.
+`STYLE_INVENTORY=PATH` also writes `class<TAB>uses` lines to `PATH`.
 
 <br>
 
 ### How sockel-build finds sockel
 
-sockel's own `build.rs` passes two values to the `build.rs` of every package
-depending on it directly (Cargo's `links` metadata): `DEP_SOCKEL_FEATURES`,
-its enabled features, and `DEP_SOCKEL_STYLE`, the `style/` directory inside
-its package. `Config` builds those features from those sources, so the
-app's stylesheet always matches the sockel it links. A package that reaches
-sockel only through another crate is told neither: it names them with
-`Config::features([...])` and `Config::style(dir)`.
+sockel's `build.rs` passes two values to the `build.rs` of every package
+that depends on it directly (Cargo's `links` metadata): `DEP_SOCKEL_FEATURES`,
+its enabled features, and `DEP_SOCKEL_STYLE`, its packaged `style/`. `Config`
+builds those features from those sources, so the app's stylesheet always
+matches the sockel it links. A package that reaches sockel only through
+another crate names them itself, with `Config::features([...])` and
+`Config::style(dir)`.
 
 <br>
 
 ### One stylesheet per app
 
-Both `Styles` fill the same element, `<style id="sockel-styles">`
-(`sockel::STYLE_ID`): with `css` it sets the element's text to the app's
+Every [`Styles`](https://docs.rs/sockel/latest/sockel/struct.Styles.html) fills the same element, `<style id="sockel-styles">`
+([`STYLE_ID`](https://docs.rs/sockel/latest/sockel/constant.STYLE_ID.html)): with `css` it sets the element's text to the app's
 stylesheet, which holds sockel's; without it, it adds sockel's only when the
-element is missing. So whichever mounts first (the app's, or a
+element is missing. Whichever mounts first (the app's, or a
 `<sockel::Styles/>` inside a component), the page ends up with the app's
 stylesheet, once. Never link or inject sockel's CSS another way beside it.
 
 An app without Sass of its own needs no `build.rs`: it mounts
-`<sockel::Styles/>` once at its root, which adds `sockel::STYLESHEET`, and
-uses `sockel::class`.
+`<sockel::Styles/>` once at its root, which adds [`STYLESHEET`](https://docs.rs/sockel/latest/sockel/constant.STYLESHEET.html), and uses
+`sockel::class`.
 
 Every class sockel styles starts with `sockel-`, modifiers included
 (`.sockel-stack.sockel-tight`), so none collides with an app's classes. A
@@ -305,15 +295,13 @@ constant is named after its class without the prefix, as an app's are:
 `.sockel-page-head-title` is `sockel::class::PAGE_HEAD_TITLE`,
 `.sockel-tight` is `sockel::class::TIGHT`.
 
-The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
-
 <br>
 
 ### With trug
 
-sockel's `Cargo.toml` opts in to [trug] (`[package.metadata.trug]`), so
-trug builds the same stylesheet from the packaged Sass, pruned to the
-enabled features. The entry emits sockel's CSS, then the app's:
+[trug] builds the same stylesheet from sockel's packaged Sass, pruned to the
+enabled features (sockel opts in with `[package.metadata.trug]`). The entry
+emits sockel's CSS, then the app's:
 
 ```scss
 // trug/app.scss
@@ -323,48 +311,49 @@ enabled features. The entry emits sockel's CSS, then the app's:
 
 A `trug/sockel.scss` holding `@forward "pkg:sockel";` lets the app's own
 `@use "sockel"` resolve; build with `trug css trug/app.scss -I trug -o
-style.css`. `build.rs` still writes the class constants. The showcase
-(`showcase/trug/`) checks both stylesheets are equal.
+style.css`. `build.rs` still writes the class constants, and both builds give
+the same stylesheet.
 
 <br>
 
 ## Migrating from trunk's Sass step
 
-An app that compiled its styles with trunk (`<link data-trunk rel="scss">`
-and `@use "../../sockel/style/..."`) moves to the getting-started setup:
+An app that compiles its styles with trunk (`<link data-trunk rel="scss">`
+and `@use "../../sockel/style/..."`) moves to the
+[getting-started](https://docs.rs/sockel/latest/sockel/#getting-started) setup in five steps:
 
 1. **Dependencies.** Replace `sockel = { path = ... }` with the lines in
-   [Dependencies](#dependencies) and the patch in
-   [Developing against a checkout](#developing-against-a-checkout).
-2. **`@use` lines.** Delete every `@use` of sockel's checkout (`"../…/sockel/style"`,
-   `"../…/sockel/style/tokens"`, a partial): `sockel-build` compiles sockel's
-   CSS first, with the app's features. A partial that needs sockel's
-   mixins or token functions writes `@use "sockel" as p;` and calls
-   `p.below(...)` and the like. A `with (...)` on the old `@use` moves to
-   `Config::with` in `build.rs` (see [Configuration](#configuration)).
+   [Dependencies](https://docs.rs/sockel/latest/sockel/#dependencies) and the patch in
+   [Developing against a checkout](https://docs.rs/sockel/latest/sockel/#developing-against-a-checkout).
+2. **`@use` lines.** Delete every `@use` of sockel's source
+   (`"../…/sockel/style"`, `"../…/sockel/style/tokens"`, a partial):
+   `sockel-build` compiles sockel's CSS first, with the app's features. A
+   partial that needs sockel's mixins or token functions writes
+   `@use "sockel" as p;` and calls `p.below(...)` and the like. A `with (...)` on the old `@use` moves to
+   `Config::with` in `build.rs` (see [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)).
 3. **The prefix.** Every class the app's Sass defines must start with one
-   prefix (`army-`), given to `Config::prefix`. Rename the app's classes in
+   prefix (`app-`), given to `Config::prefix`. Rename the app's classes in
    the Sass and the markup together; a rule that refines a sockel class
-   (`.sockel-card.army-sidebar`) keeps sockel's part as it is. A class that
-   already starts with the prefix keeps its name (no `army-army-band`). A
-   rename by search and replace also reaches strings that are not classes
-   (ARIA roles, `data-testid` values), and tests' selectors (CSS, XPath
-   `@class`, JS) need the prefix too.
-4. **Class literals.** Add the `mod class` above and replace the app's
-   class strings in Rust with its constants (`"army-sidebar"` becomes
-   `class::SIDEBAR`, `classes!("sockel-card", "army-sidebar")` becomes
+   (`.sockel-card.app-sidebar`) keeps sockel's part as it is, and a class
+   already starting with the prefix keeps its name. Watch a search and
+   replace: it also reaches strings that are not classes (ARIA roles,
+   `data-testid` values), and tests' selectors (CSS, XPath `@class`, JS)
+   need the prefix too.
+4. **Class literals.** Add the `mod class` of
+   [the class constants](https://docs.rs/sockel/latest/sockel/#the-class-constants-and-the-stylesheet) and replace
+   the app's class strings in Rust with its constants (`"app-sidebar"` with
+   `class::SIDEBAR`, `classes!("sockel-card", "app-sidebar")` with
    `classes!(sockel::class::CARD, class::SIDEBAR)`). A misspelt or removed
    class then fails to compile, and the dead-class test finds the rest.
    Class names also travel through props, builders, match arms, `format!`
    and `Option` or tuple values; look there too. A constant's value is the
    prefixed class, so a string also used for something else (a test id)
-   needs its own literal. Until every constant is used, `#[allow(dead_code)]`
-   on `mod class` keeps `-D warnings` passing.
+   needs its own literal. While some constants are unused,
+   `#[allow(dead_code)]` on `mod class` keeps `-D warnings` passing.
 5. **trunk.** Remove `<link data-trunk rel="scss">` from `index.html` and
    `[tools] sass` from `Trunk.toml`, and mount `<sockel::Styles
-   css={STYLESHEET} />` once at the root.
-   The stylesheet it linked (`style/main.scss`) becomes the style
-   directory's `_index.scss`.
+   css={STYLESHEET} />` once at the root. The stylesheet it linked
+   (`style/main.scss`) becomes the style directory's `_index.scss`.
 
 `sockel-build` compiles with [sasso], a Rust port of dart-sass, and its
 CSS matches dart-sass's. A block's declarations written after a nested
@@ -373,24 +362,24 @@ rules, so a `padding` after `@include p.below("phone") { padding: ... }`
 wins over the media query. A dart-sass feature sasso lacks fails in
 `build.rs` with the error and its line.
 
-Including sockel's Sass from a checkout (`@use "../sockel/style"`) does not
-work once sockel comes from a registry, and is not supported for apps.
+Including sockel's Sass by path (`@use "../sockel/style"`) does not work with
+sockel from a registry, and is not supported.
 
 <br>
 
 ## Choosing features
 
 sockel has a Cargo feature per component, or per family of components that
-only work together. `full`, the default, is all of them. An app that
-renders a few turns the default off and names those; each feature brings in
-the ones it needs:
+only work together; `full`, the default, is all of them. An app that renders
+a few turns the default off and names those, and each brings in the ones it
+needs:
 
 ```toml
 [dependencies]
 sockel = { version = "0.1", default-features = false, features = ["field", "input", "layout"] }
 ```
 
-A feature gates a component's Rust and its CSS together. [`STYLESHEET`] and
+A feature gates a component's Rust and its CSS together. [`STYLESHEET`](https://docs.rs/sockel/latest/sockel/constant.STYLESHEET.html) and
 `sockel::class` hold only the enabled features' rules and classes, so a
 component or class whose feature is off does not compile, rather than
 rendering unstyled. The tokens, hooks, utilities and the menus' shared
@@ -398,72 +387,71 @@ surface are always in, and so is the `:root` tokens' part of a feature
 (`tokens.table`, ...) only while a feature that reads it is on.
 
 An app compiling its own Sass through `sockel-build` gets the same subset
-without asking (see [How sockel-build finds sockel](#how-sockel-build-finds-sockel)).
-A package that reaches sockel only through another
-crate is not told, and gets every feature's CSS, the whole stylesheet;
-`Config::features([...])` names its features instead. Cargo builds one set
+without asking (see [How sockel-build finds sockel](https://docs.rs/sockel/latest/sockel/#how-sockel-build-finds-sockel)).
+A package that reaches sockel only through another crate is not told, and
+gets the whole stylesheet unless `Config::features([...])` names its
+features. Cargo builds one set
 of features for everything built together, so a workspace whose other
 member wants more gets the union.
 
 | Feature | Brings in | Gives | CSS alone |
 | --- | --- | --- | --- |
-| `action-group` | | [`ActionGroup`] | 3.7 KB |
-| `badge` | `icons` | [`Pill`], [`Badge`], [`Dot`], [`Count`], [`StatusLabel`] | 9.6 KB |
-| `button` | `icons`, `skeleton` | [`Button`], [`IconButton`] | 11.9 KB |
-| `card-grid` | | [`CardGrid`] | 4.1 KB |
-| `color-select` | `select` | [`ColorSelect`] | 48.1 KB |
-| `composer` | `drop-zone`, `input` | [`Composer`] | 22.4 KB |
-| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`], [`ConfirmPopover`], [`ConfirmButton`], [`ConfirmInline`], [`ConfirmHost`] | 37.0 KB |
-| `disclosure` | `head`, `icons` | [`Disclosure`] | 15.2 KB |
-| `drop-zone` | `button` | [`DropZone`] | 14.3 KB |
-| `field` | | [`Field`], [`FormRow`], [`FormRows`], [`Fieldset`], [`FieldCheck`], [`FieldInputs`] | 6.3 KB |
-| `head` | `layout` | [`Head`], [`PageHead`], [`SectionHead`] | 12.8 KB |
-| `icons` | | [`Icon`], [`IconSet`], [`Glyph`] | 4.0 KB |
-| `input` | `icons` | [`TextInput`], [`Textarea`], [`SearchField`], [`InputGroup`], [`SecretInput`] | 10.2 KB |
-| `lanes` | `badge`, `reorder` | [`Lanes`], [`Lane`] | 42.8 KB |
-| `layout` | | [`Stack`], [`Cluster`], [`Card`], [`Inset`], [`Toolbar`] | 9.0 KB |
-| `library-toolbar` | `input`, `layout` | [`LibraryToolbar`] | 15.8 KB |
-| `lightbox` | `overlay` | [`Lightbox`] | 28.0 KB |
-| `loadable` | `notice`, `skeleton` | [`Loadable`] | 22.2 KB |
-| `log-view` | `button` | [`LogView`], [`LogGroup`] | 14.6 KB |
-| `media` | `icons` | [`Image`], [`Avatar`] | 5.6 KB |
-| `menu` | `button`, `icons`, `overlay` | [`Menu`], [`RowActions`], [`SplitButton`], [`ContextMenu`] | 31.1 KB |
-| `notice` | `badge`, `button` | [`Notice`], [`ErrorBox`], [`EmptyState`] | 21.9 KB |
-| `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`], [`Popover`], [`Dialog`] | 25.7 KB |
-| `pager` | `icons` | [`Pager`], [`PagerSummary`] | 6.5 KB |
-| `panel` | | [`Panel`] | 4.8 KB |
-| `picker` | `overlay`, `pager`, `select` | [`Picker`], [`PickerMenu`], [`PickerDialog`], [`ChoiceList`], [`FilterPicker`] | 50.9 KB |
-| `property-list` | `button`, `input` | [`PropertyList`], [`PropertyRow`], [`InlineEdit`] | 21.4 KB |
-| `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`], [`DragHandle`] | 33.3 KB |
-| `rows` | `button` | [`RowList`], [`PickRow`], [`ActionRow`], [`SelectionBar`] | 16.9 KB |
-| `search-select` | `select` | [`SearchSelect`] | 45.1 KB |
-| `seam` | | [`Seam`] | 5.2 KB |
-| `select` | `input`, `menu`, `tooltip` | [`Select`], [`Listbox`] | 43.9 KB |
-| `shell` | `badge` | [`AppShell`], [`BottomNav`] | 13.9 KB |
-| `shortcuts` | `overlay` | [`use_shortcut`], [`use_shortcut_layer`], [`ShortcutHelp`], [`Kbd`], [`Chord`] | 27.8 KB |
-| `skeleton` | `icons`, `media` | [`Skeleton`], [`Spinner`] | 7.4 KB |
-| `split-view` | `seam` | [`SplitView`] | 6.0 KB |
-| `stepper` | `input` | [`Stepper`] | 11.2 KB |
-| `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
-| `tabs` | | [`Tabs`], [`SubTabs`], [`LinkTabs`], [`NavList`] | 6.9 KB |
-| `time` | | [`Time`], [`use_wake_at`] | 3.7 KB |
-| `toast` | `badge`, `button`, `overlay` | [`ToastHost`], [`Toast`], [`SaveBar`] | 34.1 KB |
-| `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`Chip`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
-| `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
+| `action-group` | | [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) | 3.7 KB |
+| `badge` | `icons` | [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html), [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) | 9.6 KB |
+| `button` | `icons`, `skeleton` | [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html), [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) | 11.9 KB |
+| `card-grid` | | [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) | 4.1 KB |
+| `color-select` | `select` | [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) | 48.1 KB |
+| `composer` | `drop-zone`, `input` | [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) | 22.4 KB |
+| `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html), [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html), [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html), [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html), [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) | 37.0 KB |
+| `disclosure` | `head`, `icons` | [`Disclosure`](https://docs.rs/sockel/latest/sockel/struct.Disclosure.html) | 15.2 KB |
+| `drop-zone` | `button` | [`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html) | 14.3 KB |
+| `field` | | [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html), [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html), [`FormRows`](https://docs.rs/sockel/latest/sockel/struct.FormRows.html), [`Fieldset`](https://docs.rs/sockel/latest/sockel/struct.Fieldset.html), [`FieldCheck`](https://docs.rs/sockel/latest/sockel/struct.FieldCheck.html), [`FieldInputs`](https://docs.rs/sockel/latest/sockel/enum.FieldInputs.html) | 6.3 KB |
+| `head` | `layout` | [`Head`](https://docs.rs/sockel/latest/sockel/enum.Head.html), [`PageHead`](https://docs.rs/sockel/latest/sockel/struct.PageHead.html), [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html) | 12.8 KB |
+| `icons` | | [`Icon`](https://docs.rs/sockel/latest/sockel/struct.Icon.html), [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html), [`Glyph`](https://docs.rs/sockel/latest/sockel/enum.Glyph.html) | 4.0 KB |
+| `input` | `icons` | [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html), [`Textarea`](https://docs.rs/sockel/latest/sockel/struct.Textarea.html), [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html), [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html), [`SecretInput`](https://docs.rs/sockel/latest/sockel/struct.SecretInput.html) | 10.2 KB |
+| `lanes` | `badge`, `reorder` | [`Lanes`](https://docs.rs/sockel/latest/sockel/struct.Lanes.html), [`Lane`](https://docs.rs/sockel/latest/sockel/struct.Lane.html) | 42.8 KB |
+| `layout` | | [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html), [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html), [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html), [`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html), [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) | 9.0 KB |
+| `library-toolbar` | `input`, `layout` | [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html) | 15.8 KB |
+| `lightbox` | `overlay` | [`Lightbox`](https://docs.rs/sockel/latest/sockel/struct.Lightbox.html) | 28.0 KB |
+| `loadable` | `notice`, `skeleton` | [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) | 22.2 KB |
+| `log-view` | `button` | [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html), [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) | 14.6 KB |
+| `media` | `icons` | [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html), [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) | 5.6 KB |
+| `menu` | `button`, `icons`, `overlay` | [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html), [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html), [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html), [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html) | 31.1 KB |
+| `notice` | `badge`, `button` | [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html), [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html), [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) | 21.9 KB |
+| `overlay` | `action-group`, `button`, `head`, `icons` | [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html), [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) | 25.7 KB |
+| `pager` | `icons` | [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html), [`PagerSummary`](https://docs.rs/sockel/latest/sockel/struct.PagerSummary.html) | 6.5 KB |
+| `panel` | | [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) | 4.8 KB |
+| `picker` | `overlay`, `pager`, `select` | [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html), [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html), [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html), [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html), [`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) | 50.9 KB |
+| `property-list` | `button`, `input` | [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html), [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html), [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) | 21.4 KB |
+| `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html), [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) | 33.3 KB |
+| `rows` | `button` | [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html), [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html), [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) | 16.9 KB |
+| `search-select` | `select` | [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) | 45.1 KB |
+| `seam` | | [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) | 5.2 KB |
+| `select` | `input`, `menu`, `tooltip` | [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) | 43.9 KB |
+| `shell` | `badge` | [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html), [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) | 13.9 KB |
+| `shortcuts` | `overlay` | [`use_shortcut`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut.html), [`use_shortcut_layer`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_layer.html), [`ShortcutHelp`](https://docs.rs/sockel/latest/sockel/struct.ShortcutHelp.html), [`Kbd`](https://docs.rs/sockel/latest/sockel/struct.Kbd.html), [`Chord`](https://docs.rs/sockel/latest/sockel/struct.Chord.html) | 27.8 KB |
+| `skeleton` | `icons`, `media` | [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html), [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) | 7.4 KB |
+| `split-view` | `seam` | [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) | 6.0 KB |
+| `stepper` | `input` | [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) | 11.2 KB |
+| `table` | `icons` | [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html), [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html) | 7.1 KB |
+| `tabs` | | [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html), [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html), [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html), [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) | 6.9 KB |
+| `time` | | [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html), [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) | 3.7 KB |
+| `toast` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 34.1 KB |
+| `toggles` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 10.7 KB |
+| `tooltip` | `overlay` | [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html), [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html), [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) | 26.8 KB |
 
 "CSS alone" is `STYLESHEET` with only that feature and what it brings in;
-with none it is 3.4 KB, and with `full` 130 KB. `scripts/check-features.sh`
-checks that each feature builds alone and that its CSS holds no other
-feature's rules.
+with none it is 3.4 KB, and with `full` 130 KB. Each feature builds alone,
+and its CSS holds no other feature's rules.
 
 <br>
 
 ## Theming
 
 The app supplies seven colour tokens: `--bg`, `--surface`, `--text`,
-`--muted`, `--border`, `--accent` and `--shadow-1`. sockel derives eight more
+`--muted`, `--border`, `--accent` and `--shadow-1`. sockel derives the rest
 from them, each a default the app overrides by name (or with `Config::with`,
-as `$danger` and the rest):
+as `$danger` and so on):
 
 | Token | Default | For |
 | --- | --- | --- |
@@ -477,7 +465,7 @@ as `$danger` and the rest):
 | `--field-bg` | `--surface` | a field's fill |
 | `--card-border` | `--border` | a card's edge (`transparent` for cards without one) |
 | `--card-border-width` | `--space-px` | its width (`0` for a card whose content meets its rounded edge, with no frame) |
-| `--panel-border` | `--border` | a [`Panel`]'s ring |
+| `--panel-border` | `--border` | a [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html)'s ring |
 | `--panel-tint-text` | `--text` | a tint `Panel`'s text |
 | `--band-chrome-ground` | `--surface` | a chrome `ToolBand`'s ground |
 | `--menu-item-icon-ink` | `currentColor` | a menu row's icon (an accent beside two-line rows, say) |
@@ -485,17 +473,16 @@ as `$danger` and the rest):
 The status hues are mixed toward `--text`, so they keep their contrast on a
 light and a dark background alike. The defaults are computed on `:root`: an
 app that sets its colours on a narrower element (a dark panel) sets these
-there too. An app whose theme defines one of `--danger` to
-`--card-border-width` and `--menu-item-icon-ink` itself sets its variable to
-`false` (`$danger: false`), and sockel leaves its default off `:root`.
+there too. An app whose theme defines one of these itself sets its Sass
+variable to `false` (`$danger: false`), and sockel leaves that default off
+`:root`.
 `--focus-ring-color` (default `--accent`) colours the focus ring.
 
-sockel's own scales are custom
-properties on `:root` too (`--text-*`, `--space-*`, `--radius-*`,
-`--control-height`, `--page-*` and the rest, listed under Configuration), and
-every rule reads them, so an app retunes the embedded stylesheet by
-overriding them in its own CSS, loaded after it or with a more specific
-selector:
+sockel's own scales are custom properties on `:root` too (`--text-*`,
+`--space-*`, `--radius-*`, `--control-height`, `--page-*` and the rest, listed
+under [Configuration](https://docs.rs/sockel/latest/sockel/#configuration)), and every rule reads them, so an app
+retunes the stylesheet by overriding them in its own CSS, loaded after it or
+with a more specific selector:
 
 ```css
 :root {
@@ -534,10 +521,9 @@ widths, heights and top), `$disclosure-*`, `$drag-handle-*`, `$drop-*` (but
 ## Configuration
 
 sockel's values are defaults. Every token is a `!default` variable of
-`style/_tokens.scss`; all but the Sass-only ones (see [Theming](#theming))
-are also emitted as their custom property on `:root`. An app sets
-its own in `build.rs`, before `compile()`; only values change, never
-classes:
+`style/_tokens.scss`, and all but the Sass-only ones (see
+[Theming](https://docs.rs/sockel/latest/sockel/#theming)) are also emitted as custom properties on `:root`. An app
+sets its own in `build.rs`, before `compile()`; values change, never classes:
 
 <!-- check-variant: build.rs -->
 ```rust
@@ -559,9 +545,10 @@ the custom properties, so a page can still override those at runtime.
 `!default` takes `null` as unset); turn one off with a CSS value (`auto`,
 `inherit`, `0`).
 
-A value can name the app's own Sass variables: `with_module("style/_vars.scss",
-"v")` loads that module first, so `.with("text-sm", "v.$font-sm")` keeps one
-source for the value. The module must emit no CSS.
+A value can name the app's own Sass variables:
+`with_module("style/_vars.scss", "v")` loads that module first, so
+`.with("text-sm", "v.$font-sm")` keeps one source for the value. The module
+must emit no CSS.
 
 | Variable | Default |
 | --- | --- |
@@ -637,7 +624,7 @@ source for the value. The module must emit no CSS.
 | `$listbox-max-width`, `$listbox-active-fill` | `var(--popover-max-width)`, `color-mix(in srgb, var(--text) 7%, transparent)` (a listbox's widest, a Select's list included, and its active row's fill: the menu's) |
 | `$listbox-max-height`, `$listbox-shadow`, `$listbox-group-name-transform`, `$listbox-group-name-letter-spacing` | `null` (a listbox's tallest, under the room beside its opener, which it always keeps within; its shadow, `null` keeping the list's `--shadow-1`; its group headings' `text-transform` and `letter-spacing`; `null` leaves each as without) |
 | `$select-sheet-row-height` | `null` (a Select's rows in its phone sheet, its close button too; `null` keeps `--control-height`, `var(--touch-height)` gives a finger room) |
-| `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is kept for compatibility and unused: dialogs sit at `$layer-overlay`) |
+| `$layer-sticky`, `$layer-overlay`, `$layer-dialog`, `$layer-toast`, `$layer-tooltip` | `10`, `100`, `200`, `300`, `400` (`$layer-dialog` is unused: dialogs sit at `$layer-overlay`) |
 | `$menu-width`, `$menu-width-wide`, `$menu-width-wider`, `$menu-width-panel` | `12rem`, `16rem`, `20rem`, `34rem` |
 | `$menu-edge`, `$menu-ground`, `$menu-shadow`, `$menu-padding`, `$menu-text` | `null` each (a menu's border colour, background, shadow, padding and font size; `null` keeps the list's: `--border`, `--surface-raised`, `--shadow-1`, `--nest-inset`, inherited) |
 | `$menu-scroll-gutter` | `null` (a menu's `scrollbar-gutter`; `null` keeps the list's `stable`, `auto` gives the room to the rows until the menu scrolls) |
@@ -662,14 +649,14 @@ source for the value. The module must emit no CSS.
 | `$popover-max-width`, `$popover-sheet-height` | `22rem`, `75dvh` |
 | `$dialog-width`, `$dialog-width-wide`, `$dialog-min-height`, `$dialog-height-tall`, `$dialog-top`, `$dialog-sheet-height` | `32rem`, `48rem`, `10rem`, `40rem`, `8dvh`, `85dvh` |
 | `$toast-max-width` | `28rem` |
-| `$seam-grip`, `$seam-min` | `var(--space-3)`, `8rem` (a [`Seam`]'s grip width and each side's least size) |
-| `$panel-ground`, `$panel-tint` | 4% of `--text` over `--bg`, 14% of `--accent` (a [`Panel`]'s ground and a tint one's) |
-| `$card-grid-min`, `$card-grid-wide`, `$card-grid-narrow`, `$card-grid-narrow-phone` | `15rem`, `18rem`, `10.5rem`, `9rem` (a [`CardGrid`]'s least column width: regular, `wide`, `narrow`, `narrow` on a phone) |
+| `$seam-grip`, `$seam-min` | `var(--space-3)`, `8rem` (a [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html)'s grip width and each side's least size) |
+| `$panel-ground`, `$panel-tint` | 4% of `--text` over `--bg`, 14% of `--accent` (a [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html)'s ground and a tint one's) |
+| `$card-grid-min`, `$card-grid-wide`, `$card-grid-narrow`, `$card-grid-narrow-phone` | `15rem`, `18rem`, `10.5rem`, `9rem` (a [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html)'s least column width: regular, `wide`, `narrow`, `narrow` on a phone) |
 | `$table-max-height` | `24rem` |
 | `$drop-min-height`, `$drop-tint`, `$drop-tint-over` | `var(--touch-height)`, `12%`, `28%` |
 | `$drop-overlay-inset`, `$drop-edge-width`, `$drop-tall-label-offset`, `$drop-busy-pulse` | `0`, `null` (the zone's own border), `40vh`, `null` (no pulse) |
 | `$swatch-size`, `$color-select-width` | `1.25rem`, `10rem` |
-| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
+| `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](https://docs.rs/sockel/latest/sockel/#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$selection-bar-ground`, `$selection-bar-rule`, `$selection-bar-padding`, `$selection-bar-min-height`, `$selection-bar-radius`, `$selection-bar-margin`, `$selection-bar-text` | `null`, `var(--space-px) solid var(--border)`, `var(--space-2) 0`, a control's height plus its padding and rule, `null`, `null`, `null` (a selection bar's background, top rule, padding, least height, corners, margin and font size: a tinted chip instead of a ruled band) |
 | `$row-list-item-height`, `$row-list-item-padding`, `$row-list-hover-fill`, `$row-list-name-wrap` | `var(--control-height)`, `0 var(--space-3)`, 4% of `--text`, `false` (a row's least height, padding and hover fill; `true` wraps a name anywhere instead of cutting it to one line) |
@@ -680,11 +667,11 @@ source for the value. The module must emit no CSS.
 | `$selection-bar-count-ink`, `$selection-bar-count-weight`, `$selection-bar-count-padding` | `null` each (its count's colour, weight and start padding) |
 | `$selection-bar-count-wrap` | `false` (the count is cut to one line; `true` wraps a count that does not fit, so the bar grows a line and its actions never shrink) |
 | `$band-chrome-gap`, `$band-search-text` | `$toolbar-gap`, `var(--text-sm)` |
-| `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay [`ActionRow`]'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
+| `$action-overlay-radius`, `$action-overlay-padding` | `var(--radius-sm)`, `var(--space-3) var(--space-2)` (an overlay [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html)'s corners and its start and end padding; an app whose rows are rounded gives it the row's end corners, e.g. `0 8px 8px 0`) |
 | `$visibility-breakpoint` | `"phone"` (where `phone-only` and `desktop-only` switch) |
 | `$breakpoints` | `()`, merged over sockel's: `narrow` 30rem, `small` 36rem, `phone` 40rem, `medium` 48rem, `compact` 52rem, `regular` 56rem, `large` 60rem, `tablet` 64rem, `wide` 84rem, `broad` 90rem, `desktop` 100rem |
-| `$omit` | `()` (every part emitted; see [Leaving parts out](#leaving-parts-out)) |
-| `$features` | `null` (with [trug], `pkg:sockel/features`'s `$features`; see [Leaving parts out](#leaving-parts-out)) |
+| `$omit` | `()` (every part emitted; see [Leaving parts out](https://docs.rs/sockel/latest/sockel/#leaving-parts-out)) |
+| `$features` | `null` (with [trug], `pkg:sockel/features`'s `$features`; see [Leaving parts out](https://docs.rs/sockel/latest/sockel/#leaving-parts-out)) |
 
 `$breakpoints` moves or adds named breakpoints without restating the rest:
 `$breakpoints: ("phone": 42rem)`.
@@ -693,8 +680,8 @@ source for the value. The module must emit no CSS.
 
 ### Cascade layers
 
-An app whose Sass puts its rules in cascade layers puts sockel's in one too:
-unlayered, sockel's rules would win over every layer of the app's. `layer`
+An app whose Sass uses cascade layers puts sockel's rules in one too, or
+they win over every layer of the app's. `layer`
 wraps sockel's CSS in `@layer sockel { ... }`, and `layer_order` declares
 the app's layers before it, so a layer meant to sit below sockel's (a reset)
 comes first:
@@ -718,12 +705,11 @@ unchanged.
 
 `$omit` names the optional parts an app never renders, and sockel leaves them
 out of its CSS: a modifier no markup sets, a variant no button takes, the
-tokens of a partial the app does not load. It is empty by default, and every
-part is emitted; a name sockel does not have is an error. It is for the
-finer parts of components an app does render; a component it does not
-render is left out by its feature (see [Choosing features](#choosing-features)),
-which also leaves out the `tokens.*` part only it reads, and Loadable's
-`skeleton.loadable`.
+tokens of a partial the app does not load. It is empty by default; a name
+sockel does not have is an error. It trims components an app does render; one
+it does not render is left out by its feature (see
+[Choosing features](https://docs.rs/sockel/latest/sockel/#choosing-features)), with the `tokens.*` part only it
+reads, and Loadable's `skeleton.loadable`.
 
 Sass compiled with [trug] instead loads the tokens with the build's
 features, and the same parts follow them:
@@ -748,13 +734,13 @@ fn main() {
 | --- | --- |
 | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
 | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
-| fields | `fields.field` ([`Field`] itself, not a [`FormRow`]), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
+| fields | `fields.field` ([`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) itself, not a [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html)), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.sockel-compact`, `.sockel-one-row`), `heads.label`, `heads.list` |
 | buttons | `buttons.bare`, `buttons.ghost`, `buttons.touch`, `buttons.fold`, `buttons.fold-wide`, `buttons.busy` (the spinner and `aria-busy`) |
 | menu | `menu.widths` (`wide`, `wider`, `panel` and their tokens but `--menu-width-wide`, which Picker and SearchSelect read), `menu.tight`, `menu.danger`, `menu.current`, `menu.detail` (a row's detail and hint), `menu.heading`, `menu.note`, `menu.separator`, `menu.row-actions`, `menu.split-button`, `menu.context` (ContextMenu's target and point), `menu.marks` (a check or radio item's mark), `menu.disabled` (a disabled item) |
 | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
-| inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` ([`InputGroup`] and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
-| notices | `notices.notice` ([`Notice`]), `notices.empty-state` ([`EmptyState`]), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
+| inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` ([`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html) and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
+| notices | `notices.notice` ([`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html)), `notices.empty-state` ([`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html)), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
 | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`) |
 | popover | `popover.match-anchor` |
 | confirm | `confirm.inline` |
@@ -765,171 +751,175 @@ fn main() {
 
 ## Components
 
-- [`Stack`] (`.stack`): a column, its blocks a gap apart.
-- [`Cluster`] (`.cluster`): a row that wraps, its items centred.
-- [`ActionGroup`] (`.action-group`): the buttons ending a form, a panel
+Each entry names a component and its class without the `sockel-` prefix
+(`.stack` is `.sockel-stack`); its section below has the details.
+
+- [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) (`.stack`): a column, its blocks a gap apart.
+- [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) (`.cluster`): a row that wraps, its items centred.
+- [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) (`.action-group`): the buttons ending a form, a panel
   or a section.
-- [`Button`] (`.button`): a button or a link styled as one, its
+- [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) (`.button`): a button or a link styled as one, its
   variants and sizes, an icon slot, icon-only and fold, pressed and busy,
   all in the same box.
-- [`Checkbox`] (`.checkbox`) and [`Switch`] (`.switch`): an on or off
+- [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html) (`.checkbox`) and [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html) (`.switch`): an on or off
   toggle in a box of a fixed size.
-- [`Choice`] (`.choice`): a segmented pick-one (or pick-several) group,
-  its options of one width, in a row or stacked; [`ChipToggle`] (`.chip`) and [`ChipList`] (`.chip-list`): filter
-  chips with a count; [`Chip`] (`.chip`): a link, button or removable
+- [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) (`.choice`): a segmented pick-one (or pick-several) group,
+  its options of one width, in a row or stacked; [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) (`.chip`)
+  and [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html) (`.chip-list`): filter chips with a count; [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html) (`.chip`): a link, button or removable
   item led by an avatar or an icon.
-- [`Field`] (`.field`), [`FormRows`] (`.form-rows`) with [`FormRow`],
-  [`Fieldset`] and [`FieldCheck`]: a label, control, hint and an error
+- [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) (`.field`), [`FormRows`](https://docs.rs/sockel/latest/sockel/struct.FormRows.html) (`.form-rows`) with [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html),
+  [`Fieldset`](https://docs.rs/sockel/latest/sockel/struct.Fieldset.html) and [`FieldCheck`](https://docs.rs/sockel/latest/sockel/struct.FieldCheck.html): a label, control, hint and an error
   line that can keep its room.
-- [`TextInput`] (`.input`), [`Textarea`] (`.textarea`), [`SearchField`]
-  (`.input-box`) and [`InputGroup`] (`.input-group`): text controls at a
+- [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) (`.input`), [`Textarea`](https://docs.rs/sockel/latest/sockel/struct.Textarea.html) (`.textarea`), [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html)
+  (`.input-box`) and [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html) (`.input-group`): text controls at a
   control's height, a unit or a clear button inside the field, controls
-  joined in a row; [`native_select`] (`.native-select`) for a native
+  joined in a row; [`native_select`](https://docs.rs/sockel/latest/sockel/fn.native_select.html) (`.native-select`) for a native
   `<select>` in a field's look.
-- [`Stepper`] (`.stepper`): a number between a minus and a plus button,
-  its room that of the longest bound; [`SecretInput`] (`.input-box`): a
+- [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) (`.stepper`): a number between a minus and a plus button,
+  its room that of the longest bound; [`SecretInput`](https://docs.rs/sockel/latest/sockel/struct.SecretInput.html) (`.input-box`): a
   password with show, copy and clear slots that keep their room.
-- [`IconButton`] (`.iconed`, `.trailing`): a button with an icon, which
+- [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) (`.iconed`, `.trailing`): a button with an icon, which
   the app supplies and styles.
-- [`Icon`] (`.glyph` or `.name`), [`IconSet`], [`use_icon`]: sockel's and the app's icons, from
-  the set an app provides or a built-in one, in a fixed box.
-- [`Image`] (`.image`): a picture in a box of a fixed ratio, with its
-  placeholder; [`Avatar`] (`.avatar`): a portrait of a fixed size, its
+- [`Icon`](https://docs.rs/sockel/latest/sockel/struct.Icon.html) (`.glyph` or `.name`), [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html), [`use_icon`](https://docs.rs/sockel/latest/sockel/fn.use_icon.html): sockel's and
+  the app's icons, from the set an app provides or a built-in one, in a
+  fixed box.
+- [`Image`](https://docs.rs/sockel/latest/sockel/struct.Image.html) (`.image`): a picture in a box of a fixed ratio, with its
+  placeholder; [`Avatar`](https://docs.rs/sockel/latest/sockel/struct.Avatar.html) (`.avatar`): a portrait of a fixed size, its
   initials behind it.
-- [`Notice`] (`.notice`): an inline message in a tone, its action and
-  close; [`ErrorBox`] (`.error-box`): an error, its cause and a retry;
-  [`EmptyState`] (`.empty-state`): what stands where there is nothing,
+- [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html) (`.notice`): an inline message in a tone, its action and
+  close; [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html) (`.error-box`): an error, its cause and a retry;
+  [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) (`.empty-state`): what stands where there is nothing,
   compact for a row.
-- [`DropZone`] (`.drop-zone`): a target for dropped or pasted files, or
+- [`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html) (`.drop-zone`): a target for dropped or pasted files, or
   picked with its button, with over, refused, busy and error states drawn
-  by an overlay, so its box never changes; [`accepts`] and [`refusal`]
+  by an overlay, so its box never changes; [`accepts`](https://docs.rs/sockel/latest/sockel/fn.accepts.html) and [`refusal`](https://docs.rs/sockel/latest/sockel/fn.refusal.html)
   filter by type and size.
-- [`Pill`] (`.pill`), [`Badge`] (`.badge`), [`Dot`] (`.dot`) and [`Count`]
-  (`.count`): short marks of a fixed box, in a [`Tone`];
-  [`StatusLabel`] (`.status-label`): a status as wide as its widest state.
-- [`RowList`] (`.row-list`) with [`RowListItem`]: rows of a name, a detail
-  and what ends them, divided by lines that add no height; [`PickRow`]
-  (`.pick-row`): a row that is one press; [`SelectionBar`]
+- [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html) (`.pill`), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html) (`.badge`), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html) (`.dot`) and [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html)
+  (`.count`): short marks of a fixed box, in a [`Tone`](https://docs.rs/sockel/latest/sockel/enum.Tone.html);
+  [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) (`.status-label`): a status as wide as its widest state.
+- [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html) (`.row-list`) with [`RowListItem`](https://docs.rs/sockel/latest/sockel/struct.RowListItem.html): rows of a name, a detail
+  and what ends them, divided by lines that add no height; [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html)
+  (`.pick-row`): a row that is one press; [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html)
   (`.selection-bar`): the picked count and its actions under a list;
-  [`ActionRow`] (`.action-row`): actions on what stands around them, over
-  a row's end as an overlay; [`CardGrid`] (`.card-grid`): cards in as many
+  [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html) (`.action-row`): actions on what stands around them, over
+  a row's end as an overlay; [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) (`.card-grid`): cards in as many
   columns as fit.
-- [`Reorder`] (`.reorder`) with [`ReorderRow`]s or [`ReorderItem`] children
-  (their grip a [`ReorderHandle`]): rows moved by a drag on
-  their [`DragHandle`] (`.drag-handle`) or by keyboard, nothing reflowing
+- [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html) (`.reorder`) with [`ReorderRow`](https://docs.rs/sockel/latest/sockel/struct.ReorderRow.html)s or [`ReorderItem`](https://docs.rs/sockel/latest/sockel/struct.ReorderItem.html) children
+  (their grip a [`ReorderHandle`](https://docs.rs/sockel/latest/sockel/struct.ReorderHandle.html)): rows moved by a drag on
+  their [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) (`.drag-handle`) or by keyboard, nothing reflowing
   until the drop, each step announced.
-- [`ReorderTree`] with [`ReorderList`]s at any depth (their rows'
-  grip a [`ReorderTreeHandle`]): rows moved within and between nested
+- [`ReorderTree`](https://docs.rs/sockel/latest/sockel/struct.ReorderTree.html) with [`ReorderList`](https://docs.rs/sockel/latest/sockel/struct.ReorderList.html)s at any depth (their rows'
+  grip a [`ReorderTreeHandle`](https://docs.rs/sockel/latest/sockel/struct.ReorderTreeHandle.html)): rows moved within and between nested
   lists, into a list and out of it by keyboard too.
-- [`Lanes`] (`.lanes`) with [`Lane`]s: lists side by side, a board's
+- [`Lanes`](https://docs.rs/sockel/latest/sockel/struct.Lanes.html) (`.lanes`) with [`Lane`](https://docs.rs/sockel/latest/sockel/struct.Lane.html)s: lists side by side, a board's
   columns, whose rows move within and between them by a drag or by
   keyboard (Left and Right to the lane beside), each step announced with
   the lane's name.
-- [`Spinner`] (`.spinner`): a spinning glyph in the icon box;
-  [`Skeleton`] (`.skeleton`): a placeholder of the box its content will
-  have; [`Loadable`] (`.loadable`): loading, empty, error and ready in
+- [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) (`.spinner`): a spinning glyph in the icon box;
+  [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html) (`.skeleton`): a placeholder of the box its content will
+  have; [`Loadable`](https://docs.rs/sockel/latest/sockel/struct.Loadable.html) (`.loadable`): loading, empty, error and ready in
   one box that keeps its height.
-- [`Table`] (`.table`) with [`TableRow`] and [`TableCell`]: a table in a
-  scroll area, its bulk actions' room reserved; [`SortHeader`]
+- [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html) (`.table`) with [`TableRow`](https://docs.rs/sockel/latest/sockel/struct.TableRow.html) and [`TableCell`](https://docs.rs/sockel/latest/sockel/struct.TableCell.html): a table in a
+  scroll area, its bulk actions' room reserved; [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html)
   (`.sort-header`): a column heading whose sort mark keeps its box.
-- [`Pager`] (`.pager`): page buttons in a fixed number of slots, first,
+- [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html) (`.pager`): page buttons in a fixed number of slots, first,
   previous, numbers with gaps, next and last, so it keeps its width from
-  the first page to the last; [`Disclosure`] (`.disclosure`): a summary
+  the first page to the last; [`Disclosure`](https://docs.rs/sockel/latest/sockel/struct.Disclosure.html) (`.disclosure`): a summary
   row that toggles its body, one height shut or open.
-- [`Lightbox`] (`.lightbox`): a full-screen viewer of a set of images,
+- [`Lightbox`](https://docs.rs/sockel/latest/sockel/struct.Lightbox.html) (`.lightbox`): a full-screen viewer of a set of images,
   previous and next, zoom and a pan by scrolling.
-- [`LogView`] (`.log-view`): an append-only scroll that keeps to its end
+- [`LogView`](https://docs.rs/sockel/latest/sockel/struct.LogView.html) (`.log-view`): an append-only scroll that keeps to its end
   until the reader scrolls away, with a jump back to the latest;
-  [`LogGroup`] (`.log-group`): a run of its rows folded to one.
-- [`Composer`] (`.composer`): a message's growing box, Enter to send,
+  [`LogGroup`](https://docs.rs/sockel/latest/sockel/struct.LogGroup.html) (`.log-group`): a run of its rows folded to one.
+- [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) (`.composer`): a message's growing box, Enter to send,
   attachments and a draft kept per key.
-- [`PropertyList`] (`.property-list`) with [`PropertyRow`]s: an entity's
+- [`PropertyList`](https://docs.rs/sockel/latest/sockel/struct.PropertyList.html) (`.property-list`) with [`PropertyRow`](https://docs.rs/sockel/latest/sockel/struct.PropertyRow.html)s: an entity's
   fields as label and value rows, its fields reading as text until the
-  pointer or focus is on them; [`InlineEdit`] (`.inline-edit`): a value
+  pointer or focus is on them; [`InlineEdit`](https://docs.rs/sockel/latest/sockel/struct.InlineEdit.html) (`.inline-edit`): a value
   that becomes its field in the same box, committing on Enter or a blur.
-- [`Time`] (`.time`): a moment relative to now ("3m ago", "43m left") or
+- [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html) (`.time`): a moment relative to now ("3m ago", "43m left") or
   as a date, in a box of a fixed width, redrawn by one timer the page's
   times share, and only when its text changes.
-- [`use_shortcut`] and [`use_shortcut_layer`]: keys bound in layers,
-  skipped while typing; [`ShortcutHelp`] (`.shortcut-help`): the dialog
-  listing them, made from the same registry; [`Kbd`] (`.kbd`): a chord as
+- [`use_shortcut`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut.html) and [`use_shortcut_layer`](https://docs.rs/sockel/latest/sockel/fn.use_shortcut_layer.html): keys bound in layers,
+  skipped while typing; [`ShortcutHelp`](https://docs.rs/sockel/latest/sockel/struct.ShortcutHelp.html) (`.shortcut-help`): the dialog
+  listing them, made from the same registry; [`Kbd`](https://docs.rs/sockel/latest/sockel/struct.Kbd.html) (`.kbd`): a chord as
   keycaps, Apple's symbols there and words elsewhere.
-- [`ToastHost`] (`.toast-host`) and [`Toast`] (`.toast`): short messages
+- [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html) (`.toast-host`) and [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) (`.toast`): short messages
   with an undo, fixed over the window's bottom so they move nothing, their
-  clock held under the pointer or focus; [`SaveBar`] (`.save-bar`): a
+  clock held under the pointer or focus; [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) (`.save-bar`): a
   form's unsaved changes, save and discard, in the flow at one height,
-  with [`UnloadGuard`] for the browser's own prompt.
-- [`Toolbar`] (`.toolbar`): one line of controls; `band` wraps them
-  instead (`.band`, with `.chrome` and `.search`), in [`ToolbarPart`]s
+  with [`UnloadGuard`](https://docs.rs/sockel/latest/sockel/struct.UnloadGuard.html) for the browser's own prompt.
+- [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) (`.toolbar`): one line of controls; `band` wraps them
+  instead (`.band`, with `.chrome` and `.search`), in [`ToolbarPart`](https://docs.rs/sockel/latest/sockel/struct.ToolbarPart.html)s
   (`.toolbar-part`, `.ruled`) that each keep to one line; a
-  [`ToolbarSpacer`] pushes the controls after it to the end.
-- [`Panel`] (`.panel-box`): a ringed ground over a list or a view holding
+  [`ToolbarSpacer`](https://docs.rs/sockel/latest/sockel/struct.ToolbarSpacer.html) pushes the controls after it to the end.
+- [`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) (`.panel-box`): a ringed ground over a list or a view holding
   its filters or a short form, as a column or a line, tinted or bare.
-- [`Seam`] (`.seam`): two panes and the divider dragged between them, each
+- [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) (`.seam`): two panes and the divider dragged between them, each
   pane keeping its least size.
-- [`use_width`]: an element's width, at most once a frame.
-- [`AppShell`] (`.app-shell`): an app's frame, a top bar over a page that
+- [`use_width`](https://docs.rs/sockel/latest/sockel/fn.use_width.html): an element's width, at most once a frame.
+- [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html) (`.app-shell`): an app's frame, a top bar over a page that
   scrolls on its own, its section navigation in the bar when wide and a bar
-  at the bottom when narrow; [`BottomNav`] (`.bottom-nav`): those sections,
+  at the bottom when narrow; [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) (`.bottom-nav`): those sections,
   the current one marked by `aria-current`, each with a count.
-- [`SplitView`] (`.split-view`): a list and the detail opened from it on a
-  [`Seam`] when wide, one at a time when narrow, the app's route saying
+- [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) (`.split-view`): a list and the detail opened from it on a
+  [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) when wide, one at a time when narrow, the app's route saying
   what is open.
-- [`Tabs`] (`.tabs`) and [`SubTabs`]: a tab list, the selected tab marked by
-  an underline inside its box; [`NavList`] (`.nav-list`): a side or settings
+- [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html) (`.tabs`) and [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html): a tab list, the selected tab marked by
+  an underline inside its box; [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) (`.nav-list`): a side or settings
   navigation, the current entry marked by `aria-current`.
-- [`Card`] (`.card`): a surface lifted off the page.
-- [`PageHead`] (`.page-head`) and [`SectionHead`] (`.section-head`): a
+- [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) (`.card`): a surface lifted off the page.
+- [`PageHead`](https://docs.rs/sockel/latest/sockel/struct.PageHead.html) (`.page-head`) and [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html) (`.section-head`): a
   page's or a section's title, its help and its actions.
-- [`OverlayHost`] (`.overlay-host`): the optional root of the overlay
-  layer, which [`use_overlays`] finds ([`overlay`] without one);
-  [`use_overlay`] puts an app's own overlay on its stack.
-- [`Popover`] (`.popover`): a surface beside its anchor in the overlay
-  layer, placed before it shows ([`place`], [`place_fit`], [`use_popover`]),
+- [`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html) (`.overlay-host`): the optional root of the overlay
+  layer, which [`use_overlays`](https://docs.rs/sockel/latest/sockel/fn.use_overlays.html) finds ([`overlay`](https://docs.rs/sockel/latest/sockel/fn.overlay.html) without one);
+  [`use_overlay`](https://docs.rs/sockel/latest/sockel/fn.use_overlay.html) puts an app's own overlay on its stack.
+- [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html) (`.popover`): a surface beside its anchor in the overlay
+  layer, placed before it shows ([`place`](https://docs.rs/sockel/latest/sockel/fn.place.html), [`place_fit`](https://docs.rs/sockel/latest/sockel/fn.place_fit.html), [`use_popover`](https://docs.rs/sockel/latest/sockel/fn.use_popover.html)),
   dismissed by a press outside or Escape, a sheet on a phone.
-- [`Dialog`] (`.dialog`): a modal box over a scrim, its head, a body that
+- [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) (`.dialog`): a modal box over a scrim, its head, a body that
   scrolls and pinned actions, in three sizes; a sheet on a phone. The page
   behind holds still; Escape closes the innermost overlay only.
-- [`Confirm`] (`.confirm`): a dialog asking before an action, with
-  [`ask`] and [`ConfirmHost`] for promise-style confirms;
-  [`ConfirmPopover`] and [`ConfirmButton`]: the same beside a button;
-  [`ConfirmInline`] (`.confirm-inline`): No and Yes replacing a button in
+- [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html) (`.confirm`): a dialog asking before an action, with
+  [`ask`](https://docs.rs/sockel/latest/sockel/fn.ask.html) and [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) for promise-style confirms;
+  [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html) and [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html): the same beside a button;
+  [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html) (`.confirm-inline`): No and Yes replacing a button in
   its box.
-- [`Tooltip`] (`.tooltip`) and [`DataTips`] (`data-tip`): a short tip in
+- [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html) (`.tooltip`) and [`DataTips`](https://docs.rs/sockel/latest/sockel/struct.DataTips.html) (`data-tip`): a short tip in
   the overlay layer after a pointer's rest or on keyboard focus;
-  [`HoverCard`] (`.hover-card`): a richer card on hover or focus;
-  [`ReasonButton`]: a [`Button`] that says why it cannot act, in one node.
-- [`Menu`] (`.menu`): a button opening a list of actions ([`MenuItem`],
-  [`MenuCheck`], [`MenuRadio`], separators, headings, notes), with
-  keyboard navigation and type-ahead; [`RowActions`] (`.row-actions`), a
-  row's icon buttons and overflow menu; [`SplitButton`]
-  (`.split-button`); [`ContextMenu`], opened at the pointer.
-- [`Select`] (`.select`): a field's box showing what is chosen, as wide
-  as its widest option, opening a [`Listbox`] (`.listbox`) of its options
-  while focus stays on it; [`Listbox`] is the list's keyboard state.
-- [`ColorSelect`] (`.color-select`): a swatch face of one width showing the
+  [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html) (`.hover-card`): a richer card on hover or focus;
+  [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html): a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) that says why it cannot act, in one node.
+- [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html) (`.menu`): a button opening a list of actions ([`MenuItem`](https://docs.rs/sockel/latest/sockel/struct.MenuItem.html),
+  [`MenuCheck`](https://docs.rs/sockel/latest/sockel/struct.MenuCheck.html), [`MenuRadio`](https://docs.rs/sockel/latest/sockel/struct.MenuRadio.html), separators, headings, notes), with
+  keyboard navigation and type-ahead; [`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html) (`.row-actions`), a
+  row's icon buttons and overflow menu; [`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html)
+  (`.split-button`); [`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html), opened at the pointer.
+- [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html) (`.select`): a field's box showing what is chosen, as wide
+  as its widest option, opening a [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) (`.listbox`) of its options
+  while focus stays on it; [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) is the list's keyboard state.
+- [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) (`.color-select`): a swatch face of one width showing the
   chosen colour, opening a grid of the app's palette (data) and an optional
   custom colour, on the select pattern.
-- [`SearchSelect`] (`.search-select`): a text field filtering a
-  [`Listbox`] of options in groups, loaded here or elsewhere, the list
-  one width and `--picker-rows` high, loading or not.
-- [`FilterPicker`] (`.filter-picker`): a list's filter button,
+- [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) (`.search-select`): a text field filtering a
+  [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) of options in groups, loaded here or elsewhere, the list
+  one width and `--picker-rows` high, loading or not; optionally a
+  more-results row, a new-value row and free text.
+- [`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) (`.filter-picker`): a list's filter button,
   `--filter-width` wide, the first choice and a reserved count of the
   rest, opening a multi-select listbox.
-- [`Picker`] (`.picker`): a field of one width showing the current
-  option, opening a [`ChoiceList`] (`.choice-list`), options with icon,
+- [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html) (`.picker`): a field of one width showing the current
+  option, opening a [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html) (`.choice-list`), options with icon,
   mark, detail and badge slots under a search field, `--picker-rows`
-  high; [`PickerMenu`], the same from an action's button;
-  [`PickerDialog`], the searchable shell for a large
-  set, single or multi-select, in a [`Dialog`]; [`ChoicePopup`], the
+  high; [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html), the same from an action's button;
+  [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html), the searchable shell for a large
+  set, single or multi-select, in a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html); [`ChoicePopup`](https://docs.rs/sockel/latest/sockel/struct.ChoicePopup.html), the
   list's popup below any opener the app renders.
-- [`LibraryToolbar`] (`.library-toolbar`): a list's search field and its
+- [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html) (`.library-toolbar`): a list's search field and its
   filter buttons, one row.
 
 Where a component cannot be used (the element is another component's),
-the class functions ([`stack`], [`cluster`], [`toolbar`], [`card`], ...) give
+the class functions ([`stack`](https://docs.rs/sockel/latest/sockel/fn.stack.html), [`cluster`](https://docs.rs/sockel/latest/sockel/fn.cluster.html), [`toolbar`](https://docs.rs/sockel/latest/sockel/fn.toolbar.html), [`card`](https://docs.rs/sockel/latest/sockel/fn.card.html), ...) give
 the same classes.
-
 <br>
 
 ## Button
@@ -2916,6 +2906,15 @@ listbox under it in the overlay layer, focus staying in the field. Props:
   `empty_label` (the app's words), `id`, `describedby`, `size`, `fill`
   (`FILL`), `invalid`, `disabled`, `autofocus`, `class`, `testid` (the
   list's is it suffixed `-options`).
+- Off by default: `more` with `on_more` (a more-results row ending the
+  list, for paged server results; muted with a spinner while `busy`,
+  `more_label`), `on_create: Option<Callback<String>>` (a new-value row
+  after the options offering the trimmed text typed while
+  `offers_new(options, query)`: not blank and no label, ignoring case;
+  `create_label`), `free_text` with `on_text` (no option is active until
+  the arrows move; Enter without one, Tab or a press outside give the
+  typed text, Escape still reverts) and `text` (shown while `value` is
+  none of the options).
 
 `listed(options, query, answers, busy, filter)` says what an open list shows
 (`Listed::Loading` or `Listed::Options(indices)`), `search_select(size,
@@ -2925,7 +2924,10 @@ over the enabled options (Home, End and Space edit the text), Enter picks,
 Escape, Tab or a press outside close it and give the field back what is
 chosen. Typing makes the first match active. Parts:
 `SEARCH_SELECT_LIST`, `SEARCH_SELECT_GROUP` with `SEARCH_SELECT_HEADING`,
-`SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row).
+`SEARCH_SELECT_DETAIL`, `SEARCH_SELECT_NOTE` (the loading or no-match row),
+and the rows after the options, `search_select_row(active, more)`:
+`SEARCH_SELECT_CREATE` (in the accent, the text in `SEARCH_SELECT_TYPED`)
+and `SEARCH_SELECT_MORE` (muted).
 
 `FilterPicker<T>` is a list's filter, for a [`LibraryToolbar`]: a button
 (`BUTTON`, `FILTER_PICKER`, `ON` while anything is chosen) saying `all`, or
