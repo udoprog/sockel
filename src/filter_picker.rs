@@ -10,7 +10,7 @@ use crate::phrasebookcatalog01::{L10N, label};
 use crate::picker::{ChoiceList, ChoicePopup, PickerOption, SEARCH_FROM};
 use crate::roving::printable;
 use crate::select::scroll_to;
-use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, use_overlays, use_popover};
+use crate::{Dismiss, Glyph, Icon, PopoverAlign, Side, class, use_overlays};
 
 /// One choice of a [`FilterPicker`].
 #[derive(Clone, Debug, PartialEq)]
@@ -103,12 +103,13 @@ where
         Callback::from(move |_: Dismiss| open.set(false))
     };
     let searchable = props.choices.len() > SEARCH_FROM;
-    let placed = use_popover(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         *open && !searchable,
         face.clone(),
         list.clone(),
         Side::Below,
         PopoverAlign::Start,
+        None,
         on_dismiss.clone(),
     );
     {
@@ -311,7 +312,7 @@ where
                 aria-activedescendant={active.map(|i| option_id(&id, i))}
                 aria-label={name.clone()} title={name}
                 disabled={props.disabled} data-testid={props.testid.clone()}
-                {onclick} {onmousedown} {onkeydown}>
+                {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 <span class={class::FILTER_PICKER_TEXT}>{ text }</span>
                 <span class={classes!(class::FILTER_PICKER_COUNT, (more == 0).then_some(class::OFF))}
                     aria-hidden="true">

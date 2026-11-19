@@ -12,7 +12,7 @@ use crate::roving::{menu_step, printable};
 use crate::select::scroll_to;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Dismiss, Glyph, Icon, InputSize, Pager,
-    PopoverAlign, SearchField, Side, class, input_box, page_count, use_overlays, use_popover,
+    PopoverAlign, SearchField, Side, class, input_box, page_count, use_overlays,
 };
 
 /// How many options a list has before it offers a search field.
@@ -557,12 +557,13 @@ pub struct ChoicePopupProps {
 pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
     let overlays = use_overlays();
     let popup = use_node_ref();
-    let placed = use_popover(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         props.open,
         props.anchor.clone(),
         popup.clone(),
         Side::Below,
         props.align,
+        None,
         props.on_dismiss.clone(),
     );
     {
@@ -610,7 +611,7 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
     });
     overlays.portal(html! {
         <div ref={popup} class={classes!(class::PICKER_POPUP, placed.is_some().then_some(class::PLACED))}
-            {style} {onkeydown}
+            {style} onkeydown={escape.after(onkeydown)}
             data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-popup")))}>
             { props.children.clone() }
         </div>

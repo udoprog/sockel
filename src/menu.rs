@@ -13,7 +13,7 @@ use crate::roving::{Typeahead, menu_step, printable, typeahead};
 use crate::timer::Timer;
 use crate::{
     Button, ButtonSize, ButtonVariant, Dismiss, Glyph, Icon, PopoverAlign, Side, class,
-    use_overlays, use_popover_within,
+    use_overlays,
 };
 
 /// What the arrow keys, Home, End and type-ahead move between.
@@ -297,7 +297,7 @@ struct ListProps {
 fn MenuList(props: &ListProps) -> Html {
     let overlays = use_overlays();
     let list = use_node_ref();
-    let placed = use_popover_within(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         props.open,
         props.anchor.clone(),
         list.clone(),
@@ -350,7 +350,7 @@ fn MenuList(props: &ListProps) -> Html {
                     props.sheet.then_some(class::SHEET), props.class.clone())}
                 hidden={!props.open}
                 role="menu" aria-label={props.label.clone()} {style}
-                data-testid={props.testid.clone()} {onclick} {onkeydown}>
+                data-testid={props.testid.clone()} {onclick} onkeydown={escape.after(onkeydown)}>
                 { props.children.clone() }
             </div>
         </>

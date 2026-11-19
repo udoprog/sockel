@@ -296,12 +296,13 @@ where
         let open = open.clone();
         Callback::from(move |_: Dismiss| open.set(false))
     };
-    let placed = crate::use_popover(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         *open,
         face.clone(),
         list.clone(),
         Side::Below,
         PopoverAlign::Start,
+        None,
         on_dismiss,
     );
     let held = crate::menu::use_held_width(list.clone(), placed.is_some());
@@ -685,7 +686,7 @@ where
                             aria-activedescendant={active.map(|i| option_id(&id, i))}
                             autocomplete="off" spellcheck="false"
                             data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-filter")))}
-                            {oninput} {onkeydown} />
+                            {oninput} onkeydown={escape.after(onkeydown)} />
                     </span>
                 </div>
         });
@@ -755,7 +756,7 @@ where
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled} data-testid={props.testid.clone()}
-                {onclick} {onmousedown} {onkeydown}>
+                {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 <span class={class::SELECT_VALUE}>
                     { for options.iter().enumerate().map(text) }
                     { for summary }

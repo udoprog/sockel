@@ -191,12 +191,13 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
         let open = open.clone();
         Callback::from(move |_: Dismiss| open.set(false))
     };
-    let placed = crate::use_popover(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         *open,
         face.clone(),
         list.clone(),
         Side::Below,
         PopoverAlign::Start,
+        None,
         on_dismiss,
     );
     let held = crate::menu::use_held_width(list.clone(), placed.is_some());
@@ -427,7 +428,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
             }
         });
         overlays.portal(html! {
-            <div ref={list.clone()} class={color_list(placed.is_some())} {style} {onkeydown}>
+            <div ref={list.clone()} class={color_list(placed.is_some())} {style} onkeydown={escape.after(onkeydown)}>
                 <div id={list_id.clone()} role="listbox" class={class::COLOR_GRID}
                     aria-label={props.label.clone()} onmousedown={hold_focus}
                     style={format!("--color-select-columns: {columns};")}
@@ -471,7 +472,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled} data-testid={props.testid.clone()}
-                {onclick} {onmousedown} {onkeydown}>
+                {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 { face_swatch }
                 if !swatch_only {
                     { text }

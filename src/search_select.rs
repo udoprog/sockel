@@ -8,10 +8,7 @@ use yew::prelude::*;
 use crate::listbox::{ListKey, Listbox, listbox, listbox_option, option_id};
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::select::scroll_to;
-use crate::{
-    Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays,
-    use_popover,
-};
+use crate::{Dismiss, Glyph, Icon, InputSize, PopoverAlign, Side, class, input_box, use_overlays};
 
 /// One option of a [`SearchSelect`].
 #[derive(Clone, Debug, PartialEq)]
@@ -203,12 +200,13 @@ where
             query.set(None);
         })
     };
-    let placed = use_popover(
+    let (placed, escape) = crate::popover::use_popover_keyed(
         *open,
         field.clone(),
         list.clone(),
         Side::Below,
         PopoverAlign::Start,
+        None,
         on_dismiss.clone(),
     );
     {
@@ -440,7 +438,7 @@ where
                     autocomplete="off" spellcheck="false" disabled={props.disabled}
                     data-autofocus={props.autofocus.then_some("")}
                     data-testid={props.testid.clone()}
-                    {oninput} {onkeydown} {onclick} />
+                    {oninput} onkeydown={escape.after(onkeydown)} {onclick} />
             </span>
             { popup.unwrap_or_default() }
         </>

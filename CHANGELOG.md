@@ -37,6 +37,11 @@ props with `yew::props!`, which fills them in:
 - sockel-build's docs show one `Config` shared by `build.rs` and the
   `Usage` guard: a `style.rs` that both `include!`, the guard adding
   `.style(env!("SOCKEL_STYLE"))`.
+- `--layer-host` (`$layer-host`): the overlay host's z-index, `auto` by
+  default, so the host is no stacking context and nothing changes. An app
+  whose own overlays sit at z-index 1000 or more sets it above them (say
+  `--layer-host: 1100`), and every sockel popover, menu, list, dialog, toast
+  and tooltip shows over the app's, in their own order.
 
 ### Changed
 
@@ -51,6 +56,14 @@ props with `yew::props!`, which fills them in:
 - `Reorder` with `body_drag`: a press let go outside the window before it
   became a drag no longer leaves a drag that the next pointer move over the
   row would start without a button held.
+- Escape that closes a popover, menu, select, search select, color select,
+  filter picker or picker list is now handled on its face and its surface
+  and has its default prevented. The app's own keydown handlers on their
+  ancestors (yew runs them before the document hears the key) can check
+  `defaultPrevented` and skip it, so a form that cancels on Escape no
+  longer cancels while closing a list inside it. Apps that place their own
+  popover with `use_popover` keep the document's handling, where Escape is
+  now also default-prevented.
 
 ## [0.1.0] - 2026-11-19
 

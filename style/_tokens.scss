@@ -30,6 +30,9 @@
 // - `--layer-*`: the stacking order of what floats (sticky, overlay, toast,
 //   tooltip). Popovers, menus, lists and dialogs share `--layer-overlay`; the
 //   one opened later is later in the overlay host, so it is on top.
+//   `--layer-host` is the overlay host's own z-index, `auto` by default (no
+//   stacking context): an app whose own overlays sit at 1000 or more raises
+//   it above them, and the layers inside keep their order.
 // - `--tooltip-max-width`: a tooltip's widest; `--toast-max-width`: a toast's.
 //   An app with a tray at the window's bottom sets `--toast-tray` to its height.
 // - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
@@ -572,6 +575,7 @@ $focus-ring-color: var(--accent) !default;
 $focus-ring-width: 2px !default;
 $focus-ring-offset: 2px !default;
 $layer-sticky: 10 !default;
+$layer-host: auto !default;
 $layer-overlay: 100 !default;
 // Kept so a `with()` config that sets it still compiles; nothing reads it.
 $layer-dialog: 200 !default;
@@ -844,6 +848,7 @@ $-feature-parts: (
     --focus-ring-offset: #{$focus-ring-offset};
 
     --layer-sticky: #{$layer-sticky};
+    --layer-host: #{$layer-host};
     --layer-overlay: #{$layer-overlay};
     --layer-toast: #{$layer-toast};
     --layer-tooltip: #{$layer-tooltip};

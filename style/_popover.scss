@@ -4,7 +4,7 @@
 //   toasts open in: an `OverlayHost`'s, after the app's content, or without
 //   one `#sockel-overlay`, the last child of `<body>`. It lays nothing out,
 //   so an open popover never makes the page taller or changes its
-//   scrollbar.
+//   scrollbar. Its z-index is `--layer-host` (`auto`: none of its own).
 // - `.sockel-popover`: fixed beside its anchor at the place popover.rs
 //   measured (`--popover-left`, `--popover-top`, `--popover-max-height`),
 //   as wide as its content up to `--popover-max-width`, whatever side it
@@ -28,6 +28,7 @@
     position: absolute;
     top: 0;
     left: 0;
+    z-index: var(--layer-host);
     width: 0;
     height: 0;
 }

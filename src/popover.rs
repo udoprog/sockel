@@ -1,6 +1,6 @@
 //! Popover (`style/_popover.scss`).
 
-use std::cell::Cell;
+use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
 use phrasebook02::yew023::use_phrases_with;
@@ -299,6 +299,33 @@ impl Dismiss {
     }
 }
 
+/// An open popover's Escape, for the `onkeydown` of its anchor and surface:
+/// yew runs the app's handlers on their ancestors before the document
+/// hears the key, so Escape is taken there and its default prevented,
+/// letting those handlers check `defaultPrevented`.
+#[derive(Clone, Default)]
+pub(crate) struct Escape(Rc<RefCell<Option<Keyed>>>);
+
+type Keyed = Rc<dyn Fn(&web_sys::Event)>;
+
+impl Escape {
+    pub(crate) fn on(&self, e: &KeyboardEvent) {
+        let keyed = self.0.borrow().clone();
+        if let Some(keyed) = keyed {
+            keyed(e);
+        }
+    }
+
+    /// `f`, then Escape unless `f` took the key.
+    pub(crate) fn after(&self, f: Callback<KeyboardEvent>) -> Callback<KeyboardEvent> {
+        let escape = self.clone();
+        Callback::from(move |e: KeyboardEvent| {
+            f.emit(e.clone());
+            escape.on(&e);
+        })
+    }
+}
+
 /// A listener added to a target, removed when dropped.
 pub(crate) struct Listener {
     target: web_sys::EventTarget,
@@ -509,6 +536,7 @@ pub fn use_popover(
         on_dismiss,
         false,
     )
+    .0
 }
 
 /// `use_popover` kept inside `anchor`'s closest ancestor matching the
@@ -535,6 +563,7 @@ pub fn use_popover_within(
         on_dismiss,
         false,
     )
+    .0
 }
 
 /// `use_popover` for a tip: it never keeps the overlay beneath it from
@@ -559,6 +588,7 @@ pub(crate) fn use_tip_popover(
         on_dismiss,
         true,
     )
+    .0
 }
 
 /// What a popover stands beside: its owner's node, or an element the owner
@@ -595,8 +625,9 @@ fn use_placement(
     within: Option<AttrValue>,
     on_dismiss: Callback<Dismiss>,
     tip: bool,
-) -> Option<Placed> {
+) -> (Option<Placed>, Escape) {
     let placed = use_state_eq(|| None::<Placed>);
+    let escape = use_memo((), |()| Escape::default());
     let overlays = use_overlays();
     // The latest callback, read by listeners made when it opened.
     let latest = use_mut_ref(Callback::noop);
@@ -605,6 +636,7 @@ fn use_placement(
 
     {
         let placed = placed.clone();
+        let escape = (*escape).clone();
         let deps = (open, side, align, fit, within, anchor.element.clone());
         use_effect_with(deps, move |(open, side, align, fit, within, _)| {
             let (open, side, align, fit) = (*open, *side, *align, *fit);
@@ -721,10 +753,10 @@ fn use_placement(
                             true,
                             pressed,
                         ));
-                        let keyed = {
+                        let keyed: Keyed = {
                             let (on_dismiss, refocus) = (on_dismiss.clone(), refocus.clone());
                             let layer = layer.clone();
-                            move |e: web_sys::Event| {
+                            Rc::new(move |e: &web_sys::Event| {
                                 // Not when what has the focus took the key
                                 // (a search field clearing its text).
                                 if !layer.is_top() || e.default_prevented() {
@@ -734,12 +766,19 @@ fn use_placement(
                                 // event from another frame fails `instanceof`.
                                 let key = e.unchecked_ref::<web_sys::KeyboardEvent>().key();
                                 if let Some(why) = Dismiss::for_key(&key) {
+                                    e.prevent_default();
                                     refocus.set(Some(why.returns_focus()));
                                     on_dismiss.borrow().emit(why);
                                 }
-                            }
+                            })
                         };
-                        held.push(Listener::new(document.into(), "keydown", false, keyed));
+                        *escape.0.borrow_mut() = Some(keyed.clone());
+                        held.push(Listener::active(
+                            document.into(),
+                            "keydown",
+                            false,
+                            move |e| keyed(&e),
+                        ));
                     }
                 }
 
@@ -764,6 +803,7 @@ fn use_placement(
             }
 
             move || {
+                escape.0.borrow_mut().take();
                 drop(held);
                 if let Some((watch, _)) = observer {
                     watch.disconnect();
@@ -793,7 +833,33 @@ fn use_placement(
         });
     }
 
-    *placed
+    (*placed, (*escape).clone())
+}
+
+/// `use_popover` with its [`Escape`], for the components' own anchors and
+/// surfaces.
+#[hook]
+#[allow(clippy::too_many_arguments)]
+pub(crate) fn use_popover_keyed(
+    open: bool,
+    anchor: NodeRef,
+    popover: NodeRef,
+    side: Side,
+    align: PopoverAlign,
+    within: Option<AttrValue>,
+    on_dismiss: Callback<Dismiss>,
+) -> (Option<Placed>, Escape) {
+    use_placement(
+        open,
+        Anchor::new(anchor, None),
+        popover,
+        side,
+        align,
+        Fit::Scroll,
+        within,
+        on_dismiss,
+        false,
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -927,7 +993,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
     let node = use_node_ref();
     let overlays = use_overlays();
     let anchor = Anchor::new(props.anchor.clone(), props.anchor_element.clone());
-    let placed = use_placement(
+    let (placed, escape) = use_placement(
         props.open,
         anchor.clone(),
         node.clone(),
@@ -997,16 +1063,18 @@ pub fn Popover(props: &PopoverProps) -> Html {
             }
         })
     });
-    let onkeydown = props.trap.then(|| {
-        let node = node.clone();
+    let onkeydown = {
+        let (node, trap) = (node.clone(), props.trap);
         Callback::from(move |e: KeyboardEvent| {
-            if e.key() == "Tab"
+            if trap
+                && e.key() == "Tab"
                 && let Some(root) = node.cast::<Element>()
             {
                 crate::dialog::wrap_tab(&root, &e);
             }
+            escape.on(&e);
         })
-    });
+    };
     let head = (props.sheet && props.head && props.title.is_some()).then(|| {
         let close = props.on_dismiss.reform(|_: MouseEvent| Dismiss::Close);
         html! {
