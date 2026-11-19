@@ -453,26 +453,28 @@ selector:
 }
 ```
 
-Breakpoints and the component settings (`$card-padding`,
-`$card-padding-phone`, `$toolbar-gap`, `$button-padding`, `$button-padding-small`,
-`$button-primary-weight`, `$button-radius`, `$button-gap`, `$button-press-shade`,
-`$button-transition`, `$button-colours`, `$button-text`, `$button-text-small`,
-`$button-content-gap`, `$button-icon-offset`, `$button-phone-height`, `$input-hover-edge`,
-`$input-focus-edge`, `$input-ring-offset`, `$input-padding-inline`, `$input-text`,
-`$input-phone-height`, `$dialog-padding`, `$dialog-padding-phone`,
-`$dialog-body-gap`, `$dialog-shadow`, `$dialog-head-padding`, `$dialog-head-rule`,
-`$dialog-body-padding`, `$dialog-title-size`, `$dialog-title-weight`, `$dialog-centred`,
-`$dialog-max-height`, `$dialog-scroll-gutter`, `$dialog-sheet-edge`, `$popover-padding`, `$popover-shadow`,
-`$popover-radius`, `$popover-sheet-edge`, `$popover-scroll-gutter`, `$confirm-gap`,
-`$visibility-breakpoint`) are Sass-only: an app built with
-`sockel-build` sets them with `Config::with`.
+Breakpoints and most component settings are Sass-only, with no custom
+property: `$breakpoints` and every `-breakpoint`, `$badge-*`, `$button-*`,
+`$card-padding*`, `$chip-*`, `$choice-*` (but `$choice-width`),
+`$confirm-gap`, `$corner-transform`, `$count-*`, `$dialog-*` (but its
+widths, heights and top), `$disclosure-*`, `$drag-handle-*`, `$drop-*` (but
+`-min-height`, `-tint`, `-tint-over`), `$empty-state-*`, `$error-box-*`,
+`$glyph-phone-size`, `$input-*`, `$listbox-*`, `$menu-*` (but the widths and
+`-item-icon-ink`), `$notice-*`, `$pager-*`, `$pick-row-*`,
+`$picker-popup-width`, `$popover-*` (but `-max-width`, `-sheet-height`),
+`$reorder-carried-opacity`, `$row-list-*`, `$select-sheet-row-height`,
+`$selection-bar-*`, `$skeleton-*` (but `-duration`), `$stepper-*`,
+`$switch-fill`, `$switch-on-thumb`, `$switch-thumb-inset`, `$tab-*` and
+`$toolbar-gap`. An app built with `sockel-build` sets them with
+`Config::with`.
 
 <br>
 
 ## Configuration
 
 sockel's values are defaults. Every token is a `!default` variable of
-`style/_tokens.scss`, emitted as its custom property on `:root`. An app sets
+`style/_tokens.scss`; all but the Sass-only ones (see [Theming](#theming))
+are also emitted as their custom property on `:root`. An app sets
 its own in `build.rs`, before `compile()`; only values change, never
 classes:
 
@@ -491,7 +493,7 @@ fn main() {
 The `$` is optional and the value is any Sass expression. Without `.local`,
 the same call configures sockel's own stylesheet. Local Sass cannot `@use
 "sockel" with (...)`, since sockel compiles first. The rules keep reading
-the custom properties, so a page can still override them at runtime.
+the custom properties, so a page can still override those at runtime.
 `"null"` sets nothing for a token whose default is not `null` (Sass's
 `!default` takes `null` as unset); turn one off with a CSS value (`auto`,
 `inherit`, `0`).
@@ -522,7 +524,7 @@ source for the value. The module must emit no CSS.
 | `$skeleton-duration` | `1.4s` |
 | `$pager-gap`, `$pager-button-radius`, `$pager-button-ink`, `$pager-button-text` | `var(--space-1)`, `var(--radius-sm)`, `var(--text)`, `null` (inherited) (a pager's gap and its buttons' corners, ink and size) |
 | `$pager-button-hover-fill`, `$pager-button-hover-ink`, `$pager-current-fill`, `$pager-current-ink`, `$pager-step-ink`, `$pager-phone-height` | 12% of `--accent`, `null` (as at rest), `var(--accent)`, `var(--on-accent)`, `null` (the button's), `null` (a button's hover, the current page's fill and ink, the chevrons' ink, and the controls' height below the phone breakpoint) |
-| `$button-min-width`, `$button-part-justify`, `$button-part-min-width`, `$button-part-radius`, `$input-clear-min-height`, `$input-clear-disabled-opacity`, `$input-clear-disabled-cursor` | `auto`, `null`, `null`, `null`, `null`, `null`, `null` (a button's least width under `--button-min-width`; a switch's, cross's, clear's and action's, picker face's, menu item's and step's justify-content, least width and corner radius (switch and cross only), as a blanket button rule gives them; a clear's least height and its disabled opacity and cursor) |
+| `$button-min-width`, `$button-part-justify`, `$button-part-min-width`, `$button-part-radius`, `$input-clear-min-height`, `$input-clear-disabled-opacity`, `$input-clear-disabled-cursor` | `auto`, `null`, `null`, `null`, `null`, `null`, `null` (a button's least width under `--button-min-width`; a switch's, cross's, clear's and action's, picker face's, menu item's (a button row's, not a link row's) and step's justify-content, least width and corner radius (switch and cross only), as a blanket button rule gives them; a clear's least height and its disabled opacity and cursor) |
 | `$pager-button-height`, `$pager-button-padding`, `$pager-padding-top`, `$pager-current-edge`, `$pager-range-text` | `var(--control-height)`, `var(--space-2)`, `null` (none), `null` (the ordinary edge), `null` (inherited) (a pager button's and gap's height, the room either side of its number, the room above the row, the current page's edge colour, the range text's size) |
 | `$skeleton-fill`, `$skeleton-edge`, `$skeleton-radius` | 8% of `--text` over `--surface`, `null` (none), `var(--radius-sm)` (a skeleton's fill, the 1px line inside its edge and its corners) |
 | `$skeleton-line-height`, `$skeleton-line-inset`, `$skeleton-phone-height` | `1lh`, `null` (a fifth of a line), `null` (a line's height and the transparent inset that thins it; a block's height below the phone breakpoint) |
@@ -589,6 +591,23 @@ source for the value. The module must emit no CSS.
 | `$input-padding-inline` | `var(--space-2)` (its inline padding) |
 | `$input-text` | `null` (its text size; `null` inherits it) |
 | `$input-phone-height` | `null` (its height below the phone breakpoint, as `$button-phone-height` is a button's; `null` keeps the one above it) |
+| `$notice-padding`, `$notice-gap`, `$notice-radius`, `$notice-fill`, `$notice-edge`, `$notice-align` | `var(--space-2) var(--space-3)`, `var(--space-2)`, `var(--radius-md)`, 10% of `--tone` over `--surface`, 45% of `--tone` over `--border`, `flex-start` |
+| `$notice-min-height`, `$notice-body-padding`, `$notice-line-height`, `$notice-icon-height`, `$notice-icon-ink`, `$notice-danger-ink` | one small control plus its padding and edge, centring one line in a small control, `1.4`, `var(--control-height-small)`, `var(--tone)`, `null` (the text's) |
+| `$empty-state-padding`, `$empty-state-icon-size`, `$empty-state-title-size`, `$empty-state-title-ink`, `$empty-state-title-weight` | `var(--space-7) var(--space-4)`, `var(--text-2xl)`, `var(--text-md)`, `var(--text)`, `600` |
+| `$empty-state-edge`, `-radius`, `-compact-radius`, `-icon-fill`, `-icon-ink`, `-icon-box`, `-icon-radius`, `-icon-gap`, `-hint-max-width` | `null` each (none) |
+| `$empty-state-compact-title-size`, `-compact-title-weight`, `-compact-title-ink`, `-compact-icon-box`, `-compact-icon-fill`, `-compact-icon-ink`, `-compact-justify` | `null` each (as the regular one) |
+| `$error-box-padding`, `$error-box-gap`, `$error-box-fill`, `$error-box-edge`, `$error-box-shadow`, `$error-box-message-weight` | `var(--space-4)`, `var(--space-2)`, 8% of `--tone` over `--surface`, 45% of `--tone` over `--border`, `null`, `null` |
+| `$error-box-cause-font`, `$error-box-cause-text`, `$error-box-text-end` | `ui-monospace, monospace`, `var(--text-xs)`, `null` (as much under a flanked box's text as above it) |
+| `$popover-max-width`, `$popover-sheet-height` | `22rem`, `75dvh` |
+| `$dialog-width`, `$dialog-width-wide`, `$dialog-min-height`, `$dialog-height-tall`, `$dialog-top`, `$dialog-sheet-height` | `32rem`, `48rem`, `10rem`, `40rem`, `8dvh`, `85dvh` |
+| `$toast-max-width` | `28rem` |
+| `$seam-grip`, `$seam-min` | `var(--space-3)`, `8rem` (a [`Seam`]'s grip width and each side's least size) |
+| `$panel-ground`, `$panel-tint` | 4% of `--text` over `--bg`, 14% of `--accent` (a [`Panel`]'s ground and a tint one's) |
+| `$card-grid-min`, `$card-grid-wide`, `$card-grid-narrow`, `$card-grid-narrow-phone` | `15rem`, `18rem`, `10.5rem`, `9rem` (a [`CardGrid`]'s least column width: regular, `wide`, `narrow`, `narrow` on a phone) |
+| `$table-max-height` | `24rem` |
+| `$drop-min-height`, `$drop-tint`, `$drop-tint-over` | `var(--touch-height)`, `12%`, `28%` |
+| `$drop-overlay-inset`, `$drop-edge-width`, `$drop-tall-label-offset`, `$drop-busy-pulse` | `0`, `null` (the zone's own border), `40vh`, `null` (no pulse) |
+| `$swatch-size`, `$color-select-width` | `1.25rem`, `10rem` |
 | `$danger`, `$success`, `$warning`, `$on-accent`, `$surface-raised`, `$scrim`, `$field-border`, `$field-bg`, `$card-border`, `$card-border-width`, `$band-chrome-ground`, `$panel-border`, `$panel-tint-text`, `$menu-item-icon-ink` | see [Theming](#theming) |
 | `$panel-text`, `$panel-space-after`, `$panel-tint-space-after`, `$panel-tint-radius` | `1em` (its parent's), `0`, `var(--panel-space-after)`, `var(--radius-pill)` |
 | `$selection-bar-ground`, `$selection-bar-rule`, `$selection-bar-padding`, `$selection-bar-min-height`, `$selection-bar-radius`, `$selection-bar-margin`, `$selection-bar-text` | `null`, `var(--space-px) solid var(--border)`, `var(--space-2) 0`, a control's height plus its padding and rule, `null`, `null`, `null` (a selection bar's background, top rule, padding, least height, corners, margin and font size: a tinted chip instead of a ruled band) |
@@ -781,7 +800,8 @@ fn main() {
   with [`UnloadGuard`] for the browser's own prompt.
 - [`Toolbar`] (`.toolbar`): one line of controls; `band` wraps them
   instead (`.band`, with `.chrome` and `.search`), in [`ToolbarPart`]s
-  (`.toolbar-part`, `.ruled`) that each keep to one line.
+  (`.toolbar-part`, `.ruled`) that each keep to one line; a
+  [`ToolbarSpacer`] pushes the controls after it to the end.
 - [`Panel`] (`.panel-box`): a ringed ground over a list or a view holding
   its filters or a short form, as a column or a line, tinted or bare.
 - [`Seam`] (`.seam`): two panes and the divider dragged between them, each
@@ -912,6 +932,10 @@ Besides `Button`'s `submit`, `onclick`, `disabled`, `title`, `label` and
 <br>
 
 ## Stack, Cluster and Card
+
+[`Stack`] takes `gap` ([`Gap`]) and `flush`; [`Cluster`] takes `gap`,
+`justify` ([`Justify`]), `align` ([`Align`]), `nowrap`, `inline`, `lines`
+and `flush`; [`Card`] takes `inset` ([`Inset`]).
 
 [`Stack`] and [`Cluster`] (and [`Card`]) take a `tag` (`div` by default). A list
 tag, `ul` or `ol`, renders with no bullets, margin or padding
@@ -1285,7 +1309,10 @@ set per Stepper).
 
 - `title` is Html; `icon` goes before its text in the heading, `subtitle` is a
   muted line under the row, `crumbs` (a list of links) stack above it, and
-  `back` is the inline "back / title" crumb. Each is its own prop.
+  `back` is the inline "back / title" crumb. Each is its own prop;
+  `crumbs_label` and `back_label` name the crumbs and the back link.
+- `testid` and `title_testid` reach the title, `head_testid` the head,
+  `help_testid` the help's wrapper; `title_class` adds the title's classes.
 - `help` follows the heading as its sibling, in `.sockel-head-heading` with
   the `suffix`, so the heading's text and test id exclude the help button.
   The group stays on one line: a long title wraps inside its own box, with
@@ -1483,7 +1510,7 @@ opening), until the reader scrolls more than [`LOG_END_SLOP`] (24 px) away
 from it ([`at_end`]); then it holds still, and a "Jump to latest" button
 floats over its foot (`-jump`) without moving a row, counting the rows that
 came since ("3 new") from `count`, which the app passes as its number of
-rows. The button, or a scroll back to the end, follows again;
+rows (`jump_label` overrides its words). The button, or a scroll back to the end, follows again;
 `on_follow` tells each change (`.sockel-following` while it follows).
 `live` announces new rows (`aria-live="polite"`), off by default.
 
@@ -1508,7 +1535,8 @@ both); `enter_sends: false` makes Enter a newline and Ctrl or Cmd+Enter
 send ([`compose_key`]). `on_send` gets a [`ComposerMessage`] (the text
 without blank lines at its ends, [`composed`], and the files), and the
 composer empties; nothing is sent while there is neither. `busy` holds Send
-busy while a message goes. `send_icon` gives Send an icon, shown alone
+busy while a message goes. `send_label` and `attach_label` override the
+buttons' words. `send_icon` gives Send an icon, shown alone
 below the phone breakpoint.
 
 `attachments` makes it a [`DropZone`]: files dropped, pasted or picked
@@ -2240,7 +2268,8 @@ as wide as what it says, up to the viewport's width (not
 `--popover-max-width`, so the line is not cut short), and a full-width sheet on a phone
 without the head; the two are joined as an [`InputGroup`]'s members are.
 [`ConfirmButton`] is a [`Button`] (`variant`, `size`, `icon`, `busy`, `disabled`)
-that opens one beside itself and calls `on_accept` once accepted.
+that opens one beside itself and calls `on_accept` once accepted;
+`accept_icon` puts an icon on its accept button.
 
 [`ConfirmInline`] replaces a button by No and Yes in the same box, for a row's
 own delete: the button's `variant`, `size`, `icon`, `disabled`, children as
@@ -2345,7 +2374,8 @@ overlay layer, through `use_popover`. Props:
 Its children are the items: [`MenuItem`] (an action; `icon`, `detail` under
 the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 `disabled`, `onclick`; with `href` a link row, an `<a>` that loses its
-`href` when disabled, `new_tab` opening it in a new tab (`target="_blank"`,
+`href` when disabled and, not being a button, does not get the button
+part tokens (`$button-part-*`), `new_tab` opening it in a new tab (`target="_blank"`,
 `rel="noopener noreferrer"`), `download` a link that downloads; `title` the
 row's native tooltip; `dialog: Some(open)` a button row opening a dialog
 (`aria-haspopup="dialog"`, `aria-expanded`); `current` marks the page shown,
