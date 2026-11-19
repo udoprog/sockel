@@ -1,0 +1,145 @@
+// Chip and ChipList (src/chip.rs). A pressed state is marked by colour and
+// background, never by weight, so a chip keeps its box across its states.
+//
+// - `.sockel-chip`: a filter toggle (`aria-pressed`) of a label and an
+//   optional count (`-count`, two figures wide, `.sockel-zero` dims it);
+//   also a link, button or item (`.sockel-static`, no pointer or hover) led by an
+//   avatar (`-media`, in the round start: `.sockel-lead-media`) or an icon
+//   (`-icon`, `.sockel-lead-icon`), an item removable by a cross
+//   (`-remove`). `--chip-media-display: none` on the chip hides its media.
+//   `.sockel-chip-list` wraps chips and keeps one row's height when empty.
+
+@use "tokens" as base;
+
+.sockel-chip-list {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: var(--space-2);
+    min-height: var(--control-height-small);
+}
+
+.sockel-chip {
+    display: inline-flex;
+    flex: 0 1 auto;
+    align-items: center;
+    gap: base.$chip-gap;
+    box-sizing: border-box;
+    max-width: 100%;
+    height: base.$chip-height;
+    min-height: 0;
+    margin: 0;
+    padding-block: base.$chip-padding-block;
+    padding-inline: base.$chip-padding;
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-pill);
+    background: var(--surface);
+    color: var(--text);
+    font: inherit;
+    font-size: base.$chip-font-size;
+    line-height: base.$chip-line-height;
+    text-decoration: none;
+    vertical-align: middle;
+    white-space: nowrap;
+    cursor: pointer;
+
+    &:hover:not(:disabled, .sockel-static) {
+        border-color: var(--accent);
+    }
+
+    @include base.focus-ring;
+    @include base.current;
+
+    &[aria-pressed="true"] {
+        border-color: base.$chip-on-edge;
+        background: base.$chip-on-fill;
+        color: base.$chip-on-ink;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+
+    &.sockel-static {
+        cursor: auto;
+    }
+
+    &.sockel-lead-media {
+        padding-inline-start: base.$chip-media-inset;
+    }
+
+    &.sockel-lead-icon {
+        @if base.$chip-icon-inset != null {
+            padding-inline-start: base.$chip-icon-inset;
+        } @else {
+            padding-inline-start: base.$chip-padding;
+        }
+    }
+}
+
+.sockel-chip-label {
+    @include base.truncate;
+}
+
+// `--chip-media-display: none` on a chip (an app's modifier, perhaps in a
+// container query) takes its media away.
+.sockel-chip-media {
+    display: var(--chip-media-display, inline-flex);
+    flex: none;
+}
+
+.sockel-chip-icon {
+    display: inline-flex;
+    flex: none;
+}
+
+.sockel-chip-icon {
+    color: var(--muted);
+}
+
+.sockel-chip-remove {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    @include base.button-part($radius: true);
+    min-height: 0;
+    margin: 0;
+    padding: 0 var(--space-1);
+    border: 0;
+    background: transparent;
+    color: var(--muted);
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+
+    &:hover {
+        color: var(--text);
+    }
+
+    @include base.focus-ring;
+}
+
+// The cross's drawing, under the chip, so an app's own icon rule (its
+// IconSet's svg in the glyph) does not outweigh the size.
+@if base.$chip-remove-glyph-size != null {
+    .sockel-chip > .sockel-chip-remove {
+        --glyph-size: #{base.$chip-remove-glyph-size};
+
+        svg {
+            width: base.$chip-remove-glyph-size;
+            height: base.$chip-remove-glyph-size;
+        }
+    }
+}
+
+.sockel-chip-count {
+    @include base.numeric;
+    flex: none;
+    min-width: 2ch;
+    text-align: center;
+
+    &.sockel-zero {
+        opacity: 0.6;
+    }
+}

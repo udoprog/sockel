@@ -102,6 +102,14 @@ instead.
   never does, so it no longer shows a 10px gutter on its right. Output
   changes for every confirm; a new `$confirm-scroll-gutter` (`auto`) sets it
   and `stable` keeps the popover's. `$popover-scroll-gutter` stays `stable`.
+- Smaller CSS for an app that renders only some toggles, or only Toast or
+  only SaveBar: new features `checkbox` (with `OptionCard`), `switch`,
+  `choice`, `chip`, `toasts` (`Toast`, `ToastHost`) and `save-bar` each load
+  only their own partial (`style/_checkbox.scss`, `_switch.scss`,
+  `_choice.scss`, `_chip.scss`, `_toasts.scss`, `_save-bar.scss`). `toggles`
+  and `toast` stay and enable all of theirs, `@use "sockel/toggles"` and
+  `"sockel/toast"` load the same rules as before, and `_index.scss` (so
+  the full sheet) compiles to byte-identical CSS. No `$omit` key changed.
 - sockel-build: `Config::with(token, "null")` is a build error naming the
   token. Sass treats a null configuration as unset, so the call always left
   the default in place; a build that passed it now fails. Drop the call, leave

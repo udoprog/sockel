@@ -237,3 +237,37 @@ fn tokens_features_leave_out_the_feature_parts() {
         ))
     );
 }
+
+#[test]
+fn a_component_s_feature_leaves_out_its_siblings() {
+    let css = |features: &[&str]| {
+        let enabled = closure(&cargo_features(), features[0]);
+        sockel().features(&enabled).build().unwrap().css
+    };
+    let switch = css(&["switch"]);
+    assert!(switch.contains(".sockel-switch"));
+    for sibling in [".sockel-checkbox", ".sockel-choice", ".sockel-chip"] {
+        assert!(!switch.contains(sibling), "{sibling}");
+    }
+    let toasts = css(&["toasts"]);
+    assert!(toasts.contains(".sockel-toast-host"));
+    assert!(!toasts.contains(".sockel-save-bar"));
+    let save_bar = css(&["save-bar"]);
+    assert!(save_bar.contains(".sockel-save-bar"));
+    assert!(!save_bar.contains(".sockel-toast"));
+    for (whole, parts) in [
+        (
+            "toggles",
+            [".sockel-checkbox", ".sockel-switch", ".sockel-choice"],
+        ),
+        (
+            "toast",
+            [".sockel-toast-host", ".sockel-save-bar", ".sockel-toast "],
+        ),
+    ] {
+        let whole = css(&[whole]);
+        for part in parts {
+            assert!(whole.contains(part), "{part}");
+        }
+    }
+}

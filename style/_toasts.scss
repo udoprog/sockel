@@ -1,0 +1,90 @@
+// Toast and ToastHost (src/toast.rs).
+//
+// - `.sockel-toast-host`: where toasts stand, fixed over the window's bottom
+//   (`--layer-toast`), centred, newest last, in a polite live region. It
+//   lies over the page and takes no room, so a toast coming or going moves
+//   nothing; it lets pointer events through except on a toast itself.
+//   `.sockel-raised` lifts it by `--toast-tray`, the height of a tray or bar
+//   the app keeps at the window's bottom (0 unless the app sets it).
+// - `.sockel-toast`: one message in a tone, a modifier that sets `--tone`
+//   (`.sockel-accent`, `.sockel-success`, `.sockel-warning`,
+//   `.sockel-danger`). Parts: `-icon`, `-body`, `-action`, `-close`. At
+//   least one small control plus its padding high, at most
+//   `--toast-max-width` wide and never wider than the window; its text
+//   wraps. It arrives with a fade and no motion when the user prefers none.
+
+@use "tokens" as base;
+
+.sockel-toast-host {
+    --toast-raise: 0px;
+
+    position: fixed;
+    inset-inline: 0;
+    bottom: calc(var(--space-4) + var(--toast-raise));
+    z-index: var(--layer-toast);
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    align-items: center;
+    padding-inline: var(--space-4);
+    pointer-events: none;
+
+    &.sockel-raised {
+        --toast-raise: var(--toast-tray, 0px);
+    }
+}
+
+.sockel-toast {
+    --tone: var(--muted);
+
+    display: flex;
+    gap: var(--space-2);
+    align-items: flex-start;
+    box-sizing: border-box;
+    max-width: min(var(--toast-max-width), 100%);
+    min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px));
+    padding: var(--space-2) var(--space-3);
+    @include base.reserved-border(color-mix(in srgb, var(--tone) 45%, var(--border)));
+    border-radius: var(--radius-md);
+    background: var(--surface-raised);
+    box-shadow: var(--shadow-1);
+    color: var(--text);
+    pointer-events: auto;
+
+    @include base.tones;
+
+    @media (prefers-reduced-motion: no-preference) {
+        animation: sockel-toast-in 0.15s ease-out;
+    }
+}
+
+@keyframes sockel-toast-in {
+    from {
+        opacity: 0;
+    }
+}
+
+.sockel-toast-icon {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    justify-content: center;
+    height: var(--control-height-small);
+    color: var(--tone);
+}
+
+.sockel-toast-body {
+    flex: 1 1 auto;
+    min-width: 0;
+    padding-block: calc((var(--control-height-small) - 1lh) / 2);
+    line-height: 1.4;
+    overflow-wrap: anywhere;
+}
+
+.sockel-toast-action,
+.sockel-toast-close {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+    height: var(--control-height-small);
+}

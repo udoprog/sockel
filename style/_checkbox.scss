@@ -1,0 +1,136 @@
+// Checkbox and OptionCard (src/checkbox.rs, src/option_card.rs). A checked
+// state is marked by colour and background, never by weight, and the box
+// is a fixed size, so it keeps its box across its states.
+//
+// - `.sockel-checkbox`: a label around a native checkbox and its text. The
+//   box (`-mark`, `--check-size` square) holds the input drawn as a box and
+//   the check or minus glyph over it. `-label` is the text. `-input` with
+//   `.sockel-radio` is a radio's round mark, a dot when checked.
+// - `.sockel-option-card`: a label around a checkbox's mark (a radio's or a
+//   checkbox's) and `-text`: `-label` above `-description`. `.sockel-on`
+//   is its checked state, by border and fill colour only.
+// - `.sockel-disabled` and `.sockel-invalid`: dimmed, or the border in
+//   `--danger`.
+
+@use "tokens" as base;
+
+.sockel-checkbox {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    max-width: 100%;
+    min-height: var(--control-height-small);
+    cursor: pointer;
+
+    &.sockel-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.sockel-checkbox-mark {
+    display: inline-grid;
+    flex: none;
+    place-items: center;
+    width: var(--check-size);
+    height: var(--check-size);
+    color: var(--on-accent);
+    font-size: var(--text-sm);
+}
+
+.sockel-checkbox-input {
+    grid-area: 1 / 1;
+    box-sizing: border-box;
+    width: 100%;
+    height: 100%;
+    margin: 0;
+    @include base.reserved-border(var(--field-border));
+    border-radius: var(--radius-xs);
+    background: var(--surface);
+    appearance: none;
+    cursor: inherit;
+
+    &:hover:not(:disabled) {
+        border-color: var(--accent);
+    }
+
+    &:checked,
+    &:indeterminate {
+        border-color: var(--accent);
+        background: var(--accent);
+    }
+
+    &[aria-invalid="true"] {
+        border-color: var(--danger);
+    }
+
+    &.sockel-radio {
+        border-radius: var(--radius-pill);
+    }
+
+    &.sockel-radio:checked {
+        box-shadow: inset 0 0 0 calc(var(--check-size) / 4) var(--surface);
+    }
+
+    @include base.focus-ring;
+}
+
+.sockel-checkbox-glyph {
+    grid-area: 1 / 1;
+    pointer-events: none;
+}
+
+.sockel-checkbox-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sockel-option-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-3);
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+
+    &:hover:not(.sockel-disabled) {
+        border-color: var(--accent);
+    }
+
+    &.sockel-on {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    }
+
+    &.sockel-invalid {
+        border-color: var(--danger);
+    }
+
+    &.sockel-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.sockel-option-card-text {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.sockel-option-card-label {
+    overflow-wrap: anywhere;
+}
+
+.sockel-option-card-description {
+    color: var(--muted);
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
+}
+

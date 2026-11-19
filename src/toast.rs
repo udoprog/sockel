@@ -1,4 +1,4 @@
-//! Toast and ToastHost (`style/_toast.scss`).
+//! Toast and ToastHost (`style/_toasts.scss`).
 
 use std::cell::Cell;
 

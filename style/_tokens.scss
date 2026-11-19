@@ -704,8 +704,8 @@ $-feature-parts: (
     "tokens.picker": ("picker", "search-select"),
     "tokens.seam": ("seam",),
     "tokens.table": ("table",),
-    "tokens.toast": ("toast",),
-    "tokens.toggles": ("toggles",),
+    "tokens.toast": ("toasts",),
+    "tokens.toggles": ("checkbox", "chip", "choice", "switch"),
     "tokens.tooltip": ("tooltip",),
 );
 

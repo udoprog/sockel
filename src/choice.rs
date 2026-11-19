@@ -1,4 +1,4 @@
-//! Choice (`style/_toggles.scss`).
+//! Choice (`style/_choice.scss`).
 
 use crate::class;
 use crate::roving::{self, Arrows};

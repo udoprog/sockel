@@ -1,0 +1,174 @@
+// Choice (src/choice.rs). A selected state is marked by colour and
+// background, never by weight, and every option is a fixed size.
+//
+// - `.sockel-choice`: a segmented pick-one group. Its options share one
+//   width, that of the widest (`$choice-columns: auto`: each its own), and
+//   the group's height whatever an app's button rule says;
+//   `.sockel-stretch` fills the container,
+//   `.sockel-fixed` gives each `--choice-width`. `.sockel-small` is the
+//   small control height. `.sockel-stacked` puts one option to a row across
+//   the container, each at least the group's height, labels wrapping, the
+//   rule between them across; `.sockel-stack-narrow` does so below
+//   `$choice-stack-breakpoint`. Parts: `-option` (`.sockel-icon` when its
+//   icon is alone), `-icon`, `-label`.
+// - `.sockel-disabled` and `.sockel-invalid`: dimmed, or the border in
+//   `--danger`.
+
+@use "tokens" as base;
+
+// One option to a row: each at least `--choice-height`, its label wrapping,
+// the rule between options along their tops.
+@mixin -stacked {
+    display: grid;
+    grid-auto-flow: row;
+    width: 100%;
+    height: auto;
+
+    > .sockel-choice-option {
+        justify-content: flex-start;
+        min-height: var(--choice-height);
+        padding-block: var(--space-1);
+        line-height: inherit;
+        text-align: start;
+
+        @if base.$choice-divider {
+            + .sockel-choice-option {
+                border-inline-start-color: transparent;
+                border-block-start-color: base.$choice-divider;
+            }
+        }
+
+        > .sockel-choice-label {
+            overflow: visible;
+            text-overflow: clip;
+            white-space: normal;
+            overflow-wrap: anywhere;
+        }
+    }
+}
+
+@if base.$choice-align-self {
+    :where(.sockel-choice) {
+        align-self: base.$choice-align-self;
+    }
+}
+
+.sockel-choice {
+    --choice-height: #{base.$choice-height};
+
+    display: inline-grid;
+    grid-auto-flow: column;
+    grid-auto-columns: base.$choice-columns;
+    box-sizing: border-box;
+    max-width: 100%;
+    height: var(--choice-height);
+    @include base.nests(base.$choice-radius);
+    padding: base.$choice-inset;
+    --radius-inner: calc(#{base.$choice-radius} - #{base.$choice-inset} - 1px);
+    @include base.reserved-border(var(--field-border));
+    border-radius: base.$choice-radius;
+    background: base.$choice-fill;
+    @if base.$choice-font-size {
+        font-size: base.$choice-font-size;
+    }
+
+    @if base.$choice-focus-edge {
+        &:focus-within {
+            border-color: base.$choice-focus-edge;
+        }
+    }
+
+    &.sockel-small {
+        --choice-height: var(--control-height-small);
+    }
+
+    &.sockel-stretch {
+        display: grid;
+        width: 100%;
+    }
+
+    &.sockel-fixed {
+        grid-auto-columns: var(--choice-width);
+    }
+
+    &.sockel-stacked {
+        @include -stacked;
+    }
+
+    &.sockel-stack-narrow {
+        @include base.below(base.$choice-stack-breakpoint) {
+            @include -stacked;
+        }
+    }
+
+    &.sockel-invalid {
+        border-color: var(--danger);
+    }
+
+    &.sockel-disabled {
+        opacity: 0.5;
+    }
+}
+
+.sockel-choice-option {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    gap: base.$choice-gap;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: 0;
+    margin: 0;
+    padding-block: 0;
+    padding-inline: base.$choice-padding;
+    @include base.reserved-border;
+    border-radius: var(--radius-inner, var(--radius-sm));
+    background: transparent;
+    color: base.$choice-ink;
+    font: inherit;
+    line-height: 1;
+    cursor: pointer;
+
+    @if base.$choice-divider {
+        + .sockel-choice-option {
+            border-inline-start-color: base.$choice-divider;
+        }
+    }
+
+    &:hover:not(:disabled):not([aria-checked="true"]) {
+        background: base.$choice-hover-fill;
+        @if base.$choice-hover-ink {
+            color: base.$choice-hover-ink;
+        }
+    }
+
+    @if base.$choice-icon-width {
+        &.sockel-icon {
+            min-width: base.$choice-icon-width;
+            padding-inline: 0;
+        }
+    }
+
+    @include base.focus-ring;
+    @include base.current;
+
+    &[aria-checked="true"] {
+        background: base.$choice-selected-fill;
+        color: base.$choice-selected-ink;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.sockel-choice-icon {
+    display: inline-flex;
+    flex: none;
+}
+
+.sockel-choice-label {
+    @include base.truncate;
+}
+

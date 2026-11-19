@@ -405,6 +405,9 @@
 //! | `badge` | `icons` | [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html), [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) | 9.6 KB |
 //! | `button` | `icons`, `skeleton` | [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html), [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) | 11.9 KB |
 //! | `card-grid` | | [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) | 4.1 KB |
+//! | `checkbox` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`OptionCard`](https://docs.rs/sockel/latest/sockel/struct.OptionCard.html) | 6.6 KB |
+//! | `chip` | `icons` | [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 6.6 KB |
+//! | `choice` | | [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) | 6.7 KB |
 //! | `color-select` | `select` | [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) | 48.1 KB |
 //! | `composer` | `drop-zone`, `input` | [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) | 22.4 KB |
 //! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html), [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html), [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html), [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html), [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) | 37.0 KB |
@@ -431,6 +434,7 @@
 //! | `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html), [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) | 33.3 KB |
 //! | `rows` | `button` | [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html), [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html), [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) | 16.9 KB |
 //! | `search-select` | `select` | [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) | 45.1 KB |
+//! | `save-bar` | `button` | [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 13.8 KB |
 //! | `seam` | | [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) | 5.2 KB |
 //! | `select` | `input`, `menu`, `tooltip` | [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) | 43.9 KB |
 //! | `shell` | `badge` | [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html), [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) | 13.9 KB |
@@ -438,15 +442,17 @@
 //! | `skeleton` | `icons`, `media` | [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html), [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) | 7.4 KB |
 //! | `split-view` | `seam` | [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) | 6.0 KB |
 //! | `stepper` | `input` | [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) | 11.2 KB |
+//! | `switch` | `icons` | [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html) | 6.0 KB |
 //! | `table` | `icons` | [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html), [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html) | 7.1 KB |
 //! | `tabs` | | [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html), [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html), [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html), [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) | 6.9 KB |
 //! | `time` | | [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html), [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) | 3.7 KB |
-//! | `toast` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 34.1 KB |
-//! | `toggles` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 10.7 KB |
+//! | `toast` | `save-bar`, `toasts` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 35.3 KB |
+//! | `toasts` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) | 34.4 KB |
+//! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 14.2 KB |
 //! | `tooltip` | `overlay` | [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html), [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html), [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) | 26.8 KB |
 //!
-//! "CSS alone" is `STYLESHEET` with only that feature and what it brings in;
-//! with none it is 3.4 KB, and with `full` 130 KB. Each feature builds alone,
+//! "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
+//! with none it is 3.4 KB, and with `full` 134 KB. Each feature builds alone,
 //! and its CSS holds no other feature's rules.
 //!
 //! <br>
@@ -3501,11 +3507,11 @@ mod badge;
 mod button;
 #[cfg(feature = "card-grid")]
 mod card_grid;
-#[cfg(feature = "toggles")]
+#[cfg(feature = "checkbox")]
 mod checkbox;
-#[cfg(feature = "toggles")]
+#[cfg(feature = "chip")]
 mod chip;
-#[cfg(feature = "toggles")]
+#[cfg(feature = "choice")]
 mod choice;
 #[cfg(feature = "color-select")]
 mod color_select;
@@ -3559,7 +3565,7 @@ mod menu;
 mod nav_list;
 #[cfg(feature = "notice")]
 mod notice;
-#[cfg(feature = "toggles")]
+#[cfg(feature = "checkbox")]
 mod option_card;
 #[cfg(feature = "overlay")]
 mod overlay;
@@ -3580,7 +3586,7 @@ mod reorder_tree;
 mod roving;
 #[cfg(feature = "rows")]
 mod rows;
-#[cfg(feature = "toast")]
+#[cfg(feature = "save-bar")]
 mod save_bar;
 #[cfg(feature = "seam")]
 mod seam;
@@ -3610,6 +3616,8 @@ mod status;
 #[cfg(feature = "stepper")]
 mod stepper;
 mod styles;
+#[cfg(feature = "switch")]
+mod switch;
 #[cfg(feature = "table")]
 mod table;
 #[cfg(feature = "tabs")]
@@ -3617,7 +3625,7 @@ mod tabs;
 #[cfg(feature = "time")]
 mod time;
 mod timer;
-#[cfg(feature = "toast")]
+#[cfg(feature = "toasts")]
 mod toast;
 #[cfg(feature = "tooltip")]
 mod tooltip;
@@ -3633,13 +3641,13 @@ pub use badge::{
 pub use button::{Button, ButtonProps, ButtonSize, ButtonVariant, button};
 #[cfg(feature = "card-grid")]
 pub use card_grid::{CardGrid, CardGridProps, GridSize, card_grid};
-#[cfg(feature = "toggles")]
-pub use checkbox::{Checkbox, CheckboxProps, Switch, SwitchProps, checkbox, switch};
-#[cfg(feature = "toggles")]
+#[cfg(feature = "checkbox")]
+pub use checkbox::{Checkbox, CheckboxProps, checkbox};
+#[cfg(feature = "chip")]
 pub use chip::{
     Chip, ChipList, ChipListProps, ChipProps, ChipToggle, ChipToggleProps, chip, chip_count,
 };
-#[cfg(feature = "toggles")]
+#[cfg(feature = "choice")]
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, ChoiceStack, choice};
 #[cfg(feature = "color-select")]
 pub use color_select::{
@@ -3727,7 +3735,7 @@ pub use menu::{
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 #[cfg(feature = "notice")]
 pub use notice::{Notice, NoticeProps, notice};
-#[cfg(feature = "toggles")]
+#[cfg(feature = "checkbox")]
 pub use option_card::{OptionCard, OptionCardKind, OptionCardProps, option_card};
 #[cfg(feature = "overlay")]
 pub use overlay::{
@@ -3773,7 +3781,7 @@ pub use rows::{
     PickRow, PickRowProps, RowList, RowListItem, RowListItemProps, RowListProps, pick_row,
     row_list, row_list_item,
 };
-#[cfg(feature = "toast")]
+#[cfg(feature = "save-bar")]
 pub use save_bar::{SaveBar, SaveBarProps, UnloadGuard, save_bar, unsaved, use_unload_guard};
 #[cfg(feature = "seam")]
 pub use seam::{Seam, SeamAxis, SeamProps, seam};
@@ -3820,6 +3828,8 @@ pub use stepper::{
     step_by, step_from, step_within, stepper,
 };
 pub use styles::{STYLE_ID, STYLESHEET, Styles, StylesProps};
+#[cfg(feature = "switch")]
+pub use switch::{Switch, SwitchProps, switch};
 #[cfg(feature = "table")]
 pub use table::{
     Table, TableCell, TableCellProps, TableProps, TableRow, TableRowProps, table, table_bulk,
@@ -3832,7 +3842,7 @@ pub use time::{
     JUST_NOW, Time, TimeProps, TimeStyle, TimeText, now_seconds, time, time_next, time_text,
     use_wake_at,
 };
-#[cfg(feature = "toast")]
+#[cfg(feature = "toasts")]
 pub use toast::{TOAST_MS, Toast, ToastHost, ToastHostProps, ToastProps, toast, toast_host};
 #[cfg(feature = "tooltip")]
 pub use tooltip::{

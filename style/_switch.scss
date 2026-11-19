@@ -1,0 +1,102 @@
+// Switch (src/checkbox.rs). An on state is marked by colour and background,
+// never by weight, and the track is a fixed size.
+//
+// - `.sockel-switch`: a button (`role="switch"`) of a track and thumb
+//   (`--switch-width` by `--switch-height`) and an optional label. The thumb
+//   moves by transform; `.sockel-on` is its state, `[aria-busy]` puts a
+//   spinner in the thumb.
+// - `.sockel-disabled` and `.sockel-invalid`: dimmed, or the border in
+//   `--danger`.
+
+@use "tokens" as base;
+
+.sockel-switch {
+    --switch-fill: #{base.$switch-fill};
+    --switch-edge: var(--field-border);
+    --switch-thumb: var(--muted);
+    --switch-spin: var(--surface);
+    --switch-shift: 0px;
+
+    display: inline-flex;
+    align-items: center;
+    @include base.button-part($radius: true);
+    gap: var(--space-2);
+    max-width: 100%;
+    min-height: var(--control-height-small);
+    margin: 0;
+    padding: 0;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: start;
+    cursor: pointer;
+
+    @include base.focus-ring;
+
+    &.sockel-on {
+        --switch-fill: var(--accent);
+        --switch-edge: var(--accent);
+        --switch-thumb: #{base.$switch-on-thumb};
+        --switch-spin: var(--accent);
+        --switch-shift: calc(var(--switch-width) - var(--switch-height));
+    }
+
+    &.sockel-invalid {
+        --switch-edge: var(--danger);
+    }
+
+    &[aria-busy="true"] {
+        cursor: progress;
+    }
+
+    &:disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.sockel-switch-track {
+    display: flex;
+    flex: none;
+    align-items: center;
+    box-sizing: border-box;
+    width: var(--switch-width);
+    height: var(--switch-height);
+    padding: var(--space-px);
+    @include base.reserved-border(var(--switch-edge));
+    border-radius: var(--radius-pill);
+    background: var(--switch-fill);
+
+    @if base.$switch-thumb-inset {
+        padding: calc(#{base.$switch-thumb-inset} - var(--space-px));
+    }
+}
+
+.sockel-switch-thumb {
+    display: grid;
+    flex: none;
+    place-items: center;
+    width: calc(var(--switch-height) - 4 * var(--space-px));
+    height: calc(var(--switch-height) - 4 * var(--space-px));
+    border-radius: var(--radius-pill);
+    background: var(--switch-thumb);
+    color: var(--switch-spin);
+    font-size: var(--text-xs);
+    transform: translateX(var(--switch-shift));
+    transition: transform 0.15s ease;
+
+    @if base.$switch-thumb-inset {
+        width: calc(var(--switch-height) - 2 * #{base.$switch-thumb-inset});
+        height: calc(var(--switch-height) - 2 * #{base.$switch-thumb-inset});
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+        transition: none;
+    }
+}
+
+.sockel-switch-label {
+    min-width: 0;
+    overflow-wrap: anywhere;
+}

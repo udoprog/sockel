@@ -1,4 +1,4 @@
-//! OptionCard (`style/_toggles.scss`).
+//! OptionCard (`style/_checkbox.scss`).
 
 use crate::{Glyph, Icon, class};
 use web_sys::HtmlInputElement;

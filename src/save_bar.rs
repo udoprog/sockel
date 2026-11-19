@@ -1,4 +1,4 @@
-//! SaveBar and the unload guard (`style/_toast.scss`).
+//! SaveBar and the unload guard (`style/_save-bar.scss`).
 
 use std::cell::Cell;
 

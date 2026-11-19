@@ -1,4 +1,4 @@
-//! Chip, ChipToggle and ChipList (`style/_toggles.scss`).
+//! Chip, ChipToggle and ChipList (`style/_chip.scss`).
 
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::{Glyph, Icon, class};

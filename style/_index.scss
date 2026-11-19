@@ -10,7 +10,10 @@
 @use "fields";
 @use "inputs";
 @use "icons";
-@use "toggles";
+@use "checkbox";
+@use "switch";
+@use "choice";
+@use "chip";
 @use "badges";
 @use "media";
 @use "notices";
@@ -31,7 +34,8 @@
 @use "confirm";
 @use "dialog";
 @use "tooltip";
-@use "toast";
+@use "toasts";
+@use "save-bar";
 @use "time";
 @use "shortcuts";
 @use "property-list";

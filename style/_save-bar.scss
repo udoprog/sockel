@@ -1,0 +1,52 @@
+// SaveBar (src/save_bar.rs).
+//
+// - `.sockel-save-bar`: the bar of unsaved changes, always in the page's
+//   flow at one height, as SelectionBar is: `.sockel-idle` hides it while
+//   nothing is unsaved and keeps its room, so the form never moves when
+//   it lights. `.sockel-sticky` keeps it at the bottom of its scroll
+//   container, still in the flow. Parts: `-note` (what is unsaved, at
+//   most one line), `-status` (how the last save went) and `-actions`.
+
+@use "tokens" as base;
+
+.sockel-save-bar {
+    display: flex;
+    gap: var(--space-2);
+    align-items: center;
+    box-sizing: border-box;
+    min-width: 0;
+    min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px));
+    padding: var(--space-2) 0;
+    border-top: var(--space-px) solid var(--border);
+
+    &.sockel-idle {
+        visibility: hidden;
+    }
+
+    &.sockel-sticky {
+        position: sticky;
+        bottom: 0;
+        z-index: var(--layer-sticky);
+        background: var(--surface);
+    }
+}
+
+.sockel-save-bar-note {
+    @include base.truncate;
+
+    flex: 1 1 auto;
+    color: var(--muted);
+}
+
+.sockel-save-bar-status {
+    @include base.truncate;
+
+    flex: 0 1 auto;
+}
+
+.sockel-save-bar-actions {
+    display: flex;
+    flex: none;
+    gap: var(--space-2);
+    align-items: center;
+}
