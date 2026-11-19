@@ -19,14 +19,14 @@
 //   `.sockel-pager-position`) and previous and next at the end
 //   (`.sockel-pager-steps`); `$pager-summary-padding` pads it (`null`:
 //   none).
-
 // - `.sockel-pager.sockel-ranged`: the range text (`.sockel-pager-range`,
 //   muted) at the start, the buttons (`.sockel-pager-group`) at the end; the
-//   two wrap in a narrow container.
+//   two wrap in a narrow container (the `$omit` part `pager.ranged`).
 // - `.sockel-pager-at`: "3 / 35" in a compact pager, between previous and
-//   next.
+//   next (the `$omit` part `pager.compact`).
 // - A numbered button with `data-sort-page` is a drop target: while a row is
-//   dragged over it, the list sets its `data-drop-over` attribute, it takes the accent.
+//   dragged over it, the list sets its `data-drop-over` attribute, it takes the accent
+//   (the `$omit` part `pager.drop`).
 
 @use "tokens" as base;
 
@@ -65,7 +65,9 @@
     }
 }
 
-.sockel-pager-button {
+// A button's box, and the gap's: one slot of the row.
+.sockel-pager-button,
+.sockel-pager-gap {
     display: inline-flex;
     flex: 0 1 var(--pager-button-width);
     min-width: 0;
@@ -74,6 +76,9 @@
     box-sizing: border-box;
     width: var(--pager-button-width);
     height: base.$pager-button-height;
+}
+
+.sockel-pager-button {
     min-height: 0;
     margin: 0;
     padding: 0;
@@ -118,14 +123,6 @@
 }
 
 .sockel-pager-gap {
-    display: inline-flex;
-    flex: 0 1 var(--pager-button-width);
-    min-width: 0;
-    align-items: center;
-    justify-content: center;
-    box-sizing: border-box;
-    width: var(--pager-button-width);
-    height: base.$pager-button-height;
     color: var(--muted);
 }
 
@@ -179,31 +176,37 @@
     }
 }
 
-.sockel-pager.sockel-ranged {
-    flex-wrap: wrap;
-    justify-content: space-between;
+@if base.emits("pager.ranged") {
+    .sockel-pager.sockel-ranged {
+        flex-wrap: wrap;
+        justify-content: space-between;
+    }
+
+    .sockel-pager-range {
+        color: var(--muted);
+        font-size: base.$pager-range-text;
+    }
+
+    .sockel-pager-group {
+        display: flex;
+        flex-wrap: nowrap;
+        align-items: center;
+        gap: base.$pager-gap;
+        max-width: 100%;
+    }
 }
 
-.sockel-pager-range {
-    color: var(--muted);
-    font-size: base.$pager-range-text;
+@if base.emits("pager.compact") {
+    .sockel-pager-at {
+        min-width: 3.5rem;
+        color: var(--muted);
+        text-align: center;
+    }
 }
 
-.sockel-pager-group {
-    display: flex;
-    flex-wrap: nowrap;
-    align-items: center;
-    gap: base.$pager-gap;
-    max-width: 100%;
-}
-
-.sockel-pager-at {
-    min-width: 3.5rem;
-    color: var(--muted);
-    text-align: center;
-}
-
-.sockel-pager-button[data-sort-page][data-drop-over] {
-    border-color: var(--accent);
-    background: color-mix(in srgb, var(--accent) 18%, transparent);
+@if base.emits("pager.drop") {
+    .sockel-pager-button[data-sort-page][data-drop-over] {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 18%, transparent);
+    }
 }

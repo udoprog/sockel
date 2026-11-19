@@ -126,6 +126,11 @@ instead.
 - Settings for a menu's parts, `null` by default so nothing changes:
   `$menu-separator-margin`, `$menu-separator-edge`, `$menu-heading-padding`,
   `-text`, `-ink`, `-weight`, `$menu-note-padding`, `-text`, `-ink`.
+- `$omit` parts `pager.ranged` (a ranged pager's range and group),
+  `pager.compact` (`.sockel-pager-at`), `pager.drop` (a page button as a drop
+  target), `select.filter` (a Select's filter field and no-match text),
+  `select.sheet` (a Select's phone sheet), `disclosure.heading` (a
+  Disclosure's `level` heading) and `disclosure.detail` (its `summary`).
 
 ### Changed
 
@@ -163,6 +168,13 @@ instead.
   (`Some(class::BUTTON)`), or, for a word that is not a class there, allow
   it with `Usage::unprefixed(["button"])`; a word a `dynamic` pattern
   covers once prefixed is not reported.
+- The pager, select, listbox, disclosure, drop, menu and toast partials fold
+  their repeated rules: rules with the same declarations share one selector
+  list (a pager's button and gap, a menu's and a listbox's mark and icon, a
+  toast's icon, action and close, a drop zone's over, refused and error), and
+  duplicate declarations are gone (a listbox's second `max-width` rule, a
+  `min-width: 0` beside the truncate mixin). Same rendered styles; the full
+  sheet is 651 bytes smaller (expanded), and no class changed.
 
 ### Fixed
 

@@ -24,13 +24,13 @@
 @use "menu-surface" as menu;
 
 .sockel-listbox {
-    @include menu.list(var(--listbox-anchor-width, 0px), var(--listbox-open-width, 0px));
-    max-width: min(#{base.$listbox-max-width}, calc(100vw - 2 * var(--space-2)));
-    box-shadow: base.$listbox-shadow;
-
-    @if base.$listbox-max-height {
-        max-height: min(#{base.$listbox-max-height}, var(--popover-max-height, 100vh));
-    }
+    @include menu.list(
+        var(--listbox-anchor-width, 0px),
+        var(--listbox-open-width, 0px),
+        $max-width: base.$listbox-max-width,
+        $max-height: base.$listbox-max-height,
+        $shadow: base.$listbox-shadow or var(--shadow-1)
+    );
 }
 
 .sockel-listbox-option {
@@ -46,23 +46,18 @@
     }
 }
 
-.sockel-listbox-option-mark {
-    @include menu.mark;
+.sockel-listbox-option-mark,
+.sockel-listbox-option-icon {
+    @include menu.glyph-box;
 }
 
-.sockel-listbox-option-icon {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: var(--glyph-size);
-    height: var(--glyph-size);
+.sockel-listbox-option-mark {
+    @include menu.mark-ink;
 }
 
 .sockel-listbox-option-label {
     @include base.truncate;
     flex: 1 1 auto;
-    min-width: 0;
 }
 
 .sockel-listbox-option-text {

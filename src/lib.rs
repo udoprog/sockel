@@ -757,8 +757,10 @@
 //! | skeleton | `skeleton.spinner`, `skeleton.loadable`, `skeleton.row`, `skeleton.group` (`count` above one), `skeleton.short` |
 //! | inputs | `inputs.input` (`.sockel-input`), `inputs.textarea`, `inputs.mark` (an input box's mark and unit), `inputs.group` ([`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html) and `group_classes`), `inputs.native-select` (`native_select`), `inputs.small` and `inputs.touch` (the sizes), `inputs.busy`, `inputs.invalid` (`invalid` and `aria-invalid`), `inputs.disabled` (a disabled input box; a bare input's `:disabled` is kept) |
 //! | notices | `notices.notice` ([`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html)), `notices.empty-state` ([`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html)), `notices.flanked` (an ErrorBox's icon and dismiss), `notices.causes` (an ErrorBox's `causes`) |
-//! | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`) |
+//! | pager | `pager.edges` (the first and last page), `pager.summary` (the summary pager), `pager.states` (`disabled` and `busy`), `pager.ranged` (the range text and button group), `pager.compact` (the compact pager's "3 / 35"), `pager.drop` (a page button as a drop target, `drop_page`) |
 //! | popover | `popover.match-anchor` |
+//! | select | `select.filter` (the filter field and no-match text, `filter_from`), `select.sheet` (the phone sheet, `sheet`) |
+//! | disclosure | `disclosure.heading` (the heading, `level`), `disclosure.detail` (the muted `summary`) |
 //! | confirm | `confirm.inline` |
 //! | drop | `drop.tall` |
 //! | utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |

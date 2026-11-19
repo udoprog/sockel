@@ -11,12 +11,14 @@
 //   (the placeholder, muted), `-chevron`.
 // - With a filter field, the list (`.sockel-listbox`) is `.sockel-select-popup`:
 //   `-filter` (the field, staying at its top as the options scroll under
-//   it), `-options` (the `role="listbox"`), `-empty` (no option matches).
+//   it), `-options` (the `role="listbox"`), `-empty` (no option matches);
+//   the filter and `-empty` are the `$omit` part `select.filter`.
 // - With `sheet`, the list is also `.sockel-select-sheet`: below
 //   `$sheet-breakpoint` a sheet from the bottom over `-scrim`, its `-head`
 //   (`-title`, the close button) above `-body`, which scrolls; above it the
 //   head and scrim are not shown and the list is as without.
-//   `$select-sheet-row-height` sets the sheet's rows' height.
+//   `$select-sheet-row-height` sets the sheet's rows' height. The sheet is
+//   the `$omit` part `select.sheet`.
 
 @use "tokens" as base;
 @use "hidden";
@@ -72,17 +74,19 @@
     padding-top: 0;
 }
 
-.sockel-select-filter {
-    position: sticky;
-    top: 0;
-    z-index: 1;
-    display: flex;
-    flex: none;
-    padding: var(--nest-inset) 0 var(--space-1);
-    background: var(--surface-raised);
+@if base.emits("select.filter") {
+    .sockel-select-filter {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        display: flex;
+        flex: none;
+        padding: var(--nest-inset) 0 var(--space-1);
+        background: var(--surface-raised);
 
-    > .sockel-input-box {
-        flex: 1 1 auto;
+        > .sockel-input-box {
+            flex: 1 1 auto;
+        }
     }
 }
 
@@ -93,56 +97,60 @@
     gap: var(--space-0);
 }
 
-.sockel-select-empty {
-    flex: none;
-    margin: 0;
-    padding: var(--space-2) var(--space-3);
-    color: var(--muted);
-    font-size: var(--text-sm);
-}
-
-.sockel-select-head,
-.sockel-select-scrim {
-    display: none;
-}
-
-.sockel-select-title {
-    @include base.truncate;
-    font-weight: 600;
-}
-
-@include base.below(base.$sheet-breakpoint) {
-    .sockel-select-sheet {
-        @include base.sheet($min-width: true, $edge: false) {
-            overflow: hidden;
-        }
-        padding-top: var(--nest-inset);
-        padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
-
-        @if base.$select-sheet-row-height {
-            --control-height: #{base.$select-sheet-row-height};
-        }
-    }
-
-    .sockel-select-head {
-        display: flex;
+@if base.emits("select.filter") {
+    .sockel-select-empty {
         flex: none;
-        align-items: center;
-        justify-content: space-between;
-        gap: var(--space-2);
-        padding: 0 0 var(--space-1) var(--space-3);
+        margin: 0;
+        padding: var(--space-2) var(--space-3);
+        color: var(--muted);
+        font-size: var(--text-sm);
     }
+}
 
-    .sockel-select-body {
-        display: flex;
-        flex: 1 1 auto;
-        flex-direction: column;
-        min-height: 0;
-        overflow-y: auto;
-        overscroll-behavior: contain;
-    }
-
+@if base.emits("select.sheet") {
+    .sockel-select-head,
     .sockel-select-scrim {
-        @include base.sheet-scrim;
+        display: none;
+    }
+
+    .sockel-select-title {
+        @include base.truncate;
+        font-weight: 600;
+    }
+
+    @include base.below(base.$sheet-breakpoint) {
+        .sockel-select-sheet {
+            @include base.sheet($min-width: true, $edge: false) {
+                overflow: hidden;
+            }
+            padding-top: var(--nest-inset);
+            padding-bottom: calc(var(--nest-inset) + env(safe-area-inset-bottom));
+
+            @if base.$select-sheet-row-height {
+                --control-height: #{base.$select-sheet-row-height};
+            }
+        }
+
+        .sockel-select-head {
+            display: flex;
+            flex: none;
+            align-items: center;
+            justify-content: space-between;
+            gap: var(--space-2);
+            padding: 0 0 var(--space-1) var(--space-3);
+        }
+
+        .sockel-select-body {
+            display: flex;
+            flex: 1 1 auto;
+            flex-direction: column;
+            min-height: 0;
+            overflow-y: auto;
+            overscroll-behavior: contain;
+        }
+
+        .sockel-select-scrim {
+            @include base.sheet-scrim;
+        }
     }
 }

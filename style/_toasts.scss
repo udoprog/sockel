@@ -64,12 +64,18 @@
     }
 }
 
-.sockel-toast-icon {
+// The icon's, the action's and the close's box: one small control high.
+.sockel-toast-icon,
+.sockel-toast-action,
+.sockel-toast-close {
     display: inline-flex;
     flex: none;
     align-items: center;
-    justify-content: center;
     height: var(--control-height-small);
+}
+
+.sockel-toast-icon {
+    justify-content: center;
     color: var(--tone);
 }
 
@@ -79,12 +85,4 @@
     padding-block: calc((var(--control-height-small) - 1lh) / 2);
     line-height: 1.4;
     overflow-wrap: anywhere;
-}
-
-.sockel-toast-action,
-.sockel-toast-close {
-    display: inline-flex;
-    flex: none;
-    align-items: center;
-    height: var(--control-height-small);
 }

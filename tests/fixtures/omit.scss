@@ -3,7 +3,8 @@
 @use "../../style/tokens" with (
     $omit: ("layout.toolbar", "layout.gap-wide", "buttons.fold", "heads.trail", "menu.split-button", "tokens.table",
         "fields.fieldset", "fields.error", "inputs.small", "inputs.touch", "inputs.busy", "inputs.invalid",
-        "inputs.disabled", "menu.disabled", "menu.marks", "pager.states"),
+        "inputs.disabled", "menu.disabled", "menu.marks", "pager.states", "pager.ranged", "pager.compact",
+        "pager.drop", "select.filter", "select.sheet", "disclosure.heading", "disclosure.detail"),
     $danger: false
 );
 @use "../../style/layout";
@@ -13,3 +14,5 @@
 @use "../../style/fields";
 @use "../../style/inputs";
 @use "../../style/pager";
+@use "../../style/select";
+@use "../../style/disclosure";

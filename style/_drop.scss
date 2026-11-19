@@ -44,7 +44,11 @@
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint), transparent);
     }
 
-    &.sockel-over {
+    // Over it, refused and in error alike: its colour's edge and the
+    // stronger tint; refused and in error, the colour is the danger's.
+    &.sockel-over,
+    &.sockel-refused,
+    &.sockel-error {
         --drop-border: var(--drop-color);
         --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
     }
@@ -52,8 +56,6 @@
     &.sockel-refused,
     &.sockel-error {
         --drop-color: var(--danger);
-        --drop-border: var(--drop-color);
-        --drop-fill: color-mix(in srgb, var(--drop-color) var(--drop-tint-over), transparent);
     }
 
     &.sockel-busy {

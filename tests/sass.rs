@@ -183,9 +183,10 @@ fn notice_settings() {
 fn pager_settings() {
     let Some(sass) = sass() else { return };
     let defaults = compile(&sass, "style/_index.scss");
-    assert!(defaults.contains("height: var(--control-height);\n  min-height: 0;\n  margin: 0;"));
+    let box_end = "\n}\n\n.sockel-pager-button {\n  min-height: 0;\n  margin: 0;";
+    assert!(defaults.contains(&format!("height: var(--control-height);{box_end}")));
     let css = compile(&sass, "tests/fixtures/pager_settings.scss");
-    assert!(css.contains("height: 32px;\n  min-height: 0;\n  margin: 0;"));
+    assert!(css.contains(&format!("height: 32px;{box_end}")));
     assert!(css.contains("2 * 4px"));
     assert!(css.contains("max(\n      32px,\n"));
     assert!(css.contains("padding-top: 8px;"));
@@ -323,6 +324,16 @@ fn omitted_parts_are_left_out() {
         ".sockel-menu-item[aria-disabled=true]",
         ".sockel-menu-item-mark",
         ".sockel-pager.sockel-busy",
+        ".sockel-pager.sockel-ranged",
+        ".sockel-pager-at",
+        ".sockel-pager-button[data-sort-page]",
+        ".sockel-select-filter",
+        ".sockel-select-empty",
+        ".sockel-select-sheet",
+        ".sockel-select-head",
+        ".sockel-disclosure-heading",
+        ".sockel-disclosure-summary.sockel-heading",
+        ".sockel-disclosure-detail",
     ] {
         assert!(defaults.contains(part), "{part} in the defaults");
         assert!(!css.contains(part), "{part} left out");
@@ -339,6 +350,10 @@ fn omitted_parts_are_left_out() {
         ".sockel-input-box:focus-within",
         ".sockel-menu-item-icon {",
         ".sockel-pager-button {",
+        ".sockel-pager-button,\n.sockel-pager-gap {",
+        ".sockel-select-options {",
+        ".sockel-select-popup {",
+        ".sockel-disclosure-title {",
     ] {
         assert!(css.contains(kept), "{kept} kept");
     }

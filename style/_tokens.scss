@@ -705,6 +705,7 @@ $omit: () !default;
 $-parts: (
     "buttons.bare", "buttons.busy", "buttons.fold", "buttons.fold-wide", "buttons.ghost", "buttons.touch",
     "confirm.inline",
+    "disclosure.detail", "disclosure.heading",
     "drop.tall",
     "fields.busy", "fields.check", "fields.disabled", "fields.error", "fields.field",
     "fields.fieldset", "fields.help", "fields.inputs", "fields.required",
@@ -719,8 +720,9 @@ $-parts: (
     "menu.marks", "menu.note",
     "menu.row-actions", "menu.separator", "menu.split-button", "menu.tight", "menu.widths",
     "notices.causes", "notices.empty-state", "notices.flanked", "notices.notice",
-    "pager.edges", "pager.states", "pager.summary",
+    "pager.compact", "pager.drop", "pager.edges", "pager.ranged", "pager.states", "pager.summary",
     "popover.match-anchor",
+    "select.filter", "select.sheet",
     "skeleton.group", "skeleton.loadable", "skeleton.row", "skeleton.short", "skeleton.spinner",
     "tokens.actions", "tokens.card-grid", "tokens.color-select", "tokens.drop", "tokens.fields",
     "tokens.filter-picker", "tokens.media", "tokens.panel", "tokens.picker", "tokens.seam",

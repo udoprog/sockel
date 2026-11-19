@@ -162,21 +162,24 @@
     }
 }
 
+// A check's and an icon's box, one rule for both.
+$-glyphs: ".sockel-menu-item-icon";
+@if base.emits("menu.marks") {
+    $-glyphs: ".sockel-menu-item-mark, .sockel-menu-item-icon";
+}
+
+#{$-glyphs} {
+    @include glyph-box;
+}
+
 @if base.emits("menu.marks") {
     .sockel-menu-item-mark {
-        @include mark;
-        color: base.$menu-item-mark-ink;
+        @include mark-ink(base.$menu-item-mark-ink or var(--accent));
     }
 }
 
 .sockel-menu-item-icon {
-    display: inline-flex;
     color: var(--menu-item-icon-ink);
-    flex: none;
-    align-items: center;
-    justify-content: center;
-    width: var(--glyph-size);
-    height: var(--glyph-size);
 }
 
 .sockel-menu-item-text {

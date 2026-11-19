@@ -6,7 +6,9 @@
 
 // A list beside its opener in the overlay layer, at least `$least` and
 // `$open` wide; the listbox's surface too (_listbox.scss).
-@mixin list($least, $open) {
+// `$max-width` is its widest before the window's edge, `$max-height` (`null`:
+// none) its tallest below the room the popover measured.
+@mixin list($least, $open, $max-width: var(--popover-max-width), $max-height: null, $shadow: var(--shadow-1)) {
     position: fixed;
     top: var(--popover-top, 0);
     left: var(--popover-left, 0);
@@ -17,15 +19,19 @@
     box-sizing: border-box;
     width: max-content;
     min-width: min(max($least, $open), calc(100vw - 2 * var(--space-2)));
-    max-width: min(var(--popover-max-width), calc(100vw - 2 * var(--space-2)));
-    max-height: var(--popover-max-height, none);
+    max-width: min(#{$max-width}, calc(100vw - 2 * var(--space-2)));
+    @if $max-height {
+        max-height: min(#{$max-height}, var(--popover-max-height, 100vh));
+    } @else {
+        max-height: var(--popover-max-height, none);
+    }
     @include base.scroll-area;
     @include base.reserved-border(var(--border));
     @include base.nests(var(--radius-md));
     border-radius: var(--radius-md);
     background: var(--surface-raised);
     color: var(--text);
-    box-shadow: var(--shadow-1);
+    box-shadow: $shadow;
     visibility: hidden;
 
     &.sockel-placed {
@@ -58,17 +64,27 @@
     background: color-mix(in srgb, var(--text) 7%, transparent);
 }
 
-// A row's check, its box kept when off (`.sockel-off`).
-@mixin mark {
+// A row's glyph box, a check's or an icon's.
+@mixin glyph-box {
     display: inline-flex;
     flex: none;
     align-items: center;
     justify-content: center;
     width: var(--glyph-size);
     height: var(--glyph-size);
-    color: var(--accent);
+}
+
+// A check's ink, its box kept when off (`.sockel-off`).
+@mixin mark-ink($ink: var(--accent)) {
+    color: $ink;
 
     &.sockel-off {
         visibility: hidden;
     }
+}
+
+// A row's check, its box kept when off (`.sockel-off`).
+@mixin mark {
+    @include glyph-box;
+    @include mark-ink;
 }

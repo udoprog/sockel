@@ -10,11 +10,12 @@
 //   it (`.sockel-open`) a quarter turn inside the box, which changes nothing around it.
 // - `.sockel-disclosure-title` and `.sockel-disclosure-detail`: the title and
 //   the muted summary of what it holds while shut, each cut to one line;
-//   `$disclosure-title-ink` colours the title (`null`: the text's).
+//   `$disclosure-title-ink` colours the title (`null`: the text's). The
+//   detail is the `$omit` part `disclosure.detail`.
 // - `.sockel-disclosure-body`: the content, shown while open.
 // - `.sockel-disclosure-heading`: the heading the toggle sits in when the
 //   section's title is one; `.sockel-disclosure-summary.sockel-heading` sets
-//   its title at a list head's size.
+//   its title at a list head's size (the `$omit` part `disclosure.heading`).
 
 @use "tokens" as base;
 
@@ -57,17 +58,19 @@
     }
 }
 
-.sockel-disclosure-heading {
-    display: flex;
-    flex: 1;
-    min-width: 0;
-    height: 100%;
-    margin: 0;
-    font: inherit;
-}
+@if base.emits("disclosure.heading") {
+    .sockel-disclosure-heading {
+        display: flex;
+        flex: 1;
+        min-width: 0;
+        height: 100%;
+        margin: 0;
+        font: inherit;
+    }
 
-.sockel-disclosure-summary.sockel-heading {
-    font-size: var(--text-base);
+    .sockel-disclosure-summary.sockel-heading {
+        font-size: var(--text-base);
+    }
 }
 
 .sockel-disclosure-mark {
@@ -93,11 +96,12 @@
     font-weight: 600;
 }
 
-.sockel-disclosure-detail {
-    flex: 1;
-    min-width: 0;
-    @include base.truncate;
-    color: var(--muted);
+@if base.emits("disclosure.detail") {
+    .sockel-disclosure-detail {
+        flex: 1;
+        @include base.truncate;
+        color: var(--muted);
+    }
 }
 
 .sockel-disclosure-actions {
