@@ -188,6 +188,7 @@ pub fn EmptyStatePage() -> Html {
     let icon = use_state(|| true);
     let actions = use_state(|| true);
     let compact = use_state(|| true);
+    let bare_icon = use_state(|| false);
 
     let controls = html! {
         <>
@@ -196,6 +197,7 @@ pub fn EmptyStatePage() -> Html {
             <Toggle label="icon" value={*icon} on_change={bind(&icon)} />
             <Toggle label="Actions" value={*actions} on_change={bind(&actions)} />
             <Toggle label="compact" value={*compact} on_change={bind(&compact)} />
+            <Toggle label="bare_icon" value={*bare_icon} on_change={bind(&bare_icon)} />
         </>
     };
 
@@ -205,6 +207,7 @@ pub fn EmptyStatePage() -> Html {
             .text("title", &title.of("No items yet"))
             .flag("compact", *compact)
             .expr_if(*icon, "icon", "html! { <Icon glyph={Glyph::Search} /> }")
+            .flag("bare_icon", *icon && *bare_icon)
             .expr_if(
                 *hint != Text::Empty,
                 "hint",
@@ -219,7 +222,7 @@ pub fn EmptyStatePage() -> Html {
     html! {
         <Demo {controls} {code}>
             { shown("empty_state(compact)", &empty_state(*compact)) }
-            <EmptyState title={title.of("No items yet")} compact={*compact}
+            <EmptyState title={title.of("No items yet")} compact={*compact} bare_icon={*bare_icon}
                 icon={icon.then(|| html! { <Icon glyph={Glyph::Search} /> })}
                 hint={(*hint != Text::Empty).then(|| html! { { hint.of("Add one to get started") } })}>
                 if *actions { <Button size={ButtonSize::Small}>{ "Add item" }</Button> }

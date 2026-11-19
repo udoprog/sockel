@@ -3,8 +3,8 @@ use yew::prelude::*;
 use crate::class;
 
 use sockel::{
-    Avatar, Checkbox, Chip, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster, Glyph,
-    Icon, Stack, Switch, checkbox, chip, chip_count, choice, switch,
+    Avatar, Checkbox, Chip, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster,
+    DataTips, Glyph, Icon, Stack, Switch, checkbox, chip, chip_count, choice, switch,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -23,12 +23,16 @@ const MARKS: &[(&str, Mark)] = &[
     ("Indeterminate", Mark::Mixed),
 ];
 
+const CHECKBOX_TIP: &str = "One email a month";
+const SWITCH_TIP: &str = "Sound and a badge";
+
 #[function_component]
 pub fn CheckboxPage() -> Html {
     let mark = use_state(|| Mark::Off);
     let text = use_state(|| Text::Short);
     let disabled = use_state(|| false);
     let invalid = use_state(|| false);
+    let tip = use_state(|| false);
 
     let controls = html! {
         <>
@@ -36,6 +40,7 @@ pub fn CheckboxPage() -> Html {
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
+            <Toggle label="tip" value={*tip} on_change={bind(&tip)} />
         </>
     };
     let on_change = {
@@ -52,6 +57,7 @@ pub fn CheckboxPage() -> Html {
             .flag("indeterminate", *mark == Mark::Mixed)
             .flag("disabled", *disabled)
             .flag("invalid", *invalid)
+            .text_if(*tip, "tip", CHECKBOX_TIP)
             .expr("on_change", "on_change")
             .text_if(words.is_empty(), "label", "Subscribe")
             .line_if(!words.is_empty(), text_node(&words)),
@@ -64,9 +70,11 @@ pub fn CheckboxPage() -> Html {
             </code>
             <Checkbox checked={*mark == Mark::On} indeterminate={*mark == Mark::Mixed}
                 disabled={*disabled} invalid={*invalid} {on_change}
+                tip={tip.then_some(AttrValue::from(CHECKBOX_TIP))}
                 label={text.of("").is_empty().then(|| AttrValue::from("Subscribe"))}>
                 { text.of("Subscribe to the newsletter") }
             </Checkbox>
+            if *tip { <DataTips /> }
         </Demo>
     }
 }
@@ -78,6 +86,7 @@ pub fn SwitchPage() -> Html {
     let busy = use_state(|| false);
     let disabled = use_state(|| false);
     let invalid = use_state(|| false);
+    let tip = use_state(|| false);
 
     let controls = html! {
         <>
@@ -86,6 +95,7 @@ pub fn SwitchPage() -> Html {
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
+            <Toggle label="tip" value={*tip} on_change={bind(&tip)} />
         </>
     };
 
@@ -98,6 +108,7 @@ pub fn SwitchPage() -> Html {
             .flag("busy", *busy)
             .flag("disabled", *disabled)
             .flag("invalid", *invalid)
+            .text_if(*tip, "tip", SWITCH_TIP)
             .expr("on_change", "on_change")
             .text_if(words.is_empty(), "label", "Notifications")
             .line_if(!words.is_empty(), text_node(&words)),
@@ -109,10 +120,11 @@ pub fn SwitchPage() -> Html {
                 { format!("switch(on, invalid) → \"{}\"", switch(*on, *invalid).to_string()) }
             </code>
             <Switch on={*on} busy={*busy} disabled={*disabled} invalid={*invalid}
-                on_change={bind(&on)}
+                on_change={bind(&on)} tip={tip.then_some(AttrValue::from(SWITCH_TIP))}
                 label={text.of("").is_empty().then(|| AttrValue::from("Notifications"))}>
                 { text.of("Notifications") }
             </Switch>
+            if *tip { <DataTips /> }
         </Demo>
     }
 }

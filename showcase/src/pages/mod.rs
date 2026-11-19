@@ -512,17 +512,17 @@ pub const PAGES: &[Page] = &[
             hold(
                 sockel::class::STEPPER,
                 Size::Both,
-                Across::Except(&["Size", "Max"]),
+                Across::Except(&["Size", "Max", "Decimals", "fill", "text"]),
             ),
             hold(
                 sockel::class::STEPPER_CONTROL,
                 Size::Box,
-                Across::Except(&["Size", "Max"]),
+                Across::Except(&["Size", "Max", "Decimals", "fill", "text"]),
             ),
             hold(
                 sockel::class::STEPPER_BUTTON,
                 Size::Box,
-                Across::Except(&["Size", "Max"]),
+                Across::Except(&["Size", "Max", "Decimals", "fill", "text"]),
             ),
         ],
     },
@@ -788,7 +788,7 @@ pub const PAGES: &[Page] = &[
             hold(
                 sockel::class::BUTTON,
                 Size::Box,
-                Across::Except(&["Option text", "chevron (PickerMenu, with an icon)"]),
+                Across::Except(&["Option text", "chevron (PickerMenu, with an icon)", "field"]),
             ),
             hold(
                 sockel::class::CHOICE_LIST_SEARCH,
@@ -1391,7 +1391,7 @@ pub const PAGES: &[Page] = &[
             hold(
                 sockel::class::REORDER,
                 Size::Width,
-                Across::Except(&["Rows"]),
+                Across::Except(&["Rows", "auto_scroll"]),
             ),
             hold(
                 sockel::class::REORDER,

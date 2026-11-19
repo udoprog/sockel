@@ -70,6 +70,9 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
     phrases.msg(id, &args)
 }
 
+/// The fixed heading's place in the order, among the names' indices.
+const HEADING: usize = usize::MAX;
+
 const COUNTS: &[(&str, usize)] = &[("5", 5), ("0 (empty)", 0), ("1", 1), ("8", 8)];
 
 /// Keys pressed on the second row's handle in each frame: the probe cannot
@@ -136,8 +139,22 @@ pub fn ReorderPage() -> Html {
     let auto_scroll = use_state(|| false);
     let grid = use_state(|| false);
     let picked = use_state(|| false);
+    let fixed = use_state(|| false);
     let keys = use_state(|| 0usize);
-    let order = use_state(|| (0..NAMES.len()).collect::<Vec<_>>());
+    // The heading sits after the second name until moved round.
+    let order = use_state(|| {
+        let mut order = (0..NAMES.len()).collect::<Vec<_>>();
+        order.insert(2, HEADING);
+        order
+    });
+    // The entries shown, by index into the order: names within the count,
+    // and the heading when `fixed`; moves are indices among these.
+    let shown_at: Vec<usize> = order
+        .iter()
+        .enumerate()
+        .filter(|(_, i)| if **i == HEADING { *fixed } else { **i < *count })
+        .map(|(at, _)| at)
+        .collect();
     let said = use_state(String::new);
 
     {
@@ -147,19 +164,21 @@ pub fn ReorderPage() -> Html {
 
     let on_move = {
         let order = order.clone();
+        let shown_at = shown_at.clone();
         Callback::from(move |(from, to): (usize, usize)| {
-            let mut next = (*order).clone();
-            move_item(&mut next, from, to);
-            order.set(next);
+            let mut shown: Vec<usize> = shown_at.iter().map(|at| order[*at]).collect();
+            move_item(&mut shown, from, to);
+            order.set(reshown(&order, &shown_at, shown));
         })
     };
     // Bravo and Delta picked: lifting either carries the other.
     let on_move_picked = {
         let order = order.clone();
+        let shown_at = shown_at.clone();
         Callback::from(move |(rows, to): (Vec<usize>, usize)| {
-            let mut next = (*order).clone();
-            move_items(&mut next, &rows, to);
-            order.set(next);
+            let mut shown: Vec<usize> = shown_at.iter().map(|at| order[*at]).collect();
+            move_items(&mut shown, &rows, to);
+            order.set(reshown(&order, &shown_at, shown));
         })
     };
     let phrases = use_phrases_with(&sockel::phrasebookcatalog01::L10N);
@@ -175,12 +194,16 @@ pub fn ReorderPage() -> Html {
     };
     // A grid is the children mode's: the rows are tiles the page lays out,
     // as are rows picked together.
-    let as_items = *children || *grid || *picked;
+    // Fixed rows are too.
+    let as_items = *children || *grid || *picked || *fixed;
     let picks = |name: &str| *picked && matches!(name, "Bravo" | "Delta");
-    let rows: Vec<ReorderRow> = order
+    let rows: Vec<ReorderRow> = shown_at
         .iter()
-        .filter(|i| **i < *count)
-        .map(|&i| {
+        .map(|at| order[*at])
+        .map(|i| {
+            if i == HEADING {
+                return ReorderRow::new("Later", "Later");
+            }
             let row = ReorderRow::new(NAMES[i], text.of(NAMES[i]));
             let row = if *detail {
                 row.detail(html! { { format!("Step {}", i + 1) } })
@@ -216,6 +239,7 @@ pub fn ReorderPage() -> Html {
             <Toggle label="auto_scroll" value={*auto_scroll} on_change={bind(&auto_scroll)} />
             <Toggle label="grid" value={*grid} on_change={bind(&grid)} />
             <Toggle label="picked" value={*picked} on_change={bind(&picked)} />
+            <Toggle label="fixed" value={*fixed} on_change={bind(&fixed)} />
         </>
     };
     let grid_on = *grid;
@@ -237,12 +261,19 @@ pub fn ReorderPage() -> Html {
         .flag("auto_scroll", *auto_scroll)
         .flag("grid", *grid);
     let reorder = if as_items {
-        reorder.text("class", items_class).line(each(
-            "steps",
-            "step_item",
-            rows.len(),
-            "ReorderItem",
-        ))
+        reorder
+            .text("class", items_class)
+            .line_if(
+                *fixed,
+                "<ReorderItem id=\"later\" name=\"Later\" fixed=true><strong>{ \"Later\" }</strong></ReorderItem> // among the steps",
+            )
+            .line(each(
+                "steps",
+                "step_item",
+                rows.len() - usize::from(*fixed && !rows.is_empty()),
+                "ReorderItem",
+            ))
+        .line_if(*fixed, "<ReorderItem id=\"end\" name=\"End\" fixed=true lifted_only=true>{ \"Drop here\" }</ReorderItem>")
     } else {
         reorder
     };
@@ -250,9 +281,40 @@ pub fn ReorderPage() -> Html {
     let lifted = (1, 3);
     let scroll_box = classes!(auto_scroll.then_some(class::REORDER_SCROLL));
 
+    let mut items: Vec<_> = rows
+        .iter()
+        .map(|row| {
+            if row.key == "Later" {
+                return html_nested! {
+                    <ReorderItem id="later" name="Later" fixed=true class={class::REORDER_ITEM}>
+                        <strong>{ "Later" }</strong>
+                    </ReorderItem>
+                };
+            }
+            html_nested! {
+                <ReorderItem id={row.key.clone()} name={row.name.clone()} picked={picks(&row.key)}
+                    class={classes!(class::REORDER_ITEM, grid_on.then_some(class::REORDER_TILE))}>
+                    <ReorderHandle />
+                    <strong>{ row.name.clone() }</strong>
+                    if let Some(detail) = &row.detail {
+                        <span>{ detail.clone() }</span>
+                    }
+                    { row.end.clone() }
+                </ReorderItem>
+            }
+        })
+        .collect();
+    if *fixed {
+        items.push(html_nested! {
+            <ReorderItem id="end" name="End" fixed=true lifted_only=true class={class::REORDER_ITEM}>
+                { "Drop here" }
+            </ReorderItem>
+        });
+    }
+
     html! {
         <Demo {controls} {code}>
-            if rows.is_empty() {
+            if rows.iter().all(|row| row.key == "Later") {
                 <EmptyState compact={true} title="Nothing to order" />
             } else if as_items {
                 // The app's own rows, its handle placed in them.
@@ -260,17 +322,7 @@ pub fn ReorderPage() -> Html {
                 <Reorder {on_move} {on_move_picked} text={text_cb} disabled={*disabled} quick_keys={*quick_keys}
                     titles={*titles} body_drag={*body_drag} auto_scroll={*auto_scroll} grid={*grid}
                     class={items_class}>
-                    { for rows.iter().map(|row| html_nested! {
-                        <ReorderItem id={row.key.clone()} name={row.name.clone()} picked={picks(&row.key)}
-                            class={classes!(class::REORDER_ITEM, grid_on.then_some(class::REORDER_TILE))}>
-                            <ReorderHandle />
-                            <strong>{ row.name.clone() }</strong>
-                            if let Some(detail) = &row.detail {
-                                <span>{ detail.clone() }</span>
-                            }
-                            { row.end.clone() }
-                        </ReorderItem>
-                    }) }
+                    { for items }
                 </Reorder>
                 </div>
             } else {
@@ -306,4 +358,13 @@ pub fn ReorderPage() -> Html {
             <DragHandle label="Move (a handle alone)" />
         </Demo>
     }
+}
+
+/// The order with the entries shown at `shown_at` replaced by `shown`, in turn.
+fn reshown(order: &[usize], shown_at: &[usize], shown: Vec<usize>) -> Vec<usize> {
+    let mut next = order.to_vec();
+    for (at, i) in shown_at.iter().zip(shown) {
+        next[*at] = i;
+    }
+    next
 }

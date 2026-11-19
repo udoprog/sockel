@@ -16,6 +16,8 @@ const SIZES: &[(&str, InputSize)] = &[
 
 const MAXES: &[(&str, i64)] = &[("100", 100), ("9", 9), ("99999", 99999)];
 const STEPS: &[(&str, i64)] = &[("1", 1), ("5", 5), ("25", 25)];
+const SNAPS: &[(&str, i64)] = &[("step", 0), ("1", 1), ("10", 10)];
+const DECIMALS: &[(&str, u8)] = &[("0", 0), ("1", 1), ("2", 2)];
 
 fn shown(call: &str, classes: &Classes) -> Html {
     html! { <code class={class::CLASS_CALL}>{ format!("{call} → \"{}\"", classes.to_string()) }</code> }
@@ -30,6 +32,13 @@ pub fn StepperPage() -> Html {
     let disabled = use_state(|| false);
     let busy = use_state(|| false);
     let live = use_state(|| false);
+    let snap = use_state(|| 0i64);
+    let decimals = use_state(|| 0u8);
+    let unit = use_state(|| false);
+    let fill = use_state(|| false);
+    let faint = use_state(|| false);
+    let text = use_state(|| false);
+    let strict = use_state(|| false);
     let value = use_state(|| 7i64);
 
     let controls = html! {
@@ -41,8 +50,23 @@ pub fn StepperPage() -> Html {
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="live" value={*live} on_change={bind(&live)} />
+            <Select<i64> label="Snap" options={SNAPS} value={*snap} on_change={bind(&snap)} />
+            <Select<u8> label="Decimals" options={DECIMALS} value={*decimals} on_change={bind(&decimals)} />
+            <Toggle label="unit" value={*unit} on_change={bind(&unit)} />
+            <Toggle label="fill" value={*fill} on_change={bind(&fill)} />
+            <Toggle label="faint" value={*faint} on_change={bind(&faint)} />
+            <Toggle label="text" value={*text} on_change={bind(&text)} />
+            <Toggle label="strict" value={*strict} on_change={bind(&strict)} />
         </>
     };
+    let snap_to = (*snap != 0).then_some(*snap);
+    let clamped = (*value).clamp(0, *max);
+    let shown_text = text.then(|| {
+        let n = format_number(clamped, *decimals, 0);
+        AttrValue::from(format!("{n} of {}", format_number(*max, *decimals, 0)))
+    });
+    // Room for "{max} of {max}".
+    let chars = (2 * format_number(*max, *decimals, 0).len() + 4) as u8;
     let code = snippet(
         &[],
         El::new("Stepper")
@@ -51,19 +75,29 @@ pub fn StepperPage() -> Html {
             .expr("min", "0")
             .expr("max", max.to_string())
             .expr_if(*step != 1, "step", step.to_string())
+            .expr_if(*snap != 0, "snap", format!("Some({})", *snap))
+            .expr_if(*decimals != 0, "decimals", decimals.to_string())
             .text("label", "Copies")
             .variant("size", *size)
             .flag("invalid", *invalid)
             .flag("disabled", *disabled)
             .flag("busy", *busy)
-            .flag("live", *live),
+            .flag("live", *live)
+            .flag("strict", *strict)
+            .text_if(*unit, "unit", "cm")
+            .flag("fill", *fill)
+            .flag("faint", *faint)
+            .expr_if(*text, "text", "Some(format!(\"{n} of {max}\").into())")
+            .expr_if(*text, "chars", format!("Some({chars})")),
     );
-    let clamped = (*value).clamp(0, *max);
 
     html! {
         <Demo {controls} {code}>
             <Stepper value={clamped} on_change={bind(&value)} min={0} max={*max} step={*step}
-                label="Copies" size={*size} invalid={*invalid} disabled={*disabled} busy={*busy} live={*live} />
+                snap={snap_to} decimals={*decimals} label="Copies" size={*size} invalid={*invalid}
+                disabled={*disabled} busy={*busy} live={*live} strict={*strict}
+                unit={unit.then_some(AttrValue::from("cm"))} fill={*fill} faint={*faint} text={shown_text}
+                chars={text.then_some(chars)} />
             { shown("stepper(size, invalid, disabled, busy)", &stepper(*size, *invalid, *disabled, *busy)) }
             <code class={class::CLASS_CALL}>
                 { format!("format_number(1250, 2, 3) → \"{}\"; parse_decimal(\"12,5\", 2) → {:?}",
