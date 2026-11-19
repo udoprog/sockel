@@ -1942,9 +1942,10 @@ still works, and it is still announced.
 
 ## Popover
 
-[`Popover`] is a surface beside its anchor, rendered while `open` in the
-overlay layer (see [`OverlayHost`]), so no scrolling or clipping box around
-the owner cuts it, and its events still bubble through the owner. Props:
+[`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html) is a surface beside its anchor, the placement every menu,
+select and tip shares. It renders while `open` in the overlay layer (see
+[`OverlayHost`](https://docs.rs/sockel/latest/sockel/struct.OverlayHost.html)), so no scrolling or clipping box around the owner cuts it,
+and its events still bubble through the owner. Props:
 
 - `anchor` (a `NodeRef` on the element it opens beside, where focus returns),
   `open`, and `on_dismiss: Callback<Dismiss>`: the owner closes it.
@@ -1961,13 +1962,13 @@ the owner cuts it, and its events still bubble through the owner. Props:
   taller than that: a long menu at phone height shown whole.
 - `sheet` (on by default, `sockel::class::SHEET`): below `$sheet-breakpoint`
   (the phone's) it is a sheet from the bottom over a `--scrim`, with
-  `title` as its heading and a close button (`close_label`, an override of the catalog's word), unless
-  `head` is off (on by default).
+  `title` as its heading and a close button (`close_label`, an override of
+  the catalog's word), unless `head` is off (on by default).
 - `title` is also its accessible name (`role="dialog"`); `class`, `testid`.
 - `focus` (a `NodeRef`): the element that takes focus once it is placed.
 - `focus_first`: without `focus`, focus moves once it is placed to an
   `[autofocus]` or `[data-autofocus]` element, else its body's first
-  control, else the surface (then `tabindex="-1"`), as in a [`Dialog`]: for a
+  control, else the surface (then `tabindex="-1"`), as in a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html): for a
   popover of fields or choices opened from the keyboard.
 - `role` (default `dialog`): its ARIA role; `tooltip` for a description
   shown on hover or focus, which neither takes focus nor is a dialog.
@@ -1979,7 +1980,7 @@ the owner cuts it, and its events still bubble through the owner. Props:
   alone: a popover raised in one of an app's docked windows stays over
   that window, not its neighbour. Without a match, the viewport.
 - `trap`: Tab stays inside it, from its last control to its first, as in a
-  `Dialog`; for a popover that asks for an answer ([`ConfirmPopover`] sets it).
+  `Dialog`; for a popover that asks for an answer ([`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html) sets it).
 - `flush`: a body without padding (`sockel::class::FLUSH` on
   `.sockel-popover-body`), for content that lays out its own edges, such as
   a list that runs to the surface's; off by default.
@@ -1994,12 +1995,12 @@ the owner cuts it, and its events still bubble through the owner. Props:
   pointer is there (it is in the overlay layer, so the owner's own
   `pointerleave` fires as the pointer moves onto it).
 
-Dismissal ([`Dismiss`]), only while no overlay opened after it is open:
+Dismissal ([`Dismiss`](https://docs.rs/sockel/latest/sockel/enum.Dismiss.html)), only while no overlay opened after it is open:
 `Outside`, a `pointerdown` outside the anchor and the popover, keeps focus
 where the press put it; `Escape` (unless what has the focus took it,
 preventing its default, as a search field clearing its text does) and
-`Close` (the sheet's button) return focus to the anchor, as does any close by its owner
-that leaves focus nowhere after focus or a press was inside the popover (one
+`Close` (the sheet's button) return focus to the anchor, as does any close by
+its owner that leaves focus nowhere after focus or a press was inside the popover (one
 the pointer only passed over, a hover card, leaves focus alone). Focus goes
 back to what had it inside the anchor when it opened, such as the button of
 a row the popover lines up with, else to the anchor itself.
@@ -2011,7 +2012,7 @@ dismissing. `place(anchor, (width, height), viewport, side, align)` is its
 pure placement: the given side unless the popover does not fit and the
 opposite side has more room, then moved back inside the viewport, its
 height capped (`max_height`) by the room on the side it took.
-`place_fit(.., fit)` is the same with a [`Fit`] (`place` is `Fit::Scroll`).
+`place_fit(.., fit)` is the same with a [`Fit`](https://docs.rs/sockel/latest/sockel/enum.Fit.html) (`place` is `Fit::Scroll`).
 `use_popover_within(.., within, on_dismiss)` takes `within` too, and
 `placement_bounds(anchor, within)` is the box either places inside, for a
 surface placed by its owner with `place` (`Rect::clip` cuts one box to
@@ -2036,28 +2037,30 @@ whose overflow clips. Menus, selects, pickers and tips share this placement.
 
 ## RowList, PickRow, SelectionBar, ActionRow and CardGrid
 
-[`RowList`] is a column of rows (`tag`, `ul` by default, with no bullets, margin
+Lists of rows and grids of cards, each row one height whatever its state.
+
+[`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html) is a column of rows (`tag`, `ul` by default, with no bullets, margin
 or padding). `divided` (`DIVIDED`) draws a line above every row but the first;
-`boxed` (`BOXED`) gives it a bordered, rounded surface. [`RowListItem`] is a
+`boxed` (`BOXED`) gives it a bordered, rounded surface. [`RowListItem`](https://docs.rs/sockel/latest/sockel/struct.RowListItem.html) is a
 row: `name` (one line, cut), `detail` (under it, muted, cut), and its
-children, which end the row (an [`ActionRow`], a [`Checkbox`]). `top` (`TOP`) is a
+children, which end the row (an [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), a [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html)). `top` (`TOP`) is a
 tall row: parts to the top, the name wraps. `row_list(divided, boxed)` and
 `row_list_item(top)` give the classes. Parts: `ROW_LIST_MAIN`,
 `ROW_LIST_NAME`, `ROW_LIST_DETAIL`.
 
-[`PickRow`] is a button that is a whole row choosing one thing: `name`,
+[`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html) is a button that is a whole row choosing one thing: `name`,
 `detail`, `mark` (before the name), children (after), `current`
 (`aria-current`, marked by background only), `disabled`, `onclick`.
 Parts: `PICK_ROW_MARK`, `PICK_ROW_NAME`, `PICK_ROW_DETAIL`.
 
-[`SelectionBar`] is the band under a list: `count`, `label` (the count as text,
+[`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) is the band under a list: `count`, `label` (the count as text,
 in a `role="status"`) and the actions as children. It is always in the flow
 at one height: with `count == 0` it is `IDLE` (`visibility: hidden`), so
 picking never moves the list. `inset` (`INSET`) levels its sides with the
 rows; `sticky` (`STICKY`) keeps it at the bottom of its scroll container.
 Part: `SELECTION_BAR_COUNT`. `selection_bar(idle, inset, sticky)`.
 
-`ActionRow` is actions that wrap; `nowrap` keeps one line and never shrinks.
+[`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html) is actions that wrap; `nowrap` keeps one line and never shrinks.
 `overlay` (`OVERLAY`) lies over the end of its row, taking no room, with
 `opacity: 0` and `pointer-events: none` until the row (a `RowListItem`) is
 hovered or has focus. Its controls stay in the tab order, so focus reveals
@@ -2065,15 +2068,15 @@ it. It reads `--overlay-opacity`, `--overlay-events` and `--overlay-tint`,
 which a row sets; its corners and side padding are `--action-overlay-radius`
 and `--action-overlay-padding`. `action_row(overlay, nowrap)`.
 
-[`CardGrid`] lays cards in as many columns as fit (`tag`, `ul` by default).
-`size` ([`GridSize`]): `Normal` (columns of at least `--card-grid-min`), `Wide`
+[`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) lays cards in as many columns as fit (`tag`, `ul` by default).
+`size` ([`GridSize`](https://docs.rs/sockel/latest/sockel/enum.GridSize.html)): `Normal` (columns of at least `--card-grid-min`), `Wide`
 (`--card-grid-wide`) and `Narrow` (`--card-grid-narrow`, and
 `--card-grid-narrow-phone` with a closer gap on a phone). `card_grid(size)`.
 
 Every one takes `class` and `testid` (the parts' children aside).
 
 Size guarantees: a row is at least `--control-height` high, as a compact
-[`EmptyState`] is, so one replaces the other without moving what follows. Every
+[`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) is, so one replaces the other without moving what follows. Every
 row reserves its top border, so `divided`, hover, focus and a chosen
 `PickRow` change no box. An overlay `ActionRow` takes no room, so revealing
 it moves nothing. A selection bar keeps its height whether anything is
@@ -2083,19 +2086,19 @@ picked or not. A card grid's cards are as tall as their row.
 
 ## Reorder and DragHandle
 
-[`Reorder`] is a list whose rows move by a drag on their [`DragHandle`] or by
-keyboard. `rows` is a `Vec<ReorderRow>` (`ReorderRow::new(key, name)`,
+[`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html) is a list whose rows move by a drag on their [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) or by
+keyboard, without the list reflowing until the drop. `rows` is a `Vec<ReorderRow>` (`ReorderRow::new(key, name)`,
 `.detail(html)`, `.end(html)`; the key is stable across moves), and
 `on_move((from, to))` reports a move, `to` an index in the list without the
 row: apply it with `move_item(&mut list, from, to)`. `divided`, `boxed`
-(as [`RowList`]'s), `disabled`, `class`, `testid`. The rows are
-[`RowListItem`]s (`.sockel-reorder-row`), the handle in their `start` slot
-(a new `RowListItem` prop: what begins a row).
+(as [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html)'s), `disabled`, `class`, `testid`. The rows are
+[`RowListItem`](https://docs.rs/sockel/latest/sockel/struct.RowListItem.html)s (`.sockel-reorder-row`), the handle in their `start` slot
+(what begins a row).
 
 Children mode, for rows that are the app's own (a row of fields, an
-editor): in place of `rows`, give [`ReorderItem`] children (`id`, stable
+editor): in place of `rows`, give [`ReorderItem`](https://docs.rs/sockel/latest/sockel/struct.ReorderItem.html) children (`id`, stable
 across moves; `name`, for the announcements and the handle's name;
-`class`; `testid`), each holding its content and a [`ReorderHandle`]
+`class`; `testid`), each holding its content and a [`ReorderHandle`](https://docs.rs/sockel/latest/sockel/struct.ReorderHandle.html)
 (`class`, `testid`) wherever the row wants its grip. Each item is the row
 element itself (`.sockel-reorder-row` plus its `class`), a direct child of
 the `.sockel-reorder` element, which `class` lays out; the hint and the
@@ -2135,8 +2138,8 @@ is swallowed at the window).
   lifted alone (not picked, or the only one) is `on_move`'s.
 
 - `quick_keys`: the arrows move a focused handle's row at once, as Alt and
-  an arrow do, for apps whose handles did so; Space and Enter still lift.
-- `titles`: each handle's name is its tooltip too (`DragHandle`'s new
+  an arrow do; Space and Enter still lift.
+- `titles`: each handle's name is its tooltip too (`DragHandle`'s
   `title`).
 - `tips`: each handle's name is its `data-tip` too (`DragHandle`'s `tip`),
   for apps whose tooltips read that attribute. A keyboard-moved row's
@@ -2147,8 +2150,8 @@ is swallowed at the window).
   start a drag); a finger still only by the handle, so the list scrolls
   under it. A control marked `data-reorder-surface` (a button that picks
   the row, covering most of it) counts as off them: a drag starts on it
-  too, and it is clicked when not dragged. The keyboard works as ever on
-  the handle. The row wears `REORDER_GRAB` (a grab cursor). A row with no
+  too, and it is clicked when not dragged. The keyboard works on the
+  handle. The row wears `REORDER_GRAB` (a grab cursor). A row with no
   `ReorderHandle` in it is dragged by itself: by a mouse or pen only, and
   not by the keyboard (give it another way to move, such as a menu of
   places).
@@ -2164,7 +2167,7 @@ is swallowed at the window).
   wearing `REORDER_TILED`. The arrows still step through reading order.
 - `on_drop_page: Option<Callback<(usize, AttrValue)>>`: a row dragged by
   the pointer may be let go outside the list on a place wearing
-  `data-sort-page` (another page's number in a [`Pager`] with
+  `data-sort-page` (another page's number in a [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html) with
   `drop_page`): it reports `(from, value)`, the row's index and that
   attribute's value, in place of `on_move`. While a row is held over
   one, the place wears `data-drop-over` (the Pager's accent) and no row
@@ -2197,7 +2200,7 @@ is swallowed at the window).
   the catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
   `reorder_text` gives their English. `ReorderText` is
   `#[non_exhaustive]`: a `text` callback ends in `_ => reorder_text(&t)`.
-- `DragHandle` is the grip alone (the [`IconSet`]'s `Grip`): `label`, `lifted`,
+- `DragHandle` is the grip alone (the [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html)'s `Grip`): `label`, `lifted`,
   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
   `testid`, `title`. Helpers: `reorder_row(index, lift)`,
   `drag_handle(lifted)`, `drag_target(middles, from, top, bottom)`,
@@ -2216,31 +2219,32 @@ phone breakpoint), `$drag-handle-radius`, `$drag-handle-hover-fill`,
 `$drag-handle-compact-size` (a handle with `COMPACT`, as its
 `ReorderHandle`'s `class`: only as big as its glyph, `1rem`),
 `$reorder-carried-opacity` (a `CARRIED` row's, `0.5`). An app's
-blanket button `min-height` or `min-width` does not stretch a handle. New
-classes:
-`REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
-`DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`, `CARRIED`. New partial: `_reorder.scss`. New tokens: none.
+blanket button `min-height` or `min-width` does not stretch a handle.
+Classes: `REORDER`, `REORDER_ROW`, `LIFTED`, `DROP_BEFORE`, `DROP_AFTER`,
+`DRAG_HANDLE`, `REORDER_GRAB`, `REORDER_TILED`, `CARRIED`. Partial:
+`_reorder.scss`.
 
 <br>
 
 ### ReorderTree
 
-[`ReorderTree`] holds nested lists whose rows move within a list and
+[`ReorderTree`](https://docs.rs/sockel/latest/sockel/struct.ReorderTree.html) holds nested lists whose rows move within a list and
 between lists: a layout of rows holding columns holding widgets, a list
 of groups and their entries. Its `children` are the app's markup, with a
-[`ReorderList`] (`id`, unique in the tree; `across`, for rows side by
-side; `focusable`, each row taking focus on a tap; `class`; `testid`) wherever a list is, at any depth, each holding
-[`ReorderItem`]s whose grip is a [`ReorderTreeHandle`] (`class`,
+[`ReorderList`](https://docs.rs/sockel/latest/sockel/struct.ReorderList.html) (`id`, unique in the tree; `across`, for rows side by
+side; `focusable`, each row taking focus on a tap; `class`; `testid`)
+wherever a list is, at any depth, each holding
+[`ReorderItem`](https://docs.rs/sockel/latest/sockel/struct.ReorderItem.html)s whose grip is a [`ReorderTreeHandle`](https://docs.rs/sockel/latest/sockel/struct.ReorderTreeHandle.html) (`class`,
 `testid`). A list is laid out by its `class`; its items are its direct
 children, with their `current`, `data` and handlers (a click a drag ends in is
 not their click); `fixed`, `lifted_only` and `disabled` work as in
 `Reorder`, `picked` is `Reorder`'s alone. `on_move(ReorderTreeMove { from, to })` reports a move, each a
-[`ReorderSpot`] (`list`, `index`), `to.index` an index in its list
+[`ReorderSpot`](https://docs.rs/sockel/latest/sockel/struct.ReorderSpot.html) (`list`, `index`), `to.index` an index in its list
 without the row (as `move_item` takes within one list).
 `accepts: Callback<ReorderTreeMove, bool>` refuses the places a row may
 not go (its kind does not belong there); a row never goes into a list
 inside itself. `text`, `disabled`, `titles`, `class` and `testid` are
-[`Reorder`]'s.
+[`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s.
 
 - Pointer: press a handle and move past 4px; the row lifts (`LIFTED`) and
   follows the pointer freely. It aims at the innermost list under the
@@ -2257,21 +2261,21 @@ inside itself. `text`, `disabled`, `titles`, `class` and `testid` are
 - The row it lands beside is marked `DROP_BEFORE` or `DROP_AFTER`
   (`REORDER_TILED` in an `across` list, marks at its sides); an empty
   list aimed at wears `DROP_INSIDE`.
-- The announcements are [`Reorder`]'s, their position and count in the
+- The announcements are [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s, their position and count in the
   list aimed at; they do not name that list.
 
-Size guarantees as [`Reorder`]'s: nothing reflows until the drop, the
+Size guarantees as [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s: nothing reflows until the drop, the
 lifted row moving by a transform and the marks being inset box shadows.
-New class: `DROP_INSIDE`. New tokens: none.
+Its own class: `DROP_INSIDE`.
 
-Added for lanes, each off by default:
+Off by default:
 
 - `side_by_side` (on `ReorderTree`): its outermost lists sit side by side.
   On a lifted row Up and Down, Home and End stay within the list it aims
   at; Left and Right go to the list beside that takes it, at the same
-  position or that list's end (Alt and an arrow moves at once, as ever).
+  position or that list's end (Alt and an arrow moves at once).
 - `body_drag` (on `ReorderTree`): a mouse or pen also drags a row from
-  anywhere on it off its controls, as [`Reorder`]'s `body_drag` (a control
+  anywhere on it off its controls, as [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s `body_drag` (a control
   marked `data-reorder-surface` counts as off them); a finger still only by
   the handle. The rows wear `REORDER_GRAB`; a row without a
   `ReorderTreeHandle` is dragged by itself.
@@ -2286,16 +2290,16 @@ Added for lanes, each off by default:
 
 ### Lanes
 
-[`Lanes`] is lists side by side, a board's columns (`.sockel-lanes`, on a
-[`ReorderTree`] with `side_by_side`): its children are [`Lane`]s (`id`,
+[`Lanes`](https://docs.rs/sockel/latest/sockel/struct.Lanes.html) is lists side by side, a board's columns (`.sockel-lanes`, on a
+[`ReorderTree`](https://docs.rs/sockel/latest/sockel/struct.ReorderTree.html) with `side_by_side`): its children are [`Lane`](https://docs.rs/sockel/latest/sockel/struct.Lane.html)s (`id`,
 unique among them; `name`, its head and its name for assistive technology
-and the announcements; `count`, the head's [`Count`], the rows' when
+and the announcements; `count`, the head's [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), the rows' when
 `None`; `end`, what ends the head, a menu or an add button; `empty`, what
 shows over its drop area while it has no rows; `foot`, what follows the
-rows; `current`; `class`; `testid`), each holding [`ReorderItem`]s with a
-[`ReorderTreeHandle`] in each. `on_move(ReorderTreeMove)` reports a move,
+rows; `current`; `class`; `testid`), each holding [`ReorderItem`](https://docs.rs/sockel/latest/sockel/struct.ReorderItem.html)s with a
+[`ReorderTreeHandle`](https://docs.rs/sockel/latest/sockel/struct.ReorderTreeHandle.html) in each. `on_move(ReorderTreeMove)` reports a move,
 its `list`s the lanes' ids and `to.index` counted without the row, as
-[`ReorderTree`]'s; `accepts`, `text`, `disabled` and `tips` are its too.
+[`ReorderTree`](https://docs.rs/sockel/latest/sockel/struct.ReorderTree.html)'s; `accepts`, `text`, `disabled` and `tips` are its too.
 `body_drag` is on by default: a mouse or pen drags a card from anywhere on
 it off its controls, a finger by its handle, so the lanes still scroll
 under a finger.
@@ -2319,20 +2323,21 @@ under a finger.
   sets the gap. The tokens have their defaults in the rules. `lanes()`
   gives its class.
 
-Size guarantees as [`ReorderTree`]'s: nothing reflows until the drop, the
+Size guarantees as [`ReorderTree`](https://docs.rs/sockel/latest/sockel/struct.ReorderTree.html)'s: nothing reflows until the drop, the
 lifted row moving by a transform and the marks being inset box shadows; a
-lane's head keeps its height whatever its count. New classes: `LANES`,
+lane's head keeps its height whatever its count. Classes: `LANES`,
 `LANES_TRACK`, `LANE`, `LANE_HEAD`, `LANE_TITLE`, `LANE_COUNT`, `LANE_END`,
-`LANE_BODY`, `LANE_ROWS`, `LANE_EMPTY`, `LANE_FOOT`. New partial:
-`_lanes.scss`. New tokens: `--lane-width`, `--lane-ground`, `--lanes-gap`,
+`LANE_BODY`, `LANE_ROWS`, `LANE_EMPTY`, `LANE_FOOT`. Partial:
+`_lanes.scss`. Tokens: `--lane-width`, `--lane-ground`, `--lanes-gap`,
 `--lanes-phone-width` (defaults in the rules).
 
 <br>
 
 ## Dialog
 
-[`Dialog`] is a modal box over a `--scrim`, rendered while `open` in the
-overlay layer (a portal, like [`Popover`], not a native `<dialog>`: a modal
+[`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) is a modal box that holds the page still behind it: over a
+`--scrim`, rendered while `open` in the
+overlay layer (a portal, like [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), not a native `<dialog>`: a modal
 `<dialog>` makes everything outside the top layer inert, the overlay layer
 included, so a popover or menu opened inside it could not be used). Props:
 
@@ -2349,7 +2354,7 @@ included, so a popover or menu opened inside it could not be used). Props:
   does nothing). `DialogDismiss::allows(Dismiss)` tells which.
 - `head_actions`: tools in the head, before the close button.
 - `actions` (the foot's end, the primary last) and `actions_start` (apart,
-  at its start: a Delete), each an [`ActionGroup`] in `.sockel-dialog-foot`.
+  at its start: a Delete), each an [`ActionGroup`](https://docs.rs/sockel/latest/sockel/struct.ActionGroup.html) in `.sockel-dialog-foot`.
 - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
   the bottom, up to `--dialog-sheet-height`. `close_label`,
   `close_size` (`ButtonSize::Small` by default), `close_variant`
@@ -2357,7 +2362,7 @@ included, so a popover or menu opened inside it could not be used). Props:
   button's), `onkeydown` (keys inside the dialog), `class`, `testid`.
 
 `dialog(size, sheet)` gives the classes. Parts: `.sockel-dialog-layer` (the
-scrim), `-head` (a [`SectionHead`]), `-body` (what scrolls), `-foot`.
+scrim), `-head` (a [`SectionHead`](https://docs.rs/sockel/latest/sockel/struct.SectionHead.html)), `-body` (what scrolls), `-foot`.
 
 Behaviour: opening it moves focus to an `[autofocus]` or `[data-autofocus]`
 element, else the body's first control, else the box; Tab and Shift+Tab
@@ -2365,7 +2370,7 @@ wrap inside it; the page and the overlays open before it are `inert`. A
 dialog opened from a dialog stacks over it, the one beneath dimmed by its
 scrim and out of reach. Escape and a press outside close only the innermost
 overlay, a popover included: overlays are kept on one stack. An Escape
-whose default was prevented (a [`SearchField`] clearing its text) or that
+whose default was prevented (a [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html) clearing its text) or that
 comes from outside the dialog's own DOM (an app's own popup rendered
 elsewhere, which closes alone) leaves it open. While it is the innermost
 overlay, focus that falls to the page (its control removed or disabled) comes
@@ -2392,12 +2397,12 @@ from the bottom edge.
 
 ## Confirm, ConfirmPopover, ConfirmButton and ConfirmInline
 
-Asking before an action, in three places. [`Confirm`] is a [`Dialog`] (rendered
+Asking before an action, in three places. [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html) is a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html) (rendered
 while `open`): `title` (its heading and name), `explanation`, `details` (a
 list of what it affects), `accept` (the accepting button's label) with `icon`,
 `cancel_label` (the catalog's "Cancel" unless given), `danger` (on by default: the accepting button is
 `Danger` and Cancel has the focus, so Enter never destroys by habit; off, it
-is `Primary` and has the focus), `busy`, `error` (a danger [`Notice`] under the
+is `Primary` and has the focus), `busy`, `error` (a danger [`Notice`](https://docs.rs/sockel/latest/sockel/struct.Notice.html) under the
 explanation), `on_accept` and `on_cancel`. Cancel, Escape, the close button
 and a press on the scrim all call `on_cancel`; the owner sets `open` to
 false. While `busy` the accepting button spins and nothing closes it.
@@ -2405,14 +2410,14 @@ false. While `busy` the accepting button spins and nothing closes it.
 condition holds (its name typed in `details`, say); `ConfirmPopover` and
 `ConfirmButton` take it too.
 
-[`ConfirmHost`] and `ask` are promise-style confirms: render one `ConfirmHost`
+[`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) and `ask` are promise-style confirms: render one `ConfirmHost`
 near the app's root, then `ask(ConfirmRequest::new(title, explanation))`
-from any code and `.await` the [`Answer`]: `true` when accepted, `false` when
+from any code and `.await` the [`Answer`](https://docs.rs/sockel/latest/sockel/struct.Answer.html): `true` when accepted, `false` when
 cancelled, when another question replaced it, or when no host is mounted.
-[`ConfirmRequest`] has the same fields as `Confirm`, public.
+[`ConfirmRequest`](https://docs.rs/sockel/latest/sockel/struct.ConfirmRequest.html) has the same fields as `Confirm`, public.
 
-[`ConfirmPopover`] is the same beside an element: `anchor` (or
-`anchor_element`), `open`, `side` and `align` as [`Popover`], `title` (its name, and the sheet's heading on a phone),
+[`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html) is the same beside an element: `anchor` (or
+`anchor_element`), `open`, `side` and `align` as [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html), `title` (its name, and the sheet's heading on a phone),
 the same text, `danger`, `busy` and `error`, `on_accept` and `on_cancel`
 (Cancel, Escape and a press outside; not while busy). The focus goes in once
 it is placed (`Popover`'s `focus` prop), Tab stays inside it (`trap`), and
@@ -2425,12 +2430,12 @@ accepting button joined at the end as their icons alone, `Glyph::Close` and
 `cancel_label` and `accept`, so an app passes its own words for both. It is
 as wide as what it says, up to the viewport's width (not
 `--popover-max-width`, so the line is not cut short), and a full-width sheet on a phone
-without the head; the two are joined as an [`InputGroup`]'s members are.
-[`ConfirmButton`] is a [`Button`] (`variant`, `size`, `icon`, `busy`, `disabled`)
+without the head; the two are joined as an [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html)'s members are.
+[`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html) is a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) (`variant`, `size`, `icon`, `busy`, `disabled`)
 that opens one beside itself and calls `on_accept` once accepted;
 `accept_icon` puts an icon on its accept button.
 
-[`ConfirmInline`] replaces a button by No and Yes in the same box, for a row's
+[`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html) replaces a button by No and Yes in the same box, for a row's
 own delete: the button's `variant`, `size`, `icon`, `disabled`, children as
 label, `no_label`, `yes_label`, `question` (the group's accessible name),
 `danger` (Yes is `Danger`, else `Primary`), `busy` (Yes spins, No is
@@ -2461,31 +2466,31 @@ closed.
 
 ## Tooltip, HoverCard and ReasonButton
 
-All three place themselves with `use_popover` in the overlay layer, so they
-inherit Popover's placement, following and Escape or press-outside dismissal.
+Help on hover and focus. All three place themselves with `use_popover` in
+the overlay layer, so they inherit [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html)'s placement, following and Escape or press-outside dismissal.
 
-[`Tooltip`] is a short tip beside its anchor. Props: `anchor` (a `NodeRef`),
+[`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html) is a short tip beside its anchor. Props: `anchor` (a `NodeRef`),
 `text` (nothing is shown, and nothing described, while it is empty), `side`
-(`Side::Above` by default), `delay` ([`TOOLTIP_DELAY`], 250 ms of the pointer's
+(`Side::Above` by default), `delay` ([`TOOLTIP_DELAY`](https://docs.rs/sockel/latest/sockel/constant.TOOLTIP_DELAY.html), 250 ms of the pointer's
 rest), `id`, `class`, `testid`. Keyboard focus (`:focus-visible`) shows it at
 once; a touch pointer never does; a press, Escape, leaving or losing focus
 hides it. The anchor gets `aria-describedby` naming the tip while it has
 text. The tip (`.sockel-tooltip`, `sockel::class::TOOLTIP`; `tooltip(placed)`
 gives its classes) is `--layer-tooltip`, `pointer-events: none`, hidden until
 `PLACED`, and as wide as its text up to `--tooltip-max-width` (`$tooltip-max-width`,
-24rem), wrapping beyond. [`DataTips`], mounted once, gives every element with a
+24rem), wrapping beyond. [`DataTips`](https://docs.rs/sockel/latest/sockel/struct.DataTips.html), mounted once, gives every element with a
 `data-tip` attribute the same tip (none when it says what the element already
 says, or while its menu is open, `aria-expanded="true"`); it places the tip by
 a fixed stand-in (`TIP_ANCHOR`), and hides on scroll and Escape.
 
-[`HoverCard`] is a richer card (`.sockel-hover-card` on a `.sockel-popover`,
+[`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html) is a richer card (`.sockel-hover-card` on a `.sockel-popover`,
 `hover_card(placed)`): props `anchor`, `side`, `align`, `delay`
-([`HOVER_CARD_DELAY`], 400 ms to open and to close), `title` (its accessible
+([`HOVER_CARD_DELAY`](https://docs.rs/sockel/latest/sockel/constant.HOVER_CARD_DELAY.html), 400 ms to open and to close), `title` (its accessible
 name), `class`, `testid` and the card's children. It opens on hover or
 keyboard focus and stays open while the pointer is over the anchor or the
 card, so a link in it can be reached.
 
-[`ReasonButton`] is a [`Button`] (the props `class`, `variant`, `size`, `icon`,
+[`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) is a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) (the props `class`, `variant`, `size`, `icon`,
 `submit`, `onclick`, `label`, `testid`, children) with `reason: Option<AttrValue>`
 and `busy` with `working: Option<AttrValue>`: its tooltip says the reason, else
 what it is doing (`reason_text`). A button with a reason is `unavailable`
@@ -2502,7 +2507,7 @@ spinner and the aria state change, the width does not).
 
 ## Menu, RowActions, SplitButton and ContextMenu
 
-[`Menu`] is a [`Button`] (`aria-haspopup="menu"`, `aria-expanded`) opening a
+[`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html) is a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) (`aria-haspopup="menu"`, `aria-expanded`) opening a
 list of actions (`role="menu"`, `sockel::class::MENU`) beside it in the
 overlay layer, through `use_popover`. Props:
 
@@ -2519,12 +2524,12 @@ overlay layer, through `use_popover`. Props:
   is open reaches the browser's menu. `pressed: Some(on)` makes the opener
   a toggle (`aria-pressed`), which a right-click opens the same way, so an
   opener whose `on_click` comes and goes with its state stays one element.
-- `width` ([`MenuWidth`]): `Regular` (`--menu-width`), `Wide` (`WIDE`,
-  `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), [`Panel`]
+- `width` ([`MenuWidth`](https://docs.rs/sockel/latest/sockel/enum.MenuWidth.html)): `Regular` (`--menu-width`), `Wide` (`WIDE`,
+  `--menu-width-wide`), `Wider` (`WIDER`, `--menu-width-wider`), `Panel`
   (`PANEL`, fixed at `--menu-width-panel`); `tight` (`TIGHT`) drops the gap
   between rows; `sheet` (`SHEET`, off by default): below `$sheet-breakpoint`
   a sheet from the bottom over a scrim (`.sockel-menu-scrim`), as a
-  [`Popover`] is.
+  [`Popover`](https://docs.rs/sockel/latest/sockel/struct.Popover.html) is.
 - `side`, `align` (`End` by default), `within` (as `Popover`'s),
   `disabled`; `open` and `on_toggle` for a menu its owner also opens another way; `class` (the list's),
   `testid` (the list's; the opener's is it suffixed `-toggle`, or
@@ -2532,7 +2537,7 @@ overlay layer, through `use_popover`. Props:
   list rendered, `hidden`, while closed, for an item that owns what it
   opens (a dialog) and must not be dropped when the menu closes.
 
-Its children are the items: [`MenuItem`] (an action; `icon`, `detail` under
+Its children are the items: [`MenuItem`](https://docs.rs/sockel/latest/sockel/struct.MenuItem.html) (an action; `icon`, `detail` under
 the label and `detail_html` (markup) after it, `hint` at the end, `danger`,
 `disabled`, `onclick`; with `href` a link row, an `<a>` that loses its
 `href` when disabled and, not being a button, does not get the button
@@ -2541,12 +2546,12 @@ part tokens (`$button-part-*`), `new_tab` opening it in a new tab (`target="_bla
 row's native tooltip; `dialog: Some(open)` a button row opening a dialog
 (`aria-haspopup="dialog"`, `aria-expanded`); `current` marks the page shown,
 `aria-current="page"`, by the accent's ground and ink; `tip` a styled tip,
-`data-tip`, naming what it acts on), [`MenuCheck`]
+`data-tip`, naming what it acts on), [`MenuCheck`](https://docs.rs/sockel/latest/sockel/struct.MenuCheck.html)
 (`menuitemcheckbox`: `checked`, `on_change`; the menu stays open),
-[`MenuRadio`] (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
+[`MenuRadio`](https://docs.rs/sockel/latest/sockel/struct.MenuRadio.html) (`menuitemradio`: `checked`, `on_pick`), both with `icon`,
 `detail` and `hint`; `stay` on a `MenuItem` or `MenuRadio` (`data-stay`,
 which an app's own item can wear too) keeps the menu open on a pick, for
-a step to another list of the same menu or a row of choices it holds; [`MenuSeparator`], [`MenuHeading`] and [`MenuNote`] (a line
+a step to another list of the same menu or a row of choices it holds; [`MenuSeparator`](https://docs.rs/sockel/latest/sockel/struct.MenuSeparator.html), [`MenuHeading`](https://docs.rs/sockel/latest/sockel/struct.MenuHeading.html) and [`MenuNote`](https://docs.rs/sockel/latest/sockel/struct.MenuNote.html) (a line
 such as "nothing here"). Each takes `class` and `testid`. `menu(width, tight, placed)` and `menu_item(danger)` give the
 classes; `menu_step` and `typeahead` are the keyboard's pure parts.
 
@@ -2561,7 +2566,7 @@ starts over; one letter repeated cycles). In a menu that holds fields (a
 small form), Tab and Shift+Tab move between its own fields and buttons and
 close it only past either end, and a focused field keeps its arrows and
 letters. A pick of an item or radio (or of an option of a single-select
-[`ChoiceList`] the menu holds), Tab, Escape or a press outside closes
+[`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html) the menu holds), Tab, Escape or a press outside closes
 it; all but the press return focus
 to the opener. A pick gives it back before the menu goes, so a dialog the
 pick opens returns focus to the opener when it closes; Tab gives it back
@@ -2570,7 +2575,7 @@ outside close a menu opened from a popover or a dialog before what it
 opened from. Where focus stays on the opener (a panel of text alone),
 Escape and Tab there close it too, and Escape goes no further.
 
-[`RowActions`] is a row's actions: `actions: Vec<RowAction>`
+[`RowActions`](https://docs.rs/sockel/latest/sockel/struct.RowActions.html) is a row's actions: `actions: Vec<RowAction>`
 (`RowAction::new(icon, label, onclick)`, `.danger()`, `.pressed(on)`,
 `.disabled(..)`, `.testid(..)`), shown as small quiet icon buttons, the
 danger ones last (`ROW_ACTION_DANGER`, muted until hovered or focused),
@@ -2578,15 +2583,15 @@ then `children`, then the overflow `Menu` behind its ellipsis when `more`
 holds its items (`more_label`; `more_disabled` keeps the
 opener, disabled, so every row ends the same way; `more_testid` its test
 id). The actions are named by `title`, or with `tips` by a styled tip
-(`data-tip`, for [`DataTips`]), the opener's too. `disabled`, `open`,
+(`data-tip`, for [`DataTips`](https://docs.rs/sockel/latest/sockel/struct.DataTips.html)), the opener's too. `disabled`, `open`,
 `on_toggle`, `class`, `testid`.
 
-[`SplitButton`] is a main action (`text`, `onclick`, `icon`, `busy`) joined
+[`SplitButton`](https://docs.rs/sockel/latest/sockel/struct.SplitButton.html) is a main action (`text`, `onclick`, `icon`, `busy`) joined
 to a `Menu` of its variants (its children; `menu_label`;
 `width`), `Primary` unless `variant` says otherwise, `size`, `disabled`,
 `class`, `testid` (the menu's is it suffixed `-menu`).
 
-[`ContextMenu`] wraps its children (`.sockel-context-target`,
+[`ContextMenu`](https://docs.rs/sockel/latest/sockel/struct.ContextMenu.html) wraps its children (`.sockel-context-target`,
 `display: contents`, so it lays nothing out) and opens a menu of `items`
 at the pointer on a right-click, or a press held for half a second on a
 touch screen. Closed by Escape, a pick or Tab, it gives focus back to what
@@ -2607,11 +2612,11 @@ keeps its box when off. Labels are one line, cut with an ellipsis.
 
 ## Table and SortHeader
 
-[`Table`] is a table in a scroll area (`scrollbar-gutter: stable`, so rows
-starting to scroll move nothing). `head` is the heading cells ([`TableCell`]
-with `head`, or [`SortHeader`]s); the children are [`TableRow`]s of `TableCell`s.
-`columns` is the count the `empty` row spans: `empty` (an [`EmptyState`] with
-`compact`, or an [`ErrorBox`]) stands in the rows' place. `fixed` (`FIXED`)
+[`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html) is a table in a scroll area (`scrollbar-gutter: stable`, so rows
+starting to scroll move nothing). `head` is the heading cells ([`TableCell`](https://docs.rs/sockel/latest/sockel/struct.TableCell.html)
+with `head`, or [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html)s); the children are [`TableRow`](https://docs.rs/sockel/latest/sockel/struct.TableRow.html)s of `TableCell`s.
+`columns` is the count the `empty` row spans: `empty` (an [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html) with
+`compact`, or an [`ErrorBox`](https://docs.rs/sockel/latest/sockel/struct.ErrorBox.html)) stands in the rows' place. `fixed` (`FIXED`)
 sizes columns by the first row alone, so data arriving or a sort moves no
 column; give a cell `width`, and `cut` to cut its text with an ellipsis.
 `sticky` (`STICKY`, on the wrap) holds the head while the rows scroll past
@@ -2647,7 +2652,7 @@ cell `tip` (`data-tip`).
 `none`), `first` (the way a first press runs: names from A, sizes largest
 first), `numeric`, `disabled` and `onsort`, called with the direction asked
 for. `next_sort(current, first)` is the cycle: unsorted, `first`, the other
-way, unsorted. The mark (`SORT_HEADER_MARK`, a chevron from the [`IconSet`])
+way, unsorted. The mark (`SORT_HEADER_MARK`, a chevron from the [`IconSet`](https://docs.rs/sockel/latest/sockel/struct.IconSet.html))
 has its box whether sorted or not (`IDLE` hides it), so sorting never changes
 the heading's width. `sort_header(numeric)` and `sort_mark(idle)`.
 
@@ -2656,15 +2661,15 @@ are at least `--control-height` high, every line is a reserved border, and
 hover tints the row without changing a box; the mark and the bulk bar keep
 their room. For markup sockel does not render, the mixins `table-base`
 (`$fixed`), `table-head-cell`, `table-cell` and `table-row-hover` give the
-same rules. New token: `--table-max-height`.
+same rules.
 
 <br>
 
 ## Pager and Disclosure
 
-[`Pager`] is page buttons in a fixed number of slots: first, previous, the
+[`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html) is page buttons in a fixed number of slots: first, previous, the
 numbers with gaps (`…`), next and last. `page` (from 0), `pages`, `on_page`
-(called with the page asked for), `slots` (default 7, at least [`MIN_SLOTS`],
+(called with the page asked for), `slots` (default 7, at least [`MIN_SLOTS`](https://docs.rs/sockel/latest/sockel/constant.MIN_SLOTS.html),
 5), `edges` (default true: the first and last page buttons; hidden below the
 phone breakpoint, and worth turning off in a narrow container), `phone_steps`
 (default true: the previous and next page buttons below the phone breakpoint;
@@ -2703,11 +2708,11 @@ for that page, for a list reordered by dragging to read where a row was let
 go; while one is held over it, the list sets `data-drop-over` on it and it
 takes the accent.
 
-[`Disclosure`] is a summary row that toggles its body: `title`, `summary` (what
+[`Disclosure`](https://docs.rs/sockel/latest/sockel/struct.Disclosure.html) is a summary row that toggles its body: `title`, `summary` (what
 it holds, beside the title while shut), `actions` (controls at the row's end,
 outside the toggle), `open`, `on_toggle` (the state a press asks for), `id`
 (the body's, named by `aria-controls` while open), `disabled`, `level` (a
-[`HeadLevel`]: the toggle sits in that heading, `DISCLOSURE_HEADING`, its title
+[`HeadLevel`](https://docs.rs/sockel/latest/sockel/enum.HeadLevel.html): the toggle sits in that heading, `DISCLOSURE_HEADING`, its title
 at a list head's size, for a section whose title is a heading), `class`,
 `testid`, and the children as the body, rendered only while open.
 `disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`),
@@ -2727,18 +2732,15 @@ The Disclosure's row is `--control-height` high shut or open
 `var(--touch-height)`; `$disclosure-title-ink`, `null` by default, colours
 the title), the
 mark turns inside its own box, and the title and summary are cut to one line;
-only the body adds height. New classes: `PAGER`, `PAGER_BUTTON`, `PAGER_GAP`,
-`PAGER_MARK`, `PAGER_FLIP`, `PAGER_ECHO`, `PAGER_EDGE`, `DISCLOSURE`,
-`DISCLOSURE_HEAD`, `DISCLOSURE_SUMMARY`, `DISCLOSURE_MARK`,
-`DISCLOSURE_TITLE`, `DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`,
-`DISCLOSURE_BODY` (`OPEN` is new too). New partials: `_pager.scss`,
-`_disclosure.scss`. New tokens: none (`--pager-chars` is set per Pager).
+only the body adds height. Partials: `_pager.scss`, `_disclosure.scss`
+(`--pager-chars` is set per Pager).
 
 <br>
 
 ## Select and Listbox
 
-`Select<T>` is the WAI-ARIA select-only combobox: a face in the tab order
+[`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html) picks one value (or several) from a list, at one width whatever
+is chosen. It is the WAI-ARIA select-only combobox: a face in the tab order
 (a `<button>`, `role="combobox"`, `aria-haspopup="listbox"`) showing what is
 chosen, opening a listbox (`role="listbox"`, `sockel::class::LISTBOX`) under
 it in the overlay layer through `use_popover`, while focus stays on the face
@@ -2752,9 +2754,9 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   heading, `.testid(id)` its row's test id), `value:
   Option<T>`, `on_change` (told a pick that is not the one chosen),
   `placeholder` (muted, while nothing listed is chosen).
-- `width` ([`SelectWidth`]): `Widest` (the widest option or placeholder) or
+- `width` ([`SelectWidth`](https://docs.rs/sockel/latest/sockel/enum.SelectWidth.html)): `Widest` (the widest option or placeholder) or
   `Fill` (`FILL`, its container's width).
-- `size` ([`InputSize`], as a [`TextInput`]'s), `invalid`, `disabled`, `busy`
+- `size` ([`InputSize`](https://docs.rs/sockel/latest/sockel/enum.InputSize.html), as a [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html)'s), `invalid`, `disabled`, `busy`
   (`aria-busy`; it still opens on what it has).
 - `filter_from: Option<usize>`: from how many options the list has a
   filter field above it (`None`, the default: never). It takes focus on
@@ -2781,11 +2783,11 @@ it in the overlay layer through `use_popover`, while focus stays on the face
   `close_label`) above what scrolls (`SELECT_BODY`); its filter
   field is not focused on opening there, so the keyboard does not cover
   the sheet. Above the breakpoint the list is as without it.
-- `id` and `describedby` inside a [`Field`] (its label names and opens it),
+- `id` and `describedby` inside a [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) (its label names and opens it),
   `label` (the accessible name without one), `class` (the face's), `testid`
   (the face's; the list's is it suffixed `-options`).
 
-In an [`InputGroup`], give it `group_classes(..)[i]` as its `class` like any
+In an [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html), give it `group_classes(..)[i]` as its `class` like any
 member. `select(size, width, invalid, disabled, busy)` gives the face's
 classes (the input box's, `SELECT`, `FILL`), `chosen(options, value)` the
 chosen option's index.
@@ -2794,13 +2796,13 @@ Keyboard: closed, the arrows, Enter, Space, Home and End open it (on the
 chosen option, else the first or, for ArrowUp and End, the last enabled
 one), and typing opens it on the option starting with what was typed.
 Open, the arrows (stopping at the ends), PageUp and PageDown (10), Home and
-End move over the enabled options, typing moves as a [`Menu`]'s type-ahead
+End move over the enabled options, typing moves as a [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html)'s type-ahead
 does, Enter, Space and Alt+ArrowUp pick, and Escape, Tab or a press outside
 close it. A pointer over an option makes it active; a press on the list
 keeps focus on the face.
 
-[`Listbox`] is the list's keyboard state, for anything listing options under
-what keeps focus (P12's searching pickers): `active`, `hover`, `set`,
+[`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) is the list's keyboard state, for anything listing options under
+what keeps focus (a searching picker): `active`, `hover`, `set`,
 `step`, `go_to_end`, `settle` (after filtering), `typeahead(pickable,
 labels, char, now)`, `key(key, alt, pickable) -> ListKey` (`Moved`,
 `Pick(i)`, `Ignored`) and `take_scroll` (scroll the active option into
@@ -2826,8 +2828,9 @@ out, hidden until placed), at least as wide as the face
 (`--listbox-anchor-width`) and never narrower than it opened
 (`--listbox-open-width`). Its rows are `--control-height` at least, their
 border reserved, and the active row changes only its fill. Labels are one
-line; a description under one wraps, and makes its row taller. New
-tokens: none (the two custom properties are set by the component). New partials: `_listbox.scss`, `_select.scss`. The menu's
+line; a description under one wraps, and makes its row taller. Partials:
+`_listbox.scss`, `_select.scss` (the two custom properties are set by the
+component). The menu's
 surface, row and mark are the mixins `list`, `item`, `item-active` and
 `mark` of `_menu-surface.scss` (forwarded by `_menu.scss`), which emits no
 rules, so the listbox and the Select load none of the menu's. `.sockel-hidden`
@@ -2837,7 +2840,7 @@ is `_hidden.scss`, which `_badges.scss` and `_select.scss` both load.
 
 ## DropZone
 
-A target for files dropped on it, pasted, or picked with its button. While a
+[`DropZone`](https://docs.rs/sockel/latest/sockel/struct.DropZone.html) is a target for files dropped on it, pasted, or picked with its button. While a
 file is dragged over the page the zone is outlined, over it tinted; a file of
 a type it does not take is refused. All of that, and the busy and error
 messages, is drawn by an overlay inside the zone, so the zone never changes
@@ -2861,13 +2864,13 @@ outside a text field go the same way), `tall` (a zone that may be taller
 than the screen: its label, larger, stays on screen while the zone
 scrolls; omittable part `drop.tall`), `pick` (a button with this label
 opens the file picker through a hidden input), `on_files` (the files taken,
-in order, from a drop, paste or pick), `on_refused` (a [`Refusal`]: `Type` or
+in order, from a drop, paste or pick), `on_refused` (a [`Refusal`](https://docs.rs/sockel/latest/sockel/enum.Refusal.html): `Type` or
 `TooLarge`), `testid`, `class`. `accepts(accept, name, kind)` and
 `refusal(accept, max_size, name, kind, size)` are the same filter as plain
 functions. A refusal the zone found itself is said until the next press in
 it or the next drag; a drag that carries no files passes through.
 
-Modifiers, set from [`DropState`] by `drop_zone(state, disabled)`:
+Modifiers, set from [`DropState`](https://docs.rs/sockel/latest/sockel/enum.DropState.html) by `drop_zone(state, disabled)`:
 `.sockel-dragging` (a file is dragged on the page), `.sockel-over`,
 `.sockel-refused`, `.sockel-busy`, `.sockel-error` and `.sockel-disabled`.
 Parts: `.sockel-drop-zone-overlay`, `-label` and `-pick`.
@@ -2894,8 +2897,8 @@ far inside the viewport's top and bottom a tall zone's label stays);
 
 ## ColorSelect
 
-[`ColorSelect`] picks a colour from a palette the app passes in as data; sockel
-owns no palette. It is the select-only combobox pattern of [`Select`]: a face
+[`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) picks a colour from a palette the app passes in as data; sockel
+owns no palette. It is the select-only combobox pattern of [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html): a face
 (a `<button>`, `role="combobox"`) with the chosen colour's swatch and name,
 opening a grid (`role="listbox"`) of swatches in the overlay layer through
 `use_popover`, while focus stays on the face. Props:
@@ -2909,15 +2912,15 @@ opening a grid (`role="listbox"`) of swatches in the overlay layer through
   to `on_change` like any other, and a value that is not in the palette is
   shown by its own text.
 - `columns` (6): swatches to a grid row (`--color-select-columns`).
-- `width` ([`ColorSelectWidth`]): `Fixed` (`--color-select-width`), `Fill`
+- `width` ([`ColorSelectWidth`](https://docs.rs/sockel/latest/sockel/enum.ColorSelectWidth.html)): `Fixed` (`--color-select-width`), `Fill`
   (`FILL`, the container's) or `Swatch` (`SWATCH_ONLY`, the swatch alone in a
   box as wide as it is high).
-- `size` ([`InputSize`]), `invalid`, `disabled`, `busy` (`aria-busy`; it still
-  opens on what it has), `id` and `describedby` inside a [`Field`], `label` (the
+- `size` ([`InputSize`](https://docs.rs/sockel/latest/sockel/enum.InputSize.html)), `invalid`, `disabled`, `busy` (`aria-busy`; it still
+  opens on what it has), `id` and `describedby` inside a [`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html), `label` (the
   accessible name without one), `class` (the face's), `testid` (the face's;
   the grid's is it suffixed `-options`, the custom input's `-custom`).
 
-In an [`InputGroup`], give it `group_classes(..)[i]` as its `class`.
+In an [`InputGroup`](https://docs.rs/sockel/latest/sockel/struct.InputGroup.html), give it `group_classes(..)[i]` as its `class`.
 `color_select(size, width, invalid, disabled, busy)`, `color_swatch(none)`,
 `color_list(placed)` and `color_option(active)` give the classes
 (`COLOR_SELECT`, `COLOR_SWATCH` with `NONE`, `COLOR_LIST` with `PLACED`,
@@ -2932,7 +2935,7 @@ Keyboard: closed, the arrows, Enter, Space, Home and End open it on the
 chosen colour (else the first or last), and typing opens it on the colour
 whose name starts with what was typed. Open, Left and Right move by one,
 Up and Down by a row (stopping at the ends), Home, End, PageUp and PageDown
-and type-ahead move as in a [`Listbox`], Enter, Space and Alt+ArrowUp pick,
+and type-ahead move as in a [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html), Enter, Space and Alt+ArrowUp pick,
 Escape or a press outside close it, and Tab moves into the custom input
 (with `custom`; Shift+Tab or Tab from it closes and returns to the face).
 
@@ -2943,16 +2946,16 @@ is `--swatch-size` square, a grid cell `--control-height` square with its
 border reserved, and the active and selected cells change fill and border
 colour only; the selected mark keeps its box when off. The popup is the
 menu's surface in a layer that lays nothing out, hidden until placed.
-New tokens: `--swatch-size`, `--color-select-width`. New partial:
-`_color-select.scss`; new classes as above (`SWATCH_ONLY` is new; `NONE`,
-`FILL`, `PLACED`, `ACTIVE` and `OFF` are shared).
+Tokens: `--swatch-size`, `--color-select-width`. Partial:
+`_color-select.scss`; `NONE`, `FILL`, `PLACED`, `ACTIVE` and `OFF` are
+shared classes.
 
 <br>
 
 ## SearchSelect and FilterPicker
 
-`SearchSelect<T>` is the WAI-ARIA editable combobox with list
-autocomplete: a field (the input box, `SEARCH_SELECT`) whose text filters a
+[`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) finds one value among many by typing: the WAI-ARIA
+editable combobox with list autocomplete: a field (the input box, `SEARCH_SELECT`) whose text filters a
 listbox under it in the overlay layer, focus staying in the field. Props:
 
 - `options: Vec<SearchOption<T>>` (`SearchOption::new(value, label)`,
@@ -2994,15 +2997,16 @@ and the rows after the options, `search_select_row(active, more)`:
 `SEARCH_SELECT_CREATE` (in the accent, the text in `SEARCH_SELECT_TYPED`)
 and `SEARCH_SELECT_MORE` (muted).
 
-`FilterPicker<T>` is a list's filter, for a [`LibraryToolbar`]: a button
+[`FilterPicker`](https://docs.rs/sockel/latest/sockel/struct.FilterPicker.html) is a list's filter, for a [`LibraryToolbar`](https://docs.rs/sockel/latest/sockel/struct.LibraryToolbar.html): a button
 (`BUTTON`, `FILTER_PICKER`, `ON` while anything is chosen) saying `all`, or
 the first choice and `+N` more, opening a multi-select listbox
 (`aria-multiselectable`): an option for all, then one per choice, checked
 when chosen. A pick leaves it open. Props: `choices: Vec<FilterChoice<T>>`,
 `chosen: Vec<T>` (in the order chosen), `on_change` (the choices after a
 pick, `toggled(chosen, value)`; empty for all), `label` (the accessible
-name and tooltip before what is chosen), `all` (an override of the catalog's word), `disabled`, `class`, `testid`. Keys as a [`Select`]'s. Past
-[`SEARCH_FROM`] (8) choices the pop-up is a [`ChoiceList`] (`multi`, all as
+name and tooltip before what is chosen), `all` (an override of the
+catalog's word), `disabled`, `class`, `testid`. Keys as a [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html)'s. Past
+[`SEARCH_FROM`](https://docs.rs/sockel/latest/sockel/constant.SEARCH_FROM.html) (8) choices the pop-up is a [`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html) (`multi`, all as
 its first option) with its search field, prefix matches first and its
 `--picker-rows` height whatever matches; the field takes the focus.
 `filter_summary(all, labels)` gives its words and count. Parts:
@@ -3016,18 +3020,18 @@ never measured from its text, and `--picker-rows` rows high (or what fits
 below the field), so typing, results arriving, loading and no matches
 never resize it; past that it scrolls. FilterPicker is `--filter-width`
 wide from no choice to all of them: its words are cut with an ellipsis and
-its count's room (`3ch`) is kept, hidden, with none. New token:
-`--picker-rows` (`$picker-rows: 6`). New partials: `_search-select.scss`,
+its count's room (`3ch`) is kept, hidden, with none. Token:
+`--picker-rows` (`$picker-rows: 6`). Partials: `_search-select.scss`,
 `_filter-picker.scss`.
 
 <br>
 
 ## Picker, PickerMenu, ChoiceList and PickerDialog
 
-`ChoiceList<T>` is the list every picker opens: a listbox (`CHOICE_LIST`,
+[`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html) is the list every picker opens: a listbox (`CHOICE_LIST`,
 `CHOICE_LIST_OPTIONS`) of `PickerOption<T>`s under a search field
 (`CHOICE_LIST_SEARCH`, an input box) once there are more than
-[`SEARCH_FROM`] (8) options, or with `always_search`. Focus stays in the
+[`SEARCH_FROM`](https://docs.rs/sockel/latest/sockel/constant.SEARCH_FROM.html) (8) options, or with `always_search`. Focus stays in the
 field (or on the list, without one), naming the active option with
 `aria-activedescendant`: the arrows, PageUp and PageDown move over the
 enabled options and Enter picks; without a field, Home, End, Space and
@@ -3035,10 +3039,10 @@ type-ahead too. Props: `options`, `value` (checked), `multi`
 (`aria-multiselectable`, `chosen` checked, the owner toggles a pick with
 `toggled`), `on_pick`, `label` (the list's name), `always_search`,
 `search_label` and `empty_label` (the app's words), `autofocus`, `class`,
-`clear_label` (the search field's clear button: it is a [`SearchField`], so
+`clear_label` (the search field's clear button: it is a [`SearchField`](https://docs.rs/sockel/latest/sockel/struct.SearchField.html), so
 Escape clears a query before it closes a popup), `detail_below` (each
 row's detail on a second line under its label, wrapping, in
-`LISTBOX_OPTION_TEXT` and `LISTBOX_OPTION_DESCRIPTION` as a [`Select`]'s
+`LISTBOX_OPTION_TEXT` and `LISTBOX_OPTION_DESCRIPTION` as a [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html)'s
 description), `testid` (the field's is it suffixed `-search`, each
 option's `-option`, the pager's `-pager`). Under a search field no option
 starts active (unless `tab_cycles`): ArrowDown goes to the first, ArrowUp
@@ -3049,13 +3053,13 @@ the app is still searching (a spinner in the field, `aria-busy` on the
 list, `busy_label` or Searching while nothing is listed). `filter` is
 the app's own control under the search field (`CHOICE_LIST_FILTER`), such
 as a filter by kind. `page_size`
-lists that many matches at a time with a [`Pager`] under them
+lists that many matches at a time with a [`Pager`](https://docs.rs/sockel/latest/sockel/struct.Pager.html) under them
 (`CHOICE_LIST_PAGER`, over a rule), opening on the current option's page;
 a new query goes back to the first. `tab_cycles` makes Tab and Shift+Tab
 move the active option, wrapping, instead of leaving (a list adding one
 thing after another). `rows` sets a searching list's height in rows
 (`--picker-rows`), for a list whose every option should show. A keyboard
-pick is the option's click, so a [`Menu`] holding a single-select list
+pick is the option's click, so a [`Menu`](https://docs.rs/sockel/latest/sockel/struct.Menu.html) holding a single-select list
 closes on it as on a mouse pick.
 
 `PickerOption::new(value, label)` with `.detail(..)` (muted after the
@@ -3073,10 +3077,10 @@ its `-mark`, `-icon`, `-label`), plus `CHOICE_LIST_DETAIL`,
 keywords, ignoring case, labels starting with the text first, then labels
 with a word starting with it, then the rest.
 
-`Picker<T>` is a field (the input box, `PICKER`) showing the current
+[`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html) is a field (the input box, `PICKER`) showing the current
 option's icon and label (`PICKER_ICON`, `PICKER_TEXT`), or the placeholder
 (`PICKER_PLACEHOLDER`), and a chevron (`PICKER_CHEVRON`), opening a
-[`ChoiceList`] below it in the overlay layer (`PICKER_POPUP`, the menu's
+[`ChoiceList`](https://docs.rs/sockel/latest/sockel/struct.ChoiceList.html) below it in the overlay layer (`PICKER_POPUP`, the menu's
 surface). A pick, Escape, Tab or a press outside closes it (Tab moving
 on from the field, as if it had not been open); ArrowDown or ArrowUp
 opens it. Props: `options`, `value`, `on_change`, `label` (the
@@ -3086,26 +3090,26 @@ accessible name, followed by the current option's label), `placeholder`,
 `on_search`, `busy`, `busy_label`, `filter`, `page_size`, `clear_label`, `detail_below`,
 `sheet` (below the phone breakpoint the list is a sheet from the bottom,
 headed by `label` and a close button named `close_label`, as
-[`ChoicePopup`]'s), `id`, `describedby`, `title` (the field's
+[`ChoicePopup`](https://docs.rs/sockel/latest/sockel/struct.ChoicePopup.html)'s), `id`, `describedby`, `title` (the field's
 tooltip), `fold` (the current option's icon alone below the phone
 breakpoint, its label kept for a screen reader), `class`, `testid` (the popup's is it suffixed `-popup`, the
 list's `-list`, or `list_testid`). `picker(variant, fill, invalid, disabled)`
-gives its classes. `PickerMenu<T>` is the same list opened from a [`Button`]
+gives its classes. [`PickerMenu`](https://docs.rs/sockel/latest/sockel/struct.PickerMenu.html) is the same list opened from a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html)
 for an action that takes an option (Add a language): `text`, `icon`,
 `chevron` (beside the icon too), `label`, `variant`, `size`, `fold` (as a `Button`'s), `tip`, `disabled`, `on_pick`,
-`field` (the opener is a [`Picker`]'s field showing `icon` and `text`, not a
+`field` (the opener is a [`Picker`](https://docs.rs/sockel/latest/sockel/struct.Picker.html)'s field showing `icon` and `text`, not a
 button: a field of several choices, such as a filter; ArrowDown and ArrowUp
 open it) with `fill`, and the list's
-`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles`, `rows` and `list_testid`; `width` (the popup's, as [`ChoicePopup`]'s); `align`
+`value`, `multi` and `chosen` (a multi pick leaves it open), `on_search`, `page_size`, `tab_cycles`, `rows` and `list_testid`; `width` (the popup's, as [`ChoicePopup`](https://docs.rs/sockel/latest/sockel/struct.ChoicePopup.html)'s); `align`
 (`Start` by default), `open` and `on_toggle` for a list its owner also closes, `head` (above the list, a note) and
-its children (below it, a Done button). `PickerDialog<T>` is the
-searchable shell for a large set (languages, countries): a [`Dialog`]
+its children (below it, a Done button). [`PickerDialog`](https://docs.rs/sockel/latest/sockel/struct.PickerDialog.html) is the
+searchable shell for a large set (languages, countries): a [`Dialog`](https://docs.rs/sockel/latest/sockel/struct.Dialog.html)
 (`open`, `on_dismiss`, `title`, `size`, `actions` such as Done) holding a
 `ChoiceList` that always searches, its field focused, single (the owner
-closes it on a pick) or `multi`. `ChoicePopup` is the list's popup on its own, for an
+closes it on a pick) or `multi`. [`ChoicePopup`](https://docs.rs/sockel/latest/sockel/struct.ChoicePopup.html) is the list's popup on its own, for an
 opener the app renders (a `Button` with `node_ref`, a chip, a face): props
 `anchor` (the opener's ref), `open`, `on_dismiss` (Escape, Tab or a press
-outside; a pick is the owner's to close on), `align` ([`PopoverAlign`],
+outside; a pick is the owner's to close on), `align` ([`PopoverAlign`](https://docs.rs/sockel/latest/sockel/enum.PopoverAlign.html),
 default `Start`), `width` (its least width in place of
 `$picker-popup-width`, a length such as `var(--menu-width-wide)`; the
 `--picker-popup-width` custom property), `sheet` with `title` and
@@ -3125,13 +3129,16 @@ never measured from its text. A ChoiceList's options are `--picker-rows`
 rows high whatever matches, none included, so typing never resizes the
 list, its popup or its dialog (without a search field, which never
 filters, its rows' height, two-line rows included, as far as its popup allows); past that it scrolls, its scrollbar's room kept. Marks keep their
-box when off. New partial: `_picker.scss`. No new tokens.
+box when off. Partial: `_picker.scss`.
 
 <br>
 
 ## ToolBand, Panel, Seam and use_width
 
-**ToolBand** is a [`Toolbar`] with `band`: its controls wrap onto further
+Bars, grounds and panes that keep their size as their content wraps or
+their room changes.
+
+**ToolBand** is a [`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html) with `band`: its controls wrap onto further
 lines instead of scrolling sideways (`.sockel-toolbar.sockel-band`; no
 hidden scrollbar or fade). `chrome` sets it on `--band-chrome-ground`
 (`--surface`) with a rule under it (`.sockel-chrome`, an inset shadow, so
@@ -3139,19 +3146,20 @@ no border is added), its controls `--band-chrome-gap` apart; `search` sets
 it in `--band-search-text` (`--text-sm`), as a list's filter
 (`.sockel-search`). `tool_band(chrome, search)` gives a band's classes for
 markup that is not the component.
-Group its controls in [`ToolbarPart`]s (`.sockel-toolbar-part`, `role=group`):
+Group its controls in [`ToolbarPart`](https://docs.rs/sockel/latest/sockel/struct.ToolbarPart.html)s (`.sockel-toolbar-part`, `role=group`):
 a band wraps between parts, and inside a part only when that part alone is
 wider than the band (it never overflows the band).
 `ruled` rules a part off from the one before it (`.sockel-ruled`, a
 `--border` line and `--space-3` in) from the phone breakpoint up, where a
 band has the room. A band's height changes only when it wraps, so give its
-controls fixed widths (a [`Button`]'s busy and disabled states keep its box);
+controls fixed widths (a [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html)'s busy and disabled states keep its box);
 `toolbar_part(ruled)` gives a part's classes.
 
-**Panel** is a ground over a list or a view holding its filters or a short
+[`Panel`](https://docs.rs/sockel/latest/sockel/struct.Panel.html) is a ground over a list or a view holding its filters or a short
 form (`.sockel-panel-box`): a column `--space-2` apart, on `--panel-ground`
 in a `--panel-border` ring that is always there, in `--panel-text` type,
-`--panel-space-after` above what follows, as wide as what it holds and never wider than its column. `line` lays it out
+`--panel-space-after` above what follows, as wide as what it holds and
+never wider than its column. `line` lays it out
 as one row that wraps (`.sockel-line`); `ground` is `Sunk`, `Tint` (a
 `--panel-tint-radius` `--panel-tint` chip in `--panel-tint-text`,
 `--panel-tint-space-after` above what follows,
@@ -3162,7 +3170,7 @@ turns transparent rather than going, so the ground never changes its box.
 `panel(ground, line, centered)` gives its classes; add `class::SMALL` for
 `small`.
 
-**Seam** is two panes, `start` and `end`, and the divider dragged between
+[`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) is two panes, `start` and `end`, and the divider dragged between
 them (`.sockel-seam`, `.sockel-seam-pane`, `.sockel-seam-grip`). `at` is the
 first pane's share of the room beside the divider (0 to 1); the owner keeps
 it and sets it from `on_change`, which a drag calls at most once an
@@ -3177,7 +3185,7 @@ light its line only. `axis: SeamAxis::Rows` stacks the panes
 (`.sockel-rows`); give the seam a height. Each pane scrolls what overflows
 it, so its content never widens it.
 
-**`use_width(&node)`** is the width of `node`'s element (its border box, in
+[`use_width`](https://docs.rs/sockel/latest/sockel/fn.use_width.html)`(&node)` is the width of `node`'s element (its border box, in
 CSS pixels) from a `ResizeObserver`: `0.0` until it is first measured, then
 at most one new value an animation frame, and only when it changed, so a
 component laid out against its own width renders once a frame of a resize.
@@ -3187,7 +3195,10 @@ The observer goes with the component.
 
 ## AppShell, BottomNav and SplitView
 
-**AppShell** is an app's frame (`.sockel-app-shell`), `--app-shell-height`
+An app's frame, its sections and its list-and-detail view, each laid out
+by the room it has, not by the device.
+
+[`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html) is an app's frame (`.sockel-app-shell`), `--app-shell-height`
 high (`100dvh`): a top bar of `start` (a back button, the title, a
 switcher), `nav` and `end` (status, an actions menu), at least
 `--app-shell-bar-height` (3rem) on `--app-shell-bar-ground` (`--surface`)
@@ -3204,8 +3215,8 @@ The three tokens have their defaults in the rules, so an app sets them
 where it wants and nothing is added to `:root`. `app_shell()` gives its
 class.
 
-**BottomNav** is the sections (`.sockel-bottom-nav`, a `nav` named by
-`label`): `items` are [`BottomNavItem`]s
+[`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) is the sections (`.sockel-bottom-nav`, a `nav` named by
+`label`): `items` are [`BottomNavItem`](https://docs.rs/sockel/latest/sockel/struct.BottomNavItem.html)s
 (`BottomNavItem::new(value, label)`, `.icon(html)`, `.href(url)`,
 `.count(n)`), `value` the current one (`aria-current="page"`), `on_select`
 told a section's value when pressed (a link's too, for an app's router),
@@ -3213,17 +3224,17 @@ and `max` the largest count shown whole (99). The current section is
 marked by colour and an underline in the bar, and by colour on a tint at
 the bottom, never by weight. In the bar the sections sit in a line, icon,
 label and count; at the bottom they share the row evenly, each
-`--touch-height` at least, the icon over the label and the [`Count`] a
-small accent mark (`--corner-size`) on the icon's corner, off the flow. A count of none is hidden and keeps its
-box (`hide_zero`), so the first arrival moves nothing. Outside an
+`--touch-height` at least, the icon over the label and the [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html) a
+small accent mark (`--corner-size`) on the icon's corner, off the flow. A
+count of none is hidden and keeps its box (`hide_zero`), so the first arrival moves nothing. Outside an
 AppShell it is always the line. `bottom_nav()` gives its class.
 
-**SplitView** is a list and the detail opened from it
+[`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) is a list and the detail opened from it
 (`.sockel-split-view`, `.sockel-open` while one is): `list`, `detail`
 (`Option<Html>`, from the app's route: `None` while nothing is open) and
 `empty`, what the detail pane holds beside the list while nothing is
 open. From `$split-view-breakpoint` (`tablet`) of its own width (a
-container query) they sit side by side on a [`Seam`]
+container query) they sit side by side on a [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html)
 (`.sockel-split-view-seam`): `at` is where the list's share starts (0.4)
 and whenever it changes, a drag or a key moves it from there and
 `on_settle` reports where it settled, for the app to keep; `min` and
@@ -3240,12 +3251,12 @@ whatever the page holds and whichever section is current; a count
 arriving or going changes no section's box; opening a detail changes
 which pane shows, never the panes' boxes, and the divider keeps
 `--seam-grip`. Settings: `$app-shell-breakpoint`, `$split-view-breakpoint`.
-New classes: `APP_SHELL`, `APP_SHELL_FRAME`, `APP_SHELL_BAR`,
+Classes: `APP_SHELL`, `APP_SHELL_FRAME`, `APP_SHELL_BAR`,
 `APP_SHELL_START`, `APP_SHELL_END`, `APP_SHELL_NAV`, `APP_SHELL_MAIN`,
 `BOTTOM_NAV`, `BOTTOM_NAV_ITEMS`, `BOTTOM_NAV_ENTRY`, `BOTTOM_NAV_ITEM`,
 `BOTTOM_NAV_ICON`, `BOTTOM_NAV_LABEL`, `BOTTOM_NAV_COUNT`, `SPLIT_VIEW`,
-`SPLIT_VIEW_SEAM`, `SPLIT_VIEW_BACK`. New partials: `_shell.scss`,
-`_split-view.scss`. New tokens: `--app-shell-height`,
+`SPLIT_VIEW_SEAM`, `SPLIT_VIEW_BACK`. Partials: `_shell.scss`,
+`_split-view.scss`. Tokens: `--app-shell-height`,
 `--app-shell-bar-height`, `--app-shell-bar-ground` (defaults in the rules).
 
 <br>
@@ -3264,13 +3275,13 @@ rule of the same weight; none uses `!important`.
 | `reserved-border($color: transparent, $width: var(--space-px))` | | The border is always there; a state changes only its colour. |
 | `numeric` | `.sockel-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
 | `scroll-area` | `.sockel-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
-| | `.sockel-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard scroll as before. |
+| | `.sockel-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard still scroll it. |
 | `truncate` | `.sockel-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |
 | `clamp($lines)` | `.sockel-clamp-2`, `-3`, `-4` (`CLAMP_2`...) | At most that many lines, the last cut with an ellipsis. |
 | `visually-hidden` | `.sockel-visually-hidden` (`VISUALLY_HIDDEN`) | Read by a screen reader, takes no room (a hidden h1). |
 | `phone-only`, `desktop-only` | `.sockel-phone-only`, `.sockel-desktop-only` | Shown only below `$visibility-breakpoint`, or only from it up. |
 | `current($by: background)` | | Marks `[aria-current]` (not `"false"`) and `[aria-selected="true"]` by `background` (`--accent` under `--on-accent`), `color` or `underline`; never by weight, so the item keeps its width. |
-| `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded ([`Toolbar`], [`Tabs`]). |
+| `scroll-fade` | | Scrolls sideways with the scrollbar hidden and the edge that has hidden content faded ([`Toolbar`](https://docs.rs/sockel/latest/sockel/struct.Toolbar.html), [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html)). |
 
 <br>
 
@@ -3332,11 +3343,11 @@ let book = Phrasebook::builder()
   coverage) as for any catalog of the app's.
 - Label props (`close_label`, `less_label`, `empty_label`, ...) are per-use
   overrides: `Option<AttrValue>`, `None` reading the catalog. `label="..."`
-  in `html!` still compiles; a struct literal or a field read needs
-  `Some(..)`/`.as_deref()`. [`ConfirmRequest`]'s `accept` and `cancel_label`
+  in `html!` works as is; a struct literal or a field read needs
+  `Some(..)` or `.as_deref()`. [`ConfirmRequest`](https://docs.rs/sockel/latest/sockel/struct.ConfirmRequest.html)'s `accept` and `cancel_label`
   are `Option` too, and `ConfirmRequest::new` leaves them `None`.
-- [`Reorder`]'s announcements are `sockel-reorder-*` messages with the
-  position and count as numbers; `text` still overrides them, and
+- [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html)'s announcements are `sockel-reorder-*` messages with the
+  position and count as numbers; `text` overrides them, and
   `reorder_text` returns the catalog's English.
 
 sockel's own rule: no user-visible text as a literal in a component. Every
@@ -3364,7 +3375,7 @@ trunk serve --port 8095 --open
 ```
 
 Pick a free port. The showcase dogfoods sockel: its page controls and
-its Theme picker are sockel's own [`Select`], so every page also exercises
+its Theme picker are sockel's own [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), so every page also exercises
 it. Neither the showcase nor sockel's components render a native
 `<select>`, whose open list the OS draws outside sockel's tokens.
 
