@@ -1,0 +1,32 @@
+// Time (src/time.rs): a moment relative to now or as a date, in a box of
+// a fixed width.
+//
+// - `.sockel-time`: one line at least `--time-width` (`8ch`: "just now",
+//   "59m ago", "43m left") wide, in figures of one width, so neither its
+//   ticking nor a change of unit moves what is beside it.
+// - `.sockel-short`: a bare span ("5m", "now"), `--time-short-width`
+//   (`4ch`).
+// - `.sockel-wide`: a date and time, `--time-wide-width` (`16ch`).
+// - `.sockel-end`: the text keeps to the box's end (a column of times).
+
+@use "tokens" as base;
+
+.sockel-time {
+    @include base.numeric;
+    display: inline-block;
+    box-sizing: content-box;
+    min-inline-size: var(--time-width, 8ch);
+    white-space: nowrap;
+
+    &.sockel-short {
+        min-inline-size: var(--time-short-width, 4ch);
+    }
+
+    &.sockel-wide {
+        min-inline-size: var(--time-wide-width, 16ch);
+    }
+
+    &.sockel-end {
+        text-align: end;
+    }
+}

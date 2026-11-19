@@ -5,19 +5,24 @@
 use std::path::Path;
 
 const NOT_TEXT: &[&str] = &[
+    "Alt",
     "ArrowDown",
     "ArrowLeft",
     "ArrowRight",
     "ArrowUp",
     "Backspace",
+    "Control",
     "Delete",
     "End",
     "Enter",
     "Escape",
     "Files",
     "Home",
+    "Meta",
     "PageDown",
     "PageUp",
+    "Shift",
+    "Space",
     "Tab",
 ];
 

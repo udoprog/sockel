@@ -28,11 +28,13 @@ mod reorder_tree;
 mod rows;
 mod select;
 mod shell;
+mod shortcuts;
 mod steppers;
 mod structures;
 mod styles;
 mod tables;
 mod tabs;
+mod time;
 mod toasts;
 mod toggles;
 mod tooltips;
@@ -1002,6 +1004,56 @@ pub const PAGES: &[Page] = &[
                 Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
             ),
         ],
+    },
+    Page {
+        id: "time",
+        title: "Time",
+        group: Group::Feedback,
+        about: "A moment relative to now (ago, since, until, left) or as a date, in a box of a fixed width in figures of one width. Every Time shares one timer, woken only when some label's text changes: a label reading 2h ago redraws once an hour.",
+        covers: &[
+            "Time",
+            "TimeProps",
+            "TimeStyle",
+            "TimeText",
+            "JUST_NOW",
+            "now_seconds",
+            "time",
+            "time_next",
+            "time_text",
+            "use_wake_at",
+        ],
+        render: || html! { <time::TimePage /> },
+        holds: &[hold(
+            sockel::class::TIME,
+            Size::Width,
+            Across::Except(&["style"]),
+        )],
+    },
+    Page {
+        id: "shortcuts",
+        title: "Shortcuts and Kbd",
+        group: Group::Actions,
+        about: "Keys bound with use_shortcut, in layers (use_shortcut_layer: the newest is active) and skipped while typing, listed by ShortcutHelp from the same registry so the help cannot drift; Kbd draws a chord as keycaps, Apple's symbols there and words elsewhere; MenuItem's keys shows one at a row's end.",
+        covers: &[
+            "Chord",
+            "Kbd",
+            "KbdProps",
+            "Shortcut",
+            "ShortcutHelp",
+            "ShortcutHelpProps",
+            "is_apple",
+            "kbd",
+            "shortcut_applies",
+            "use_shortcut",
+            "use_shortcut_layer",
+            "use_shortcut_list",
+        ],
+        render: || html! { <shortcuts::ShortcutsPage /> },
+        holds: &[hold(
+            sockel::class::KBD_KEY,
+            Size::Height,
+            Across::Except(&["keys"]),
+        )],
     },
     Page {
         id: "toast",

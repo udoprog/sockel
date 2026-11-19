@@ -570,6 +570,11 @@ pub struct MenuItemProps {
     /// A note at the row's end, such as its shortcut.
     #[prop_or_default]
     pub hint: Option<AttrValue>,
+    /// Its shortcut as keycaps at the row's end, after any hint (a
+    /// [`Chord`](crate::Chord)'s text), also named by `aria-keyshortcuts`.
+    #[cfg(feature = "shortcuts")]
+    #[prop_or_default]
+    pub keys: Option<AttrValue>,
     /// A link row (`<a>`): picking it follows the link and closes the menu.
     #[prop_or_default]
     pub href: Option<AttrValue>,
@@ -652,6 +657,17 @@ impl Row<'_> {
         let hint = p.hint.clone().map(|hint| {
             html! { <span class={class::MENU_ITEM_HINT}>{ hint }</span> }
         });
+        #[cfg(feature = "shortcuts")]
+        let hint = hint.into_iter().chain(p.keys.clone().map(|keys| {
+            html! { <span class={class::MENU_ITEM_HINT}><crate::Kbd {keys} decorative=true /></span> }
+        }));
+        #[cfg(feature = "shortcuts")]
+        let keyshortcuts = p
+            .keys
+            .as_deref()
+            .map(|keys| crate::Chord::parse(keys).aria(crate::is_apple()));
+        #[cfg(not(feature = "shortcuts"))]
+        let keyshortcuts: Option<String> = None;
         let onclick = {
             let (onclick, disabled) = (self.onclick, p.disabled);
             Callback::from(move |e: MouseEvent| {
@@ -683,6 +699,7 @@ impl Row<'_> {
                     rel={p.new_tab.then_some("noopener noreferrer")}
                     download={p.download.then_some("")} title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
+                    aria-keyshortcuts={keyshortcuts.clone()}
                     data-stay={stay} data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </a>
@@ -694,6 +711,7 @@ impl Row<'_> {
                     aria-expanded={p.dialog.map(|open| open.to_string())}
                     title={p.title.clone()}
                     aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
+                    aria-keyshortcuts={keyshortcuts}
                     data-stay={stay} data-testid={p.testid.clone()} {onclick}>
                     { content }
                 </button>
@@ -750,6 +768,8 @@ fn item_props(
         detail: detail.clone(),
         detail_html: None,
         hint: hint.clone(),
+        #[cfg(feature = "shortcuts")]
+        keys: None,
         href: None,
         new_tab: false,
         download: false,

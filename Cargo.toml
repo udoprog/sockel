@@ -41,6 +41,7 @@ popover = "overlay"
 reorder = "reorder"
 rows = "rows"
 seam = "seam"
+shortcuts = "shortcuts"
 search-select = "search-select"
 select = "select"
 shell = "shell"
@@ -49,13 +50,14 @@ split-view = "split-view"
 stepper = "stepper"
 table = "table"
 tabs = "tabs"
+time = "time"
 toast = "toast"
 toggles = "toggles"
 tooltip = "tooltip"
 
 [features]
 default = ["full"]
-full = ["action-group", "badge", "button", "card-grid", "color-select", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "lanes", "layout", "library-toolbar", "loadable", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "reorder", "rows", "search-select", "seam", "select", "shell", "skeleton", "split-view", "stepper", "table", "tabs", "toast", "toggles", "tooltip"]
+full = ["action-group", "badge", "button", "card-grid", "color-select", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "lanes", "layout", "library-toolbar", "loadable", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "reorder", "rows", "seam", "search-select", "select", "shell", "shortcuts", "skeleton", "split-view", "stepper", "table", "tabs", "time", "toast", "toggles", "tooltip"]
 action-group = []
 badge = ["icons"]
 button = ["icons", "skeleton"]
@@ -85,16 +87,19 @@ search-select = ["select"]
 seam = []
 select = ["input", "menu", "tooltip"]
 shell = ["badge"]
+shortcuts = ["overlay"]
 skeleton = ["icons", "media"]
 split-view = ["seam"]
 stepper = ["input"]
 table = ["icons"]
 tabs = []
+time = []
 toast = ["badge", "button", "overlay"]
 toggles = ["icons"]
 tooltip = ["overlay"]
 
 [dependencies]
+js-sys = "0.3.77"
 phrasebook02 = { package = "phrasebook", version = "0.2.0", features = ["yew023"] }
 phrasebookcatalog01 = { package = "phrasebook-catalog", version = "0.1.0" }
 wasm-bindgen = "0.2.100"

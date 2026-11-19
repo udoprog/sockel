@@ -353,11 +353,13 @@
 //! | `seam` | | [`Seam`] | 5.2 KB |
 //! | `select` | `input`, `menu`, `tooltip` | [`Select`], [`Listbox`] | 43.9 KB |
 //! | `shell` | `badge` | [`AppShell`], [`BottomNav`] | 13.9 KB |
+//! | `shortcuts` | `overlay` | [`use_shortcut`], [`use_shortcut_layer`], [`ShortcutHelp`], [`Kbd`], [`Chord`] | 27.8 KB |
 //! | `skeleton` | `icons`, `media` | [`Skeleton`], [`Spinner`] | 7.4 KB |
 //! | `split-view` | `seam` | [`SplitView`] | 6.0 KB |
 //! | `stepper` | `input` | [`Stepper`] | 11.2 KB |
 //! | `table` | `icons` | [`Table`], [`SortHeader`] | 7.1 KB |
 //! | `tabs` | | [`Tabs`], [`SubTabs`], [`LinkTabs`], [`NavList`] | 6.9 KB |
+//! | `time` | | [`Time`], [`use_wake_at`] | 3.7 KB |
 //! | `toast` | `badge`, `button`, `overlay` | [`ToastHost`], [`Toast`], [`SaveBar`] | 34.1 KB |
 //! | `toggles` | `icons` | [`Checkbox`], [`Switch`], [`Choice`], [`Chip`], [`ChipList`], [`ChipToggle`] | 10.7 KB |
 //! | `tooltip` | `overlay` | [`Tooltip`], [`HoverCard`], [`ReasonButton`] | 26.8 KB |
@@ -725,6 +727,13 @@
 //!   previous, numbers with gaps, next and last, so it keeps its width from
 //!   the first page to the last; [`Disclosure`] (`.disclosure`): a summary
 //!   row that toggles its body, one height shut or open.
+//! - [`Time`] (`.time`): a moment relative to now ("3m ago", "43m left") or
+//!   as a date, in a box of a fixed width, redrawn by one timer the page's
+//!   times share, and only when its text changes.
+//! - [`use_shortcut`] and [`use_shortcut_layer`]: keys bound in layers,
+//!   skipped while typing; [`ShortcutHelp`] (`.shortcut-help`): the dialog
+//!   listing them, made from the same registry; [`Kbd`] (`.kbd`): a chord as
+//!   keycaps, Apple's symbols there and words elsewhere.
 //! - [`ToastHost`] (`.toast-host`) and [`Toast`] (`.toast`): short messages
 //!   with an undo, fixed over the window's bottom so they move nothing, their
 //!   clock held under the pointer or focus; [`SaveBar`] (`.save-bar`): a
@@ -1409,6 +1418,83 @@
 //!
 //! <br>
 //!
+//! ## Time
+//!
+//! [`Time`] is a `<time>` saying `at` (seconds since the epoch) in a
+//! [`TimeStyle`]: `Ago` ("just now", "3m ago"; the default), `Since` ("5m"),
+//! `Until` ("4m", then "now"), `Left` ("43m left", down to "0s left") or `At`
+//! (the local date and time, "2026-11-19 04:02"). Its words are the catalog's
+//! `sockel-time-*` messages, the count passed as `$n`, so a language says
+//! them its own way. The box is at least `--time-width` (`8ch`) wide, a bare
+//! span (`Since`, `Until`, `.sockel-short`) `--time-short-width` (`4ch`) and a
+//! date (`.sockel-wide`) `--time-wide-width` (`16ch`), in figures of one width,
+//! so neither its ticking nor its unit changing moves what is beside it; `end`
+//! keeps the text to the box's end (`.sockel-end`). A language whose words are
+//! longer sets the widths. Its `title` is the local date and time unless given,
+//! and `datetime` the ISO instant.
+//!
+//! Every [`Time`] on the page shares one clock: each asks to be woken at the
+//! instant its own text next changes ([`time_next`]), and one `setTimeout` is
+//! kept pointed at the earliest. A time reading "2h ago" is woken once an hour,
+//! and only it redraws. [`use_wake_at`] puts any component on the same clock.
+//! `now` fixes the time it is read at (a test, a server render), and then it is
+//! not woken. [`time_text`] gives the message and count without rendering,
+//! [`now_seconds`] the browser's clock, and `time(style, end)` the classes.
+//!
+//! <br>
+//!
+//! ## Shortcuts, ShortcutHelp and Kbd
+//!
+//! [`use_shortcut`] binds a [`Shortcut`] to a callback while the calling
+//! component is mounted. A shortcut has one or more [`Chord`]s, read from text
+//! by [`Chord::parse`]: `"?"`, `"n"`, `"S"` (Shift and s), `"Mod+Enter"` (Ctrl,
+//! or Cmd on Apple platforms), `"Ctrl+Shift+k"`, `"Escape"`, `"Space"`; `or`
+//! adds another (`j` or `ArrowDown`). A symbol such as `?` matches whatever
+//! Shift it took to type it. Its `label` is what the help lists, under its
+//! `group`.
+//!
+//! ```rust,ignore
+//! use_shortcut(Shortcut::new("?", "Show shortcuts").always(), open_help);
+//! use_shortcut(Shortcut::new("j", "Next row").or("ArrowDown").group("Rows"), next);
+//! use_shortcut(Shortcut::new("Mod+Enter", "Save").layer("edit").in_fields(), save);
+//! use_shortcut_layer("edit".into(), editing);
+//! ```
+//!
+//! - **Layers.** A shortcut without a `layer` is the page's base layer.
+//!   [`use_shortcut_layer`] makes a named layer active while its component is
+//!   mounted and `active`; layers stack and the newest is active, so only its
+//!   shortcuts and the `always` ones apply. An open overlay (a [`Dialog`], a
+//!   [`Popover`]) holds the base layer and the `always` ones, while a layer
+//!   pushed from inside it keeps its own; [`shortcut_applies`] is the rule.
+//! - **Typing.** A press in an input, a textarea, a select or an editable
+//!   element is left to it, unless the shortcut is `in_fields` (Mod+Enter,
+//!   Escape). A press already handled (`defaultPrevented`) or composing is
+//!   left alone, and one a shortcut takes has its default prevented.
+//! - **The newest wins.** Where several bindings of a chord apply, the one
+//!   bound last does; `enabled(false)` sets one aside, `hidden` keeps it out
+//!   of the help.
+//! - One listener on the document serves every shortcut while any is bound;
+//!   the registry is the page's, not a context's.
+//!
+//! [`ShortcutHelp`] is a [`Dialog`] (`open`, `on_dismiss`) listing the
+//! shortcuts that apply where it was opened, from the same registry, so it
+//! cannot drift from the keys: each chord's keycaps beside its label, ungrouped
+//! ones first, then each `group` under its heading
+//! (`.sockel-shortcut-help`, `-body`, `-group`, `-heading`, `-list`, `-row`, `-keys`,
+//! `-label`, `-empty`). [`use_shortcut_list`] is the same list, kept current,
+//! for an app's own help.
+//!
+//! [`Kbd`] draws a chord (`keys`, a [`Chord`]'s text) as keycaps: a `<kbd>`
+//! (`.sockel-kbd`) of `<kbd>`s (`.sockel-kbd-key`, at least `--kbd-size`,
+//! `1.5em`, on `--kbd-ground`), Apple's symbols there (⌘ ⇧ ⌥ ⌃) and the
+//! catalog's words elsewhere (`sockel-key-*`: Ctrl, Shift, Esc); a capital
+//! letter alone is drawn as itself. `decorative` hides it from assistive
+//! technology, for keys inside a control that names them in
+//! `aria-keyshortcuts` ([`Chord::aria`]). [`MenuItem`]'s `keys` (with this
+//! feature) draws a chord at the row's end and sets its `aria-keyshortcuts`.
+//! [`is_apple`] tells the platform.
+//!
+//! <br>
 //! ## Spinner, Skeleton and Loadable
 //!
 //! [`Spinner`] is a spinning glyph (`Glyph::Spinner` from the icon set) in the
@@ -3107,6 +3193,8 @@ mod select;
 mod selection;
 #[cfg(feature = "shell")]
 mod shell;
+#[cfg(feature = "shortcuts")]
+mod shortcuts;
 mod size;
 #[cfg(feature = "skeleton")]
 mod skeleton;
@@ -3125,6 +3213,8 @@ mod styles;
 mod table;
 #[cfg(feature = "tabs")]
 mod tabs;
+#[cfg(feature = "time")]
+mod time;
 mod timer;
 #[cfg(feature = "toast")]
 mod toast;
@@ -3283,6 +3373,11 @@ pub use selection::{
 pub use shell::{
     AppShell, AppShellProps, BottomNav, BottomNavItem, BottomNavProps, app_shell, bottom_nav,
 };
+#[cfg(feature = "shortcuts")]
+pub use shortcuts::{
+    Chord, Kbd, KbdProps, Shortcut, ShortcutHelp, ShortcutHelpProps, is_apple, kbd,
+    shortcut_applies, use_shortcut, use_shortcut_layer, use_shortcut_list,
+};
 pub use size::use_width;
 #[cfg(feature = "skeleton")]
 pub use skeleton::{Skeleton, SkeletonProps, SkeletonShape, skeleton};
@@ -3309,6 +3404,11 @@ pub use table::{
 };
 #[cfg(feature = "tabs")]
 pub use tabs::{LinkTabs, LinkTabsProps, SubTabs, TabItem, Tabs, TabsProps, tabs};
+#[cfg(feature = "time")]
+pub use time::{
+    JUST_NOW, Time, TimeProps, TimeStyle, TimeText, now_seconds, time, time_next, time_text,
+    use_wake_at,
+};
 #[cfg(feature = "toast")]
 pub use toast::{TOAST_MS, Toast, ToastHost, ToastHostProps, ToastProps, toast, toast_host};
 #[cfg(feature = "tooltip")]

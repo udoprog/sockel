@@ -1,0 +1,87 @@
+// Shortcuts (src/shortcuts.rs): keycaps and the help dialog.
+//
+// - `.sockel-kbd`: a chord, its keycaps a hair apart on the text's
+//   baseline, in `--text-xs` figures of one width.
+// - `.sockel-kbd-key`: one keycap, at least `--kbd-size` square
+//   (`1.5em`), on `--kbd-ground` inside a `--border` ring, in `--muted`.
+// - `.sockel-shortcut-help`: the help dialog, its groups in `-body`; `-group` each
+//   heading (`-heading`) and its list (`-list`), `-row` a chord (`-keys`,
+//   its alternatives side by side) beside what it does (`-label`);
+//   `-empty` what it says with none.
+
+@use "tokens" as base;
+
+.sockel-kbd {
+    display: inline-flex;
+    flex: none;
+    gap: var(--space-px);
+    align-items: baseline;
+    font: inherit;
+    vertical-align: baseline;
+    white-space: nowrap;
+}
+
+.sockel-kbd-key {
+    @include base.numeric;
+    display: inline-block;
+    box-sizing: border-box;
+    min-inline-size: var(--kbd-size, 1.5em);
+    padding: 0 var(--space-1);
+    border: var(--space-px) solid var(--border);
+    border-block-end-width: 2px;
+    border-radius: var(--radius-sm);
+    background: var(--kbd-ground, var(--surface));
+    color: var(--muted);
+    font-family: inherit;
+    font-size: var(--text-xs);
+    line-height: calc(var(--kbd-size, 1.5em) - 3px);
+    text-align: center;
+}
+
+.sockel-shortcut-help .sockel-shortcut-help-body {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-4);
+}
+
+.sockel-shortcut-help-group {
+    min-width: 0;
+}
+
+.sockel-shortcut-help-heading {
+    margin: 0 0 var(--space-2);
+    color: var(--muted);
+    font-size: var(--text-xs);
+    font-weight: 600;
+    letter-spacing: 0.04em;
+    text-transform: uppercase;
+}
+
+.sockel-shortcut-help-list {
+    display: grid;
+    grid-template-columns: minmax(max-content, 6rem) 1fr;
+    gap: var(--space-2) var(--space-4);
+    align-items: center;
+    margin: 0;
+}
+
+.sockel-shortcut-help-row {
+    display: contents;
+}
+
+.sockel-shortcut-help-keys {
+    display: flex;
+    flex-wrap: wrap;
+    gap: var(--space-1);
+    align-items: baseline;
+}
+
+.sockel-shortcut-help-label {
+    min-width: 0;
+    margin: 0;
+}
+
+.sockel-shortcut-help-empty {
+    margin: 0;
+    color: var(--muted);
+}
