@@ -354,6 +354,7 @@ member wants more gets the union.
 | `pager` | `icons` | [`Pager`], [`PagerSummary`] | 6.5 KB |
 | `panel` | | [`Panel`] | 4.8 KB |
 | `picker` | `overlay`, `pager`, `select` | [`Picker`], [`PickerMenu`], [`PickerDialog`], [`ChoiceList`], [`FilterPicker`] | 50.9 KB |
+| `property-list` | `button`, `input` | [`PropertyList`], [`PropertyRow`], [`InlineEdit`] | 21.4 KB |
 | `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`], [`DragHandle`] | 33.3 KB |
 | `rows` | `button` | [`RowList`], [`PickRow`], [`ActionRow`], [`SelectionBar`] | 16.9 KB |
 | `search-select` | `select` | [`SearchSelect`] | 45.1 KB |
@@ -733,6 +734,10 @@ fn main() {
   previous, numbers with gaps, next and last, so it keeps its width from
   the first page to the last; [`Disclosure`] (`.disclosure`): a summary
   row that toggles its body, one height shut or open.
+- [`PropertyList`] (`.property-list`) with [`PropertyRow`]s: an entity's
+  fields as label and value rows, its fields reading as text until the
+  pointer or focus is on them; [`InlineEdit`] (`.inline-edit`): a value
+  that becomes its field in the same box, committing on Enter or a blur.
 - [`Time`] (`.time`): a moment relative to now ("3m ago", "43m left") or
   as a date, in a box of a fixed width, redrawn by one timer the page's
   times share, and only when its text changes.
@@ -1415,6 +1420,42 @@ container, still in the flow. Its save button is busy in its own box.
 
 <br>
 
+## PropertyList, PropertyRow and InlineEdit
+
+[`PropertyList`] is an entity's fields as label and value rows (a `<dl>`,
+`.sockel-property-list`), the way a detail view shows and edits them: the
+labels in a column `--property-label-width` (`9rem`) wide
+(`--property-label-phone-width`, `6.5rem`, below the phone breakpoint) and
+each value beside its label at least `--control-height` tall, so a row
+keeps its height whether its value is read or edited. A field in a value
+(an [`InlineEdit`]'s face, a [`Picker`] or [`Select`] with `fill`) shows its
+box only under the pointer or with focus, so the rows read as text; `boxed`
+shows the boxes at rest (`.sockel-boxed`). `label` names the list.
+
+[`PropertyRow`] is one `label` (`.sockel-property-label`) and its value
+(`.sockel-property-value`, the children): text, a mark, an [`InlineEdit`],
+or a picker or select, which commit on a pick. `hint` is a line under the
+value (`.sockel-property-hint`); `stacked` sets the label above the value
+across the row (a description, `.sockel-stacked`); `id` is the label's.
+
+[`InlineEdit`] is a `value` read as text in the input's own box (a
+`<button>`, `.sockel-input.sockel-inline-edit`), named `label` with its
+value for assistive technology. Activated (a click, Enter or Space), it is
+replaced by a field of the same box with its text selected; Enter or a blur
+commits, Escape cancels (not the dialog around it), and focus returns to
+the face. `on_commit` is told the new text only when it changed.
+`multiline` is long text: the face wraps (`.sockel-multiline`), and the
+edit is a textarea where Enter is a newline, with Save (Ctrl or Cmd+Enter)
+and Cancel (Escape) buttons, which a blur leaves open
+(`.sockel-inline-edit-editor`, `-actions`). With no value the face shows
+`placeholder` muted (`.sockel-empty`, the catalog's "None" when unset).
+`busy` shows the face as saving, `disabled` keeps it from editing, and
+`on_editing` tells when an edit starts and ends (to push a shortcut layer).
+[`edit_key`] is what a key does in its field; `property_list(boxed)`,
+`property_row(stacked)` and `inline_edit(empty, multiline)` give the
+classes.
+
+<br>
 ## Time
 
 [`Time`] is a `<time>` saying `at` (seconds since the epoch) in a

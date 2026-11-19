@@ -171,6 +171,7 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("pager", &["pager"]),
     ("panel", &["panel"]),
     ("picker", &["picker", "filter-picker"]),
+    ("property-list", &["property-list"]),
     ("reorder", &["reorder"]),
     ("rows", &["rows"]),
     ("search-select", &["search-select"]),

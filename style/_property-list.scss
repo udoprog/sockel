@@ -1,0 +1,156 @@
+// PropertyList, PropertyRow and InlineEdit (src/property_list.rs): an
+// entity's fields as label and value rows, each edited where it stands.
+//
+// - `.sockel-property-list`: a `<dl>` grid, the labels in a column
+//   `--property-label-width` (`9rem`) wide, `--property-label-phone-width`
+//   (`6.5rem`) below the phone breakpoint, the values beside them.
+//   Without `.sockel-boxed`, a field in a value (an inline edit's face, a
+//   picker, a select) shows its box only under the pointer or with focus,
+//   and its text starts where a plain value's does, the box reaching into
+//   the gap before it.
+// - `.sockel-property-row`: one label (`-label`) and value (`-value`, at
+//   least `--control-height`), with a `-hint` line under the value;
+//   `.sockel-stacked` sets the label above the value across the row.
+// - `.sockel-inline-edit`: a value as text in the input's box, so reading
+//   and editing are one box; `.sockel-empty` muted, `.sockel-multiline`
+//   long text that wraps (`-text`). `-field` is the line's field;
+//   `-editor` long text's textarea and its actions (`-actions`).
+
+@use "tokens" as base;
+
+.sockel-property-list {
+    display: grid;
+    grid-template-columns:
+        minmax(0, var(--property-label-width, 9rem))
+        minmax(0, 1fr);
+    gap: var(--space-1) var(--space-3);
+    align-items: start;
+    margin: 0;
+    min-width: 0;
+
+    @include base.below("phone") {
+        grid-template-columns:
+            minmax(0, var(--property-label-phone-width, 6.5rem))
+            minmax(0, 1fr);
+    }
+}
+
+.sockel-property-row {
+    display: contents;
+}
+
+.sockel-property-label {
+    display: flex;
+    align-items: center;
+    min-width: 0;
+    min-height: var(--control-height);
+    margin: 0;
+    color: var(--muted);
+    font-size: var(--text-sm);
+    overflow-wrap: anywhere;
+}
+
+.sockel-property-value {
+    display: flex;
+    flex-direction: column;
+    align-items: stretch;
+    justify-content: center;
+    gap: var(--space-0);
+    min-width: 0;
+    min-height: var(--control-height);
+    margin: 0;
+}
+
+.sockel-property-hint {
+    color: var(--muted);
+    font-size: var(--text-xs);
+}
+
+.sockel-property-row.sockel-stacked {
+    > .sockel-property-label,
+    > .sockel-property-value {
+        grid-column: 1 / -1;
+    }
+
+    > .sockel-property-label {
+        min-height: 0;
+        margin-block-start: var(--space-2);
+    }
+}
+
+// A quiet list's fields read as text until the pointer or focus is on them.
+.sockel-property-list:not(.sockel-boxed) .sockel-property-value {
+    > .sockel-input,
+    > .sockel-input-box {
+        // Its text on the edge plain values start at; its box reaches
+        // into the gap before it.
+        width: calc(100% + #{base.$input-padding-inline} + var(--space-px));
+        margin-inline-start: calc(-1 * (#{base.$input-padding-inline} + var(--space-px)));
+
+        &:not(:hover, :focus, :focus-within) {
+            --input-edge: transparent;
+            background: transparent;
+        }
+    }
+}
+
+.sockel-inline-edit {
+    display: flex;
+    align-items: center;
+    color: var(--text);
+    text-align: start;
+    cursor: text;
+
+    &.sockel-empty {
+        color: var(--muted);
+    }
+
+    &.sockel-busy {
+        cursor: progress;
+        opacity: 0.7;
+    }
+
+    &:disabled {
+        cursor: default;
+    }
+
+    &.sockel-multiline {
+        align-items: flex-start;
+        height: auto;
+        min-height: var(--input-height);
+        padding-block: calc((var(--input-height) - 1lh) / 2 - var(--space-px));
+    }
+}
+
+.sockel-inline-edit-text {
+    @include base.truncate;
+    flex: 1 1 auto;
+
+    .sockel-multiline > & {
+        overflow: visible;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+}
+
+.sockel-inline-edit-field {
+    width: 100%;
+}
+
+.sockel-inline-edit-editor {
+    display: flex;
+    flex-direction: column;
+    gap: var(--space-2);
+    min-width: 0;
+
+    > .sockel-textarea {
+        width: 100%;
+        resize: vertical;
+    }
+}
+
+.sockel-inline-edit-actions {
+    display: flex;
+    justify-content: flex-end;
+    gap: var(--space-2);
+}

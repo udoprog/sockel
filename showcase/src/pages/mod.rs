@@ -23,6 +23,7 @@ mod pagers;
 mod picker;
 mod pickers;
 mod popover;
+mod property_list;
 mod reorder;
 mod reorder_tree;
 mod rows;
@@ -1002,6 +1003,34 @@ pub const PAGES: &[Page] = &[
                 sockel::class::LOADABLE,
                 Size::Height,
                 Across::Only(&["state=Loading", "state=Ready", "placeholder", "retrying"]),
+            ),
+        ],
+    },
+    Page {
+        id: "property-list",
+        title: "PropertyList and InlineEdit",
+        group: Group::Inputs,
+        about: "An entity's fields as label and value rows: a text value edits where it stands (Enter or a blur commits, Escape cancels, long text saves with Ctrl/Cmd+Enter), a choice is a Picker or Select that commits on a pick. The fields read as text until the pointer or focus is on them, and a row keeps its height while it is edited.",
+        covers: &[
+            "PropertyList",
+            "PropertyListProps",
+            "PropertyRow",
+            "PropertyRowProps",
+            "InlineEdit",
+            "InlineEditProps",
+            "EditKey",
+            "edit_key",
+            "inline_edit",
+            "property_list",
+            "property_row",
+        ],
+        render: || html! { <property_list::PropertyListPage /> },
+        holds: &[
+            hold(sockel::class::PROPERTY_LIST, Size::Width, Across::All),
+            hold(
+                sockel::class::PROPERTY_LABEL,
+                Size::Width,
+                Across::Except(&["Labels"]),
             ),
         ],
     },
