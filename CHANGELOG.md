@@ -139,6 +139,15 @@ instead.
   `$row-list-item-edge`, `.sockel-least` (`class::LEAST`; a `Button`'s or
   `TextInput`'s size as a least height) and `.sockel-shrink` (`class::SHRINK`;
   `min-width: 0` for a column in a row).
+- `.sockel-reveal-host` and `.sockel-reveal` (`class::REVEAL_HOST`,
+  `class::REVEAL`): a part of any container that stays invisible and inert
+  until the container is hovered or has focus inside, keeping its room (an
+  overlay ActionRow lies over the row instead); shown where nothing hovers.
+- `.sockel-button.sockel-menu-row` (`class::MENU_ROW`): a button as a
+  start-aligned row of a dropdown, spanning its container.
+- `$head-trail-separator` (`"\203A"`), `$head-trail-mark` (unset) and
+  `$head-trail-mark-size` (`1em`): the mark after each crumb of a head's
+  trail, a string or a mask image drawn in the muted ink.
 
 ### Changed
 

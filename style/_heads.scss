@@ -24,6 +24,9 @@
 // - `--page-title-size`: the page title's size (unset, the browser's heading size);
 //   `--page-head-crumbs-align`: how a crumb head's back link, `/` and title line up
 //   (`baseline`).
+// - `$head-trail-separator` (`"\203A"`) is the mark after each crumb of a trail;
+//   `$head-trail-mark` (a mask image such as a `url(...)`, unset by default) draws an
+//   icon in the muted ink instead, `$head-trail-mark-size` (`1em`) its box.
 // - `.sockel-page-head.sockel-compact`: the head of a compact page (the game's): the
 //   actions as icons (their label text hidden), and on a phone one row,
 //   the title on two lines and the back link's words (`.sockel-page-head-back-label`)
@@ -116,9 +119,18 @@
         align-items: center;
 
         &::after {
-            content: "\203A";
             margin-inline: var(--space-1);
             color: var(--muted);
+
+            @if not base.$head-trail-mark {
+                content: base.$head-trail-separator;
+            } @else {
+                content: "";
+                width: base.$head-trail-mark-size;
+                height: base.$head-trail-mark-size;
+                background: currentcolor;
+                mask: base.$head-trail-mark center / contain no-repeat;
+            }
         }
 
         a {

@@ -494,6 +494,13 @@ $text-2xl: 1.75rem !default;
 $section-title-size: var(--text-lg) !default;
 $page-title-size: null !default;
 $page-head-crumbs-align: baseline !default;
+// The mark after each crumb in a head's trail: a string, or (when
+// `$head-trail-mark` is set) none. `$head-trail-mark` is a mask image (a
+// `url(...)`, a gradient) drawn in the muted ink, an icon in place of the
+// character.
+$head-trail-separator: "\203A" !default;
+$head-trail-mark: null !default;
+$head-trail-mark-size: 1em !default;
 $card-button-fill: var(--surface) !default;
 $space-0: 0.125rem !default;
 $space-px: 1px !default;

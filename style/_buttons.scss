@@ -16,6 +16,8 @@
 // - `.sockel-icon`: the icon alone, square. `.sockel-fold`: the icon alone
 //   below the phone breakpoint, the label kept for a screen reader;
 //   `.sockel-fold-wide` the same from the phone breakpoint up.
+// - `.sockel-menu-row`: a row of a dropdown of buttons: spans its container,
+//   the icon and the label at the start.
 // - `.sockel-spread`: spans its container, the icon and the label at the two
 //   ends. `.sockel-wide` with `.sockel-icon`: an icon-only button as wide as a
 //   regular control is high (`--control-height`) whatever its size, the
@@ -141,6 +143,18 @@
         > .sockel-button-content {
             flex: 1 1 auto;
             justify-content: space-between;
+        }
+    }
+
+    // A row of a dropdown: spans its container, the icon and the label at
+    // the start.
+    &.sockel-menu-row {
+        width: 100%;
+        justify-content: flex-start;
+        text-align: start;
+
+        > .sockel-button-content {
+            justify-content: flex-start;
         }
     }
 

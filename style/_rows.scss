@@ -21,6 +21,10 @@
 // - `.sockel-action-row`: actions that wrap. `.sockel-nowrap` keeps one
 //   line. `.sockel-overlay` lies over the end of a row, taking no room,
 //   invisible and inert until the row is hovered or has focus.
+// - `.sockel-reveal-host` and `.sockel-reveal`: the same hover reveal for any
+//   container and a part of it that keeps its room: the part is invisible
+//   and inert until the host is hovered or has focus inside, and always shown
+//   where nothing hovers (a touch screen). A `.sockel-row-list-item` is a host.
 
 @use "tokens" as base;
 
@@ -234,6 +238,32 @@ $name-break: normal;
         min-width: min-content;
         overflow: visible;
         white-space: normal;
+    }
+}
+
+.sockel-reveal-host {
+    --overlay-opacity: 0;
+    --overlay-events: none;
+
+    &:hover,
+    &:focus-within {
+        --overlay-opacity: 1;
+        --overlay-events: auto;
+    }
+}
+
+.sockel-reveal {
+    opacity: var(--overlay-opacity, 0);
+    pointer-events: var(--overlay-events, none);
+
+    &:focus-within {
+        opacity: 1;
+        pointer-events: auto;
+    }
+
+    @media (hover: none) {
+        opacity: 1;
+        pointer-events: auto;
     }
 }
 

@@ -305,6 +305,14 @@ pub fn ActionRowPage() -> Html {
                 <RowListItem name={html! { { "Another row" } }} />
             </RowList>
             <span class={class::CONTROL_LABEL}>{ "An overlay is invisible and inert until its row is hovered or has focus; tab to it." }</span>
+            <div class={classes!(sockel::class::REVEAL_HOST)} data-testid="reveal-host">
+                <span>{ "A host: hover it to reveal the part that keeps its room" }</span>
+                <Button class={classes!(sockel::class::REVEAL)} size={ButtonSize::Small}>{ "Revealed" }</Button>
+            </div>
+            <div data-testid="menu-rows">
+                <Button class={classes!(sockel::class::MENU_ROW)} variant={ButtonVariant::Ghost}>{ "Rename" }</Button>
+                <Button class={classes!(sockel::class::MENU_ROW)} variant={ButtonVariant::Ghost}>{ "Delete" }</Button>
+            </div>
         </Demo>
     }
 }

@@ -1052,6 +1052,23 @@ mod tests {
     }
 
     #[test]
+    fn a_trail_mark_replaces_the_separator_character() {
+        let plain = sockel().build().unwrap();
+        assert!(plain.css.contains("content: \"\u{203a}\""));
+        assert!(!plain.css.contains("mask:"));
+        let marked = sockel()
+            .with("$head-trail-mark", "url(chevron.svg)")
+            .build()
+            .unwrap();
+        assert!(
+            marked
+                .css
+                .contains("mask: url(chevron.svg) center/contain no-repeat")
+        );
+        assert!(!marked.css.contains("content: \"\u{203a}\""));
+    }
+
+    #[test]
     fn rejects_a_null_token_value() {
         let error = sockel()
             .with("text-md", "1rem")
