@@ -943,6 +943,12 @@
 //!   `ghost-danger` in `$button-colours`), `Success` (`SUCCESS`), `Bare` (`BARE`, no fill, edge,
 //!   padding or height of its own, for an opener whose content is its face,
 //!   such as a swatch; the focus outline kept).
+//! - `selected` (`SELECTED`): the pressed look for the current choice of a
+//!   set, without `aria-pressed` (pair it with `current` or `checked`); `link`
+//!   (`LINK`): a text link, no fill, edge, height or padding, in the accent.
+//! - Events beside `onclick` and `onkeydown`: `onmouseenter`, `onmouseleave`,
+//!   `onpointerdown`, `onmousedown`, `onauxclick`; `form` submits a form
+//!   the button stands outside of.
 //! - `size` ([`ButtonSize`]): `Regular` (`--control-height`), `Small` (`SMALL`,
 //!   `--control-height-small`), `Touch` (`TOUCH`, `--touch-height`).
 //! - An icon without a label is the icon alone (`ICON`), square, named by
@@ -1484,7 +1490,7 @@
 //! `role="status"`, unless `alert` is set (a failure drawn in the accent). `id` sets the
 //! element's id (for `aria-describedby`). `notice(tone)` gives the classes.
 //!
-//! [`ErrorBox`] is an error, in `--tone: var(--danger)`: `title`, the message (its children), `cause` (the
+//! [`ErrorBox`] is an error, in `--tone: var(--danger)`: `id`, `title`, the message (its children), `cause` (the
 //! technical text, cut to three lines, whole in its `title` attribute) or
 //! `causes` (a chain of them, most specific last: `ERROR_BOX_CAUSES`, a list
 //! of a line each, never cut) and `onretry` (a small button, `retry_label`; `retrying` makes it
@@ -2300,8 +2306,9 @@
 //!   at its start: a Delete), each an [`ActionGroup`] in `.sockel-dialog-foot`.
 //! - `sheet` (on by default, `SHEET`): below `$sheet-breakpoint` a sheet from
 //!   the bottom, up to `--dialog-sheet-height`. `close_label`,
-//!   `close_size` (`ButtonSize::Small` by default) and `close_testid` (the
-//!   close button's), `class`, `testid`.
+//!   `close_size` (`ButtonSize::Small` by default), `close_variant`
+//!   (`ButtonVariant::Quiet` by default) and `close_testid` (the close
+//!   button's), `onkeydown` (keys inside the dialog), `class`, `testid`.
 //!
 //! `dialog(size, sheet)` gives the classes. Parts: `.sockel-dialog-layer` (the
 //! scrim), `-head` (a [`SectionHead`]), `-body` (what scrolls), `-foot`.
@@ -2454,7 +2461,8 @@
 //!
 //! - `text` (the opener's visible content; without it the opener is its icon
 //!   alone), `icon` (the app's; a text opener without one ends in the
-//!   IconSet's chevron, an icon-only one shows its ellipsis), `label` (the
+//!   IconSet's chevron, an icon-only one shows its ellipsis; `chevron` adds
+//!   the chevron after an icon too), `label` (the
 //!   accessible name of the opener and the list), `variant` and `size` (the
 //!   opener's, `Regular` so it matches the buttons beside it), `opener_class`,
 //!   `tip` (the opener's `data-tip`), `title` (the opener's native tooltip).

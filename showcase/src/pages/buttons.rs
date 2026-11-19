@@ -53,6 +53,8 @@ pub fn ButtonPage() -> Html {
     let busy = use_state(|| false);
     let disabled = use_state(|| false);
     let link = use_state(|| false);
+    let selected = use_state(|| false);
+    let link_look = use_state(|| false);
     let clicks = use_state(|| 0);
 
     let controls = html! {
@@ -66,6 +68,8 @@ pub fn ButtonPage() -> Html {
             <Toggle label="fold_wide (above a phone)" value={*fold_wide} on_change={bind(&fold_wide)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
+            <Toggle label="selected" value={*selected} on_change={bind(&selected)} />
+            <Toggle label="link (a text link look)" value={*link_look} on_change={bind(&link_look)} />
             <Toggle label="href (a link)" value={*link} on_change={bind(&link)} />
         </>
     };
@@ -105,6 +109,8 @@ pub fn ButtonPage() -> Html {
                 "pressed",
                 format!("Some({})", pressed.unwrap_or_default()),
             )
+            .flag("selected", *selected)
+            .flag("link", *link_look)
             .flag("busy", *busy)
             .flag("disabled", *disabled)
             .text_if(*link, "href", "#button")
@@ -123,7 +129,7 @@ pub fn ButtonPage() -> Html {
                 <Button variant={*variant} size={*size}
                     icon={(*placement != Placement::None).then(|| html! { <Icon glyph={Glyph::Check} /> })}
                     trailing={*placement == Placement::Trailing}
-                    fold={*fold} fold_wide={*fold_wide} pressed={*pressed} busy={*busy} disabled={*disabled}
+                    fold={*fold} fold_wide={*fold_wide} pressed={*pressed} selected={*selected} link={*link_look} busy={*busy} disabled={*disabled}
                     href={link.then(|| AttrValue::from("#button"))}
                     title="Save the draft" label={label.is_empty().then(|| AttrValue::from("Save the draft"))}
                     {onclick}>

@@ -383,6 +383,10 @@ pub struct MenuProps {
     /// opener ends in a chevron.
     #[prop_or_default]
     pub icon: Option<Html>,
+    /// The opener ends in a chevron after its icon, as a text opener does
+    /// without one.
+    #[prop_or_default]
+    pub chevron: bool,
     /// The accessible name of the opener and the menu (`aria-label`).
     #[prop_or_default]
     pub label: Option<AttrValue>,
@@ -523,7 +527,7 @@ pub fn Menu(props: &MenuProps) -> Html {
 
     let button = html! {
         <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
-            class={props.opener_class.clone()} {icon} {trailing}
+            class={props.opener_class.clone()} {icon} {trailing} chevron={props.chevron && props.icon.is_some()}
             label={props.label.clone()} tip={props.tip.clone()} title={props.title.clone()}
             disabled={props.disabled}
             pressed={props.pressed}
@@ -1304,6 +1308,21 @@ mod tests {
         // A text opener ends in its chevron, at the full control height.
         assert!(!html.contains(class::SMALL), "{html}");
         assert!(html.contains(class::BUTTON_LABEL), "{html}");
+    }
+
+    #[test]
+    fn an_icon_opener_ends_in_a_chevron_only_when_asked() {
+        let icons = |chevron| {
+            render::<Menu>(yew::props!(MenuProps {
+                text: html! { "New" },
+                icon: Some(html! { <svg /> }),
+                chevron,
+            }))
+            .matches(class::BUTTON_ICON)
+            .count()
+        };
+        assert_eq!(icons(false), 1);
+        assert_eq!(icons(true), 2);
     }
 
     #[test]

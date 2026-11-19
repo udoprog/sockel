@@ -81,6 +81,9 @@ pub struct DialogProps {
     /// The close button's size; small by default.
     #[prop_or(ButtonSize::Small)]
     pub close_size: ButtonSize,
+    /// The close button's variant; `Quiet` by default.
+    #[prop_or(ButtonVariant::Quiet)]
+    pub close_variant: ButtonVariant,
     /// The close button's `data-testid`.
     #[prop_or_default]
     pub close_testid: Option<AttrValue>,
@@ -97,6 +100,9 @@ pub struct DialogProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Keys pressed inside the dialog, after its own handling.
+    #[prop_or_default]
+    pub onkeydown: Callback<KeyboardEvent>,
     #[prop_or_default]
     pub children: Html,
 }
@@ -415,7 +421,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
     let close = props.dismiss.allows(Dismiss::Close).then(|| {
         let onclick = props.on_dismiss.reform(|_: MouseEvent| Dismiss::Close);
         html! {
-            <Button variant={ButtonVariant::Quiet} size={props.close_size}
+            <Button variant={props.close_variant} size={props.close_size}
                 icon={html! { <Icon glyph={Glyph::Close} /> }}
                 label={label(&phrases, &props.close_label, "sockel-dialog-close")} testid={props.close_testid.clone()} {onclick} />
         }
@@ -439,7 +445,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
             <div ref={panel_ref}
                 class={classes!(dialog(props.size, props.sheet), props.class.clone())}
                 role="dialog" aria-modal="true" aria-label={props.title.clone()} tabindex="-1"
-                data-testid={props.testid.clone()} {onfocusin}>
+                data-testid={props.testid.clone()} {onfocusin} onkeydown={props.onkeydown.clone()}>
                 <SectionHead class={class::DIALOG_HEAD} title={html! { props.title.clone() }}
                     icon={props.icon.clone()}>
                     { props.head_actions.clone() }
@@ -551,12 +557,14 @@ mod tests {
             } else {
                 ButtonSize::Small
             },
+            close_variant: ButtonVariant::Quiet,
             close_testid: Some("close".into()),
             head_actions: html! { <button>{ "Import" }</button> },
             actions,
             actions_start: Html::default(),
             class: Classes::new(),
             testid: None,
+            onkeydown: Callback::noop(),
             children: html! { "Body" },
         };
         futures::executor::block_on(
@@ -590,6 +598,12 @@ mod tests {
         let html = render(true, DialogDismiss::Any, Html::default());
         assert!(!html.contains(&body), "{html}");
         assert!(html.contains(class::SMALL), "{html}");
+    }
+
+    #[test]
+    fn the_close_variant_is_quiet_unless_set() {
+        let html = render(true, DialogDismiss::Any, Html::default());
+        assert!(html.contains(class::QUIET), "{html}");
     }
 
     #[test]

@@ -3,6 +3,31 @@
 All notable changes to sockel and sockel-build. The format follows
 [Keep a Changelog](https://keepachangelog.com/en/1.1.0/).
 
+## [Unreleased]
+
+### Breaking
+
+New public prop fields break struct literals of these props (none derives
+`Default`). Add the new fields with their defaults (`false`, `None`,
+`Callback::noop()`, `ButtonVariant::Quiet` for `close_variant`), or build the
+props with `yew::props!`, which fills them in:
+
+- `ButtonProps`: `selected`, `link`, `onmouseenter`, `onmouseleave`,
+  `onpointerdown`, `onmousedown`, `onauxclick`.
+- `MenuProps`: `chevron`.
+- `DialogProps`: `close_variant`, `onkeydown`.
+- `ErrorBoxProps`: `id`.
+
+### Added
+
+- Button: `selected` (the pressed look for a current choice, without
+  `aria-pressed`), `link` (a text link look) and the mouse and pointer events
+  `onmouseenter`, `onmouseleave`, `onpointerdown`, `onmousedown`, `onauxclick`.
+- Menu: `chevron` ends an icon opener in a chevron, as Button's does.
+- Dialog: `close_variant` (the close button's variant, `Quiet` by default) and
+  `onkeydown`.
+- ErrorBox: `id`.
+
 ## [0.1.0] - 2026-11-19
 
 First release. It covers what changed for the apps that adopted plinth

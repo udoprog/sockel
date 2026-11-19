@@ -18,7 +18,11 @@
 //   ends. `.sockel-wide` with `.sockel-icon`: an icon-only button as wide as a
 //   regular control is high (`--control-height`) whatever its size, the
 //   height its size's.
-// - `[aria-pressed="true"]`: a toggle that is on; `[aria-busy="true"]`:
+// - `[aria-pressed="true"]` and `.sockel-selected`: a toggle that is on, and
+//   the current choice of a set that is not a toggle, drawn alike.
+//   `.sockel-link`: a text link, no fill, edge, height or padding, in the
+//   accent, underlined on hover.
+// - `[aria-busy="true"]`:
 //   working, its content hidden by visibility so it keeps its room.
 //
 // - `.sockel-iconed` (IconButton, styled by the app): a button with an icon,
@@ -89,6 +93,22 @@
             height: auto;
             padding-inline: 0;
             border-width: 0;
+        }
+    }
+
+    &.sockel-link {
+        --button-fill: transparent;
+        --button-hover-fill: transparent;
+        --button-pressed-fill: transparent;
+        --button-ink: var(--accent);
+        --button-hover-ink: var(--accent);
+        height: auto;
+        min-width: 0;
+        padding-inline: 0;
+        border-width: 0;
+
+        &:hover {
+            text-decoration: underline;
         }
     }
 

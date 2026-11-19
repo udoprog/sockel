@@ -71,6 +71,15 @@ pub struct ButtonProps {
     /// A toggle and whether it is on (`aria-pressed`).
     #[prop_or_default]
     pub pressed: Option<bool>,
+    /// The current choice of a set, drawn as a pressed button without being
+    /// a toggle (`.sockel-selected`, no `aria-pressed`): pair it with
+    /// `current` or `checked` for assistive tech.
+    #[prop_or_default]
+    pub selected: bool,
+    /// Drawn as a text link: no fill, edge, height or padding, accent ink
+    /// (`.sockel-link`).
+    #[prop_or_default]
+    pub link: bool,
     /// Working on what it started: a spinner over the label, which keeps
     /// its room (`aria-busy`). A busy button ignores clicks.
     #[prop_or_default]
@@ -114,6 +123,17 @@ pub struct ButtonProps {
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
     pub onkeydown: Callback<KeyboardEvent>,
+    #[prop_or_default]
+    pub onmouseenter: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub onmouseleave: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub onpointerdown: Callback<PointerEvent>,
+    #[prop_or_default]
+    pub onmousedown: Callback<MouseEvent>,
+    /// A click of a non-primary button, the middle one included.
+    #[prop_or_default]
+    pub onauxclick: Callback<MouseEvent>,
     #[prop_or_default]
     pub title: Option<AttrValue>,
     /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
@@ -190,6 +210,8 @@ pub fn Button(props: &ButtonProps) -> Html {
     let class = classes!(
         button(props.variant, props.size, icon_only, fold),
         fold_wide.then_some(class::FOLD_WIDE),
+        props.selected.then_some(class::SELECTED),
+        props.link.then_some(class::LINK),
         (props.wide && icon_only).then_some(class::WIDE),
         (props.spread && props.icon.is_some() && has_label).then_some(class::SPREAD),
         props.class.clone()
@@ -263,6 +285,11 @@ pub fn Button(props: &ButtonProps) -> Html {
                 hidden={props.hidden}
                 {onclick}
                 onkeydown={props.onkeydown.clone()}
+                onmouseenter={props.onmouseenter.clone()}
+                onmouseleave={props.onmouseleave.clone()}
+                onpointerdown={props.onpointerdown.clone()}
+                onmousedown={props.onmousedown.clone()}
+                onauxclick={props.onauxclick.clone()}
             >
                 { content }{ for spinner }
             </a>
@@ -290,6 +317,11 @@ pub fn Button(props: &ButtonProps) -> Html {
                 aria-current={props.current.clone()}
                 {onclick}
                 onkeydown={props.onkeydown.clone()}
+                onmouseenter={props.onmouseenter.clone()}
+                onmouseleave={props.onmouseleave.clone()}
+                onpointerdown={props.onpointerdown.clone()}
+                onmousedown={props.onmousedown.clone()}
+                onauxclick={props.onauxclick.clone()}
             >
                 { content }{ for spinner }
             </button>
@@ -338,6 +370,8 @@ mod tests {
             tabindex: None,
             data: Vec::new(),
             pressed: None,
+            selected: false,
+            link: false,
             busy: false,
             disabled: false,
             unavailable: false,
@@ -348,6 +382,11 @@ mod tests {
             submit: false,
             onclick: Callback::noop(),
             onkeydown: Callback::noop(),
+            onmouseenter: Callback::noop(),
+            onmouseleave: Callback::noop(),
+            onpointerdown: Callback::noop(),
+            onmousedown: Callback::noop(),
+            onauxclick: Callback::noop(),
             title: None,
             tip: None,
             label: None,
@@ -391,6 +430,20 @@ mod tests {
             names(button(v, s, false, true)),
             [class::BUTTON, class::FOLD]
         );
+    }
+
+    #[test]
+    fn selected_and_link_are_modifiers() {
+        let plain = render(props());
+        assert!(!plain.contains(class::SELECTED) && !plain.contains(class::LINK));
+        let html = render(ButtonProps {
+            selected: true,
+            link: true,
+            ..props()
+        });
+        assert!(html.contains(class::SELECTED), "{html}");
+        assert!(html.contains(class::LINK), "{html}");
+        assert!(!html.contains("aria-pressed"), "{html}");
     }
 
     #[test]

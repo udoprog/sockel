@@ -41,6 +41,9 @@ pub struct ErrorBoxProps {
     pub dismiss_label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The box's `id`, for `aria-describedby` and the like.
+    #[prop_or_default]
+    pub id: Option<AttrValue>,
     /// The message.
     #[prop_or_default]
     pub children: Html,
@@ -86,7 +89,7 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
 
     html! {
         <div class={classes!(error_box(flanked), props.class.clone())} role="alert"
-            data-testid={props.testid.clone()}>
+            id={props.id.clone()} data-testid={props.testid.clone()}>
             if flanked {
                 if let Some(icon) = &props.icon {
                     <span class={class::ERROR_BOX_ICON} aria-hidden="true">{ icon.clone() }</span>
@@ -133,6 +136,7 @@ mod tests {
             ondismiss: None,
             dismiss_label: None,
             testid: None,
+            id: None,
             children: html! { "Saving failed" },
         }
     }
@@ -165,6 +169,16 @@ mod tests {
         assert!(html.contains(class::ERROR_BOX_CLOSE), "{html}");
         assert!(html.contains("aria-label=\"Dismiss error\""), "{html}");
         assert!(html.contains("title=\"Dismiss error\""), "{html}");
+    }
+
+    #[test]
+    fn an_id_is_the_boxs_own() {
+        assert!(!render(props()).contains("id="));
+        let html = render(ErrorBoxProps {
+            id: Some("err".into()),
+            ..props()
+        });
+        assert!(html.contains("id=\"err\""), "{html}");
     }
 
     #[test]
