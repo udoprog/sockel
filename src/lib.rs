@@ -2123,7 +2123,9 @@
 //!   `drop_page`): it reports `(from, value)`, the row's index and that
 //!   attribute's value, in place of `on_move`. While a row is held over
 //!   one, the place wears `data-drop-over` (the Pager's accent) and no row
-//!   is marked.
+//!   is marked. A picked row carrying others is let go there only with
+//!   `on_drop_page_picked: Option<Callback<(Vec<usize>, AttrValue)>>`,
+//!   which reports every carried row's index, in order, and the value.
 //! - `role` (on `Reorder` and an item) and `tail`: in the children mode the
 //!   list and a row wear the `role` (a table's body `rowgroup`, its rows
 //!   `row`), and `tail` follows the rows inside the list, before the hint:
@@ -2143,9 +2145,13 @@
 //! - `text: Callback<ReorderText, String>` gives the handle's name
 //!   (`Handle`), its hint (`Hint`, its `aria-describedby`) and the
 //!   announcements (`Lifted`, `Moving`, `Dropped`, `Cancelled`, positions from
-//!   1), read from a `role="status"` region. Without it they are the
-//!   catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
-//!   `reorder_text` gives their English.
+//!   1), read from a `role="status"` region. A row aimed or dropped next to
+//!   a fixed row names it (`MovingBeside`, `DroppedBeside`), a picked row
+//!   carrying others says how many (`LiftedCarrying`, `DroppedCarrying`),
+//!   and a drop on a page says which (`DroppedOnPage`). Without it they are
+//!   the catalog's `sockel-reorder-*` messages ("Moved Alpha to 3 of 5");
+//!   `reorder_text` gives their English. `ReorderText` is
+//!   `#[non_exhaustive]`: a `text` callback ends in `_ => reorder_text(&t)`.
 //! - `DragHandle` is the grip alone (the [`IconSet`]'s `Grip`): `label`, `lifted`,
 //!   `disabled`, `describedby`, the pointer, key and blur callbacks, `class`,
 //!   `testid`, `title`. Helpers: `reorder_row(index, lift)`,
@@ -2227,7 +2233,8 @@
 //! - `name` (on `ReorderList`): what the list is called, its `aria-label`.
 //!   With one, the catalog's announcements placing a row there say it
 //!   (`sockel-reorder-lifted-in`, `-moving-in`, `-dropped-in`,
-//!   `-cancelled-in`: "Moved Alpha to Done, 2 of 5"); a tree with `text`
+//!   `-cancelled-in`: "Moved Alpha to Done, 2 of 5", and `-moving-beside-in`,
+//!   `-dropped-beside-in` naming the fixed row it lands next to); a tree with `text`
 //!   says what `text` gives, which is not told the list.
 //!
 //! <br>

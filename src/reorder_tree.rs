@@ -11,8 +11,8 @@ use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
 use crate::reorder::{
-    CONTROLS, ReorderItem, ReorderText, SURFACE, phrase, phrase_in, place, scrolled, scroller_of,
-    with_data,
+    CONTROLS, ReorderItem, ReorderText, SURFACE, beside, phrase, phrase_in, place, scrolled,
+    scroller_of, with_data,
 };
 use crate::tooltip::next_id;
 use crate::{DragHandle, class, slot_at};
@@ -404,7 +404,7 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
             };
             let row = html! {
                 <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
-                    data-reorder-fixed={item.fixed.then_some("")} hidden={item.lifted_only && !lifting}
+                    data-reorder-fixed={item.fixed.then(|| item.name.clone())} hidden={item.lifted_only && !lifting}
                     tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
                     {onclick} ondblclick={item.ondblclick.clone()} oncontextmenu={item.oncontextmenu.clone()}
                     {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
@@ -567,14 +567,26 @@ impl TreeGrip {
         }
     }
 
-    /// The row's position landing at `aim`, from 1, and how many rows move
-    /// in that list: fixed rows are not counted.
-    fn place_text(&self, aim: &Aim, lists: &[(Element, AttrValue, TreeList)]) -> (usize, usize) {
-        let stays = lists
+    /// The row's position landing at `aim`, from 1, how many rows move in
+    /// that list (fixed rows are not counted) and the fixed row it lands
+    /// next to.
+    fn place_text(
+        &self,
+        aim: &Aim,
+        lists: &[(Element, AttrValue, TreeList)],
+    ) -> (usize, usize, Option<AttrValue>) {
+        let fixed = lists
             .iter()
             .find(|(_, id, _)| *id == aim.list)
             .map_or_else(Vec::new, |(el, _, _)| fixed_rows(el));
-        tree_place(&stays, aim.list == self.spot.list, &self.spot, aim)
+        let stays: Vec<bool> = fixed.iter().map(Option::is_some).collect();
+        let same = aim.list == self.spot.list;
+        let (position, count) = tree_place(&stays, same, &self.spot, aim);
+        let from = if same { self.spot.index } else { usize::MAX };
+        let next = beside(&stays, from, aim.landing(&self.spot).index)
+            .and_then(|i| fixed[i].clone())
+            .map(AttrValue::from);
+        (position, count, next)
     }
 
     /// Whether the row may be lifted at all.
@@ -587,7 +599,7 @@ impl TreeGrip {
         let root = self.tree.root.cast::<Element>();
         let lists = root.as_ref().map(lists_of).unwrap_or_default();
         let at = |aim: &Aim| self.place_text(aim, &lists);
-        let (position, count) = if self.tree.live.borrow().lift.is_none() {
+        let (position, count, fixed) = if self.tree.live.borrow().lift.is_none() {
             // Lifted where it lies, wherever a drag first aims it.
             at(&Aim {
                 list: self.spot.list.clone(),
@@ -618,6 +630,13 @@ impl TreeGrip {
                 position,
                 count,
             }
+        } else if let Some(fixed) = fixed {
+            ReorderText::MovingBeside {
+                name,
+                fixed,
+                position,
+                count,
+            }
         } else {
             ReorderText::Moving {
                 name,
@@ -642,7 +661,7 @@ impl TreeGrip {
             .cast::<Element>()
             .map(|r| lists_of(&r))
             .unwrap_or_default();
-        let (position, count) = self.place_text(&lift.aim, &lists);
+        let (position, count, fixed) = self.place_text(&lift.aim, &lists);
         if !lift.aim.stays(&lift.from) {
             self.tree.on_move.emit(ReorderTreeMove {
                 from: lift.from.clone(),
@@ -650,14 +669,20 @@ impl TreeGrip {
             });
             self.tree.live.borrow_mut().focus = Some(lift.key.clone());
         }
-        self.announce(
-            ReorderText::Dropped {
+        let text = match fixed {
+            Some(fixed) => ReorderText::DroppedBeside {
+                name: lift.name,
+                fixed,
+                position,
+                count,
+            },
+            None => ReorderText::Dropped {
                 name: lift.name,
                 position,
                 count,
             },
-            &lift.aim.list,
-        );
+        };
+        self.announce(text, &lift.aim.list);
         self.tree.bump.emit(());
     }
 
@@ -677,7 +702,7 @@ impl TreeGrip {
                 list: self.spot.list.clone(),
                 slot: self.spot.index,
             };
-            let (position, count) = self.place_text(&here, &lists);
+            let (position, count, _) = self.place_text(&here, &lists);
             self.announce(
                 ReorderText::Cancelled {
                     name: self.name.clone(),
@@ -984,12 +1009,12 @@ impl TreeGrip {
     }
 }
 
-/// The fixed rows of a list's element, by index.
-fn fixed_rows(list: &Element) -> Vec<bool> {
+/// The names of a list's element's fixed rows, by index.
+fn fixed_rows(list: &Element) -> Vec<Option<String>> {
     let rows = list.children();
     (0..rows.length())
         .filter_map(|i| rows.item(i))
-        .map(|r| r.has_attribute(FIXED))
+        .map(|r| r.get_attribute(FIXED))
         .collect()
 }
 

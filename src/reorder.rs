@@ -69,8 +69,11 @@ impl ReorderRow {
 }
 
 /// What a [`Reorder`] says: a handle's name, its hint and the
-/// announcements. Positions count from 1.
+/// announcements. Positions count from 1; `carried` counts the other picked
+/// rows that go with the lifted one. New kinds may be added: an app's
+/// `text` falls back to [`reorder_text`] for the ones it does not know.
 #[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub enum ReorderText {
     Handle {
         name: AttrValue,
@@ -81,8 +84,22 @@ pub enum ReorderText {
         position: usize,
         count: usize,
     },
+    /// Lifted with other picked rows.
+    LiftedCarrying {
+        name: AttrValue,
+        carried: usize,
+        position: usize,
+        count: usize,
+    },
     Moving {
         name: AttrValue,
+        position: usize,
+        count: usize,
+    },
+    /// Moving to land next to a fixed row, `fixed` its name.
+    MovingBeside {
+        name: AttrValue,
+        fixed: AttrValue,
         position: usize,
         count: usize,
     },
@@ -90,6 +107,27 @@ pub enum ReorderText {
         name: AttrValue,
         position: usize,
         count: usize,
+    },
+    /// Dropped next to a fixed row, `fixed` its name.
+    DroppedBeside {
+        name: AttrValue,
+        fixed: AttrValue,
+        position: usize,
+        count: usize,
+    },
+    /// Dropped with other picked rows.
+    DroppedCarrying {
+        name: AttrValue,
+        carried: usize,
+        position: usize,
+        count: usize,
+    },
+    /// Let go on a place outside the list (`on_drop_page`), `page` its
+    /// `data-sort-page` value.
+    DroppedOnPage {
+        name: AttrValue,
+        carried: usize,
+        page: AttrValue,
     },
     Cancelled {
         name: AttrValue,
@@ -107,78 +145,127 @@ pub fn reorder_text(text: &ReorderText) -> String {
 /// [`ReorderList`](crate::ReorderList)'s `name`): the announcements that
 /// place it say the list's name too.
 pub(crate) fn phrase_in(phrases: &Phrases, text: &ReorderText, list: &str) -> String {
-    let (id, name, position, count) = match text {
-        ReorderText::Lifted {
-            name,
-            position,
-            count,
-        } => ("sockel-reorder-lifted-in", name, position, count),
-        ReorderText::Moving {
-            name,
-            position,
-            count,
-        } => ("sockel-reorder-moving-in", name, position, count),
-        ReorderText::Dropped {
-            name,
-            position,
-            count,
-        } => ("sockel-reorder-dropped-in", name, position, count),
-        ReorderText::Cancelled {
-            name,
-            position,
-            count,
-        } => ("sockel-reorder-cancelled-in", name, position, count),
-        ReorderText::Handle { .. } | ReorderText::Hint => return phrase(phrases, text),
-    };
-    let mut args = Args::new();
-    args.set("name", name.as_str())
-        .set("list", list)
-        .set("position", *position)
-        .set("count", *count);
-    phrases.msg(id, &args)
+    let (id, id_in) = phrase_ids(text);
+    let mut args = phrase_args(text);
+    if id_in.is_empty() {
+        return phrases.msg(id, &args);
+    }
+    args.set("list", list);
+    phrases.msg(id_in, &args)
 }
 
 pub(crate) fn phrase(phrases: &Phrases, text: &ReorderText) -> String {
-    let (id, name, place) = match text {
-        ReorderText::Handle { name } => ("sockel-reorder-handle", Some(name), None),
-        ReorderText::Hint => ("sockel-reorder-hint", None, None),
+    phrases.msg(phrase_ids(text).0, &phrase_args(text))
+}
+
+/// A text's message, and its message naming the list a row is placed in
+/// (`""`: none).
+fn phrase_ids(text: &ReorderText) -> (&'static str, &'static str) {
+    use ReorderText as T;
+    match text {
+        T::Handle { .. } => ("sockel-reorder-handle", ""),
+        T::Hint => ("sockel-reorder-hint", ""),
+        T::Lifted { .. } => ("sockel-reorder-lifted", "sockel-reorder-lifted-in"),
+        T::LiftedCarrying { .. } => (
+            "sockel-reorder-lifted-carrying",
+            "sockel-reorder-lifted-carrying-in",
+        ),
+        T::Moving { .. } => ("sockel-reorder-moving", "sockel-reorder-moving-in"),
+        T::MovingBeside { .. } => (
+            "sockel-reorder-moving-beside",
+            "sockel-reorder-moving-beside-in",
+        ),
+        T::Dropped { .. } => ("sockel-reorder-dropped", "sockel-reorder-dropped-in"),
+        T::DroppedBeside { .. } => (
+            "sockel-reorder-dropped-beside",
+            "sockel-reorder-dropped-beside-in",
+        ),
+        T::DroppedCarrying { .. } => (
+            "sockel-reorder-dropped-carrying",
+            "sockel-reorder-dropped-carrying-in",
+        ),
+        T::DroppedOnPage { carried: 0, .. } => ("sockel-reorder-dropped-page", ""),
+        T::DroppedOnPage { .. } => ("sockel-reorder-dropped-page-carrying", ""),
+        T::Cancelled { .. } => ("sockel-reorder-cancelled", "sockel-reorder-cancelled-in"),
+    }
+}
+
+fn phrase_args(text: &ReorderText) -> Args<'_> {
+    let mut args = Args::new();
+    match text {
+        ReorderText::Handle { name } => {
+            args.set("name", name.as_str());
+        }
+        ReorderText::Hint => {}
         ReorderText::Lifted {
             name,
             position,
             count,
-        } => ("sockel-reorder-lifted", Some(name), Some((position, count))),
-        ReorderText::Moving {
+        }
+        | ReorderText::Moving {
             name,
             position,
             count,
-        } => ("sockel-reorder-moving", Some(name), Some((position, count))),
-        ReorderText::Dropped {
+        }
+        | ReorderText::Dropped {
             name,
             position,
             count,
-        } => (
-            "sockel-reorder-dropped",
-            Some(name),
-            Some((position, count)),
-        ),
-        ReorderText::Cancelled {
+        }
+        | ReorderText::Cancelled {
             name,
             position,
             count,
-        } => (
-            "sockel-reorder-cancelled",
-            Some(name),
-            Some((position, count)),
-        ),
-    };
-    let mut args = Args::new();
-    if let Some(name) = name {
-        args.set("name", name.as_str());
+        } => {
+            args.set("name", name.as_str())
+                .set("position", *position)
+                .set("count", *count);
+        }
+        ReorderText::LiftedCarrying {
+            name,
+            carried,
+            position,
+            count,
+        }
+        | ReorderText::DroppedCarrying {
+            name,
+            carried,
+            position,
+            count,
+        } => {
+            args.set("name", name.as_str())
+                .set("carried", *carried)
+                .set("position", *position)
+                .set("count", *count);
+        }
+        ReorderText::MovingBeside {
+            name,
+            fixed,
+            position,
+            count,
+        }
+        | ReorderText::DroppedBeside {
+            name,
+            fixed,
+            position,
+            count,
+        } => {
+            args.set("name", name.as_str())
+                .set("fixed", fixed.as_str())
+                .set("position", *position)
+                .set("count", *count);
+        }
+        ReorderText::DroppedOnPage {
+            name,
+            carried,
+            page,
+        } => {
+            args.set("name", name.as_str())
+                .set("carried", *carried)
+                .set("page", page.as_str());
+        }
     }
-    if let Some((position, count)) = place {
-        args.set("position", *position).set("count", *count);
-    }
-    phrases.msg(id, &args)
+    args
 }
 
 /// The index a row lifted from `from` lands at when dropped in `slot` (the
@@ -246,6 +333,18 @@ pub(crate) fn place(stays: &[bool], from: usize, to: usize) -> (usize, usize) {
         .filter(|i| !stays[*i])
         .count();
     (before + 1, stays.iter().filter(|s| !**s).count())
+}
+
+/// The fixed row (`stays`) a row lifted from `from` lands next to at `to`:
+/// the one before it, else the one after.
+pub(crate) fn beside(stays: &[bool], from: usize, to: usize) -> Option<usize> {
+    let rest: Vec<usize> = (0..stays.len()).filter(|i| *i != from).collect();
+    let before = to.checked_sub(1).and_then(|i| rest.get(i));
+    before
+        .into_iter()
+        .chain(rest.get(to))
+        .copied()
+        .find(|i| stays[*i])
 }
 
 /// Moves `list[from]` to `to`, as [`Reorder`]'s `on_move` reports it.
@@ -576,6 +675,11 @@ pub struct ReorderProps {
     /// no row is marked.
     #[prop_or_default]
     pub on_drop_page: Option<Callback<(usize, AttrValue)>>,
+    /// Picked rows lifted together and let go on such a place: their
+    /// indices in order and the attribute's value. Without it, a picked row
+    /// that carries others is not let go on a page.
+    #[prop_or_default]
+    pub on_drop_page_picked: Option<Callback<(Vec<usize>, AttrValue)>>,
     /// The children mode's list element wears this `role` (`rowgroup` for a
     /// table's body, whose rows wear `role="row"`).
     #[prop_or_default]
@@ -882,6 +986,15 @@ pub fn Reorder(props: &ReorderProps) -> Html {
     } else {
         props.rows.iter().map(|r| r.key.clone()).collect()
     };
+    let names: Rc<[AttrValue]> = if items {
+        props
+            .children
+            .iter()
+            .map(|c| c.props.name.clone())
+            .collect()
+    } else {
+        props.rows.iter().map(|r| r.name.clone()).collect()
+    };
     let stays: Rc<[bool]> = if items {
         props.children.iter().map(|c| c.props.fixed).collect()
     } else {
@@ -969,11 +1082,13 @@ pub fn Reorder(props: &ReorderProps) -> Html {
             list: list.clone(),
             on_move: props.on_move.clone(),
             on_drop_page: props.on_drop_page.clone(),
+            on_drop_page_picked: props.on_drop_page_picked.clone(),
             on_move_picked: props.on_move_picked.clone(),
             say: say.clone(),
             index,
             count,
             stays: stays.clone(),
+            names: names.clone(),
             carried: carried.clone(),
             name,
             key: keys[index].clone(),
@@ -1098,9 +1213,11 @@ impl PartialEq for Grip {
             && Rc::ptr_eq(&a.say, &b.say)
             && a.on_move == b.on_move
             && a.on_drop_page == b.on_drop_page
+            && a.on_drop_page_picked == b.on_drop_page_picked
             && a.on_move_picked == b.on_move_picked
             && (a.index, a.count, a.quick) == (b.index, b.count, b.quick)
             && a.stays == b.stays
+            && a.names == b.names
             && a.carried == b.carried
             && (a.body, a.auto, a.grid, a.disabled, a.fixed)
                 == (b.body, b.auto, b.grid, b.disabled, b.fixed)
@@ -1140,12 +1257,15 @@ struct Ctx {
     list: NodeRef,
     on_move: Callback<(usize, usize)>,
     on_drop_page: Option<Callback<(usize, AttrValue)>>,
+    on_drop_page_picked: Option<Callback<(Vec<usize>, AttrValue)>>,
     on_move_picked: Callback<(Vec<usize>, usize)>,
     say: Rc<dyn Fn(ReorderText) -> String>,
     index: usize,
     count: usize,
     /// Which rows are fixed, by index.
     stays: Rc<[bool]>,
+    /// Every row's name, by index.
+    names: Rc<[AttrValue]>,
     /// Which rows a picked row lifted carries, by index; none unless several
     /// are picked.
     carried: Rc<[bool]>,
@@ -1166,22 +1286,108 @@ impl Ctx {
         self.live.borrow_mut().status = (self.say)(text);
     }
 
+    /// The rows carried with this one, lifted: none unless it is picked
+    /// with others.
+    fn carrying(&self) -> usize {
+        if self.carried[self.index] {
+            self.carried.iter().filter(|c| **c).count() - 1
+        } else {
+            0
+        }
+    }
+
+    fn fixed_beside(&self, at: usize) -> Option<AttrValue> {
+        beside(&self.stays, self.index, at).map(|i| self.names[i].clone())
+    }
+
     fn lifted(&self, at: usize) -> ReorderText {
         let (position, count) = place(&self.stays, self.index, at);
-        ReorderText::Lifted {
-            name: self.name.clone(),
-            position,
-            count,
+        let name = self.name.clone();
+        match self.carrying() {
+            0 => ReorderText::Lifted {
+                name,
+                position,
+                count,
+            },
+            carried => ReorderText::LiftedCarrying {
+                name,
+                carried,
+                position,
+                count,
+            },
         }
     }
 
     fn moving(&self, at: usize) -> ReorderText {
         let (position, count) = place(&self.stays, self.index, at);
-        ReorderText::Moving {
-            name: self.name.clone(),
-            position,
-            count,
+        let name = self.name.clone();
+        match self.fixed_beside(at) {
+            Some(fixed) => ReorderText::MovingBeside {
+                name,
+                fixed,
+                position,
+                count,
+            },
+            None => ReorderText::Moving {
+                name,
+                position,
+                count,
+            },
         }
+    }
+
+    fn dropped(&self, at: usize) -> ReorderText {
+        let (position, count) = place(&self.stays, self.index, at);
+        let name = self.name.clone();
+        match (self.carrying(), self.fixed_beside(at)) {
+            (0, Some(fixed)) => ReorderText::DroppedBeside {
+                name,
+                fixed,
+                position,
+                count,
+            },
+            (0, None) => ReorderText::Dropped {
+                name,
+                position,
+                count,
+            },
+            (carried, _) => ReorderText::DroppedCarrying {
+                name,
+                carried,
+                position,
+                count,
+            },
+        }
+    }
+
+    /// Whether the lifted row may be let go on a page: a picked row
+    /// carrying others only with `on_drop_page_picked`.
+    fn drops_on_page(&self) -> bool {
+        if self.carrying() > 0 {
+            self.on_drop_page_picked.is_some()
+        } else {
+            self.on_drop_page.is_some()
+        }
+    }
+
+    /// Lets the lifted row (and the rows it carries) go on page `value`.
+    fn drop_on_page(&self, value: AttrValue) {
+        self.live.borrow_mut().lift = None;
+        let carried = self.carrying();
+        if carried > 0 {
+            if let Some(on) = &self.on_drop_page_picked {
+                let rows = (0..self.count).filter(|i| self.carried[*i]).collect();
+                on.emit((rows, value.clone()));
+            }
+        } else if let Some(on) = &self.on_drop_page {
+            on.emit((self.index, value.clone()));
+        }
+        self.announce(ReorderText::DroppedOnPage {
+            name: self.name.clone(),
+            carried,
+            page: value,
+        });
+        self.redraw.force_update();
     }
 
     fn cancelled(&self) -> ReorderText {
@@ -1207,12 +1413,7 @@ impl Ctx {
             self.on_move.emit((self.index, to));
             self.live.borrow_mut().focus = Some((self.key.clone(), before, to));
         }
-        let (position, count) = place(&self.stays, self.index, to);
-        self.announce(ReorderText::Dropped {
-            name: self.name.clone(),
-            position,
-            count,
-        });
+        self.announce(self.dropped(to));
         self.live.borrow_mut().lift = None;
         self.redraw.force_update();
     }
@@ -1435,7 +1636,7 @@ impl Ctx {
             format!("--reorder-shift: {dy}px")
         };
         let _ = drag.row.set_attribute("style", &style);
-        let over = self.on_drop_page.as_ref().and_then(|_| drop_page_at(at));
+        let over = self.drops_on_page().then(|| drop_page_at(at)).flatten();
         let to = if over.is_some() {
             // Over a place outside the list: the row goes there, not
             // among the rows.
@@ -1484,18 +1685,12 @@ impl Ctx {
             if drag.active {
                 swallow_click();
             }
-            let page = match &self.on_drop_page {
-                Some(on) if drag.active => {
-                    drop_page_at((f64::from(e.client_x()), f64::from(e.client_y())))
-                        .and_then(|page| page.get_attribute(DROP_PAGE))
-                        .map(|value| (on, value))
-                }
-                _ => None,
-            };
-            if let Some((on, value)) = page {
-                self.live.borrow_mut().lift = None;
-                on.emit((self.index, value.into()));
-                self.redraw.force_update();
+            let page = (drag.active && self.drops_on_page())
+                .then(|| drop_page_at((f64::from(e.client_x()), f64::from(e.client_y()))))
+                .flatten()
+                .and_then(|page| page.get_attribute(DROP_PAGE));
+            if let Some(value) = page {
+                self.drop_on_page(value.into());
                 return;
             }
             let lift = self.live.borrow().lift;
@@ -1794,6 +1989,69 @@ mod tests {
             }),
             "Moved Alpha to 3 of 4"
         );
+    }
+
+    #[test]
+    fn the_announcements_name_the_fixed_row_the_carried_rows_and_the_page() {
+        let name = AttrValue::from("Alpha");
+        assert_eq!(
+            reorder_text(&ReorderText::MovingBeside {
+                name: name.clone(),
+                fixed: "Done".into(),
+                position: 2,
+                count: 4
+            }),
+            "Alpha, position 2 of 4, next to Done"
+        );
+        assert_eq!(
+            reorder_text(&ReorderText::LiftedCarrying {
+                name: name.clone(),
+                carried: 2,
+                position: 1,
+                count: 4
+            }),
+            "Alpha and 2 more lifted, position 1 of 4"
+        );
+        assert_eq!(
+            reorder_text(&ReorderText::DroppedOnPage {
+                name: name.clone(),
+                carried: 0,
+                page: "3".into()
+            }),
+            "Moved Alpha to page 3"
+        );
+        assert_eq!(
+            reorder_text(&ReorderText::DroppedOnPage {
+                name: name.clone(),
+                carried: 1,
+                page: "3".into()
+            }),
+            "Moved Alpha and 1 more to page 3"
+        );
+        let phrases = Phrases::from_catalog(&L10N);
+        let text = ReorderText::DroppedBeside {
+            name,
+            fixed: "Done".into(),
+            position: 3,
+            count: 4,
+        };
+        assert_eq!(
+            phrase_in(&phrases, &text, "Later"),
+            "Moved Alpha to Later, 3 of 4, next to Done"
+        );
+    }
+
+    #[test]
+    fn a_row_lands_next_to_the_fixed_row_before_it_else_after() {
+        // Rows 0 and 3 fixed; row 2 lifted.
+        let stays = [true, false, false, true];
+        assert_eq!(beside(&stays, 2, 0), Some(0));
+        assert_eq!(beside(&stays, 2, 1), Some(0));
+        assert_eq!(beside(&stays, 2, 2), Some(3));
+        assert_eq!(beside(&stays, 2, 3), Some(3));
+        assert_eq!(beside(&[false, false, false], 0, 1), None);
+        // From another list: every row stays where it is.
+        assert_eq!(beside(&[false, true], usize::MAX, 2), Some(1));
     }
 
     #[test]

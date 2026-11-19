@@ -20,8 +20,26 @@ props with `yew::props!`, which fills them in:
 - `ReorderItemProps`: `disabled`.
 - `SearchSelectProps`: `more`, `on_more`, `more_label`, `on_create`,
   `create_label`, `free_text`, `on_text`, `text`.
+- `ReorderProps`: `on_drop_page_picked`.
+
+`ReorderText` is `#[non_exhaustive]` and has new variants (`LiftedCarrying`,
+`MovingBeside`, `DroppedBeside`, `DroppedCarrying`, `DroppedOnPage`), so a
+`text` callback that matches it no longer compiles: add a last arm falling
+back to the catalog's text, `_ => sockel::reorder_text(&text)`.
+
+`Reorder`: a picked row carrying others is no longer let go on a page
+(`on_drop_page`, which reported only the lifted row); set
+`on_drop_page_picked` to take that drop, with every carried row.
 
 ### Added
+
+- `Reorder` and `ReorderTree` announce the fixed row a row lands next to,
+  `Reorder` how many picked rows a lifted one carries and a drop on a page
+  (`on_drop_page`). New catalog messages: `sockel-reorder-lifted-carrying`,
+  `-moving-beside`, `-dropped-beside`, `-dropped-carrying`, `-dropped-page`,
+  `-dropped-page-carrying`, and the `-in` forms of the first four.
+- `Reorder`'s `on_drop_page_picked`: picked rows lifted together and let go on
+  a page, reported as `(rows, value)`.
 
 - Button: `selected` (the pressed look for a current choice, without
   `aria-pressed`), `link` (a text link look) and the mouse and pointer events

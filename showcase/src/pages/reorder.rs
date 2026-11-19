@@ -6,7 +6,7 @@ use yew::prelude::*;
 use sockel::{
     Button, ButtonSize, ButtonVariant, DragHandle, EmptyState, Reorder, ReorderHandle, ReorderItem,
     ReorderRow, ReorderText, drag_handle, drag_target, edge_step, grid_target, key_target, landing,
-    move_item, move_items, reorder_row, slot_at,
+    move_item, move_items, reorder_row, reorder_text, slot_at,
 };
 
 use crate::class;
@@ -59,6 +59,8 @@ fn say(phrases: &Phrases, text: &ReorderText) -> String {
             Some(name),
             Some((*position, *count)),
         ),
+        // Kinds this page does not translate: sockel's own words.
+        _ => return reorder_text(text),
     };
     let mut args = Args::new();
     if let Some(name) = name {
