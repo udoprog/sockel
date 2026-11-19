@@ -196,7 +196,7 @@ fn button_part_settings() {
     assert!(!defaults.contains(".sockel-input-clear:disabled"));
     let css = compile(&sass, "tests/fixtures/button_parts.scss");
     assert!(css.contains("min-width: var(--button-min-width, 0);"));
-    assert!(css.contains(".sockel-switch {"));
+    assert!(css.contains(".sockel-menu-item:where(button) {\n  justify-content: center;"));
     assert!(css.contains("justify-content: center;\n  min-width: 0;\n  border-radius: 8px;"));
     assert!(css.contains("min-height: 36px;"));
     assert!(css.contains(".sockel-input-clear:disabled,\n.sockel-input-action:disabled {\n  opacity: 0.5;\n  cursor: default;"));

@@ -109,7 +109,6 @@
 
 .sockel-menu-item {
     @include item;
-    @include base.button-part;
     gap: base.$menu-item-gap;
     min-height: base.$menu-item-height;
     padding: base.$menu-item-padding;
@@ -119,6 +118,11 @@
     }
 
     text-decoration: none;
+
+    // A link item is not a button: no blanket button rule reached it.
+    &:where(button) {
+        @include base.button-part;
+    }
 
     &:hover,
     &:focus-visible {
