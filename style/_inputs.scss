@@ -21,6 +21,8 @@
 //   `.sockel-touch` (`--touch-height`), by the same modifiers as a button's.
 // - `.sockel-invalid` (and `[aria-invalid="true"]` on the bare input): the
 //   border in `--danger`. `.sockel-disabled` and `.sockel-busy`.
+// - `.sockel-least`: the size is a least height (`min-height`, `height: auto`) on an
+//   `.sockel-input` or `.sockel-input-box`, as a `.sockel-button.sockel-least`'s.
 // - `.sockel-in-row`: an input, or its box, in a row of controls: it takes the
 //   room left (`flex: 1 1 0`) instead of `width: 100%`, no `.sockel-grow` wrapper.
 // - `.sockel-input-group`: joined controls in a row, one border between
@@ -46,6 +48,12 @@
 // An input (or its box) in a row of controls takes the room left, rather than
 // the whole row's width to share out with its neighbours.
 @if base.emits("inputs.input") {
+    .sockel-input.sockel-least,
+    .sockel-input-box.sockel-least {
+        height: auto;
+        min-height: var(--input-height);
+    }
+
     .sockel-input.sockel-in-row,
     .sockel-input-box.sockel-in-row {
         flex: 1 1 0;

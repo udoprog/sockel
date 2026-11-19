@@ -5,6 +5,8 @@
 // - `.sockel-row-list`: a column of rows. `.sockel-divided` draws a line
 //   above every row but the first, in the rows' own reserved top borders
 //   (`--row-line`); `.sockel-boxed` gives it a bordered, rounded surface.
+//   `$row-list-item-edge` is the width of that reserved line (`0`: none, so a
+//   row is no taller than an app's own, and `.sockel-divided` draws nothing).
 // - `.sockel-row-list-item`: a row. Parts: `-main` (takes the room), `-name`
 //   (one line, cut) and `-detail` (under it, muted, cut). What follows the
 //   main part ends the row. `.sockel-top` puts the parts to the top and lets
@@ -70,7 +72,7 @@ $name-break: normal;
     min-width: 0;
     min-height: base.$row-list-item-height;
     padding: base.$row-list-item-padding;
-    border-top: var(--space-px) solid var(--row-line);
+    border-top: base.$row-list-item-edge solid var(--row-line);
 
     // The tint stays inside the box's corners; nothing is clipped.
     &:first-child {

@@ -1190,7 +1190,8 @@ mod tests {
         assert!(declarations(probe, ".x-line").contains(&"flex-wrap: nowrap".to_owned()));
         let primary = declarations(probe, ".x-primary");
         assert!(primary.contains(&"--button-fill: var(--accent)".to_owned()));
-        assert!(primary.contains(&"height: var(--control-height)".to_owned()));
+        assert!(primary.contains(&"--button-height: var(--control-height)".to_owned()));
+        assert!(primary.contains(&"height: var(--button-height)".to_owned()));
         assert!(compile_probe(".x { @include p.button(loud); }").is_err());
     }
 

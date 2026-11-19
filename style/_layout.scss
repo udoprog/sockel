@@ -36,7 +36,8 @@
 //   small radius and no lift; `.sockel-link` for a card that is a link or button: its border lights
 //   on hover and focus, and it takes the focus ring.
 //
-// - `.sockel-grow` (an item takes the room left; `.sockel-basis-sm`, `.sockel-basis-md` and
+// - `.sockel-shrink` (an item, a column in a row, may be narrower than its content),
+//   `.sockel-grow` (an item takes the room left; `.sockel-basis-sm`, `.sockel-basis-md` and
 //   `.sockel-basis-lg` set the width it starts from), `.sockel-self-start` (an item in a stack
 //   keeps its own width), `.sockel-push-end` (an item, and what follows it, at the
 //   end of its row), `.sockel-contents` (an element whose children are its
@@ -84,6 +85,12 @@
             flex: 2 1 10rem;
         }
     }
+}
+
+// A flex or grid item that may be narrower than its content, as a `.sockel-stack`
+// or `.sockel-cluster` is: its text wraps or is cut instead of widening the row.
+.sockel-shrink {
+    min-width: 0;
 }
 
 // A block in a stack or a flex column that keeps its own width at the start,

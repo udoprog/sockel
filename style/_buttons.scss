@@ -10,7 +10,9 @@
 //   `.sockel-danger` is the quiet destructive button (no edge, red ink); `.sockel-bare`, no
 //   fill, edge, padding or height of its own: its content is its face (a
 //   swatch), only the focus outline kept.
-// - Sizes: regular, `.sockel-small`, `.sockel-touch`.
+// - Sizes: regular, `.sockel-small`, `.sockel-touch`. `.sockel-least` makes
+//   the size a least height (`min-height`, `height: auto`) so a wrapped label grows
+//   the button and an app's own rule that shrinks a nested control still works.
 // - `.sockel-icon`: the icon alone, square. `.sockel-fold`: the icon alone
 //   below the phone breakpoint, the label kept for a screen reader;
 //   `.sockel-fold-wide` the same from the phone breakpoint up.
@@ -70,16 +72,25 @@
     }
 
     &.sockel-small {
-        height: var(--control-height-small);
+        --button-height: var(--control-height-small);
+        height: var(--button-height);
         padding-inline: var(--button-pad-x, #{base.$button-padding-small});
         font-size: base.$button-text-small;
     }
 
     @if base.emits("buttons.touch") {
         &.sockel-touch {
-            height: var(--touch-height);
+            --button-height: var(--touch-height);
+            height: var(--button-height);
             padding-inline: var(--button-pad-x, var(--space-4));
         }
+    }
+
+    // The size is a least height: nested controls an app shrinks stay shrunk,
+    // and a wrapped label grows the button (`.sockel-least`, opt-in).
+    &.sockel-least {
+        height: auto;
+        min-height: var(--button-height);
     }
 
     @if base.emits("buttons.bare") {
@@ -157,15 +168,23 @@
 @if base.$button-phone-height {
     @include base.below("phone") {
         .sockel-button {
+            --button-height: #{base.$button-phone-height};
+
             height: base.$button-phone-height;
 
             &.sockel-small {
+                --button-height: #{base.$button-phone-height};
+
                 height: base.$button-phone-height;
                 @if base.$button-text {
                     font-size: base.$button-text;
                 } @else {
                     font-size: inherit;
                 }
+            }
+
+            &.sockel-least {
+                height: auto;
             }
         }
     }

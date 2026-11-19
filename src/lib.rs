@@ -1033,6 +1033,13 @@
 //! blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
 //! to the reading column (`--page-reading`), as a long entry's text.
 //!
+//! `SHRINK` (`.sockel-shrink`) lets a column in a row, or a grid item, be narrower than its
+//! content (`min-width: 0`, as a `Stack` and a `Cluster` are). `LEAST` on a
+//! [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html) or a [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) makes its size a least height, not a fixed one.
+//! `$row-list-item-edge` (`1px`) is the line a row reserves above itself, `0` for none, and
+//! `$empty-state-compact-actions-wrap` (`wrap`) is `nowrap` to keep a compact
+//! [`EmptyState`](https://docs.rs/sockel/latest/sockel/struct.EmptyState.html)'s actions on its one row.
+//!
 //! <br>
 //!
 //! ## ActionGroup and Toolbar
@@ -2771,7 +2778,9 @@
 //! `disclosure(open)` gives the classes (`DISCLOSURE`, `OPEN`),
 //! `disclosure_summary(heading)` the toggle's (`HEADING`). Parts:
 //! `DISCLOSURE_HEAD`, `DISCLOSURE_SUMMARY`, `DISCLOSURE_MARK`, `DISCLOSURE_TITLE`,
-//! `DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`, `DISCLOSURE_BODY`.
+//! `DISCLOSURE_DETAIL`, `DISCLOSURE_ACTIONS`, `DISCLOSURE_BODY`. `WRAP` in `class`
+//! lets a long title wrap and the row grow to it, `$disclosure-row-height` its least
+//! height, instead of the title being cut to one line.
 //!
 //! Size guarantees: the Pager's slots are as many whatever the page, and each
 //! button and gap is as wide as the widest page number (`--pager-chars`, the

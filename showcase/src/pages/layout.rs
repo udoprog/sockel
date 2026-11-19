@@ -249,12 +249,12 @@ pub fn CardPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Card inset={*inset} tag={*tag} gap={(*stacked).then_some(Gap::Normal)}>
+            <Card inset={*inset} tag={*tag} class={classes!(sockel::class::SHRINK)} gap={(*stacked).then_some(Gap::Normal)}>
                 { content }
                 if *stacked {
                     <Cluster>
                         <TextInput value="" on_input={Callback::noop()} label="Name"
-                            class={classes!(sockel::class::IN_ROW)} />
+                            class={classes!(sockel::class::IN_ROW, sockel::class::LEAST)} />
                         { button("Save".to_owned(), false, false) }
                     </Cluster>
                 }

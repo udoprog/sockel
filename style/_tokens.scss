@@ -348,6 +348,9 @@ $selection-bar-count-wrap: false !default;
 // and whether a name wraps (anywhere) instead of being cut to one line.
 $row-list-item-height: var(--control-height) !default;
 $row-list-item-padding: 0 var(--space-3) !default;
+// The width of the line a row reserves above itself (`--row-line` draws in it);
+// `0` leaves a row without the edge, and a `.sockel-divided` list without lines.
+$row-list-item-edge: var(--space-px) !default;
 $row-list-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
 $row-list-name-wrap: false !default;
 // A row's main part: its vertical padding and the gap between its lines
@@ -456,6 +459,9 @@ $empty-state-compact-icon-box: null !default;
 $empty-state-compact-icon-fill: null !default;
 $empty-state-compact-icon-ink: null !default;
 $empty-state-compact-justify: null !default;
+// Whether a compact empty state's actions may wrap onto a second line
+// (`wrap`), which its one-row height clips; `nowrap` keeps them on the row.
+$empty-state-compact-actions-wrap: wrap !default;
 $empty-state-hint-max-width: null !default;
 $empty-state-icon-gap: null !default;
 // An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
@@ -1343,7 +1349,9 @@ $-button-variants: (
     justify-content: center;
     box-sizing: border-box;
     max-width: 100%;
-    height: var(--control-height);
+    --button-height: var(--control-height);
+
+    height: var(--button-height);
     // Its height is its size's, under an app's own button min-height.
     min-height: 0;
     min-width: var(--button-min-width, #{$button-min-width});

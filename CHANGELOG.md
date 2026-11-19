@@ -131,12 +131,22 @@ instead.
   target), `select.filter` (a Select's filter field and no-match text),
   `select.sheet` (a Select's phone sheet), `disclosure.heading` (a
   Disclosure's `level` heading) and `disclosure.detail` (its `summary`).
+- Opt-in layout modifiers and tokens: `.sockel-disclosure.sockel-wrap` (`class::WRAP`; a long
+  title wraps and the row grows), `$empty-state-compact-actions-wrap`,
+  `$row-list-item-edge`, `.sockel-least` (`class::LEAST`; a `Button`'s or
+  `TextInput`'s size as a least height) and `.sockel-shrink` (`class::SHRINK`;
+  `min-width: 0` for a column in a row).
 
 ### Changed
 
 - TextInput's `autofocus` focuses the input on mount. Inside a dialog or
   popover (`[role=dialog]`) it stays the `data-autofocus` mark they focus as
   they open, as before; elsewhere it used to do nothing.
+- A `Button` reads its height from `--button-height` (its size's), so
+  `.sockel-least` can turn it into `min-height`; the height is the same
+  without it. A Disclosure's row height and title wrap, a compact
+  EmptyState's actions wrap and a row's top edge each read a token or
+  custom property whose default is today's value, so output is unchanged.
 - A `PageHead` title has a size of its own, `--page-title-size`; unset (the
   default) it keeps the browser's heading size (`revert`), so output is the
   same until an app sets `$page-title-size`. A secondary button's fill reads

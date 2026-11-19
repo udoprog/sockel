@@ -16,7 +16,9 @@
 // - `.sockel-empty-state`: what stands where a list or page has nothing.
 //   Parts: `-icon`, `-title`, `-hint`, `-actions`. `.sockel-compact` is one
 //   row high (`--control-height`), its title and hint cut to one line, so
-//   it replaces a row without moving what follows.
+//   it replaces a row without moving what follows; `$empty-state-compact-actions-wrap`
+//   (`wrap`) is whether its actions may wrap onto a second line, which its
+//   height then clips (`nowrap` keeps them on the one row).
 
 @use "tokens" as base;
 
@@ -173,6 +175,7 @@
         --empty-nowrap: normal;
         --empty-hint-flex: 0 1 auto;
         --empty-actions-margin: var(--space-2) 0 0;
+        --empty-actions-wrap: wrap;
 
         display: flex;
         flex-direction: column;
@@ -191,6 +194,7 @@
             --empty-nowrap: nowrap;
             --empty-hint-flex: 1 1 0;
             --empty-actions-margin: 0 0 0 auto;
+            --empty-actions-wrap: #{base.$empty-state-compact-actions-wrap};
 
             flex-direction: row;
             height: var(--control-height);
@@ -271,7 +275,7 @@
     .sockel-empty-state-actions {
         display: flex;
         flex: none;
-        flex-wrap: wrap;
+        flex-wrap: var(--empty-actions-wrap);
         gap: var(--space-2);
         justify-content: center;
         margin: var(--empty-actions-margin);

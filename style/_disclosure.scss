@@ -6,6 +6,9 @@
 //   (`--control-height`) high shut or open: the toggle
 //   (`.sockel-disclosure-summary`, a button across the row) and the
 //   actions (`.sockel-disclosure-actions`) at its end.
+// - `.sockel-disclosure.sockel-wrap`: a long title wraps and the row grows to
+//   it (`$disclosure-row-height` is then its least height), instead of the
+//   title being cut to one line beside the actions.
 // - `.sockel-disclosure-mark`: the chevron in a box of its own; open turns
 //   it (`.sockel-open`) a quarter turn inside the box, which changes nothing around it.
 // - `.sockel-disclosure-title` and `.sockel-disclosure-detail`: the title and
@@ -20,7 +23,17 @@
 @use "tokens" as base;
 
 .sockel-disclosure {
+    --disclosure-head-height: #{base.$disclosure-row-height};
+    --disclosure-head-min-height: 0;
+    --disclosure-title-wrap: nowrap;
+
     border-top: var(--space-px) solid var(--border);
+
+    &.sockel-wrap {
+        --disclosure-head-height: auto;
+        --disclosure-head-min-height: #{base.$disclosure-row-height};
+        --disclosure-title-wrap: normal;
+    }
 }
 
 .sockel-disclosure-head {
@@ -28,7 +41,8 @@
     align-items: center;
     gap: var(--space-2);
     box-sizing: border-box;
-    height: base.$disclosure-row-height;
+    height: var(--disclosure-head-height);
+    min-height: var(--disclosure-head-min-height);
 }
 
 .sockel-disclosure-summary {
@@ -92,6 +106,7 @@
     flex: none;
     max-width: 100%;
     @include base.truncate;
+    white-space: var(--disclosure-title-wrap);
     color: base.$disclosure-title-ink;
     font-weight: 600;
 }
