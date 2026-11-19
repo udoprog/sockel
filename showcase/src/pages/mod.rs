@@ -12,6 +12,7 @@ mod foundations;
 mod heads;
 mod icons;
 mod inputs;
+mod intro;
 mod lanes;
 mod layout;
 mod library;
@@ -52,6 +53,7 @@ use crate::probe::{Across, Hold, Size};
 /// The kinds the navigation groups pages by, in display order.
 #[derive(Clone, Copy, Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum Group {
+    Start,
     Foundations,
     Actions,
     Feedback,
@@ -65,7 +67,8 @@ pub enum Group {
 }
 
 impl Group {
-    pub const ALL: [Group; 10] = [
+    pub const ALL: [Group; 11] = [
+        Group::Start,
         Group::Foundations,
         Group::Actions,
         Group::Feedback,
@@ -80,6 +83,7 @@ impl Group {
 
     pub fn title(self) -> &'static str {
         match self {
+            Group::Start => "Start",
             Group::Foundations => "Foundations",
             Group::Actions => "Actions",
             Group::Feedback => "Feedback & status",
@@ -95,7 +99,7 @@ impl Group {
 }
 
 /// The page shown for an unknown address.
-pub const FALLBACK: &str = "stack";
+pub const FALLBACK: &str = "intro";
 
 /// The indexes into `PAGES` of a group's pages, alphabetical by title.
 pub fn in_group(group: Group) -> Vec<usize> {
@@ -132,11 +136,20 @@ const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
 
 /// A page with no states for the probe to cycle.
 #[cfg(test)]
-const UNPROBED: &[&str] = &["styles", "translations"];
+const UNPROBED: &[&str] = &["intro", "styles", "translations"];
 
 /// Every page, in the navigation's order. A name sockel exports must be in
 /// some page's `covers`, which the test below checks.
 pub const PAGES: &[Page] = &[
+    Page {
+        id: "intro",
+        title: "Introduction",
+        group: Group::Start,
+        about: "What sockel is, two demos to play with, and how to start. Every component has a page of its own in the navigation.",
+        covers: &[],
+        render: || html! { <intro::IntroPage /> },
+        holds: &[],
+    },
     Page {
         id: "stack",
         title: "Stack",

@@ -534,6 +534,9 @@ body {
 
     // The derived colours resolve where they are set: a scope sets its own.
     --surface-raised: var(--surface);
+    --field-border: var(--border);
+    --field-bg: var(--surface);
+    --card-border: var(--border);
 
     &.showcase-scope-light {
         --bg: #e8f4f1;

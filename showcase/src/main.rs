@@ -161,9 +161,11 @@ fn App() -> Html {
                 <Stack gap={Gap::Loose} class={sockel::class::WORKSPACE_PAGE}>
                     <PageHead title={page.title} />
                     <p class={classes!(class::PROSE, class::MUTED)}>{ page.about }</p>
-                    <Cluster gap={Gap::Snug}>
-                        { for page.covers.iter().map(|name| html! { <code class={class::CHIP}>{ *name }</code> }) }
-                    </Cluster>
+                    if !page.covers.is_empty() {
+                        <Cluster gap={Gap::Snug}>
+                            { for page.covers.iter().map(|name| html! { <code class={class::CHIP}>{ *name }</code> }) }
+                        </Cluster>
+                    }
                     <div key={page.id} class={sockel::class::CONTENTS}>{ (page.render)() }</div>
                 </Stack>
             </main>
