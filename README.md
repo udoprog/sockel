@@ -409,6 +409,9 @@ member wants more gets the union.
 | `badge` | `icons` | [`Pill`](https://docs.rs/sockel/latest/sockel/struct.Pill.html), [`Badge`](https://docs.rs/sockel/latest/sockel/struct.Badge.html), [`Dot`](https://docs.rs/sockel/latest/sockel/struct.Dot.html), [`Count`](https://docs.rs/sockel/latest/sockel/struct.Count.html), [`StatusLabel`](https://docs.rs/sockel/latest/sockel/struct.StatusLabel.html) | 9.6 KB |
 | `button` | `icons`, `skeleton` | [`Button`](https://docs.rs/sockel/latest/sockel/struct.Button.html), [`IconButton`](https://docs.rs/sockel/latest/sockel/struct.IconButton.html) | 11.9 KB |
 | `card-grid` | | [`CardGrid`](https://docs.rs/sockel/latest/sockel/struct.CardGrid.html) | 4.1 KB |
+| `checkbox` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`OptionCard`](https://docs.rs/sockel/latest/sockel/struct.OptionCard.html) | 6.6 KB |
+| `chip` | `icons` | [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 6.6 KB |
+| `choice` | | [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html) | 6.7 KB |
 | `color-select` | `select` | [`ColorSelect`](https://docs.rs/sockel/latest/sockel/struct.ColorSelect.html) | 48.1 KB |
 | `composer` | `drop-zone`, `input` | [`Composer`](https://docs.rs/sockel/latest/sockel/struct.Composer.html) | 22.4 KB |
 | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | [`Confirm`](https://docs.rs/sockel/latest/sockel/struct.Confirm.html), [`ConfirmPopover`](https://docs.rs/sockel/latest/sockel/struct.ConfirmPopover.html), [`ConfirmButton`](https://docs.rs/sockel/latest/sockel/struct.ConfirmButton.html), [`ConfirmInline`](https://docs.rs/sockel/latest/sockel/struct.ConfirmInline.html), [`ConfirmHost`](https://docs.rs/sockel/latest/sockel/struct.ConfirmHost.html) | 37.0 KB |
@@ -435,6 +438,7 @@ member wants more gets the union.
 | `reorder` | `icons`, `rows`, `tooltip` | [`Reorder`](https://docs.rs/sockel/latest/sockel/struct.Reorder.html), [`DragHandle`](https://docs.rs/sockel/latest/sockel/struct.DragHandle.html) | 33.3 KB |
 | `rows` | `button` | [`RowList`](https://docs.rs/sockel/latest/sockel/struct.RowList.html), [`PickRow`](https://docs.rs/sockel/latest/sockel/struct.PickRow.html), [`ActionRow`](https://docs.rs/sockel/latest/sockel/struct.ActionRow.html), [`SelectionBar`](https://docs.rs/sockel/latest/sockel/struct.SelectionBar.html) | 16.9 KB |
 | `search-select` | `select` | [`SearchSelect`](https://docs.rs/sockel/latest/sockel/struct.SearchSelect.html) | 45.1 KB |
+| `save-bar` | `button` | [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 13.8 KB |
 | `seam` | | [`Seam`](https://docs.rs/sockel/latest/sockel/struct.Seam.html) | 5.2 KB |
 | `select` | `input`, `menu`, `tooltip` | [`Select`](https://docs.rs/sockel/latest/sockel/struct.Select.html), [`Listbox`](https://docs.rs/sockel/latest/sockel/struct.Listbox.html) | 43.9 KB |
 | `shell` | `badge` | [`AppShell`](https://docs.rs/sockel/latest/sockel/struct.AppShell.html), [`BottomNav`](https://docs.rs/sockel/latest/sockel/struct.BottomNav.html) | 13.9 KB |
@@ -442,15 +446,17 @@ member wants more gets the union.
 | `skeleton` | `icons`, `media` | [`Skeleton`](https://docs.rs/sockel/latest/sockel/struct.Skeleton.html), [`Spinner`](https://docs.rs/sockel/latest/sockel/struct.Spinner.html) | 7.4 KB |
 | `split-view` | `seam` | [`SplitView`](https://docs.rs/sockel/latest/sockel/struct.SplitView.html) | 6.0 KB |
 | `stepper` | `input` | [`Stepper`](https://docs.rs/sockel/latest/sockel/struct.Stepper.html) | 11.2 KB |
+| `switch` | `icons` | [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html) | 6.0 KB |
 | `table` | `icons` | [`Table`](https://docs.rs/sockel/latest/sockel/struct.Table.html), [`SortHeader`](https://docs.rs/sockel/latest/sockel/struct.SortHeader.html) | 7.1 KB |
 | `tabs` | | [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html), [`SubTabs`](https://docs.rs/sockel/latest/sockel/struct.SubTabs.html), [`LinkTabs`](https://docs.rs/sockel/latest/sockel/struct.LinkTabs.html), [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) | 6.9 KB |
 | `time` | | [`Time`](https://docs.rs/sockel/latest/sockel/struct.Time.html), [`use_wake_at`](https://docs.rs/sockel/latest/sockel/fn.use_wake_at.html) | 3.7 KB |
-| `toast` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 34.1 KB |
-| `toggles` | `icons` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 10.7 KB |
+| `toast` | `save-bar`, `toasts` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html), [`SaveBar`](https://docs.rs/sockel/latest/sockel/struct.SaveBar.html) | 35.3 KB |
+| `toasts` | `badge`, `button`, `overlay` | [`ToastHost`](https://docs.rs/sockel/latest/sockel/struct.ToastHost.html), [`Toast`](https://docs.rs/sockel/latest/sockel/struct.Toast.html) | 34.4 KB |
+| `toggles` | `checkbox`, `chip`, `choice`, `switch` | [`Checkbox`](https://docs.rs/sockel/latest/sockel/struct.Checkbox.html), [`Switch`](https://docs.rs/sockel/latest/sockel/struct.Switch.html), [`Choice`](https://docs.rs/sockel/latest/sockel/struct.Choice.html), [`Chip`](https://docs.rs/sockel/latest/sockel/struct.Chip.html), [`ChipList`](https://docs.rs/sockel/latest/sockel/struct.ChipList.html), [`ChipToggle`](https://docs.rs/sockel/latest/sockel/struct.ChipToggle.html) | 14.2 KB |
 | `tooltip` | `overlay` | [`Tooltip`](https://docs.rs/sockel/latest/sockel/struct.Tooltip.html), [`HoverCard`](https://docs.rs/sockel/latest/sockel/struct.HoverCard.html), [`ReasonButton`](https://docs.rs/sockel/latest/sockel/struct.ReasonButton.html) | 26.8 KB |
 
-"CSS alone" is `STYLESHEET` with only that feature and what it brings in;
-with none it is 3.4 KB, and with `full` 130 KB. Each feature builds alone,
+"CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
+with none it is 3.4 KB, and with `full` 134 KB. Each feature builds alone,
 and its CSS holds no other feature's rules.
 
 <br>
@@ -592,6 +598,7 @@ must emit no CSS.
 | `$choice-height`, `$choice-stack-breakpoint` | `var(--control-height)`, `"phone"` (a choice's height, a stacked option's least, and where a `Narrow` one stacks) |
 | `$choice-columns`, `$choice-align-self`, `$choice-gap`, `$choice-icon-width`, `$choice-focus-edge` | `1fr`, `null`, `var(--space-2)`, `null`, `null` (the options' columns, `auto` each its own width; the group's `align-self` at no specificity; an option's icon-to-label gap; an icon-only option's least width, unpadded (`ICON`); the group's border while it holds the focus) |
 | `$tab-gap`, `$tab-phone-icons` | `var(--space-2)`, `false` (a tab's icon-to-label gap, and whether its icon stays below the phone breakpoint) |
+| `$tab-bar-icon-size`, `$tab-bar-gap` | `var(--text-xl)`, `var(--space-1)` (a stacked tab's icon size and its icon-to-label gap) |
 | `$chip-height`, `$chip-padding-block`, `$chip-padding`, `$chip-gap`, `$chip-font-size`, `$chip-line-height` | `var(--control-height-small)`, `0`, `var(--space-3)`, `var(--space-2)`, `var(--text-sm)`, `1` (a chip's height, `auto` as its content; its block and inline padding, gap, size, `inherit` its parent's, and line height) |
 | `$chip-media-inset`, `$chip-icon-inset` | `var(--space-1)`, `null` (how far a chip's avatar and its icon sit from its start edge; `null` keeps the padding) |
 | `$chip-on-edge`, `$chip-on-fill`, `$chip-on-ink` | `var(--accent)`, `var(--accent)`, `var(--on-accent)` (an on toggle chip's edge, fill and ink) |
@@ -1010,7 +1017,7 @@ wraps, [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) a bordere
 
 [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) takes `gap` ([`Gap`](https://docs.rs/sockel/latest/sockel/enum.Gap.html)) and `flush`; [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) takes `gap`,
 `justify` ([`Justify`](https://docs.rs/sockel/latest/sockel/enum.Justify.html)), `align` ([`Align`](https://docs.rs/sockel/latest/sockel/enum.Align.html)), `nowrap`, `inline`, `lines`
-and `flush`; [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) takes `inset` ([`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html)).
+and `flush`; [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) takes `inset` ([`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html)) and `gap` (a stack of that gap).
 
 [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) and [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) (and [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html)) take a `tag` (`div` by default). A list
 tag, `ul` or `ol`, renders with no bullets, margin or padding
@@ -1141,7 +1148,11 @@ changes no box. Every component takes `class`.
   and `invalid(bool)` (`aria-invalid` and the tab in `--danger`).
   `segmented` on the list sets the tabs in a tinted pill with the selected
   one a raised segment (`SEGMENTED`) instead of an underline. `fill`
-  spans the container, the tabs sharing its width equally (`FILL`). Every
+  spans the container, the tabs sharing its width equally (`FILL`).
+  `stacked` sets each tab's icon over its one-line, truncated label, the
+  tabs of equal width across the container, as a phone's bottom bar
+  (`STACKED`; the icons stay on a phone; `$tab-bar-icon-size`,
+  `$tab-bar-gap`), none changing size when selected. Every
   tab carries its `value` as `data-value`. Roving tabindex: the
   selected tab, or the first enabled, is the one tab stop; Left and Right
   (with wrap), Home and End select and focus the next enabled tab, from
@@ -1157,8 +1168,8 @@ changes no box. Every component takes `class`.
   links, each `TabItem` with its `.href(url)` and an `.onclick(callback)`
   run before the browser follows it (an app's router prevents that and
   shows the page in place). `value` is the current tab
-  (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`
-  and `fill` as for [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html). Each link is a tab stop and the arrows are
+  (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`,
+  `fill` and `stacked` as for [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html). Each link is a tab stop and the arrows are
   the page's; a disabled one has no `href` (`aria-disabled`).
 - [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) (`.sockel-nav-list`): a `nav` of a column of [`NavItem`](https://docs.rs/sockel/latest/sockel/struct.NavItem.html)s
   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a
@@ -1321,7 +1332,8 @@ never changes with the viewport), `invalid` (`INVALID` and `aria-invalid`),
   takes none), and `detached[i]` starts a new run after a `--space-2` gap
   (`GROUP_DETACHED`). The members overlap by their one-pixel border, the
   hovered or focused one on top. A `TextInput` in a group takes the room
-  the buttons leave.
+  the buttons leave. Outside a group, `IN_ROW` (`.sockel-in-row`) in a `TextInput`'s `class`
+  does the same in any row of controls; [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) with a `unit` takes it on its box.
 - Bare helpers: `input(size, invalid, busy)`, `input_box(size, invalid,
   disabled, busy)`, `textarea(size, invalid, busy)`.
 
