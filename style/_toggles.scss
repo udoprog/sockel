@@ -4,7 +4,11 @@
 //
 // - `.sockel-checkbox`: a label around a native checkbox and its text. The
 //   box (`-mark`, `--check-size` square) holds the input drawn as a box and
-//   the check or minus glyph over it. `-label` is the text.
+//   the check or minus glyph over it. `-label` is the text. `-input` with
+//   `.sockel-radio` is a radio's round mark, a dot when checked.
+// - `.sockel-option-card`: a label around a checkbox's mark (a radio's or a
+//   checkbox's) and `-text`: `-label` above `-description`. `.sockel-on`
+//   is its checked state, by border and fill colour only.
 // - `.sockel-switch`: a button (`role="switch"`) of a track and thumb
 //   (`--switch-width` by `--switch-height`) and an optional label. The thumb
 //   moves by transform; `.sockel-on` is its state, `[aria-busy]` puts a
@@ -81,6 +85,14 @@
         border-color: var(--danger);
     }
 
+    &.sockel-radio {
+        border-radius: var(--radius-pill);
+    }
+
+    &.sockel-radio:checked {
+        box-shadow: inset 0 0 0 calc(var(--check-size) / 4) var(--surface);
+    }
+
     @include base.focus-ring;
 }
 
@@ -91,6 +103,55 @@
 
 .sockel-checkbox-label {
     min-width: 0;
+    overflow-wrap: anywhere;
+}
+
+.sockel-option-card {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr);
+    align-items: start;
+    gap: var(--space-3);
+    box-sizing: border-box;
+    width: 100%;
+    padding: var(--space-3);
+    @include base.reserved-border(var(--border));
+    border-radius: var(--radius-md);
+    background: var(--surface);
+    color: var(--text);
+    cursor: pointer;
+
+    &:hover:not(.sockel-disabled) {
+        border-color: var(--accent);
+    }
+
+    &.sockel-on {
+        border-color: var(--accent);
+        background: color-mix(in srgb, var(--accent) 8%, var(--surface));
+    }
+
+    &.sockel-invalid {
+        border-color: var(--danger);
+    }
+
+    &.sockel-disabled {
+        opacity: 0.5;
+        cursor: not-allowed;
+    }
+}
+
+.sockel-option-card-text {
+    display: grid;
+    gap: var(--space-1);
+    min-width: 0;
+}
+
+.sockel-option-card-label {
+    overflow-wrap: anywhere;
+}
+
+.sockel-option-card-description {
+    color: var(--muted);
+    font-size: var(--text-sm);
     overflow-wrap: anywhere;
 }
 

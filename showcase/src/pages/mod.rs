@@ -262,6 +262,27 @@ pub const PAGES: &[Page] = &[
         ],
     },
     Page {
+        id: "option-card",
+        title: "OptionCard",
+        group: Group::Inputs,
+        about: "A radio or checkbox drawn as a card with a label and a description line: checked changes its border and fill only. Click a card, or tab to it and press space. Radios sharing a name are one group (the page shows two copies, so it sets none).",
+        covers: &[
+            "OptionCard",
+            "OptionCardProps",
+            "OptionCardKind",
+            "option_card",
+        ],
+        render: || html! { <toggles::OptionCardPage /> },
+        holds: &[
+            hold(sockel::class::CHECKBOX_MARK, Size::Both, Across::All),
+            hold(
+                sockel::class::OPTION_CARD,
+                Size::Both,
+                Across::Except(&["Description"]),
+            ),
+        ],
+    },
+    Page {
         id: "chip",
         title: "ChipToggle",
         group: Group::Inputs,

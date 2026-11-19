@@ -65,6 +65,7 @@ fn buttons(
     icon: &Option<Html>,
     danger: bool,
     busy: bool,
+    accept_disabled: bool,
     on_cancel: &Callback<()>,
     on_accept: &Callback<()>,
     cancel_ref: &NodeRef,
@@ -77,7 +78,7 @@ fn buttons(
                 { cancel_label.clone() }
             </Button>
             <Button variant={accept_variant(danger)} {busy} icon={icon.clone()}
-                node_ref={accept_ref.clone()} onclick={on_accept.reform(|_: MouseEvent| ())}
+                disabled={accept_disabled} node_ref={accept_ref.clone()} onclick={on_accept.reform(|_: MouseEvent| ())}
                 testid="confirm-accept">
                 { accept.clone() }
             </Button>
@@ -110,6 +111,10 @@ pub struct ConfirmProps {
     /// Working on it: the accepting button is busy and nothing closes it.
     #[prop_or_default]
     pub busy: bool,
+    /// The accepting button is disabled until the app's condition holds
+    /// (the name typed in `details`, say).
+    #[prop_or_default]
+    pub accept_disabled: bool,
     /// What went wrong when accepting failed, below the explanation.
     #[prop_or_default]
     pub error: Option<AttrValue>,
@@ -146,6 +151,7 @@ pub fn Confirm(props: &ConfirmProps) -> Html {
         &props.icon,
         props.danger,
         props.busy,
+        props.accept_disabled,
         &props.on_cancel,
         &props.on_accept,
         &cancel_ref,
@@ -185,6 +191,9 @@ pub struct ConfirmPopoverProps {
     pub danger: bool,
     #[prop_or_default]
     pub busy: bool,
+    /// As for [`Confirm`].
+    #[prop_or_default]
+    pub accept_disabled: bool,
     #[prop_or_default]
     pub error: Option<AttrValue>,
     #[prop_or_default]
@@ -243,7 +252,7 @@ fn compact(
                     node_ref={cancel_ref.clone()} class={class::CONFIRM_NO}
                     onclick={props.on_cancel.reform(|_: MouseEvent| ())} testid="confirm-cancel" />
                 <Button variant={accept_variant(props.danger)} busy={props.busy}
-                    icon={accept_icon} label={props.accept.clone()} title={props.accept.clone()}
+                    disabled={props.accept_disabled} icon={accept_icon} label={props.accept.clone()} title={props.accept.clone()}
                     node_ref={accept_ref.clone()} class={class::CONFIRM_YES}
                     onclick={props.on_accept.reform(|_: MouseEvent| ())} testid="confirm-accept" />
             </div>
@@ -278,7 +287,7 @@ pub fn ConfirmPopover(props: &ConfirmPopoverProps) -> Html {
                 { body(&props.explanation, &props.details, props.error.as_ref()) }
                 <ActionGroup end=true>
                     { buttons(&cancel_label, &props.accept, &props.icon, props.danger,
-                        props.busy, &props.on_cancel, &props.on_accept, &cancel_ref, &accept_ref) }
+                        props.busy, props.accept_disabled, &props.on_cancel, &props.on_accept, &cancel_ref, &accept_ref) }
                 </ActionGroup>
             </>
         }
@@ -321,6 +330,9 @@ pub struct ConfirmButtonProps {
     pub accept_icon: Option<Html>,
     #[prop_or(true)]
     pub danger: bool,
+    /// As for [`Confirm`]: its popover's accepting button.
+    #[prop_or_default]
+    pub accept_disabled: bool,
     #[prop_or_default]
     pub side: Side,
     #[prop_or_default]
@@ -369,6 +381,7 @@ pub fn ConfirmButton(props: &ConfirmButtonProps) -> Html {
                 explanation={props.explanation.clone()} details={props.details.clone()}
                 accept={props.accept.clone()} cancel_label={props.cancel_label.clone()}
                 icon={props.accept_icon.clone()} danger={props.danger}
+                accept_disabled={props.accept_disabled}
                 side={props.side} align={props.align} {on_accept} {on_cancel} />
         </>
     }
@@ -762,6 +775,7 @@ mod tests {
             icon: None,
             danger,
             busy: false,
+            accept_disabled: false,
             error: error.then(|| "It failed.".into()),
             on_accept: Callback::noop(),
             on_cancel: Callback::noop(),
@@ -796,6 +810,35 @@ mod tests {
     }
 
     #[test]
+    fn the_accept_button_waits_for_its_condition() {
+        let render = |accept_disabled| {
+            futures::executor::block_on(
+                yew::LocalServerRenderer::<ConfirmPopover>::with_props(yew::props!(
+                    ConfirmPopoverProps {
+                        open: true,
+                        title: AttrValue::from("Delete board?"),
+                        explanation: AttrValue::from("Type its name."),
+                        accept: AttrValue::from("Delete"),
+                        accept_disabled: accept_disabled,
+                        on_accept: Callback::noop(),
+                        on_cancel: Callback::noop(),
+                    }
+                ))
+                .hydratable(false)
+                .render(),
+            )
+        };
+        let accept = |html: &str| {
+            let at = html.find("confirm-accept").expect("accept button");
+            let end = at + html[at..].find('>').expect("its tag");
+            html[at..end].contains("disabled")
+        };
+        let on = render(true);
+        assert!(!accept(&render(false)));
+        assert!(accept(&on), "{on}");
+    }
+
+    #[test]
     fn compact_is_a_modifier() {
         assert_eq!(names(confirm_popover(false)), [class::CONFIRM_POPOVER]);
         assert_eq!(
@@ -817,6 +860,7 @@ mod tests {
             icon: None,
             danger: true,
             busy: false,
+            accept_disabled: false,
             error: None,
             side: Side::Below,
             align: PopoverAlign::Start,

@@ -4,7 +4,8 @@ use crate::class;
 
 use sockel::{
     Avatar, Checkbox, Chip, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster,
-    DataTips, Glyph, Icon, Stack, Switch, checkbox, chip, chip_count, choice, switch,
+    DataTips, Glyph, Icon, OptionCard, OptionCardKind, Stack, Switch, checkbox, chip, chip_count,
+    choice, option_card, switch,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -429,6 +430,86 @@ pub fn ChipItemPage() -> Html {
                     <Chip {href} {on_click} {media} {icon} {on_remove}>{ label }</Chip>
                 </ChipList>
                 <span class={class::CONTROL_LABEL}>{ format!("{} removed", *removed) }</span>
+            </Stack>
+        </Demo>
+    }
+}
+
+const KINDS: &[(&str, OptionCardKind)] = &[
+    ("Radio", OptionCardKind::Radio),
+    ("Checkbox", OptionCardKind::Checkbox),
+];
+
+const CARDS: &[(&str, &str)] = &[
+    ("Keep", "Leave the card where it is"),
+    ("Move", "Send it back to ready for another worker"),
+    ("Close", "Mark it invalid"),
+];
+
+#[function_component]
+pub fn OptionCardPage() -> Html {
+    let kind = use_state(|| OptionCardKind::Radio);
+    let selected = use_state(|| 0usize);
+    let text = use_state(|| Text::Short);
+    let disabled = use_state(|| false);
+    let invalid = use_state(|| false);
+    let picked = use_state(|| vec![true, false, false]);
+
+    let controls = html! {
+        <>
+            <Select<OptionCardKind> label="Kind" options={KINDS} value={*kind} on_change={bind(&kind)} />
+            <Select<usize> label="Selected" options={SELECTED} value={*selected} on_change={bind(&selected)} />
+            <Select<Text> label="Description" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
+            <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
+            <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
+        </>
+    };
+    let radio = *kind == OptionCardKind::Radio;
+    let checked = |i: usize| if radio { *selected == i } else { picked[i] };
+
+    let (label, description) = CARDS[0];
+    let description = text.of(description);
+    let code = snippet(
+        &[],
+        El::new("OptionCard")
+            .variant("kind", *kind)
+            .flag("checked", checked(0))
+            .expr_if(!checked(0), "checked", "false")
+            .text("label", label)
+            .text_if(!description.is_empty(), "description", &description)
+            .flag("disabled", *disabled)
+            .flag("invalid", *invalid)
+            .expr("on_change", "on_change"),
+    );
+
+    html! {
+        <Demo {controls} {code}>
+            <code class={class::CLASS_CALL}>
+                { format!("option_card(checked, disabled, invalid) → \"{}\"",
+                    option_card(checked(0), *disabled, *invalid).to_string()) }
+            </code>
+            <Stack>
+                { for CARDS.iter().enumerate().map(|(i, (label, description))| {
+                    let on_change = {
+                        let (selected, picked) = (selected.clone(), picked.clone());
+                        Callback::from(move |on: bool| {
+                            if radio {
+                                selected.set(i);
+                            } else {
+                                let mut next = (*picked).clone();
+                                next[i] = on;
+                                picked.set(next);
+                            }
+                        })
+                    };
+                    let description = text.of(description);
+                    html! {
+                        <OptionCard kind={*kind}
+                            value={*label} checked={checked(i)} label={*label}
+                            description={(!description.is_empty()).then(|| AttrValue::from(description))}
+                            disabled={*disabled} invalid={*invalid} {on_change} />
+                    }
+                }) }
             </Stack>
         </Demo>
     }

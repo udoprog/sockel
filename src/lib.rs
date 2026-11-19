@@ -1057,6 +1057,14 @@
 //!   enabled option. `multiple` with `values` picks several: a `group` of
 //!   `checkbox` options, each a tab stop, `on_change` given the value
 //!   clicked for the app to toggle.
+//! - [`OptionCard`] (`.sockel-option-card`): a radio or checkbox drawn as a
+//!   card, `kind` ([`OptionCardKind`]: `Radio`, the mark round with a dot
+//!   (`RADIO` on `CHECKBOX_INPUT`), or `Checkbox`, the checkbox's mark),
+//!   `checked` (`ON`), `name` (radios sharing one are a group), `value`,
+//!   `on_change(bool)`, `label` (`OPTION_CARD_LABEL`), `description` (a
+//!   `--muted` line, `OPTION_CARD_DESCRIPTION`), `disabled`, `invalid`,
+//!   `testid`; `option_card(checked, disabled, invalid)` gives its classes.
+//!   Checked, hover and focus change colours only.
 //! - [`ChipToggle`] (`.sockel-chip`) and [`ChipList`] (`.sockel-chip-list`):
 //!   filter chips. `on` (`aria-pressed`), `count` (`chip_count(n)` marks a
 //!   zero with `ZERO`), `disabled`, `on_toggle(bool)`, children as the
@@ -1243,9 +1251,11 @@
 //! [`Field`], pass the field's `id` and `describedby={field_describedby(..)}`.
 //!
 //! - [`TextInput`] (`.sockel-input`): `value` and `on_input` (the new text), `on_change`,
-//!   `on_blur`, `on_keydown`, `kind` ([`InputKind`]: text, email, url, tel),
+//!   `on_blur`, `on_keydown`, `kind` ([`InputKind`]: text, email, url, tel,
+//!   `Number`, `DateTime` as `datetime-local`),
 //!   `maxlength`, `list` (a `<datalist>`'s id), `inputmode` and `enterkeyhint`
-//!   (a touch keyboard's kind and enter key),
+//!   (a touch keyboard's kind and enter key), `autocomplete` and `spellcheck`
+//!   (`Option<bool>`; each set only when given),
 //!   `placeholder`, `label` (the accessible name without a `Field`), `readonly`,
 //!   `required`, `autofocus`, `node_ref`. With a `unit` (Html, `aria-hidden`)
 //!   the input sits in a box (`INPUT_BOX`) with the unit after the text inside
@@ -1258,7 +1268,8 @@
 //!   way to the items beside it; `fill` makes it its container's
 //!   width. Set `aria-invalid` with `invalid`, as on a bare input.
 //! - [`Textarea`] (`.sockel-textarea`): `rows` (default 3), at least `--input-height`
-//!   high, resized vertically by the user only.
+//!   high, resized vertically by the user only. `node_ref` (to focus or
+//!   autosize it), `on_keydown`, `on_paste` and `on_drop`.
 //! - [`SearchField`] (`.sockel-input-box`): a search icon, the text and a clear
 //!   button. `label` is the placeholder and the accessible name, `clear_label`
 //!   names the button, `busy` swaps the icon for a spinner in the same box.
@@ -2334,6 +2345,9 @@
 //! explanation), `on_accept` and `on_cancel`. Cancel, Escape, the close button
 //! and a press on the scrim all call `on_cancel`; the owner sets `open` to
 //! false. While `busy` the accepting button spins and nothing closes it.
+//! `accept_disabled` holds the accepting button disabled until the app's
+//! condition holds (its name typed in `details`, say); `ConfirmPopover` and
+//! `ConfirmButton` take it too.
 //!
 //! [`ConfirmHost`] and `ask` are promise-style confirms: render one `ConfirmHost`
 //! near the app's root, then `ask(ConfirmRequest::new(title, explanation))`
@@ -3430,6 +3444,8 @@ mod menu;
 mod nav_list;
 #[cfg(feature = "notice")]
 mod notice;
+#[cfg(feature = "toggles")]
+mod option_card;
 #[cfg(feature = "overlay")]
 mod overlay;
 #[cfg(feature = "pager")]
@@ -3596,6 +3612,8 @@ pub use menu::{
 pub use nav_list::{NavItem, NavList, NavListProps, nav_list};
 #[cfg(feature = "notice")]
 pub use notice::{Notice, NoticeProps, notice};
+#[cfg(feature = "toggles")]
+pub use option_card::{OptionCard, OptionCardKind, OptionCardProps, option_card};
 #[cfg(feature = "overlay")]
 pub use overlay::{
     OVERLAY_ID, OverlayHost, OverlayHostProps, Overlays, overlay, overlay_host, use_overlay,

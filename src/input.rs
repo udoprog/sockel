@@ -24,6 +24,11 @@ pub enum InputKind {
     Email,
     Url,
     Tel,
+    /// A number (`type="number"`); for digits without a spinner, `Text`
+    /// with `inputmode="numeric"`.
+    Number,
+    /// A local date and time (`type="datetime-local"`).
+    DateTime,
 }
 
 impl InputKind {
@@ -33,6 +38,8 @@ impl InputKind {
             InputKind::Email => "email",
             InputKind::Url => "url",
             InputKind::Tel => "tel",
+            InputKind::Number => "number",
+            InputKind::DateTime => "datetime-local",
         }
     }
 }
@@ -159,6 +166,12 @@ pub struct TextInputProps {
     /// The label of a touch keyboard's enter key (`go`, `search`, ...).
     #[prop_or_default]
     pub enterkeyhint: Option<AttrValue>,
+    /// The browser's autofill (`off`, `username`, ...), only when set.
+    #[prop_or_default]
+    pub autocomplete: Option<AttrValue>,
+    /// Spell checking on or off, only when set.
+    #[prop_or_default]
+    pub spellcheck: Option<bool>,
     #[prop_or_default]
     pub kind: InputKind,
     #[prop_or_default]
@@ -220,6 +233,8 @@ pub fn TextInput(props: &TextInputProps) -> Html {
                     type={props.kind.attr()} value={props.value.clone()}
                     maxlength={props.maxlength.map(|n| n.to_string())} list={props.list.clone()}
                     inputmode={props.inputmode.clone()} enterkeyhint={props.enterkeyhint.clone()}
+                    autocomplete={props.autocomplete.clone()}
+                    spellcheck={props.spellcheck.map(|on| if on { "true" } else { "false" })}
                     placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
                     aria-describedby={props.describedby.clone()}
                     aria-invalid={aria_invalid} aria-busy={aria_busy}
@@ -286,6 +301,15 @@ pub struct TextareaProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The textarea, for a caller that focuses, measures or sizes it.
+    #[prop_or_default]
+    pub node_ref: NodeRef,
+    #[prop_or_default]
+    pub on_keydown: Callback<KeyboardEvent>,
+    #[prop_or_default]
+    pub on_paste: Callback<Event>,
+    #[prop_or_default]
+    pub on_drop: Callback<DragEvent>,
 }
 
 /// Lines of text: as high as its `rows`, resized only vertically by the
@@ -309,7 +333,9 @@ pub fn Textarea(props: &TextareaProps) -> Html {
             aria-invalid={props.invalid.then_some("true")}
             aria-busy={props.busy.then_some("true")}
             disabled={props.disabled} readonly={props.readonly} required={props.required}
-            data-testid={props.testid.clone()} {oninput} {onchange} />
+            data-testid={props.testid.clone()} ref={props.node_ref.clone()}
+            {oninput} {onchange} onkeydown={props.on_keydown.clone()}
+            onpaste={props.on_paste.clone()} ondrop={props.on_drop.clone()} />
     }
 }
 
@@ -524,6 +550,52 @@ mod tests {
     }
 
     #[test]
+    fn autocomplete_and_spellcheck_only_when_set() {
+        let plain = render::<TextInput>(yew::props!(TextInputProps {
+            value: AttrValue::from(""),
+            on_input: Callback::noop(),
+        }));
+        assert!(!plain.contains("autocomplete") && !plain.contains("spellcheck"));
+        let html = render::<TextInput>(yew::props!(TextInputProps {
+            value: AttrValue::from(""),
+            on_input: Callback::noop(),
+            autocomplete: AttrValue::from("off"),
+            spellcheck: false,
+        }));
+        assert!(html.contains("autocomplete=\"off\""), "{html}");
+        assert!(html.contains("spellcheck=\"false\""), "{html}");
+    }
+
+    #[test]
+    fn a_kind_is_its_type() {
+        for (kind, attr) in [
+            (InputKind::Number, "type=\"number\""),
+            (InputKind::DateTime, "type=\"datetime-local\""),
+        ] {
+            let html = render::<TextInput>(yew::props!(TextInputProps {
+                value: AttrValue::from(""),
+                on_input: Callback::noop(),
+                kind: kind,
+            }));
+            assert!(html.contains(attr), "{attr} in {html}");
+        }
+    }
+
+    #[test]
+    fn a_textarea_takes_its_ref_and_events() {
+        let props = yew::props!(TextareaProps {
+            value: AttrValue::from(""),
+            on_input: Callback::noop(),
+        });
+        let html = render::<Textarea>(TextareaProps {
+            on_paste: Callback::from(|_: Event| ()),
+            on_drop: Callback::from(|_: DragEvent| ()),
+            ..props
+        });
+        assert!(html.contains(class::TEXTAREA), "{html}");
+    }
+
+    #[test]
     fn each_size_is_its_modifier() {
         let of = |s| names(input(s, false, false));
         assert_eq!(of(InputSize::Regular), [class::INPUT]);
@@ -719,6 +791,8 @@ mod tests {
             list: None,
             inputmode: None,
             enterkeyhint: None,
+            autocomplete: None,
+            spellcheck: None,
             kind: InputKind::Text,
             size: InputSize::Regular,
             placeholder: None,
