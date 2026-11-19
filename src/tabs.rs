@@ -134,6 +134,10 @@ pub struct TabsProps {
     /// The list spans its container and the tabs share its width equally.
     #[prop_or_default]
     pub fill: bool,
+    /// Stacked, a bar: each tab's icon over its one-line label, every tab the
+    /// same width and the bar spanning its container (`STACKED`).
+    #[prop_or_default]
+    pub stacked: bool,
 }
 
 /// The props of [`LinkTabs`].
@@ -154,6 +158,9 @@ pub struct LinkTabsProps {
     pub segmented: bool,
     #[prop_or_default]
     pub fill: bool,
+    /// Stacked, as for [`TabsProps`].
+    #[prop_or_default]
+    pub stacked: bool,
     /// At the small control height, as [`SubTabs`].
     #[prop_or_default]
     pub small: bool,
@@ -164,22 +171,24 @@ pub fn tabs(small: bool) -> Classes {
     classes!(class::TABS, small.then_some(class::SMALL))
 }
 
-fn list(small: bool, segmented: bool, fill: bool, class: &Classes) -> Classes {
+fn list(small: bool, segmented: bool, fill: bool, stacked: bool, class: &Classes) -> Classes {
     classes!(
         tabs(small),
         segmented.then_some(class::SEGMENTED),
         fill.then_some(class::FILL),
+        stacked.then_some(class::STACKED),
         class.clone()
     )
 }
 
-fn face(tab: &TabItem) -> Html {
+fn face(tab: &TabItem, stacked: bool) -> Html {
+    let stacked = stacked.then_some(class::STACKED);
     html! {
         <>
             { for tab.icon.clone().map(|icon| html! {
-                <span class={class::TAB_ICON} aria-hidden="true">{ icon }</span>
+                <span class={classes!(class::TAB_ICON, stacked)} aria-hidden="true">{ icon }</span>
             }) }
-            <span class={class::TAB_LABEL}>
+            <span class={classes!(class::TAB_LABEL, stacked)}>
                 { match &tab.content {
                     Some(content) => content.clone(),
                     None => html! { { tab.label.clone() } },
@@ -230,7 +239,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
     };
 
     html! {
-        <div role="tablist" class={list(small, props.segmented, props.fill, &props.class)}
+        <div role="tablist" class={list(small, props.segmented, props.fill, props.stacked, &props.class)}
             aria-label={props.label.clone()}
             data-testid={props.testid.clone()}
             {onkeydown}>
@@ -243,7 +252,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
                 };
                 html! {
                     <>
-                    <button type="button" role="tab" class={classes!(class::TAB, tab.invalid.then_some(class::INVALID), tab.class.clone())}
+                    <button type="button" role="tab" class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
                         aria-selected={selected.to_string()}
                         aria-invalid={tab.invalid.then_some("true")}
                         aria-label={name(tab)}
@@ -253,7 +262,7 @@ fn render(props: &TabsProps, small: bool) -> Html {
                         tabindex={if stop == Some(i) { "0" } else { "-1" }}
                         disabled={tab.disabled}
                         {onclick}>
-                        { face(tab) }
+                        { face(tab, props.stacked) }
                     </button>
                     { after(tab, selected) }
                     </>
@@ -285,7 +294,7 @@ pub fn SubTabs(props: &TabsProps) -> Html {
 #[function_component]
 pub fn LinkTabs(props: &LinkTabsProps) -> Html {
     html! {
-        <nav class={list(props.small, props.segmented, props.fill, &props.class)}
+        <nav class={list(props.small, props.segmented, props.fill, props.stacked, &props.class)}
             aria-label={props.label.clone()}
             data-testid={props.testid.clone()}>
             { for props.tabs.iter().map(|tab| {
@@ -293,7 +302,7 @@ pub fn LinkTabs(props: &LinkTabsProps) -> Html {
                 let onclick = tab.onclick.clone().filter(|_| !tab.disabled);
                 html! {
                     <>
-                    <a class={classes!(class::TAB, tab.invalid.then_some(class::INVALID), tab.class.clone())}
+                    <a class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
                         href={tab.href.clone().filter(|_| !tab.disabled)}
                         aria-current={current.then_some("page")}
                         aria-disabled={tab.disabled.then_some("true")}
@@ -303,7 +312,7 @@ pub fn LinkTabs(props: &LinkTabsProps) -> Html {
                         data-testid={tab.testid.clone()}
                         data-value={tab.value.clone()}
                         {onclick}>
-                        { face(tab) }
+                        { face(tab, props.stacked) }
                     </a>
                     { after(tab, current) }
                     </>
@@ -449,6 +458,32 @@ mod tests {
         let mut p = props(Some("a"), items());
         p.fill = true;
         assert!(html_of::<Tabs>(p).contains(class::FILL));
+    }
+
+    #[test]
+    fn stacked_is_a_class_on_the_list_the_tabs_and_their_parts() {
+        let t = vec![TabItem::new("a", "A").icon(html! { <i /> })];
+        let off = html_of::<Tabs>(props(Some("a"), t.clone()));
+        assert!(!off.contains(class::STACKED), "{off}");
+        let mut p = props(Some("a"), t);
+        p.stacked = true;
+        let on = html_of::<Tabs>(p);
+        // The list, the tab, its icon and its label.
+        assert_eq!(on.matches(class::STACKED).count(), 4, "{on}");
+    }
+
+    #[test]
+    fn link_tabs_stack_too() {
+        let html = futures::executor::block_on(
+            yew::LocalServerRenderer::<LinkTabs>::with_props(yew::props!(LinkTabsProps {
+                tabs: vec![TabItem::new("a", "A").href("/a")],
+                label: "Pages",
+                stacked: true
+            }))
+            .hydratable(false)
+            .render(),
+        );
+        assert!(html.contains(class::STACKED), "{html}");
     }
 
     fn links(value: Option<&str>) -> String {

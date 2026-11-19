@@ -523,6 +523,9 @@ $choice-stack-breakpoint: "phone" !default;
 // breakpoint.
 $tab-gap: var(--space-2) !default;
 $tab-phone-icons: false !default;
+// A stacked tab bar's icon size and its icon-to-label gap.
+$tab-bar-icon-size: var(--text-xl) !default;
+$tab-bar-gap: var(--space-1) !default;
 // A chip's look (ChipToggle and Chip): its height (`auto`: as its content,
 // with `$chip-padding-block`), padding, gap, font size (`inherit`: its
 // parent's) and line height; how far a leading avatar sits from its start

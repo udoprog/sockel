@@ -26,6 +26,7 @@ props with `yew::props!`, which fills them in:
   `sheet`, `title`, `close_label`. `PickerOption` gains the public field
   `trailing` (`None`), which breaks a struct literal of it; build options
   with `PickerOption::new`.
+- `TabsProps`, `LinkTabsProps`: `stacked`.
 
 `ReorderText` is `#[non_exhaustive]` and has new variants (`LiftedCarrying`,
 `MovingBeside`, `DroppedBeside`, `DroppedCarrying`, `DroppedOnPage`), so a
@@ -43,6 +44,10 @@ instead.
 
 ### Added
 
+- `Tabs`, `SubTabs` and `LinkTabs` take `stacked`: a phone's bottom bar, each
+  tab's icon over its one-line, truncated label, the tabs of equal width
+  across the container and none changing size when selected. Off by default;
+  tokens `$tab-bar-icon-size` and `$tab-bar-gap`.
 - `Reorder` and `ReorderTree` announce the fixed row a row lands next to,
   `Reorder` how many picked rows a lifted one carries and a drop on a page
   (`on_drop_page`). New catalog messages: `sockel-reorder-lifted-carrying`,

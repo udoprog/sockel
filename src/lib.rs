@@ -594,6 +594,7 @@
 //! | `$choice-height`, `$choice-stack-breakpoint` | `var(--control-height)`, `"phone"` (a choice's height, a stacked option's least, and where a `Narrow` one stacks) |
 //! | `$choice-columns`, `$choice-align-self`, `$choice-gap`, `$choice-icon-width`, `$choice-focus-edge` | `1fr`, `null`, `var(--space-2)`, `null`, `null` (the options' columns, `auto` each its own width; the group's `align-self` at no specificity; an option's icon-to-label gap; an icon-only option's least width, unpadded (`ICON`); the group's border while it holds the focus) |
 //! | `$tab-gap`, `$tab-phone-icons` | `var(--space-2)`, `false` (a tab's icon-to-label gap, and whether its icon stays below the phone breakpoint) |
+//! | `$tab-bar-icon-size`, `$tab-bar-gap` | `var(--text-xl)`, `var(--space-1)` (a stacked tab's icon size and its icon-to-label gap) |
 //! | `$chip-height`, `$chip-padding-block`, `$chip-padding`, `$chip-gap`, `$chip-font-size`, `$chip-line-height` | `var(--control-height-small)`, `0`, `var(--space-3)`, `var(--space-2)`, `var(--text-sm)`, `1` (a chip's height, `auto` as its content; its block and inline padding, gap, size, `inherit` its parent's, and line height) |
 //! | `$chip-media-inset`, `$chip-icon-inset` | `var(--space-1)`, `null` (how far a chip's avatar and its icon sit from its start edge; `null` keeps the padding) |
 //! | `$chip-on-edge`, `$chip-on-fill`, `$chip-on-ink` | `var(--accent)`, `var(--accent)`, `var(--on-accent)` (an on toggle chip's edge, fill and ink) |
@@ -1143,7 +1144,11 @@
 //!   and `invalid(bool)` (`aria-invalid` and the tab in `--danger`).
 //!   `segmented` on the list sets the tabs in a tinted pill with the selected
 //!   one a raised segment (`SEGMENTED`) instead of an underline. `fill`
-//!   spans the container, the tabs sharing its width equally (`FILL`). Every
+//!   spans the container, the tabs sharing its width equally (`FILL`).
+//!   `stacked` sets each tab's icon over its one-line, truncated label, the
+//!   tabs of equal width across the container, as a phone's bottom bar
+//!   (`STACKED`; the icons stay on a phone; `$tab-bar-icon-size`,
+//!   `$tab-bar-gap`), none changing size when selected. Every
 //!   tab carries its `value` as `data-value`. Roving tabindex: the
 //!   selected tab, or the first enabled, is the one tab stop; Left and Right
 //!   (with wrap), Home and End select and focus the next enabled tab, from
@@ -1159,8 +1164,8 @@
 //!   links, each `TabItem` with its `.href(url)` and an `.onclick(callback)`
 //!   run before the browser follows it (an app's router prevents that and
 //!   shows the page in place). `value` is the current tab
-//!   (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`
-//!   and `fill` as for [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html). Each link is a tab stop and the arrows are
+//!   (`aria-current="page"`, drawn as a selected tab); `small`, `segmented`,
+//!   `fill` and `stacked` as for [`Tabs`](https://docs.rs/sockel/latest/sockel/struct.Tabs.html). Each link is a tab stop and the arrows are
 //!   the page's; a disabled one has no `href` (`aria-disabled`).
 //! - [`NavList`](https://docs.rs/sockel/latest/sockel/struct.NavList.html) (`.sockel-nav-list`): a `nav` of a column of [`NavItem`](https://docs.rs/sockel/latest/sockel/struct.NavItem.html)s
 //!   (`new(value, label)`, `.icon(html)`, `.href(url)`, `.disabled(bool)`), a

@@ -28,6 +28,7 @@ pub fn TabsPage() -> Html {
     let small = use_state(|| false);
     let segmented = use_state(|| false);
     let fill = use_state(|| false);
+    let stacked = use_state(|| false);
     let links = use_state(|| false);
 
     let controls = html! {
@@ -40,6 +41,7 @@ pub fn TabsPage() -> Html {
             <Toggle label="small" value={*small} on_change={bind(&small)} />
             <Toggle label="segmented" value={*segmented} on_change={bind(&segmented)} />
             <Toggle label="fill" value={*fill} on_change={bind(&fill)} />
+            <Toggle label="stacked" value={*stacked} on_change={bind(&stacked)} />
             <Toggle label="links" value={*links} on_change={bind(&links)} />
         </>
     };
@@ -120,7 +122,12 @@ pub fn TabsPage() -> Html {
             .text("label", "Sections")
             .expr("on_change", "on_change")
     };
-    let code = snippet(&lets, el.flag("segmented", *segmented).flag("fill", *fill));
+    let code = snippet(
+        &lets,
+        el.flag("segmented", *segmented)
+            .flag("fill", *fill)
+            .flag("stacked", *stacked),
+    );
 
     let value = (*count > 0).then(|| AttrValue::from(format!("tab-{current}")));
     html! {
@@ -130,13 +137,13 @@ pub fn TabsPage() -> Html {
             </code>
             if *links {
                 <LinkTabs tabs={items} {value} label="Sections" small={*small}
-                    segmented={*segmented} fill={*fill} />
+                    segmented={*segmented} fill={*fill} stacked={*stacked} />
             } else if *small {
                 <SubTabs tabs={items} {value} label="Sections" {on_change}
-                    segmented={*segmented} fill={*fill} />
+                    segmented={*segmented} fill={*fill} stacked={*stacked} />
             } else {
                 <Tabs tabs={items} {value} label="Sections" {on_change}
-                    segmented={*segmented} fill={*fill} />
+                    segmented={*segmented} fill={*fill} stacked={*stacked} />
             }
             <span class={class::CONTROL_LABEL}>{ "Tab to it, then the arrow keys, Home and End." }</span>
         </Demo>

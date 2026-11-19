@@ -22,6 +22,12 @@
 //   control height.
 // - `.sockel-fill` on a `.sockel-tabs`: the list spans its container and
 //   its tabs share the width equally, with little inline padding.
+// - `.sockel-stacked` on a `.sockel-tabs` (a phone's bottom bar): the bar
+//   spans its container and each tab, also marked `.sockel-stacked`, is an
+//   equal share of it with its icon (`-icon.sockel-stacked`, always shown,
+//   `$tab-bar-icon-size`) over its one-line, truncated label
+//   (`-label.sockel-stacked`), `$tab-bar-gap` apart. The underline is the
+//   same inset shadow, so no tab changes size when selected.
 // - `.sockel-nav-list`: a `nav` of a column of `.sockel-nav-item`s (links
 //   or buttons, in `.sockel-nav-list-items`); the current one
 //   (`aria-current`) takes the accent colour and a tint. Parts: `-icon`,
@@ -143,6 +149,35 @@
         flex: 1 1 0;
         padding-inline: var(--space-1);
     }
+}
+
+.sockel-tabs.sockel-stacked {
+    --tab-height: auto;
+
+    width: 100%;
+    gap: 0;
+}
+
+.sockel-tab.sockel-stacked {
+    flex: 1 1 0;
+    flex-direction: column;
+    height: auto;
+    min-height: var(--control-height);
+    gap: base.$tab-bar-gap;
+    padding-block: var(--space-2);
+    padding-inline: var(--space-1);
+    font-size: var(--text-sm);
+}
+
+.sockel-tab-icon.sockel-stacked {
+    display: inline-flex;
+    font-size: base.$tab-bar-icon-size;
+}
+
+.sockel-tab-label.sockel-stacked {
+    display: block;
+    max-width: 100%;
+    @include base.truncate;
 }
 
 .sockel-tab-icon {
