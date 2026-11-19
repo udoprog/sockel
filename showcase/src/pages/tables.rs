@@ -111,6 +111,7 @@ pub fn TablePage() -> Html {
     let disabled = use_state(|| false);
     let cards = use_state(|| true);
     let foot = use_state(|| false);
+    let stacked = use_state(|| false);
     let framed = use_state(|| false);
     let top = use_state(|| false);
     let flagged = use_state(|| true);
@@ -129,6 +130,7 @@ pub fn TablePage() -> Html {
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="cards" value={*cards} on_change={bind(&cards)} />
             <Toggle label="foot" value={*foot} on_change={bind(&foot)} />
+            <Toggle label="stacked" value={*stacked} on_change={bind(&stacked)} />
             <Toggle label="top" value={*top} on_change={bind(&top)} />
             <Toggle label="framed" value={*framed} on_change={bind(&framed)} />
             <Toggle label="flagged" value={*flagged} on_change={bind(&flagged)} />
@@ -199,6 +201,7 @@ pub fn TablePage() -> Html {
             .flag("sticky", *sticky)
             .flag("cards", *cards)
             .flag("foot", *foot)
+            .flag("stacked", *stacked)
             .flag("top", *top)
             .flag("framed", *framed)
             .expr_if(*bulk, "bulk", "Some(html! { { bulk_actions } })")
@@ -219,7 +222,7 @@ pub fn TablePage() -> Html {
     html! {
         <Demo {controls} {code}>
             <Table head={head} columns={4} fixed={*fixed} sticky={*sticky}
-                cards={*cards} foot={*foot} top={*top} framed={*framed}
+                cards={*cards} foot={*foot} stacked={*stacked} top={*top} framed={*framed}
                 bulk={bulk_bar} bulk_active={*bulk && *picked} {empty} label="Items">
                 { rows }
             </Table>

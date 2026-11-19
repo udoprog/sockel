@@ -7,6 +7,9 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Added
 
+- `Table` takes `stacked`: with `cards`, each cell after the first is a
+  field, its label over its value, two to a line (`.sockel-stacked` on the
+  table).
 - Every props struct except `ImageProps` implements `Default` (its `#[prop_or]`
   values, otherwise the empty value), so apps can write `..Default::default()`
   and later new props stay non-breaking. The crate docs recommend `html!` and

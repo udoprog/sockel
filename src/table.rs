@@ -26,6 +26,10 @@ pub struct TableProps {
     /// With `cards`, the `actions` cell goes on a line under the row instead.
     #[prop_or_default]
     pub foot: bool,
+    /// With `cards`, each cell after the first is a field, its label over its
+    /// value, two to a line, and no room is kept beside them for `actions`.
+    #[prop_or_default]
+    pub stacked: bool,
     /// Tops the cells, for rows whose text runs on.
     #[prop_or_default]
     pub top: bool,
@@ -64,6 +68,7 @@ impl Default for TableProps {
             sticky: Default::default(),
             cards: Default::default(),
             foot: Default::default(),
+            stacked: Default::default(),
             top: Default::default(),
             framed: Default::default(),
             bulk: Default::default(),
@@ -127,7 +132,7 @@ pub fn Table(props: &TableProps) -> Html {
                     <div class={table_bulk(!props.bulk_active)} role="status">{ bulk.clone() }</div>
                 }
                 <div class={table_wrap(props.sticky)}>
-                    <table class={classes!(table(props.fixed), table_mode(props.cards, props.foot, props.top))} aria-label={props.label.clone()}>
+                    <table class={classes!(table(props.fixed), table_mode(props.cards, props.foot, props.top), props.stacked.then_some(class::STACKED))} aria-label={props.label.clone()}>
                         <thead><tr>{ props.head.clone() }</tr></thead>
                         <tbody>{ rows }</tbody>
                     </table>

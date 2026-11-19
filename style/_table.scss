@@ -29,7 +29,9 @@
 //   cells are gone, and the `.sockel-actions` cell sits at the card's top
 //   right (`--table-card-actions`, 5rem, is the room kept for it; a row with
 //   none sets it to 0rem). `.sockel-foot` on the table puts the actions on a
-//   line under the row instead.
+//   line under the row instead. `.sockel-stacked` on the table makes each
+//   cell after the first a field, its label over its value, two to a line,
+//   with no room kept beside them for the actions.
 // - `.sockel-sort-header`: a heading cell with a button
 //   (`.sockel-sort-header-button`) of its label and a mark
 //   (`.sockel-sort-header-mark`) in a box of the glyph size, kept whether
@@ -173,6 +175,19 @@
                     position: static;
                     flex-basis: 100%;
                     margin-block-start: var(--space-2);
+                }
+            }
+
+            &.sockel-stacked {
+                .sockel-table-row {
+                    padding-inline-end: var(--space-4);
+                }
+
+                .sockel-table-cell:not(:first-child, .sockel-actions) {
+                    display: flex;
+                    flex: 1 1 calc(50% - var(--space-3));
+                    flex-direction: column;
+                    gap: var(--space-0);
                 }
             }
         }
