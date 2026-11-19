@@ -18,6 +18,7 @@ props with `yew::props!`, which fills them in:
 - `DialogProps`: `close_variant`, `onkeydown`.
 - `ErrorBoxProps`: `id`.
 - `ReorderItemProps`: `disabled`.
+- `CardProps`: `gap` (`None`).
 - `SearchSelectProps`: `more`, `on_more`, `more_label`, `on_create`,
   `create_label`, `free_text`, `on_text`, `text`.
 - `ReorderProps`: `on_drop_page_picked`.
@@ -100,9 +101,19 @@ instead.
   `sheet`, `title` and `close_label`: `.sockel-picker-popup.sockel-sheet`,
   `-popup-head`, `-popup-title`, `.sockel-picker-scrim`). Phrases
   `sockel-picker-searching`, `sockel-picker-close`.
+- Layout gaps: `--page-title-size` (a `PageHead` title's size, `$page-title-size`),
+  `--page-head-crumbs-align` (a crumb head's back link, `/` and title; `baseline`),
+  `$card-button-fill` (a secondary `Button`'s fill on a `Card`; `var(--surface)`),
+  `Card`'s `gap` prop (the card as a `Stack`) and `.sockel-in-row` (`class::IN_ROW`):
+  a `TextInput` or its box taking the room left in a row, no `sockel-grow` wrapper.
 
 ### Changed
 
+- A `PageHead` title has a size of its own, `--page-title-size`; unset (the
+  default) it keeps the browser's heading size (`revert`), so output is the
+  same until an app sets `$page-title-size`. A secondary button's fill reads
+  `--button-surface` (set on `.sockel-card`, `$card-button-fill`), the same
+  colour by default.
 - ConfirmPopover's body has a scrollbar gutter only where it scrolls: it
   never does, so it no longer shows a 10px gutter on its right. Output
   changes for every confirm; a new `$confirm-scroll-gutter` (`auto`) sets it

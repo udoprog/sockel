@@ -3,8 +3,8 @@ use yew::prelude::*;
 use crate::class;
 
 use sockel::{
-    Align, Card, Cluster, Gap, Inset, Justify, Stack, Toolbar, ToolbarSpacer, card, cluster, stack,
-    stack_with, toolbar,
+    Align, Card, Cluster, Gap, Inset, Justify, Stack, TextInput, Toolbar, ToolbarSpacer, card,
+    cluster, stack, stack_with, toolbar,
 };
 
 use crate::code::{El, each, snippet, text_node};
@@ -207,10 +207,12 @@ pub fn CardPage() -> Html {
     let tag = use_state(|| "div");
     let text = use_state(|| Text::Short);
     let list = use_state(|| false);
+    let stacked = use_state(|| false);
 
     let controls = html! {
         <>
             <Select<Inset> label="inset" options={INSETS} value={*inset} on_change={bind(&inset)} />
+            <Toggle label="Stacked, with a row" value={*stacked} on_change={bind(&stacked)} />
             <Select<&'static str> label="tag" options={TAGS} value={*tag} on_change={bind(&tag)} />
             <Select<Text> label="Text" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="Holds a list" value={*list} on_change={bind(&list)} />
@@ -247,7 +249,16 @@ pub fn CardPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Card inset={*inset} tag={*tag}>{ content }</Card>
+            <Card inset={*inset} tag={*tag} gap={(*stacked).then_some(Gap::Normal)}>
+                { content }
+                if *stacked {
+                    <Cluster>
+                        <TextInput value="" on_input={Callback::noop()} label="Name"
+                            class={classes!(sockel::class::IN_ROW)} />
+                        { button("Save".to_owned(), false, false) }
+                    </Cluster>
+                }
+            </Card>
         </Demo>
     }
 }

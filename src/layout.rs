@@ -353,6 +353,9 @@ pub fn ToolbarPart(props: &ToolbarPartProps) -> Html {
 pub struct CardProps {
     #[prop_or_default]
     pub inset: Inset,
+    /// Lays the content out as a [`Stack`] with this gap, without a `stack` class of the app's.
+    #[prop_or_default]
+    pub gap: Option<Gap>,
     #[prop_or("div")]
     pub tag: &'static str,
     #[prop_or_default]
@@ -368,7 +371,7 @@ pub struct CardProps {
 #[function_component]
 pub fn Card(props: &CardProps) -> Html {
     html! {
-        <@{props.tag} class={classes!(card(props.inset, false), list_reset(props.tag), props.class.clone())}
+        <@{props.tag} class={classes!(card(props.inset, false), props.gap.map(stack), list_reset(props.tag), props.class.clone())}
             data-testid={props.testid.clone()}>
             { props.children.clone() }
         </@>

@@ -21,6 +21,9 @@
 // - `.sockel-page-head.sockel-crumb`: a head that leads back, `.sockel-page-head-crumbs`: the back
 //   link (`.sockel-page-head-back`), a `/` (`.sockel-page-head-sep`) and the title; its
 //   keywords (`.sockel-page-head-meta`) come before the actions.
+// - `--page-title-size`: the page title's size (unset, the browser's heading size);
+//   `--page-head-crumbs-align`: how a crumb head's back link, `/` and title line up
+//   (`baseline`).
 // - `.sockel-page-head.sockel-compact`: the head of a compact page (the game's): the
 //   actions as icons (their label text hidden), and on a phone one row,
 //   the title on two lines and the back link's words (`.sockel-page-head-back-label`)
@@ -54,6 +57,11 @@
     min-width: 0;
     margin: 0;
     overflow-wrap: anywhere;
+}
+
+// Unset, `revert` leaves the browser's heading size (the `h1`'s or the `level`'s).
+.sockel-page-head-title {
+    font-size: var(--page-title-size, revert);
 }
 
 .sockel-section-head-title {
@@ -182,7 +190,7 @@
 @if base.emits("heads.crumbs") {
     .sockel-page-head-crumbs {
         display: flex;
-        align-items: baseline;
+        align-items: var(--page-head-crumbs-align, baseline);
         gap: var(--space-2);
         min-width: 0;
 

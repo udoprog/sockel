@@ -474,6 +474,9 @@ $text-title: 1.4rem !default;
 $text-xl: 1.5rem !default;
 $text-2xl: 1.75rem !default;
 $section-title-size: var(--text-lg) !default;
+$page-title-size: null !default;
+$page-head-crumbs-align: baseline !default;
+$card-button-fill: var(--surface) !default;
 $space-0: 0.125rem !default;
 $space-px: 1px !default;
 $space-1: 0.25rem !default;
@@ -782,6 +785,12 @@ $-feature-parts: (
     --text-2xl: #{$text-2xl};
     // A section head's title (`.sockel-section-head-title`).
     --section-title-size: #{$section-title-size};
+    // A page head's title (`.sockel-page-head-title`); unset, the browser's heading size.
+    @if $page-title-size {
+        --page-title-size: #{$page-title-size};
+    }
+    // The cross-axis alignment of a crumb head's back link, `/` and title.
+    --page-head-crumbs-align: #{$page-head-crumbs-align};
 
     --space-0: #{$space-0};
     --space-px: #{$space-px};
@@ -1249,7 +1258,7 @@ $-feature-parts: (
 // button), `primary`, `ghost`, `quiet`, `danger`, `ghost-danger` or `success`, each with
 // its `$button-colours` in place of sockel's.
 $-button-variants: (
-    secondary: (fill: var(--surface), ink: var(--text), edge: var(--border), hover-edge: var(--accent)),
+    secondary: (fill: var(--button-surface, var(--surface)), ink: var(--text), edge: var(--border), hover-edge: var(--accent)),
     primary: (fill: var(--accent), ink: var(--on-accent), edge: var(--accent), hover-edge: var(--text)),
     ghost: (fill: transparent),
     quiet: (fill: transparent, ink: var(--muted), edge: transparent, hover-edge: var(--border)),

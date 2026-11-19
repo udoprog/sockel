@@ -1013,7 +1013,7 @@
 //!
 //! [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) takes `gap` ([`Gap`](https://docs.rs/sockel/latest/sockel/enum.Gap.html)) and `flush`; [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) takes `gap`,
 //! `justify` ([`Justify`](https://docs.rs/sockel/latest/sockel/enum.Justify.html)), `align` ([`Align`](https://docs.rs/sockel/latest/sockel/enum.Align.html)), `nowrap`, `inline`, `lines`
-//! and `flush`; [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) takes `inset` ([`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html)).
+//! and `flush`; [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html) takes `inset` ([`Inset`](https://docs.rs/sockel/latest/sockel/enum.Inset.html)) and `gap` (a stack of that gap).
 //!
 //! [`Stack`](https://docs.rs/sockel/latest/sockel/struct.Stack.html) and [`Cluster`](https://docs.rs/sockel/latest/sockel/struct.Cluster.html) (and [`Card`](https://docs.rs/sockel/latest/sockel/struct.Card.html)) take a `tag` (`div` by default). A list
 //! tag, `ul` or `ol`, renders with no bullets, margin or padding
@@ -1328,7 +1328,8 @@
 //!   takes none), and `detached[i]` starts a new run after a `--space-2` gap
 //!   (`GROUP_DETACHED`). The members overlap by their one-pixel border, the
 //!   hovered or focused one on top. A `TextInput` in a group takes the room
-//!   the buttons leave.
+//!   the buttons leave. Outside a group, `IN_ROW` (`.sockel-in-row`) in a `TextInput`'s `class`
+//!   does the same in any row of controls; [`TextInput`](https://docs.rs/sockel/latest/sockel/struct.TextInput.html) with a `unit` takes it on its box.
 //! - Bare helpers: `input(size, invalid, busy)`, `input_box(size, invalid,
 //!   disabled, busy)`, `textarea(size, invalid, busy)`.
 //!
