@@ -2,6 +2,7 @@
 //! box.
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// The one tone vocabulary of marks and messages: a modifier class that
@@ -80,15 +81,20 @@ pub fn Pill(props: &PillProps) -> Html {
     let label = html! { <span class={class::PILL_LABEL}>{ props.children.clone() }</span> };
 
     match &props.on_click {
-        Some(on_click) => html! {
-            <button type="button" {class} disabled={props.disabled}
-                data-testid={props.testid.clone()} onclick={on_click.clone()}>
-                { label }
-            </button>
-        },
-        None => html! {
-            <span {class} data-testid={props.testid.clone()}>{ label }</span>
-        },
+        Some(on_click) => with_testid(
+            html! {
+                <button type="button" {class} disabled={props.disabled} onclick={on_click.clone()}>
+                    { label }
+                </button>
+            },
+            props.testid.clone(),
+        ),
+        None => with_testid(
+            html! {
+                <span {class}>{ label }</span>
+            },
+            props.testid.clone(),
+        ),
     }
 }
 
@@ -123,12 +129,14 @@ pub struct BadgeProps {
 /// A short text or figure in a bordered pill, as wide as tall at least.
 #[function_component]
 pub fn Badge(props: &BadgeProps) -> Html {
-    html! {
-        <span class={classes!(badge(props.tone, props.solid, props.corner), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(badge(props.tone, props.solid, props.corner), props.class.clone())}>
+                { props.children.clone() }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A [`Dot`]'s classes: `dot`, its tone and `on` when filled.
@@ -155,13 +163,15 @@ pub struct DotProps {
 /// A small status circle of `--dot-size`, filled or a ring in the same box.
 #[function_component]
 pub fn Dot(props: &DotProps) -> Html {
-    html! {
-        <span class={classes!(dot(props.tone, props.on), props.class.clone())}
-            role={props.label.is_some().then_some("img")}
-            aria-label={props.label.clone()}
-            aria-hidden={props.label.is_none().then_some("true")}
-            data-testid={props.testid.clone()} />
-    }
+    with_testid(
+        html! {
+            <span class={classes!(dot(props.tone, props.on), props.class.clone())}
+                role={props.label.is_some().then_some("img")}
+                aria-label={props.label.clone()}
+                aria-hidden={props.label.is_none().then_some("true")} />
+        },
+        props.testid.clone(),
+    )
 }
 
 /// The text of `value` in a [`Count`]: `max+` above `max`.
@@ -206,14 +216,16 @@ pub fn Count(props: &CountProps) -> Html {
     let hidden = props.hide_zero && props.value == 0;
     let digits = props.max.to_string().len();
 
-    html! {
-        <span class={classes!(count(props.value, props.hide_zero), props.class.clone())}
-            style={format!("--count-digits: {digits}")}
-            aria-hidden={hidden.then_some("true")}
-            data-testid={props.testid.clone()}>
-            { count_text(props.value, props.max) }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(count(props.value, props.hide_zero), props.class.clone())}
+                style={format!("--count-digits: {digits}")}
+                aria-hidden={hidden.then_some("true")}>
+                { count_text(props.value, props.max) }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

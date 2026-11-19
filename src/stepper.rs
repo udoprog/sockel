@@ -2,6 +2,7 @@
 
 use crate::input::{InputSize, input_box};
 use crate::phrasebookcatalog01::{L10N, label};
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
@@ -466,14 +467,16 @@ pub fn Stepper(props: &StepperProps) -> Html {
             && base.is_some_and(|n| if dir < 0 { n > min } else { n < max })
             && (may || !typed_ok);
         let onclick = Callback::from(move |_: MouseEvent| step.emit((by, snap)));
-        html! {
-            <button type="button" class={class::STEPPER_BUTTON} tabindex="-1"
-                aria-label={label.clone()} data-tip={label.clone()}
-                data-testid={props.testid.as_ref().map(|id| format!("{id}-{suffix}"))}
-                disabled={!can} {onclick}>
-                <Icon {glyph} />
-            </button>
-        }
+        with_testid(
+            html! {
+                <button type="button" class={class::STEPPER_BUTTON} tabindex="-1"
+                    aria-label={label.clone()} data-tip={label.clone()}
+                    disabled={!can} {onclick}>
+                    <Icon {glyph} />
+                </button>
+            },
+            props.testid.as_ref().map(|id| format!("{id}-{suffix}")),
+        )
     };
     let invalid = props.invalid || !typed_ok;
 
@@ -486,7 +489,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
         )} role="group" aria-busy={props.busy.then_some("true")}
             style={format!("--stepper-chars: {chars}")}>
             { button(-1, Glyph::Minus, &less_label, "less", props.can_less) }
-            <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0 && !mixed).then_some(class::ZERO))}
+            { with_testid(html! { <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0 && !mixed).then_some(class::ZERO))}
                 id={props.id.clone()} type="text" role="spinbutton" autocomplete="off"
                 inputmode={if min < 0 { "text" } else if decimals > 0 { "decimal" } else { "numeric" }}
                 value={shown} aria-label={props.label.clone()}
@@ -497,8 +500,8 @@ pub fn Stepper(props: &StepperProps) -> Html {
                 aria-valuemax={format_number(max, decimals, 0)}
                 aria-invalid={invalid.then_some("true")}
                 data-autofocus={props.autofocus.then_some("")}
-                disabled={props.disabled} data-testid={props.testid.clone()}
-                {oninput} {onchange} {onblur} {onfocus} {onkeydown} />
+                disabled={props.disabled}
+                {oninput} {onchange} {onblur} {onfocus} {onkeydown} /> }, props.testid.clone()) }
             { button(1, Glyph::Plus, &more_label, "more", props.can_more) }
         </span>
     };
@@ -737,8 +740,14 @@ mod tests {
             ..props(5)
         });
         assert!(html.contains(class::STEPPER_FIELD), "{html}");
-        assert!(html.contains("data-testid=\"reach-less\""), "{html}");
-        assert!(html.contains("data-testid=\"reach-more\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"reach-less\"", crate::testid::ATTR)),
+            "{html}"
+        );
+        assert!(
+            html.contains(&format!("{}=\"reach-more\"", crate::testid::ATTR)),
+            "{html}"
+        );
     }
 
     #[test]

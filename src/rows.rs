@@ -1,5 +1,6 @@
 //! RowList, RowListItem and PickRow (`style/_rows.scss`).
 
+use crate::testid::with_testid;
 use crate::{button::is_empty, class};
 use yew::prelude::*;
 
@@ -35,12 +36,14 @@ pub fn row_list(divided: bool, boxed: bool) -> Classes {
 /// dividing the list or not moves nothing.
 #[function_component]
 pub fn RowList(props: &RowListProps) -> Html {
-    html! {
-        <@{props.tag} class={classes!(row_list(props.divided, props.boxed), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </@>
-    }
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(row_list(props.divided, props.boxed), props.class.clone())}>
+                { props.children.clone() }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -78,23 +81,25 @@ pub fn row_list_item(top: bool) -> Classes {
 /// ends the row. At least `--control-height` high, as a compact empty state.
 #[function_component]
 pub fn RowListItem(props: &RowListItemProps) -> Html {
-    html! {
-        <@{props.tag} class={classes!(row_list_item(props.top), props.class.clone())}
-            data-testid={props.testid.clone()} onpointerdown={props.onpointerdown.clone()}>
-            if let Some(start) = &props.start {
-                { start.clone() }
-            }
-            <div class={class::ROW_LIST_MAIN}>
-                <span class={class::ROW_LIST_NAME}>{ props.name.clone() }</span>
-                if let Some(detail) = &props.detail {
-                    <span class={class::ROW_LIST_DETAIL}>{ detail.clone() }</span>
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(row_list_item(props.top), props.class.clone())} onpointerdown={props.onpointerdown.clone()}>
+                if let Some(start) = &props.start {
+                    { start.clone() }
                 }
-            </div>
-            if !is_empty(&props.children) {
-                { props.children.clone() }
-            }
-        </@>
-    }
+                <div class={class::ROW_LIST_MAIN}>
+                    <span class={class::ROW_LIST_NAME}>{ props.name.clone() }</span>
+                    if let Some(detail) = &props.detail {
+                        <span class={class::ROW_LIST_DETAIL}>{ detail.clone() }</span>
+                    }
+                </div>
+                if !is_empty(&props.children) {
+                    { props.children.clone() }
+                }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -130,21 +135,23 @@ pub fn pick_row() -> Classes {
 /// focused or disabled it keeps its box.
 #[function_component]
 pub fn PickRow(props: &PickRowProps) -> Html {
-    html! {
-        <button type="button" class={classes!(pick_row(), props.class.clone())}
-            aria-current={props.current.then_some("true")}
-            disabled={props.disabled} onclick={props.onclick.clone()}
-            data-testid={props.testid.clone()}>
-            if let Some(mark) = &props.mark {
-                <span class={class::PICK_ROW_MARK} aria-hidden="true">{ mark.clone() }</span>
-            }
-            <span class={class::PICK_ROW_NAME}>{ props.name.clone() }</span>
-            if let Some(detail) = &props.detail {
-                <span class={class::PICK_ROW_DETAIL}>{ detail.clone() }</span>
-            }
-            { props.children.clone() }
-        </button>
-    }
+    with_testid(
+        html! {
+            <button type="button" class={classes!(pick_row(), props.class.clone())}
+                aria-current={props.current.then_some("true")}
+                disabled={props.disabled} onclick={props.onclick.clone()}>
+                if let Some(mark) = &props.mark {
+                    <span class={class::PICK_ROW_MARK} aria-hidden="true">{ mark.clone() }</span>
+                }
+                <span class={class::PICK_ROW_NAME}>{ props.name.clone() }</span>
+                if let Some(detail) = &props.detail {
+                    <span class={class::PICK_ROW_DETAIL}>{ detail.clone() }</span>
+                }
+                { props.children.clone() }
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

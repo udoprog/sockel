@@ -2,6 +2,7 @@
 //! and its section navigation, which is in the bar on a wide screen and a
 //! tab bar at the bottom on a narrow one (`style/_shell.scss`).
 
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 use crate::{Count, class};
@@ -41,20 +42,23 @@ pub fn app_shell() -> Classes {
 /// focus stays where it was.
 #[function_component]
 pub fn AppShell(props: &AppShellProps) -> Html {
-    html! {
-        <div class={classes!(app_shell(), props.class.clone())} data-testid={props.testid.clone()}>
-            <div class={class::APP_SHELL_FRAME}>
-                <header class={class::APP_SHELL_BAR}>
-                    <div class={class::APP_SHELL_START}>{ props.start.clone() }</div>
-                    <div class={class::APP_SHELL_END}>{ props.end.clone() }</div>
-                </header>
-                <div class={class::APP_SHELL_NAV}>{ props.nav.clone() }</div>
-                <main class={classes!(class::APP_SHELL_MAIN, class::SCROLL_AREA)}>
-                    { props.children.clone() }
-                </main>
+    with_testid(
+        html! {
+            <div class={classes!(app_shell(), props.class.clone())}>
+                <div class={class::APP_SHELL_FRAME}>
+                    <header class={class::APP_SHELL_BAR}>
+                        <div class={class::APP_SHELL_START}>{ props.start.clone() }</div>
+                        <div class={class::APP_SHELL_END}>{ props.end.clone() }</div>
+                    </header>
+                    <div class={class::APP_SHELL_NAV}>{ props.nav.clone() }</div>
+                    <main class={classes!(class::APP_SHELL_MAIN, class::SCROLL_AREA)}>
+                        { props.children.clone() }
+                    </main>
+                </div>
             </div>
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 /// One section of a [`BottomNav`].
@@ -132,47 +136,50 @@ pub fn bottom_nav() -> Classes {
 /// the icon's corner, clear of the window's safe area.
 #[function_component]
 pub fn BottomNav(props: &BottomNavProps) -> Html {
-    html! {
-        <nav class={classes!(bottom_nav(), props.class.clone())}
-            aria-label={props.label.clone()} data-testid={props.testid.clone()}>
-            <ul class={class::BOTTOM_NAV_ITEMS}>
-                { for props.items.iter().map(|item| {
-                    let current = props.value.as_ref() == Some(&item.value);
-                    let aria_current = current.then_some("page");
-                    let onclick = {
-                        let on_select = props.on_select.clone();
-                        let value = item.value.clone();
-                        Callback::from(move |_: MouseEvent| on_select.emit(value.clone()))
-                    };
-                    let content = html! {
-                        <>
-                            <span class={class::BOTTOM_NAV_ICON} aria-hidden="true">
-                                { item.icon.clone().unwrap_or_default() }
-                            </span>
-                            <span class={class::BOTTOM_NAV_LABEL}>{ item.label.clone() }</span>
-                            if let Some(count) = item.count {
-                                <Count class={class::BOTTOM_NAV_COUNT} value={count} max={props.max} hide_zero=true />
-                            }
-                        </>
-                    };
-                    html! {
-                        <li class={class::BOTTOM_NAV_ENTRY}>
-                            if let Some(href) = item.href.clone() {
-                                <a class={class::BOTTOM_NAV_ITEM} {href} aria-current={aria_current} {onclick}>
-                                    { content }
-                                </a>
-                            } else {
-                                <button type="button" class={class::BOTTOM_NAV_ITEM}
-                                    aria-current={aria_current} {onclick}>
-                                    { content }
-                                </button>
-                            }
-                        </li>
-                    }
-                }) }
-            </ul>
-        </nav>
-    }
+    with_testid(
+        html! {
+            <nav class={classes!(bottom_nav(), props.class.clone())}
+                aria-label={props.label.clone()}>
+                <ul class={class::BOTTOM_NAV_ITEMS}>
+                    { for props.items.iter().map(|item| {
+                        let current = props.value.as_ref() == Some(&item.value);
+                        let aria_current = current.then_some("page");
+                        let onclick = {
+                            let on_select = props.on_select.clone();
+                            let value = item.value.clone();
+                            Callback::from(move |_: MouseEvent| on_select.emit(value.clone()))
+                        };
+                        let content = html! {
+                            <>
+                                <span class={class::BOTTOM_NAV_ICON} aria-hidden="true">
+                                    { item.icon.clone().unwrap_or_default() }
+                                </span>
+                                <span class={class::BOTTOM_NAV_LABEL}>{ item.label.clone() }</span>
+                                if let Some(count) = item.count {
+                                    <Count class={class::BOTTOM_NAV_COUNT} value={count} max={props.max} hide_zero=true />
+                                }
+                            </>
+                        };
+                        html! {
+                            <li class={class::BOTTOM_NAV_ENTRY}>
+                                if let Some(href) = item.href.clone() {
+                                    <a class={class::BOTTOM_NAV_ITEM} {href} aria-current={aria_current} {onclick}>
+                                        { content }
+                                    </a>
+                                } else {
+                                    <button type="button" class={class::BOTTOM_NAV_ITEM}
+                                        aria-current={aria_current} {onclick}>
+                                        { content }
+                                    </button>
+                                }
+                            </li>
+                        }
+                    }) }
+                </ul>
+            </nav>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

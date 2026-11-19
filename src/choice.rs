@@ -2,6 +2,7 @@
 
 use crate::class;
 use crate::roving::{self, Arrows};
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// How a [`Choice`]'s options share its width: all of them the width of
@@ -209,50 +210,51 @@ pub fn Choice(props: &ChoiceProps) -> Html {
         })
     };
 
-    html! {
-        <div role={if multiple { "group" } else { "radiogroup" }}
-            class={classes!(choice(props.fit, props.small, props.invalid, props.disabled), props.stack.class(), props.class.clone())}
-            aria-label={props.labelled_by.is_none().then(|| props.label.clone())}
-            aria-labelledby={props.labelled_by.clone()}
-            aria-invalid={props.invalid.then_some("true")}
-            aria-disabled={props.disabled.then_some("true")}
-            data-testid={props.testid.clone()}
-            {onkeydown}>
-            { for props.options.iter().enumerate().map(|(i, option)| {
-                let selected = selected(props, option);
-                let tabindex = if multiple || stop == Some(i) { "0" } else { "-1" };
-                let onclick = {
-                    let on_change = props.on_change.clone();
-                    let value = option.value.clone();
-                    Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
-                };
-                let mut button = html! {
-                    <button type="button" role={if multiple { "checkbox" } else { "radio" }} class={classes!(class::CHOICE_OPTION, option.icon_only.then_some(class::ICON), option.class.clone())}
-                        data-testid={option.testid.clone()}
-                        data-tip={option.tip.clone()}
-                        aria-checked={selected.to_string()}
-                        aria-label={option.icon_only.then(|| option.label.clone())}
-                        title={(option.icon_only && option.tip.is_none()).then(|| option.label.clone())}
-                        {tabindex}
-                        disabled={props.disabled || option.disabled}
-                        {onclick}>
-                        { for option.icon.clone().map(|icon| html! {
-                            <span class={class::CHOICE_ICON} aria-hidden="true">{ icon }</span>
-                        }) }
-                        if !option.icon_only {
-                            <span class={class::CHOICE_LABEL}>{ option.label.clone() }</span>
+    with_testid(
+        html! {
+            <div role={if multiple { "group" } else { "radiogroup" }}
+                class={classes!(choice(props.fit, props.small, props.invalid, props.disabled), props.stack.class(), props.class.clone())}
+                aria-label={props.labelled_by.is_none().then(|| props.label.clone())}
+                aria-labelledby={props.labelled_by.clone()}
+                aria-invalid={props.invalid.then_some("true")}
+                aria-disabled={props.disabled.then_some("true")}
+                {onkeydown}>
+                { for props.options.iter().enumerate().map(|(i, option)| {
+                    let selected = selected(props, option);
+                    let tabindex = if multiple || stop == Some(i) { "0" } else { "-1" };
+                    let onclick = {
+                        let on_change = props.on_change.clone();
+                        let value = option.value.clone();
+                        Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
+                    };
+                    let mut button = with_testid(html! {
+                        <button type="button" role={if multiple { "checkbox" } else { "radio" }} class={classes!(class::CHOICE_OPTION, option.icon_only.then_some(class::ICON), option.class.clone())}
+                            data-tip={option.tip.clone()}
+                            aria-checked={selected.to_string()}
+                            aria-label={option.icon_only.then(|| option.label.clone())}
+                            title={(option.icon_only && option.tip.is_none()).then(|| option.label.clone())}
+                            {tabindex}
+                            disabled={props.disabled || option.disabled}
+                            {onclick}>
+                            { for option.icon.clone().map(|icon| html! {
+                                <span class={class::CHOICE_ICON} aria-hidden="true">{ icon }</span>
+                            }) }
+                            if !option.icon_only {
+                                <span class={class::CHOICE_LABEL}>{ option.label.clone() }</span>
+                            }
+                        </button>
+                    }, option.testid.clone());
+                    if let Html::VTag(tag) = &mut button {
+                        for (name, value) in &option.data {
+                            std::rc::Rc::make_mut(tag).add_attribute(name, value.clone());
                         }
-                    </button>
-                };
-                if let Html::VTag(tag) = &mut button {
-                    for (name, value) in &option.data {
-                        std::rc::Rc::make_mut(tag).add_attribute(name, value.clone());
                     }
-                }
-                button
-            }) }
-        </div>
-    }
+                    button
+                }) }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

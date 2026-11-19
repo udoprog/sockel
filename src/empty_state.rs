@@ -1,5 +1,6 @@
 //! EmptyState (`style/_notices.scss`).
 
+use crate::testid::with_testid;
 use crate::{button::is_empty, class};
 use yew::prelude::*;
 
@@ -36,23 +37,25 @@ pub fn empty_state(compact: bool) -> Classes {
 /// and actions. Compact, it is one row high whatever it says, its text cut.
 #[function_component]
 pub fn EmptyState(props: &EmptyStateProps) -> Html {
-    html! {
-        <div class={classes!(empty_state(props.compact), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            if let Some(icon) = &props.icon {
-                <span class={classes!(class::EMPTY_STATE_ICON, props.bare_icon.then_some(class::BARE))} aria-hidden="true">{ icon.clone() }</span>
-            }
-            if !props.title.is_empty() {
-                <p class={class::EMPTY_STATE_TITLE}>{ props.title.clone() }</p>
-            }
-            if let Some(hint) = &props.hint {
-                <p class={class::EMPTY_STATE_HINT}>{ hint.clone() }</p>
-            }
-            if !is_empty(&props.children) {
-                <div class={class::EMPTY_STATE_ACTIONS}>{ props.children.clone() }</div>
-            }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(empty_state(props.compact), props.class.clone())}>
+                if let Some(icon) = &props.icon {
+                    <span class={classes!(class::EMPTY_STATE_ICON, props.bare_icon.then_some(class::BARE))} aria-hidden="true">{ icon.clone() }</span>
+                }
+                if !props.title.is_empty() {
+                    <p class={class::EMPTY_STATE_TITLE}>{ props.title.clone() }</p>
+                }
+                if let Some(hint) = &props.hint {
+                    <p class={class::EMPTY_STATE_HINT}>{ hint.clone() }</p>
+                }
+                if !is_empty(&props.children) {
+                    <div class={class::EMPTY_STATE_ACTIONS}>{ props.children.clone() }</div>
+                }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

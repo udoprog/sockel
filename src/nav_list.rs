@@ -1,6 +1,7 @@
 //! NavList (`style/_tabs.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// One entry of a [`NavList`].
@@ -68,46 +69,48 @@ pub fn nav_list() -> Classes {
 /// one marked by `aria-current` and by colour and background, never weight.
 #[function_component]
 pub fn NavList(props: &NavListProps) -> Html {
-    html! {
-        <nav class={classes!(nav_list(), props.class.clone())}
-            aria-label={props.label.clone()}
-            data-testid={props.testid.clone()}>
-            <ul class={class::NAV_LIST_ITEMS}>
-                { for props.items.iter().map(|item| {
-                    let current = props.value.as_ref() == Some(&item.value);
-                    let aria_current = current.then_some("page");
-                    let onclick = {
-                        let on_select = props.on_select.clone();
-                        let value = item.value.clone();
-                        Callback::from(move |_: MouseEvent| on_select.emit(value.clone()))
-                    };
-                    let content = html! {
-                        <>
-                            { for item.icon.clone().map(|icon| html! {
-                                <span class={class::NAV_ICON} aria-hidden="true">{ icon }</span>
-                            }) }
-                            <span class={class::NAV_LABEL}>{ item.label.clone() }</span>
-                        </>
-                    };
-                    html! {
-                        <li>
-                            if let Some(href) = item.href.clone().filter(|_| !item.disabled) {
-                                <a class={class::NAV_ITEM} {href} aria-current={aria_current} {onclick}>
-                                    { content }
-                                </a>
-                            } else {
-                                <button type="button" class={class::NAV_ITEM}
-                                    aria-current={aria_current}
-                                    disabled={item.disabled} {onclick}>
-                                    { content }
-                                </button>
-                            }
-                        </li>
-                    }
-                }) }
-            </ul>
-        </nav>
-    }
+    with_testid(
+        html! {
+            <nav class={classes!(nav_list(), props.class.clone())}
+                aria-label={props.label.clone()}>
+                <ul class={class::NAV_LIST_ITEMS}>
+                    { for props.items.iter().map(|item| {
+                        let current = props.value.as_ref() == Some(&item.value);
+                        let aria_current = current.then_some("page");
+                        let onclick = {
+                            let on_select = props.on_select.clone();
+                            let value = item.value.clone();
+                            Callback::from(move |_: MouseEvent| on_select.emit(value.clone()))
+                        };
+                        let content = html! {
+                            <>
+                                { for item.icon.clone().map(|icon| html! {
+                                    <span class={class::NAV_ICON} aria-hidden="true">{ icon }</span>
+                                }) }
+                                <span class={class::NAV_LABEL}>{ item.label.clone() }</span>
+                            </>
+                        };
+                        html! {
+                            <li>
+                                if let Some(href) = item.href.clone().filter(|_| !item.disabled) {
+                                    <a class={class::NAV_ITEM} {href} aria-current={aria_current} {onclick}>
+                                        { content }
+                                    </a>
+                                } else {
+                                    <button type="button" class={class::NAV_ITEM}
+                                        aria-current={aria_current}
+                                        disabled={item.disabled} {onclick}>
+                                        { content }
+                                    </button>
+                                }
+                            </li>
+                        }
+                    }) }
+                </ul>
+            </nav>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

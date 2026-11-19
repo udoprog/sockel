@@ -1,5 +1,6 @@
 //! Popover (`style/_popover.scss`).
 
+use crate::testid::with_testid;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 
@@ -1094,7 +1095,7 @@ pub fn Popover(props: &PopoverProps) -> Html {
             if props.sheet {
                 <div class={class::POPOVER_SCRIM} aria-hidden="true"></div>
             }
-            <div ref={node}
+            { with_testid(html! { <div ref={node}
                 class={classes!(
                     popover(props.sheet, placed.is_some()),
                     props.match_anchor.then_some(class::MATCH_ANCHOR),
@@ -1103,13 +1104,12 @@ pub fn Popover(props: &PopoverProps) -> Html {
                 role={props.role.clone()} aria-label={props.title.clone()} {style} {onkeydown} {onmousedown}
                 tabindex={props.focus_first.then_some("-1")}
                 onpointerenter={props.on_pointer_enter.clone()}
-                onpointerleave={props.on_pointer_leave.clone()}
-                data-testid={props.testid.clone()}>
+                onpointerleave={props.on_pointer_leave.clone()}>
                 { for head }
                 <div class={classes!(class::POPOVER_BODY, props.flush.then_some(class::FLUSH))}>
                     { props.children.clone() }
                 </div>
-            </div>
+            </div> }, props.testid.clone()) }
         </>
     })
 }

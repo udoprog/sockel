@@ -1,5 +1,6 @@
 //! SecretInput (`style/_inputs.scss`).
 
+use crate::testid::with_testid;
 use std::rc::Rc;
 
 use crate::input::{InputSize, input_box};
@@ -225,13 +226,12 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
             input_box(props.size, props.invalid, props.disabled, props.busy),
             props.class.clone()
         )} aria-busy={props.busy.then_some("true")}>
-            <input class={class::INPUT_CONTROL} type={if shown { "text" } else { "password" }}
+            { with_testid(html! { <input class={class::INPUT_CONTROL} type={if shown { "text" } else { "password" }}
                 id={props.id.clone()} value={value.clone()}
                 placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
                 aria-invalid={props.invalid.then_some("true")} disabled={props.disabled}
                 autocomplete="off" spellcheck="false" autocapitalize="off"
-                data-autofocus={props.autofocus.then_some("")}
-                data-testid={props.testid.clone()} {oninput} {onchange} />
+                data-autofocus={props.autofocus.then_some("")} {oninput} {onchange} /> }, props.testid.clone()) }
             { action(glyph, label, toggle) }
             { action(Glyph::Copy, &copy_label, copy) }
             { action(Glyph::Close, &clear_label, clear) }

@@ -1,6 +1,7 @@
 //! Field, FormRows and Fieldset (`style/_fields.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// How a field lays out its controls ([`FieldProps::inputs`]).
@@ -160,19 +161,21 @@ fn messages(props: &FieldProps) -> Html {
 /// [`field_describedby`] gives.
 #[function_component]
 pub fn Field(props: &FieldProps) -> Html {
-    html! {
-        <div class={classes!(field(props.disabled, props.busy), props.class.clone())}
-            role={props.group.then_some("group")}
-            aria-labelledby={props.group.then(|| label_id(props))}
-            aria-busy={props.busy.then_some("true")}
-            data-testid={props.testid.clone()}>
-            <div class={class::FIELD_HEAD}>
-                { label_parts(props, classes!(class::FIELD_LABEL)) }
+    with_testid(
+        html! {
+            <div class={classes!(field(props.disabled, props.busy), props.class.clone())}
+                role={props.group.then_some("group")}
+                aria-labelledby={props.group.then(|| label_id(props))}
+                aria-busy={props.busy.then_some("true")}>
+                <div class={class::FIELD_HEAD}>
+                    { label_parts(props, classes!(class::FIELD_LABEL)) }
+                </div>
+                { controls(props) }
+                { messages(props) }
             </div>
-            { controls(props) }
-            { messages(props) }
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -202,21 +205,23 @@ pub fn FormRows(props: &FormRowsProps) -> Html {
 /// the control with its hint and error beside it.
 #[function_component]
 pub fn FormRow(props: &FieldProps) -> Html {
-    html! {
-        <div class={classes!(form_row(props.disabled, props.busy), props.class.clone())}
-            role={props.group.then_some("group")}
-            aria-labelledby={props.group.then(|| label_id(props))}
-            aria-busy={props.busy.then_some("true")}
-            data-testid={props.testid.clone()}>
-            <div class={class::FORM_LABEL}>
-                { label_parts(props, classes!(class::FIELD_LABEL)) }
+    with_testid(
+        html! {
+            <div class={classes!(form_row(props.disabled, props.busy), props.class.clone())}
+                role={props.group.then_some("group")}
+                aria-labelledby={props.group.then(|| label_id(props))}
+                aria-busy={props.busy.then_some("true")}>
+                <div class={class::FORM_LABEL}>
+                    { label_parts(props, classes!(class::FIELD_LABEL)) }
+                </div>
+                <div class={class::FORM_CONTROL}>
+                    { controls(props) }
+                    { messages(props) }
+                </div>
             </div>
-            <div class={class::FORM_CONTROL}>
-                { controls(props) }
-                { messages(props) }
-            </div>
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -236,16 +241,18 @@ pub struct FieldsetProps {
 /// A `<fieldset>` with its legend and an optional hint under it.
 #[function_component]
 pub fn Fieldset(props: &FieldsetProps) -> Html {
-    html! {
-        <fieldset class={classes!(class::FIELDSET, props.class.clone())}
-            data-testid={props.testid.clone()}>
-            <legend class={class::LEGEND}>{ props.legend.clone() }</legend>
-            if let Some(hint) = &props.hint {
-                <p class={class::FIELD_HINT}>{ hint.clone() }</p>
-            }
-            { props.children.clone() }
-        </fieldset>
-    }
+    with_testid(
+        html! {
+            <fieldset class={classes!(class::FIELDSET, props.class.clone())}>
+                <legend class={class::LEGEND}>{ props.legend.clone() }</legend>
+                if let Some(hint) = &props.hint {
+                    <p class={class::FIELD_HINT}>{ hint.clone() }</p>
+                }
+                { props.children.clone() }
+            </fieldset>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]

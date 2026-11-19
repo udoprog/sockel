@@ -1,6 +1,7 @@
 //! PageHead and SectionHead (`style/_heads.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq, Clone)]
@@ -127,9 +128,10 @@ fn head_classes(head: &'static str, crumb: bool) -> Classes {
 fn head(kind: Head, props: &HeadProps) -> Html {
     let [head, title, actions] = kind.classes();
     let help = props.help.clone().map(|help| match &props.help_testid {
-        Some(testid) => {
-            html! { <span class={class::CONTENTS} data-testid={testid.clone()}>{ help }</span> }
-        }
+        Some(testid) => with_testid(
+            html! { <span class={class::CONTENTS}>{ help }</span> },
+            Some(testid.clone()),
+        ),
         None => help,
     });
     let tag = props.level.map_or(kind.tag(), HeadLevel::tag);
@@ -139,12 +141,15 @@ fn head(kind: Head, props: &HeadProps) -> Html {
         html! { <div class={actions}>{ props.children.clone() }</div> }
     });
 
-    let title = html! {
-        <@{tag} class={classes!(title, props.title_class.clone())} data-testid={testid}>
-            { for props.icon.clone().map(|icon| html! { <span class={class::HEAD_ICON}>{ icon }</span> }) }
-            { props.title.clone() }
-        </@>
-    };
+    let title = with_testid(
+        html! {
+            <@{tag} class={classes!(title, props.title_class.clone())}>
+                { for props.icon.clone().map(|icon| html! { <span class={class::HEAD_ICON}>{ icon }</span> }) }
+                { props.title.clone() }
+            </@>
+        },
+        testid,
+    );
     let meta = props.meta.clone();
     let trail = (!props.crumbs.is_empty()).then(|| {
         html! {
@@ -163,36 +168,42 @@ fn head(kind: Head, props: &HeadProps) -> Html {
         .map(|subtitle| html! { <p class={class::HEAD_SUBTITLE}>{ subtitle }</p> });
 
     let Some(back) = props.back.clone() else {
-        return html! {
-            <header class={classes!(head_classes(head, false), props.class.clone())} data-testid={props.head_testid.clone()}>
+        return with_testid(
+            html! {
+                <header class={classes!(head_classes(head, false), props.class.clone())}>
+                    { for trail }
+                    <div class={class::HEAD_HEADING}>
+                        { title }
+                        { for help }
+                        { for suffix }
+                    </div>
+                    { for meta }
+                    { for actions }
+                    { for subtitle }
+                </header>
+            },
+            props.head_testid.clone(),
+        );
+    };
+
+    with_testid(
+        html! {
+            <header class={classes!(head_classes(head, true), props.class.clone())}>
                 { for trail }
-                <div class={class::HEAD_HEADING}>
+                <nav class={class::PAGE_HEAD_CRUMBS} aria-label={props.back_label.clone()}>
+                    { back }
+                    <span class={class::PAGE_HEAD_SEP} aria-hidden="true">{ "/" }</span>
                     { title }
                     { for help }
                     { for suffix }
-                </div>
+                </nav>
                 { for meta }
                 { for actions }
                 { for subtitle }
             </header>
-        };
-    };
-
-    html! {
-        <header class={classes!(head_classes(head, true), props.class.clone())} data-testid={props.head_testid.clone()}>
-            { for trail }
-            <nav class={class::PAGE_HEAD_CRUMBS} aria-label={props.back_label.clone()}>
-                { back }
-                <span class={class::PAGE_HEAD_SEP} aria-hidden="true">{ "/" }</span>
-                { title }
-                { for help }
-                { for suffix }
-            </nav>
-            { for meta }
-            { for actions }
-            { for subtitle }
-        </header>
-    }
+        },
+        props.head_testid.clone(),
+    )
 }
 
 /// A page's head: its title (`h1`) with its help, and its actions.

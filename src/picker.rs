@@ -2,6 +2,7 @@
 //! in a list with a search field over it, opened from a field, a button or
 //! a dialog (`style/_picker.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
@@ -478,91 +479,95 @@ where
                 }
             })
         });
-        html! {
-            <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
-                aria-selected={selected.to_string()}
-                aria-disabled={o.disabled.then_some("true")}
-                data-value={o.data_value.clone()}
-                data-testid={option_testid.clone()} {onclick} {onmousemove}>
-                <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
-                    aria-hidden="true">
-                    <Icon glyph={Glyph::Check} />
-                </span>
-                if decorated {
-                    <span class={class::LISTBOX_OPTION_ICON} aria-hidden="true">
-                        { o.icon.clone().unwrap_or_default() }
+        with_testid(
+            html! {
+                <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
+                    aria-selected={selected.to_string()}
+                    aria-disabled={o.disabled.then_some("true")}
+                    data-value={o.data_value.clone()} {onclick} {onmousemove}>
+                    <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
+                        aria-hidden="true">
+                        <Icon glyph={Glyph::Check} />
                     </span>
-                }
-                if let (Some(detail), true) = (&o.detail, detail_below) {
-                    <span class={class::LISTBOX_OPTION_TEXT}>
-                        <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
-                        <span class={class::LISTBOX_OPTION_DESCRIPTION}>{ detail.clone() }</span>
-                    </span>
-                } else {
-                    <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
-                    if let Some(detail) = &o.detail {
-                        <span class={class::CHOICE_LIST_DETAIL}>{ detail.clone() }</span>
+                    if decorated {
+                        <span class={class::LISTBOX_OPTION_ICON} aria-hidden="true">
+                            { o.icon.clone().unwrap_or_default() }
+                        </span>
                     }
-                }
-                if let Some(trailing) = &o.trailing {
-                    <span class={class::CHOICE_LIST_TRAILING}>
-                        { trailing.clone() }
-                        if let Some(badge) = &o.badge {
-                            <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
+                    if let (Some(detail), true) = (&o.detail, detail_below) {
+                        <span class={class::LISTBOX_OPTION_TEXT}>
+                            <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                            <span class={class::LISTBOX_OPTION_DESCRIPTION}>{ detail.clone() }</span>
+                        </span>
+                    } else {
+                        <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
+                        if let Some(detail) = &o.detail {
+                            <span class={class::CHOICE_LIST_DETAIL}>{ detail.clone() }</span>
                         }
-                    </span>
-                } else if let Some(badge) = &o.badge {
-                    <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
-                }
-            </div>
-        }
+                    }
+                    if let Some(trailing) = &o.trailing {
+                        <span class={class::CHOICE_LIST_TRAILING}>
+                            { trailing.clone() }
+                            if let Some(badge) = &o.badge {
+                                <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
+                            }
+                        </span>
+                    } else if let Some(badge) = &o.badge {
+                        <span class={class::CHOICE_LIST_BADGE}>{ badge.clone() }</span>
+                    }
+                </div>
+            },
+            option_testid.clone(),
+        )
     };
     let active_id = active.map(|i| option_id(&id, i));
     // Focus stays in the search field.
     let onmousedown = searchable.then(|| Callback::from(|e: MouseEvent| e.prevent_default()));
 
-    html! {
-        <div class={classes!(class::CHOICE_LIST, props.class.clone())}
-            data-testid={props.testid.clone()}>
-            if searchable {
-                <SearchField class={class::CHOICE_LIST_SEARCH} value={AttrValue::from((*query).clone())}
-                    {on_input} label={search_label} clear_label={props.clear_label.clone()}
-                    controls={AttrValue::from(list_id.clone())} activedescendant={active_id.clone().map(AttrValue::from)}
-                    autofocus={props.autofocus} on_keydown={onkeydown.clone()} busy={props.busy}
-                    testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-search")))} />
-            }
-            if props.filter != Html::default() {
-                <div class={class::CHOICE_LIST_FILTER}>{ props.filter.clone() }</div>
-            }
-            <div id={list_id.clone()} role="listbox" class={class::CHOICE_LIST_OPTIONS}
-                aria-label={props.label.clone()}
-                aria-multiselectable={props.multi.then_some("true")}
-                aria-busy={props.busy.then_some("true")}
-                tabindex={(!searchable).then_some("0")}
-                aria-activedescendant={(!searchable).then_some(active_id).flatten()}
-                style={match (searchable, props.rows) {
-                    (false, _) => Some(AttrValue::Static("--choice-list-height: auto;")),
-                    (true, Some(rows)) => Some(AttrValue::from(format!("--picker-rows: {rows};"))),
-                    (true, None) => None,
-                }}
-                data-autofocus={(props.autofocus && !searchable).then_some("")}
-                onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
-                if shown.is_empty() && props.busy {
-                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.busy_label, "sockel-picker-searching") }</div>
-                } else if shown.is_empty() {
-                    <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "sockel-picker-empty") }</div>
-                } else {
-                    { for shown.iter().copied().map(option) }
+    with_testid(
+        html! {
+            <div class={classes!(class::CHOICE_LIST, props.class.clone())}>
+                if searchable {
+                    <SearchField class={class::CHOICE_LIST_SEARCH} value={AttrValue::from((*query).clone())}
+                        {on_input} label={search_label} clear_label={props.clear_label.clone()}
+                        controls={AttrValue::from(list_id.clone())} activedescendant={active_id.clone().map(AttrValue::from)}
+                        autofocus={props.autofocus} on_keydown={onkeydown.clone()} busy={props.busy}
+                        testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-search")))} />
+                }
+                if props.filter != Html::default() {
+                    <div class={class::CHOICE_LIST_FILTER}>{ props.filter.clone() }</div>
+                }
+                <div id={list_id.clone()} role="listbox" class={class::CHOICE_LIST_OPTIONS}
+                    aria-label={props.label.clone()}
+                    aria-multiselectable={props.multi.then_some("true")}
+                    aria-busy={props.busy.then_some("true")}
+                    tabindex={(!searchable).then_some("0")}
+                    aria-activedescendant={(!searchable).then_some(active_id).flatten()}
+                    style={match (searchable, props.rows) {
+                        (false, _) => Some(AttrValue::Static("--choice-list-height: auto;")),
+                        (true, Some(rows)) => Some(AttrValue::from(format!("--picker-rows: {rows};"))),
+                        (true, None) => None,
+                    }}
+                    data-autofocus={(props.autofocus && !searchable).then_some("")}
+                    onkeydown={(!searchable).then_some(onkeydown)} onmousedown={onmousedown.clone()}>
+                    if shown.is_empty() && props.busy {
+                        <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.busy_label, "sockel-picker-searching") }</div>
+                    } else if shown.is_empty() {
+                        <div class={class::CHOICE_LIST_NOTE} role="status">{ label(&phrases, &props.empty_label, "sockel-picker-empty") }</div>
+                    } else {
+                        { for shown.iter().copied().map(option) }
+                    }
+                </div>
+                if pages > 1 {
+                    <div class={class::CHOICE_LIST_PAGER} onmousedown={onmousedown.clone()}>
+                        <Pager page={(*page).min(pages - 1)} {pages} {on_page} slots={5} edges={false}
+                            testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-pager")))} />
+                    </div>
                 }
             </div>
-            if pages > 1 {
-                <div class={class::CHOICE_LIST_PAGER} onmousedown={onmousedown.clone()}>
-                    <Pager page={(*page).min(pages - 1)} {pages} {on_page} slots={5} edges={false}
-                        testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-pager")))} />
-                </div>
-            }
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -692,18 +697,17 @@ pub fn ChoicePopup(props: &ChoicePopupProps) -> Html {
             if props.sheet {
                 <div class={class::PICKER_SCRIM} aria-hidden="true"></div>
             }
-            <div ref={popup}
+            { with_testid(html! { <div ref={popup}
                 class={classes!(
                     class::PICKER_POPUP,
                     props.sheet.then_some(class::SHEET),
                     placed.is_some().then_some(class::PLACED)
                 )}
                 {style} onkeydown={escape.after(onkeydown)} tabindex={props.sheet.then_some("-1")}
-                aria-label={props.sheet.then(|| props.title.clone()).flatten()}
-                data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-popup")))}>
+                aria-label={props.sheet.then(|| props.title.clone()).flatten()}>
                 { for sheet_head }
                 { props.children.clone() }
-            </div>
+            </div> }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-popup")))) }
         </>
     })
 }
@@ -860,7 +864,7 @@ where
 
     html! {
         <>
-            <button ref={face.clone()} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face.clone()} type="button" id={props.id.clone()}
                 class={classes!(
                     picker(props.variant, props.fill, props.invalid, props.disabled),
                     props.class.clone()
@@ -869,13 +873,13 @@ where
                 aria-label={name} aria-describedby={props.describedby.clone()}
                 title={props.title.clone()}
                 aria-invalid={props.invalid.then_some("true")}
-                disabled={props.disabled} data-testid={props.testid.clone()}
+                disabled={props.disabled}
                 onclick={toggle} {onkeydown}>
                 { text }
                 <span class={class::PICKER_CHEVRON} aria-hidden="true">
                     <Icon glyph={Glyph::ChevronDown} />
                 </span>
-            </button>
+            </button> }, props.testid.clone()) }
             <ChoicePopup anchor={face} open={*open} {on_dismiss} testid={props.testid.clone()}
                 sheet={props.sheet} title={Some(props.label.clone())} close_label={props.close_label.clone()}>
                 <ChoiceList<T> options={props.options.clone()} value={props.value.clone()} {on_pick}
@@ -1036,25 +1040,28 @@ where
                 }
             })
         };
-        html! {
-            <button ref={opener.clone()} type="button"
-                class={classes!(
-                    picker(PickerVariant::Field, props.fill, false, props.disabled),
-                    props.class.clone()
-                )}
-                aria-haspopup="listbox" aria-expanded={is_open.to_string()}
-                aria-label={props.label.clone()} data-tip={props.tip.clone()}
-                disabled={props.disabled} data-testid={props.testid.clone()}
-                {onclick} {onkeydown}>
-                if let Some(icon) = &props.icon {
-                    <span class={class::PICKER_ICON} aria-hidden="true">{ icon.clone() }</span>
-                }
-                <span class={class::PICKER_TEXT}>{ props.text.clone() }</span>
-                <span class={class::PICKER_CHEVRON} aria-hidden="true">
-                    <Icon glyph={Glyph::ChevronDown} />
-                </span>
-            </button>
-        }
+        with_testid(
+            html! {
+                <button ref={opener.clone()} type="button"
+                    class={classes!(
+                        picker(PickerVariant::Field, props.fill, false, props.disabled),
+                        props.class.clone()
+                    )}
+                    aria-haspopup="listbox" aria-expanded={is_open.to_string()}
+                    aria-label={props.label.clone()} data-tip={props.tip.clone()}
+                    disabled={props.disabled}
+                    {onclick} {onkeydown}>
+                    if let Some(icon) = &props.icon {
+                        <span class={class::PICKER_ICON} aria-hidden="true">{ icon.clone() }</span>
+                    }
+                    <span class={class::PICKER_TEXT}>{ props.text.clone() }</span>
+                    <span class={class::PICKER_CHEVRON} aria-hidden="true">
+                        <Icon glyph={Glyph::ChevronDown} />
+                    </span>
+                </button>
+            },
+            props.testid.clone(),
+        )
     } else {
         html! {
             <Button node_ref={opener.clone()} variant={props.variant} size={props.size}
@@ -1281,7 +1288,10 @@ mod tests {
         }));
         assert_eq!(html.matches("role=\"option\"").count(), 5, "{html}");
         assert!(html.contains(">Option 27<"), "{html}");
-        assert!(html.contains("data-testid=\"list-pager\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"list-pager\"", crate::testid::ATTR)),
+            "{html}"
+        );
         assert!(html.contains(class::CHOICE_LIST_PAGER), "{html}");
     }
 

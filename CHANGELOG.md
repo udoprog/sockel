@@ -48,6 +48,11 @@ instead.
 
 ### Added
 
+- A configurable test-id attribute: set `SOCKEL_TEST_ID_ATTR` at build time
+  (`.cargo/config.toml` `[env]`) and every component writes its `testid` to
+  that attribute instead of `data-testid`, the default. Unset, an element
+  has the same attributes as before, the test id now last among them (a
+  snapshot comparing attribute order sees it move).
 - sockel-build: `Report::omitted`, the sockel classes the build leaves out
   (by `$omit` or a feature) that a source writes, as a literal or
   `sockel::class::NAME`, unless the local styles define them.

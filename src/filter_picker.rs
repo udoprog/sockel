@@ -1,6 +1,7 @@
 //! FilterPicker: a list's filter button of one width, opening a listbox of
 //! choices to check (`style/_filter-picker.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlElement;
 use yew::prelude::*;
@@ -271,14 +272,13 @@ where
             }
             style
         });
-        overlays.portal(html! {
+        overlays.portal(with_testid(html! {
             <div ref={list.clone()} id={list_id.clone()} role="listbox" aria-multiselectable="true"
                 class={classes!(listbox(placed.is_some()), class::FILTER_PICKER_LIST)}
-                aria-label={props.label.clone()} {style} {onmousedown}
-                data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
+                aria-label={props.label.clone()} {style} {onmousedown}>
                 { for (0..=choices.len()).map(option) }
             </div>
-        })
+        }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))))
     });
 
     let search = searchable.then(|| {
@@ -305,13 +305,13 @@ where
 
     html! {
         <>
-            <button ref={face} type="button"
+            { with_testid(html! { <button ref={face} type="button"
                 class={classes!(filter_picker(!props.chosen.is_empty()), props.class.clone())}
                 aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
                 aria-activedescendant={active.map(|i| option_id(&id, i))}
                 aria-label={name.clone()} title={name}
-                disabled={props.disabled} data-testid={props.testid.clone()}
+                disabled={props.disabled}
                 {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 <span class={class::FILTER_PICKER_TEXT}>{ text }</span>
                 <span class={classes!(class::FILTER_PICKER_COUNT, (more == 0).then_some(class::OFF))}
@@ -321,7 +321,7 @@ where
                 <span class={class::FILTER_PICKER_CHEVRON} aria-hidden="true">
                     <Icon glyph={Glyph::ChevronDown} />
                 </span>
-            </button>
+            </button> }, props.testid.clone()) }
             { popup.unwrap_or_default() }
             { search.unwrap_or_default() }
         </>

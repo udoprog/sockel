@@ -1,6 +1,7 @@
 //! CardGrid (`style/_card-grid.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// How wide a card-grid column starts.
@@ -45,12 +46,14 @@ pub fn card_grid(size: GridSize) -> Classes {
 /// and all sharing the row's room; a card is as tall as its row.
 #[function_component]
 pub fn CardGrid(props: &CardGridProps) -> Html {
-    html! {
-        <@{props.tag} class={classes!(card_grid(props.size), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </@>
-    }
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(card_grid(props.size), props.class.clone())}>
+                { props.children.clone() }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

@@ -1,5 +1,6 @@
 //! Switch (`style/_switch.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use yew::prelude::*;
 
@@ -55,26 +56,28 @@ pub fn Switch(props: &SwitchProps) -> Html {
     };
     let has_text = props.children != html! {};
 
-    html! {
-        <button type="button" role="switch" class={classes!(switch(props.on, props.invalid), props.class.clone())}
-            aria-checked={props.on.to_string()}
-            aria-busy={props.busy.then_some("true")}
-            aria-invalid={props.invalid.then_some("true")}
-            aria-label={props.label.clone()}
-            disabled={props.disabled}
-            data-testid={props.testid.clone()}
-            data-tip={props.tip.clone()}
-            {onclick}>
-            <span class={class::SWITCH_TRACK}>
-                <span class={class::SWITCH_THUMB}>
-                    if props.busy { <Icon glyph={Glyph::Spinner} /> }
+    with_testid(
+        html! {
+            <button type="button" role="switch" class={classes!(switch(props.on, props.invalid), props.class.clone())}
+                aria-checked={props.on.to_string()}
+                aria-busy={props.busy.then_some("true")}
+                aria-invalid={props.invalid.then_some("true")}
+                aria-label={props.label.clone()}
+                disabled={props.disabled}
+                data-tip={props.tip.clone()}
+                {onclick}>
+                <span class={class::SWITCH_TRACK}>
+                    <span class={class::SWITCH_THUMB}>
+                        if props.busy { <Icon glyph={Glyph::Spinner} /> }
+                    </span>
                 </span>
-            </span>
-            if has_text {
-                <span class={class::SWITCH_LABEL}>{ props.children.clone() }</span>
-            }
-        </button>
-    }
+                if has_text {
+                    <span class={class::SWITCH_LABEL}>{ props.children.clone() }</span>
+                }
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 #[cfg(test)]
 mod tests {

@@ -1,5 +1,6 @@
 //! Loadable (`style/_skeleton.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlElement;
 use yew::prelude::*;
@@ -150,15 +151,18 @@ pub fn Loadable(props: &LoadableProps) -> Html {
         },
     };
 
-    html! {
-        <div ref={root} class={classes!(class::LOADABLE, props.class.clone())} {style}
-            aria-busy={busy.then_some("true")} data-testid={props.testid.clone()}>
-            <span class={class::VISUALLY_HIDDEN} role="status">
-                if busy { { label(&phrases, &props.label, "sockel-loadable-loading") } }
-            </span>
-            { content }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div ref={root} class={classes!(class::LOADABLE, props.class.clone())} {style}
+                aria-busy={busy.then_some("true")}>
+                <span class={class::VISUALLY_HIDDEN} role="status">
+                    if busy { { label(&phrases, &props.label, "sockel-loadable-loading") } }
+                </span>
+                { content }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

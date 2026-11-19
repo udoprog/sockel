@@ -1,5 +1,6 @@
 //! Tooltip, HoverCard and ReasonButton (`style/_tooltip.scss`).
 
+use crate::testid::with_testid;
 use std::cell::{Cell, RefCell};
 use std::rc::Rc;
 use std::sync::atomic::{AtomicUsize, Ordering};
@@ -295,13 +296,15 @@ fn tip_view(
     testid: Option<AttrValue>,
 ) -> Html {
     let style = placed.map(|p| position(p.left, p.top));
-    overlays.portal(html! {
-        <div ref={node} {id} role="tooltip" {style}
-            class={classes!(tooltip(placed.is_some()), class)}
-            data-testid={testid}>
-            { text.clone() }
-        </div>
-    })
+    overlays.portal(with_testid(
+        html! {
+            <div ref={node} {id} role="tooltip" {style}
+                class={classes!(tooltip(placed.is_some()), class)}>
+                { text.clone() }
+            </div>
+        },
+        testid,
+    ))
 }
 
 #[derive(Properties, PartialEq)]
@@ -366,15 +369,17 @@ pub fn HoverCard(props: &HoverCardProps) -> Html {
         )
     });
     let (enter, leave) = (hover.control.clone(), hover.control.clone());
-    overlays.portal(html! {
-        <div ref={node} id={(*id).clone()} role="group" aria-label={props.title.clone()} {style}
-            class={classes!(hover_card(placed.is_some()), props.class.clone())}
-            onpointerenter={Callback::from(move |_| enter.pointer(true))}
-            onpointerleave={Callback::from(move |_| leave.pointer(false))}
-            data-testid={props.testid.clone()}>
-            <div class={class::POPOVER_BODY}>{ props.children.clone() }</div>
-        </div>
-    })
+    overlays.portal(with_testid(
+        html! {
+            <div ref={node} id={(*id).clone()} role="group" aria-label={props.title.clone()} {style}
+                class={classes!(hover_card(placed.is_some()), props.class.clone())}
+                onpointerenter={Callback::from(move |_| enter.pointer(true))}
+                onpointerleave={Callback::from(move |_| leave.pointer(false))}>
+                <div class={class::POPOVER_BODY}>{ props.children.clone() }</div>
+            </div>
+        },
+        props.testid.clone(),
+    ))
 }
 
 #[derive(Properties, PartialEq)]

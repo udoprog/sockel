@@ -1,6 +1,7 @@
 //! Confirm, ConfirmPopover, ConfirmButton, ConfirmInline and the host for
 //! promise-style confirms (`style/_confirm.scss`).
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::future::Future;
 use std::pin::Pin;
@@ -501,28 +502,30 @@ pub fn ConfirmInline(props: &ConfirmInlineProps) -> Html {
         })
     };
 
-    html! {
-        <span class={classes!(class::CONFIRM_INLINE, props.class.clone())} {onkeydown}
-            data-testid={props.testid.clone()}>
-            <Button variant={props.variant} size={props.size} icon={props.icon.clone()}
-                disabled={props.disabled} node_ref={idle_ref}
-                class={confirm_inline(class::CONFIRM_IDLE, asking)} onclick={ask}>
-                { props.children.clone() }
-            </Button>
-            <span ref={ask_ref} class={confirm_inline(class::CONFIRM_ASK, !asking)}
-                role="group"
-                aria-label={label(&phrases, &props.question, "sockel-confirm-inline-question")}>
-                <Button size={props.size} variant={ButtonVariant::Ghost} disabled={props.busy}
-                    node_ref={no_ref} onclick={no} testid="confirm-cancel">
-                    { label(&phrases, &props.no_label, "sockel-confirm-inline-no") }
+    with_testid(
+        html! {
+            <span class={classes!(class::CONFIRM_INLINE, props.class.clone())} {onkeydown}>
+                <Button variant={props.variant} size={props.size} icon={props.icon.clone()}
+                    disabled={props.disabled} node_ref={idle_ref}
+                    class={confirm_inline(class::CONFIRM_IDLE, asking)} onclick={ask}>
+                    { props.children.clone() }
                 </Button>
-                <Button size={props.size} variant={accept_variant(props.danger)}
-                    busy={props.busy} onclick={yes} testid="confirm-accept">
-                    { label(&phrases, &props.yes_label, "sockel-confirm-inline-yes") }
-                </Button>
+                <span ref={ask_ref} class={confirm_inline(class::CONFIRM_ASK, !asking)}
+                    role="group"
+                    aria-label={label(&phrases, &props.question, "sockel-confirm-inline-question")}>
+                    <Button size={props.size} variant={ButtonVariant::Ghost} disabled={props.busy}
+                        node_ref={no_ref} onclick={no} testid="confirm-cancel">
+                        { label(&phrases, &props.no_label, "sockel-confirm-inline-no") }
+                    </Button>
+                    <Button size={props.size} variant={accept_variant(props.danger)}
+                        busy={props.busy} onclick={yes} testid="confirm-accept">
+                        { label(&phrases, &props.yes_label, "sockel-confirm-inline-yes") }
+                    </Button>
+                </span>
             </span>
-        </span>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A question put to the [`ConfirmHost`]: what a [`Confirm`] shows.
@@ -830,8 +833,9 @@ mod tests {
         };
         let accept = |html: &str| {
             let at = html.find("confirm-accept").expect("accept button");
+            let start = html[..at].rfind('<').expect("its tag");
             let end = at + html[at..].find('>').expect("its tag");
-            html[at..end].contains("disabled")
+            html[start..end].contains("disabled")
         };
         let on = render(true);
         assert!(!accept(&render(false)));

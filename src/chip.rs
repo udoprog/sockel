@@ -1,6 +1,7 @@
 //! Chip, ChipToggle and ChipList (`style/_chip.scss`).
 
 use crate::phrasebookcatalog01::{L10N, label};
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
@@ -82,12 +83,11 @@ pub fn Chip(props: &ChipProps) -> Html {
     let remove = props.on_remove.as_ref().filter(|_| still).map(|on_remove| {
         let name = label(&phrases, &props.remove_label, "sockel-chip-remove-label");
 
-        html! {
-            <button type="button" class={class::CHIP_REMOVE} aria-label={name.clone()} data-tip={name}
-                data-testid={props.remove_testid.clone()} onclick={on_remove.clone()}>
+        with_testid(html! {
+            <button type="button" class={class::CHIP_REMOVE} aria-label={name.clone()} data-tip={name} onclick={on_remove.clone()}>
                 <Icon glyph={Glyph::Close} />
             </button>
-        }
+        }, props.remove_testid.clone())
     });
 
     let content = html! {
@@ -102,16 +102,25 @@ pub fn Chip(props: &ChipProps) -> Html {
 
     let (testid, tip, style) = (props.testid.clone(), props.tip.clone(), props.style.clone());
     let mut node = match (&props.href, &props.on_click) {
-        (Some(href), onclick) => html! {
-            <a href={href.clone()} {class} {style} data-tip={tip} data-testid={testid} onclick={onclick.clone()}>{ content }</a>
-        },
-        (None, Some(onclick)) => html! {
-            <button type="button" {class} {style} data-tip={tip} data-testid={testid}
-                disabled={props.disabled} onclick={onclick.clone()}>{ content }</button>
-        },
-        (None, None) => html! {
-            <span {class} {style} data-tip={tip} data-testid={testid}>{ content }</span>
-        },
+        (Some(href), onclick) => with_testid(
+            html! {
+                <a href={href.clone()} {class} {style} data-tip={tip} onclick={onclick.clone()}>{ content }</a>
+            },
+            testid,
+        ),
+        (None, Some(onclick)) => with_testid(
+            html! {
+                <button type="button" {class} {style} data-tip={tip}
+                    disabled={props.disabled} onclick={onclick.clone()}>{ content }</button>
+            },
+            testid,
+        ),
+        (None, None) => with_testid(
+            html! {
+                <span {class} {style} data-tip={tip}>{ content }</span>
+            },
+            testid,
+        ),
     };
 
     if let Html::VTag(tag) = &mut node {
@@ -159,16 +168,18 @@ pub fn ChipToggle(props: &ChipToggleProps) -> Html {
         Callback::from(move |_: MouseEvent| on_toggle.emit(!on))
     };
 
-    html! {
-        <button type="button" class={classes!(class::CHIP, props.class.clone())}
-            aria-pressed={props.on.to_string()}
-            disabled={props.disabled}
-            data-testid={props.testid.clone()}
-            {onclick}>
-            <span class={class::CHIP_LABEL}>{ props.children.clone() }</span>
-            { for props.count.map(|count| html! { <span class={chip_count(count)}>{ count }</span> }) }
-        </button>
-    }
+    with_testid(
+        html! {
+            <button type="button" class={classes!(class::CHIP, props.class.clone())}
+                aria-pressed={props.on.to_string()}
+                disabled={props.disabled}
+                {onclick}>
+                <span class={class::CHIP_LABEL}>{ props.children.clone() }</span>
+                { for props.count.map(|count| html! { <span class={chip_count(count)}>{ count }</span> }) }
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]

@@ -9,6 +9,8 @@ fn main() {
             std::env::var_os(var).is_some()
         })
         .collect();
+    // The test-id attribute is read with `option_env!` (see src/testid.rs).
+    println!("cargo::rerun-if-env-changed=SOCKEL_TEST_ID_ATTR");
     let manifest = std::env::var_os("CARGO_MANIFEST_DIR").expect("CARGO_MANIFEST_DIR");
     let style = Path::new(&manifest).join("style");
     // A dependent's build.rs sees these as DEP_SOCKEL_FEATURES and

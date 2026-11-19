@@ -1,5 +1,6 @@
 //! Disclosure (`style/_disclosure.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, HeadLevel, Icon, class};
 use yew::prelude::*;
 
@@ -76,18 +77,20 @@ pub fn Disclosure(props: &DisclosureProps) -> Html {
         None => summary,
     };
 
-    html! {
-        <div class={classes!(disclosure(props.open), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            <div class={class::DISCLOSURE_HEAD}>
-                { heading }
-                <span class={class::DISCLOSURE_ACTIONS}>{ props.actions.clone() }</span>
+    with_testid(
+        html! {
+            <div class={classes!(disclosure(props.open), props.class.clone())}>
+                <div class={class::DISCLOSURE_HEAD}>
+                    { heading }
+                    <span class={class::DISCLOSURE_ACTIONS}>{ props.actions.clone() }</span>
+                </div>
+                if props.open {
+                    <div class={class::DISCLOSURE_BODY} id={props.id.clone()}>{ props.children.clone() }</div>
+                }
             </div>
-            if props.open {
-                <div class={class::DISCLOSURE_BODY} id={props.id.clone()}>{ props.children.clone() }</div>
-            }
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

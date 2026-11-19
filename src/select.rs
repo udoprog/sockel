@@ -1,6 +1,7 @@
 //! Select: a field's box showing what is chosen, opening a [`Listbox`] of
 //! its options (`style/_select.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
@@ -549,10 +550,10 @@ where
                     }
                 })
             });
-            html! {
+            with_testid(html! {
                 <div id={option_id(&id, i)} role="option" class={listbox_option(is_active)}
                     aria-selected={selected.to_string()}
-                    aria-disabled={o.disabled.then_some("true")} data-testid={o.testid.clone()}
+                    aria-disabled={o.disabled.then_some("true")}
                     {onclick} {onmousemove}>
                     <span class={classes!(class::LISTBOX_OPTION_MARK, (!selected).then_some(class::OFF))}
                         aria-hidden="true">
@@ -570,7 +571,7 @@ where
                         <span class={class::LISTBOX_OPTION_LABEL}>{ o.label.clone() }</span>
                     }
                 </div>
-            }
+            }, o.testid.clone())
         };
         let rows = group_runs(options).into_iter().enumerate().map(|(n, (group, run))| {
             let run: Vec<Html> = run
@@ -622,13 +623,13 @@ where
             .as_ref()
             .map(|t| AttrValue::from(format!("{t}-options")));
         if !filtering && !props.sheet {
-            return overlays.portal(html! {
+            return overlays.portal(with_testid(html! {
                 <div ref={list.clone()} id={list_id.clone()} role="listbox"
                     class={listbox(placed.is_some())} aria-label={props.label.clone()}
-                    aria-multiselectable={multiple.then_some("true")} {style} {onmousedown} data-testid={testid}>
+                    aria-multiselectable={multiple.then_some("true")} {style} {onmousedown}>
                     { for rows }
                 </div>
-            });
+            }, testid));
         }
         let oninput = {
             let (filter, redraw) = (filter.clone(), redraw.clone());
@@ -678,15 +679,14 @@ where
                 <div class={class::SELECT_FILTER}>
                     <span class={input_box(InputSize::Regular, false, false, false)}>
                         <span class={class::INPUT_MARK}><Icon glyph={Glyph::Search} /></span>
-                        <input ref={input.clone()} class={class::INPUT_CONTROL} type="text"
+                        { with_testid(html! { <input ref={input.clone()} class={class::INPUT_CONTROL} type="text"
                             value={(*filter).clone()} placeholder={filter_label.clone()}
                             aria-label={filter_label.clone()} role="combobox"
                             aria-autocomplete="list" aria-expanded="true"
                             aria-controls={list_id.clone()}
                             aria-activedescendant={active.map(|i| option_id(&id, i))}
                             autocomplete="off" spellcheck="false"
-                            data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-filter")))}
-                            {oninput} onkeydown={escape.after(onkeydown)} />
+                            {oninput} onkeydown={escape.after(onkeydown)} /> }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-filter")))) }
                     </span>
                 </div>
         });
@@ -694,14 +694,14 @@ where
             <p class={class::SELECT_EMPTY}>{ label(&phrases, &props.no_match, "sockel-select-no-match") }</p>
         });
         if !props.sheet {
-            return overlays.portal(html! {
+            return overlays.portal(with_testid(html! {
                 <div ref={list.clone()} class={classes!(listbox(placed.is_some()), class::SELECT_POPUP)}
-                    {style} {onmousedown} data-testid={testid}>
+                    {style} {onmousedown}>
                     { for filter_field }
                     { options }
                     { for empty }
                 </div>
-            });
+            }, testid));
         }
         let close = {
             let (open, face) = (open.clone(), face.clone());
@@ -715,13 +715,13 @@ where
         overlays.portal(html! {
             <>
                 <div class={class::SELECT_SCRIM} aria-hidden="true"></div>
-                <div ref={list.clone()}
+                { with_testid(html! { <div ref={list.clone()}
                     class={classes!(
                         listbox(placed.is_some()),
                         filtering.then_some(class::SELECT_POPUP),
                         class::SELECT_SHEET
                     )}
-                    {style} {onmousedown} data-testid={testid}>
+                    {style} {onmousedown}>
                     <div ref={head.clone()} class={class::SELECT_HEAD}>
                         <span class={class::SELECT_TITLE}>{ props.label.clone() }</span>
                         <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
@@ -733,14 +733,14 @@ where
                         { options }
                         { for empty }
                     </div>
-                </div>
+                </div> }, testid) }
             </>
         })
     });
 
     html! {
         <>
-            <button ref={face} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face} type="button" id={props.id.clone()}
                 class={classes!(
                     select(props.size, props.width, props.invalid, props.disabled, props.busy),
                     props.class.clone()
@@ -755,7 +755,7 @@ where
                 aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
-                disabled={props.disabled} data-testid={props.testid.clone()}
+                disabled={props.disabled}
                 {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 <span class={class::SELECT_VALUE}>
                     { for options.iter().enumerate().map(text) }
@@ -765,7 +765,7 @@ where
                 <span class={class::SELECT_CHEVRON} aria-hidden="true">
                     <Icon glyph={Glyph::ChevronDown} />
                 </span>
-            </button>
+            </button> }, props.testid.clone()) }
             { popup.unwrap_or_default() }
         </>
     }

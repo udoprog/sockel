@@ -1,6 +1,7 @@
 //! SelectionBar and ActionRow (`style/_rows.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -39,13 +40,15 @@ pub fn selection_bar(idle: bool, inset: bool, sticky: bool) -> Classes {
 /// so picking never moves the list.
 #[function_component]
 pub fn SelectionBar(props: &SelectionBarProps) -> Html {
-    html! {
-        <div class={classes!(selection_bar(props.count == 0, props.inset, props.sticky), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            <span class={class::SELECTION_BAR_COUNT} role="status">{ props.label.clone() }</span>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(selection_bar(props.count == 0, props.inset, props.sticky), props.class.clone())}>
+                <span class={class::SELECTION_BAR_COUNT} role="status">{ props.label.clone() }</span>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -78,12 +81,14 @@ pub fn action_row(overlay: bool, nowrap: bool) -> Classes {
 /// crowded. As an overlay it takes no room: it lies over its row's end.
 #[function_component]
 pub fn ActionRow(props: &ActionRowProps) -> Html {
-    html! {
-        <div class={classes!(action_row(props.overlay, props.nowrap), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(action_row(props.overlay, props.nowrap), props.class.clone())}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

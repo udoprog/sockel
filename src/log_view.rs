@@ -2,6 +2,7 @@
 //! jump back to the latest and groups folded to one row; the app renders
 //! the rows (`style/_log-view.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -163,21 +164,24 @@ pub fn LogView(props: &LogViewProps) -> Html {
         label(&phrases, &props.jump_label, "sockel-log-view-to-latest")
     };
 
-    html! {
-        <div class={classes!(log_view(*following), props.class.clone())} data-testid={props.testid.clone()}>
-            <div ref={scroll} class={class::LOG_VIEW_SCROLL} role="log"
-                aria-label={props.label.clone()}
-                aria-live={if props.live { "polite" } else { "off" }} tabindex="0" {onscroll}>
-                <div ref={content} class={class::LOG_VIEW_ROWS}>{ props.children.clone() }</div>
+    with_testid(
+        html! {
+            <div class={classes!(log_view(*following), props.class.clone())}>
+                <div ref={scroll} class={class::LOG_VIEW_SCROLL} role="log"
+                    aria-label={props.label.clone()}
+                    aria-live={if props.live { "polite" } else { "off" }} tabindex="0" {onscroll}>
+                    <div ref={content} class={class::LOG_VIEW_ROWS}>{ props.children.clone() }</div>
+                </div>
+                <div class={class::LOG_VIEW_JUMP} hidden={*following}>
+                    <Button size={ButtonSize::Small} variant={ButtonVariant::Primary}
+                        icon={html! { <Icon glyph={Glyph::ChevronDown} /> }} onclick={jump}>
+                        { words }
+                    </Button>
+                </div>
             </div>
-            <div class={class::LOG_VIEW_JUMP} hidden={*following}>
-                <Button size={ButtonSize::Small} variant={ButtonVariant::Primary}
-                    icon={html! { <Icon glyph={Glyph::ChevronDown} /> }} onclick={jump}>
-                    { words }
-                </Button>
-            </div>
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -223,20 +227,23 @@ pub fn LogGroup(props: &LogGroupProps) -> Html {
             on_toggle.emit(!open);
         })
     };
-    html! {
-        <div class={classes!(log_group(open), props.class.clone())} data-testid={props.testid.clone()}>
-            <button type="button" class={class::LOG_GROUP_HEAD} aria-expanded={open.to_string()} {onclick}>
-                <span class={class::LOG_GROUP_MARK} aria-hidden="true"><Icon glyph={Glyph::ChevronRight} /></span>
-                <span class={class::LOG_GROUP_SUMMARY}>{ props.summary.clone() }</span>
-                if let Some(count) = props.count {
-                    <span class={class::LOG_GROUP_COUNT}>{ count }</span>
+    with_testid(
+        html! {
+            <div class={classes!(log_group(open), props.class.clone())}>
+                <button type="button" class={class::LOG_GROUP_HEAD} aria-expanded={open.to_string()} {onclick}>
+                    <span class={class::LOG_GROUP_MARK} aria-hidden="true"><Icon glyph={Glyph::ChevronRight} /></span>
+                    <span class={class::LOG_GROUP_SUMMARY}>{ props.summary.clone() }</span>
+                    if let Some(count) = props.count {
+                        <span class={class::LOG_GROUP_COUNT}>{ count }</span>
+                    }
+                </button>
+                if open {
+                    <div class={class::LOG_GROUP_ROWS}>{ props.children.clone() }</div>
                 }
-            </button>
-            if open {
-                <div class={class::LOG_GROUP_ROWS}>{ props.children.clone() }</div>
-            }
-        </div>
-    }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

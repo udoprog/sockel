@@ -2,6 +2,7 @@
 //! its states.
 
 use crate::badge::{Tone, pill};
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use yew::prelude::*;
 
@@ -55,17 +56,20 @@ pub fn StatusLabel(props: &StatusLabelProps) -> Html {
         }
     };
 
-    html! {
-        <span class={classes!(status_label(props.tone, props.pill), props.class.clone())}
-            role="status" data-testid={props.testid.clone()}>
-            if props.spinner {
-                <span class={class::STATUS_SPINNER} aria-hidden="true">
-                    if props.busy { <Icon glyph={Glyph::Spinner} /> }
-                </span>
-            }
-            <span class={class::STATUS_LABELS}>{ for props.states.iter().enumerate().map(text) }</span>
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(status_label(props.tone, props.pill), props.class.clone())}
+                role="status">
+                if props.spinner {
+                    <span class={class::STATUS_SPINNER} aria-hidden="true">
+                        if props.busy { <Icon glyph={Glyph::Spinner} /> }
+                    </span>
+                }
+                <span class={class::STATUS_LABELS}>{ for props.states.iter().enumerate().map(text) }</span>
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

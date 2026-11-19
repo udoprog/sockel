@@ -3,6 +3,7 @@
 
 use crate::class;
 use crate::icons::{Glyph, Icon};
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// The box an [`Image`] keeps, whatever it shows. There is no default: an
@@ -145,22 +146,24 @@ pub fn Image(props: &ImageProps) -> Html {
     let onload = props.onload.clone();
     let onerror = props.onerror.clone();
 
-    html! {
-        <span class={image(props.class.clone(), props.ratio, status)} {style}
-            data-testid={props.testid.clone()}>
-            if let Some(src) = &props.src {
-                <img class={picture(status)} src={src.clone()} alt={props.alt.clone()}
-                    {width} {height} loading={props.lazy.then_some("lazy")}
-                    onload={Callback::from(move |e: Event| { loaded.emit(e.clone()); onload.emit(e); })}
-                    onerror={Callback::from(move |e: Event| { failed.emit(e.clone()); onerror.emit(e); })} />
-            }
-            if let Some(glyph) = glyph {
-                <span class={class::PLACEHOLDER}>
-                    <Icon {glyph} />
-                </span>
-            }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={image(props.class.clone(), props.ratio, status)} {style}>
+                if let Some(src) = &props.src {
+                    <img class={picture(status)} src={src.clone()} alt={props.alt.clone()}
+                        {width} {height} loading={props.lazy.then_some("lazy")}
+                        onload={Callback::from(move |e: Event| { loaded.emit(e.clone()); onload.emit(e); })}
+                        onerror={Callback::from(move |e: Event| { failed.emit(e.clone()); onerror.emit(e); })} />
+                }
+                if let Some(glyph) = glyph {
+                    <span class={class::PLACEHOLDER}>
+                        <Icon {glyph} />
+                    </span>
+                }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// The fixed sizes of an [`Avatar`], from the `--avatar-*` tokens.
@@ -228,16 +231,19 @@ pub struct AvatarProps {
 pub fn Avatar(props: &AvatarProps) -> Html {
     let (status, loaded, failed) = use_status(&props.src);
 
-    html! {
-        <span class={avatar(props.class.clone(), props.size)} role="img"
-            aria-label={props.name.clone()} data-testid={props.testid.clone()}>
-            <span class={class::AVATAR_INITIALS} aria-hidden="true">{ initials(&props.name) }</span>
-            if let Some(src) = &props.src {
-                <img class={picture(status)} src={src.clone()} alt="" loading={props.lazy.then_some("lazy")}
-                    onload={loaded} onerror={failed} />
-            }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={avatar(props.class.clone(), props.size)} role="img"
+                aria-label={props.name.clone()}>
+                <span class={class::AVATAR_INITIALS} aria-hidden="true">{ initials(&props.name) }</span>
+                if let Some(src) = &props.src {
+                    <img class={picture(status)} src={src.clone()} alt="" loading={props.lazy.then_some("lazy")}
+                        onload={loaded} onerror={failed} />
+                }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

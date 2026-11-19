@@ -1,6 +1,7 @@
 //! ColorSelect: a swatch face opening a grid of the app's colours, with an
 //! optional custom colour (`style/_color-select.scss`).
 
+use crate::testid::with_testid;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
@@ -421,20 +422,18 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
             html! {
                 <label class={class::COLOR_CUSTOM}>
                     <span class={class::COLOR_CUSTOM_LABEL}>{ label }</span>
-                    <input ref={custom_input.clone()} type="color" class={class::COLOR_CUSTOM_INPUT}
-                        value={shown} onchange={on_custom}
-                        data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-custom")))} />
+                    { with_testid(html! { <input ref={custom_input.clone()} type="color" class={class::COLOR_CUSTOM_INPUT}
+                        value={shown} onchange={on_custom} /> }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-custom")))) }
                 </label>
             }
         });
         overlays.portal(html! {
             <div ref={list.clone()} class={color_list(placed.is_some())} {style} onkeydown={escape.after(onkeydown)}>
-                <div id={list_id.clone()} role="listbox" class={class::COLOR_GRID}
+                { with_testid(html! { <div id={list_id.clone()} role="listbox" class={class::COLOR_GRID}
                     aria-label={props.label.clone()} onmousedown={hold_focus}
-                    style={format!("--color-select-columns: {columns};")}
-                    data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
+                    style={format!("--color-select-columns: {columns};")}>
                     { for options.iter().enumerate().map(cell) }
-                </div>
+                </div> }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))) }
                 { for custom }
             </div>
         })
@@ -459,7 +458,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
 
     html! {
         <>
-            <button ref={face} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face} type="button" id={props.id.clone()}
                 class={classes!(
                     color_select(props.size, props.width, props.invalid, props.disabled, props.busy),
                     props.class.clone()
@@ -471,7 +470,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                 aria-describedby={props.describedby.clone()}
                 aria-invalid={props.invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
-                disabled={props.disabled} data-testid={props.testid.clone()}
+                disabled={props.disabled}
                 {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
                 { face_swatch }
                 if !swatch_only {
@@ -480,7 +479,7 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
                         <Icon glyph={Glyph::ChevronDown} />
                     </span>
                 }
-            </button>
+            </button> }, props.testid.clone()) }
             { popup.unwrap_or_default() }
         </>
     }

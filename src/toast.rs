@@ -1,5 +1,6 @@
 //! Toast and ToastHost (`style/_toasts.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 
 use crate::phrasebookcatalog01::L10N;
@@ -39,13 +40,15 @@ pub fn toast_host(raised: bool) -> Classes {
 /// takes no room in the page: a toast coming or going moves nothing.
 #[function_component]
 pub fn ToastHost(props: &ToastHostProps) -> Html {
-    use_overlays().portal(html! {
-        <div class={classes!(toast_host(props.raised), props.class.clone())}
-            role="region" aria-live="polite" aria-relevant="additions"
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    })
+    use_overlays().portal(with_testid(
+        html! {
+            <div class={classes!(toast_host(props.raised), props.class.clone())}
+                role="region" aria-live="polite" aria-relevant="additions">
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    ))
 }
 
 #[derive(Properties, PartialEq)]
@@ -244,34 +247,36 @@ pub fn Toast(props: &ToastProps) -> Html {
         hold(|h, on| h.focus = on, false),
     );
 
-    html! {
-        <div class={classes!(toast(props.tone), props.class.clone())}
-            data-testid={props.testid.clone()}
-            onmouseenter={enter.reform(|e: MouseEvent| e.into())}
-            onmouseleave={leave.reform(|e: MouseEvent| e.into())}
-            onfocusin={focusin.reform(|e: FocusEvent| e.into())}
-            onfocusout={focusout.reform(|e: FocusEvent| e.into())}>
-            if let Some(icon) = &props.icon {
-                <span class={class::TOAST_ICON} aria-hidden="true">{ icon.clone() }</span>
-            }
-            <div class={class::TOAST_BODY}>{ props.children.clone() }</div>
-            if let Some(label) = &props.action {
-                <span class={class::TOAST_ACTION}>
+    with_testid(
+        html! {
+            <div class={classes!(toast(props.tone), props.class.clone())}
+                onmouseenter={enter.reform(|e: MouseEvent| e.into())}
+                onmouseleave={leave.reform(|e: MouseEvent| e.into())}
+                onfocusin={focusin.reform(|e: FocusEvent| e.into())}
+                onfocusout={focusout.reform(|e: FocusEvent| e.into())}>
+                if let Some(icon) = &props.icon {
+                    <span class={class::TOAST_ICON} aria-hidden="true">{ icon.clone() }</span>
+                }
+                <div class={class::TOAST_BODY}>{ props.children.clone() }</div>
+                if let Some(label) = &props.action {
+                    <span class={class::TOAST_ACTION}>
+                        <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                            icon={props.action_icon.clone()} testid={props.action_testid.clone()}
+                            onclick={act.reform(|_: MouseEvent| ())}>
+                            { label.clone() }
+                        </Button>
+                    </span>
+                }
+                <span class={class::TOAST_CLOSE}>
                     <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
-                        icon={props.action_icon.clone()} testid={props.action_testid.clone()}
-                        onclick={act.reform(|_: MouseEvent| ())}>
-                        { label.clone() }
-                    </Button>
+                        icon={html! { <Icon glyph={Glyph::Close} /> }}
+                        label={crate::phrasebookcatalog01::label(&phrases, &props.close_label, "sockel-toast-dismiss")}
+                        onclick={dismiss.reform(|_: MouseEvent| ())} />
                 </span>
-            }
-            <span class={class::TOAST_CLOSE}>
-                <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
-                    icon={html! { <Icon glyph={Glyph::Close} /> }}
-                    label={crate::phrasebookcatalog01::label(&phrases, &props.close_label, "sockel-toast-dismiss")}
-                    onclick={dismiss.reform(|_: MouseEvent| ())} />
-            </span>
-        </div>
-    }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]
@@ -355,12 +360,15 @@ mod tests {
     fn the_action_takes_an_icon_and_a_testid_only_when_given() {
         let plain = render(None, None);
         assert!(plain.contains("Undo"), "{plain}");
-        assert!(!plain.contains("data-testid"), "{plain}");
+        assert!(!plain.contains(crate::testid::ATTR), "{plain}");
         let given = render(
             Some(html! { <svg data-mark="undo" /> }),
             Some("undo".into()),
         );
         assert!(given.contains("data-mark=\"undo\""), "{given}");
-        assert!(given.contains("data-testid=\"undo\""), "{given}");
+        assert!(
+            given.contains(&format!("{}=\"undo\"", crate::testid::ATTR)),
+            "{given}"
+        );
     }
 }

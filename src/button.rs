@@ -1,5 +1,6 @@
 //! Button (`style/_buttons.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, Spinner, class};
 use yew::prelude::*;
 
@@ -265,67 +266,71 @@ pub fn Button(props: &ButtonProps) -> Html {
     let checked = props.checked.map(|on| on.to_string());
 
     let mut node = match &props.href {
-        Some(href) => html! {
-            <a {class} ref={props.node_ref.clone()}
-                aria-expanded={expanded.clone()}
-                aria-haspopup={props.haspopup.clone()}
-                href={(!props.disabled).then(|| href.clone())}
-                aria-disabled={(props.disabled || props.unavailable).then_some("true")}
-                aria-busy={busy}
-                aria-pressed={pressed}
-                title={props.title.clone()}
-                data-tip={props.tip.clone()}
-                aria-label={props.label.clone()}
-                data-testid={props.testid.clone()}
-                data-autofocus={props.autofocus.then_some("")}
-                role={props.role.clone()}
-                tabindex={props.tabindex.clone()}
-                aria-checked={checked.clone()}
-                aria-current={props.current.clone()}
-                hidden={props.hidden}
-                {onclick}
-                onkeydown={props.onkeydown.clone()}
-                onmouseenter={props.onmouseenter.clone()}
-                onmouseleave={props.onmouseleave.clone()}
-                onpointerdown={props.onpointerdown.clone()}
-                onmousedown={props.onmousedown.clone()}
-                onauxclick={props.onauxclick.clone()}
-            >
-                { content }{ for spinner }
-            </a>
-        },
-        None => html! {
-            <button ref={props.node_ref.clone()}
-                aria-expanded={expanded.clone()}
-                aria-haspopup={props.haspopup.clone()}
-                type={if props.submit { "submit" } else { "button" }}
-                form={props.form.clone()}
-                hidden={props.hidden}
-                {class}
-                disabled={props.disabled}
-                aria-disabled={unavailable}
-                aria-busy={busy}
-                aria-pressed={pressed}
-                title={props.title.clone()}
-                data-tip={props.tip.clone()}
-                aria-label={props.label.clone()}
-                data-testid={props.testid.clone()}
-                data-autofocus={props.autofocus.then_some("")}
-                role={props.role.clone()}
-                tabindex={props.tabindex.clone()}
-                aria-checked={checked.clone()}
-                aria-current={props.current.clone()}
-                {onclick}
-                onkeydown={props.onkeydown.clone()}
-                onmouseenter={props.onmouseenter.clone()}
-                onmouseleave={props.onmouseleave.clone()}
-                onpointerdown={props.onpointerdown.clone()}
-                onmousedown={props.onmousedown.clone()}
-                onauxclick={props.onauxclick.clone()}
-            >
-                { content }{ for spinner }
-            </button>
-        },
+        Some(href) => with_testid(
+            html! {
+                <a {class} ref={props.node_ref.clone()}
+                    aria-expanded={expanded.clone()}
+                    aria-haspopup={props.haspopup.clone()}
+                    href={(!props.disabled).then(|| href.clone())}
+                    aria-disabled={(props.disabled || props.unavailable).then_some("true")}
+                    aria-busy={busy}
+                    aria-pressed={pressed}
+                    title={props.title.clone()}
+                    data-tip={props.tip.clone()}
+                    aria-label={props.label.clone()}
+                    data-autofocus={props.autofocus.then_some("")}
+                    role={props.role.clone()}
+                    tabindex={props.tabindex.clone()}
+                    aria-checked={checked.clone()}
+                    aria-current={props.current.clone()}
+                    hidden={props.hidden}
+                    {onclick}
+                    onkeydown={props.onkeydown.clone()}
+                    onmouseenter={props.onmouseenter.clone()}
+                    onmouseleave={props.onmouseleave.clone()}
+                    onpointerdown={props.onpointerdown.clone()}
+                    onmousedown={props.onmousedown.clone()}
+                    onauxclick={props.onauxclick.clone()}
+                >
+                    { content }{ for spinner }
+                </a>
+            },
+            props.testid.clone(),
+        ),
+        None => with_testid(
+            html! {
+                <button ref={props.node_ref.clone()}
+                    aria-expanded={expanded.clone()}
+                    aria-haspopup={props.haspopup.clone()}
+                    type={if props.submit { "submit" } else { "button" }}
+                    form={props.form.clone()}
+                    hidden={props.hidden}
+                    {class}
+                    disabled={props.disabled}
+                    aria-disabled={unavailable}
+                    aria-busy={busy}
+                    aria-pressed={pressed}
+                    title={props.title.clone()}
+                    data-tip={props.tip.clone()}
+                    aria-label={props.label.clone()}
+                    data-autofocus={props.autofocus.then_some("")}
+                    role={props.role.clone()}
+                    tabindex={props.tabindex.clone()}
+                    aria-checked={checked.clone()}
+                    aria-current={props.current.clone()}
+                    {onclick}
+                    onkeydown={props.onkeydown.clone()}
+                    onmouseenter={props.onmouseenter.clone()}
+                    onmouseleave={props.onmouseleave.clone()}
+                    onpointerdown={props.onpointerdown.clone()}
+                    onmousedown={props.onmousedown.clone()}
+                    onauxclick={props.onauxclick.clone()}
+                >
+                    { content }{ for spinner }
+                </button>
+            },
+            props.testid.clone(),
+        ),
     };
 
     if let Html::VTag(tag) = &mut node {

@@ -1,6 +1,7 @@
 //! TextInput, Textarea, SearchField and InputGroup (`style/_inputs.scss`).
 
 use crate::phrasebookcatalog01::{L10N, label};
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
@@ -250,7 +251,7 @@ pub fn TextInput(props: &TextInputProps) -> Html {
 
     macro_rules! field {
         ($class:expr) => {
-            html! {
+            with_testid(html! {
                 <input class={$class} id={props.id.clone()} name={props.name.clone()}
                     type={props.kind.attr()} value={props.value.clone()}
                     maxlength={props.maxlength.map(|n| n.to_string())} list={props.list.clone()}
@@ -261,11 +262,10 @@ pub fn TextInput(props: &TextInputProps) -> Html {
                     aria-describedby={props.describedby.clone()}
                     aria-invalid={aria_invalid} aria-busy={aria_busy}
                     disabled={props.disabled} readonly={props.readonly} required={props.required}
-                    data-autofocus={props.autofocus.then_some("")}
-                    data-testid={props.testid.clone()} ref={props.node_ref.clone()}
+                    data-autofocus={props.autofocus.then_some("")} ref={props.node_ref.clone()}
                     {oninput} {onchange} onblur={props.on_blur.clone()}
                     onkeydown={props.on_keydown.clone()} />
-            }
+            }, props.testid.clone())
         };
     }
 
@@ -347,18 +347,20 @@ pub fn Textarea(props: &TextareaProps) -> Html {
             .value()
     });
 
-    html! {
-        <textarea class={classes!(textarea(props.size, props.invalid, props.busy), props.class.clone())}
-            id={props.id.clone()} name={props.name.clone()} rows={props.rows.to_string()}
-            value={props.value.clone()} placeholder={props.placeholder.clone()}
-            aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-            aria-invalid={props.invalid.then_some("true")}
-            aria-busy={props.busy.then_some("true")}
-            disabled={props.disabled} readonly={props.readonly} required={props.required}
-            data-testid={props.testid.clone()} ref={props.node_ref.clone()}
-            {oninput} {onchange} onkeydown={props.on_keydown.clone()}
-            onpaste={props.on_paste.clone()} ondrop={props.on_drop.clone()} />
-    }
+    with_testid(
+        html! {
+            <textarea class={classes!(textarea(props.size, props.invalid, props.busy), props.class.clone())}
+                id={props.id.clone()} name={props.name.clone()} rows={props.rows.to_string()}
+                value={props.value.clone()} placeholder={props.placeholder.clone()}
+                aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
+                aria-invalid={props.invalid.then_some("true")}
+                aria-busy={props.busy.then_some("true")}
+                disabled={props.disabled} readonly={props.readonly} required={props.required} ref={props.node_ref.clone()}
+                {oninput} {onchange} onkeydown={props.on_keydown.clone()}
+                onpaste={props.on_paste.clone()} ondrop={props.on_drop.clone()} />
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -482,7 +484,7 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
             props.class.clone()
         )} aria-busy={props.busy.then_some("true")}>
             <span class={class::INPUT_MARK}><Icon {glyph} /></span>
-            <input class={class::INPUT_CONTROL} type="search" id={props.id.clone()}
+            { with_testid(html! { <input class={class::INPUT_CONTROL} type="search" id={props.id.clone()}
                 value={props.value.clone()}
                 placeholder={props.placeholder.clone().unwrap_or_else(|| props.label.clone())}
                 title={props.title.clone()} aria-keyshortcuts={props.keyshortcuts.clone()}
@@ -494,10 +496,9 @@ pub fn SearchField(props: &SearchFieldProps) -> Html {
                 aria-expanded={combobox.then(|| if props.expanded.unwrap_or(true) { "true" } else { "false" })}
                 aria-controls={props.controls.clone()}
                 aria-activedescendant={props.activedescendant.clone()}
-                autocomplete={combobox.then_some("off")} spellcheck={combobox.then_some("false")}
-                data-testid={props.testid.clone()} ref={input}
+                autocomplete={combobox.then_some("off")} spellcheck={combobox.then_some("false")} ref={input}
                 onfocus={props.on_focus.clone()} onblur={props.on_blur.clone()}
-                {oninput} {onkeydown} />
+                {oninput} {onkeydown} /> }, props.testid.clone()) }
             <button type="button" class={classes!(class::INPUT_CLEAR, empty.then_some(class::EMPTY))}
                 aria-label={label(&phrases, &props.clear_label, "sockel-search-field-clear")} disabled={props.disabled || empty}
                 aria-hidden={empty.then_some("true")} tabindex={empty.then_some("-1")} {onclick}>

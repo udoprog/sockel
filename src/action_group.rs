@@ -1,6 +1,7 @@
 //! ActionGroup (`style/_actions.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -37,11 +38,14 @@ pub fn action_group(end: bool, quiet: bool, wrap: bool) -> Classes {
 pub fn ActionGroup(props: &ActionGroupProps) -> Html {
     let classes = action_group(props.end, props.quiet, !props.nowrap);
 
-    html! {
-        <div class={classes!(classes, props.class.clone())} data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(classes, props.class.clone())}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

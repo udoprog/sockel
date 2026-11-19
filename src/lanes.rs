@@ -1,6 +1,7 @@
 //! Lanes and Lane: lists side by side whose rows move within and between
 //! them, by drag or keyboard, on [`ReorderTree`] (`style/_lanes.scss`).
 
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 use crate::{Count, ReorderItem, ReorderList, ReorderText, ReorderTree, ReorderTreeMove, class};
@@ -102,25 +103,28 @@ pub fn Lane(props: &LaneProps) -> Html {
     let count = props
         .count
         .unwrap_or_else(|| u32::try_from(len).unwrap_or(u32::MAX));
-    html! {
-        <section class={classes!(class::LANE, props.class.clone())} aria-label={props.name.clone()}
-            aria-current={props.current.then_some("true")} data-testid={props.testid.clone()}>
-            <header class={class::LANE_HEAD}>
-                <span class={class::LANE_TITLE}>{ props.name.clone() }</span>
-                <Count class={class::LANE_COUNT} value={count} />
-                <span class={class::LANE_END}>{ props.end.clone() }</span>
-            </header>
-            <div class={class::LANE_BODY}>
-                <ReorderList id={props.id.clone()} name={props.name.clone()} class={class::LANE_ROWS}>
-                    { for props.children.iter() }
-                </ReorderList>
-                if len == 0 {
-                    <div class={class::LANE_EMPTY}>{ props.empty.clone() }</div>
-                }
-            </div>
-            <div class={class::LANE_FOOT}>{ props.foot.clone() }</div>
-        </section>
-    }
+    with_testid(
+        html! {
+            <section class={classes!(class::LANE, props.class.clone())} aria-label={props.name.clone()}
+                aria-current={props.current.then_some("true")}>
+                <header class={class::LANE_HEAD}>
+                    <span class={class::LANE_TITLE}>{ props.name.clone() }</span>
+                    <Count class={class::LANE_COUNT} value={count} />
+                    <span class={class::LANE_END}>{ props.end.clone() }</span>
+                </header>
+                <div class={class::LANE_BODY}>
+                    <ReorderList id={props.id.clone()} name={props.name.clone()} class={class::LANE_ROWS}>
+                        { for props.children.iter() }
+                    </ReorderList>
+                    if len == 0 {
+                        <div class={class::LANE_EMPTY}>{ props.empty.clone() }</div>
+                    }
+                </div>
+                <div class={class::LANE_FOOT}>{ props.foot.clone() }</div>
+            </section>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

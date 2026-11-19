@@ -1,5 +1,6 @@
 //! Skeleton (`style/_skeleton.scss`).
 
+use crate::testid::with_testid;
 use crate::{Ratio, class};
 use yew::prelude::*;
 
@@ -63,10 +64,13 @@ pub fn Skeleton(props: &SkeletonProps) -> Html {
         (ratio, width) => ratio.or(width),
     };
     let one = |short: bool, extra: Classes, testid: Option<AttrValue>| {
-        html! {
-            <span class={classes!(skeleton(props.shape, short), extra)} style={style.clone()}
-                aria-hidden="true" data-testid={testid} />
-        }
+        with_testid(
+            html! {
+                <span class={classes!(skeleton(props.shape, short), extra)} style={style.clone()}
+                    aria-hidden="true" />
+            },
+            testid,
+        )
     };
 
     if props.count == 1 {
@@ -74,14 +78,16 @@ pub fn Skeleton(props: &SkeletonProps) -> Html {
     }
 
     let last = props.count.saturating_sub(1);
-    html! {
-        <span class={classes!(class::SKELETON_GROUP, props.class.clone())} aria-hidden="true"
-            data-testid={props.testid.clone()}>
-            { for (0..props.count).map(|n| {
-                one(props.shape == SkeletonShape::Line && n == last, Classes::new(), None)
-            }) }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(class::SKELETON_GROUP, props.class.clone())} aria-hidden="true">
+                { for (0..props.count).map(|n| {
+                    one(props.shape == SkeletonShape::Line && n == last, Classes::new(), None)
+                }) }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

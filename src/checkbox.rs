@@ -1,5 +1,6 @@
 //! Checkbox (`style/_checkbox.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -66,12 +67,11 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
     html! {
         <label class={classes!(checkbox(props.disabled), props.class.clone())} data-tip={props.tip.clone()}>
             <span class={class::CHECKBOX_MARK}>
-                <input type="checkbox" class={class::CHECKBOX_INPUT} ref={input}
+                { with_testid(html! { <input type="checkbox" class={class::CHECKBOX_INPUT} ref={input}
                     checked={props.checked} disabled={props.disabled}
                     aria-invalid={props.invalid.then_some("true")}
                     aria-label={props.label.clone()}
-                    data-testid={props.testid.clone()}
-                    {onchange} />
+                    {onchange} /> }, props.testid.clone()) }
                 { for glyph.map(|glyph| html! { <Icon {glyph} class={class::CHECKBOX_GLYPH} /> }) }
             </span>
             if has_text {

@@ -6,6 +6,7 @@
 //! The registry is the page's, not a context's: the page has one keyboard,
 //! so one listener on the document serves every shortcut.
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::rc::Rc;
 use std::sync::OnceLock;
@@ -623,13 +624,15 @@ pub struct KbdProps {
 pub fn Kbd(props: &KbdProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let caps = Chord::parse(&props.keys).caps(&phrases, is_apple());
-    html! {
-        <kbd class={classes!(kbd(), props.class.clone())}
-            aria-hidden={props.decorative.then_some("true")}
-            data-testid={props.testid.clone()}>
-            { for caps.into_iter().map(|cap| html! { <kbd class={class::KBD_KEY}>{ cap }</kbd> }) }
-        </kbd>
-    }
+    with_testid(
+        html! {
+            <kbd class={classes!(kbd(), props.class.clone())}
+                aria-hidden={props.decorative.then_some("true")}>
+                { for caps.into_iter().map(|cap| html! { <kbd class={class::KBD_KEY}>{ cap }</kbd> }) }
+            </kbd>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]

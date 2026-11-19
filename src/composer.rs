@@ -2,6 +2,7 @@
 //! with its text, sends on Enter, takes attachments and keeps a draft per
 //! key (`style/_composer.scss`).
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::collections::HashMap;
 
@@ -325,11 +326,14 @@ pub fn Composer(props: &ComposerProps) -> Html {
         bar
     };
 
-    html! {
-        <div class={classes!(composer(props.busy), props.class.clone())} data-testid={props.testid.clone()}>
-            { body }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(composer(props.busy), props.class.clone())}>
+                { body }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

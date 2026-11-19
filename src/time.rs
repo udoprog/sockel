@@ -7,6 +7,7 @@
 //! pointed at the earliest of them. A label reading "2h ago" is woken once an
 //! hour, and a page full of them holds one timer.
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::collections::BTreeMap;
 
@@ -351,13 +352,15 @@ pub fn Time(props: &TimeProps) -> Html {
         (props.style != TimeStyle::At && !date.is_empty()).then(|| AttrValue::from(date))
     });
 
-    html! {
-        <time class={classes!(time(props.style, props.end), props.class.clone())}
-            datetime={(!iso.is_empty()).then_some(iso)} {title}
-            data-testid={props.testid.clone()}>
-            { text }
-        </time>
-    }
+    with_testid(
+        html! {
+            <time class={classes!(time(props.style, props.end), props.class.clone())}
+                datetime={(!iso.is_empty()).then_some(iso)} {title}>
+                { text }
+            </time>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

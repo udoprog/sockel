@@ -1,6 +1,7 @@
 //! SplitView: a list and the detail opened from it, side by side on a
 //! [`Seam`], one at a time when narrow (`style/_split-view.scss`).
 
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 use crate::{Seam, class};
@@ -65,13 +66,16 @@ pub fn SplitView(props: &SplitViewProps) -> Html {
     let open = props.detail.is_some();
     let detail = props.detail.clone().unwrap_or_else(|| props.empty.clone());
 
-    html! {
-        <div class={classes!(split_view(open), props.class.clone())} data-testid={props.testid.clone()}>
-            <Seam class={class::SPLIT_VIEW_SEAM} at={*at} {on_change} on_settle={props.on_settle.clone()}
-                min={props.min} max={props.max} label={props.label.clone()}
-                start={props.list.clone()} end={detail} />
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(split_view(open), props.class.clone())}>
+                <Seam class={class::SPLIT_VIEW_SEAM} at={*at} {on_change} on_settle={props.on_settle.clone()}
+                    min={props.min} max={props.max} label={props.label.clone()}
+                    start={props.list.clone()} end={detail} />
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

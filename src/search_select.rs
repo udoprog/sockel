@@ -1,6 +1,7 @@
 //! SearchSelect: a text field filtering a [`Listbox`] of options under it
 //! (`style/_search-select.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -541,17 +542,16 @@ where
             }
             style
         });
-        overlays.portal(html! {
+        overlays.portal(with_testid(html! {
             <div ref={list.clone()} id={list_id.clone()} role="listbox"
                 class={classes!(listbox(placed.is_some()), class::SEARCH_SELECT_LIST)}
                 aria-label={props.label.clone()} aria-busy={(shown == Listed::Loading).then_some("true")}
-                {style} {onmousedown}
-                data-testid={props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))}>
+                {style} {onmousedown}>
                 { body }
                 { create.unwrap_or_default() }
                 { more.unwrap_or_default() }
             </div>
-        })
+        }, props.testid.as_ref().map(|t| AttrValue::from(format!("{t}-options")))))
     });
 
     html! {
@@ -561,7 +561,7 @@ where
                 props.class.clone()
             )} aria-busy={props.busy.then_some("true")}>
                 <span class={class::INPUT_MARK}><Icon {glyph} /></span>
-                <input class={class::INPUT_CONTROL} type="text" id={props.id.clone()}
+                { with_testid(html! { <input class={class::INPUT_CONTROL} type="text" id={props.id.clone()}
                     value={text} placeholder={props.label.clone()}
                     role="combobox" aria-autocomplete="list" aria-expanded={open.to_string()}
                     aria-controls={open.then(|| list_id.clone())}
@@ -570,8 +570,7 @@ where
                     aria-invalid={props.invalid.then_some("true")}
                     autocomplete="off" spellcheck="false" disabled={props.disabled}
                     data-autofocus={props.autofocus.then_some("")}
-                    data-testid={props.testid.clone()}
-                    {oninput} onkeydown={escape.after(onkeydown)} {onclick} />
+                    {oninput} onkeydown={escape.after(onkeydown)} {onclick} /> }, props.testid.clone()) }
             </span>
             { popup.unwrap_or_default() }
         </>

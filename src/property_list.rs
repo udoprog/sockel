@@ -1,6 +1,7 @@
 //! PropertyList, PropertyRow and InlineEdit: an entity's fields as label and
 //! value rows, each value edited where it stands (`style/_property-list.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -44,12 +45,15 @@ pub struct PropertyListProps {
 /// row keeps its height whether its value is read or edited.
 #[function_component]
 pub fn PropertyList(props: &PropertyListProps) -> Html {
-    html! {
-        <dl class={classes!(property_list(props.boxed), props.class.clone())}
-            aria-label={props.label.clone()} data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </dl>
-    }
+    with_testid(
+        html! {
+            <dl class={classes!(property_list(props.boxed), props.class.clone())}
+                aria-label={props.label.clone()}>
+                { props.children.clone() }
+            </dl>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -86,18 +90,20 @@ pub fn property_row(stacked: bool) -> Classes {
 /// One label and its value in a [`PropertyList`].
 #[function_component]
 pub fn PropertyRow(props: &PropertyRowProps) -> Html {
-    html! {
-        <div class={classes!(property_row(props.stacked), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            <dt class={class::PROPERTY_LABEL} id={props.id.clone()}>{ props.label.clone() }</dt>
-            <dd class={class::PROPERTY_VALUE}>
-                { props.children.clone() }
-                if let Some(hint) = props.hint.clone() {
-                    <span class={class::PROPERTY_HINT}>{ hint }</span>
-                }
-            </dd>
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(property_row(props.stacked), props.class.clone())}>
+                <dt class={class::PROPERTY_LABEL} id={props.id.clone()}>{ props.label.clone() }</dt>
+                <dd class={class::PROPERTY_VALUE}>
+                    { props.children.clone() }
+                    if let Some(hint) = props.hint.clone() {
+                        <span class={class::PROPERTY_HINT}>{ hint }</span>
+                    }
+                </dd>
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// What a key in an [`InlineEdit`]'s field does.
@@ -302,30 +308,35 @@ pub fn InlineEdit(props: &InlineEditProps) -> Html {
                 Callback::from(move |_: MouseEvent| end.emit((true, true)))
             };
             let cancel = Callback::from(move |_: MouseEvent| end.emit((false, true)));
-            return html! {
-                <div class={classes!(class::INLINE_EDIT_EDITOR, class)} data-testid={props.testid.clone()}>
-                    <textarea ref={field} class={textarea(InputSize::Regular, false, false)}
-                        aria-label={props.label.clone()} value={text} {rows}
-                        maxlength={props.maxlength.map(|n| n.to_string())}
-                        {onkeydown} {oninput} />
-                    <div class={class::INLINE_EDIT_ACTIONS}>
-                        <Button size={ButtonSize::Small} onclick={cancel}>
-                            { label(&phrases, &props.cancel_label, "sockel-inline-edit-cancel") }
-                        </Button>
-                        <Button size={ButtonSize::Small} variant={ButtonVariant::Primary} onclick={save}>
-                            { label(&phrases, &props.save_label, "sockel-inline-edit-save") }
-                        </Button>
+            return with_testid(
+                html! {
+                    <div class={classes!(class::INLINE_EDIT_EDITOR, class)}>
+                        <textarea ref={field} class={textarea(InputSize::Regular, false, false)}
+                            aria-label={props.label.clone()} value={text} {rows}
+                            maxlength={props.maxlength.map(|n| n.to_string())}
+                            {onkeydown} {oninput} />
+                        <div class={class::INLINE_EDIT_ACTIONS}>
+                            <Button size={ButtonSize::Small} onclick={cancel}>
+                                { label(&phrases, &props.cancel_label, "sockel-inline-edit-cancel") }
+                            </Button>
+                            <Button size={ButtonSize::Small} variant={ButtonVariant::Primary} onclick={save}>
+                                { label(&phrases, &props.save_label, "sockel-inline-edit-save") }
+                            </Button>
+                        </div>
                     </div>
-                </div>
-            };
+                },
+                props.testid.clone(),
+            );
         }
-        return html! {
-            <input ref={field} type="text" class={classes!(input(InputSize::Regular, false, false), class::INLINE_EDIT_FIELD, class)}
-                aria-label={props.label.clone()} value={text}
-                maxlength={props.maxlength.map(|n| n.to_string())}
-                data-testid={props.testid.clone()}
-                {onkeydown} {oninput} {onblur} />
-        };
+        return with_testid(
+            html! {
+                <input ref={field} type="text" class={classes!(input(InputSize::Regular, false, false), class::INLINE_EDIT_FIELD, class)}
+                    aria-label={props.label.clone()} value={text}
+                    maxlength={props.maxlength.map(|n| n.to_string())}
+                    {onkeydown} {oninput} {onblur} />
+            },
+            props.testid.clone(),
+        );
     }
 
     let empty = props.value.is_empty();
@@ -341,15 +352,17 @@ pub fn InlineEdit(props: &InlineEditProps) -> Html {
     let mut args = Args::new();
     args.set("label", props.label.as_str());
     let title = phrases.msg("sockel-inline-edit-edit", &args);
-    html! {
-        <button ref={face} type="button"
-            class={classes!(inline_edit(empty, multiline), props.busy.then_some(class::BUSY), class)}
-            aria-label={name} {title} disabled={props.disabled}
-            aria-busy={props.busy.then_some("true")}
-            data-testid={props.testid.clone()} onclick={start}>
-            <span class={class::INLINE_EDIT_TEXT}>{ shown }</span>
-        </button>
-    }
+    with_testid(
+        html! {
+            <button ref={face} type="button"
+                class={classes!(inline_edit(empty, multiline), props.busy.then_some(class::BUSY), class)}
+                aria-label={name} {title} disabled={props.disabled}
+                aria-busy={props.busy.then_some("true")} onclick={start}>
+                <span class={class::INLINE_EDIT_TEXT}>{ shown }</span>
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

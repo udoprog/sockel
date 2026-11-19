@@ -2,6 +2,7 @@
 //! short form (`style/_panel.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// What a panel stands on.
@@ -62,17 +63,19 @@ pub struct PanelProps {
 pub fn Panel(props: &PanelProps) -> Html {
     let role = props.label.is_some().then_some("group");
 
-    html! {
-        <div {role} aria-label={props.label.clone()}
-            class={classes!(
-                panel(props.ground, props.line, props.centered),
-                props.small.then_some(class::SMALL),
-                props.class.clone()
-            )}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div {role} aria-label={props.label.clone()}
+                class={classes!(
+                    panel(props.ground, props.line, props.centered),
+                    props.small.then_some(class::SMALL),
+                    props.class.clone()
+                )}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

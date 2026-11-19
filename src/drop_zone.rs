@@ -1,5 +1,6 @@
 //! DropZone (`style/_drop.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -582,31 +583,33 @@ pub fn DropZone(props: &DropZoneProps) -> Html {
     let alert = matches!(state, DropState::Error);
     let tall = props.tall.then_some(class::TALL);
 
-    html! {
-        <div ref={zone} class={classes!(drop_zone(state, props.disabled), props.class.clone())}
-            {ondragenter} {ondragover} {ondragleave} {ondrop} {onpointerdown}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-            if let Some(pick) = &props.pick {
-                <div class={class::DROP_ZONE_PICK}>
-                    <Button size={ButtonSize::Small} disabled={props.disabled || props.busy.is_some()}
-                        onclick={onpick}>
-                        { pick.clone() }
-                    </Button>
-                </div>
-                <input type="file" hidden=true accept={props.accept.clone()}
-                    multiple={props.multiple} {onchange} ref={input} />
-            }
-            if let Some(text) = text {
-                <div class={classes!(class::DROP_ZONE_OVERLAY, tall)}
-                    role={if alert { "alert" } else { "status" }}
-                    aria-hidden={(!alert && state != DropState::Busy).then_some("true")}>
-                    <span class={classes!(class::DROP_ZONE_LABEL, tall,
-                        (state == DropState::Busy).then_some(class::BUSY))}>{ text }</span>
-                </div>
-            }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div ref={zone} class={classes!(drop_zone(state, props.disabled), props.class.clone())}
+                {ondragenter} {ondragover} {ondragleave} {ondrop} {onpointerdown}>
+                { props.children.clone() }
+                if let Some(pick) = &props.pick {
+                    <div class={class::DROP_ZONE_PICK}>
+                        <Button size={ButtonSize::Small} disabled={props.disabled || props.busy.is_some()}
+                            onclick={onpick}>
+                            { pick.clone() }
+                        </Button>
+                    </div>
+                    <input type="file" hidden=true accept={props.accept.clone()}
+                        multiple={props.multiple} {onchange} ref={input} />
+                }
+                if let Some(text) = text {
+                    <div class={classes!(class::DROP_ZONE_OVERLAY, tall)}
+                        role={if alert { "alert" } else { "status" }}
+                        aria-hidden={(!alert && state != DropState::Busy).then_some("true")}>
+                        <span class={classes!(class::DROP_ZONE_LABEL, tall,
+                            (state == DropState::Busy).then_some(class::BUSY))}>{ text }</span>
+                    </div>
+                }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

@@ -1,5 +1,6 @@
 //! Spinner (`style/_skeleton.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use yew::prelude::*;
 
@@ -21,13 +22,15 @@ pub struct SpinnerProps {
 #[function_component]
 pub fn Spinner(props: &SpinnerProps) -> Html {
     let labelled = props.label.is_some();
-    html! {
-        <span class={classes!(class::SPINNER, props.class.clone())}
-            role={labelled.then_some("status")}
-            aria-label={props.label.clone()}
-            aria-hidden={(!labelled).then_some("true")}
-            data-testid={props.testid.clone()}>
-            <Icon glyph={Glyph::Spinner} />
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(class::SPINNER, props.class.clone())}
+                role={labelled.then_some("status")}
+                aria-label={props.label.clone()}
+                aria-hidden={(!labelled).then_some("true")}>
+                <Icon glyph={Glyph::Spinner} />
+            </span>
+        },
+        props.testid.clone(),
+    )
 }

@@ -1,6 +1,7 @@
 //! Menu, its items, RowActions, SplitButton and ContextMenu
 //! (`style/_menu.scss`).
 
+use crate::testid::with_testid;
 use std::rc::Rc;
 
 use phrasebook02::yew023::use_phrases_with;
@@ -345,14 +346,13 @@ fn MenuList(props: &ListProps) -> Html {
             if props.sheet && props.open {
                 <div class={class::MENU_SCRIM} aria-hidden="true"></div>
             }
-            <div ref={list}
+            { with_testid(html! { <div ref={list}
                 class={classes!(menu(props.width, props.tight, placed.is_some()),
                     props.sheet.then_some(class::SHEET), props.class.clone())}
                 hidden={!props.open}
-                role="menu" aria-label={props.label.clone()} {style}
-                data-testid={props.testid.clone()} {onclick} onkeydown={escape.after(onkeydown)}>
+                role="menu" aria-label={props.label.clone()} {style} {onclick} onkeydown={escape.after(onkeydown)}>
                 { props.children.clone() }
-            </div>
+            </div> }, props.testid.clone()) }
         </>
     })
 }
@@ -696,30 +696,36 @@ impl Row<'_> {
         let current = p.current.then_some("page");
         let stay = p.stay.then_some("true");
         match &p.href {
-            Some(href) => html! {
-                <a role={self.role} tabindex="-1" {class}
-                    href={(!p.disabled).then(|| href.clone())}
-                    target={p.new_tab.then_some("_blank")}
-                    rel={p.new_tab.then_some("noopener noreferrer")}
-                    download={p.download.then_some("")} title={p.title.clone()}
-                    aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
-                    aria-keyshortcuts={keyshortcuts.clone()}
-                    data-stay={stay} data-testid={p.testid.clone()} {onclick}>
-                    { content }
-                </a>
-            },
-            None => html! {
-                <button type="button" role={self.role} tabindex="-1" {class}
-                    aria-checked={self.checked.map(|on| on.to_string())}
-                    aria-haspopup={p.dialog.map(|_| "dialog")}
-                    aria-expanded={p.dialog.map(|open| open.to_string())}
-                    title={p.title.clone()}
-                    aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
-                    aria-keyshortcuts={keyshortcuts}
-                    data-stay={stay} data-testid={p.testid.clone()} {onclick}>
-                    { content }
-                </button>
-            },
+            Some(href) => with_testid(
+                html! {
+                    <a role={self.role} tabindex="-1" {class}
+                        href={(!p.disabled).then(|| href.clone())}
+                        target={p.new_tab.then_some("_blank")}
+                        rel={p.new_tab.then_some("noopener noreferrer")}
+                        download={p.download.then_some("")} title={p.title.clone()}
+                        aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
+                        aria-keyshortcuts={keyshortcuts.clone()}
+                        data-stay={stay} {onclick}>
+                        { content }
+                    </a>
+                },
+                p.testid.clone(),
+            ),
+            None => with_testid(
+                html! {
+                    <button type="button" role={self.role} tabindex="-1" {class}
+                        aria-checked={self.checked.map(|on| on.to_string())}
+                        aria-haspopup={p.dialog.map(|_| "dialog")}
+                        aria-expanded={p.dialog.map(|open| open.to_string())}
+                        title={p.title.clone()}
+                        aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
+                        aria-keyshortcuts={keyshortcuts}
+                        data-stay={stay} {onclick}>
+                        { content }
+                    </button>
+                },
+                p.testid.clone(),
+            ),
         }
     }
 }
@@ -876,30 +882,36 @@ pub struct MenuPartProps {
 /// A rule between groups of items.
 #[function_component]
 pub fn MenuSeparator(props: &MenuPartProps) -> Html {
-    html! { <div role="separator" class={classes!(class::MENU_SEPARATOR, props.class.clone())}
-    data-testid={props.testid.clone()}></div> }
+    with_testid(
+        html! { <div role="separator" class={classes!(class::MENU_SEPARATOR, props.class.clone())}></div> },
+        props.testid.clone(),
+    )
 }
 
 /// A group's heading, on one line.
 #[function_component]
 pub fn MenuHeading(props: &MenuPartProps) -> Html {
-    html! {
-        <div role="presentation" class={classes!(class::MENU_HEADING, props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div role="presentation" class={classes!(class::MENU_HEADING, props.class.clone())}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A line of text among the items: that there are none, or what they are.
 #[function_component]
 pub fn MenuNote(props: &MenuPartProps) -> Html {
-    html! {
-        <p role="presentation" class={classes!(class::MENU_NOTE, props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </p>
-    }
+    with_testid(
+        html! {
+            <p role="presentation" class={classes!(class::MENU_NOTE, props.class.clone())}>
+                { props.children.clone() }
+            </p>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// One of a row's actions, shown as its icon and named by its label.
@@ -1018,21 +1030,24 @@ pub fn RowActions(props: &RowActionsProps) -> Html {
     let plain = props.actions.iter().filter(|a| !a.danger).map(button);
     let danger = props.actions.iter().filter(|a| a.danger).map(button);
 
-    html! {
-        <span class={classes!(class::ROW_ACTIONS, props.class.clone())} data-testid={props.testid.clone()}>
-            { for plain }
-            { props.children.clone() }
-            { for danger }
-            if let Some(more) = &props.more {
-                <Menu variant={ButtonVariant::Quiet} size={ButtonSize::Small}
-                    label={more_label.clone()} disabled={props.disabled || props.more_disabled}
-                    tip={tips.then_some(more_label)} testid={props.more_testid.clone()}
-                    open={props.open} on_toggle={props.on_toggle.clone()}>
-                    { more.clone() }
-                </Menu>
-            }
-        </span>
-    }
+    with_testid(
+        html! {
+            <span class={classes!(class::ROW_ACTIONS, props.class.clone())}>
+                { for plain }
+                { props.children.clone() }
+                { for danger }
+                if let Some(more) = &props.more {
+                    <Menu variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                        label={more_label.clone()} disabled={props.disabled || props.more_disabled}
+                        tip={tips.then_some(more_label)} testid={props.more_testid.clone()}
+                        open={props.open} on_toggle={props.on_toggle.clone()}>
+                        { more.clone() }
+                    </Menu>
+                }
+            </span>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -1410,7 +1425,10 @@ mod tests {
         }));
         assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
         assert!(html.contains("aria-expanded=\"false\""), "{html}");
-        assert!(html.contains("data-testid=\"sort-toggle\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"sort-toggle\"", crate::testid::ATTR)),
+            "{html}"
+        );
         assert!(!html.contains("role=\"menu\""), "{html}");
         // A text opener ends in its chevron, at the full control height.
         assert!(!html.contains(class::SMALL), "{html}");
@@ -1470,7 +1488,10 @@ mod tests {
             children: html! { <MenuItem dialog={Some(false)}>{ "Rename…" }</MenuItem> },
         }));
         assert!(html.contains("aria-expanded=\"false\""), "{html}");
-        assert!(html.contains("data-testid=\"more\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"more\"", crate::testid::ATTR)),
+            "{html}"
+        );
         assert!(html.contains("role=\"menu\""), "{html}");
         assert!(html.contains(" hidden"), "{html}");
         assert!(!html.contains(class::MENU_SCRIM), "{html}");
@@ -1566,7 +1587,10 @@ mod tests {
         let html = render::<MenuNote>(yew::props!(MenuPartProps {
             testid: Some(AttrValue::Static("none")),
         }));
-        assert!(html.contains("data-testid=\"none\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"none\"", crate::testid::ATTR)),
+            "{html}"
+        );
     }
 
     #[test]
@@ -1674,7 +1698,10 @@ mod tests {
         assert!(html.contains("data-tip=\"Edit\""), "{html}");
         assert!(html.contains("data-tip=\"More actions\""), "{html}");
         assert!(!html.contains("title="), "{html}");
-        assert!(html.contains("data-testid=\"row-more-toggle\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"row-more-toggle\"", crate::testid::ATTR)),
+            "{html}"
+        );
         let html = render::<RowActions>(yew::props!(RowActionsProps {
             actions: vec![RowAction::new(html! { <svg /> }, "Edit", Callback::noop())],
         }));

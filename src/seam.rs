@@ -1,5 +1,6 @@
 //! Seam: two panes and the divider dragged between them (`style/_seam.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
@@ -251,21 +252,23 @@ pub fn Seam(props: &SeamProps) -> Html {
     };
     let at = props.at.clamp(0.0, 1.0);
 
-    html! {
-        <div ref={root} class={classes!(seam(axis, *held), props.class.clone())}
-            style={format!("--sockel-seam-at: {at}")}
-            data-testid={props.testid.clone()}>
-            <div ref={start} class={class::SEAM_PANE}>{ props.start.clone() }</div>
-            <div ref={grip} class={class::SEAM_GRIP} role="separator" tabindex="0"
-                aria-orientation={orientation} aria-label={label(&phrases, &props.label, "sockel-seam-resize")}
-                aria-valuemin="0" aria-valuemax="100"
-                aria-valuenow={format!("{:.0}", at * 100.0)}
-                {onpointerdown} {onpointermove}
-                onpointerup={release.clone()} onpointercancel={release}
-                {onkeydown} {ondblclick} />
-            <div ref={end} class={class::SEAM_PANE}>{ props.end.clone() }</div>
-        </div>
-    }
+    with_testid(
+        html! {
+            <div ref={root} class={classes!(seam(axis, *held), props.class.clone())}
+                style={format!("--sockel-seam-at: {at}")}>
+                <div ref={start} class={class::SEAM_PANE}>{ props.start.clone() }</div>
+                <div ref={grip} class={class::SEAM_GRIP} role="separator" tabindex="0"
+                    aria-orientation={orientation} aria-label={label(&phrases, &props.label, "sockel-seam-resize")}
+                    aria-valuemin="0" aria-valuemax="100"
+                    aria-valuenow={format!("{:.0}", at * 100.0)}
+                    {onpointerdown} {onpointermove}
+                    onpointerup={release.clone()} onpointercancel={release}
+                    {onkeydown} {ondblclick} />
+                <div ref={end} class={class::SEAM_PANE}>{ props.end.clone() }</div>
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

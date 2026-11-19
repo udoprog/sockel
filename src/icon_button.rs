@@ -1,6 +1,7 @@
 //! IconButton (`style/_buttons.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -64,25 +65,27 @@ pub fn icon_button(classes: Classes, trailing: bool) -> Classes {
 #[function_component]
 pub fn IconButton(props: &IconButtonProps) -> Html {
     let class = icon_button(props.class.clone(), props.trailing);
-    html! {
-        <button
-            type={if props.submit { "submit" } else { "button" }}
-            {class}
-            disabled={props.disabled}
-            onclick={props.onclick.clone()}
-            ref={props.node_ref.clone()}
-            aria-haspopup={(props.haspopup || props.dialog.is_some()).then_some("dialog")}
-            aria-expanded={props.dialog.or(props.expanded).map(|open| open.to_string())}
-            aria-pressed={props.pressed.map(|on| on.to_string())}
-            aria-controls={props.controls.clone()}
-            aria-current={props.current.clone()}
-            title={props.title.clone()}
-            aria-label={props.label.clone()}
-            data-testid={props.testid.clone()}
-        >
-            { props.children.clone() }
-        </button>
-    }
+    with_testid(
+        html! {
+            <button
+                type={if props.submit { "submit" } else { "button" }}
+                {class}
+                disabled={props.disabled}
+                onclick={props.onclick.clone()}
+                ref={props.node_ref.clone()}
+                aria-haspopup={(props.haspopup || props.dialog.is_some()).then_some("dialog")}
+                aria-expanded={props.dialog.or(props.expanded).map(|open| open.to_string())}
+                aria-pressed={props.pressed.map(|on| on.to_string())}
+                aria-controls={props.controls.clone()}
+                aria-current={props.current.clone()}
+                title={props.title.clone()}
+                aria-label={props.label.clone()}
+            >
+                { props.children.clone() }
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

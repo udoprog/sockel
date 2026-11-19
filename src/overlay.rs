@@ -197,8 +197,8 @@ pub fn OverlayHost(props: &OverlayHostProps) -> Html {
             element.set_class_name(&classes);
         }
         match &props.testid {
-            Some(id) => _ = element.set_attribute("data-testid", id),
-            None => _ = element.remove_attribute("data-testid"),
+            Some(id) => _ = element.set_attribute(crate::testid::ATTR, id),
+            None => _ = element.remove_attribute(crate::testid::ATTR),
         }
     }
     let host = (*element)

@@ -1,5 +1,6 @@
 //! SaveBar and the unload guard (`style/_save-bar.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 
 use phrasebook02::yew023::use_phrases_with;
@@ -149,27 +150,29 @@ pub fn SaveBar(props: &SaveBarProps) -> Html {
     use_unload_guard(props.guard && props.dirty);
     let phrases = use_phrases_with(&L10N);
 
-    html! {
-        <div class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "sockel-save-bar-unsaved") }</span>
-            <span class={class::SAVE_BAR_STATUS} role="status">{ props.status.clone() }</span>
-            <span class={class::SAVE_BAR_ACTIONS}>
-                { props.children.clone() }
-                if let Some(ondiscard) = &props.ondiscard {
-                    <Button variant={ButtonVariant::Ghost} disabled={props.busy}
-                        onclick={ondiscard.clone()}>
-                        { label(&phrases, &props.discard_label, "sockel-save-bar-discard") }
+    with_testid(
+        html! {
+            <div class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}>
+                <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "sockel-save-bar-unsaved") }</span>
+                <span class={class::SAVE_BAR_STATUS} role="status">{ props.status.clone() }</span>
+                <span class={class::SAVE_BAR_ACTIONS}>
+                    { props.children.clone() }
+                    if let Some(ondiscard) = &props.ondiscard {
+                        <Button variant={ButtonVariant::Ghost} disabled={props.busy}
+                            onclick={ondiscard.clone()}>
+                            { label(&phrases, &props.discard_label, "sockel-save-bar-discard") }
+                        </Button>
+                    }
+                    <Button variant={ButtonVariant::Primary} submit={props.submit}
+                        busy={props.busy} disabled={props.disabled}
+                        onclick={props.onsave.clone()}>
+                        { label(&phrases, &props.save_label, "sockel-save-bar-save") }
                     </Button>
-                }
-                <Button variant={ButtonVariant::Primary} submit={props.submit}
-                    busy={props.busy} disabled={props.disabled}
-                    onclick={props.onsave.clone()}>
-                    { label(&phrases, &props.save_label, "sockel-save-bar-save") }
-                </Button>
-            </span>
-        </div>
-    }
+                </span>
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

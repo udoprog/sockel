@@ -1,5 +1,6 @@
 //! Notice (`style/_notices.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
 
@@ -64,25 +65,28 @@ pub fn Notice(props: &NoticeProps) -> Html {
     };
     let close_label = label(&phrases, &props.close_label, "sockel-notice-dismiss");
 
-    html! {
-        <div class={classes!(notice(props.tone), props.class.clone())} {role}
-            id={props.id.clone()} data-testid={props.testid.clone()}>
-            if let Some(icon) = &props.icon {
-                <span class={class::NOTICE_ICON}>{ icon.clone() }</span>
-            }
-            <div class={class::NOTICE_BODY}>{ props.children.clone() }</div>
-            if let Some(action) = &props.action {
-                <span class={class::NOTICE_ACTION}>{ action.clone() }</span>
-            }
-            if let Some(onclose) = &props.onclose {
-                <span class={class::NOTICE_CLOSE}>
-                    <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
-                        icon={html! { <Icon glyph={Glyph::Close} /> }}
-                        label={close_label.clone()} tip={close_label} onclick={onclose.clone()} />
-                </span>
-            }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(notice(props.tone), props.class.clone())} {role}
+                id={props.id.clone()}>
+                if let Some(icon) = &props.icon {
+                    <span class={class::NOTICE_ICON}>{ icon.clone() }</span>
+                }
+                <div class={class::NOTICE_BODY}>{ props.children.clone() }</div>
+                if let Some(action) = &props.action {
+                    <span class={class::NOTICE_ACTION}>{ action.clone() }</span>
+                }
+                if let Some(onclose) = &props.onclose {
+                    <span class={class::NOTICE_CLOSE}>
+                        <Button variant={ButtonVariant::Quiet} size={ButtonSize::Small}
+                            icon={html! { <Icon glyph={Glyph::Close} /> }}
+                            label={close_label.clone()} tip={close_label} onclick={onclose.clone()} />
+                    </span>
+                }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

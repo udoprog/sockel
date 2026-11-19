@@ -1,5 +1,6 @@
 //! ErrorBox (`style/_notices.scss`).
 
+use crate::testid::with_testid;
 use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
 
@@ -87,28 +88,31 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
     };
     let flanked = props.icon.is_some() || props.ondismiss.is_some();
 
-    html! {
-        <div class={classes!(error_box(flanked), props.class.clone())} role="alert"
-            id={props.id.clone()} data-testid={props.testid.clone()}>
-            if flanked {
-                if let Some(icon) = &props.icon {
-                    <span class={class::ERROR_BOX_ICON} aria-hidden="true">{ icon.clone() }</span>
+    with_testid(
+        html! {
+            <div class={classes!(error_box(flanked), props.class.clone())} role="alert"
+                id={props.id.clone()}>
+                if flanked {
+                    if let Some(icon) = &props.icon {
+                        <span class={class::ERROR_BOX_ICON} aria-hidden="true">{ icon.clone() }</span>
+                    }
+                    <div class={class::ERROR_BOX_BODY}>{ text }</div>
+                    if let Some(ondismiss) = &props.ondismiss {
+                        <span class={class::ERROR_BOX_CLOSE}>
+                            <Button variant={ButtonVariant::Quiet}
+                                icon={html! { <Icon glyph={Glyph::Close} /> }}
+                                label={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
+                                title={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
+                                onclick={ondismiss.clone()} />
+                        </span>
+                    }
+                } else {
+                    { text }
                 }
-                <div class={class::ERROR_BOX_BODY}>{ text }</div>
-                if let Some(ondismiss) = &props.ondismiss {
-                    <span class={class::ERROR_BOX_CLOSE}>
-                        <Button variant={ButtonVariant::Quiet}
-                            icon={html! { <Icon glyph={Glyph::Close} /> }}
-                            label={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
-                            title={label(&phrases, &props.dismiss_label, "sockel-error-box-dismiss")}
-                            onclick={ondismiss.clone()} />
-                    </span>
-                }
-            } else {
-                { text }
-            }
-        </div>
-    }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

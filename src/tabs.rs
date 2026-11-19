@@ -2,6 +2,7 @@
 
 use crate::class;
 use crate::roving::{self, Arrows};
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// One tab of [`Tabs`].
@@ -238,38 +239,39 @@ fn render(props: &TabsProps, small: bool) -> Html {
         })
     };
 
-    html! {
-        <div role="tablist" class={list(small, props.segmented, props.fill, props.stacked, &props.class)}
-            aria-label={props.label.clone()}
-            data-testid={props.testid.clone()}
-            {onkeydown}>
-            { for props.tabs.iter().enumerate().map(|(i, tab)| {
-                let selected = props.value.as_ref() == Some(&tab.value);
-                let onclick = {
-                    let on_change = props.on_change.clone();
-                    let value = tab.value.clone();
-                    Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
-                };
-                html! {
-                    <>
-                    <button type="button" role="tab" class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
-                        aria-selected={selected.to_string()}
-                        aria-invalid={tab.invalid.then_some("true")}
-                        aria-label={name(tab)}
-                        data-tip={tab.tip.clone()}
-                        data-testid={tab.testid.clone()}
-                        data-value={tab.value.clone()}
-                        tabindex={if stop == Some(i) { "0" } else { "-1" }}
-                        disabled={tab.disabled}
-                        {onclick}>
-                        { face(tab, props.stacked) }
-                    </button>
-                    { after(tab, selected) }
-                    </>
-                }
-            }) }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div role="tablist" class={list(small, props.segmented, props.fill, props.stacked, &props.class)}
+                aria-label={props.label.clone()}
+                {onkeydown}>
+                { for props.tabs.iter().enumerate().map(|(i, tab)| {
+                    let selected = props.value.as_ref() == Some(&tab.value);
+                    let onclick = {
+                        let on_change = props.on_change.clone();
+                        let value = tab.value.clone();
+                        Callback::from(move |_: MouseEvent| on_change.emit(value.clone()))
+                    };
+                    html! {
+                        <>
+                        { with_testid(html! { <button type="button" role="tab" class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
+                            aria-selected={selected.to_string()}
+                            aria-invalid={tab.invalid.then_some("true")}
+                            aria-label={name(tab)}
+                            data-tip={tab.tip.clone()}
+                            data-value={tab.value.clone()}
+                            tabindex={if stop == Some(i) { "0" } else { "-1" }}
+                            disabled={tab.disabled}
+                            {onclick}>
+                            { face(tab, props.stacked) }
+                        </button> }, tab.testid.clone()) }
+                        { after(tab, selected) }
+                        </>
+                    }
+                }) }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A row of tabs (`role="tablist"`): the selected one marked by its colour
@@ -293,33 +295,34 @@ pub fn SubTabs(props: &TabsProps) -> Html {
 /// `href` (`aria-disabled`).
 #[function_component]
 pub fn LinkTabs(props: &LinkTabsProps) -> Html {
-    html! {
-        <nav class={list(props.small, props.segmented, props.fill, props.stacked, &props.class)}
-            aria-label={props.label.clone()}
-            data-testid={props.testid.clone()}>
-            { for props.tabs.iter().map(|tab| {
-                let current = props.value.as_ref() == Some(&tab.value);
-                let onclick = tab.onclick.clone().filter(|_| !tab.disabled);
-                html! {
-                    <>
-                    <a class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
-                        href={tab.href.clone().filter(|_| !tab.disabled)}
-                        aria-current={current.then_some("page")}
-                        aria-disabled={tab.disabled.then_some("true")}
-                        aria-invalid={tab.invalid.then_some("true")}
-                        aria-label={name(tab)}
-                        data-tip={tab.tip.clone()}
-                        data-testid={tab.testid.clone()}
-                        data-value={tab.value.clone()}
-                        {onclick}>
-                        { face(tab, props.stacked) }
-                    </a>
-                    { after(tab, current) }
-                    </>
-                }
-            }) }
-        </nav>
-    }
+    with_testid(
+        html! {
+            <nav class={list(props.small, props.segmented, props.fill, props.stacked, &props.class)}
+                aria-label={props.label.clone()}>
+                { for props.tabs.iter().map(|tab| {
+                    let current = props.value.as_ref() == Some(&tab.value);
+                    let onclick = tab.onclick.clone().filter(|_| !tab.disabled);
+                    html! {
+                        <>
+                        { with_testid(html! { <a class={classes!(class::TAB, props.stacked.then_some(class::STACKED), tab.invalid.then_some(class::INVALID), tab.class.clone())}
+                            href={tab.href.clone().filter(|_| !tab.disabled)}
+                            aria-current={current.then_some("page")}
+                            aria-disabled={tab.disabled.then_some("true")}
+                            aria-invalid={tab.invalid.then_some("true")}
+                            aria-label={name(tab)}
+                            data-tip={tab.tip.clone()}
+                            data-value={tab.value.clone()}
+                            {onclick}>
+                            { face(tab, props.stacked) }
+                        </a> }, tab.testid.clone()) }
+                        { after(tab, current) }
+                        </>
+                    }
+                }) }
+            </nav>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]
@@ -416,7 +419,10 @@ mod tests {
                 .after(html! { <i data-after="" /> }),
         ];
         let html = html_of::<Tabs>(props(Some("a"), t));
-        assert!(html.contains("data-testid=\"tab-a\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"tab-a\"", crate::testid::ATTR)),
+            "{html}"
+        );
         assert!(html.contains("data-tip=\"Tip A\""), "{html}");
         assert!(html.contains("aria-label=\"Tip A\""), "{html}");
         assert!(html.contains("mine"), "{html}");
@@ -516,7 +522,10 @@ mod tests {
             html.find("aria-current") > html.find("href=\"/b\""),
             "{html}"
         );
-        assert!(html.contains("data-testid=\"tab-a\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"tab-a\"", crate::testid::ATTR)),
+            "{html}"
+        );
         assert_eq!(links(None).matches("aria-current").count(), 0);
     }
 

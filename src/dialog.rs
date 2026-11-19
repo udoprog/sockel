@@ -1,5 +1,6 @@
 //! Dialog (`style/_dialog.scss`).
 
+use crate::testid::with_testid;
 use std::rc::Rc;
 
 use phrasebook02::yew023::use_phrases_with;
@@ -442,10 +443,9 @@ pub fn Dialog(props: &DialogProps) -> Html {
         <div ref={layer_ref}
             class={classes!(class::DIALOG_LAYER, props.sheet.then_some(class::SHEET))}
             {onpointerdown} {onclick}>
-            <div ref={panel_ref}
+            { with_testid(html! { <div ref={panel_ref}
                 class={classes!(dialog(props.size, props.sheet), props.class.clone())}
-                role="dialog" aria-modal="true" aria-label={props.title.clone()} tabindex="-1"
-                data-testid={props.testid.clone()} {onfocusin} onkeydown={props.onkeydown.clone()}>
+                role="dialog" aria-modal="true" aria-label={props.title.clone()} tabindex="-1" {onfocusin} onkeydown={props.onkeydown.clone()}>
                 <SectionHead class={class::DIALOG_HEAD} title={html! { props.title.clone() }}
                     icon={props.icon.clone()}>
                     { props.head_actions.clone() }
@@ -455,7 +455,7 @@ pub fn Dialog(props: &DialogProps) -> Html {
                     { props.children.clone() }
                 </div>
                 { for foot }
-            </div>
+            </div> }, props.testid.clone()) }
         </div>
     })
 }
@@ -584,7 +584,10 @@ mod tests {
         assert!(html.contains("aria-label=\"Close\""), "{html}");
         assert!(html.contains(class::DIALOG_FOOT), "{html}");
         assert!(html.contains(class::DIALOG_LAYER), "{html}");
-        assert!(html.contains("data-testid=\"close\""), "{html}");
+        assert!(
+            html.contains(&format!("{}=\"close\"", crate::testid::ATTR)),
+            "{html}"
+        );
         let head = html.find("Import").expect("head action");
         assert!(head < html.find("aria-label=\"Close\"").unwrap(), "{html}");
     }

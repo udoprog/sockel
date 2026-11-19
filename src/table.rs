@@ -1,6 +1,7 @@
 //! Table, TableRow and TableCell (`style/_table.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 #[derive(Properties, PartialEq)]
@@ -97,19 +98,22 @@ pub fn Table(props: &TableProps) -> Html {
         None => props.children.clone(),
     };
 
-    html! {
-        <div class={classes!(table_frame(props.framed), props.class.clone())} data-testid={props.testid.clone()}>
-            if let Some(bulk) = &props.bulk {
-                <div class={table_bulk(!props.bulk_active)} role="status">{ bulk.clone() }</div>
-            }
-            <div class={table_wrap(props.sticky)}>
-                <table class={classes!(table(props.fixed), table_mode(props.cards, props.foot, props.top))} aria-label={props.label.clone()}>
-                    <thead><tr>{ props.head.clone() }</tr></thead>
-                    <tbody>{ rows }</tbody>
-                </table>
+    with_testid(
+        html! {
+            <div class={classes!(table_frame(props.framed), props.class.clone())}>
+                if let Some(bulk) = &props.bulk {
+                    <div class={table_bulk(!props.bulk_active)} role="status">{ bulk.clone() }</div>
+                }
+                <div class={table_wrap(props.sticky)}>
+                    <table class={classes!(table(props.fixed), table_mode(props.cards, props.foot, props.top))} aria-label={props.label.clone()}>
+                        <thead><tr>{ props.head.clone() }</tr></thead>
+                        <tbody>{ rows }</tbody>
+                    </table>
+                </div>
             </div>
-        </div>
-    }
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -132,15 +136,18 @@ pub struct TableRowProps {
 /// A table row, tinted on hover and focus.
 #[function_component]
 pub fn TableRow(props: &TableRowProps) -> Html {
-    html! {
-        <tr class={classes!(
-            class::TABLE_ROW,
-            props.flagged.then_some(class::FLAGGED),
-            props.class.clone()
-        )} data-testid={props.testid.clone()} data-value={props.value.clone()}>
-            { props.children.clone() }
-        </tr>
-    }
+    with_testid(
+        html! {
+            <tr class={classes!(
+                class::TABLE_ROW,
+                props.flagged.then_some(class::FLAGGED),
+                props.class.clone()
+            )} data-value={props.value.clone()}>
+                { props.children.clone() }
+            </tr>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -226,17 +233,26 @@ pub fn TableCell(props: &TableCellProps) -> Html {
 
     if props.head {
         let scope = props.scope.clone().unwrap_or(AttrValue::Static("col"));
-        html! {
-            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
-        }
+        with_testid(
+            html! {
+                <th {class} {style} {scope} {colspan} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
+            },
+            props.testid.clone(),
+        )
     } else if let Some(scope) = props.scope.clone() {
-        html! {
-            <th {class} {style} {scope} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
-        }
+        with_testid(
+            html! {
+                <th {class} {style} {scope} {colspan} data-tip={props.tip.clone()}>{ props.children.clone() }</th>
+            },
+            props.testid.clone(),
+        )
     } else {
-        html! {
-            <td {class} {style} {colspan} data-testid={props.testid.clone()} data-tip={props.tip.clone()}>{ props.children.clone() }</td>
-        }
+        with_testid(
+            html! {
+                <td {class} {style} {colspan} data-tip={props.tip.clone()}>{ props.children.clone() }</td>
+            },
+            props.testid.clone(),
+        )
     }
 }
 

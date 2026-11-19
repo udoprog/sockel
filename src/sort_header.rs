@@ -1,5 +1,6 @@
 //! SortHeader (`style/_table.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use yew::prelude::*;
 
@@ -86,19 +87,21 @@ pub fn SortHeader(props: &SortHeaderProps) -> Html {
         Callback::from(move |_: MouseEvent| onsort.emit(next_sort(direction, first)))
     };
 
-    html! {
-        <th class={classes!(sort_header(props.numeric), props.class.clone())} scope="col"
-            aria-sort={props.direction.map_or("none", SortDirection::aria)}
-            data-testid={props.testid.clone()}>
-            <button type="button" class={classes!(class::SORT_HEADER_BUTTON, props.numeric.then_some(class::NUMERIC))}
-                disabled={props.disabled} {onclick}>
-                <span class={class::SORT_HEADER_LABEL}>{ props.label.clone() }</span>
-                <span class={sort_mark(props.direction.is_none())} aria-hidden="true">
-                    <Icon {glyph} />
-                </span>
-            </button>
-        </th>
-    }
+    with_testid(
+        html! {
+            <th class={classes!(sort_header(props.numeric), props.class.clone())} scope="col"
+                aria-sort={props.direction.map_or("none", SortDirection::aria)}>
+                <button type="button" class={classes!(class::SORT_HEADER_BUTTON, props.numeric.then_some(class::NUMERIC))}
+                    disabled={props.disabled} {onclick}>
+                    <span class={class::SORT_HEADER_LABEL}>{ props.label.clone() }</span>
+                    <span class={sort_mark(props.direction.is_none())} aria-hidden="true">
+                        <Icon {glyph} />
+                    </span>
+                </button>
+            </th>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

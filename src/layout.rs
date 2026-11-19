@@ -1,6 +1,7 @@
 //! Stack, Cluster, Toolbar and Card (`style/_layout.scss`).
 
 use crate::class;
+use crate::testid::with_testid;
 use yew::prelude::*;
 
 /// The space between a stack's or a cluster's items: one scale for both, a
@@ -208,12 +209,14 @@ fn list_reset(tag: &str) -> Option<&'static str> {
 
 #[function_component]
 pub fn Stack(props: &StackProps) -> Html {
-    html! {
-        <@{props.tag} class={classes!(stack_with(props.gap, props.flush), list_reset(props.tag), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </@>
-    }
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(stack_with(props.gap, props.flush), list_reset(props.tag), props.class.clone())}>
+                { props.children.clone() }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -258,12 +261,14 @@ pub fn Cluster(props: &ClusterProps) -> Html {
         props.flush,
     );
 
-    html! {
-        <@{props.tag} class={classes!(classes, list_reset(props.tag), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </@>
-    }
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(classes, list_reset(props.tag), props.class.clone())}>
+                { props.children.clone() }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -297,17 +302,19 @@ pub struct ToolbarProps {
 /// its end.
 #[function_component]
 pub fn Toolbar(props: &ToolbarProps) -> Html {
-    html! {
-        <div role="toolbar" aria-label={props.label.clone()}
-            class={classes!(
-                toolbar_with(props.boxed, props.band, props.chrome, props.search),
-                props.gap.class(),
-                props.class.clone()
-            )}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div role="toolbar" aria-label={props.label.clone()}
+                class={classes!(
+                    toolbar_with(props.boxed, props.band, props.chrome, props.search),
+                    props.gap.class(),
+                    props.class.clone()
+                )}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -341,12 +348,14 @@ pub struct ToolbarPartProps {
 /// only when the part alone is wider than the band.
 #[function_component]
 pub fn ToolbarPart(props: &ToolbarPartProps) -> Html {
-    html! {
-        <div role="group" class={classes!(toolbar_part(props.ruled), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div role="group" class={classes!(toolbar_part(props.ruled), props.class.clone())}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Properties, PartialEq)]
@@ -370,12 +379,14 @@ pub struct CardProps {
 /// on its `Link`.
 #[function_component]
 pub fn Card(props: &CardProps) -> Html {
-    html! {
-        <@{props.tag} class={classes!(card(props.inset, false), props.gap.map(stack), list_reset(props.tag), props.class.clone())}
-            data-testid={props.testid.clone()}>
-            { props.children.clone() }
-        </@>
-    }
+    with_testid(
+        html! {
+            <@{props.tag} class={classes!(card(props.inset, false), props.gap.map(stack), list_reset(props.tag), props.class.clone())}>
+                { props.children.clone() }
+            </@>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]

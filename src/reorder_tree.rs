@@ -1,6 +1,7 @@
 //! ReorderTree and ReorderList: rows moved within and between nested lists
 //! (`style/_reorder.scss`).
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -270,17 +271,20 @@ pub fn ReorderTree(props: &ReorderTreeProps) -> Html {
         body_drag: props.body_drag,
     };
 
-    html! {
-        <div ref={root} class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}>
-            <ContextProvider<Tree> context={tree}>
-                { props.children.clone() }
-            </ContextProvider<Tree>>
-            <span id={(*hint).clone()} class={class::VISUALLY_HIDDEN}>{ say(ReorderText::Hint) }</span>
-            <span class={class::VISUALLY_HIDDEN} role="status" aria-live="assertive">
-                { live.borrow().status.clone() }
-            </span>
-        </div>
-    }
+    with_testid(
+        html! {
+            <div ref={root} class={classes!(class::REORDER, props.class.clone())}>
+                <ContextProvider<Tree> context={tree}>
+                    { props.children.clone() }
+                </ContextProvider<Tree>>
+                <span id={(*hint).clone()} class={class::VISUALLY_HIDDEN}>{ say(ReorderText::Hint) }</span>
+                <span class={class::VISUALLY_HIDDEN} role="status" aria-live="assertive">
+                    { live.borrow().status.clone() }
+                </span>
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 fn handle_of(root: &NodeRef, key: &str) -> Option<HtmlElement> {
@@ -402,8 +406,8 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                     }
                 })
             };
-            let row = html! {
-                <div class={classes} data-testid={item.testid.clone()} data-reorder-key={item.id.clone()}
+            let row = with_testid(html! {
+                <div class={classes} data-reorder-key={item.id.clone()}
                     data-reorder-fixed={item.fixed.then(|| item.name.clone())} hidden={item.lifted_only && !lifting}
                     tabindex={props.focusable.then_some("-1")} aria-current={item.current.then_some("true")}
                     {onclick} ondblclick={item.ondblclick.clone()} oncontextmenu={item.oncontextmenu.clone()}
@@ -411,7 +415,7 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
                     onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
                     { item.children.clone() }
                 </div>
-            };
+            }, item.testid.clone());
             html! {
                 <ContextProvider<TreeGrip> key={item.id.to_string()} context={grip}>
                     { with_data(row, &item.data) }
@@ -420,13 +424,16 @@ pub fn ReorderList(props: &ReorderListProps) -> Html {
         })
         .collect();
     let inside = (len == 0 && aim == Some(0)).then_some(class::DROP_INSIDE);
-    html! {
-        <div class={classes!(props.class.clone(), inside)} data-testid={props.testid.clone()}
-            data-reorder-list={props.id.clone()} data-reorder-across={props.across.then_some("")}
-            data-reorder-list-name={props.name.clone()} aria-label={props.name.clone()}>
-            { rows }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(props.class.clone(), inside)}
+                data-reorder-list={props.id.clone()} data-reorder-across={props.across.then_some("")}
+                data-reorder-list-name={props.name.clone()} aria-label={props.name.clone()}>
+                { rows }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[derive(Clone, PartialEq)]

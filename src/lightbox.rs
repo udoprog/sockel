@@ -1,6 +1,7 @@
 //! Lightbox: a full-screen viewer of a set of images, one at a time, with
 //! previous and next, zoom and a pan by scrolling (`style/_lightbox.scss`).
 
+use crate::testid::with_testid;
 use std::cell::Cell;
 use std::rc::Rc;
 
@@ -253,11 +254,10 @@ pub fn Lightbox(props: &LightboxProps) -> Html {
         }
     };
 
-    overlays.portal(html! {
+    overlays.portal(with_testid(html! {
         <div ref={root} class={classes!(lightbox(zoomed), props.class.clone())}
             role="dialog" aria-modal="true" tabindex="-1"
-            aria-label={label(&phrases, &props.label, "sockel-lightbox-label")}
-            data-testid={props.testid.clone()} {onkeydown}>
+            aria-label={label(&phrases, &props.label, "sockel-lightbox-label")} {onkeydown}>
             <div class={class::LIGHTBOX_HEAD}>
                 <span class={class::LIGHTBOX_POSITION} aria-live="polite">{ position }</span>
                 <span class={class::LIGHTBOX_TOOLS}>
@@ -281,7 +281,7 @@ pub fn Lightbox(props: &LightboxProps) -> Html {
                 { tool(Glyph::ChevronRight, "sockel-lightbox-next", next, index + 1 >= count, None) }
             </div>
         </div>
-    })
+    }, props.testid.clone()))
 }
 
 #[cfg(test)]

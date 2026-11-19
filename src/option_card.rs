@@ -1,5 +1,6 @@
 //! OptionCard (`style/_checkbox.scss`).
 
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -64,12 +65,11 @@ pub fn OptionCard(props: &OptionCardProps) -> Html {
     html! {
         <label class={classes!(option_card(props.checked, props.disabled, props.invalid), props.class.clone())}>
             <span class={class::CHECKBOX_MARK}>
-                <input type={if radio { "radio" } else { "checkbox" }}
+                { with_testid(html! { <input type={if radio { "radio" } else { "checkbox" }}
                     class={classes!(class::CHECKBOX_INPUT, radio.then_some(class::RADIO))}
                     name={props.name.clone()} value={props.value.clone()}
                     checked={props.checked} disabled={props.disabled}
-                    aria-invalid={props.invalid.then_some("true")}
-                    data-testid={props.testid.clone()} {onchange} />
+                    aria-invalid={props.invalid.then_some("true")} {onchange} /> }, props.testid.clone()) }
                 if props.checked && !radio {
                     <Icon glyph={Glyph::Check} class={class::CHECKBOX_GLYPH} />
                 }

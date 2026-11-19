@@ -1,5 +1,6 @@
 //! Reorder and DragHandle (`style/_reorder.scss`).
 
+use crate::testid::with_testid;
 use std::cell::RefCell;
 use std::rc::Rc;
 
@@ -530,16 +531,19 @@ pub struct DragHandleProps {
 /// starts at once on a phone.
 #[function_component]
 pub fn DragHandle(props: &DragHandleProps) -> Html {
-    html! {
-        <button type="button" class={classes!(drag_handle(props.lifted), props.class.clone())}
-            aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-            title={props.title.clone()} data-tip={props.tip.clone()} disabled={props.disabled} data-testid={props.testid.clone()}
-            onpointerdown={props.onpointerdown.clone()} onpointermove={props.onpointermove.clone()}
-            onpointerup={props.onpointerup.clone()} onpointercancel={props.onpointercancel.clone()}
-            onkeydown={props.onkeydown.clone()} onblur={props.onblur.clone()}>
-            <Icon glyph={Glyph::Grip} />
-        </button>
-    }
+    with_testid(
+        html! {
+            <button type="button" class={classes!(drag_handle(props.lifted), props.class.clone())}
+                aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
+                title={props.title.clone()} data-tip={props.tip.clone()} disabled={props.disabled}
+                onpointerdown={props.onpointerdown.clone()} onpointermove={props.onpointermove.clone()}
+                onpointerup={props.onpointerup.clone()} onpointercancel={props.onpointercancel.clone()}
+                onkeydown={props.onkeydown.clone()} onblur={props.onblur.clone()}>
+                <Icon glyph={Glyph::Grip} />
+            </button>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// One row of a [`Reorder`] in its children mode: the row's own element,
@@ -599,15 +603,18 @@ pub struct ReorderItemProps {
 /// `<div>` of its children.
 #[function_component]
 pub fn ReorderItem(props: &ReorderItemProps) -> Html {
-    let row = html! {
-        <div class={props.class.clone()} data-testid={props.testid.clone()} role={props.role.clone()}
-            aria-current={props.current.then_some("true")}
-            onclick={props.onclick.clone()} ondblclick={props.ondblclick.clone()}
-            oncontextmenu={props.oncontextmenu.clone()}
-            onmouseenter={props.onmouseenter.clone()} onmouseleave={props.onmouseleave.clone()}>
-            { props.children.clone() }
-        </div>
-    };
+    let row = with_testid(
+        html! {
+            <div class={props.class.clone()} role={props.role.clone()}
+                aria-current={props.current.then_some("true")}
+                onclick={props.onclick.clone()} ondblclick={props.ondblclick.clone()}
+                oncontextmenu={props.oncontextmenu.clone()}
+                onmouseenter={props.onmouseenter.clone()} onmouseleave={props.onmouseleave.clone()}>
+                { props.children.clone() }
+            </div>
+        },
+        props.testid.clone(),
+    );
     with_data(row, &props.data)
 }
 
@@ -1157,8 +1164,8 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                 let onpointerup = grip.ctx.clone().row_only(grip.ctx.clone().pointer_up());
                 let onpointercancel = grip.ctx.clone().row_only(grip.ctx.clone().pointer_cancel());
                 let onclick = item.onclick.clone();
-                let row = html! {
-                    <div class={classes!(marks(index, item.fixed || item.disabled), item.class.clone())} data-testid={item.testid.clone()}
+                let row = with_testid(html! {
+                    <div class={classes!(marks(index, item.fixed || item.disabled), item.class.clone())}
                         role={item.role.clone()}
                         hidden={item.lifted_only && lift.is_none()} aria-current={item.current.then_some("true")}
                         {onpointerdown} {onpointermove} {onpointerup} {onpointercancel}
@@ -1167,7 +1174,7 @@ pub fn Reorder(props: &ReorderProps) -> Html {
                         onmouseenter={item.onmouseenter.clone()} onmouseleave={item.onmouseleave.clone()}>
                         { item.children.clone() }
                     </div>
-                };
+                }, item.testid.clone());
                 html! {
                     <ContextProvider<Grip> key={item.id.to_string()} context={grip}>
                         { with_data(row, &item.data) }
@@ -1178,14 +1185,17 @@ pub fn Reorder(props: &ReorderProps) -> Html {
 
         // The rows are the list's first children, the hint and the status
         // after them.
-        return html! {
-            <div ref={list.clone()} class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}
-                role={props.role.clone()}>
-                { rows }
-                { props.tail.clone() }
-                { status }
-            </div>
-        };
+        return with_testid(
+            html! {
+                <div ref={list.clone()} class={classes!(class::REORDER, props.class.clone())}
+                    role={props.role.clone()}>
+                    { rows }
+                    { props.tail.clone() }
+                    { status }
+                </div>
+            },
+            props.testid.clone(),
+        );
     }
 
     let rows: Html = props
@@ -1206,12 +1216,15 @@ pub fn Reorder(props: &ReorderProps) -> Html {
         })
         .collect();
 
-    html! {
-        <div class={classes!(class::REORDER, props.class.clone())} data-testid={props.testid.clone()}>
-            <ul ref={list.clone()} class={row_list(props.divided, props.boxed)}>{ rows }</ul>
-            { status }
-        </div>
-    }
+    with_testid(
+        html! {
+            <div class={classes!(class::REORDER, props.class.clone())}>
+                <ul ref={list.clone()} class={row_list(props.divided, props.boxed)}>{ rows }</ul>
+                { status }
+            </div>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A row's handle, as its [`Reorder`] renders it: also the context a

@@ -1,6 +1,7 @@
 //! Pager (`style/_pager.scss`).
 
 use crate::phrasebookcatalog01::{L10N, label};
+use crate::testid::with_testid;
 use crate::{Glyph, Icon, class};
 use phrasebook02::args;
 use phrasebook02::yew023::use_phrases_with;
@@ -292,20 +293,22 @@ pub fn Pager(props: &PagerProps) -> Html {
         </>
     };
 
-    html! {
-        <nav class={classes!(pager(props.disabled, props.busy), props.range.is_some().then_some(class::RANGED), props.class.clone())}
-            aria-label={nav_label} aria-busy={props.busy.then_some("true")}
-            style={format!("--pager-chars: {}", pages.to_string().len())}
-            ref={props.nav_ref.clone()}
-            data-testid={props.testid.clone()}>
-            if let Some(range) = &props.range {
-                <span class={class::PAGER_RANGE}>{ range.clone() }</span>
-                <span class={class::PAGER_GROUP}>{ buttons }</span>
-            } else {
-                { buttons }
-            }
-        </nav>
-    }
+    with_testid(
+        html! {
+            <nav class={classes!(pager(props.disabled, props.busy), props.range.is_some().then_some(class::RANGED), props.class.clone())}
+                aria-label={nav_label} aria-busy={props.busy.then_some("true")}
+                style={format!("--pager-chars: {}", pages.to_string().len())}
+                ref={props.nav_ref.clone()}>
+                if let Some(range) = &props.range {
+                    <span class={class::PAGER_RANGE}>{ range.clone() }</span>
+                    <span class={class::PAGER_GROUP}>{ buttons }</span>
+                } else {
+                    { buttons }
+                }
+            </nav>
+        },
+        props.testid.clone(),
+    )
 }
 
 /// A summary pager: the counts, then previous and next.
@@ -334,22 +337,24 @@ fn summary_pager(
         }
     };
 
-    html! {
-        <nav class={classes!(pager(props.disabled, props.busy), class::SUMMARY, props.class.clone())}
-            aria-label={nav_label.clone()} aria-busy={props.busy.then_some("true")}
-            style="--pager-chars: 1"
-            ref={props.nav_ref.clone()}
-            data-testid={props.testid.clone()}>
-            <span class={class::PAGER_STATUS} aria-live="polite">
-                <span class={class::PAGER_SHOWN}>{ summary.shown.clone() }</span>
-                <span class={class::PAGER_POSITION}>{ summary.position.clone() }</span>
-            </span>
-            <span class={class::PAGER_STEPS}>
-                { step(previous_label, false, page.saturating_sub(1).min(pages - 1), page == 0) }
-                { step(next_label, true, page + 1, page + 1 >= pages) }
-            </span>
-        </nav>
-    }
+    with_testid(
+        html! {
+            <nav class={classes!(pager(props.disabled, props.busy), class::SUMMARY, props.class.clone())}
+                aria-label={nav_label.clone()} aria-busy={props.busy.then_some("true")}
+                style="--pager-chars: 1"
+                ref={props.nav_ref.clone()}>
+                <span class={class::PAGER_STATUS} aria-live="polite">
+                    <span class={class::PAGER_SHOWN}>{ summary.shown.clone() }</span>
+                    <span class={class::PAGER_POSITION}>{ summary.position.clone() }</span>
+                </span>
+                <span class={class::PAGER_STEPS}>
+                    { step(previous_label, false, page.saturating_sub(1).min(pages - 1), page == 0) }
+                    { step(next_label, true, page + 1, page + 1 >= pages) }
+                </span>
+            </nav>
+        },
+        props.testid.clone(),
+    )
 }
 
 #[cfg(test)]
