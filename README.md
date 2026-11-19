@@ -814,7 +814,7 @@ icon too, as a menu's opener. sockel styles only `.sockel-button`, never a bare 
 - An icon without a label is the icon alone (`ICON`), square, named by
   `label` (`aria-label`). `fold` (`FOLD`) makes a button with both the icon
   alone below the phone breakpoint, its label kept for a screen reader;
-  `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `wide` (`WIDE`) makes an icon-only button as wide as a regular control is high whatever its size; `form`, `hidden` and `data` (more `data-*` attributes) are attributes;
+  `spread` (`SPREAD`) spans the container with the icon and label at its two ends (both needed); `wide` (`WIDE`) makes an icon-only button as wide as a regular control is high whatever its size; `form`, `hidden`, `tabindex` (`-1` takes it out of the tab order, as a roving group's unselected members) and `data` (more `data-*` attributes) are attributes;
   `fold_wide` (`FOLD_WIDE`) the other way round, the icon alone from the
   phone breakpoint up.
 - `pressed: Some(on)` is a toggle (`aria-pressed`), marked by its fill and

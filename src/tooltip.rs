@@ -443,6 +443,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         spread: false,
         wide: false,
         form: None,
+        tabindex: None,
         hidden: false,
         data: Vec::new(),
         pressed: None,

@@ -103,6 +103,10 @@ pub struct ButtonProps {
     /// is not drawn, whatever display the button's classes give.
     #[prop_or_default]
     pub hidden: bool,
+    /// The tab order (`tabindex`): `"-1"` for a button reached by script
+    /// or by arrow keys, as the unselected members of a roving group.
+    #[prop_or_default]
+    pub tabindex: Option<AttrValue>,
     /// More `data-*` attributes (`("data-state", ..)`) the app's code reads.
     #[prop_or_default]
     pub data: Vec<(&'static str, AttrValue)>,
@@ -253,6 +257,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-testid={props.testid.clone()}
                 data-autofocus={props.autofocus.then_some("")}
                 role={props.role.clone()}
+                tabindex={props.tabindex.clone()}
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
                 hidden={props.hidden}
@@ -280,6 +285,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                 data-testid={props.testid.clone()}
                 data-autofocus={props.autofocus.then_some("")}
                 role={props.role.clone()}
+                tabindex={props.tabindex.clone()}
                 aria-checked={checked.clone()}
                 aria-current={props.current.clone()}
                 {onclick}
@@ -329,6 +335,7 @@ mod tests {
             wide: false,
             form: None,
             hidden: false,
+            tabindex: None,
             data: Vec::new(),
             pressed: None,
             busy: false,
@@ -508,6 +515,16 @@ mod tests {
         assert!(spread(Some(html! { <svg /> }), html! { "Open" }).contains(class::SPREAD));
         assert!(!spread(None, html! { "Open" }).contains(class::SPREAD));
         assert!(!spread(Some(html! { <svg /> }), Html::default()).contains(class::SPREAD));
+    }
+
+    #[test]
+    fn tabindex_is_an_attribute_only_when_given() {
+        let html = render(ButtonProps {
+            tabindex: Some("-1".into()),
+            ..props()
+        });
+        assert!(html.contains("tabindex=\"-1\""), "{html}");
+        assert!(!render(props()).contains("tabindex"));
     }
 
     #[test]
