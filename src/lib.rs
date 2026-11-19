@@ -48,7 +48,7 @@
 //! <!-- check: Cargo.toml -->
 //! ```toml
 //! [dependencies]
-//! sockel = { version = "0.1", default-features = false, features = ["button", "layout"] }
+//! sockel = { version = "0.1", default-features = false, features = ["button", "layout", "overlay"] }
 //! yew = { version = "0.23", features = ["csr"] }
 //!
 //! [build-dependencies]
@@ -91,6 +91,17 @@
 //! ```scss
 //! @use "sockel" as p;
 //!
+//! // The colours sockel reads; it supplies none (see Theming).
+//! :root {
+//!     --bg: #fafafa;
+//!     --surface: #fff;
+//!     --text: #1d1d1f;
+//!     --muted: #6e6e73;
+//!     --border: #d2d2d7;
+//!     --accent: #0a66c2;
+//!     --shadow-1: 0 1px 2px rgb(0 0 0 / 0.08);
+//! }
+//!
 //! .app-sidebar {
 //!     padding: var(--space-4);
 //!
@@ -116,6 +127,11 @@
 //! Classes a dependency's markup writes (a sign-in form the app styles) are
 //! the exception: `Config::foreign(["auth-*"])` lets the app style them
 //! unprefixed (a trailing `*` is a prefix), and they get no constant.
+//!
+//! The stylesheet is sockel's CSS, then the app's, so an app rule as specific
+//! as sockel's wins. An app may also style a sockel class whose part its
+//! `$omit` leaves out (a label head it draws itself, with `heads.label`
+//! omitted); a misspelt `sockel-` class is still an error.
 //!
 //! <br>
 //!
@@ -168,9 +184,35 @@
 //!         </>
 //!     }
 //! }
+//! ```
+//!
+//! The app's icons and overlays come in at the same root: an [`IconSet`]
+//! provider (see [Icons](#icons)) and an [`OverlayHost`] (see
+//! [OverlayHost](#overlayhost)), which needs the `overlay` feature:
+//!
+//! <!-- check: src/main.rs -->
+//! ```rust,ignore
+//! #[function_component]
+//! fn Root() -> Html {
+//!     // A glyph the set leaves out is sockel's built-in one.
+//!     let icons = use_state(|| {
+//!         sockel::IconSet::default().with_named(
+//!             "save",
+//!             html! { <svg viewBox="0 0 16 16"><path d="M3 8h10" /></svg> },
+//!         )
+//!     });
+//!
+//!     html! {
+//!         <ContextProvider<sockel::IconSet> context={(*icons).clone()}>
+//!             <sockel::OverlayHost>
+//!                 <App />
+//!             </sockel::OverlayHost>
+//!         </ContextProvider<sockel::IconSet>>
+//!     }
+//! }
 //!
 //! fn main() {
-//!     yew::Renderer::<App>::new().render();
+//!     yew::Renderer::<Root>::new().render();
 //! }
 //! ```
 //!
@@ -257,6 +299,25 @@
 //! `.sockel-tight` is `sockel::class::TIGHT`.
 //!
 //! The showcase (`showcase/build.rs`, `showcase/style/`) is set up this way.
+//!
+//! <br>
+//!
+//! ### With trug
+//!
+//! sockel's `Cargo.toml` opts in to [trug] (`[package.metadata.trug]`), so
+//! trug builds the same stylesheet from the packaged Sass, pruned to the
+//! enabled features. The entry emits sockel's CSS, then the app's:
+//!
+//! ```scss
+//! // trug/app.scss
+//! @use "pkg:sockel";
+//! @use "../style/index";
+//! ```
+//!
+//! A `trug/sockel.scss` holding `@forward "pkg:sockel";` lets the app's own
+//! `@use "sockel"` resolve; build with `trug css trug/app.scss -I trug -o
+//! style.css`. `build.rs` still writes the class constants. The showcase
+//! (`showcase/trug/`) checks both stylesheets are equal.
 //!
 //! <br>
 //!
@@ -942,6 +1003,25 @@
 //! A page's column is `WORKSPACE_PAGE` or `LIBRARY_PAGE` (an index, whose
 //! blocks lose their own margins); `LIBRARY_PAGE` + `READING` keeps its blocks
 //! to the reading column (`--page-reading`), as a long entry's text.
+//!
+//! <br>
+//!
+//! ## ActionGroup and Toolbar
+//!
+//! [`ActionGroup`] holds the buttons ending a form, a panel or a section, the
+//! primary first, `--space-2` apart, wrapping. `end` puts it at its row's end
+//! (`.sockel-end`), `quiet` sets quiet icon actions `--space-1` apart
+//! (`.sockel-quiet`), `nowrap` keeps one line. `action_group(end, quiet, wrap)`
+//! gives its classes.
+//!
+//! [`Toolbar`] is one line of controls, `--space-1` apart (`gap` sets
+//! another), with a `label` for assistive technology. It never wraps: when
+//! it runs out of room it scrolls sideways, its scrollbar hidden and the edge
+//! with hidden controls faded, so its height stays one control's. `boxed`
+//! draws it as a bar of its own, bordered on `--surface` (`.sockel-boxed`).
+//! A [`ToolbarSpacer`] pushes the controls after it to
+//! the end. `band`, `chrome` and `search` make it a band that wraps instead
+//! (see [ToolBand](#toolband-panel-seam-and-use_width)).
 //!
 //! <br>
 //!
