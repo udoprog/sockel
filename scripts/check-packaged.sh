@@ -7,11 +7,14 @@
 # in a build of its own. The app's `[patch.crates-io]` points at the
 # unpacked packages, each in a directory of its own, so a path reaching
 # outside a package fails.
+# Usage: check-packaged.sh [README]; the blocks come from README.md unless
+# another file is given.
 # Works offline from cargo's cache, in target/package-check/. Set
 # CARGO_BUILD_JOBS as the board's build policy asks.
 set -euo pipefail
 cd "$(dirname "$0")/.."
 root=$PWD
+readme=$(realpath "${1:-README.md}")
 scratch=$root/target/package-check
 rm -rf "$scratch/crates" "$scratch/app" "$scratch/variants"
 mkdir -p "$scratch/crates/sockel" "$scratch/crates/sockel-build" "$scratch/app"
@@ -36,10 +39,10 @@ awk -v app="$scratch/app" -v variants="$scratch/variants" '
         system("mkdir -p \"" dir "\"")
         print > file
     }
-' README.md
+' "$readme"
 
 cd "$scratch/app"
-for file in Cargo.toml build.rs src/main.rs style/_index.scss tests/style_classes.rs; do
+for file in Cargo.toml style.rs build.rs src/main.rs style/_index.scss tests/style_classes.rs; do
     [[ -s $file ]] || { echo "README has no check block for $file" >&2; exit 1; }
 done
 sed -i "1i [package]\nname = \"packaged-app\"\nedition = \"2024\"\npublish = false\n" Cargo.toml
