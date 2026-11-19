@@ -130,6 +130,11 @@ parameter of the sources' own `fn` named for a class, reached through
 write on purpose is allowed with [`Usage::unprefixed`]; one a
 [`Usage::dynamic`] pattern covers needs nothing.
 
+It fails as well on a sockel class the build leaves out (`$omit`) that a
+source writes, unless the local styles define it. Sockel's own components
+that emit an omitted class are not seen: check those against the parts table
+in [sockel's docs](https://docs.rs/sockel/latest/sockel/#leaving-parts-out).
+
 [`Usage::one_file_per_component`] also fails on a class with a top-level
 rule in more than one local Sass file, so a component's rules stay in its
 own file.
