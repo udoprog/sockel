@@ -63,7 +63,7 @@ impl Usage {
     /// local ones, or sockel's own without local styles. With
     /// `STYLE_INVENTORY=PATH` set, also writes `class<TAB>uses` lines to `PATH`.
     pub fn report(&self, config: &Config) -> Result<Report, Error> {
-        let (output, omitted) = config.build_with(true)?;
+        let (output, omitted, pruned) = config.build_with(true)?;
         let css_bytes = output.css.len();
         let (classes, prefix) = match (&config.local, &config.prefix) {
             (Some(_), Some(prefix)) => (output.local_classes, prefix.as_str()),
@@ -144,6 +144,9 @@ impl Usage {
             .collect();
         let report = Report {
             css_bytes,
+            pruned: pruned.classes,
+            pruned_rules: pruned.rules,
+            pruned_bytes: pruned.bytes,
             omitted,
             dead: uses
                 .iter()
@@ -177,6 +180,95 @@ impl Usage {
         Ok(report)
     }
 
+    pub(crate) fn sources(&self) -> &[PathBuf] {
+        &self.sources
+    }
+
+    /// The sockel classes among `classes` that sockel's Rust in `sockel_src`
+    /// writes only in components the sources never reach, and the sources do
+    /// not write themselves. A component is reached when a source, or a
+    /// reached component, names one of its module's top-level `pub` items.
+    pub(crate) fn unreached(
+        &self,
+        sockel_src: &Path,
+        classes: &[String],
+    ) -> Result<BTreeSet<String>, Error> {
+        let mut app = String::new();
+        for source in &self.sources {
+            for file in rust_files(source)? {
+                app.push_str(&code(&std::fs::read_to_string(&file)?));
+                app.push('\n');
+            }
+        }
+        if !sockel_src.is_dir() {
+            return Err(Error::Io(std::io::Error::new(
+                std::io::ErrorKind::NotFound,
+                format!(
+                    "{}: no directory of sockel's Rust sources, which Config::prune reads",
+                    sockel_src.display()
+                ),
+            )));
+        }
+        let files = rust_files(sockel_src)?;
+        let mut modules = Vec::new();
+        for file in files {
+            if file.file_name().is_some_and(|name| name == "lib.rs") {
+                continue;
+            }
+            modules.push(Module::new(&code(&std::fs::read_to_string(&file)?)));
+        }
+        let app_idents = idents(&app);
+        let mut reached = app_idents.clone();
+        let mut used = vec![false; modules.len()];
+        for _ in 0..=modules.len() {
+            let mut changed = false;
+            for (module, used) in modules.iter().zip(&mut used) {
+                if !*used && module.exports.iter().any(|name| reached.contains(name)) {
+                    *used = true;
+                    changed = true;
+                    reached.extend(module.idents.iter().cloned());
+                }
+            }
+            if !changed {
+                break;
+            }
+        }
+        let app_literals = words(&literals(&app));
+        let built = |words: &BTreeSet<String>, class: &str| {
+            words.contains(class)
+                || words.iter().any(|word| {
+                    word.len() > "sockel-".len() && word.ends_with('-') && class.starts_with(word)
+                })
+        };
+        let mut unreached = BTreeSet::new();
+        for class in classes {
+            let Some(name) = class
+                .strip_prefix("sockel-")
+                .and_then(|stem| const_name(stem).ok())
+            else {
+                continue;
+            };
+            let writes =
+                |module: &Module| module.classes.contains(&name) || module.literals.contains(class);
+            let allowed = self
+                .dynamic
+                .iter()
+                .chain(&self.foreign)
+                .any(|pattern| matches(pattern, class));
+            let kept = allowed
+                || app_idents.contains(&name)
+                || built(&app_literals, class)
+                || !modules.iter().any(writes)
+                || modules.iter().zip(&used).any(|(module, used)| {
+                    *used && (writes(module) || built(&module.literals, class))
+                });
+            if !kept {
+                unreached.insert(class.clone());
+            }
+        }
+        Ok(unreached)
+    }
+
     /// Prints the [`Report`] and panics when it is not [clean](Report::is_clean).
     pub fn assert_clean(&self, config: &Config) {
         let report = self
@@ -193,6 +285,12 @@ impl Usage {
 pub struct Report {
     /// The stylesheet's size in bytes, uncompressed.
     pub css_bytes: usize,
+    /// With [`Config::prune`], the sockel classes whose rules it drops.
+    pub pruned: Vec<String>,
+    /// With [`Config::prune`], the rules it drops whole.
+    pub pruned_rules: usize,
+    /// With [`Config::prune`], the bytes it drops, uncompressed.
+    pub pruned_bytes: usize,
     /// Each styled class with the number of times the sources write it.
     pub uses: BTreeMap<String, usize>,
     /// Classes written once.
@@ -233,6 +331,15 @@ impl fmt::Display for Report {
             self.dead.len(),
             self.css_bytes
         )?;
+        if !self.pruned.is_empty() {
+            writeln!(
+                f,
+                "pruned: {} classes, {} rules, {} bytes",
+                self.pruned.len(),
+                self.pruned_rules,
+                self.pruned_bytes
+            )?;
+        }
         for class in &self.dead {
             writeln!(f, "dead: .{class} is styled and written by no source")?;
         }
@@ -288,6 +395,66 @@ fn rust_files(path: &Path) -> std::io::Result<Vec<PathBuf>> {
         }
     }
     Ok(files)
+}
+
+/// A module of sockel's: the items it exports, the identifiers it names,
+/// the classes it writes by constant and the words of its literals.
+struct Module {
+    exports: Vec<String>,
+    idents: BTreeSet<String>,
+    classes: BTreeSet<String>,
+    literals: BTreeSet<String>,
+}
+
+impl Module {
+    fn new(code: &str) -> Self {
+        let mut exports = Vec::new();
+        for line in code.lines() {
+            let Some(rest) = line
+                .strip_prefix("pub ")
+                .or_else(|| line.strip_prefix("pub(crate) "))
+            else {
+                continue;
+            };
+            let words: Vec<&str> = rest
+                .split(|c: char| !(c.is_alphanumeric() || c == '_'))
+                .filter(|word| !word.is_empty())
+                .collect();
+            let kinds = ["fn", "struct", "enum", "trait", "type", "static", "union"];
+            let name = match words.as_slice() {
+                ["const", name, ..] if *name != "fn" => Some(*name),
+                _ => words
+                    .iter()
+                    .position(|word| kinds.contains(word))
+                    .and_then(|at| words.get(at + 1).copied()),
+            };
+            exports.extend(name.map(str::to_owned));
+        }
+        let classes = code
+            .split("class::")
+            .skip(1)
+            .map(|rest| {
+                let end = rest
+                    .find(|c: char| !(c.is_ascii_alphanumeric() || c == '_'))
+                    .unwrap_or(rest.len());
+                rest[..end].to_owned()
+            })
+            .collect();
+        Self {
+            exports,
+            idents: idents(code),
+            classes,
+            literals: words(&literals(code)),
+        }
+    }
+}
+
+fn idents(code: &str) -> BTreeSet<String> {
+    words(&code.replace(|c: char| !c.is_alphanumeric() && c != '_', " "))
+}
+
+fn words(text: &str) -> BTreeSet<String> {
+    text.split_whitespace().map(str::to_owned).collect()
 }
 
 fn count_words(text: &str) -> BTreeMap<String, usize> {
@@ -835,6 +1002,74 @@ mod tests {
             )])
         );
         assert!(!report.is_clean());
+    }
+
+    #[test]
+    fn finds_the_classes_only_unused_components_write() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/prune");
+        let classes = [
+            "alpha",
+            "alpha-extra",
+            "beta",
+            "delta",
+            "gamma",
+            "loose",
+            "own",
+            "shared",
+            "tone-warm",
+        ]
+        .map(|stem| format!("sockel-{stem}"));
+        let usage = Usage::new().source(dir.join("app"));
+        let src = dir.join("sockel/src");
+        let unreached = usage.unreached(&src, &classes).unwrap();
+        assert_eq!(
+            unreached.into_iter().collect::<Vec<_>>(),
+            ["sockel-delta", "sockel-gamma", "sockel-shared"]
+        );
+        let unreached = usage
+            .dynamic(["sockel-gam*"])
+            .foreign(["sockel-delta"])
+            .unreached(&src, &classes)
+            .unwrap();
+        assert_eq!(unreached.into_iter().collect::<Vec<_>>(), ["sockel-shared"]);
+        assert!(
+            Usage::new()
+                .unreached(&dir.join("missing"), &classes)
+                .is_err()
+        );
+    }
+
+    #[test]
+    fn prunes_the_rules_of_unused_components() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/prune/button");
+        let usage = Usage::new().source(&dir);
+        let plain = crate::sockel().build().unwrap();
+        let config = crate::sockel().prune(usage.clone());
+        let pruned = config.build().unwrap();
+        assert!(pruned.css.contains("\n.sockel-button {"));
+        assert!(!pruned.css.contains(".sockel-error-box"));
+        assert_eq!(pruned.sockel_classes, plain.sockel_classes);
+        let report = usage.report(&config).unwrap();
+        assert!(
+            report
+                .pruned
+                .iter()
+                .any(|class| class == "sockel-error-box")
+        );
+        assert!(!report.pruned.iter().any(|class| class == "sockel-button"));
+        assert_eq!(report.pruned_bytes, plain.css.len() - pruned.css.len());
+        assert_eq!(report.css_bytes, pruned.css.len());
+        assert!(report.pruned_rules > 0);
+        assert!(report.to_string().contains("\npruned: "));
+        let off = usage.report(&crate::sockel()).unwrap();
+        assert!(off.pruned.is_empty() && off.pruned_rules == 0 && off.pruned_bytes == 0);
+
+        let (local, usage) = fixture();
+        let plain = local.build().unwrap();
+        let pruned = local.prune(usage).build().unwrap();
+        let tail = |css: &str| css[css.find(".usage-").unwrap()..].to_owned();
+        assert_eq!(tail(&pruned.css), tail(&plain.css));
+        assert!(pruned.css.len() < plain.css.len());
     }
 
     #[test]

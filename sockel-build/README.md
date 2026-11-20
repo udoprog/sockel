@@ -96,6 +96,22 @@ Sass does not define does not compile, and mount the stylesheet once with
 
 <br>
 
+## Leaving out unused components
+
+[`Config::prune`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html#method.prune) drops sockel's rules for classes the app never reaches: a [`Usage`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html)'s sources do not write them, and no sockel component the sources use does (a component is used when a source, or a used component, names an item its module exports). A selector naming such classes only is dropped, a selector list keeps the rest, and the app's own rules are untouched. A class built at runtime is kept: one no sockel component writes by name, or one a [`Usage::dynamic`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.dynamic) or [`Usage::foreign`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.foreign) pattern covers. The class constants do not change.
+
+```rust
+sockel_build::Config::new()
+    .local("style/")
+    .prefix("app-")
+    .prune(sockel_build::Usage::new().source("src/"))
+    .compile();
+```
+
+Name every crate that renders sockel's components in the `Usage`, or their rules go. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
+
+<br>
+
 ## How it finds sockel
 
 sockel's own `build.rs` passes two values to the `build.rs` of every

@@ -16,6 +16,11 @@ All notable changes to sockel and sockel-build. The format follows
 - `SelectionBar` takes `onkeydown`, `count_testid` (the count span's test id)
   and `idle: Option<bool>`, which overrides `count == 0` when the count is a
   phrase. Unset, the markup is as before.
+- `Config::prune(usage)`: leaves out sockel's rules for classes the app never
+  reaches (neither its sources nor a sockel component they use write them),
+  and `Report::pruned`, `pruned_rules` and `pruned_bytes`. Off by default, the
+  stylesheet unchanged. Measured: territory 107.6 KB to 104.2 KB (15.2 to
+  15.0 KB gzip), characterize 370.0 KB to 364.4 KB (49.9 to 49.4 KB gzip).
 
 ### Breaking
 

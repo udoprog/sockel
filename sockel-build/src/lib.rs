@@ -92,6 +92,22 @@
 //!
 //! <br>
 //!
+//! ## Leaving out unused components
+//!
+//! [`Config::prune`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html#method.prune) drops sockel's rules for classes the app never reaches: a [`Usage`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html)'s sources do not write them, and no sockel component the sources use does (a component is used when a source, or a used component, names an item its module exports). A selector naming such classes only is dropped, a selector list keeps the rest, and the app's own rules are untouched. A class built at runtime is kept: one no sockel component writes by name, or one a [`Usage::dynamic`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.dynamic) or [`Usage::foreign`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.foreign) pattern covers. The class constants do not change.
+//!
+//! ```no_run
+//! sockel_build::Config::new()
+//!     .local("style/")
+//!     .prefix("app-")
+//!     .prune(sockel_build::Usage::new().source("src/"))
+//!     .compile();
+//! ```
+//!
+//! Name every crate that renders sockel's components in the `Usage`, or their rules go. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
+//!
+//! <br>
+//!
 //! ## How it finds sockel
 //!
 //! sockel's own `build.rs` passes two values to the `build.rs` of every
@@ -223,6 +239,7 @@ fn test_sources() -> Sources {
     }
 }
 
+mod prune;
 mod usage;
 use usage::matches;
 pub use usage::{Report, Usage};
@@ -493,6 +510,15 @@ pub struct Config {
     layer: Option<String>,
     layer_order: Vec<String>,
     css_budget: Option<usize>,
+    prune: Option<Usage>,
+}
+
+/// What [`Config::prune`] drops.
+#[derive(Default)]
+pub(crate) struct Pruned {
+    classes: Vec<String>,
+    rules: usize,
+    bytes: usize,
 }
 
 /// A build's results.
@@ -757,18 +783,46 @@ impl Config {
         }
     }
 
+    /// Drops sockel's rules for classes `usage`'s sources never reach: not
+    /// written by them, nor by a sockel component they use. sockel's Rust is
+    /// read from beside its style directory.
+    pub fn prune(mut self, usage: Usage) -> Self {
+        self.prune = Some(usage);
+        self
+    }
+
+    /// sockel's CSS without the rules [`Config::prune`] drops.
+    fn pruned<'a>(
+        &self,
+        style: &Path,
+        sockel_css: &'a str,
+        classes: &[String],
+    ) -> Result<(std::borrow::Cow<'a, str>, Pruned), Error> {
+        let Some(usage) = &self.prune else {
+            return Ok((sockel_css.into(), Pruned::default()));
+        };
+        let unused = usage.unreached(&style.join("../src"), classes)?;
+        let (css, rules) = prune::prune(sockel_css, &unused);
+        let pruned = Pruned {
+            classes: unused.into_iter().collect(),
+            rules,
+            bytes: sockel_css.len() - css.len(),
+        };
+        Ok((css.into(), pruned))
+    }
+
     pub fn build(&self) -> Result<Output, Error> {
         Ok(self.build_with(false)?.0)
     }
 
     /// [`Config::build`], and with `omitted` the sockel classes the build
     /// leaves out that the app's local Sass does not style itself.
-    pub(crate) fn build_with(&self, omitted: bool) -> Result<(Output, Vec<String>), Error> {
+    pub(crate) fn build_with(&self, omitted: bool) -> Result<(Output, Vec<String>, Pruned), Error> {
         let enabled = self.enabled();
         let style = self.style_dir()?;
         let sources = Sources {
             index: Self::index(&style, enabled.as_deref())?,
-            style,
+            style: style.clone(),
         };
         let options = sasso::Options::new().with_importer(&sources);
         let sockel_use = self.sockel_use(enabled.as_deref())?;
@@ -778,6 +832,7 @@ impl Config {
         sockel_classes.extend(class_names(&hooks));
         sockel_classes.sort();
         sockel_classes.dedup();
+        let (kept, pruned) = self.pruned(&style, &sockel_css, &sockel_classes)?;
 
         let Some(dir) = &self.local else {
             let omitted = if omitted {
@@ -785,14 +840,14 @@ impl Config {
             } else {
                 Vec::new()
             };
-            let css = self.layered(&sockel_css);
+            let css = self.layered(&kept);
             self.within_budget(&css)?;
             let output = Output {
                 css,
                 sockel_classes,
                 local_classes: Vec::new(),
             };
-            return Ok((output, omitted));
+            return Ok((output, omitted, pruned));
         };
         let prefix = self.prefix.as_deref().ok_or(Error::NoPrefix)?;
         let index = local_index(dir)?;
@@ -801,7 +856,7 @@ impl Config {
         let entry = format!("{sockel_use}@use \"{}\";\n", sass_string(&index));
         let whole = sasso::compile(&entry, &options)?;
         let local_css = whole.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
-        let css = format!("{}{local_css}", self.layered(&sockel_css));
+        let css = format!("{}{local_css}", self.layered(&kept));
         self.within_budget(&css)?;
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
@@ -841,7 +896,7 @@ impl Config {
             sockel_classes,
             local_classes,
         };
-        Ok((output, omitted))
+        Ok((output, omitted, pruned))
     }
 
     /// The classes of sockel's enabled features that the build omits and
@@ -884,8 +939,14 @@ impl Config {
         let fail = |error: &dyn fmt::Display| -> ! { panic!("sockel-build: {error}") };
         println!("cargo:rerun-if-changed=build.rs");
         let style = self.style_dir().unwrap_or_else(|error| fail(&error));
-        let dirs = [Some(&style), self.local.as_ref()];
-        for dir in dirs.into_iter().flatten() {
+        let src = style.join("../src");
+        let mut dirs = vec![&style];
+        dirs.extend(&self.local);
+        if let Some(usage) = &self.prune {
+            dirs.push(&src);
+            dirs.extend(usage.sources());
+        }
+        for dir in dirs {
             for path in local_files(dir).unwrap_or_else(|error| fail(&error)) {
                 println!("cargo:rerun-if-changed={}", path.display());
             }
