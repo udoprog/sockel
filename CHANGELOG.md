@@ -22,7 +22,9 @@ All notable changes to sockel and sockel-build. The format follows
   one quantity in base units, with `Unit`, the ready-made `durations()` and
   `byte_sizes()`, an optional off choice, and the pure `readable_unit`,
   `unit_bounds` and `convert`. It shows the largest unit that divides the
-  value; the select and the number keep their width across units.
+  value; the select and the number keep their width across units. `on_commit`
+  (with `commit_delay`) tells the settled quantity in base units once, as the
+  `Stepper`'s does, and at once for a unit picked, off included.
 - `Report::css_bytes`, the compiled stylesheet's plain size, and
   `Config::css_budget(bytes)`, which fails any build over that size with the
   new `Error::OverBudget { size, budget }`. No budget, no change.

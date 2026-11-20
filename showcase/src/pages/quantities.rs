@@ -40,6 +40,11 @@ pub fn QuantityPage() -> Html {
         Units::Durations => ("durations()", 4 * 604_800),
         Units::Bytes => ("byte_sizes()", 4 << 30),
     };
+    let commits = use_state(|| 0usize);
+    let on_commit = {
+        let commits = commits.clone();
+        Callback::from(move |_: Option<i64>| commits.set(*commits + 1))
+    };
     let current = (*value).map(|v| v.clamp(0, max));
 
     let controls = html! {
@@ -56,6 +61,7 @@ pub fn QuantityPage() -> Html {
         El::new("QuantityField")
             .expr("value", "value")
             .expr("on_change", "on_change.clone()")
+            .expr("on_commit", "Some(on_commit.clone())")
             .expr("units", builder)
             .expr("min", "0")
             .expr("max", max.to_string())
@@ -68,7 +74,7 @@ pub fn QuantityPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <QuantityField value={current} on_change={bind(&value)} units={set.clone()} min={0} {max}
+            <QuantityField value={current} on_change={bind(&value)} on_commit={Some(on_commit)} units={set.clone()} min={0} {max}
                 label="Keep for" off_label={off.then(|| AttrValue::from("Off"))} size={*size}
                 invalid={*invalid} disabled={*disabled} testid="quantity" />
             <code class={class::CLASS_CALL}>
@@ -76,7 +82,7 @@ pub fn QuantityPage() -> Html {
                     quantity().to_string(), current.unwrap_or(0),
                     set.get(readable_unit(current.unwrap_or(0), &set)).map(|u| u.label.to_string())) }
             </code>
-            <p class={class::CONTROL_LABEL}>{ format!("Value {current:?}") }</p>
+            <p class={class::CONTROL_LABEL}>{ format!("Value {current:?}, committed {} times", *commits) }</p>
         </Demo>
     }
 }

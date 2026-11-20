@@ -84,6 +84,15 @@ pub fn convert(value: i64, factor: i64, min: i64, max: i64) -> i64 {
     }
 }
 
+/// The base value of `n` whole numbers of `factor`, clamped to `min..=max`.
+pub fn to_base(n: i64, factor: i64, min: i64, max: i64) -> i64 {
+    n.saturating_mul(factor).clamp(min, max.max(min))
+}
+
+/// How long after the last step, in milliseconds, `on_commit` waits (the
+/// [`Stepper`]'s own).
+const COMMIT_DELAY: u32 = 500;
+
 #[derive(Properties, PartialEq)]
 pub struct QuantityFieldProps {
     /// The quantity in base units; `None` is off (see `off_label`).
@@ -91,6 +100,14 @@ pub struct QuantityFieldProps {
     /// A quantity typed, stepped or converted to, within `min..=max`; `None`
     /// when off is picked.
     pub on_change: Callback<Option<i64>>,
+    /// The settled quantity, once, in base units, as the [`Stepper`]'s
+    /// `on_commit` settles its number; a unit picked (off included) is settled
+    /// at once. `on_change` still fires on each change.
+    #[prop_or_default]
+    pub on_commit: Option<Callback<Option<i64>>>,
+    /// The quiet after the last step before `on_commit`, in milliseconds.
+    #[prop_or(COMMIT_DELAY)]
+    pub commit_delay: u32,
     /// The units, ascending by factor. The base unit need not be among them.
     pub units: Vec<Unit>,
     /// The least and greatest quantity, in base units. The number's room is
@@ -159,14 +176,19 @@ pub fn QuantityField(props: &QuantityFieldProps) -> Html {
     let on_number = {
         let (on_change, sent) = (props.on_change.clone(), sent.clone());
         Callback::from(move |n: i64| {
-            let next = n.saturating_mul(factor).clamp(min, max);
+            let next = to_base(n, factor, min, max);
             *sent.borrow_mut() = Some(next);
             on_change.emit(Some(next));
         })
     };
 
+    let on_settle = props.on_commit.clone().map(|on_commit| {
+        Callback::from(move |n: i64| on_commit.emit(Some(to_base(n, factor, min, max))))
+    });
+
     let on_unit = {
         let (on_change, sent, unit) = (props.on_change.clone(), sent.clone(), unit.clone());
+        let on_commit = props.on_commit.clone();
         let (units, value) = (units.clone(), props.value);
         Callback::from(move |pick: Option<usize>| {
             let next = pick.map(|i| {
@@ -181,6 +203,10 @@ pub fn QuantityField(props: &QuantityFieldProps) -> Html {
 
             if next != value {
                 on_change.emit(next);
+
+                if let Some(on_commit) = &on_commit {
+                    on_commit.emit(next);
+                }
             }
         })
     };
@@ -208,6 +234,7 @@ pub fn QuantityField(props: &QuantityFieldProps) -> Html {
     html! {
         <div class={quantity()}>
             <Stepper value={props.value.map_or(lo, |v| v / factor)} on_change={on_number}
+                on_commit={on_settle} commit_delay={props.commit_delay}
                 min={lo} max={hi.max(lo)} label={props.label.clone()} id={props.id.clone()}
                 size={props.size} invalid={props.invalid} disabled={props.disabled || off}
                 mixed={off} placeholder={off.then(|| AttrValue::from("–"))}
@@ -236,6 +263,8 @@ mod tests {
         QuantityFieldProps {
             value,
             on_change: Callback::noop(),
+            on_commit: None,
+            commit_delay: COMMIT_DELAY,
             units: durations(),
             min: 0,
             max: 4 * 604_800,
@@ -285,6 +314,14 @@ mod tests {
         assert_eq!(convert(100, 3_600, 60, 1_000_000), 3_600);
         assert_eq!(convert(90, 3_600, 60, 100), 60);
         assert_eq!(convert(5_400, 3_600, 0, 3_700), 3_600);
+    }
+
+    #[test]
+    fn a_settled_number_is_told_in_base_units_within_the_range() {
+        assert_eq!(to_base(2, 3_600, 0, 1_000_000), 7_200);
+        assert_eq!(to_base(5, 3_600, 0, 10_000), 10_000);
+        assert_eq!(to_base(-1, 60, 0, 100), 0);
+        assert_eq!(to_base(i64::MAX, 60, 0, 100), 100);
     }
 
     #[test]
