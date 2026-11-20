@@ -416,7 +416,7 @@
 //! | `chip` | `icons` | 6.6 KB |
 //! | `chip-select` | `chip`, `layout`, `search-select` | 49.8 KB |
 //! | `choice` | | 7.2 KB |
-//! | `color-select` | `select` | 50.1 KB |
+//! | `color-select` | `select` | 50.2 KB |
 //! | `composer` | `drop-zone`, `input` | 23.4 KB |
 //! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.3 KB |
 //! | `disclosure` | `head`, `icons` | 15.8 KB |
@@ -432,20 +432,20 @@
 //! | `loadable` | `notice`, `skeleton` | 24.1 KB |
 //! | `log-view` | `button` | 15.5 KB |
 //! | `media` | `icons` | 5.7 KB |
-//! | `menu` | `button`, `icons`, `overlay` | 32.9 KB |
+//! | `menu` | `button`, `icons`, `overlay` | 33.0 KB |
 //! | `notice` | `badge`, `button` | 23.8 KB |
 //! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.5 KB |
 //! | `pager` | `icons` | 6.9 KB |
 //! | `panel` | | 4.9 KB |
-//! | `picker` | `overlay`, `pager`, `select` | 54.6 KB |
+//! | `picker` | `overlay`, `pager`, `select` | 54.7 KB |
 //! | `property-list` | `button`, `input` | 22.8 KB |
-//! | `quantity` | `select`, `stepper` | 47.5 KB |
+//! | `quantity` | `select`, `stepper` | 47.6 KB |
 //! | `reorder` | `icons`, `rows`, `tooltip` | 36.5 KB |
 //! | `rows` | `button` | 18.9 KB |
-//! | `search-select` | `select` | 47.2 KB |
+//! | `search-select` | `select` | 47.3 KB |
 //! | `save-bar` | `button` | 14.3 KB |
 //! | `seam` | | 5.3 KB |
-//! | `select` | `input`, `menu`, `tooltip` | 45.8 KB |
+//! | `select` | `input`, `menu`, `tooltip` | 45.9 KB |
 //! | `shell` | `badge` | 14.3 KB |
 //! | `shortcuts` | `overlay` | 29.0 KB |
 //! | `skeleton` | `icons`, `media` | 7.5 KB |
