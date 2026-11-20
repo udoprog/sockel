@@ -68,6 +68,14 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Breaking
 
+- `ComposerProps` gains `value`, `send_tip`, `field_testid` and `send_testid`
+  (all `Option<AttrValue>`, default `None`; build the props with `yew::props!`
+  or add `..Default::default()`). `value` is a controlled mode: the textarea
+  shows it, edits go to `on_input`, and Send no longer clears the text, so the
+  app sets `value` to `""` once a send is confirmed and a failed send keeps its
+  words (drafts per `draft_key` are then the app's). `send_tip` is a
+  `data-tip` on Send; `field_testid` and `send_testid` are the textarea's and
+  Send's test ids. Unset, nothing changes.
 - `ButtonProps` gains `busy_mark` (busy with the app's own mark: `aria-busy`
   and ignored clicks, the content kept, no spinner) and the drag callbacks
   `ondragenter`, `ondragover`, `ondragleave` and `ondrop`, and `style`

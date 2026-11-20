@@ -206,6 +206,8 @@ pub fn ComposerPage() -> Html {
     let busy = use_state(|| false);
     let icon = use_state(|| true);
     let sent = use_state(Vec::<String>::new);
+    let controlled = use_state(|| false);
+    let value = use_state(String::new);
 
     let controls = html! {
         <>
@@ -214,6 +216,7 @@ pub fn ComposerPage() -> Html {
             <Toggle label="attachments" value={*attachments} on_change={bind(&attachments)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="send_icon" value={*icon} on_change={bind(&icon)} />
+            <Toggle label="value (controlled)" value={*controlled} on_change={bind(&controlled)} />
         </>
     };
     let code = snippet(
@@ -229,15 +232,24 @@ pub fn ComposerPage() -> Html {
                 "Some(html! { <Icon glyph={Glyph::ChevronUp} /> })",
             )
             .flag("busy", *busy)
+            .expr_if(*controlled, "value", "Some(text.clone().into())")
+            .expr_if(*controlled, "on_input", "set_text")
+            .text("send_tip", "Send (Enter; Shift+Enter starts a new line)")
             .expr("on_send", "send"),
     );
     let on_send = {
-        let sent = sent.clone();
+        let (sent, value) = (sent.clone(), value.clone());
         Callback::from(move |m: ComposerMessage| {
             let mut all = (*sent).clone();
             all.push(format!("{:?} with {} files", m.text, m.files.len()));
             sent.set(all);
+            // Controlled: the app clears the text once the send is confirmed.
+            value.set(String::new());
         })
+    };
+    let on_input = {
+        let value = value.clone();
+        Callback::from(move |text: String| value.set(text))
     };
     let other = if *key == "session-a" {
         "session-b"
@@ -266,6 +278,9 @@ pub fn ComposerPage() -> Html {
                 <Composer draft_key={AttrValue::from(*key)} placeholder="Message the lead"
                     attachments={*attachments} enter_sends={*enter_sends} busy={*busy}
                     send_icon={icon.then(|| html! { <Icon glyph={Glyph::ChevronUp} /> })}
+                    value={controlled.then(|| AttrValue::from((*value).clone()))} {on_input}
+                    send_tip="Send (Enter; Shift+Enter starts a new line)"
+                    field_testid="composer-field" send_testid="composer-send"
                     {on_send} />
                 <span class={class::CONTROL_LABEL}>
                     { format!("The other session's draft: {kept:?}. Drop or paste a file, or Attach. {rule}") }

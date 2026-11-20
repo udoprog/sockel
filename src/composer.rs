@@ -85,12 +85,20 @@ pub fn composer(busy: bool) -> Classes {
 #[derive(Properties, PartialEq)]
 pub struct ComposerProps {
     /// Told the message on Send; the composer then empties itself and its
-    /// draft. Nothing is sent while there is neither text nor a file.
+    /// draft, unless `value` is set (then the app clears it). Nothing is sent
+    /// while there is neither text nor a file.
     pub on_send: Callback<ComposerMessage>,
     /// The key its draft is kept under (a conversation's id), across
     /// unmounting and between keys; none kept while `None`.
     #[prop_or_default]
     pub draft_key: Option<AttrValue>,
+    /// Controlled mode: the text shown, followed on every change. Edits go to
+    /// `on_input`, which the app stores; Send does not clear the text, the app
+    /// does (by setting `value` to `""`) once the send is confirmed, so a
+    /// failed send keeps its words. Drafts per `draft_key` are then the app's.
+    /// Unset, the composer keeps its own text.
+    #[prop_or_default]
+    pub value: Option<AttrValue>,
     /// The field's accessible name, else the catalog's.
     #[prop_or_default]
     pub label: Option<AttrValue>,
@@ -126,6 +134,10 @@ pub struct ComposerProps {
     pub send_icon: Option<Html>,
     #[prop_or_default]
     pub send_label: Option<AttrValue>,
+    /// A tooltip on Send (`data-tip`, shown by [`DataTips`](crate::DataTips)),
+    /// for a hint too long for the label.
+    #[prop_or_default]
+    pub send_tip: Option<AttrValue>,
     #[prop_or_default]
     pub attach_label: Option<AttrValue>,
     /// Controls before Send (a Comment or Note choice).
@@ -140,6 +152,12 @@ pub struct ComposerProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The test id of the textarea, as `testid` is of the wrapper.
+    #[prop_or_default]
+    pub field_testid: Option<AttrValue>,
+    /// The test id of the Send button.
+    #[prop_or_default]
+    pub send_testid: Option<AttrValue>,
 }
 
 impl Default for ComposerProps {
@@ -147,6 +165,7 @@ impl Default for ComposerProps {
         Self {
             on_send: Default::default(),
             draft_key: Default::default(),
+            value: Default::default(),
             label: Default::default(),
             placeholder: Default::default(),
             enter_sends: ::yew::html::IntoPropValue::into_prop_value(true),
@@ -158,12 +177,15 @@ impl Default for ComposerProps {
             on_keydown: Default::default(),
             send_icon: Default::default(),
             send_label: Default::default(),
+            send_tip: Default::default(),
             attach_label: Default::default(),
             actions: Default::default(),
             busy: Default::default(),
             disabled: Default::default(),
             class: Default::default(),
             testid: Default::default(),
+            field_testid: Default::default(),
+            send_testid: Default::default(),
         }
     }
 }
@@ -191,17 +213,22 @@ fn fit(area: &HtmlTextAreaElement) {
 pub fn Composer(props: &ComposerProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let key = props.draft_key.clone();
-    let text = use_state(|| key.as_deref().and_then(composer_draft).unwrap_or_default());
+    let own = use_state(|| key.as_deref().and_then(composer_draft).unwrap_or_default());
+    let controlled = props.value.is_some();
+    let text = props
+        .value
+        .as_ref()
+        .map_or_else(|| (*own).clone(), |v| v.to_string());
     let files = use_state(Vec::<File>::new);
     let area = use_node_ref();
 
     // Another key: its own draft.
     {
-        let (text, area) = (text.clone(), area.clone());
-        use_effect_with(key.clone(), move |key| {
+        let (own, area) = (own.clone(), area.clone());
+        use_effect_with((key.clone(), controlled), move |(key, controlled)| {
             let draft = key.as_deref().and_then(composer_draft).unwrap_or_default();
-            if *text != draft {
-                text.set(draft);
+            if !controlled && *own != draft {
+                own.set(draft);
             }
             if let Some(area) = area.cast::<HtmlTextAreaElement>() {
                 fit(&area);
@@ -210,7 +237,7 @@ pub fn Composer(props: &ComposerProps) -> Html {
     }
     {
         let area = area.clone();
-        use_effect_with((*text).clone(), move |_| {
+        use_effect_with(text.clone(), move |_| {
             if let Some(area) = area.cast::<HtmlTextAreaElement>() {
                 fit(&area);
             }
@@ -218,7 +245,8 @@ pub fn Composer(props: &ComposerProps) -> Html {
     }
 
     let send = {
-        let (text, files, key) = (text.clone(), files.clone(), key.clone());
+        let (own, files, key) = (own.clone(), files.clone(), key.clone());
+        let text = text.clone();
         let (on_send, blocked) = (props.on_send.clone(), props.busy || props.disabled);
         Callback::from(move |()| {
             let message = ComposerMessage {
@@ -228,16 +256,18 @@ pub fn Composer(props: &ComposerProps) -> Html {
             if blocked || (message.text.is_empty() && message.files.is_empty()) {
                 return;
             }
-            if let Some(key) = &key {
-                set_composer_draft(key, "");
+            if !controlled {
+                if let Some(key) = &key {
+                    set_composer_draft(key, "");
+                }
+                own.set(String::new());
             }
-            text.set(String::new());
             files.set(Vec::new());
             on_send.emit(message);
         })
     };
     let oninput = {
-        let (text, key, on_input) = (text.clone(), key.clone(), props.on_input.clone());
+        let (own, key, on_input) = (own.clone(), key.clone(), props.on_input.clone());
         Callback::from(move |e: InputEvent| {
             let Some(area) = e
                 .target()
@@ -247,11 +277,13 @@ pub fn Composer(props: &ComposerProps) -> Html {
             };
             let value = area.value();
             fit(&area);
-            if let Some(key) = &key {
-                set_composer_draft(key, &value);
+            if !controlled {
+                if let Some(key) = &key {
+                    set_composer_draft(key, &value);
+                }
+                own.set(value.clone());
             }
-            on_input.emit(value.clone());
-            text.set(value);
+            on_input.emit(value);
         })
     };
     let onkeydown = {
@@ -286,13 +318,16 @@ pub fn Composer(props: &ComposerProps) -> Html {
     };
     let onclick = Callback::from(move |_: MouseEvent| send.emit(()));
 
-    let field = html! {
-        <textarea ref={area} class={classes!(textarea(InputSize::Regular, false, false), class::COMPOSER_FIELD)}
-            rows="1" value={(*text).clone()}
-            aria-label={label(&phrases, &props.label, "sockel-composer-label")}
-            placeholder={props.placeholder.clone()} disabled={props.disabled}
-            {oninput} {onkeydown} />
-    };
+    let field = with_testid(
+        html! {
+            <textarea ref={area} class={classes!(textarea(InputSize::Regular, false, false), class::COMPOSER_FIELD)}
+                rows="1" value={text.clone()}
+                aria-label={label(&phrases, &props.label, "sockel-composer-label")}
+                placeholder={props.placeholder.clone()} disabled={props.disabled}
+                {oninput} {onkeydown} />
+        },
+        props.field_testid.clone(),
+    );
     let list = (!files.is_empty()).then(|| {
         html! {
             <ul class={class::COMPOSER_FILES}>
@@ -324,6 +359,7 @@ pub fn Composer(props: &ComposerProps) -> Html {
         <Button variant={ButtonVariant::Primary} icon={props.send_icon.clone()}
             fold={props.send_icon.is_some()} label={send_label.clone()}
             busy={props.busy} disabled={props.disabled || empty} {onclick}
+            tip={props.send_tip.clone()} testid={props.send_testid.clone()}
             class={class::COMPOSER_SEND}>
             { send_label.clone() }
         </Button>
@@ -427,5 +463,49 @@ mod tests {
             html.contains(&format!("{} {}", class::COMPOSER, class::SMALL)),
             "{html}"
         );
+    }
+
+    fn render(props: ComposerProps) -> String {
+        #[function_component]
+        fn Shown(props: &ComposerProps) -> Html {
+            let props = ComposerProps {
+                value: props.value.clone(),
+                draft_key: props.draft_key.clone(),
+                send_tip: props.send_tip.clone(),
+                field_testid: props.field_testid.clone(),
+                send_testid: props.send_testid.clone(),
+                ..Default::default()
+            };
+            html! { <Composer ..props /> }
+        }
+        futures::executor::block_on(yew::LocalServerRenderer::<Shown>::with_props(props).render())
+    }
+
+    #[test]
+    fn a_value_is_the_text_shown_over_a_draft() {
+        set_composer_draft("ctl", "old draft");
+        let html = render(ComposerProps {
+            value: Some("from the app".into()),
+            draft_key: Some("ctl".into()),
+            ..Default::default()
+        });
+        assert!(html.contains("from the app"), "{html}");
+        assert!(!html.contains("old draft"), "{html}");
+    }
+
+    #[test]
+    fn test_ids_and_tip_are_there_only_when_given() {
+        let html = render(ComposerProps::default());
+        assert!(!html.contains("data-testid"), "{html}");
+        assert!(!html.contains("data-tip"), "{html}");
+        let html = render(ComposerProps {
+            field_testid: Some("box".into()),
+            send_testid: Some("go".into()),
+            send_tip: Some("Send (Enter)".into()),
+            ..Default::default()
+        });
+        assert!(html.contains("data-testid=\"box\""), "{html}");
+        assert!(html.contains("data-testid=\"go\""), "{html}");
+        assert!(html.contains("data-tip=\"Send (Enter)\""), "{html}");
     }
 }
