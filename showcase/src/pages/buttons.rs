@@ -2,7 +2,7 @@ use yew::prelude::*;
 
 use crate::class;
 
-use sockel::{Button, ButtonSize, ButtonVariant, Cluster, Glyph, Icon, button};
+use sockel::{Badge, Button, ButtonSize, ButtonVariant, Cluster, Glyph, Icon, button};
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
@@ -51,6 +51,7 @@ pub fn ButtonPage() -> Html {
     let fold_wide = use_state(|| false);
     let pressed = use_state(|| None);
     let busy = use_state(|| false);
+    let badge = use_state(|| false);
     let disabled = use_state(|| false);
     let link = use_state(|| false);
     let selected = use_state(|| false);
@@ -67,6 +68,7 @@ pub fn ButtonPage() -> Html {
             <Toggle label="fold (on a phone)" value={*fold} on_change={bind(&fold)} />
             <Toggle label="fold_wide (above a phone)" value={*fold_wide} on_change={bind(&fold_wide)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
+            <Toggle label="after (a badge)" value={*badge} on_change={bind(&badge)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
             <Toggle label="selected" value={*selected} on_change={bind(&selected)} />
             <Toggle label="link (a text link look)" value={*link_look} on_change={bind(&link_look)} />
@@ -112,6 +114,7 @@ pub fn ButtonPage() -> Html {
             .flag("selected", *selected)
             .flag("link", *link_look)
             .flag("busy", *busy)
+            .expr_if(*badge, "after", "Some(html! { <Badge>{ \"3\" }</Badge> })")
             .flag("disabled", *disabled)
             .text_if(*link, "href", "#button")
             .text("title", "Save the draft")
@@ -130,6 +133,7 @@ pub fn ButtonPage() -> Html {
                     icon={(*placement != Placement::None).then(|| html! { <Icon glyph={Glyph::Check} /> })}
                     trailing={*placement == Placement::Trailing}
                     fold={*fold} fold_wide={*fold_wide} pressed={*pressed} selected={*selected} link={*link_look} busy={*busy} disabled={*disabled}
+                    after={(*badge).then(|| html! { <Badge>{ "3" }</Badge> })}
                     href={link.then(|| AttrValue::from("#button"))}
                     title="Save the draft" label={label.is_empty().then(|| AttrValue::from("Save the draft"))}
                     {onclick}>

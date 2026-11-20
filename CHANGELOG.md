@@ -65,7 +65,10 @@ All notable changes to sockel and sockel-build. The format follows
 - `ButtonProps` gains `busy_mark` (busy with the app's own mark: `aria-busy`
   and ignored clicks, the content kept, no spinner) and the drag callbacks
   `ondragenter`, `ondragover`, `ondragleave` and `ondrop`, and `style`
-  (inline style, such as custom properties the app's rules read). Code
+  (inline style, such as custom properties the app's rules read), `after`
+  (content after the label and before the chevron, in `.sockel-button-after`;
+  an icon with `after` and no label is no longer icon-only) and
+  `label_testid` (the test id of the label's span). Code
   building `ButtonProps` as a struct literal adds the fields; `html!` users
   change nothing.
 - `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant

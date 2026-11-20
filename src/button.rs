@@ -162,6 +162,14 @@ pub struct ButtonProps {
     pub label: Option<AttrValue>,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The test id of the label's span, as `testid` is of the button.
+    #[prop_or_default]
+    pub label_testid: Option<AttrValue>,
+    /// Content after the label and before the chevron, kept at its size
+    /// (`.sockel-button-after`), such as a count badge. An icon with no label
+    /// but `after` is not icon-only: the button is as wide as its content.
+    #[prop_or_default]
+    pub after: Option<Html>,
     /// Takes the focus when a dialog or popover opens on it
     /// (`data-autofocus`, which those look for).
     #[prop_or_default]
@@ -221,7 +229,7 @@ pub(crate) fn is_empty(html: &Html) -> bool {
 #[function_component]
 pub fn Button(props: &ButtonProps) -> Html {
     let has_label = !is_empty(&props.children);
-    let icon_only = props.icon.is_some() && !has_label;
+    let icon_only = props.icon.is_some() && !has_label && props.after.is_none();
     let fold = props.fold && props.icon.is_some() && has_label;
     let fold_wide = props.fold_wide && props.icon.is_some() && has_label;
     let class = classes!(
@@ -239,16 +247,23 @@ pub fn Button(props: &ButtonProps) -> Html {
         .clone()
         .map(|icon| html! { <span class={class::BUTTON_ICON} aria-hidden="true">{ icon }</span> });
     let label = has_label.then(|| {
-        html! {
-            <span class={classes!(
-                class::BUTTON_LABEL,
-                fold.then_some(class::FOLD),
-                fold_wide.then_some(class::FOLD_WIDE)
-            )}>
-                { props.children.clone() }
-            </span>
-        }
+        with_testid(
+            html! {
+                <span class={classes!(
+                    class::BUTTON_LABEL,
+                    fold.then_some(class::FOLD),
+                    fold_wide.then_some(class::FOLD_WIDE)
+                )}>
+                    { props.children.clone() }
+                </span>
+            },
+            props.label_testid.clone(),
+        )
     });
+    let after = props
+        .after
+        .clone()
+        .map(|after| html! { <span class={class::BUTTON_AFTER}>{ after }</span> });
     let chevron = props.chevron.then(|| {
         html! {
             <span class={class::BUTTON_ICON} aria-hidden="true"><Icon glyph={Glyph::ChevronDown} /></span>
@@ -257,6 +272,7 @@ pub fn Button(props: &ButtonProps) -> Html {
     let content = html! {
         <span class={classes!(class::BUTTON_CONTENT, props.busy.then_some(class::BUSY))}>
             if props.trailing { { for label } { for icon } } else { { for icon } { for label } }
+            { for after }
             { for chevron }
         </span>
     };
@@ -428,6 +444,8 @@ mod tests {
             tip: None,
             label: None,
             testid: None,
+            label_testid: None,
+            after: None,
             autofocus: false,
             role: None,
             checked: None,
@@ -508,6 +526,51 @@ mod tests {
             "{html}"
         );
         assert!(!html.contains(class::BUTTON_LABEL), "{html}");
+    }
+
+    #[test]
+    fn after_follows_the_label_and_precedes_the_chevron() {
+        let html = render(ButtonProps {
+            chevron: true,
+            after: Some(html! { <b>{ "3" }</b> }),
+            ..props()
+        });
+        let label = html.find(class::BUTTON_LABEL).unwrap();
+        let after = html.find(class::BUTTON_AFTER).unwrap();
+        let chevron = html.rfind(class::BUTTON_ICON).unwrap();
+        assert!(label < after && after < chevron, "{html}");
+        assert!(html.contains("<b>3</b>"), "{html}");
+        assert!(!render(props()).contains(class::BUTTON_AFTER));
+    }
+
+    #[test]
+    fn after_makes_an_icon_button_not_icon_only() {
+        let html = render(ButtonProps {
+            icon: Some(html! { <svg /> }),
+            children: Html::default(),
+            after: Some(html! { "3" }),
+            ..props()
+        });
+        assert!(
+            !html.contains(&format!("{} {}", class::BUTTON, class::ICON)),
+            "{html}"
+        );
+    }
+
+    #[test]
+    fn label_testid_is_on_the_label_only_when_given() {
+        let html = render(ButtonProps {
+            label_testid: Some("save-label".into()),
+            ..props()
+        });
+        assert!(html.contains("data-testid=\"save-label\""), "{html}");
+        assert!(!render(props()).contains("data-testid"));
+        let none = render(ButtonProps {
+            label_testid: Some("x-label".into()),
+            children: Html::default(),
+            ..props()
+        });
+        assert!(!none.contains("x-label"), "{none}");
     }
 
     #[test]

@@ -246,6 +246,12 @@
     }
 }
 
+.sockel-button-after {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
+}
+
 .sockel-button-label {
     @include base.truncate;
 
