@@ -4,7 +4,9 @@
 //   name, `-file-name`, and a remove button) above the bar (`-bar`): the
 //   field (`-field`), from one line to `--composer-max-height` (`12rem`)
 //   tall, then scrolling, and its actions (`-actions`, Send last as
-//   `-send`) at the bar's end, at the foot of a field that grows.
+//   `-send`) at the bar's end, at the foot of a field that grows. With
+//   `send_attached` the field and Send are one `-joined` pair, joined by the
+//   `.sockel-group-first` and `-last` classes, after the actions.
 
 @use "tokens" as base;
 
@@ -35,6 +37,13 @@
     max-height: var(--composer-max-height, 12rem);
     overflow-y: auto;
     resize: none;
+}
+
+.sockel-composer-joined {
+    display: flex;
+    flex: 1 1 auto;
+    align-items: flex-end;
+    min-width: 0;
 }
 
 .sockel-composer-actions {

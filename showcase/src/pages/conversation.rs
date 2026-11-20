@@ -205,6 +205,8 @@ pub fn ComposerPage() -> Html {
     let attachments = use_state(|| true);
     let busy = use_state(|| false);
     let icon = use_state(|| true);
+    let icon_only = use_state(|| false);
+    let attached = use_state(|| false);
     let sent = use_state(Vec::<String>::new);
     let controlled = use_state(|| false);
     let value = use_state(String::new);
@@ -216,6 +218,8 @@ pub fn ComposerPage() -> Html {
             <Toggle label="attachments" value={*attachments} on_change={bind(&attachments)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="send_icon" value={*icon} on_change={bind(&icon)} />
+            <Toggle label="send_icon_only" value={*icon_only} on_change={bind(&icon_only)} />
+            <Toggle label="send_attached" value={*attached} on_change={bind(&attached)} />
             <Toggle label="value (controlled)" value={*controlled} on_change={bind(&controlled)} />
         </>
     };
@@ -231,6 +235,8 @@ pub fn ComposerPage() -> Html {
                 "send_icon",
                 "Some(html! { <Icon glyph={Glyph::ChevronUp} /> })",
             )
+            .flag("send_icon_only", *icon_only)
+            .flag("send_attached", *attached)
             .flag("busy", *busy)
             .expr_if(*controlled, "value", "Some(text.clone().into())")
             .expr_if(*controlled, "on_input", "set_text")
@@ -278,6 +284,7 @@ pub fn ComposerPage() -> Html {
                 <Composer draft_key={AttrValue::from(*key)} placeholder="Message the lead"
                     attachments={*attachments} enter_sends={*enter_sends} busy={*busy}
                     send_icon={icon.then(|| html! { <Icon glyph={Glyph::ChevronUp} /> })}
+                    send_icon_only={*icon_only} send_attached={*attached}
                     value={controlled.then(|| AttrValue::from((*value).clone()))} {on_input}
                     send_tip="Send (Enter; Shift+Enter starts a new line)"
                     field_testid="composer-field" send_testid="composer-send"

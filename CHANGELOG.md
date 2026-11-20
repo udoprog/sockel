@@ -68,6 +68,14 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Breaking
 
+- `ComposerProps` gains `send_icon_only` and `send_attached` (`bool`, default
+  `false`; build the props with `yew::props!` or add `..Default::default()`).
+  `send_icon_only`, with `send_icon`, makes Send the icon alone at every width,
+  the label its `aria-label` and, unless `send_tip` is set, its tip.
+  `send_attached` joins Send to the field (one border between them, the
+  joined corners squared, via `.sockel-group-first` and `-last`) in a new
+  `.sockel-composer-joined`, with `actions` before the pair. Unset, nothing
+  changes.
 - `ComposerProps` gains `value`, `send_tip`, `field_testid` and `send_testid`
   (all `Option<AttrValue>`, default `None`; build the props with `yew::props!`
   or add `..Default::default()`). `value` is a controlled mode: the textarea

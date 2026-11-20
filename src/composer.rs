@@ -129,9 +129,17 @@ pub struct ComposerProps {
     #[prop_or_default]
     pub on_keydown: Callback<KeyboardEvent>,
     /// The Send button's icon; with one, Send is that icon alone below the
-    /// phone breakpoint.
+    /// phone breakpoint (at every width with `send_icon_only`).
     #[prop_or_default]
     pub send_icon: Option<Html>,
+    /// With `send_icon`, Send is the icon alone at every width: the label is
+    /// its accessible name, and its tip unless `send_tip` is set.
+    #[prop_or_default]
+    pub send_icon_only: bool,
+    /// Send sits flush against the field, sharing its border, with `actions`
+    /// before the pair.
+    #[prop_or_default]
+    pub send_attached: bool,
     #[prop_or_default]
     pub send_label: Option<AttrValue>,
     /// A tooltip on Send (`data-tip`, shown by [`DataTips`](crate::DataTips)),
@@ -176,6 +184,8 @@ impl Default for ComposerProps {
             on_input: Default::default(),
             on_keydown: Default::default(),
             send_icon: Default::default(),
+            send_icon_only: Default::default(),
+            send_attached: Default::default(),
             send_label: Default::default(),
             send_tip: Default::default(),
             attach_label: Default::default(),
@@ -320,7 +330,8 @@ pub fn Composer(props: &ComposerProps) -> Html {
 
     let field = with_testid(
         html! {
-            <textarea ref={area} class={classes!(textarea(InputSize::Regular, false, false), class::COMPOSER_FIELD)}
+            <textarea ref={area} class={classes!(textarea(InputSize::Regular, false, false), class::COMPOSER_FIELD,
+                    props.send_attached.then_some(class::GROUP_FIRST))}
                 rows="1" value={text.clone()}
                 aria-label={label(&phrases, &props.label, "sockel-composer-label")}
                 placeholder={props.placeholder.clone()} disabled={props.disabled}
@@ -355,23 +366,40 @@ pub fn Composer(props: &ComposerProps) -> Html {
     });
     let empty = composed(&text).is_empty() && files.is_empty();
     let send_label = label(&phrases, &props.send_label, "sockel-composer-send-label");
+    let icon_only = props.send_icon_only && props.send_icon.is_some();
+    let send_tip = props
+        .send_tip
+        .clone()
+        .or_else(|| icon_only.then(|| send_label.clone()));
     let send_button = html! {
         <Button variant={ButtonVariant::Primary} icon={props.send_icon.clone()}
-            fold={props.send_icon.is_some()} label={send_label.clone()}
+            fold={props.send_icon.is_some() && !icon_only} label={send_label.clone()}
             busy={props.busy} disabled={props.disabled || empty} {onclick}
-            tip={props.send_tip.clone()} testid={props.send_testid.clone()}
-            class={class::COMPOSER_SEND}>
-            { send_label.clone() }
+            tip={send_tip} testid={props.send_testid.clone()}
+            class={classes!(class::COMPOSER_SEND, props.send_attached.then_some(class::GROUP_LAST))}>
+            { for (!icon_only).then(|| send_label.clone()) }
         </Button>
     };
-    let bar = html! {
-        <div class={class::COMPOSER_BAR}>
-            { field }
-            <div class={class::COMPOSER_ACTIONS}>
-                { props.actions.clone() }
-                { send_button }
+    let bar = if props.send_attached {
+        html! {
+            <div class={class::COMPOSER_BAR}>
+                <div class={class::COMPOSER_ACTIONS}>{ props.actions.clone() }</div>
+                <div class={class::COMPOSER_JOINED}>
+                    { field }
+                    { send_button }
+                </div>
             </div>
-        </div>
+        }
+    } else {
+        html! {
+            <div class={class::COMPOSER_BAR}>
+                { field }
+                <div class={class::COMPOSER_ACTIONS}>
+                    { props.actions.clone() }
+                    { send_button }
+                </div>
+            </div>
+        }
     };
 
     let body = if props.attachments {
@@ -472,6 +500,9 @@ mod tests {
                 value: props.value.clone(),
                 draft_key: props.draft_key.clone(),
                 send_tip: props.send_tip.clone(),
+                send_icon: props.send_icon.clone(),
+                send_icon_only: props.send_icon_only,
+                send_attached: props.send_attached,
                 field_testid: props.field_testid.clone(),
                 send_testid: props.send_testid.clone(),
                 ..Default::default()
@@ -507,5 +538,38 @@ mod tests {
         assert!(html.contains("data-testid=\"box\""), "{html}");
         assert!(html.contains("data-testid=\"go\""), "{html}");
         assert!(html.contains("data-tip=\"Send (Enter)\""), "{html}");
+    }
+
+    #[test]
+    fn send_is_the_icon_alone_and_attached_only_when_asked() {
+        let icon = || Some(html! { <span>{ "i" }</span> });
+        let plain = render(ComposerProps {
+            send_icon: icon(),
+            ..Default::default()
+        });
+        assert!(plain.contains(">Send<"), "{plain}");
+        assert!(!plain.contains(class::GROUP_FIRST), "{plain}");
+        assert!(!plain.contains(class::COMPOSER_JOINED), "{plain}");
+        let only = render(ComposerProps {
+            send_icon: icon(),
+            send_icon_only: true,
+            ..Default::default()
+        });
+        assert!(!only.contains(">Send<"), "{only}");
+        assert!(only.contains("aria-label=\"Send\""), "{only}");
+        assert!(only.contains("data-tip=\"Send\""), "{only}");
+        assert!(only.contains(class::ICON), "{only}");
+        let bare = render(ComposerProps {
+            send_icon_only: true,
+            ..Default::default()
+        });
+        assert!(bare.contains(">Send<"), "{bare}");
+        let attached = render(ComposerProps {
+            send_attached: true,
+            ..Default::default()
+        });
+        assert!(attached.contains(class::COMPOSER_JOINED), "{attached}");
+        assert!(attached.contains(class::GROUP_FIRST), "{attached}");
+        assert!(attached.contains(class::GROUP_LAST), "{attached}");
     }
 }
