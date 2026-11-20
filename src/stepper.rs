@@ -3,8 +3,11 @@
 use crate::input::{InputSize, input_box};
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::testid::with_testid;
+use crate::timer::Timer;
 use crate::{Glyph, Icon, class};
 use phrasebook02::yew023::use_phrases_with;
+use std::rc::Rc;
+use wasm_bindgen::JsCast;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
 
@@ -173,12 +176,30 @@ pub fn key_value(key: &str, value: i64, step: i64, min: i64, max: i64) -> Option
     }
 }
 
+/// The value to report as committed: `pending` (the last number stepped or
+/// typed since the last commit), when it is not the one `committed` already.
+fn commit_due(pending: Option<i64>, committed: Option<i64>) -> Option<i64> {
+    pending.filter(|n| Some(*n) != committed)
+}
+
+/// How long after the last step, in milliseconds, `on_commit` waits.
+const COMMIT_DELAY: u32 = 500;
+
 #[derive(Properties, PartialEq)]
 pub struct StepperProps {
     /// The number, in units of the last of [`StepperProps::decimals`].
     pub value: i64,
     /// A number typed or stepped to, always within `min..=max`.
     pub on_change: Callback<i64>,
+    /// The settled number, once: when a burst of steps has been quiet for
+    /// `commit_delay`, when focus leaves the control, or when a typed number
+    /// is committed (Enter, blur); never the number last committed again.
+    /// `on_change` still fires on each step.
+    #[prop_or_default]
+    pub on_commit: Option<Callback<i64>>,
+    /// The quiet after the last step before `on_commit`, in milliseconds.
+    #[prop_or(COMMIT_DELAY)]
+    pub commit_delay: u32,
     pub min: i64,
     pub max: i64,
     /// How far the buttons and arrow keys step, onto its multiples.
@@ -289,6 +310,8 @@ impl Default for StepperProps {
         Self {
             value: Default::default(),
             on_change: Default::default(),
+            on_commit: Default::default(),
+            commit_delay: COMMIT_DELAY,
             min: Default::default(),
             max: Default::default(),
             step: ::yew::html::IntoPropValue::into_prop_value(1),
@@ -377,22 +400,64 @@ pub fn Stepper(props: &StepperProps) -> Html {
         });
     }
 
+    // What `on_commit` has yet to tell, what it last told, and the wait.
+    let on_commit = use_mut_ref(|| None::<Callback<i64>>);
+    *on_commit.borrow_mut() = props.on_commit.clone();
+    let pending = use_mut_ref(|| None::<i64>);
+    let committed = use_mut_ref(|| (!mixed).then_some(props.value));
+    let timer = use_mut_ref(|| None::<Timer>);
+    {
+        let (pending, committed) = (pending.clone(), committed.clone());
+        use_effect_with((props.value, mixed), move |(value, mixed)| {
+            if pending.borrow().is_none() {
+                *committed.borrow_mut() = (!mixed).then_some(*value);
+            }
+        });
+    }
+    let settle = {
+        let (on_commit, pending, committed) =
+            (on_commit.clone(), pending.clone(), committed.clone());
+        Rc::new(move || {
+            let due = commit_due(pending.borrow_mut().take(), *committed.borrow());
+            if let (Some(n), Some(on_commit)) = (due, on_commit.borrow().as_ref()) {
+                *committed.borrow_mut() = Some(n);
+                on_commit.emit(n);
+            }
+        })
+    };
+    // Tells `on_commit` now, and stops the wait.
+    let flush = {
+        let (settle, timer) = (settle.clone(), timer.clone());
+        Callback::from(move |()| {
+            timer.borrow_mut().take();
+            settle();
+        })
+    };
+    let delay = props.commit_delay;
     let set = {
         let draft = draft.clone();
         let on_change = props.on_change.clone();
         let on_valid = props.on_valid.clone();
         let value = props.value;
+        let (settle, pending, timer) = (settle.clone(), pending.clone(), timer.clone());
+        let wanted = props.on_commit.is_some();
         Callback::from(move |n: i64| {
             draft.set(None);
             on_valid.emit(true);
             if n != value || mixed {
                 on_change.emit(n);
             }
+            if wanted {
+                *pending.borrow_mut() = Some(n);
+                let settle = settle.clone();
+                *timer.borrow_mut() = Timer::start(delay, move || settle());
+            }
         })
     };
     let commit = {
         let draft = draft.clone();
         let set = set.clone();
+        let flush = flush.clone();
         let on_valid = props.on_valid.clone();
         Callback::from(move |()| {
             let Some(text) = draft.as_deref() else {
@@ -416,6 +481,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
                     None => draft.set(None),
                 }
             }
+            flush.emit(());
         })
     };
 
@@ -425,6 +491,8 @@ pub fn Stepper(props: &StepperProps) -> Html {
         let on_valid = props.on_valid.clone();
         let on_empty = props.on_empty.clone();
         let value = props.value;
+        let pending = pending.clone();
+        let wanted = props.on_commit.is_some();
         Callback::from(move |e: InputEvent| {
             let text = e.target_unchecked_into::<HtmlInputElement>().value();
 
@@ -441,12 +509,32 @@ pub fn Stepper(props: &StepperProps) -> Html {
             on_valid.emit(within.is_some());
             if let Some(n) = live_value(live, &text, value, decimals, min, max) {
                 on_change.emit(n);
+                if wanted {
+                    *pending.borrow_mut() = Some(n);
+                }
             }
             draft.set(Some(text));
         })
     };
     let onchange = commit.reform(|_: Event| ());
     let onblur = commit.reform(|_: FocusEvent| ());
+    // Focus leaving the whole control, not moving between its parts.
+    let onfocusout = {
+        let flush = flush.clone();
+        Callback::from(move |e: FocusEvent| {
+            let inside = e
+                .related_target()
+                .and_then(|t| t.dyn_into::<web_sys::Node>().ok())
+                .zip(
+                    e.current_target()
+                        .and_then(|t| t.dyn_into::<web_sys::Node>().ok()),
+                )
+                .is_some_and(|(target, group)| group.contains(Some(&target)));
+            if !inside {
+                flush.emit(());
+            }
+        })
+    };
     let onfocus = Callback::from(|e: FocusEvent| {
         e.target_unchecked_into::<HtmlInputElement>().select();
     });
@@ -528,7 +616,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
             props.fill.then_some(class::FILL),
             props.faint.then_some(class::FAINT),
             props.class.clone()
-        )} role="group" aria-busy={props.busy.then_some("true")}
+        )} role="group" aria-busy={props.busy.then_some("true")} {onfocusout}
             style={format!("--stepper-chars: {chars}")}>
             { button(-1, Glyph::Minus, &less_label, "less", props.can_less) }
             { with_testid(html! { <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0 && !mixed).then_some(class::ZERO))}
@@ -585,6 +673,8 @@ mod tests {
         StepperProps {
             value,
             on_change: Callback::noop(),
+            on_commit: None,
+            commit_delay: COMMIT_DELAY,
             min: 0,
             max: 100,
             step: 1,
@@ -619,6 +709,14 @@ mod tests {
             class: Classes::new(),
             testid: None,
         }
+    }
+
+    #[test]
+    fn a_commit_is_due_for_a_number_not_yet_committed() {
+        assert_eq!(commit_due(Some(5), Some(4)), Some(5));
+        assert_eq!(commit_due(Some(5), None), Some(5));
+        assert_eq!(commit_due(Some(5), Some(5)), None);
+        assert_eq!(commit_due(None, Some(5)), None);
     }
 
     #[test]

@@ -40,6 +40,11 @@ pub fn StepperPage() -> Html {
     let text = use_state(|| false);
     let strict = use_state(|| false);
     let value = use_state(|| 7i64);
+    let commits = use_state(|| 0usize);
+    let on_commit = {
+        let commits = commits.clone();
+        Callback::from(move |_: i64| commits.set(*commits + 1))
+    };
 
     let controls = html! {
         <>
@@ -72,6 +77,7 @@ pub fn StepperPage() -> Html {
         El::new("Stepper")
             .expr("value", "value")
             .expr("on_change", "on_change.clone()")
+            .expr("on_commit", "Some(on_commit.clone())")
             .expr("min", "0")
             .expr("max", max.to_string())
             .expr_if(*step != 1, "step", step.to_string())
@@ -93,7 +99,7 @@ pub fn StepperPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Stepper value={clamped} on_change={bind(&value)} min={0} max={*max} step={*step}
+            <Stepper value={clamped} on_change={bind(&value)} on_commit={Some(on_commit)} min={0} max={*max} step={*step}
                 snap={snap_to} decimals={*decimals} label="Copies" size={*size} invalid={*invalid}
                 disabled={*disabled} busy={*busy} live={*live} strict={*strict}
                 unit={unit.then_some(AttrValue::from("cm"))} fill={*fill} faint={*faint} text={shown_text}
@@ -107,7 +113,7 @@ pub fn StepperPage() -> Html {
                 { format!("step_by(value, step, step, 0, max) → {}; key_step(\"PageUp\", step, step, None) → {:?}",
                     step_by(clamped, *step, *step, 0, *max), key_step("PageUp", *step, *step, None)) }
             </code>
-            <p class={class::CONTROL_LABEL}>{ format!("Value {clamped}") }</p>
+            <p class={class::CONTROL_LABEL}>{ format!("Value {clamped}, committed {} times", *commits) }</p>
         </Demo>
     }
 }

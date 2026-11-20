@@ -7,6 +7,11 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Added
 
+- `Stepper` takes `on_commit` (`Option<Callback<i64>>`) and `commit_delay`
+  (milliseconds, default 500): `on_commit` tells the settled number once, when
+  a burst of steps has been quiet for the delay, focus leaves the control or a
+  typed number is committed, and not again for the number last committed.
+  `on_change` fires as before; unset, nothing changes.
 - `Report::css_bytes`, the compiled stylesheet's plain size, and
   `Config::css_budget(bytes)`, which fails any build over that size with the
   new `Error::OverBudget { size, budget }`. No budget, no change.
@@ -36,7 +41,7 @@ All notable changes to sockel and sockel-build. The format follows
 - New public prop fields break struct literals of `MenuItemProps` (`pressed`,
   `busy`, `haspopup`, `data`, `node_ref`, `end`, `aria_label`) and
   `SelectionBarProps` (`count_testid`, `idle`, `onkeydown`), `SwitchProps` and
-  `CheckboxProps` (`title`). End the literal with `..Default::default()`, or
+  `CheckboxProps` (`title`) and `StepperProps` (`on_commit`, `commit_delay`). End the literal with `..Default::default()`, or
   build the props with `yew::props!`.
 
 ### Changed
