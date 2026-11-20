@@ -674,13 +674,16 @@ pub struct MenuItemProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
-    /// The label. Empty, with no detail, the row has no text part: a lone
-    /// glyph.
+    /// The label, which is all of the row's text: a row with several parts
+    /// puts its glyph in `icon`, its label here and trailing marks or a
+    /// chevron in `end`. Empty, with no detail, the row has no text part;
+    /// with only an `icon` it is a lone glyph, centred (`.sockel-glyph-only`).
     #[prop_or_default]
     pub children: Html,
 }
 
-/// A menu item's classes: `menu-item`, `danger` in the danger colour.
+/// A menu item's classes: `menu-item`, `danger` in the danger colour. A
+/// row of a lone glyph also has `glyph-only`.
 pub fn menu_item(danger: bool) -> Classes {
     classes!(class::MENU_ITEM, danger.then_some(class::DANGER))
 }
@@ -748,6 +751,16 @@ impl Row<'_> {
                 }
             })
         };
+        #[cfg(feature = "shortcuts")]
+        let keys_none = p.keys.is_none();
+        #[cfg(not(feature = "shortcuts"))]
+        let keys_none = true;
+        let glyph_only = mark.is_none()
+            && icon.is_some()
+            && text.is_none()
+            && p.hint.is_none()
+            && keys_none
+            && end.is_none();
         let content = html! {
             <>
                 { for mark }
@@ -757,7 +770,11 @@ impl Row<'_> {
                 { for end }
             </>
         };
-        let class = classes!(menu_item(p.danger), p.class.clone());
+        let class = classes!(
+            menu_item(p.danger),
+            glyph_only.then_some(class::GLYPH_ONLY),
+            p.class.clone()
+        );
         let disabled = p.disabled.then_some("true");
         let current = p.current.then_some("page");
         let stay = p.stay.then_some("true");
@@ -1810,6 +1827,33 @@ mod tests {
             children: html! { "Copy" },
         }));
         assert!(!html.contains("aria-label"), "{html}");
+    }
+
+    #[test]
+    fn only_a_lone_glyph_row_is_glyph_only() {
+        let glyph = || Some(html! { <Icon glyph={Glyph::Plus} /> });
+        let html = render::<MenuItem>(yew::props!(MenuItemProps { icon: glyph() }));
+        assert!(html.contains(class::GLYPH_ONLY), "{html}");
+        for html in [
+            render::<MenuItem>(yew::props!(MenuItemProps {
+                icon: glyph(),
+                children: html! { "Add" },
+            })),
+            render::<MenuItem>(yew::props!(MenuItemProps {
+                icon: glyph(),
+                hint: Some(AttrValue::Static("A")),
+            })),
+            render::<MenuItem>(yew::props!(MenuItemProps {
+                icon: glyph(),
+                end: Some(html! { <i /> }),
+            })),
+            render::<MenuItem>(yew::props!(MenuItemProps {
+                children: html! { "Add" },
+            })),
+            render::<MenuItem>(yew::props!(MenuItemProps {})),
+        ] {
+            assert!(!html.contains(class::GLYPH_ONLY), "{html}");
+        }
     }
 
     #[test]

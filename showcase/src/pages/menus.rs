@@ -84,7 +84,7 @@ fn SampleItems(props: &ItemsProps) -> Html {
                     { "Show grid" }
                 </MenuItem>
                 <MenuItem icon={html! { <Icon glyph={Glyph::Search} /> }} aria_label="Find"
-                    title="A glyph-only row: no text part" onclick={pick("find")} />
+                    title="A glyph-only row: no text part, the glyph centred" onclick={pick("find")} />
                 <MenuItem href="#menu" current=true detail="A link row, the page shown">{ "Open this page" }</MenuItem>
                 <MenuItem href="https://example.org/" new_tab=true detail="A link row in a new tab"
                     detail_html={html! { <>{ " · " }<em>{ "example.org" }</em></> }}>

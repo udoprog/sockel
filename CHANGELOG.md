@@ -39,6 +39,16 @@ All notable changes to sockel and sockel-build. The format follows
   end (after any hint and keys) in the new `.sockel-menu-item-end`, which
   doesn't shrink, and `aria_label` (`aria-label`, an accessible name other
   than the visible label). Unset, they render nothing.
+- A `MenuItem` of an icon alone (no label, detail, hint, keys, mark or `end`)
+  has the new class `.sockel-glyph-only` (`class::GLYPH_ONLY`), which centres
+  its glyph. It is set from the content, as a prop could contradict it.
+  `MenuItemProps::children` now documents `icon` / children / `end` as a
+  row's parts, the children being its label.
+
+### Fixed
+
+- A glyph-only `MenuItem` has no padding above or below its glyph, so a
+  glyph taller than the text line cannot make it taller than a labelled row.
 
 ### Breaking
 

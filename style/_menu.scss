@@ -16,8 +16,10 @@
 //   radio's, its box kept when off, `.sockel-off`), `-icon`, `-text`
 //   (`-label` on one line, `-detail` under it; left out of a glyph-only
 //   row), `-hint` (a shortcut), `-end` (the app's markup, kept whole).
-//   `.sockel-danger`: in the danger colour. An `<a>` row (a link) looks the
-//   same as a `<button>` one.
+//   `.sockel-danger`: in the danger colour. `.sockel-glyph-only` (set for a
+//   row of an icon alone): the glyph centred, and no padding above or below
+//   it, so a tall glyph never makes the row taller than a labelled one. An
+//   `<a>` row (a link) looks the same as a `<button>` one.
 // - `.sockel-menu-separator`, `.sockel-menu-heading`, `.sockel-menu-note`.
 // - `.sockel-row-actions`: a row's icon buttons and its overflow menu, one
 //   size; `.sockel-row-action-danger` is muted until hovered or focused.
@@ -123,6 +125,11 @@
             outline: none;
             border-color: var(--focus-ring-color);
         }
+    }
+
+    &.sockel-glyph-only {
+        justify-content: center;
+        padding-block: 0;
     }
 
     @if base.emits("menu.danger") {
