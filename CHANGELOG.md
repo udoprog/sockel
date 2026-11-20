@@ -78,6 +78,12 @@ All notable changes to sockel and sockel-build. The format follows
   `.sockel-menu-item-text` span, which took the row's free space, so the
   app can centre the glyph. Rows with a label render as before.
 
+### Fixed
+
+- `Lightbox` closes on a click on the dark area around the image (the stage
+  and the empty parts of the head and foot). A click on the image or a tool, a
+  double-click, a swipe and a pan while zoomed do not close it.
+
 ## [0.2.2] - 2026-11-19
 
 ### Added

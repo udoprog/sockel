@@ -80,6 +80,14 @@ pub fn swipe_step(dx: f64, dy: f64) -> Option<isize> {
     (dx.abs() >= 48.0 && dx.abs() > dy.abs() * 1.5).then_some(if dx < 0.0 { 1 } else { -1 })
 }
 
+/// Whether a click leaves the lightbox: it landed on the dark area (not on
+/// the image or a control), was not part of a double-click (`detail` is the
+/// click count) and ended within 6 pixels of where the press began, so a
+/// swipe or a pan does not close it.
+pub fn backdrop_close(on_content: bool, detail: i32, travel: f64) -> bool {
+    !on_content && detail <= 1 && travel <= 6.0
+}
+
 /// A lightbox's classes: `lightbox`, `zoomed` while larger than the screen.
 pub fn lightbox(zoomed: bool) -> Classes {
     classes!(class::LIGHTBOX, zoomed.then_some(class::ZOOMED))
@@ -116,6 +124,7 @@ pub fn Lightbox(props: &LightboxProps) -> Html {
     let zoom = use_state(|| 0usize);
     let fitted = use_memo((), |()| Rc::new(Cell::new(0.0f64)));
     let press = use_memo((), |()| Rc::new(Cell::new(None::<(f64, f64)>)));
+    let origin = use_memo((), |()| Rc::new(Cell::new((0.0f64, 0.0f64))));
     let root = use_node_ref();
     let image = use_node_ref();
 
@@ -211,6 +220,26 @@ pub fn Lightbox(props: &LightboxProps) -> Html {
             }
         })
     };
+    let onpointerdown_root = {
+        let origin = origin.clone();
+        Callback::from(move |e: PointerEvent| {
+            origin.set((f64::from(e.client_x()), f64::from(e.client_y())));
+        })
+    };
+    let onclick_root = {
+        let (origin, on_close) = (origin.clone(), props.on_close.clone());
+        Callback::from(move |e: MouseEvent| {
+            let on_content = e
+                .target_dyn_into::<Element>()
+                .and_then(|t| t.closest("img, button, a").ok().flatten())
+                .is_some();
+            let (x, y) = origin.get();
+            let travel = (f64::from(e.client_x()) - x).hypot(f64::from(e.client_y()) - y);
+            if backdrop_close(on_content, e.detail(), travel) {
+                on_close.emit(());
+            }
+        })
+    };
     let ondblclick = {
         let set_zoom = set_zoom.clone();
         Callback::from(move |_: MouseEvent| set_zoom.emit(if zoomed { 0 } else { 2 }))
@@ -257,7 +286,8 @@ pub fn Lightbox(props: &LightboxProps) -> Html {
     overlays.portal(with_testid(html! {
         <div ref={root} class={classes!(lightbox(zoomed), props.class.clone())}
             role="dialog" aria-modal="true" tabindex="-1"
-            aria-label={label(&phrases, &props.label, "sockel-lightbox-label")} {onkeydown}>
+            aria-label={label(&phrases, &props.label, "sockel-lightbox-label")} {onkeydown}
+            onpointerdown={onpointerdown_root} onclick={onclick_root}>
             <div class={class::LIGHTBOX_HEAD}>
                 <span class={class::LIGHTBOX_POSITION} aria-live="polite">{ position }</span>
                 <span class={class::LIGHTBOX_TOOLS}>
@@ -307,6 +337,15 @@ mod tests {
         assert_eq!(swipe_step(80.0, 10.0), Some(-1));
         assert_eq!(swipe_step(20.0, 0.0), None, "too short");
         assert_eq!(swipe_step(60.0, 60.0), None, "not sideways");
+    }
+
+    #[test]
+    fn a_click_on_the_dark_area_closes() {
+        assert!(backdrop_close(false, 1, 0.0));
+        assert!(backdrop_close(false, 1, 5.0), "a steady hand");
+        assert!(!backdrop_close(true, 1, 0.0), "on the image or a control");
+        assert!(!backdrop_close(false, 1, 80.0), "a swipe or a pan");
+        assert!(!backdrop_close(false, 2, 0.0), "a double-click");
     }
 
     #[test]
