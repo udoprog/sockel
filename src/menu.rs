@@ -644,6 +644,22 @@ pub struct MenuItemProps {
     /// list of the same menu.
     #[prop_or_default]
     pub stay: bool,
+    /// Whether it is on now (`aria-pressed`), as a tool's row.
+    #[prop_or_default]
+    pub pressed: Option<bool>,
+    /// Working (`aria-busy`).
+    #[prop_or_default]
+    pub busy: bool,
+    /// What it opens (`aria-haspopup`: `"menu"`, `"listbox"`); it wins over
+    /// [`MenuItemProps::dialog`]'s `"dialog"`.
+    #[prop_or_default]
+    pub haspopup: Option<AttrValue>,
+    /// More `data-*` attributes (`("data-kind", ..)`) the app's code reads.
+    #[prop_or_default]
+    pub data: Vec<(&'static str, AttrValue)>,
+    /// The row's element.
+    #[prop_or_default]
+    pub node_ref: NodeRef,
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
@@ -727,7 +743,9 @@ impl Row<'_> {
         let disabled = p.disabled.then_some("true");
         let current = p.current.then_some("page");
         let stay = p.stay.then_some("true");
-        match &p.href {
+        let pressed = p.pressed.map(|on| on.to_string());
+        let busy = p.busy.then_some("true");
+        let mut node = match &p.href {
             Some(href) => with_testid(
                 html! {
                     <a role={self.role} tabindex="-1" {class}
@@ -737,6 +755,8 @@ impl Row<'_> {
                         download={p.download.then_some("")} title={p.title.clone()}
                         aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                         aria-keyshortcuts={keyshortcuts.clone()}
+                        aria-pressed={pressed} aria-busy={busy}
+                        aria-haspopup={p.haspopup.clone()} ref={p.node_ref.clone()}
                         data-stay={stay} {onclick}>
                         { content }
                     </a>
@@ -747,18 +767,25 @@ impl Row<'_> {
                 html! {
                     <button type="button" role={self.role} tabindex="-1" {class}
                         aria-checked={self.checked.map(|on| on.to_string())}
-                        aria-haspopup={p.dialog.map(|_| "dialog")}
+                        aria-haspopup={p.haspopup.clone().or(p.dialog.map(|_| AttrValue::Static("dialog")))}
                         aria-expanded={p.dialog.map(|open| open.to_string())}
                         title={p.title.clone()}
                         aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                         aria-keyshortcuts={keyshortcuts}
+                        aria-pressed={pressed} aria-busy={busy} ref={p.node_ref.clone()}
                         data-stay={stay} {onclick}>
                         { content }
                     </button>
                 },
                 p.testid.clone(),
             ),
+        };
+        if let Html::VTag(tag) = &mut node {
+            for (name, value) in &p.data {
+                std::rc::Rc::make_mut(tag).add_attribute(name, value.clone());
+            }
         }
+        node
     }
 }
 
@@ -822,6 +849,11 @@ fn item_props(
         danger: false,
         disabled,
         stay: false,
+        pressed: None,
+        busy: false,
+        haspopup: None,
+        data: Vec::new(),
+        node_ref: NodeRef::default(),
         onclick: Callback::noop(),
         class: class.clone(),
         testid: testid.clone(),
@@ -1663,6 +1695,60 @@ mod tests {
         assert!(
             html.contains(&format!("{}=\"none\"", crate::testid::ATTR)),
             "{html}"
+        );
+    }
+
+    #[test]
+    fn an_item_passes_on_pressed_busy_haspopup_and_data() {
+        for href in [None, Some(AttrValue::Static("/x"))] {
+            let html = render::<MenuItem>(yew::props!(MenuItemProps {
+                href: href.clone(),
+                pressed: Some(true),
+                busy: true,
+                haspopup: Some(AttrValue::Static("menu")),
+                data: vec![("data-kind", AttrValue::Static("port"))],
+                testid: Some(AttrValue::Static("row")),
+            }));
+            for attr in [
+                "aria-pressed=\"true\"",
+                "aria-busy=\"true\"",
+                "aria-haspopup=\"menu\"",
+                "data-kind=\"port\"",
+                "role=\"menuitem\"",
+                "tabindex=\"-1\"",
+            ] {
+                assert!(html.contains(attr), "{attr}: {html}");
+            }
+            let html = render::<MenuItem>(yew::props!(MenuItemProps { href }));
+            for attr in ["aria-pressed", "aria-busy", "aria-haspopup", "data-kind"] {
+                assert!(!html.contains(attr), "{attr}: {html}");
+            }
+        }
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            pressed: Some(false),
+        }));
+        assert!(html.contains("aria-pressed=\"false\""), "{html}");
+    }
+
+    #[test]
+    fn haspopup_wins_over_a_dialog_rows_and_defaults_are_unchanged() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            dialog: Some(false),
+            haspopup: Some(AttrValue::Static("menu")),
+        }));
+        assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
+        assert!(html.contains("aria-expanded=\"false\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            children: html! { "Copy" },
+        }));
+        assert_eq!(
+            html,
+            format!(
+                "<button type=\"button\" role=\"menuitem\" tabindex=\"-1\" class=\"{}\"><span class=\"{}\"><span class=\"{}\">Copy</span></span></button>",
+                class::MENU_ITEM,
+                class::MENU_ITEM_TEXT,
+                class::MENU_ITEM_LABEL
+            )
         );
     }
 

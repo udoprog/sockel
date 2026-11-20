@@ -10,11 +10,21 @@ All notable changes to sockel and sockel-build. The format follows
 - `Report::css_bytes`, the compiled stylesheet's plain size, and
   `Config::css_budget(bytes)`, which fails any build over that size with the
   new `Error::OverBudget { size, budget }`. No budget, no change.
+- `MenuItem` passes on `pressed` (`aria-pressed`), `busy` (`aria-busy`),
+  `haspopup` (`aria-haspopup`, over `dialog`'s `"dialog"`), `data` (more
+  `data-*` attributes, as Button's) and `node_ref`. Unset, they render nothing.
+- `SelectionBar` takes `onkeydown`, `count_testid` (the count span's test id)
+  and `idle: Option<bool>`, which overrides `count == 0` when the count is a
+  phrase. Unset, the markup is as before.
 
 ### Breaking
 
 - `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant
   `OverBudget`; an exhaustive `match` on it needs an arm.
+- New public prop fields break struct literals of `MenuItemProps` (`pressed`,
+  `busy`, `haspopup`, `data`, `node_ref`) and `SelectionBarProps`
+  (`count_testid`, `idle`, `onkeydown`). End the literal with
+  `..Default::default()`, or build the props with `yew::props!`.
 
 ### Changed
 

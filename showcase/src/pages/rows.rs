@@ -201,6 +201,7 @@ pub fn SelectionBarPage() -> Html {
     let label = use_state(|| Text::Short);
     let inset = use_state(|| true);
     let sticky = use_state(|| false);
+    let shown_idle = use_state(|| false);
     let busy = use_state(|| false);
     let disabled = use_state(|| false);
 
@@ -210,6 +211,7 @@ pub fn SelectionBarPage() -> Html {
             <Select<Text> label="Label" options={Text::OPTIONS} value={*label} on_change={bind(&label)} />
             <Toggle label="inset" value={*inset} on_change={bind(&inset)} />
             <Toggle label="sticky" value={*sticky} on_change={bind(&sticky)} />
+            <Toggle label="idle: Some(false)" value={*shown_idle} on_change={bind(&shown_idle)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
         </>
@@ -243,6 +245,7 @@ pub fn SelectionBarPage() -> Html {
                     .text("label", &label.of(&text))
                     .flag("inset", *inset)
                     .flag("sticky", *sticky)
+                    .expr_if(*shown_idle, "idle", "Some(false)")
                     .line(format!(
                         "<Button size={{ButtonSize::Small}}{}>{}</Button>",
                         if *busy { " busy=true" } else { "" },
@@ -254,11 +257,12 @@ pub fn SelectionBarPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <RowList divided=true boxed=true>{ rows }</RowList>
-            <SelectionBar count={*picked} label={label.of(&text)} inset={*inset} sticky={*sticky}>
+            <SelectionBar count={*picked} label={label.of(&text)} inset={*inset} sticky={*sticky}
+                idle={shown_idle.then_some(false)}>
                 <Button size={ButtonSize::Small} busy={*busy} disabled={*disabled}>{ "Move" }</Button>
                 <Button size={ButtonSize::Small} variant={ButtonVariant::Danger} disabled={*disabled}>{ "Delete" }</Button>
             </SelectionBar>
-            { shown("selection_bar(idle, inset, sticky)", &selection_bar(*picked == 0, *inset, *sticky)) }
+            { shown("selection_bar(idle, inset, sticky)", &selection_bar(*picked == 0 && !*shown_idle, *inset, *sticky)) }
         </Demo>
     }
 }

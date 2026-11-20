@@ -20,6 +20,15 @@ pub struct SelectionBarProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// The count's test id, on its span.
+    #[prop_or_default]
+    pub count_testid: Option<AttrValue>,
+    /// Whether nothing is picked, when `count` cannot say (a count shown as
+    /// a phrase); `None` takes it from `count == 0`.
+    #[prop_or_default]
+    pub idle: Option<bool>,
+    #[prop_or_default]
+    pub onkeydown: Callback<KeyboardEvent>,
     /// The actions on the picked rows.
     #[prop_or_default]
     pub children: Html,
@@ -40,10 +49,18 @@ pub fn selection_bar(idle: bool, inset: bool, sticky: bool) -> Classes {
 /// so picking never moves the list.
 #[function_component]
 pub fn SelectionBar(props: &SelectionBarProps) -> Html {
+    let idle = props.idle.unwrap_or(props.count == 0);
+    let count = with_testid(
+        html! {
+            <span class={class::SELECTION_BAR_COUNT} role="status">{ props.label.clone() }</span>
+        },
+        props.count_testid.clone(),
+    );
     with_testid(
         html! {
-            <div class={classes!(selection_bar(props.count == 0, props.inset, props.sticky), props.class.clone())}>
-                <span class={class::SELECTION_BAR_COUNT} role="status">{ props.label.clone() }</span>
+            <div class={classes!(selection_bar(idle, props.inset, props.sticky), props.class.clone())}
+                onkeydown={props.onkeydown.clone()}>
+                { count }
                 { props.children.clone() }
             </div>
         },
@@ -123,6 +140,61 @@ mod tests {
                 class::INSET,
                 class::STICKY
             ]
+        );
+    }
+
+    fn render(props: SelectionBarProps) -> String {
+        futures::executor::block_on(
+            yew::LocalServerRenderer::<SelectionBar>::with_props(props)
+                .hydratable(false)
+                .render(),
+        )
+    }
+
+    #[test]
+    fn idle_comes_from_the_count_unless_given() {
+        let idle = |count, idle| {
+            render(SelectionBarProps {
+                count,
+                idle,
+                label: "Some picked".into(),
+                ..Default::default()
+            })
+            .contains(class::IDLE)
+        };
+        assert!(idle(0, None));
+        assert!(!idle(2, None));
+        assert!(!idle(0, Some(false)));
+        assert!(idle(2, Some(true)));
+    }
+
+    #[test]
+    fn the_count_takes_a_test_id() {
+        let attr = crate::testid::ATTR;
+        let html = render(SelectionBarProps {
+            count: 1,
+            label: "1 selected".into(),
+            count_testid: Some("picked".into()),
+            ..Default::default()
+        });
+        assert!(
+            html.contains(&format!("{attr}=\"picked\">1 selected</span>")),
+            "{html}"
+        );
+        let html = render(SelectionBarProps {
+            count: 1,
+            label: "1 selected".into(),
+            ..Default::default()
+        });
+        assert!(!html.contains(attr), "{html}");
+        // Unchanged from before the new props.
+        assert_eq!(
+            html,
+            format!(
+                "<div class=\"{}\"><span role=\"status\" class=\"{}\">1 selected</span></div>",
+                class::SELECTION_BAR,
+                class::SELECTION_BAR_COUNT
+            )
         );
     }
 
