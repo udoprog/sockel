@@ -1,6 +1,6 @@
 [package]
 name = "sockel"
-version = "0.2.2"
+version = "0.2.3"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
 edition = "2024"
 description = "Yew components that keep their size as their content and state change, each shipped with its Sass, so an app's pages never jitter."
@@ -132,11 +132,11 @@ web-sys = { version = "0.3.77", features = ["AddEventListenerOptions", "BeforeUn
 yew = "0.23.0"
 
 [build-dependencies]
-sockel-build = { version = "0.2.2", path = "sockel-build" }
+sockel-build = { version = "0.2.3", path = "sockel-build" }
 
 [dev-dependencies]
 futures = "0.3"
-sockel-build = { version = "0.2.2", path = "sockel-build" }
+sockel-build = { version = "0.2.3", path = "sockel-build" }
 yew = { version = "0.23.0", features = ["ssr"] }
 
 [workspace]
