@@ -87,6 +87,12 @@ Sass does not define does not compile, and mount the stylesheet once with
 
 <br>
 
+## A size budget
+
+[`Report::css_bytes`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.css_bytes) is the stylesheet's size in plain bytes. [`Config::css_budget`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html#method.css_budget) fails the build with [`Error::OverBudget`](https://docs.rs/sockel-build/latest/sockel_build/enum.Error.html#variant.OverBudget) when the sheet is larger, so growth is caught where it happens. There is no limit unless one is set.
+
+<br>
+
 ## How it finds sockel
 
 sockel's own `build.rs` passes two values to the `build.rs` of every

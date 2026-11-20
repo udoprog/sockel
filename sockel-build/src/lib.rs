@@ -83,6 +83,12 @@
 //!
 //! <br>
 //!
+//! ## A size budget
+//!
+//! [`Report::css_bytes`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.css_bytes) is the stylesheet's size in plain bytes. [`Config::css_budget`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html#method.css_budget) fails the build with [`Error::OverBudget`](https://docs.rs/sockel-build/latest/sockel_build/enum.Error.html#variant.OverBudget) when the sheet is larger, so growth is caught where it happens. There is no limit unless one is set.
+//!
+//! <br>
+//!
 //! ## How it finds sockel
 //!
 //! sockel's own `build.rs` passes two values to the `build.rs` of every
@@ -415,6 +421,11 @@ pub enum Error {
     Feature(String),
     /// No [`Config::style`] and no [`STYLE_VAR`].
     NoStyle,
+    /// The stylesheet is larger than [`Config::css_budget`].
+    OverBudget {
+        size: usize,
+        budget: usize,
+    },
 }
 
 impl fmt::Display for Error {
@@ -437,6 +448,10 @@ impl fmt::Display for Error {
             }
             Error::NotVerbatim => write!(f, "sockel's CSS did not come first and unchanged"),
             Error::Feature(name) => write!(f, "sockel has no feature `{name}`"),
+            Error::OverBudget { size, budget } => write!(
+                f,
+                "the stylesheet is {size} bytes, over the budget of {budget}"
+            ),
             Error::NoStyle => write!(
                 f,
                 "sockel's style directory is unknown: {STYLE_VAR} is set only in the \
@@ -474,6 +489,7 @@ pub struct Config {
     foreign: Vec<String>,
     layer: Option<String>,
     layer_order: Vec<String>,
+    css_budget: Option<usize>,
 }
 
 /// A build's results.
@@ -721,6 +737,23 @@ impl Config {
         css
     }
 
+    /// Fails the build with [`Error::OverBudget`] when the stylesheet is
+    /// over `bytes` (plain, uncompressed). [`Report::css_bytes`] is its size.
+    pub fn css_budget(mut self, bytes: usize) -> Self {
+        self.css_budget = Some(bytes);
+        self
+    }
+
+    fn within_budget(&self, css: &str) -> Result<(), Error> {
+        match self.css_budget {
+            Some(budget) if css.len() > budget => Err(Error::OverBudget {
+                size: css.len(),
+                budget,
+            }),
+            _ => Ok(()),
+        }
+    }
+
     pub fn build(&self) -> Result<Output, Error> {
         Ok(self.build_with(false)?.0)
     }
@@ -749,8 +782,10 @@ impl Config {
             } else {
                 Vec::new()
             };
+            let css = self.layered(&sockel_css);
+            self.within_budget(&css)?;
             let output = Output {
-                css: self.layered(&sockel_css),
+                css,
                 sockel_classes,
                 local_classes: Vec::new(),
             };
@@ -764,6 +799,7 @@ impl Config {
         let whole = sasso::compile(&entry, &options)?;
         let local_css = whole.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
         let css = format!("{}{local_css}", self.layered(&sockel_css));
+        self.within_budget(&css)?;
         let mut unconfigured = None;
         let mut local_classes = Vec::new();
         let local_all = class_names(local_css);
@@ -1008,6 +1044,23 @@ fn selector_classes(selector: &str, classes: &mut std::collections::BTreeSet<Str
 #[cfg(test)]
 mod tests {
     use super::*;
+
+    #[test]
+    fn a_budget_fails_a_larger_sheet() {
+        let size = sockel().build().unwrap().css.len();
+        assert!(sockel().css_budget(size).build().is_ok());
+        match sockel().css_budget(size - 1).build() {
+            Err(Error::OverBudget {
+                size: found,
+                budget,
+            }) => {
+                assert_eq!((found, budget), (size, size - 1));
+            }
+            other => panic!("expected OverBudget, got {other:?}"),
+        }
+        let message = sockel().css_budget(1).build().unwrap_err().to_string();
+        assert!(message.contains("over the budget of 1"), "{message}");
+    }
 
     #[test]
     fn compiles_sockel_s_sources() {

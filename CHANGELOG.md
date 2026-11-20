@@ -5,6 +5,17 @@ All notable changes to sockel and sockel-build. The format follows
 
 ## [Unreleased]
 
+### Added
+
+- `Report::css_bytes`, the compiled stylesheet's plain size, and
+  `Config::css_budget(bytes)`, which fails any build over that size with the
+  new `Error::OverBudget { size, budget }`. No budget, no change.
+
+### Breaking
+
+- `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant
+  `OverBudget`; an exhaustive `match` on it needs an arm.
+
 ### Changed
 
 - A pill button's text on hover is 45% tone and 55% `--text` (the new

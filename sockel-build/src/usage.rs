@@ -64,6 +64,7 @@ impl Usage {
     /// `STYLE_INVENTORY=PATH` set, also writes `class<TAB>uses` lines to `PATH`.
     pub fn report(&self, config: &Config) -> Result<Report, Error> {
         let (output, omitted) = config.build_with(true)?;
+        let css_bytes = output.css.len();
         let (classes, prefix) = match (&config.local, &config.prefix) {
             (Some(_), Some(prefix)) => (output.local_classes, prefix.as_str()),
             _ => (output.sockel_classes, "sockel-"),
@@ -142,6 +143,7 @@ impl Usage {
             })
             .collect();
         let report = Report {
+            css_bytes,
             omitted,
             dead: uses
                 .iter()
@@ -189,6 +191,8 @@ impl Usage {
 #[derive(Clone, Debug, PartialEq, Eq)]
 #[non_exhaustive]
 pub struct Report {
+    /// The stylesheet's size in bytes, uncompressed.
+    pub css_bytes: usize,
     /// Each styled class with the number of times the sources write it.
     pub uses: BTreeMap<String, usize>,
     /// Classes written once.
@@ -223,10 +227,11 @@ impl fmt::Display for Report {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         writeln!(
             f,
-            "{} classes, {} single-use, {} dead",
+            "{} classes, {} single-use, {} dead, {} bytes of CSS",
             self.uses.len(),
             self.single_use.len(),
-            self.dead.len()
+            self.dead.len(),
+            self.css_bytes
         )?;
         for class in &self.dead {
             writeln!(f, "dead: .{class} is styled and written by no source")?;
@@ -741,10 +746,11 @@ mod tests {
         assert_eq!(report.single_use, ["usage-once"]);
         assert_eq!(report.uses.len(), 4);
         assert!(!report.is_clean());
+        assert!(report.css_bytes > 0);
         assert!(
             report
                 .to_string()
-                .starts_with("4 classes, 1 single-use, 2 dead")
+                .starts_with("4 classes, 1 single-use, 2 dead, ")
         );
     }
 
