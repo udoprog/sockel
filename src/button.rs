@@ -85,6 +85,10 @@ pub struct ButtonProps {
     /// its room (`aria-busy`). A busy button ignores clicks.
     #[prop_or_default]
     pub busy: bool,
+    /// Busy with the app's own mark: `aria-busy` and ignored clicks, like
+    /// `busy`, but the content stays and no spinner is drawn.
+    #[prop_or_default]
+    pub busy_mark: bool,
     #[prop_or_default]
     pub disabled: bool,
     /// Cannot act now but stays focusable and hoverable, so it can say why
@@ -135,6 +139,14 @@ pub struct ButtonProps {
     /// A click of a non-primary button, the middle one included.
     #[prop_or_default]
     pub onauxclick: Callback<MouseEvent>,
+    #[prop_or_default]
+    pub ondragenter: Callback<DragEvent>,
+    #[prop_or_default]
+    pub ondragover: Callback<DragEvent>,
+    #[prop_or_default]
+    pub ondragleave: Callback<DragEvent>,
+    #[prop_or_default]
+    pub ondrop: Callback<DragEvent>,
     #[prop_or_default]
     pub title: Option<AttrValue>,
     /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
@@ -250,7 +262,7 @@ pub fn Button(props: &ButtonProps) -> Html {
 
     let onclick = {
         let onclick = props.onclick.clone();
-        let blocked = props.busy || props.disabled || props.unavailable;
+        let blocked = props.busy || props.busy_mark || props.disabled || props.unavailable;
         Callback::from(move |e: MouseEvent| {
             if blocked {
                 e.prevent_default();
@@ -259,7 +271,7 @@ pub fn Button(props: &ButtonProps) -> Html {
             }
         })
     };
-    let busy = props.busy.then_some("true");
+    let busy = (props.busy || props.busy_mark).then_some("true");
     let unavailable = props.unavailable.then_some("true");
     let pressed = props.pressed.map(|on| on.to_string());
     let expanded = props.expanded.map(|on| on.to_string());
@@ -291,6 +303,10 @@ pub fn Button(props: &ButtonProps) -> Html {
                     onpointerdown={props.onpointerdown.clone()}
                     onmousedown={props.onmousedown.clone()}
                     onauxclick={props.onauxclick.clone()}
+                    ondragenter={props.ondragenter.clone()}
+                    ondragover={props.ondragover.clone()}
+                    ondragleave={props.ondragleave.clone()}
+                    ondrop={props.ondrop.clone()}
                 >
                     { content }{ for spinner }
                 </a>
@@ -325,6 +341,10 @@ pub fn Button(props: &ButtonProps) -> Html {
                     onpointerdown={props.onpointerdown.clone()}
                     onmousedown={props.onmousedown.clone()}
                     onauxclick={props.onauxclick.clone()}
+                    ondragenter={props.ondragenter.clone()}
+                    ondragover={props.ondragover.clone()}
+                    ondragleave={props.ondragleave.clone()}
+                    ondrop={props.ondrop.clone()}
                 >
                     { content }{ for spinner }
                 </button>
@@ -378,6 +398,7 @@ mod tests {
             selected: false,
             link: false,
             busy: false,
+            busy_mark: false,
             disabled: false,
             unavailable: false,
             node_ref: NodeRef::default(),
@@ -392,6 +413,10 @@ mod tests {
             onpointerdown: Callback::noop(),
             onmousedown: Callback::noop(),
             onauxclick: Callback::noop(),
+            ondragenter: Callback::noop(),
+            ondragover: Callback::noop(),
+            ondragleave: Callback::noop(),
+            ondrop: Callback::noop(),
             title: None,
             tip: None,
             label: None,
@@ -616,6 +641,18 @@ mod tests {
             ..props()
         });
         assert!(!html.contains(class::FOLD), "{html}");
+    }
+
+    #[test]
+    fn busy_mark_sets_aria_busy_and_leaves_the_content() {
+        let html = render(ButtonProps {
+            busy_mark: true,
+            ..props()
+        });
+        assert!(html.contains("aria-busy=\"true\""), "{html}");
+        assert!(html.contains(">Save</span>"), "{html}");
+        assert!(!html.contains(class::BUTTON_SPINNER), "{html}");
+        assert!(!html.contains(class::BUSY), "{html}");
     }
 
     #[test]
