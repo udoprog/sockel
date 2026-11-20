@@ -14,7 +14,8 @@
 // - `.sockel-menu-item`: a row at `--control-height`, its border reserved,
 //   so hover and focus change its fill only. Parts: `-mark` (a check's or
 //   radio's, its box kept when off, `.sockel-off`), `-icon`, `-text`
-//   (`-label` on one line, `-detail` under it), `-hint` (a shortcut).
+//   (`-label` on one line, `-detail` under it; left out of a glyph-only
+//   row), `-hint` (a shortcut), `-end` (the app's markup, kept whole).
 //   `.sockel-danger`: in the danger colour. An `<a>` row (a link) looks the
 //   same as a `<button>` one.
 // - `.sockel-menu-separator`, `.sockel-menu-heading`, `.sockel-menu-note`.
@@ -209,6 +210,13 @@ $-glyphs: ".sockel-menu-item-icon";
         color: var(--muted);
         font-size: var(--text-xs);
     }
+}
+
+// The app's markup at the row's end, after any hint.
+.sockel-menu-item-end {
+    display: inline-flex;
+    flex: none;
+    align-items: center;
 }
 
 @if base.emits("menu.separator") {

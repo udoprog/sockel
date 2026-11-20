@@ -611,6 +611,10 @@ pub struct MenuItemProps {
     #[cfg(feature = "shortcuts")]
     #[prop_or_default]
     pub keys: Option<AttrValue>,
+    /// Markup at the row's very end, after any hint and keys, kept whole
+    /// (`.sockel-menu-item-end`): a state box the app draws.
+    #[prop_or_default]
+    pub end: Option<Html>,
     /// A link row (`<a>`): picking it follows the link and closes the menu.
     #[prop_or_default]
     pub href: Option<AttrValue>,
@@ -624,6 +628,10 @@ pub struct MenuItemProps {
     /// The row's native tooltip (`title`).
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// Its accessible name (`aria-label`), when it differs from the visible
+    /// label.
+    #[prop_or_default]
+    pub aria_label: Option<AttrValue>,
     /// A button row that opens a dialog: whether it is open now
     /// (`aria-haspopup="dialog"`, `aria-expanded`).
     #[prop_or_default]
@@ -666,7 +674,8 @@ pub struct MenuItemProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
-    /// The label.
+    /// The label. Empty, with no detail, the row has no text part: a lone
+    /// glyph.
     #[prop_or_default]
     pub children: Html,
 }
@@ -706,6 +715,17 @@ impl Row<'_> {
                 </span>
             }
         });
+        let text = (detail.is_some() || !crate::button::is_empty(&p.children)).then(|| {
+            html! {
+                <span class={class::MENU_ITEM_TEXT}>
+                    <span class={class::MENU_ITEM_LABEL}>{ p.children.clone() }</span>
+                    { for detail }
+                </span>
+            }
+        });
+        let end = p.end.clone().map(|end| {
+            html! { <span class={class::MENU_ITEM_END}>{ end }</span> }
+        });
         let hint = p.hint.clone().map(|hint| {
             html! { <span class={class::MENU_ITEM_HINT}>{ hint }</span> }
         });
@@ -732,11 +752,9 @@ impl Row<'_> {
             <>
                 { for mark }
                 { for icon }
-                <span class={class::MENU_ITEM_TEXT}>
-                    <span class={class::MENU_ITEM_LABEL}>{ p.children.clone() }</span>
-                    { for detail }
-                </span>
+                { for text }
                 { for hint }
+                { for end }
             </>
         };
         let class = classes!(menu_item(p.danger), p.class.clone());
@@ -753,6 +771,7 @@ impl Row<'_> {
                         target={p.new_tab.then_some("_blank")}
                         rel={p.new_tab.then_some("noopener noreferrer")}
                         download={p.download.then_some("")} title={p.title.clone()}
+                        aria-label={p.aria_label.clone()}
                         aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                         aria-keyshortcuts={keyshortcuts.clone()}
                         aria-pressed={pressed} aria-busy={busy}
@@ -769,7 +788,7 @@ impl Row<'_> {
                         aria-checked={self.checked.map(|on| on.to_string())}
                         aria-haspopup={p.haspopup.clone().or(p.dialog.map(|_| AttrValue::Static("dialog")))}
                         aria-expanded={p.dialog.map(|open| open.to_string())}
-                        title={p.title.clone()}
+                        title={p.title.clone()} aria-label={p.aria_label.clone()}
                         aria-disabled={disabled} aria-current={current} data-tip={p.tip.clone()}
                         aria-keyshortcuts={keyshortcuts}
                         aria-pressed={pressed} aria-busy={busy} ref={p.node_ref.clone()}
@@ -839,10 +858,12 @@ fn item_props(
         hint: hint.clone(),
         #[cfg(feature = "shortcuts")]
         keys: None,
+        end: None,
         href: None,
         new_tab: false,
         download: false,
         title: None,
+        aria_label: None,
         dialog: None,
         current: false,
         tip: None,
@@ -1749,6 +1770,71 @@ mod tests {
                 class::MENU_ITEM_TEXT,
                 class::MENU_ITEM_LABEL
             )
+        );
+    }
+
+    #[test]
+    fn an_item_ends_with_the_apps_markup() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            hint: Some(AttrValue::Static("Ctrl+S")),
+            end: Some(html! { <i>{ "box" }</i> }),
+            children: html! { "Save" },
+        }));
+        let hint = html.find(class::MENU_ITEM_HINT).unwrap();
+        let end = html
+            .find(&format!(
+                "<span class=\"{}\"><i>box</i></span>",
+                class::MENU_ITEM_END
+            ))
+            .unwrap_or_else(|| panic!("{html}"));
+        assert!(hint < end, "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            children: html! { "Save" },
+        }));
+        assert!(!html.contains(class::MENU_ITEM_END), "{html}");
+    }
+
+    #[test]
+    fn an_item_takes_an_accessible_name() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            aria_label: Some(AttrValue::Static("Copy the path")),
+            children: html! { "Copy" },
+        }));
+        assert!(html.contains("aria-label=\"Copy the path\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            href: Some(AttrValue::Static("/a")),
+            aria_label: Some(AttrValue::Static("Open a")),
+        }));
+        assert!(html.contains("aria-label=\"Open a\""), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            children: html! { "Copy" },
+        }));
+        assert!(!html.contains("aria-label"), "{html}");
+    }
+
+    #[test]
+    fn a_glyph_only_item_has_no_text_part() {
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            icon: Some(html! { <Icon glyph={Glyph::Plus} /> }),
+        }));
+        assert!(html.contains(class::MENU_ITEM_ICON), "{html}");
+        assert!(!html.contains(class::MENU_ITEM_TEXT), "{html}");
+        assert!(!html.contains(class::MENU_ITEM_LABEL), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            icon: Some(html! { <Icon glyph={Glyph::Plus} /> }),
+            detail: Some(AttrValue::Static("More")),
+        }));
+        assert!(html.contains(class::MENU_ITEM_TEXT), "{html}");
+        let html = render::<MenuItem>(yew::props!(MenuItemProps {
+            children: html! { "Copy" },
+        }));
+        assert!(
+            html.contains(&format!(
+                "<span class=\"{}\"><span class=\"{}\">Copy</span></span>",
+                class::MENU_ITEM_TEXT,
+                class::MENU_ITEM_LABEL
+            )),
+            "{html}"
         );
     }
 

@@ -24,16 +24,20 @@ All notable changes to sockel and sockel-build. The format follows
   and `Report::pruned`, `pruned_rules` and `pruned_bytes`. Off by default, the
   stylesheet unchanged. Measured: territory 107.6 KB to 104.2 KB (15.2 to
   15.0 KB gzip), characterize 370.0 KB to 364.4 KB (49.9 to 49.4 KB gzip).
+- `MenuItem` takes `end: Option<Html>`, the app's markup at the row's very
+  end (after any hint and keys) in the new `.sockel-menu-item-end`, which
+  doesn't shrink, and `aria_label` (`aria-label`, an accessible name other
+  than the visible label). Unset, they render nothing.
 
 ### Breaking
 
 - `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant
   `OverBudget`; an exhaustive `match` on it needs an arm.
 - New public prop fields break struct literals of `MenuItemProps` (`pressed`,
-  `busy`, `haspopup`, `data`, `node_ref`) and `SelectionBarProps`
-  (`count_testid`, `idle`, `onkeydown`), `SwitchProps` and `CheckboxProps`
-  (`title`). End the literal with
-  `..Default::default()`, or build the props with `yew::props!`.
+  `busy`, `haspopup`, `data`, `node_ref`, `end`, `aria_label`) and
+  `SelectionBarProps` (`count_testid`, `idle`, `onkeydown`), `SwitchProps` and
+  `CheckboxProps` (`title`). End the literal with `..Default::default()`, or
+  build the props with `yew::props!`.
 
 ### Changed
 
@@ -44,6 +48,9 @@ All notable changes to sockel and sockel-build. The format follows
 - A pill button's text on hover is 45% tone and 55% `--text` (the new
   `$pill-button-hover-ink`), so it reads at 4.5:1 or more on the deeper hover
   tint too.
+- A `MenuItem` with no label and no detail (a lone glyph) leaves out its
+  `.sockel-menu-item-text` span, which took the row's free space, so the
+  app can centre the glyph. Rows with a label render as before.
 
 ## [0.2.2] - 2026-11-19
 

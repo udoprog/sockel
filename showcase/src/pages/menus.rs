@@ -77,6 +77,14 @@ fn SampleItems(props: &ItemsProps) -> Html {
                 <MenuItem detail="Keeps its history" onclick={pick("rename")}>{ "Rename" }</MenuItem>
                 <MenuItem disabled={props.disabled} onclick={pick("move")}>{ "Move to…" }</MenuItem>
                 <MenuItem onclick={pick("copy")}>{ "Copy link" }</MenuItem>
+                <MenuItem aria_label="Copy the file's full path" onclick={pick("copy-path")}>
+                    { "Copy path" }
+                </MenuItem>
+                <MenuItem hint="G" end={html! { <Icon glyph={Glyph::Check} /> }} onclick={pick("grid")}>
+                    { "Show grid" }
+                </MenuItem>
+                <MenuItem icon={html! { <Icon glyph={Glyph::Search} /> }} aria_label="Find"
+                    title="A glyph-only row: no text part" onclick={pick("find")} />
                 <MenuItem href="#menu" current=true detail="A link row, the page shown">{ "Open this page" }</MenuItem>
                 <MenuItem href="https://example.org/" new_tab=true detail="A link row in a new tab"
                     detail_html={html! { <>{ " · " }<em>{ "example.org" }</em></> }}>
