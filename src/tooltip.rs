@@ -504,6 +504,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         ondragleave: Callback::noop(),
         ondrop: Callback::noop(),
         title: None,
+        style: None,
         tip: None,
         label: props.label.clone(),
         testid: props.testid.clone(),

@@ -149,6 +149,10 @@ pub struct ButtonProps {
     pub ondrop: Callback<DragEvent>,
     #[prop_or_default]
     pub title: Option<AttrValue>,
+    /// Inline style on the element, such as custom properties the app's
+    /// own rules read.
+    #[prop_or_default]
+    pub style: Option<AttrValue>,
     /// Its tooltip, shown by [`DataTips`](crate::DataTips) (`data-tip`).
     #[prop_or_default]
     pub tip: Option<AttrValue>,
@@ -288,6 +292,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                     aria-busy={busy}
                     aria-pressed={pressed}
                     title={props.title.clone()}
+                    style={props.style.clone()}
                     data-tip={props.tip.clone()}
                     aria-label={props.label.clone()}
                     data-autofocus={props.autofocus.then_some("")}
@@ -327,6 +332,7 @@ pub fn Button(props: &ButtonProps) -> Html {
                     aria-busy={busy}
                     aria-pressed={pressed}
                     title={props.title.clone()}
+                    style={props.style.clone()}
                     data-tip={props.tip.clone()}
                     aria-label={props.label.clone()}
                     data-autofocus={props.autofocus.then_some("")}
@@ -418,6 +424,7 @@ mod tests {
             ondragleave: Callback::noop(),
             ondrop: Callback::noop(),
             title: None,
+            style: None,
             tip: None,
             label: None,
             testid: None,
@@ -641,6 +648,24 @@ mod tests {
             ..props()
         });
         assert!(!html.contains(class::FOLD), "{html}");
+    }
+
+    #[test]
+    fn style_renders_only_when_given() {
+        let html = render(ButtonProps {
+            style: Some("--tint: red".into()),
+            ..props()
+        });
+        assert!(html.contains("style=\"--tint: red\""), "{html}");
+
+        let html = render(ButtonProps {
+            style: Some("--tint: red".into()),
+            href: Some("/x".into()),
+            ..props()
+        });
+        assert!(html.contains("style=\"--tint: red\""), "{html}");
+
+        assert!(!render(props()).contains("style="), "{html}");
     }
 
     #[test]

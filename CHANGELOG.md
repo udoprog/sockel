@@ -64,9 +64,10 @@ All notable changes to sockel and sockel-build. The format follows
 
 - `ButtonProps` gains `busy_mark` (busy with the app's own mark: `aria-busy`
   and ignored clicks, the content kept, no spinner) and the drag callbacks
-  `ondragenter`, `ondragover`, `ondragleave` and `ondrop`. Code building
-  `ButtonProps` as a struct literal adds the fields; `html!` users change
-  nothing.
+  `ondragenter`, `ondragover`, `ondragleave` and `ondrop`, and `style`
+  (inline style, such as custom properties the app's rules read). Code
+  building `ButtonProps` as a struct literal adds the fields; `html!` users
+  change nothing.
 - `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant
   `OverBudget`; an exhaustive `match` on it needs an arm.
 - New public prop fields break struct literals of `MenuItemProps` (`pressed`,
