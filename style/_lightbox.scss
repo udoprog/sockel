@@ -51,6 +51,9 @@
 .sockel-lightbox-stage {
     @include base.scroll-area;
     display: grid;
+    // One track as large as the stage, not as its image: an auto track grows
+    // to a tall image and the percentage `max-block-size` never fits it.
+    grid-template: minmax(0, 1fr) / minmax(0, 1fr);
     place-items: center;
     touch-action: pan-x pan-y pinch-zoom;
 }

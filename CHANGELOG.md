@@ -56,6 +56,9 @@ All notable changes to sockel and sockel-build. The format follows
 
 - A glyph-only `MenuItem` has no padding above or below its glyph, so a
   glyph taller than the text line cannot make it taller than a labelled row.
+- `Lightbox` fits a tall image (a square one on a wide, short screen) inside
+  its stage instead of overflowing it, so zoom steps and `0` start from the
+  fitted size.
 
 ### Breaking
 
