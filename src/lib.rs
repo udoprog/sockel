@@ -414,6 +414,7 @@
 //! | `card-grid` | | 4.2 KB |
 //! | `checkbox` | `icons` | 6.6 KB |
 //! | `chip` | `icons` | 6.6 KB |
+//! | `chip-select` | `chip`, `layout`, `search-select` | 49.8 KB |
 //! | `choice` | | 6.8 KB |
 //! | `color-select` | `select` | 49.9 KB |
 //! | `composer` | `drop-zone`, `input` | 23.4 KB |
@@ -1009,6 +1010,8 @@ mod card_grid;
 mod checkbox;
 #[cfg(feature = "chip")]
 mod chip;
+#[cfg(feature = "chip-select")]
+mod chip_select;
 #[cfg(feature = "choice")]
 mod choice;
 #[cfg(feature = "color-select")]
@@ -1145,6 +1148,8 @@ pub use checkbox::{Checkbox, CheckboxProps, checkbox};
 pub use chip::{
     Chip, ChipList, ChipListProps, ChipProps, ChipToggle, ChipToggleProps, chip, chip_count,
 };
+#[cfg(feature = "chip-select")]
+pub use chip_select::{ChipSelect, ChipSelectProps, chip_select};
 #[cfg(feature = "choice")]
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, ChoiceStack, choice};
 #[cfg(feature = "color-select")]

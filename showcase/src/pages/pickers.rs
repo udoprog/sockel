@@ -3,8 +3,8 @@ use wasm_bindgen::closure::Closure;
 use yew::prelude::*;
 
 use sockel::{
-    Field, FilterChoice, FilterPicker, InputSize, LibraryToolbar, SearchOption, SearchSelect,
-    Stack, field_describedby, search_matches,
+    ChipSelect, Field, FilterChoice, FilterPicker, InputSize, LibraryToolbar, SearchOption,
+    SearchSelect, Stack, field_describedby, search_matches,
 };
 
 use super::fields::use_control_id;
@@ -314,6 +314,54 @@ pub fn SearchSelectPage() -> Html {
     html! {
         <Demo {controls} {code}>
             <SearchSample settings={s} value={*value} on_change={pick} />
+        </Demo>
+    }
+}
+
+const PICK_MINIMUMS: &[(&str, usize)] = &[("0", 0), ("1", 1), ("2", 2)];
+
+#[function_component]
+pub fn ChipSelectPage() -> Html {
+    let value = use_state(|| vec![2usize, 0]);
+    let ordered = use_state(|| false);
+    let min = use_state(|| 1usize);
+    let invalid = use_state(|| false);
+    let disabled = use_state(|| false);
+
+    let options: Vec<SearchOption<usize>> = ["Apple", "Pear", "Cherry", "Plum", "Fig"]
+        .into_iter()
+        .enumerate()
+        .map(|(i, label)| SearchOption::new(i, label))
+        .collect();
+
+    let controls = html! {
+        <>
+            <Toggle label="ordered" value={*ordered} on_change={bind(&ordered)} />
+            <Control<usize> label="min" options={PICK_MINIMUMS} value={*min} on_change={bind(&min)} />
+            <Toggle label="invalid" value={*invalid} on_change={bind(&invalid)} />
+            <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
+        </>
+    };
+
+    let code = snippet(
+        &[],
+        El::new("ChipSelect<Fruit>")
+            .expr("options", "options")
+            .expr("value", "picks")
+            .expr("on_change", "set_picks")
+            .text("label", "Fruit")
+            .flag("ordered", *ordered)
+            .expr_if(*min > 0, "min", min.to_string())
+            .text("empty_label", "No other fruit")
+            .flag("invalid", *invalid)
+            .flag("disabled", *disabled),
+    );
+
+    html! {
+        <Demo {controls} {code}>
+            <ChipSelect<usize> {options} value={(*value).clone()} on_change={bind(&value)}
+                label="Fruit" ordered={*ordered} min={*min} empty_label="No other fruit"
+                invalid={*invalid} disabled={*disabled} />
         </Demo>
     }
 }

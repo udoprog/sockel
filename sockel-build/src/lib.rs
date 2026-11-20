@@ -254,6 +254,7 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("card-grid", &["card-grid"]),
     ("checkbox", &["checkbox"]),
     ("chip", &["chip"]),
+    ("chip-select", &[]),
     ("choice", &["choice"]),
     ("color-select", &["color-select"]),
     ("composer", &["composer"]),

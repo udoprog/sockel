@@ -753,6 +753,18 @@ pub const PAGES: &[Page] = &[
         ],
     },
     Page {
+        id: "chip-select",
+        title: "ChipSelect",
+        group: Group::Pickers,
+        about: "Removable chips of what is picked over a SearchSelect of what is not. The chip row keeps its height and the search its place as picks come and go; at the minimum no chip can be removed, and Backspace in the empty search removes the last chip.",
+        covers: &["ChipSelect", "ChipSelectProps", "chip_select"],
+        render: || html! { <pickers::ChipSelectPage /> },
+        holds: &[
+            hold(sockel::class::CHIP_LIST, Size::Height, Across::All),
+            hold(sockel::class::SEARCH_SELECT, Size::Box, Across::All),
+        ],
+    },
+    Page {
         id: "filter-picker",
         title: "FilterPicker",
         group: Group::Pickers,

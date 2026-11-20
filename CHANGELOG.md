@@ -12,6 +12,12 @@ All notable changes to sockel and sockel-build. The format follows
   a burst of steps has been quiet for the delay, focus leaves the control or a
   typed number is committed, and not again for the number last committed.
   `on_change` fires as before; unset, nothing changes.
+- `ChipSelect` (feature `chip-select`): removable `Chip`s of what is picked over
+  a `SearchSelect` of what is not, for a token field. Props: `options`,
+  `value`, `on_change`, `ordered` (picks keep the order picked), `min` (at it
+  no chip can be removed), `empty_label`, `size`, `invalid`, `disabled`. The
+  chip row keeps its height; Backspace in the empty search removes the last
+  chip. No new Sass: a `chip_select()` stack.
 - `Report::css_bytes`, the compiled stylesheet's plain size, and
   `Config::css_budget(bytes)`, which fails any build over that size with the
   new `Error::OverBudget { size, budget }`. No budget, no change.
