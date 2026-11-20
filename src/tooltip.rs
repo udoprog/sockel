@@ -475,6 +475,8 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         fold: false,
         fold_wide: false,
         spread: false,
+        justify: false,
+        labelled: false,
         wide: false,
         form: None,
         tabindex: None,

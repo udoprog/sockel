@@ -52,6 +52,8 @@ pub fn ButtonPage() -> Html {
     let pressed = use_state(|| None);
     let busy = use_state(|| false);
     let badge = use_state(|| false);
+    let justify = use_state(|| false);
+    let labelled = use_state(|| false);
     let disabled = use_state(|| false);
     let link = use_state(|| false);
     let selected = use_state(|| false);
@@ -67,6 +69,8 @@ pub fn ButtonPage() -> Html {
             <Select<Option<bool>> label="pressed" options={PRESSED} value={*pressed} on_change={bind(&pressed)} />
             <Toggle label="fold (on a phone)" value={*fold} on_change={bind(&fold)} />
             <Toggle label="fold_wide (above a phone)" value={*fold_wide} on_change={bind(&fold_wide)} />
+            <Toggle label="justify (icon and label at the two ends)" value={*justify} on_change={bind(&justify)} />
+            <Toggle label="labelled (never icon-only)" value={*labelled} on_change={bind(&labelled)} />
             <Toggle label="busy" value={*busy} on_change={bind(&busy)} />
             <Toggle label="after (a badge)" value={*badge} on_change={bind(&badge)} />
             <Toggle label="disabled" value={*disabled} on_change={bind(&disabled)} />
@@ -89,7 +93,7 @@ pub fn ButtonPage() -> Html {
     };
 
     let label = text.of("Save the draft");
-    let icon_only = *placement != Placement::None && label.is_empty();
+    let icon_only = *placement != Placement::None && label.is_empty() && !*labelled;
     let fold_applies = *fold && *placement != Placement::None && !label.is_empty();
     let classes = button(*variant, *size, icon_only, fold_applies);
 
@@ -106,6 +110,8 @@ pub fn ButtonPage() -> Html {
             .flag("trailing", *placement == Placement::Trailing)
             .flag("fold", *fold)
             .flag("fold_wide", *fold_wide)
+            .flag("justify", *justify)
+            .flag("labelled", *labelled)
             .expr_if(
                 pressed.is_some(),
                 "pressed",
@@ -132,7 +138,7 @@ pub fn ButtonPage() -> Html {
                 <Button variant={*variant} size={*size}
                     icon={(*placement != Placement::None).then(|| html! { <Icon glyph={Glyph::Check} /> })}
                     trailing={*placement == Placement::Trailing}
-                    fold={*fold} fold_wide={*fold_wide} pressed={*pressed} selected={*selected} link={*link_look} busy={*busy} disabled={*disabled}
+                    fold={*fold} fold_wide={*fold_wide} justify={*justify} labelled={*labelled} pressed={*pressed} selected={*selected} link={*link_look} busy={*busy} disabled={*disabled}
                     after={(*badge).then(|| html! { <Badge>{ "3" }</Badge> })}
                     href={link.then(|| AttrValue::from("#button"))}
                     title="Save the draft" label={label.is_empty().then(|| AttrValue::from("Save the draft"))}

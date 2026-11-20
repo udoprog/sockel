@@ -7,6 +7,12 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Added
 
+- `Button` takes `justify` (`.sockel-justify`): the icon and the label at the
+  two ends with no width of its own, so the context decides it; `spread` is
+  now this plus `width: 100%`. Like `spread`, only with an icon and a label.
+  `labelled` keeps a button with an icon and empty children from being
+  icon-only: the label slot is drawn, so `trailing`, `spread` and `justify`
+  work for a label-less select without a non-breaking space.
 - `Stepper` takes `on_commit` (`Option<Callback<i64>>`) and `commit_delay`
   (milliseconds, default 500): `on_commit` tells the settled number once, when
   a burst of steps has been quiet for the delay, focus leaves the control or a
@@ -68,7 +74,8 @@ All notable changes to sockel and sockel-build. The format follows
   (inline style, such as custom properties the app's rules read), `after`
   (content after the label and before the chevron, in `.sockel-button-after`;
   an icon with `after` and no label is no longer icon-only) and
-  `label_testid` (the test id of the label's span). Code
+  `label_testid` (the test id of the label's span), `justify` and
+  `labelled` (see Added). Code
   building `ButtonProps` as a struct literal adds the fields; `html!` users
   change nothing.
 - `sockel_build::Error` (not `#[non_exhaustive]`) has the new variant

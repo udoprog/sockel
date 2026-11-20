@@ -64,6 +64,17 @@ pub struct ButtonProps {
     /// chevron: only with both an icon and a label.
     #[prop_or_default]
     pub spread: bool,
+    /// The icon and the label at the two ends (`.sockel-justify`), with no
+    /// width of its own: the context (a block parent, a flex rule) decides
+    /// it. `spread` is this and the container's full width. Only with both
+    /// an icon and a label.
+    #[prop_or_default]
+    pub justify: bool,
+    /// Never icon-only, even with empty children: the label slot is drawn, so
+    /// `trailing`, `spread` and `justify` work for a button with an icon and
+    /// no label, such as a label-less select.
+    #[prop_or_default]
+    pub labelled: bool,
     /// An icon-only button as wide as a regular control is high
     /// (`--control-height`) whatever its size (`.sockel-wide`), its height
     /// the size's: a small icon button that stays as wide as a regular one.
@@ -228,7 +239,7 @@ pub(crate) fn is_empty(html: &Html) -> bool {
 /// hovered or focused.
 #[function_component]
 pub fn Button(props: &ButtonProps) -> Html {
-    let has_label = !is_empty(&props.children);
+    let has_label = props.labelled || !is_empty(&props.children);
     let icon_only = props.icon.is_some() && !has_label && props.after.is_none();
     let fold = props.fold && props.icon.is_some() && has_label;
     let fold_wide = props.fold_wide && props.icon.is_some() && has_label;
@@ -239,6 +250,7 @@ pub fn Button(props: &ButtonProps) -> Html {
         props.link.then_some(class::LINK),
         (props.wide && icon_only).then_some(class::WIDE),
         (props.spread && props.icon.is_some() && has_label).then_some(class::SPREAD),
+        (props.justify && props.icon.is_some() && has_label).then_some(class::JUSTIFY),
         props.class.clone()
     );
 
@@ -411,6 +423,8 @@ mod tests {
             fold: false,
             fold_wide: false,
             spread: false,
+            justify: false,
+            labelled: false,
             wide: false,
             form: None,
             hidden: false,
@@ -668,6 +682,35 @@ mod tests {
         assert!(spread(Some(html! { <svg /> }), html! { "Open" }).contains(class::SPREAD));
         assert!(!spread(None, html! { "Open" }).contains(class::SPREAD));
         assert!(!spread(Some(html! { <svg /> }), Html::default()).contains(class::SPREAD));
+    }
+
+    #[test]
+    fn justify_needs_an_icon_and_a_label() {
+        let justify = |icon: Option<Html>, label: Html| {
+            render(ButtonProps {
+                icon,
+                justify: true,
+                children: label,
+                ..props()
+            })
+        };
+        assert!(justify(Some(html! { <svg /> }), html! { "Open" }).contains(class::JUSTIFY));
+        assert!(!justify(None, html! { "Open" }).contains(class::JUSTIFY));
+        assert!(!justify(Some(html! { <svg /> }), Html::default()).contains(class::JUSTIFY));
+    }
+
+    #[test]
+    fn labelled_keeps_an_empty_button_from_being_icon_only() {
+        let html = render(ButtonProps {
+            icon: Some(html! { <svg /> }),
+            labelled: true,
+            justify: true,
+            children: Html::default(),
+            ..props()
+        });
+        assert!(!html.contains(class::ICON), "{html}");
+        assert!(html.contains(class::BUTTON_LABEL), "{html}");
+        assert!(html.contains(class::JUSTIFY), "{html}");
     }
 
     #[test]

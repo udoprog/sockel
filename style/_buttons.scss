@@ -18,8 +18,9 @@
 //   `.sockel-fold-wide` the same from the phone breakpoint up.
 // - `.sockel-menu-row`: a row of a dropdown of buttons: spans its container,
 //   the icon and the label at the start.
-// - `.sockel-spread`: spans its container, the icon and the label at the two
-//   ends. `.sockel-wide` with `.sockel-icon`: an icon-only button as wide as a
+// - `.sockel-justify`: the icon and the label at the two ends, no width of its
+//   own (the context decides it). `.sockel-spread`: the same, spanning its
+//   container. `.sockel-wide` with `.sockel-icon`: an icon-only button as wide as a
 //   regular control is high (`--control-height`) whatever its size, the
 //   height its size's.
 // - `[aria-pressed="true"]` and `.sockel-selected`: a toggle that is on, and
@@ -137,14 +138,18 @@
         width: var(--control-height);
     }
 
-    &.sockel-spread {
-        width: 100%;
+    &.sockel-spread,
+    &.sockel-justify {
         justify-content: space-between;
 
         > .sockel-button-content {
             flex: 1 1 auto;
             justify-content: space-between;
         }
+    }
+
+    &.sockel-spread {
+        width: 100%;
     }
 
     // A row of a dropdown: spans its container, the icon and the label at
