@@ -18,6 +18,10 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Changed
 
+- sockel-build's docs: the short-prefix advice gives the measured cost. A
+  long prefix is a large share of the raw sheet (`characterize-`, about
+  34 KB of 369 KB) but gzip removes almost all of it (0.2–2% of the
+  compressed sheet), so it matters for raw size, little on the wire.
 - A pill button's text on hover is 45% tone and 55% `--text` (the new
   `$pill-button-hover-ink`), so it reads at 4.5:1 or more on the deeper hover
   tint too.

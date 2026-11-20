@@ -57,7 +57,10 @@ dependency's markup writes are allowed with [`Config::foreign`](https://docs.rs/
 `*` is a prefix), and get no constant. Tokens are configured on the build
 with [`Config::with`](https://docs.rs/sockel-build/latest/sockel_build/struct.Config.html#method.with), not `@use "sockel" with (...)`. The prefix is in
 every selector naming a local class, so a short one (`ch-` rather than
-`characterize-`) keeps the stylesheet smaller; the constants do not change.
+`characterize-`) keeps the raw stylesheet smaller (about 34 KB of
+characterize's 369 KB); the constants do not change. Gzip removes almost
+all of it: stripping the prefix entirely saves 0.2–2% of the compressed
+sheet.
 
 <br>
 
