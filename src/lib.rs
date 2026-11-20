@@ -409,59 +409,60 @@
 //! | Feature | Brings in | CSS alone |
 //! | --- | --- | --- |
 //! | `action-group` | | 3.8 KB |
-//! | `badge` | `icons` | 9.7 KB |
+//! | `badge` | `icons` | 9.8 KB |
 //! | `button` | `icons`, `skeleton` | 13.4 KB |
 //! | `card-grid` | | 4.2 KB |
 //! | `checkbox` | `icons` | 6.6 KB |
 //! | `chip` | `icons` | 6.6 KB |
 //! | `chip-select` | `chip`, `layout`, `search-select` | 49.8 KB |
-//! | `choice` | | 6.8 KB |
-//! | `color-select` | `select` | 49.9 KB |
+//! | `choice` | | 7.2 KB |
+//! | `color-select` | `select` | 50.1 KB |
 //! | `composer` | `drop-zone`, `input` | 23.4 KB |
-//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.1 KB |
+//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.3 KB |
 //! | `disclosure` | `head`, `icons` | 15.8 KB |
 //! | `drop-zone` | `button` | 15.7 KB |
 //! | `field` | | 6.4 KB |
 //! | `head` | `layout` | 13.0 KB |
 //! | `icons` | | 4.0 KB |
 //! | `input` | `icons` | 10.5 KB |
-//! | `lanes` | `badge`, `reorder` | 44.4 KB |
+//! | `lanes` | `badge`, `reorder` | 44.5 KB |
 //! | `layout` | | 9.1 KB |
 //! | `library-toolbar` | `input`, `layout` | 16.2 KB |
-//! | `lightbox` | `overlay` | 29.1 KB |
-//! | `loadable` | `notice`, `skeleton` | 24.0 KB |
-//! | `log-view` | `button` | 15.4 KB |
+//! | `lightbox` | `overlay` | 29.2 KB |
+//! | `loadable` | `notice`, `skeleton` | 24.1 KB |
+//! | `log-view` | `button` | 15.5 KB |
 //! | `media` | `icons` | 5.7 KB |
-//! | `menu` | `button`, `icons`, `overlay` | 32.8 KB |
-//! | `notice` | `badge`, `button` | 23.7 KB |
+//! | `menu` | `button`, `icons`, `overlay` | 32.9 KB |
+//! | `notice` | `badge`, `button` | 23.8 KB |
 //! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.5 KB |
 //! | `pager` | `icons` | 6.9 KB |
 //! | `panel` | | 4.9 KB |
-//! | `picker` | `overlay`, `pager`, `select` | 54.5 KB |
+//! | `picker` | `overlay`, `pager`, `select` | 54.6 KB |
 //! | `property-list` | `button`, `input` | 22.8 KB |
-//! | `reorder` | `icons`, `rows`, `tooltip` | 36.4 KB |
+//! | `quantity` | `select`, `stepper` | 47.5 KB |
+//! | `reorder` | `icons`, `rows`, `tooltip` | 36.5 KB |
 //! | `rows` | `button` | 18.9 KB |
-//! | `search-select` | `select` | 47.0 KB |
-//! | `save-bar` | `button` | 14.2 KB |
+//! | `search-select` | `select` | 47.2 KB |
+//! | `save-bar` | `button` | 14.3 KB |
 //! | `seam` | | 5.3 KB |
-//! | `select` | `input`, `menu`, `tooltip` | 45.7 KB |
-//! | `shell` | `badge` | 14.2 KB |
+//! | `select` | `input`, `menu`, `tooltip` | 45.8 KB |
+//! | `shell` | `badge` | 14.3 KB |
 //! | `shortcuts` | `overlay` | 29.0 KB |
 //! | `skeleton` | `icons`, `media` | 7.5 KB |
-//! | `split-view` | `seam` | 6.1 KB |
+//! | `split-view` | `seam` | 6.4 KB |
 //! | `stepper` | `input` | 12.1 KB |
 //! | `switch` | `icons` | 6.0 KB |
-//! | `table` | `icons` | 10.5 KB |
+//! | `table` | `icons` | 10.8 KB |
 //! | `tabs` | | 9.1 KB |
 //! | `time` | | 3.8 KB |
-//! | `toast` | `save-bar`, `toasts` | 35.8 KB |
-//! | `toasts` | `badge`, `button`, `overlay` | 35.0 KB |
-//! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.2 KB |
+//! | `toast` | `save-bar`, `toasts` | 36.0 KB |
+//! | `toasts` | `badge`, `button`, `overlay` | 35.1 KB |
+//! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.6 KB |
 //! | `tooltip` | `overlay` | 28.6 KB |
 //!
 //! A feature is named for the component or family it gates; the
 //! [showcase](https://udoprog.github.io/sockel/) shows each one. "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
-//! with none it is 3.4 KB, and with `full` 135 KB. Each feature builds alone,
+//! with none it is 3.4 KB, and with `full` 137 KB. Each feature builds alone,
 //! and its CSS holds no other feature's rules.
 //! `scripts/feature-sizes.sh` in the repository measures every row and rewrites the
 //! column and these figures in place; run it when the styles change.
@@ -1080,6 +1081,8 @@ mod picker;
 mod popover;
 #[cfg(feature = "property-list")]
 mod property_list;
+#[cfg(feature = "quantity")]
+mod quantity;
 #[cfg(feature = "reorder")]
 mod reorder;
 #[cfg(feature = "reorder")]
@@ -1267,6 +1270,11 @@ pub use popover::{
 pub use property_list::{
     EditKey, InlineEdit, InlineEditProps, PropertyList, PropertyListProps, PropertyRow,
     PropertyRowProps, edit_key, inline_edit, property_list, property_row,
+};
+#[cfg(feature = "quantity")]
+pub use quantity::{
+    QuantityField, QuantityFieldProps, Unit, byte_sizes, convert, durations, quantity,
+    readable_unit, unit_bounds,
 };
 #[cfg(feature = "reorder")]
 pub use reorder::{

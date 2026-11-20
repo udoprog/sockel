@@ -1,6 +1,6 @@
 //! sockel's components spell no user-visible words: they come from the
 //! catalog (`locales/`). A capitalised string literal in component code is
-//! taken for one, unless it is a key or a data-transfer type.
+//! taken for one, unless it is a key, a data-transfer type or a unit symbol.
 
 use std::path::Path;
 
@@ -17,8 +17,11 @@ const NOT_TEXT: &[&str] = &[
     "Enter",
     "Escape",
     "Files",
+    "GiB",
     "Home",
+    "KiB",
     "Meta",
+    "MiB",
     "PageDown",
     "PageUp",
     "Shift",

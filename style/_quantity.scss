@@ -1,0 +1,14 @@
+// QuantityField (src/quantity.rs): a stepper and a unit select as one
+// control.
+//
+// - `.sockel-quantity`: the two on one line, `--space-2` apart, as wide as
+//   their parts (the select's face keeps its width across units, the
+//   stepper's number the room of its widest unit).
+
+.sockel-quantity {
+    display: inline-flex;
+    align-items: center;
+    gap: var(--space-2);
+    width: fit-content;
+    max-width: 100%;
+}

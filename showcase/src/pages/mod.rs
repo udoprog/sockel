@@ -26,6 +26,7 @@ mod picker;
 mod pickers;
 mod popover;
 mod property_list;
+mod quantities;
 mod reorder;
 mod reorder_tree;
 mod rows;
@@ -557,6 +558,36 @@ pub const PAGES: &[Page] = &[
                 sockel::class::STEPPER_BUTTON,
                 Size::Box,
                 Across::Except(&["Size", "Max", "Decimals", "fill", "text"]),
+            ),
+        ],
+    },
+    Page {
+        id: "quantity-field",
+        title: "QuantityField",
+        group: Group::Inputs,
+        about: "A number and a unit select as one control, the value held in base units. It shows the largest unit that divides the value exactly; picking another unit converts, rounding and clamping when it does not divide. The select and the number keep their width across units, and an off choice can sit in the select.",
+        covers: &[
+            "QuantityField",
+            "QuantityFieldProps",
+            "Unit",
+            "quantity",
+            "durations",
+            "byte_sizes",
+            "readable_unit",
+            "unit_bounds",
+            "convert",
+        ],
+        render: || html! { <quantities::QuantityPage /> },
+        holds: &[
+            hold(
+                sockel::class::QUANTITY,
+                Size::Both,
+                Across::Except(&["Size", "Units"]),
+            ),
+            hold(
+                sockel::class::STEPPER,
+                Size::Both,
+                Across::Except(&["Size", "Units"]),
             ),
         ],
     },

@@ -18,6 +18,11 @@ All notable changes to sockel and sockel-build. The format follows
   no chip can be removed), `empty_label`, `size`, `invalid`, `disabled`. The
   chip row keeps its height; Backspace in the empty search removes the last
   chip. No new Sass: a `chip_select()` stack.
+- `QuantityField` (feature `quantity`): a `Stepper` and a unit `Select` holding
+  one quantity in base units, with `Unit`, the ready-made `durations()` and
+  `byte_sizes()`, an optional off choice, and the pure `readable_unit`,
+  `unit_bounds` and `convert`. It shows the largest unit that divides the
+  value; the select and the number keep their width across units.
 - `Report::css_bytes`, the compiled stylesheet's plain size, and
   `Config::css_budget(bytes)`, which fails any build over that size with the
   new `Error::OverBudget { size, budget }`. No budget, no change.

@@ -94,6 +94,7 @@ sockel-composer-attach = Bifoga
 sockel-composer-remove = Ta bort
 sockel-stepper-decrease = Minska
 sockel-stepper-increase = Öka
+sockel-quantity-unit = Enhet
 sockel-seam-resize = Ändra panelernas storlek
 sockel-reorder-handle = Flytta { $name }
 sockel-reorder-hint = Dra, eller tryck på blanksteg för att lyfta, piltangenterna för att flytta och blanksteg för att släppa. Escape avbryter.

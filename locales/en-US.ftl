@@ -94,6 +94,7 @@ sockel-composer-attach = Attach
 sockel-composer-remove = Remove
 sockel-stepper-decrease = Decrease
 sockel-stepper-increase = Increase
+sockel-quantity-unit = Unit
 sockel-seam-resize = Resize panes
 sockel-reorder-handle = Move { $name }
 sockel-reorder-hint = Drag, or press Space to lift, the arrow keys to move and Space to drop. Escape cancels.

@@ -279,6 +279,7 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("panel", &["panel"]),
     ("picker", &["picker", "filter-picker"]),
     ("property-list", &["property-list"]),
+    ("quantity", &["quantity"]),
     ("reorder", &["reorder"]),
     ("rows", &["rows"]),
     ("save-bar", &["save-bar"]),
