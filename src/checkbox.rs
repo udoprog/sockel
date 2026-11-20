@@ -29,6 +29,9 @@ pub struct CheckboxProps {
     /// A tip for [`DataTips`](crate::DataTips) (`data-tip` on the label).
     #[prop_or_default]
     pub tip: Option<AttrValue>,
+    /// A native hover hint (`title` on the label).
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
     /// The text beside the box.
     #[prop_or_default]
     pub children: Html,
@@ -65,7 +68,8 @@ pub fn Checkbox(props: &CheckboxProps) -> Html {
     let has_text = props.children != html! {};
 
     html! {
-        <label class={classes!(checkbox(props.disabled), props.class.clone())} data-tip={props.tip.clone()}>
+        <label class={classes!(checkbox(props.disabled), props.class.clone())} data-tip={props.tip.clone()}
+            title={props.title.clone()}>
             <span class={class::CHECKBOX_MARK}>
                 { with_testid(html! { <input type="checkbox" class={class::CHECKBOX_INPUT} ref={input}
                     checked={props.checked} disabled={props.disabled}
@@ -114,6 +118,19 @@ mod tests {
         };
         assert!(!checkbox(None).contains("data-tip"));
         assert!(checkbox(Some("Pin")).contains("data-tip=\"Pin\""));
+    }
+
+    #[test]
+    fn a_title_is_set_only_when_given() {
+        let checkbox = |title: Option<&'static str>| {
+            render::<Checkbox>(yew::props!(CheckboxProps {
+                checked: false,
+                title: title.map(AttrValue::from),
+                on_change: Callback::noop()
+            }))
+        };
+        assert!(!checkbox(None).contains("title="));
+        assert!(checkbox(Some("Pin")).contains("title=\"Pin\""));
     }
 
     #[test]

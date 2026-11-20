@@ -16,6 +16,9 @@ All notable changes to sockel and sockel-build. The format follows
 - `SelectionBar` takes `onkeydown`, `count_testid` (the count span's test id)
   and `idle: Option<bool>`, which overrides `count == 0` when the count is a
   phrase. Unset, the markup is as before.
+- `Switch` and `Checkbox` take `title`, a native hover hint (on the switch's
+  button, on the checkbox's label), for apps without `DataTips`. Unset, it
+  renders nothing.
 - `Config::prune(usage)`: leaves out sockel's rules for classes the app never
   reaches (neither its sources nor a sockel component they use write them),
   and `Report::pruned`, `pruned_rules` and `pruned_bytes`. Off by default, the
@@ -28,7 +31,8 @@ All notable changes to sockel and sockel-build. The format follows
   `OverBudget`; an exhaustive `match` on it needs an arm.
 - New public prop fields break struct literals of `MenuItemProps` (`pressed`,
   `busy`, `haspopup`, `data`, `node_ref`) and `SelectionBarProps`
-  (`count_testid`, `idle`, `onkeydown`). End the literal with
+  (`count_testid`, `idle`, `onkeydown`), `SwitchProps` and `CheckboxProps`
+  (`title`). End the literal with
   `..Default::default()`, or build the props with `yew::props!`.
 
 ### Changed

@@ -26,6 +26,9 @@ pub struct SwitchProps {
     /// A tip for [`DataTips`](crate::DataTips) (`data-tip`).
     #[prop_or_default]
     pub tip: Option<AttrValue>,
+    /// A native hover hint (`title`).
+    #[prop_or_default]
+    pub title: Option<AttrValue>,
     /// The text beside the switch.
     #[prop_or_default]
     pub children: Html,
@@ -65,6 +68,7 @@ pub fn Switch(props: &SwitchProps) -> Html {
                 aria-label={props.label.clone()}
                 disabled={props.disabled}
                 data-tip={props.tip.clone()}
+                title={props.title.clone()}
                 {onclick}>
                 <span class={class::SWITCH_TRACK}>
                     <span class={class::SWITCH_THUMB}>
@@ -123,5 +127,18 @@ mod tests {
             on_change: Callback::noop()
         }));
         assert!(switch.contains("data-tip=\"Live\""), "{switch}");
+    }
+
+    #[test]
+    fn a_title_is_set_only_when_given() {
+        let switch = |title: Option<&'static str>| {
+            render::<Switch>(yew::props!(SwitchProps {
+                on: false,
+                title: title.map(AttrValue::from),
+                on_change: Callback::noop()
+            }))
+        };
+        assert!(!switch(None).contains("title="));
+        assert!(switch(Some("Turn on")).contains("title=\"Turn on\""));
     }
 }
