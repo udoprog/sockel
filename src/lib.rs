@@ -410,44 +410,45 @@
 //! | --- | --- | --- |
 //! | `action-group` | | 3.8 KB |
 //! | `badge` | `icons` | 9.8 KB |
-//! | `button` | `icons`, `skeleton` | 13.4 KB |
+//! | `button` | `icons`, `skeleton` | 13.6 KB |
 //! | `card-grid` | | 4.2 KB |
 //! | `checkbox` | `icons` | 6.6 KB |
 //! | `chip` | `icons` | 6.6 KB |
-//! | `chip-select` | `chip`, `layout`, `search-select` | 49.8 KB |
+//! | `chip-select` | `chip`, `layout`, `search-select` | 50.1 KB |
 //! | `choice` | | 7.2 KB |
-//! | `color-select` | `select` | 50.2 KB |
-//! | `composer` | `drop-zone`, `input` | 23.4 KB |
-//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.3 KB |
+//! | `color-select` | `select` | 50.4 KB |
+//! | `composer` | `drop-zone`, `input` | 23.8 KB |
+//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.5 KB |
 //! | `disclosure` | `head`, `icons` | 15.8 KB |
-//! | `drop-zone` | `button` | 15.7 KB |
+//! | `drop-zone` | `button` | 16.0 KB |
 //! | `field` | | 6.4 KB |
+//! | `file-browser` | `badge`, `button`, `field`, `icons`, `input`, `layout`, `notice`, `overlay`, `rows` | 53.2 KB |
 //! | `head` | `layout` | 13.0 KB |
 //! | `icons` | | 4.0 KB |
 //! | `input` | `icons` | 10.5 KB |
-//! | `lanes` | `badge`, `reorder` | 44.5 KB |
+//! | `lanes` | `badge`, `reorder` | 44.8 KB |
 //! | `layout` | | 9.1 KB |
 //! | `library-toolbar` | `input`, `layout` | 16.2 KB |
-//! | `lightbox` | `overlay` | 29.2 KB |
-//! | `loadable` | `notice`, `skeleton` | 24.1 KB |
-//! | `log-view` | `button` | 15.5 KB |
+//! | `lightbox` | `overlay` | 29.5 KB |
+//! | `loadable` | `notice`, `skeleton` | 24.3 KB |
+//! | `log-view` | `button` | 15.7 KB |
 //! | `media` | `icons` | 5.7 KB |
-//! | `menu` | `button`, `icons`, `overlay` | 33.0 KB |
-//! | `notice` | `badge`, `button` | 23.8 KB |
-//! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.5 KB |
+//! | `menu` | `button`, `icons`, `overlay` | 33.2 KB |
+//! | `notice` | `badge`, `button` | 24.0 KB |
+//! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.7 KB |
 //! | `pager` | `icons` | 6.9 KB |
 //! | `panel` | | 4.9 KB |
-//! | `picker` | `overlay`, `pager`, `select` | 54.7 KB |
-//! | `property-list` | `button`, `input` | 22.8 KB |
-//! | `quantity` | `select`, `stepper` | 47.6 KB |
-//! | `reorder` | `icons`, `rows`, `tooltip` | 36.5 KB |
-//! | `rows` | `button` | 18.9 KB |
-//! | `search-select` | `select` | 47.3 KB |
-//! | `save-bar` | `button` | 14.3 KB |
+//! | `picker` | `overlay`, `pager`, `select` | 54.9 KB |
+//! | `property-list` | `button`, `input` | 23.0 KB |
+//! | `quantity` | `select`, `stepper` | 47.8 KB |
+//! | `reorder` | `icons`, `rows`, `tooltip` | 36.7 KB |
+//! | `rows` | `button` | 19.2 KB |
+//! | `search-select` | `select` | 47.5 KB |
+//! | `save-bar` | `button` | 14.5 KB |
 //! | `seam` | | 5.3 KB |
-//! | `select` | `input`, `menu`, `tooltip` | 45.9 KB |
+//! | `select` | `input`, `menu`, `tooltip` | 46.1 KB |
 //! | `shell` | `badge` | 14.3 KB |
-//! | `shortcuts` | `overlay` | 29.0 KB |
+//! | `shortcuts` | `overlay` | 29.2 KB |
 //! | `skeleton` | `icons`, `media` | 7.5 KB |
 //! | `split-view` | `seam` | 6.4 KB |
 //! | `stepper` | `input` | 12.1 KB |
@@ -455,10 +456,10 @@
 //! | `table` | `icons` | 10.8 KB |
 //! | `tabs` | | 9.1 KB |
 //! | `time` | | 3.8 KB |
-//! | `toast` | `save-bar`, `toasts` | 36.0 KB |
-//! | `toasts` | `badge`, `button`, `overlay` | 35.1 KB |
+//! | `toast` | `save-bar`, `toasts` | 36.2 KB |
+//! | `toasts` | `badge`, `button`, `overlay` | 35.3 KB |
 //! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.6 KB |
-//! | `tooltip` | `overlay` | 28.6 KB |
+//! | `tooltip` | `overlay` | 28.8 KB |
 //!
 //! A feature is named for the component or family it gates; the
 //! [showcase](https://udoprog.github.io/sockel/) shows each one. "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
@@ -1033,6 +1034,8 @@ mod empty_state;
 mod error_box;
 #[cfg(feature = "field")]
 mod field;
+#[cfg(feature = "file-browser")]
+mod file_browser;
 #[cfg(feature = "picker")]
 mod filter_picker;
 #[cfg(feature = "head")]
@@ -1186,6 +1189,11 @@ pub use field::{
     Field, FieldCheck, FieldCheckProps, FieldInputs, FieldProps, Fieldset, FieldsetProps, FormRow,
     FormRows, FormRowsProps, field, field_describedby, field_error, field_inputs, form_row,
     form_rows,
+};
+#[cfg(feature = "file-browser")]
+pub use file_browser::{
+    EntryKind, FileBrowser, FileBrowserMode, FileBrowserProps, ListRequest, Listing, ListingEntry,
+    Place, PlaceKind, file_browser_note,
 };
 #[cfg(feature = "picker")]
 pub use filter_picker::{

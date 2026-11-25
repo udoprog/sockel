@@ -1,0 +1,12 @@
+// FileBrowser (src/file_browser.rs): a Dialog (_dialog.scss) holding places
+// (buttons in a cluster), the location (an input), the directory's entries
+// (`.sockel-pick-row`s in a boxed `.sockel-row-list`, _rows.scss) and,
+// saving, a name field.
+//
+// - `.sockel-file-browser-note`: loading or nothing here, over the rows,
+//   muted.
+
+.sockel-file-browser-note {
+    margin: 0;
+    color: var(--muted);
+}

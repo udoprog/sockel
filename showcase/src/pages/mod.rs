@@ -8,6 +8,7 @@ mod dialog;
 mod disclosures;
 mod drops;
 mod fields;
+mod file_browser;
 mod foundations;
 mod heads;
 mod icons;
@@ -910,6 +911,26 @@ pub const PAGES: &[Page] = &[
             ),
             hold(sockel::class::CHOICE_LIST, Size::Width, Across::All),
         ],
+    },
+    Page {
+        id: "file-browser",
+        title: "FileBrowser",
+        group: Group::Pickers,
+        about: "A dialog choosing a path on a machine the browser cannot see, to open or to save to: places, an editable location (Enter goes there), the directory's entries with hidden ones on request, and, saving, a name that warns when it replaces a file. The app answers each ListRequest; here a made-up machine does. Open it, browse, pick a .gz with the filter on.",
+        covers: &[
+            "FileBrowser",
+            "FileBrowserProps",
+            "FileBrowserMode",
+            "ListRequest",
+            "Listing",
+            "ListingEntry",
+            "EntryKind",
+            "Place",
+            "PlaceKind",
+            "file_browser_note",
+        ],
+        render: || html! { <file_browser::FileBrowserPage /> },
+        holds: &[hold(sockel::class::BUTTON, Size::Box, Across::All)],
     },
     Page {
         id: "icon-button",

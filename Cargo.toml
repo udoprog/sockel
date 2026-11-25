@@ -33,6 +33,7 @@ dialog = "overlay"
 disclosure = "disclosure"
 drop = "drop-zone"
 fields = "field"
+file-browser = "file-browser"
 filter-picker = "picker"
 heads = "head"
 icons = "icons"
@@ -73,7 +74,7 @@ tooltip = "tooltip"
 
 [features]
 default = ["full"]
-full = ["action-group", "badge", "button", "card-grid", "checkbox", "chip", "chip-select", "choice", "color-select", "composer", "confirm", "disclosure", "drop-zone", "field", "head", "icons", "input", "lanes", "layout", "library-toolbar", "lightbox", "loadable", "log-view", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "property-list", "quantity", "reorder", "rows", "save-bar", "seam", "search-select", "select", "shell", "shortcuts", "skeleton", "split-view", "stepper", "switch", "table", "tabs", "time", "toast", "toasts", "toggles", "tooltip"]
+full = ["action-group", "badge", "button", "card-grid", "checkbox", "chip", "chip-select", "choice", "color-select", "composer", "confirm", "disclosure", "drop-zone", "field", "file-browser", "head", "icons", "input", "lanes", "layout", "library-toolbar", "lightbox", "loadable", "log-view", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "property-list", "quantity", "reorder", "rows", "save-bar", "seam", "search-select", "select", "shell", "shortcuts", "skeleton", "split-view", "stepper", "switch", "table", "tabs", "time", "toast", "toasts", "toggles", "tooltip"]
 action-group = []
 badge = ["icons"]
 button = ["icons", "skeleton"]
@@ -88,6 +89,7 @@ confirm = ["action-group", "badge", "button", "notice", "overlay"]
 disclosure = ["head", "icons"]
 drop-zone = ["button"]
 field = []
+file-browser = ["badge", "button", "field", "icons", "input", "layout", "notice", "overlay", "rows"]
 head = ["layout"]
 icons = []
 input = ["icons"]

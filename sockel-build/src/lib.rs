@@ -262,6 +262,7 @@ pub const FEATURES: &[(&str, &[&str])] = &[
     ("disclosure", &["disclosure"]),
     ("drop-zone", &["drop"]),
     ("field", &["fields"]),
+    ("file-browser", &["file-browser"]),
     ("head", &["heads"]),
     ("icons", &["icons"]),
     ("input", &["inputs"]),
