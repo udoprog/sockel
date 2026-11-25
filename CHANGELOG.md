@@ -60,6 +60,9 @@ All notable changes to sockel and sockel-build. The format follows
 
 ### Fixed
 
+- sockel-build: `Config::local` builds on Windows (the generated `@use` of
+  the local index no longer takes its namespace from the path) and beside a
+  `with_module` namespaced `index`.
 - A glyph-only `MenuItem` has no padding above or below its glyph, so a
   glyph taller than the text line cannot make it taller than a labelled row.
 - `Lightbox` fits a tall image (a square one on a wide, short screen) inside

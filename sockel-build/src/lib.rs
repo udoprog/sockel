@@ -854,8 +854,10 @@ impl Config {
         let prefix = self.prefix.as_deref().ok_or(Error::NoPrefix)?;
         let index = local_index(dir)?;
         // One compilation, sockel first, so a local `@use "sockel"` reuses
-        // the module loaded here and emits nothing again.
-        let entry = format!("{sockel_use}@use \"{}\";\n", sass_string(&index));
+        // the module loaded here and emits nothing again. `as *`: the default
+        // namespace (`index`) can clash with a module's, and a Windows path
+        // has no `/` to take one from.
+        let entry = format!("{sockel_use}@use \"{}\" as *;\n", sass_string(&index));
         let whole = sasso::compile(&entry, &options)?;
         let local_css = whole.strip_prefix(&sockel_css).ok_or(Error::NotVerbatim)?;
         let css = format!("{}{local_css}", self.layered(&kept));
@@ -1201,6 +1203,18 @@ mod tests {
         let message = error.to_string();
         assert!(message.contains("$card-border-width"), "{message}");
         assert!(message.contains("$omit"), "{message}");
+    }
+
+    #[test]
+    fn uses_the_local_index_without_a_namespace() {
+        // `index` is the local `_index.scss`'s default namespace; on Windows
+        // its absolute path makes none at all.
+        sockel()
+            .with_module(fixture("tests/module/_vars.scss"), "index")
+            .local(fixture("fixture/style"))
+            .prefix("fixture-")
+            .build()
+            .unwrap();
     }
 
     #[test]
