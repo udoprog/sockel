@@ -127,6 +127,9 @@ pub struct Listing {
     /// directory.
     pub file: Option<String>,
     pub places: Vec<Place>,
+    /// Shown in place of its entries, as when it cannot be read; it is still
+    /// the listed directory, and in [`FileBrowserMode::Folder`] may be chosen.
+    pub notice: Option<String>,
 }
 
 impl Listing {
@@ -230,8 +233,17 @@ pub struct FileBrowserProps {
     /// A file's mark, else a built-in page.
     #[prop_or_default]
     pub file_icon: Option<Html>,
+    /// Its dialog's `data-testid`, and the stem of its parts':
+    /// `<testid>-row` on each row, `<testid>-place` on each place,
+    /// `<testid>-segment` on each path segment, `<testid>-choose` and
+    /// `<testid>-cancel` on its buttons.
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+}
+
+/// The test id of a [`FileBrowser`]'s `part`, if it has one.
+fn part_testid(testid: Option<&AttrValue>, part: &str) -> Option<AttrValue> {
+    testid.map(|testid| AttrValue::from(format!("{testid}-{part}")))
 }
 
 #[derive(Clone, Default, PartialEq)]
@@ -592,8 +604,11 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         .as_ref()
         .is_some_and(|listing| replaced(mode, listing, current, &props.extensions).is_some());
 
+    let row_testid = part_testid(props.testid.as_ref(), "row");
+
     let rows = listing
         .as_ref()
+        .filter(|listing| listing.notice.is_none())
         .map(|listing| {
             listing
                 .entries
@@ -661,7 +676,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                     html! {
                         <PickRow key={entry.name.clone()} name={html!({ entry.name.clone() })}
                             {detail} {mark} current={!is_dir && entry.name == current}
-                            {disabled} {onclick} {ondblclick} {onkeydown} />
+                            {disabled} {onclick} {ondblclick} {onkeydown}
+                            testid={row_testid.clone()} />
                     }
                 })
                 .collect::<Html>()
@@ -670,6 +686,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
     let note = if listing.is_none() && state.loading {
         Some(phrases.text("sockel-file-browser-loading"))
+    } else if let Some(notice) = listing.as_ref().and_then(|l| l.notice.clone()) {
+        Some(notice.into())
     } else if listing
         .as_ref()
         .is_some_and(|l| !l.entries.iter().any(|e| shown(mode, l, e, *show_hidden)))
@@ -719,7 +737,12 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                         (None, None) => props.folder_icon.clone().unwrap_or_else(folder_icon),
                     };
 
-                    NavItem::new(place.path.clone(), label).icon(icon)
+                    let item = NavItem::new(place.path.clone(), label).icon(icon);
+
+                    match part_testid(props.testid.as_ref(), "place") {
+                        Some(testid) => item.testid(testid),
+                        None => item,
+                    }
                 })
                 .collect::<Vec<_>>();
 
@@ -859,6 +882,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     } else {
         let segments = listing.as_ref().map(|l| l.segments()).unwrap_or_default();
         let last = segments.len().checked_sub(1);
+        let testid = part_testid(props.testid.as_ref(), "segment");
 
         let segments = segments
             .into_iter()
@@ -874,7 +898,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                         }
                         <Button size={ButtonSize::Small} variant={ButtonVariant::Quiet}
                             current={current.then(|| AttrValue::from("location"))}
-                            {onclick}>{ label }</Button>
+                            testid={testid.clone()} {onclick}>{ label }</Button>
                     </li>
                 }
             })
@@ -1092,11 +1116,13 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
     let actions = html! {
         <>
-            <Button onclick={props.on_dismiss.reform(|_| ())}>
+            <Button onclick={props.on_dismiss.reform(|_| ())}
+                testid={part_testid(props.testid.as_ref(), "cancel")}>
                 { phrases.text("sockel-file-browser-cancel") }
             </Button>
             <Button variant={ButtonVariant::Primary} disabled={chosen.is_none()}
-                title={chosen.clone()} onclick={choose}>{ choose_label }</Button>
+                title={chosen.clone()} onclick={choose}
+                testid={part_testid(props.testid.as_ref(), "choose")}>{ choose_label }</Button>
         </>
     };
 
@@ -1208,10 +1234,15 @@ mod tests {
             ],
             file: None,
             places: Vec::new(),
+            notice: None,
         }
     }
 
     fn render(mode: FileBrowserMode) -> String {
+        render_with(mode, None)
+    }
+
+    fn render_with(mode: FileBrowserMode, testid: Option<&str>) -> String {
         let props = FileBrowserProps {
             open: true,
             mode,
@@ -1223,7 +1254,7 @@ mod tests {
             on_dismiss: Callback::noop(),
             folder_icon: None,
             file_icon: None,
-            testid: None,
+            testid: testid.map(AttrValue::from),
         };
 
         futures::executor::block_on(
@@ -1565,6 +1596,54 @@ mod tests {
         assert!(state.editing);
         let state = state.reduce(Action::Editing(false));
         assert_eq!(state.location, "/home/me");
+    }
+
+    #[test]
+    fn an_unreadable_folder_is_listed_and_may_be_chosen() {
+        let mut locked = listing();
+        locked.path = "/home/me/locked".into();
+        locked.entries.clear();
+        locked.notice = Some("This folder cannot be read.".into());
+        let folder = FileBrowserMode::Folder;
+        let state = Rc::new(State::default()).reduce(Action::Listed(folder, listing()));
+        let state = state.reduce(Action::Loading);
+        let state = state.reduce(Action::Listed(folder, locked.clone()));
+        assert_eq!(state.location, "/home/me/locked");
+        assert_eq!(state.error, None);
+        assert!(!state.loading);
+        assert_eq!(state.listing.as_deref(), Some(&locked));
+        assert_eq!(
+            chosen(folder, &locked, "", &[]).as_deref(),
+            Some("/home/me/locked")
+        );
+    }
+
+    #[test]
+    fn a_failed_listing_keeps_the_previous_one() {
+        let folder = FileBrowserMode::Folder;
+        let state = Rc::new(State::default()).reduce(Action::Listed(folder, listing()));
+        let state = state.reduce(Action::Loading);
+        let state = state.reduce(Action::Failed("Permission denied".into()));
+        assert_eq!(state.location, "/home/me");
+        assert_eq!(state.error.as_deref(), Some("Permission denied"));
+        assert_eq!(
+            state.listing.as_deref().map(|l| l.path.as_str()),
+            Some("/home/me")
+        );
+    }
+
+    #[test]
+    fn parts_take_test_ids_from_the_browser() {
+        assert_eq!(
+            part_testid(Some(&AttrValue::from("fb")), "row").as_deref(),
+            Some("fb-row")
+        );
+        assert_eq!(part_testid(None, "row"), None);
+
+        let html = render_with(FileBrowserMode::Folder, Some("fb"));
+        assert!(html.contains("data-testid=\"fb-choose\""), "{html}");
+        assert!(html.contains("data-testid=\"fb-cancel\""), "{html}");
+        assert!(!render(FileBrowserMode::Folder).contains("data-testid"));
     }
 
     #[test]

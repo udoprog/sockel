@@ -40,6 +40,7 @@ const TREE: &[(&str, &[Entry])] = &[
             ("Desktop", EntryKind::Directory, None),
             ("Documents", EntryKind::Directory, None),
             ("Downloads", EntryKind::Directory, None),
+            ("Locked", EntryKind::Directory, None),
             ("Music", EntryKind::Directory, None),
             ("Pictures", EntryKind::Directory, None),
             ("Videos", EntryKind::Directory, None),
@@ -75,7 +76,12 @@ const TREE: &[(&str, &[Entry])] = &[
         &[("harbour.jpg", EntryKind::File, Some(2_411_724))],
     ),
     ("/home/me/Videos", &[]),
+    (LOCKED, &[]),
 ];
+
+/// A directory the service may not read: listed with a notice, and still a
+/// folder to choose.
+const LOCKED: &str = "/home/me/Locked";
 
 /// The places a service would send, in their order.
 const PLACES: &[(PlaceKind, &str)] = &[
@@ -130,6 +136,7 @@ fn listed(path: &str, file: Option<String>) -> Option<Listing> {
                 .label("App settings")
                 .icon(app_icon())])
             .collect(),
+        notice: (*path == LOCKED).then(|| "This folder cannot be read.".to_owned()),
     })
 }
 
@@ -302,5 +309,7 @@ mod tests {
         assert!(ask("/home/me/x/y", false).is_err());
         assert_eq!(ask("/", false).unwrap().parent, None);
         assert_eq!(ask("/etc", false).unwrap().parent.as_deref(), Some("/"));
+        assert!(ask(LOCKED, false).unwrap().notice.is_some());
+        assert_eq!(ask(HOME, false).unwrap().notice, None);
     }
 }

@@ -14,6 +14,8 @@ pub struct NavItem {
     /// A link to this address; without one the entry is a button.
     pub href: Option<AttrValue>,
     pub disabled: bool,
+    /// Its link's or button's `data-testid`.
+    pub testid: Option<AttrValue>,
 }
 
 impl NavItem {
@@ -24,6 +26,7 @@ impl NavItem {
             icon: None,
             href: None,
             disabled: false,
+            testid: None,
         }
     }
 
@@ -39,6 +42,11 @@ impl NavItem {
 
     pub fn disabled(mut self, disabled: bool) -> Self {
         self.disabled = disabled;
+        self
+    }
+
+    pub fn testid(mut self, testid: impl Into<AttrValue>) -> Self {
+        self.testid = Some(testid.into());
         self
     }
 }
@@ -97,15 +105,19 @@ pub fn NavList(props: &NavListProps) -> Html {
                         html! {
                             <li>
                                 if let Some(href) = item.href.clone().filter(|_| !item.disabled) {
-                                    <a class={class::NAV_ITEM} {href} aria-current={aria_current} {onclick}>
-                                        { content }
-                                    </a>
+                                    { with_testid(html! {
+                                        <a class={class::NAV_ITEM} {href} aria-current={aria_current} {onclick}>
+                                            { content }
+                                        </a>
+                                    }, item.testid.clone()) }
                                 } else {
-                                    <button type="button" class={class::NAV_ITEM}
-                                        aria-current={aria_current}
-                                        disabled={item.disabled} {onclick}>
-                                        { content }
-                                    </button>
+                                    { with_testid(html! {
+                                        <button type="button" class={class::NAV_ITEM}
+                                            aria-current={aria_current}
+                                            disabled={item.disabled} {onclick}>
+                                            { content }
+                                        </button>
+                                    }, item.testid.clone()) }
                                 }
                             </li>
                         }
@@ -167,6 +179,21 @@ mod tests {
         assert!(html.contains("href=\"#a\""), "{html}");
         assert!(!html.contains("#c"), "{html}");
         assert_eq!(html.matches("disabled=").count(), 1, "{html}");
+    }
+
+    #[test]
+    fn an_entry_has_its_test_id() {
+        let html = render(
+            None,
+            vec![
+                NavItem::new("a", "A").href("#a").testid("go-a"),
+                NavItem::new("b", "B").testid("go-b"),
+                NavItem::new("c", "C"),
+            ],
+        );
+        assert!(html.contains("data-testid=\"go-a\""), "{html}");
+        assert!(html.contains("data-testid=\"go-b\""), "{html}");
+        assert_eq!(html.matches("data-testid").count(), 2, "{html}");
     }
 
     #[test]
