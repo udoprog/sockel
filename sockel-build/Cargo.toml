@@ -1,6 +1,6 @@
 [package]
 name = "sockel-build"
-version = "0.3.2"
+version = "0.3.3"
 authors = ["John-John Tedro <udoprog@tedro.se>"]
 edition = "2024"
 description = "Builds sockel's stylesheet and an app's own Sass beside it, with a constant per class, from a build.rs."
