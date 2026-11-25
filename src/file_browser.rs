@@ -8,6 +8,8 @@ use std::rc::Rc;
 
 use phrasebook02::args;
 use phrasebook02::yew023::use_phrases_with;
+use wasm_bindgen::JsCast;
+use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
@@ -107,6 +109,14 @@ impl Listing {
 
     fn find(&self, name: &str) -> Option<&ListingEntry> {
         self.entries.iter().find(|e| e.name == name)
+    }
+
+    /// Whether it lies inside a hidden directory, where hidden entries are
+    /// listed without asking.
+    fn within_hidden(&self) -> bool {
+        self.path
+            .split(self.separator.as_str())
+            .any(|c| c.starts_with('.') && c != "." && c != "..")
     }
 
     /// Its last name, or the whole path at a root.
@@ -240,6 +250,24 @@ fn chosen(
     }
 }
 
+/// Whether `entry` of `listing` is listed.
+fn shown(
+    mode: FileBrowserMode,
+    listing: &Listing,
+    entry: &ListingEntry,
+    show_hidden: bool,
+) -> bool {
+    (show_hidden || !entry.name.starts_with('.') || listing.within_hidden())
+        && (mode != FileBrowserMode::Folder || entry.kind == EntryKind::Directory)
+}
+
+/// Where the keyboard goes once the next listing is shown: into the rows
+/// `rows`, onto the one named `name` or else the first.
+struct Landing {
+    rows: Element,
+    name: Option<String>,
+}
+
 /// A file browser's loading or empty note's classes.
 pub fn file_browser_note() -> Classes {
     classes!(class::FILE_BROWSER_NOTE)
@@ -260,6 +288,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let state = use_reducer(State::default);
     let latest = use_mut_ref(|| 0u32);
+    let landing = use_mut_ref(|| None::<Landing>);
+    let rows_ref = use_node_ref();
     let show_hidden = use_state_eq(|| false);
     let mode = props.mode;
 
@@ -316,6 +346,47 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         });
     }
 
+    {
+        let landing = landing.clone();
+
+        use_effect_with(
+            (state.listing.clone(), state.error.clone(), *show_hidden),
+            move |(listing, error, show_hidden)| {
+                let Some(listing) = listing else {
+                    return;
+                };
+
+                if error.is_some() {
+                    landing.borrow_mut().take();
+                    return;
+                }
+
+                let Some(Landing { rows, name }) = landing.borrow_mut().take() else {
+                    return;
+                };
+
+                let index = name
+                    .and_then(|name| {
+                        listing
+                            .entries
+                            .iter()
+                            .filter(|e| shown(mode, listing, e, *show_hidden))
+                            .position(|e| e.name == name)
+                    })
+                    .unwrap_or(0);
+
+                let row = u32::try_from(index)
+                    .ok()
+                    .and_then(|index| rows.children().item(index))
+                    .and_then(|row| row.dyn_into::<HtmlElement>().ok());
+
+                if let Some(row) = row {
+                    let _ = row.focus();
+                }
+            },
+        );
+    }
+
     let listing = state.listing.clone();
 
     let set_name = {
@@ -336,18 +407,13 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                 .is_some_and(|e| e.kind == EntryKind::File)
         });
 
-    let visible = |e: &&ListingEntry| {
-        (*show_hidden || !e.name.starts_with('.'))
-            && (mode != FileBrowserMode::Folder || e.kind == EntryKind::Directory)
-    };
-
     let rows = listing
         .as_ref()
         .map(|listing| {
             listing
                 .entries
                 .iter()
-                .filter(visible)
+                .filter(|e| shown(mode, listing, e, *show_hidden))
                 .map(|entry| {
                     let path = listing.join(&entry.name);
                     let is_dir = entry.kind == EntryKind::Directory;
@@ -394,7 +460,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         Some(phrases.text("sockel-file-browser-loading"))
     } else if listing
         .as_ref()
-        .is_some_and(|l| !l.entries.iter().any(|e| visible(&e)))
+        .is_some_and(|l| !l.entries.iter().any(|e| shown(mode, l, e, *show_hidden)))
     {
         Some(if mode == FileBrowserMode::Folder {
             phrases.text("sockel-file-browser-no-folders")
@@ -471,7 +537,11 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         } else {
             Glyph::EyeOff
         };
-        let label = phrases.text("sockel-file-browser-hidden");
+        let label = if mode == FileBrowserMode::Folder {
+            phrases.text("sockel-file-browser-hidden-folders")
+        } else {
+            phrases.text("sockel-file-browser-hidden")
+        };
 
         html! {
             <Button size={ButtonSize::Small} variant={ButtonVariant::Quiet}
@@ -494,6 +564,74 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
             if e.key() == "Enter" {
                 e.prevent_default();
                 navigate.emit((location.clone(), false));
+            }
+        })
+    };
+
+    // ArrowRight opens a focused directory row and ArrowLeft lists the
+    // parent, landing back on the row of the directory left.
+    let on_rows_key = {
+        let navigate = navigate.clone();
+        let landing = landing.clone();
+        let listing = listing.clone();
+        let show_hidden = *show_hidden;
+        let rows_ref = rows_ref.clone();
+
+        Callback::from(move |e: KeyboardEvent| {
+            if e.alt_key() || e.ctrl_key() || e.meta_key() || e.shift_key() {
+                return;
+            }
+
+            let Some(listing) = &listing else {
+                return;
+            };
+
+            let Some(row) = e.target().and_then(|t| t.dyn_into::<Element>().ok()) else {
+                return;
+            };
+
+            let Some(rows) = row.parent_element() else {
+                return;
+            };
+
+            let wrapper = rows_ref.cast::<Element>();
+
+            if wrapper.is_none() || rows.parent_element() != wrapper {
+                return;
+            }
+
+            let to = match e.key().as_str() {
+                "ArrowRight" => {
+                    let children = rows.children();
+                    let index = (0..children.length())
+                        .position(|i| children.item(i).as_ref() == Some(&row));
+
+                    let entry = index.and_then(|index| {
+                        listing
+                            .entries
+                            .iter()
+                            .filter(|e| shown(mode, listing, e, show_hidden))
+                            .nth(index)
+                    });
+
+                    match entry {
+                        Some(entry) if entry.kind == EntryKind::Directory => {
+                            Some((listing.join(&entry.name), None))
+                        }
+                        _ => None,
+                    }
+                }
+                "ArrowLeft" => listing
+                    .parent
+                    .clone()
+                    .map(|parent| (parent, Some(listing.leaf().to_owned()))),
+                _ => None,
+            };
+
+            if let Some((path, name)) = to {
+                e.prevent_default();
+                *landing.borrow_mut() = Some(Landing { rows, name });
+                navigate.emit((path, false));
             }
         })
     };
@@ -569,7 +707,9 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                     if let Some(note) = note {
                         <p class={file_browser_note()}>{ note }</p>
                     }
-                    <RowList tag="div" divided={true} boxed={true}>{ rows }</RowList>
+                    <div ref={rows_ref} onkeydown={on_rows_key}>
+                        <RowList tag="div" divided={true} boxed={true}>{ rows }</RowList>
+                    </div>
                     { name_field }
                 </Stack>
             </div>
@@ -792,6 +932,26 @@ mod tests {
         let html = render(FileBrowserMode::Folder);
         assert!(html.contains("Choose"), "{html}");
         assert!(!html.contains("sockel-file-browser-name"), "{html}");
+    }
+
+    #[test]
+    fn hidden_entries_show_inside_a_hidden_directory() {
+        let mut listing = listing();
+        let hidden = ListingEntry {
+            name: ".git".into(),
+            kind: EntryKind::Directory,
+            size: None,
+        };
+        let open = FileBrowserMode::Open;
+        assert!(!shown(open, &listing, &hidden, false));
+        assert!(shown(open, &listing, &hidden, true));
+        listing.path = "/home/me/.config/app".into();
+        assert!(shown(open, &listing, &hidden, false));
+        listing.path = "/home/me/./app".into();
+        assert!(!shown(open, &listing, &hidden, false));
+        listing.path = "C:\\Users\\.config".into();
+        listing.separator = "\\".into();
+        assert!(shown(open, &listing, &hidden, false));
     }
 
     #[test]
