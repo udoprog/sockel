@@ -11,7 +11,7 @@ repository = "https://github.com/udoprog/sockel"
 license = "MIT OR Apache-2.0"
 keywords = ["components", "css", "ui", "wasm", "yew"]
 categories = ["gui", "wasm", "web-programming"]
-include = ["/build.rs", "/locales", "/src", "/style", "/README.md"]
+include = ["/build.rs", "/locales", "/src", "/style", "/tests", "/README.md"]
 links = "sockel"
 
 [package.metadata.trug]
