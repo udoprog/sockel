@@ -14,8 +14,9 @@ use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
 use crate::{
-    Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Field, Gap, Glyph, Icon, NavItem,
-    NavList, Notice, PickRow, RowList, Stack, TextInput, Tone, class, field_describedby,
+    Button, ButtonSize, ButtonVariant, Cluster, Dialog, DialogSize, Field, Gap, Glyph, Icon,
+    NavItem, NavList, Notice, PickRow, RowList, SearchField, Stack, TextInput, Tone, class,
+    field_describedby,
 };
 
 /// Whether a [`FileBrowser`] chooses a file to open, a path to save to or a
@@ -149,6 +150,42 @@ impl Listing {
             .any(|c| c.starts_with('.') && c != "." && c != "..")
     }
 
+    /// Its path's segments, the root first: each a label and the path it
+    /// lists. A root is its leading separators (`/`) or its first name and
+    /// a separator (`C:\\`).
+    fn segments(&self) -> Vec<(String, String)> {
+        let sep = self.separator.as_str();
+
+        if sep.is_empty() {
+            return vec![(self.path.clone(), self.path.clone())];
+        }
+
+        let rest = self.path.trim_start_matches(sep);
+        let root = self.path.strip_suffix(rest).unwrap_or_default();
+        let mut names = rest.split(sep).filter(|name| !name.is_empty());
+        let mut segments = Vec::new();
+        let mut built = String::new();
+
+        if !root.is_empty() {
+            built.push_str(root);
+            segments.push((root.to_owned(), built.clone()));
+        } else if let Some(first) = names.next() {
+            built = format!("{first}{sep}");
+            segments.push((first.to_owned(), built.clone()));
+        }
+
+        for name in names {
+            if !built.ends_with(sep) {
+                built.push_str(sep);
+            }
+
+            built.push_str(name);
+            segments.push((name.to_owned(), built.clone()));
+        }
+
+        segments
+    }
+
     /// Its last name, or the whole path at a root.
     fn leaf(&self) -> &str {
         let trimmed = self.path.trim_end_matches(self.separator.as_str());
@@ -206,6 +243,10 @@ struct State {
     location: String,
     /// The chosen name in the listed directory.
     name: String,
+    /// The location is being typed instead of shown as segments.
+    editing: bool,
+    /// What the listed entries are narrowed to.
+    find: String,
 }
 
 enum Action {
@@ -215,6 +256,9 @@ enum Action {
     Failed(String),
     Location(String),
     Name(String),
+    /// Types the location, or shows it as segments again, as listed.
+    Editing(bool),
+    Find(String),
 }
 
 impl Reducible for State {
@@ -235,7 +279,16 @@ impl Reducible for State {
                     state.name = listing.file.clone().unwrap_or_default();
                 }
 
+                if state
+                    .listing
+                    .as_ref()
+                    .is_none_or(|l| l.path != listing.path)
+                {
+                    state.find.clear();
+                }
+
                 state.location = listing.path.clone();
+                state.editing = false;
                 state.listing = Some(Rc::new(listing));
                 state.loading = false;
                 state.error = None;
@@ -246,10 +299,23 @@ impl Reducible for State {
             }
             Action::Location(location) => state.location = location,
             Action::Name(name) => state.name = name,
+            Action::Editing(editing) => {
+                state.editing = editing;
+
+                if !editing && let Some(listing) = &state.listing {
+                    state.location = listing.path.clone();
+                }
+            }
+            Action::Find(find) => state.find = find,
         }
 
         Rc::new(state)
     }
+}
+
+/// Whether `name` holds `needle`, already lowercase, ignoring case.
+fn matches(needle: &str, name: &str) -> bool {
+    needle.is_empty() || name.to_lowercase().contains(needle)
 }
 
 fn accepts(extensions: &[AttrValue], name: &str) -> bool {
@@ -342,6 +408,10 @@ pub fn file_browser_body() -> Classes {
 pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let phrases = use_phrases_with(&L10N);
     let state = use_reducer(State::default);
+    let location_ref = use_node_ref();
+    let segments_ref = use_node_ref();
+    let edit_ref = use_node_ref();
+    let was_editing = use_mut_ref(|| false);
     let latest = use_mut_ref(|| 0u32);
     let landing = use_mut_ref(|| None::<Landing>);
     let rows_ref = use_node_ref();
@@ -443,6 +513,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     }
 
     let listing = state.listing.clone();
+    let needle = state.find.trim().to_lowercase();
 
     let set_name = {
         let dispatcher = state.dispatcher();
@@ -468,7 +539,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
             listing
                 .entries
                 .iter()
-                .filter(|e| shown(mode, listing, e, *show_hidden))
+                .filter(|e| shown(mode, listing, e, *show_hidden) && matches(&needle, &e.name))
                 .map(|entry| {
                     let path = listing.join(&entry.name);
                     let is_dir = entry.kind == EntryKind::Directory;
@@ -549,6 +620,12 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         } else {
             phrases.text("sockel-file-browser-empty")
         })
+    } else if listing.as_ref().is_some_and(|l| {
+        !l.entries
+            .iter()
+            .any(|e| shown(mode, l, e, *show_hidden) && matches(&needle, &e.name))
+    }) {
+        Some(phrases.text("sockel-file-browser-no-matches"))
     } else {
         None
     };
@@ -650,12 +727,150 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
     let on_location_key = {
         let navigate = navigate.clone();
+        let dispatcher = state.dispatcher();
         let location = state.location.clone();
 
-        Callback::from(move |e: KeyboardEvent| {
-            if e.key() == "Enter" {
+        Callback::from(move |e: KeyboardEvent| match e.key().as_str() {
+            "Enter" => {
                 e.prevent_default();
                 navigate.emit((location.clone(), false));
+                dispatcher.dispatch(Action::Editing(false));
+            }
+            "Escape" => {
+                e.prevent_default();
+                e.stop_propagation();
+                dispatcher.dispatch(Action::Editing(false));
+            }
+            _ => {}
+        })
+    };
+
+    let edit = {
+        let dispatcher = state.dispatcher();
+        Callback::from(move |()| dispatcher.dispatch(Action::Editing(true)))
+    };
+
+    {
+        let location_ref = location_ref.clone();
+        let edit_ref = edit_ref.clone();
+        let was_editing = was_editing.clone();
+
+        use_effect_with(state.editing, move |&editing| {
+            if editing {
+                if let Some(input) = location_ref.cast::<web_sys::HtmlInputElement>() {
+                    _ = input.focus();
+                    input.select();
+                }
+            } else if *was_editing.borrow()
+                && focus_lost()
+                && let Some(button) = edit_ref.cast::<web_sys::HtmlElement>()
+            {
+                _ = button.focus();
+            }
+
+            *was_editing.borrow_mut() = editing;
+        });
+    }
+
+    {
+        let segments_ref = segments_ref.clone();
+        let path = listing.as_ref().map(|l| l.path.clone());
+
+        use_effect_with((path, state.editing), move |_| {
+            if let Some(nav) = segments_ref.cast::<web_sys::Element>() {
+                nav.set_scroll_left(nav.scroll_width());
+            }
+        });
+    }
+
+    let location = if state.editing {
+        let stop_editing = {
+            let dispatcher = state.dispatcher();
+            Callback::from(move |_: FocusEvent| dispatcher.dispatch(Action::Editing(false)))
+        };
+
+        html! {
+            <TextInput value={state.location.clone()} on_input={on_location}
+                on_keydown={on_location_key}
+                on_blur={stop_editing}
+                label={phrases.text("sockel-file-browser-location")}
+                enterkeyhint="go" spellcheck={false} busy={state.loading}
+                class={classes!(class::GROW, class::BASIS_LG)} node_ref={location_ref.clone()} />
+        }
+    } else {
+        let segments = listing.as_ref().map(|l| l.segments()).unwrap_or_default();
+        let last = segments.len().checked_sub(1);
+
+        let segments = segments
+            .into_iter()
+            .enumerate()
+            .map(|(i, (label, path))| {
+                let current = Some(i) == last;
+                let onclick = navigate.reform(move |_: MouseEvent| (path.clone(), false));
+
+                html! {
+                    <li class={class::FILE_BROWSER_SEGMENT}>
+                        if i > 0 {
+                            <Icon glyph={Glyph::ChevronRight} />
+                        }
+                        <Button size={ButtonSize::Small} variant={ButtonVariant::Quiet}
+                            current={current.then(|| AttrValue::from("location"))}
+                            {onclick}>{ label }</Button>
+                    </li>
+                }
+            })
+            .collect::<Html>();
+
+        let label = phrases.text("sockel-file-browser-edit");
+
+        html! {
+            <div class={classes!(class::GROW, class::BASIS_LG, class::FILE_BROWSER_PATH)} aria-busy={state.loading.then_some("true")}>
+                <nav class={class::FILE_BROWSER_SEGMENTS} ref={segments_ref.clone()}
+                    aria-label={phrases.text("sockel-file-browser-path")}>
+                    <ol class={classes!(class::PLAIN_LIST, class::FILE_BROWSER_SEGMENT_LIST)}>
+                        { segments }
+                    </ol>
+                </nav>
+                <span class={class::FILE_BROWSER_PATH_SPACE} onclick={edit.reform(|_: MouseEvent| ())}
+                    aria-hidden="true" />
+                <Button size={ButtonSize::Small} variant={ButtonVariant::Quiet}
+                    icon={html!(<Icon glyph={Glyph::Pencil} />)} label={label.clone()}
+                    tip={phrases.text("sockel-file-browser-edit-tip")} node_ref={edit_ref.clone()}
+                    onclick={edit.reform(|_: MouseEvent| ())} />
+            </div>
+        }
+    };
+
+    let find = {
+        let dispatcher = state.dispatcher();
+        let empty = state.find.is_empty();
+        let label = if mode == FileBrowserMode::Folder {
+            phrases.text("sockel-file-browser-find-folders")
+        } else {
+            phrases.text("sockel-file-browser-find")
+        };
+
+        // Escape clears the text, never the dialog too.
+        let on_keydown = Callback::from(move |e: KeyboardEvent| {
+            if e.key() == "Escape" && !empty {
+                e.stop_propagation();
+            }
+        });
+
+        html! {
+            <SearchField value={state.find.clone()} {label} {on_keydown}
+                on_input={Callback::from(move |find: String| dispatcher.dispatch(Action::Find(find)))}
+                class={classes!(class::GROW, class::BASIS_SM)} />
+        }
+    };
+
+    let on_dialog_key = {
+        let edit = edit.clone();
+
+        Callback::from(move |e: KeyboardEvent| {
+            if (e.ctrl_key() || e.meta_key()) && !e.alt_key() && e.key().eq_ignore_ascii_case("l") {
+                e.prevent_default();
+                edit.emit(());
             }
         })
     };
@@ -667,6 +882,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         let landing = landing.clone();
         let listing = listing.clone();
         let show_hidden = *show_hidden;
+        let needle = needle.clone();
         let rows_ref = rows_ref.clone();
 
         Callback::from(move |e: KeyboardEvent| {
@@ -702,7 +918,9 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                         listing
                             .entries
                             .iter()
-                            .filter(|e| shown(mode, listing, e, show_hidden))
+                            .filter(|e| {
+                                shown(mode, listing, e, show_hidden) && matches(&needle, &e.name)
+                            })
                             .nth(index)
                     });
 
@@ -787,14 +1005,11 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     html! {
         <Dialog open={props.open} on_dismiss={props.on_dismiss.reform(|_| ())}
             title={props.title.clone()} size={DialogSize::WideTall} {head_actions} {actions}
-            testid={props.testid.clone()}>
+            onkeydown={on_dialog_key} testid={props.testid.clone()}>
             <div class={file_browser_body()}>
                 { places }
                 <Stack class={class::GROW}>
-                    <TextInput value={state.location.clone()} on_input={on_location}
-                        on_keydown={on_location_key}
-                        label={phrases.text("sockel-file-browser-location")}
-                        enterkeyhint="go" spellcheck={false} busy={state.loading} />
+                    <Cluster>{ location }{ find }</Cluster>
                     { error }
                     if let Some(note) = note {
                         <p class={file_browser_note()}>{ note }</p>
@@ -806,6 +1021,18 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                 </Stack>
             </div>
         </Dialog>
+    }
+}
+
+/// Whether the focus went nowhere, as when the focused element is removed.
+fn focus_lost() -> bool {
+    let Some(document) = web_sys::window().and_then(|w| w.document()) else {
+        return false;
+    };
+
+    match document.active_element() {
+        None => true,
+        Some(active) => document.body().is_some_and(|body| active == *body),
     }
 }
 
@@ -1107,6 +1334,99 @@ mod tests {
         listing.path = "C:\\Users\\.config".into();
         listing.separator = "\\".into();
         assert!(shown(open, &listing, &hidden, false));
+    }
+
+    fn segments(path: &str, separator: &str) -> Vec<(String, String)> {
+        Listing {
+            path: path.into(),
+            separator: separator.into(),
+            ..Listing::default()
+        }
+        .segments()
+    }
+
+    fn pairs(pairs: &[(&str, &str)]) -> Vec<(String, String)> {
+        pairs
+            .iter()
+            .map(|(a, b)| (a.to_string(), b.to_string()))
+            .collect()
+    }
+
+    #[test]
+    fn posix_segments_start_at_the_root() {
+        assert_eq!(segments("/", "/"), pairs(&[("/", "/")]));
+        assert_eq!(
+            segments("/home/me", "/"),
+            pairs(&[("/", "/"), ("home", "/home"), ("me", "/home/me")])
+        );
+        assert_eq!(
+            segments("/home//me/", "/"),
+            pairs(&[("/", "/"), ("home", "/home"), ("me", "/home/me")])
+        );
+    }
+
+    #[test]
+    fn windows_segments_start_at_the_drive() {
+        assert_eq!(segments("C:\\", "\\"), pairs(&[("C:", "C:\\")]));
+        assert_eq!(
+            segments("C:\\Users\\me", "\\"),
+            pairs(&[
+                ("C:", "C:\\"),
+                ("Users", "C:\\Users"),
+                ("me", "C:\\Users\\me")
+            ])
+        );
+        assert_eq!(
+            segments("\\\\server\\share", "\\"),
+            pairs(&[
+                ("\\\\", "\\\\"),
+                ("server", "\\\\server"),
+                ("share", "\\\\server\\share")
+            ])
+        );
+        assert_eq!(segments("", "/"), pairs(&[]));
+        assert_eq!(segments("x", ""), pairs(&[("x", "x")]));
+    }
+
+    #[test]
+    fn finding_ignores_case() {
+        assert!(matches("", "Anything"));
+        assert!(matches("doc", "My Documents"));
+        assert!(matches("ä", "Äpple"));
+        assert!(!matches("zip", "a.gz"));
+    }
+
+    #[test]
+    fn find_names_what_it_finds() {
+        assert!(render(FileBrowserMode::Open).contains("Find in folder"));
+        assert!(render(FileBrowserMode::Folder).contains("Find folders"));
+    }
+
+    #[test]
+    fn listing_elsewhere_clears_the_find() {
+        let state = Rc::new(State::default());
+        let open = FileBrowserMode::Open;
+        let state = state.reduce(Action::Listed(open, listing()));
+        let state = state.reduce(Action::Find("doc".into()));
+        let state = state.reduce(Action::Listed(open, listing()));
+        assert_eq!(state.find, "doc");
+        let mut other = listing();
+        other.path = "/home".into();
+        let state = state.reduce(Action::Editing(true));
+        let state = state.reduce(Action::Listed(open, other));
+        assert_eq!(state.find, "");
+        assert!(!state.editing);
+    }
+
+    #[test]
+    fn leaving_the_typed_location_shows_the_listed_one() {
+        let state = Rc::new(State::default());
+        let state = state.reduce(Action::Listed(FileBrowserMode::Open, listing()));
+        let state = state.reduce(Action::Editing(true));
+        let state = state.reduce(Action::Location("/tm".into()));
+        assert!(state.editing);
+        let state = state.reduce(Action::Editing(false));
+        assert_eq!(state.location, "/home/me");
     }
 
     #[test]

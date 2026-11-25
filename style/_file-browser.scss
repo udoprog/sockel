@@ -8,6 +8,12 @@
 //   rail at its own width (at most a third). Below the phone breakpoint the
 //   rail sits on top, its places one row, without its label.
 // - `.sockel-file-browser-places`: the rail; `-label` its label, muted.
+// - `.sockel-file-browser-path`: the location shown as segments, in a
+//   field's box and at its height, in the room the input typing it takes. `-space` is its blank space, a press there types the location.
+// - `.sockel-file-browser-segments`: the segments' `<nav>`, one line that
+//   scrolls sideways (kept at its end by the component); below the phone
+//   breakpoint `.sockel-file-browser-segment-list` wraps instead. Each
+//   `.sockel-file-browser-segment` is a chevron, muted, and its button.
 // - `.sockel-file-browser-note`: loading, nothing here or no folders here,
 //   over the rows,
 //   muted.
@@ -49,5 +55,49 @@
 
 .sockel-file-browser-note {
     margin: 0;
+    color: var(--muted);
+}
+
+.sockel-file-browser-path {
+    @include base.input-box;
+    display: flex;
+    align-items: center;
+    min-height: var(--input-height);
+    padding-inline: var(--space-1);
+}
+
+.sockel-file-browser-path-space {
+    flex: 1 1 0;
+    align-self: stretch;
+    cursor: text;
+}
+
+.sockel-file-browser-segments {
+    flex: 0 1 auto;
+    min-width: 0;
+    overflow-x: auto;
+    scrollbar-width: none;
+
+    @include base.below("phone") {
+        overflow-x: visible;
+    }
+}
+
+// One line, not a cluster: a cluster wraps or not at every width, this
+// scrolls until the phone breakpoint and wraps below it.
+.sockel-file-browser-segment-list {
+    display: flex;
+    flex-wrap: nowrap;
+    align-items: center;
+
+    @include base.below("phone") {
+        flex-wrap: wrap;
+    }
+}
+
+.sockel-file-browser-segment {
+    display: flex;
+    flex: none;
+    align-items: center;
     color: var(--muted);
 }

@@ -33,6 +33,7 @@ pub enum Glyph {
     Picture,
     Film,
     Drive,
+    Pencil,
 }
 
 impl Glyph {
@@ -59,6 +60,7 @@ impl Glyph {
         Glyph::Picture,
         Glyph::Film,
         Glyph::Drive,
+        Glyph::Pencil,
     ];
 }
 
@@ -150,6 +152,7 @@ fn built_in(glyph: Glyph) -> Html {
         Glyph::Drive => svg(
             html! { <><path d="M3 9l1.5-6h7L13 9" /><rect x="1.5" y="9" width="13" height="4.5" rx="1" /><path d="M11 11.25h.01" /></> },
         ),
+        Glyph::Pencil => svg(html! { <path d="M10.5 3l2.5 2.5-7.5 7.5H3v-2.5zM9 4.5l2.5 2.5" /> }),
     }
 }
 

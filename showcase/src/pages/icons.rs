@@ -99,6 +99,7 @@ const PICKS: &[(&str, Pick)] = &[
     ("Picture", Pick::Glyph(Glyph::Picture)),
     ("Film", Pick::Glyph(Glyph::Film)),
     ("Drive", Pick::Glyph(Glyph::Drive)),
+    ("Pencil", Pick::Glyph(Glyph::Pencil)),
     ("\"trash\" (app icon)", Pick::Named("trash")),
     ("\"star\" (app icon)", Pick::Named("star")),
     ("\"ghost\" (not in any set)", Pick::Named("ghost")),
