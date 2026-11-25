@@ -14,8 +14,8 @@ use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
 use crate::{
-    Button, ButtonSize, ButtonVariant, Cluster, Dialog, DialogSize, Field, Gap, Glyph, Icon,
-    NavItem, NavList, Notice, PickRow, RowList, SearchField, Stack, TextInput, Tone, class,
+    Button, ButtonSize, ButtonVariant, Cluster, Confirm, Dialog, DialogSize, Field, Gap, Glyph,
+    Icon, NavItem, NavList, Notice, PickRow, RowList, SearchField, Stack, TextInput, Tone, class,
     field_describedby,
 };
 
@@ -352,6 +352,49 @@ fn chosen(
     }
 }
 
+/// What choosing `name` in `listing` does.
+#[derive(Clone, Debug, PartialEq, Eq)]
+enum Choice {
+    Choose(String),
+    /// Saving over the existing file `name`, once confirmed.
+    Replace {
+        path: String,
+        name: String,
+    },
+}
+
+fn choice(
+    mode: FileBrowserMode,
+    listing: &Listing,
+    name: &str,
+    extensions: &[AttrValue],
+) -> Option<Choice> {
+    let path = chosen(mode, listing, name, extensions)?;
+
+    match replaced(mode, listing, name, extensions) {
+        Some(name) => Some(Choice::Replace { path, name }),
+        None => Some(Choice::Choose(path)),
+    }
+}
+
+/// The existing file saving as `name` replaces.
+fn replaced(
+    mode: FileBrowserMode,
+    listing: &Listing,
+    name: &str,
+    extensions: &[AttrValue],
+) -> Option<String> {
+    if mode != FileBrowserMode::Save {
+        return None;
+    }
+
+    save_name(listing, name, extensions).filter(|name| {
+        listing
+            .find(name)
+            .is_some_and(|e| e.kind == EntryKind::File)
+    })
+}
+
 /// The name saving as `name` writes in `listing`: trimmed, with the first
 /// extension appended when it has none. None for an empty name, `.`, `..`
 /// or one holding a separator.
@@ -403,7 +446,7 @@ pub fn file_browser_body() -> Classes {
 /// a path to save to or, in [`FileBrowserMode::Folder`], the listed
 /// directory: a rail of places, an editable location, the directory's
 /// entries (hidden ones on request) and, saving, a name that warns when it
-/// replaces a file.
+/// replaces a file and asks before replacing it.
 #[function_component]
 pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let phrases = use_phrases_with(&L10N);
@@ -416,6 +459,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let landing = use_mut_ref(|| None::<Landing>);
     let rows_ref = use_node_ref();
     let show_hidden = use_state_eq(|| false);
+    let replacing = use_state_eq(|| None::<(String, String)>);
     let mode = props.mode;
 
     let navigate = {
@@ -459,8 +503,11 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         let dispatcher = state.dispatcher();
         let latest = latest.clone();
         let path = props.path.to_string();
+        let replacing = replacing.clone();
 
         use_effect_with(props.open, move |&open| {
+            replacing.set(None);
+
             if open {
                 dispatcher.dispatch(Action::Reset);
                 navigate.emit((path, true));
@@ -520,18 +567,30 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         Callback::from(move |name: String| dispatcher.dispatch(Action::Name(name)))
     };
 
-    let chosen = listing
+    // Replacing an existing file asks first.
+    let decide = {
+        let on_choose = props.on_choose.clone();
+        let replacing = replacing.clone();
+
+        Callback::from(move |choice: Choice| match choice {
+            Choice::Choose(path) => on_choose.emit(path),
+            Choice::Replace { path, name } => replacing.set(Some((path, name))),
+        })
+    };
+
+    let choice = listing
         .as_ref()
-        .and_then(|listing| chosen(mode, listing, &state.name, &props.extensions));
+        .and_then(|listing| choice(mode, listing, &state.name, &props.extensions));
+
+    let chosen = choice.as_ref().map(|choice| match choice {
+        Choice::Choose(path) | Choice::Replace { path, .. } => path.clone(),
+    });
 
     let current = state.name.trim();
 
-    let replaces = mode == FileBrowserMode::Save
-        && listing.as_ref().is_some_and(|listing| {
-            save_name(listing, current, &props.extensions)
-                .and_then(|name| listing.find(&name))
-                .is_some_and(|e| e.kind == EntryKind::File)
-        });
+    let replaces = listing
+        .as_ref()
+        .is_some_and(|listing| replaced(mode, listing, current, &props.extensions).is_some());
 
     let rows = listing
         .as_ref()
@@ -558,18 +617,18 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                         })
                     };
 
-                    // Double-click or Enter on a file chooses it.
+                    // Double-click or Enter on a file chooses it, asking before replacing it.
                     let pick = (!is_dir && mode != FileBrowserMode::Folder).then(|| {
                         let set_name = set_name.clone();
-                        let on_choose = props.on_choose.clone();
-                        let path = self::chosen(mode, listing, &entry.name, &props.extensions);
+                        let decide = decide.clone();
+                        let choice = self::choice(mode, listing, &entry.name, &props.extensions);
                         let name = entry.name.clone();
 
                         Callback::from(move |()| {
                             set_name.emit(name.clone());
 
-                            if let Some(path) = &path {
-                                on_choose.emit(path.clone());
+                            if let Some(choice) = &choice {
+                                decide.emit(choice.clone());
                             }
                         })
                     });
@@ -966,14 +1025,55 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     });
 
     let choose = {
-        let on_choose = props.on_choose.clone();
-        let chosen = chosen.clone();
+        let decide = decide.clone();
+        let choice = choice.clone();
 
         Callback::from(move |_: MouseEvent| {
-            if let Some(path) = &chosen {
-                on_choose.emit(path.clone());
+            if let Some(choice) = &choice {
+                decide.emit(choice.clone());
             }
         })
+    };
+
+    let confirm = {
+        let (path, name) = (*replacing).clone().unzip();
+        let name = name.unwrap_or_default();
+        let folder = listing.as_ref().map(|l| l.path.clone()).unwrap_or_default();
+        let title: AttrValue = phrases
+            .msg(
+                "sockel-file-browser-replace-title",
+                &args([("name", name.as_str())]),
+            )
+            .into();
+        let explanation: AttrValue = phrases
+            .msg(
+                "sockel-file-browser-replace-text",
+                &args([("name", name.as_str()), ("folder", folder.as_str())]),
+            )
+            .into();
+
+        let on_accept = {
+            let on_choose = props.on_choose.clone();
+            let replacing = replacing.clone();
+
+            Callback::from(move |()| {
+                replacing.set(None);
+
+                if let Some(path) = &path {
+                    on_choose.emit(path.clone());
+                }
+            })
+        };
+
+        let on_cancel = {
+            let replacing = replacing.clone();
+            Callback::from(move |()| replacing.set(None))
+        };
+
+        html! {
+            <Confirm open={props.open && replacing.is_some()} {title} {explanation}
+                accept={phrases.text("sockel-file-browser-replace")} {on_accept} {on_cancel} />
+        }
     };
 
     let choose_label = match mode {
@@ -1003,6 +1103,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let head_actions = html! { <>{ up }{ hidden }</> };
 
     html! {
+        <>
         <Dialog open={props.open} on_dismiss={props.on_dismiss.reform(|_| ())}
             title={props.title.clone()} size={DialogSize::WideTall} {head_actions} {actions}
             onkeydown={on_dialog_key} testid={props.testid.clone()}>
@@ -1021,6 +1122,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                 </Stack>
             </div>
         </Dialog>
+        { confirm }
+        </>
     }
 }
 
@@ -1254,6 +1357,41 @@ mod tests {
         assert_eq!(save_name(&listing, "a\\b", &[]), None);
         assert_eq!(save_name(&listing, "a/b", &[]), None);
         assert_eq!(save_name(&listing, "..a", &[]).as_deref(), Some("..a"));
+    }
+
+    #[test]
+    fn saving_over_an_existing_file_asks_first() {
+        let listing = listing();
+        let save = FileBrowserMode::Save;
+        let gz = [AttrValue::from(".gz")];
+        assert_eq!(
+            choice(save, &listing, "a", &gz),
+            Some(Choice::Replace {
+                path: "/home/me/a.gz".into(),
+                name: "a.gz".into()
+            })
+        );
+        assert_eq!(
+            choice(save, &listing, "b.txt", &[]),
+            Some(Choice::Replace {
+                path: "/home/me/b.txt".into(),
+                name: "b.txt".into()
+            })
+        );
+        assert_eq!(
+            choice(save, &listing, "new", &gz),
+            Some(Choice::Choose("/home/me/new.gz".into()))
+        );
+        assert_eq!(choice(save, &listing, "docs", &[]), None);
+    }
+
+    #[test]
+    fn opening_an_existing_file_chooses_it_at_once() {
+        let listing = listing();
+        assert_eq!(
+            choice(FileBrowserMode::Open, &listing, "b.txt", &[]),
+            Some(Choice::Choose("/home/me/b.txt".into()))
+        );
     }
 
     #[test]
