@@ -13,6 +13,7 @@ use crate::controls::{Demo, Select, Toggle, bind};
 const MODES: &[(&str, FileBrowserMode)] = &[
     ("Open", FileBrowserMode::Open),
     ("Save", FileBrowserMode::Save),
+    ("Folder", FileBrowserMode::Folder),
 ];
 
 const HOME: &str = "/home/me";
@@ -146,6 +147,14 @@ fn list(request: ListRequest) {
     request.reply.emit(result);
 }
 
+fn title(mode: FileBrowserMode) -> &'static str {
+    match mode {
+        FileBrowserMode::Open => "Open a file",
+        FileBrowserMode::Save => "Save as",
+        FileBrowserMode::Folder => "Choose a folder",
+    }
+}
+
 #[derive(Properties, PartialEq, Clone)]
 struct Setup {
     mode: FileBrowserMode,
@@ -183,10 +192,7 @@ fn FileBrowserDemo(props: &Setup) -> Html {
     } else {
         ""
     };
-    let title = match props.mode {
-        FileBrowserMode::Open => "Open a file",
-        FileBrowserMode::Save => "Save as",
-    };
+    let title = title(props.mode);
 
     html! {
         <Stack>
@@ -224,7 +230,7 @@ pub fn FileBrowserPage() -> Html {
         El::new("FileBrowser")
             .expr("open", "open")
             .variant("mode", *mode)
-            .text("title", "Open a file")
+            .text("title", title(*mode))
             .text_if(*start, "path", "/home/me/Documents/report.gz")
             .expr_if(*gz, "extensions", "vec![\".gz\".into()]")
             .expr("list", "list")

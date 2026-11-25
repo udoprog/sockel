@@ -1,9 +1,9 @@
 // FileBrowser (src/file_browser.rs): a Dialog (_dialog.scss) holding places
 // (buttons in a cluster), the location (an input), the directory's entries
 // (`.sockel-pick-row`s in a boxed `.sockel-row-list`, _rows.scss) and,
-// saving, a name field.
+// saving, a name field. Choosing a folder lists directories only.
 //
-// - `.sockel-file-browser-note`: loading or nothing here, over the rows,
+// - `.sockel-file-browser-note`: loading, nothing here or no folders here, over the rows,
 //   muted.
 
 .sockel-file-browser-note {

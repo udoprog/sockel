@@ -1,11 +1,12 @@
 //! FileBrowser: a dialog choosing a path on a machine the browser cannot
-//! see, to open or to save to (`style/_file-browser.scss`).
+//! see, to open, to save to or a folder (`style/_file-browser.scss`).
 //!
 //! It knows nothing of how directories are listed: the owner answers each
 //! [`ListRequest`] through `list`.
 
 use std::rc::Rc;
 
+use phrasebook02::args;
 use phrasebook02::yew023::use_phrases_with;
 use yew::prelude::*;
 
@@ -15,7 +16,8 @@ use crate::{
     Notice, PickRow, RowList, Stack, TextInput, Tone, class, field_describedby,
 };
 
-/// Whether a [`FileBrowser`] chooses a file to open or a path to save to.
+/// Whether a [`FileBrowser`] chooses a file to open, a path to save to or a
+/// folder.
 #[derive(Clone, Copy, Debug, Default, PartialEq, Eq)]
 pub enum FileBrowserMode {
     /// Choose an existing file.
@@ -23,6 +25,9 @@ pub enum FileBrowserMode {
     Open,
     /// Choose a path to save to, which may not exist yet.
     Save,
+    /// Choose the listed directory. Only directories are listed, and
+    /// `extensions` does not apply.
+    Folder,
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
@@ -82,6 +87,17 @@ impl Listing {
 
     fn find(&self, name: &str) -> Option<&ListingEntry> {
         self.entries.iter().find(|e| e.name == name)
+    }
+
+    /// Its last name, or the whole path at a root.
+    fn leaf(&self) -> &str {
+        let trimmed = self.path.trim_end_matches(self.separator.as_str());
+
+        match trimmed.rsplit_once(self.separator.as_str()) {
+            Some((_, leaf)) if !leaf.is_empty() => leaf,
+            _ if trimmed.is_empty() => &self.path,
+            _ => trimmed,
+        }
     }
 }
 
@@ -187,6 +203,10 @@ fn chosen(
     name: &str,
     extensions: &[AttrValue],
 ) -> Option<String> {
+    if mode == FileBrowserMode::Folder {
+        return Some(listing.path.clone());
+    }
+
     let name = name.trim();
 
     if name.is_empty() || !accepts(extensions, name) {
@@ -205,8 +225,9 @@ pub fn file_browser_note() -> Classes {
     classes!(class::FILE_BROWSER_NOTE)
 }
 
-/// A dialog browsing directories the owner lists, to choose a file to open
-/// or a path to save to: places, an editable location, the directory's
+/// A dialog browsing directories the owner lists, to choose a file to open,
+/// a path to save to or, in [`FileBrowserMode::Folder`], the listed
+/// directory: places, an editable location, the directory's
 /// entries (hidden ones on request) and, saving, a name that warns when it
 /// replaces a file.
 #[function_component]
@@ -290,7 +311,10 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                 .is_some_and(|e| e.kind == EntryKind::File)
         });
 
-    let visible = |e: &&ListingEntry| *show_hidden || !e.name.starts_with('.');
+    let visible = |e: &&ListingEntry| {
+        (*show_hidden || !e.name.starts_with('.'))
+            && (mode != FileBrowserMode::Folder || e.kind == EntryKind::Directory)
+    };
 
     let rows = listing
         .as_ref()
@@ -347,7 +371,11 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         .as_ref()
         .is_some_and(|l| !l.entries.iter().any(|e| visible(&e)))
     {
-        Some(phrases.text("sockel-file-browser-empty"))
+        Some(if mode == FileBrowserMode::Folder {
+            phrases.text("sockel-file-browser-no-folders")
+        } else {
+            phrases.text("sockel-file-browser-empty")
+        })
     } else {
         None
     };
@@ -468,6 +496,15 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
     let choose_label = match mode {
         FileBrowserMode::Open => phrases.text("sockel-file-browser-open"),
         FileBrowserMode::Save => phrases.text("sockel-file-browser-save"),
+        FileBrowserMode::Folder => match &listing {
+            Some(listing) => phrases
+                .msg(
+                    "sockel-file-browser-choose",
+                    &args([("name", listing.leaf())]),
+                )
+                .into(),
+            None => phrases.text("sockel-file-browser-choose-none"),
+        },
     };
 
     let actions = html! {
@@ -652,6 +689,47 @@ mod tests {
             Some("/b.txt")
         );
         assert_eq!(chosen(save, &listing, "docs", &[]), None);
+    }
+
+    #[test]
+    fn a_folder_is_the_listed_directory() {
+        let listing = listing();
+        let folder = FileBrowserMode::Folder;
+        let gz = [AttrValue::from(".gz")];
+        assert_eq!(
+            chosen(folder, &listing, "", &[]).as_deref(),
+            Some("/home/me")
+        );
+        assert_eq!(
+            chosen(folder, &listing, "a.gz", &gz).as_deref(),
+            Some("/home/me")
+        );
+        assert_eq!(
+            chosen(folder, &listing, "docs", &[]).as_deref(),
+            Some("/home/me")
+        );
+    }
+
+    #[test]
+    fn a_leaf_is_the_last_name_or_the_root() {
+        let mut listing = listing();
+        assert_eq!(listing.leaf(), "me");
+        listing.path = "/home/me/".into();
+        assert_eq!(listing.leaf(), "me");
+        listing.path = "/".into();
+        assert_eq!(listing.leaf(), "/");
+        listing.path = "C:\\".into();
+        listing.separator = "\\".into();
+        assert_eq!(listing.leaf(), "C:");
+        listing.path = "C:\\Users".into();
+        assert_eq!(listing.leaf(), "Users");
+    }
+
+    #[test]
+    fn choosing_a_folder_asks_for_no_name() {
+        let html = render(FileBrowserMode::Folder);
+        assert!(html.contains("Choose"), "{html}");
+        assert!(!html.contains("sockel-file-browser-name"), "{html}");
     }
 
     #[test]
