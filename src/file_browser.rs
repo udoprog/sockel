@@ -59,11 +59,14 @@ pub enum PlaceKind {
     Videos,
     /// A file system root, labelled with its path.
     Root,
+    /// The app's own, labelled by [`Place::label`] (else its path) and
+    /// marked by [`Place::icon`] (else a folder).
+    Other,
 }
 
 impl PlaceKind {
-    fn glyph(self) -> Glyph {
-        match self {
+    fn glyph(self) -> Option<Glyph> {
+        Some(match self {
             PlaceKind::Home => Glyph::Home,
             PlaceKind::Desktop => Glyph::Desktop,
             PlaceKind::Documents => Glyph::Document,
@@ -72,19 +75,46 @@ impl PlaceKind {
             PlaceKind::Pictures => Glyph::Picture,
             PlaceKind::Videos => Glyph::Film,
             PlaceKind::Root => Glyph::Drive,
-        }
+            PlaceKind::Other => return None,
+        })
     }
 }
 
 /// A place offered in the side rail, in the order given.
-#[derive(Clone, Debug, PartialEq, Eq)]
+#[derive(Clone, Debug, PartialEq)]
+#[non_exhaustive]
 pub struct Place {
     pub kind: PlaceKind,
     pub path: String,
+    /// Its label, else the kind's.
+    pub label: Option<String>,
+    /// Its mark, else the kind's.
+    pub icon: Option<Html>,
+}
+
+impl Place {
+    pub fn new(kind: PlaceKind, path: impl Into<String>) -> Self {
+        Self {
+            kind,
+            path: path.into(),
+            label: None,
+            icon: None,
+        }
+    }
+
+    pub fn label(mut self, label: impl Into<String>) -> Self {
+        self.label = Some(label.into());
+        self
+    }
+
+    pub fn icon(mut self, icon: Html) -> Self {
+        self.icon = Some(icon);
+        self
+    }
 }
 
 /// One listed directory.
-#[derive(Clone, Debug, Default, PartialEq, Eq)]
+#[derive(Clone, Debug, Default, PartialEq)]
 pub struct Listing {
     /// Its absolute path.
     pub path: String,
@@ -233,20 +263,45 @@ fn chosen(
     name: &str,
     extensions: &[AttrValue],
 ) -> Option<String> {
-    if mode == FileBrowserMode::Folder {
-        return Some(listing.path.clone());
-    }
+    match mode {
+        FileBrowserMode::Folder => Some(listing.path.clone()),
+        FileBrowserMode::Open => {
+            let name = name.trim();
 
+            if !accepts(extensions, name) {
+                return None;
+            }
+
+            let entry = listing.find(name)?;
+            (entry.kind == EntryKind::File).then(|| listing.join(name))
+        }
+        FileBrowserMode::Save => {
+            let name = save_name(listing, name, extensions)?;
+
+            match listing.find(&name).map(|e| e.kind) {
+                None | Some(EntryKind::File) => Some(listing.join(&name)),
+                _ => None,
+            }
+        }
+    }
+}
+
+/// The name saving as `name` writes in `listing`: trimmed, with the first
+/// extension appended when it has none. None for an empty name, `.`, `..`
+/// or one holding a separator.
+fn save_name(listing: &Listing, name: &str, extensions: &[AttrValue]) -> Option<String> {
     let name = name.trim();
 
-    if name.is_empty() || !accepts(extensions, name) {
+    if matches!(name, "" | "." | "..")
+        || name.contains('/')
+        || (!listing.separator.is_empty() && name.contains(listing.separator.as_str()))
+    {
         return None;
     }
 
-    match (mode, listing.find(name).map(|e| e.kind)) {
-        (FileBrowserMode::Open, Some(EntryKind::File))
-        | (FileBrowserMode::Save, None | Some(EntryKind::File)) => Some(listing.join(name)),
-        _ => None,
+    match extensions.first() {
+        Some(first) if !accepts(extensions, name) => Some(format!("{name}{first}")),
+        _ => Some(name.to_owned()),
     }
 }
 
@@ -402,8 +457,8 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
     let replaces = mode == FileBrowserMode::Save
         && listing.as_ref().is_some_and(|listing| {
-            listing
-                .find(current)
+            save_name(listing, current, &props.extensions)
+                .and_then(|name| listing.find(&name))
                 .is_some_and(|e| e.kind == EntryKind::File)
         });
 
@@ -432,6 +487,33 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                         })
                     };
 
+                    // Double-click or Enter on a file chooses it.
+                    let pick = (!is_dir && mode != FileBrowserMode::Folder).then(|| {
+                        let set_name = set_name.clone();
+                        let on_choose = props.on_choose.clone();
+                        let path = self::chosen(mode, listing, &entry.name, &props.extensions);
+                        let name = entry.name.clone();
+
+                        Callback::from(move |()| {
+                            set_name.emit(name.clone());
+
+                            if let Some(path) = &path {
+                                on_choose.emit(path.clone());
+                            }
+                        })
+                    });
+
+                    let ondblclick = pick.clone().map(|pick| pick.reform(|_: MouseEvent| ()));
+
+                    let onkeydown = pick.map(|pick| {
+                        Callback::from(move |e: KeyboardEvent| {
+                            if e.key() == "Enter" {
+                                e.prevent_default();
+                                pick.emit(());
+                            }
+                        })
+                    });
+
                     let disabled = match entry.kind {
                         EntryKind::Directory => false,
                         EntryKind::File => !accepts(&props.extensions, &entry.name),
@@ -449,7 +531,7 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                     html! {
                         <PickRow key={entry.name.clone()} name={html!({ entry.name.clone() })}
                             {detail} {mark} current={!is_dir && entry.name == current}
-                            {disabled} {onclick} />
+                            {disabled} {onclick} {ondblclick} {onkeydown} />
                     }
                 })
                 .collect::<Html>()
@@ -479,19 +561,29 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
                 .places
                 .iter()
                 .map(|place| {
-                    let label = match place.kind {
-                        PlaceKind::Home => phrases.text("sockel-file-browser-home"),
-                        PlaceKind::Desktop => phrases.text("sockel-file-browser-desktop"),
-                        PlaceKind::Documents => phrases.text("sockel-file-browser-documents"),
-                        PlaceKind::Downloads => phrases.text("sockel-file-browser-downloads"),
-                        PlaceKind::Music => phrases.text("sockel-file-browser-music"),
-                        PlaceKind::Pictures => phrases.text("sockel-file-browser-pictures"),
-                        PlaceKind::Videos => phrases.text("sockel-file-browser-videos"),
-                        PlaceKind::Root => place.path.as_str().into(),
+                    let label = match (&place.label, place.kind) {
+                        (Some(label), _) => label.as_str().into(),
+                        (None, PlaceKind::Home) => phrases.text("sockel-file-browser-home"),
+                        (None, PlaceKind::Desktop) => phrases.text("sockel-file-browser-desktop"),
+                        (None, PlaceKind::Documents) => {
+                            phrases.text("sockel-file-browser-documents")
+                        }
+                        (None, PlaceKind::Downloads) => {
+                            phrases.text("sockel-file-browser-downloads")
+                        }
+                        (None, PlaceKind::Music) => phrases.text("sockel-file-browser-music"),
+                        (None, PlaceKind::Pictures) => phrases.text("sockel-file-browser-pictures"),
+                        (None, PlaceKind::Videos) => phrases.text("sockel-file-browser-videos"),
+                        (None, PlaceKind::Root | PlaceKind::Other) => place.path.as_str().into(),
                     };
 
-                    NavItem::new(place.path.clone(), label)
-                        .icon(html!(<Icon glyph={place.kind.glyph()} />))
+                    let icon = match (&place.icon, place.kind.glyph()) {
+                        (Some(icon), _) => icon.clone(),
+                        (None, Some(glyph)) => html!(<Icon {glyph} />),
+                        (None, None) => props.folder_icon.clone().unwrap_or_else(folder_icon),
+                    };
+
+                    NavItem::new(place.path.clone(), label).icon(icon)
                 })
                 .collect::<Vec<_>>();
 
@@ -841,7 +933,7 @@ mod tests {
             PlaceKind::Videos,
             PlaceKind::Root,
         ];
-        let glyphs: std::collections::HashSet<_> = kinds.iter().map(|k| k.glyph()).collect();
+        let glyphs: std::collections::HashSet<_> = kinds.iter().filter_map(|k| k.glyph()).collect();
         assert_eq!(glyphs.len(), kinds.len());
     }
 
@@ -891,6 +983,69 @@ mod tests {
             Some("/b.txt")
         );
         assert_eq!(chosen(save, &listing, "docs", &[]), None);
+    }
+
+    #[test]
+    fn saving_adds_the_first_extension() {
+        let listing = listing();
+        let save = FileBrowserMode::Save;
+        let exts = [AttrValue::from(".ptscan.json"), AttrValue::from(".gz")];
+        assert_eq!(
+            chosen(save, &listing, " list ", &exts).as_deref(),
+            Some("/home/me/list.ptscan.json")
+        );
+        assert_eq!(
+            chosen(save, &listing, "list.ptscan.json", &exts).as_deref(),
+            Some("/home/me/list.ptscan.json")
+        );
+        assert_eq!(
+            chosen(save, &listing, "a.gz", &exts).as_deref(),
+            Some("/home/me/a.gz")
+        );
+        assert_eq!(
+            chosen(save, &listing, "b.txt", &exts).as_deref(),
+            Some("/home/me/b.txt.ptscan.json")
+        );
+        assert_eq!(
+            chosen(save, &listing, "list", &[]).as_deref(),
+            Some("/home/me/list")
+        );
+    }
+
+    #[test]
+    fn saving_refuses_names_that_are_not_plain() {
+        let mut listing = listing();
+        let save = FileBrowserMode::Save;
+        let gz = [AttrValue::from(".gz")];
+
+        for name in ["", " ", ".", "..", "a/b", "../a.gz", "/a.gz"] {
+            assert_eq!(chosen(save, &listing, name, &gz), None, "{name:?}");
+            assert_eq!(save_name(&listing, name, &[]), None, "{name:?}");
+        }
+
+        listing.separator = "\\".into();
+        assert_eq!(save_name(&listing, "a\\b", &[]), None);
+        assert_eq!(save_name(&listing, "a/b", &[]), None);
+        assert_eq!(save_name(&listing, "..a", &[]).as_deref(), Some("..a"));
+    }
+
+    #[test]
+    fn saving_a_bare_name_warns_of_the_file_it_replaces() {
+        let listing = listing();
+        let gz = [AttrValue::from(".gz")];
+        let name = save_name(&listing, "a", &gz);
+        assert_eq!(name.as_deref(), Some("a.gz"));
+        assert!(listing.find("a.gz").is_some());
+    }
+
+    #[test]
+    fn an_app_place_has_its_own_label_and_mark() {
+        let place = Place::new(PlaceKind::Other, "/data")
+            .label("App data")
+            .icon(html!(<b>{ "*" }</b>));
+        assert_eq!(place.label.as_deref(), Some("App data"));
+        assert!(place.icon.is_some());
+        assert_eq!(PlaceKind::Other.glyph(), None);
     }
 
     #[test]

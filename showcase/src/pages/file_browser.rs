@@ -89,6 +89,18 @@ const PLACES: &[(PlaceKind, &str)] = &[
     (PlaceKind::Root, "/"),
 ];
 
+/// A place of the app's own, with its label and mark.
+const APP_PLACE: &str = "/home/me/.config";
+
+fn app_icon() -> Html {
+    html! {
+        <svg viewBox="0 0 16 16" width="16" height="16" fill="none" stroke="currentColor"
+            stroke-width="1.5" stroke-linejoin="round" aria-hidden="true" focusable="false">
+            <path d="M8 1.5l1.9 4 4.3.5-3.2 3 .9 4.3L8 11.1l-3.9 2.2.9-4.3-3.2-3 4.3-.5z" />
+        </svg>
+    }
+}
+
 fn parent(path: &str) -> Option<String> {
     let path = path.trim_end_matches('/');
     let (parent, _) = path.rsplit_once('/')?;
@@ -113,10 +125,10 @@ fn listed(path: &str, file: Option<String>) -> Option<Listing> {
         file,
         places: PLACES
             .iter()
-            .map(|(kind, path)| Place {
-                kind: *kind,
-                path: (*path).to_owned(),
-            })
+            .map(|(kind, path)| Place::new(*kind, *path))
+            .chain([Place::new(PlaceKind::Other, APP_PLACE)
+                .label("App settings")
+                .icon(app_icon())])
             .collect(),
     })
 }

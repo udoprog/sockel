@@ -916,7 +916,7 @@ pub const PAGES: &[Page] = &[
         id: "file-browser",
         title: "FileBrowser",
         group: Group::Pickers,
-        about: "A dialog choosing a path on a machine the browser cannot see, to open, to save to or a folder: a rail of places (a row on a phone; none when the app sends none), an editable location (Enter goes there), the directory's entries with hidden ones on request, and, saving, a name that warns when it replaces a file. Choosing a folder lists only directories and chooses the one on screen. The app answers each ListRequest; here a made-up machine does. Open it, browse, pick a .gz with the filter on.",
+        about: "A dialog choosing a path on a machine the browser cannot see, to open, to save to or a folder: a rail of places (a row on a phone; none when the app sends none), an editable location (Enter goes there), the directory's entries with hidden ones on request, and, saving, a name that warns when it replaces a file. Saving adds the first extension to a name with none. Double-click or Enter on a file chooses it. An app adds places of its own with their label and mark. Choosing a folder lists only directories and chooses the one on screen. The app answers each ListRequest; here a made-up machine does. Open it, browse, pick a .gz with the filter on.",
         covers: &[
             "FileBrowser",
             "FileBrowserProps",

@@ -147,6 +147,10 @@ pub struct PickRowProps {
     #[prop_or_default]
     pub onclick: Callback<MouseEvent>,
     #[prop_or_default]
+    pub ondblclick: Option<Callback<MouseEvent>>,
+    #[prop_or_default]
+    pub onkeydown: Option<Callback<KeyboardEvent>>,
+    #[prop_or_default]
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
@@ -168,7 +172,8 @@ pub fn PickRow(props: &PickRowProps) -> Html {
         html! {
             <button type="button" class={classes!(pick_row(), props.class.clone())}
                 aria-current={props.current.then_some("true")}
-                disabled={props.disabled} onclick={props.onclick.clone()}>
+                disabled={props.disabled} onclick={props.onclick.clone()}
+                ondblclick={props.ondblclick.clone()} onkeydown={props.onkeydown.clone()}>
                 if let Some(mark) = &props.mark {
                     <span class={class::PICK_ROW_MARK} aria-hidden="true">{ mark.clone() }</span>
                 }
