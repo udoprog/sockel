@@ -324,7 +324,7 @@ fn the_full_stylesheet_is_within_its_budget() {
 }
 
 /// Prints the stylesheet's size with every part and with a typical app's
-/// `$omit`, for the changelog.
+/// `$omit`.
 #[test]
 #[ignore = "prints sizes"]
 fn omit_sizes() {
