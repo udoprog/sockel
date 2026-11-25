@@ -51,14 +51,14 @@
 //! <!-- check: Cargo.toml -->
 //! ```toml
 //! [dependencies]
-//! sockel = { version = "0.2", default-features = false, features = ["button", "layout", "overlay"] }
+//! sockel = { version = "0.3", default-features = false, features = ["button", "layout", "overlay"] }
 //! yew = { version = "0.23", features = ["csr"] }
 //!
 //! [build-dependencies]
-//! sockel-build = "0.2"
+//! sockel-build = "0.3"
 //!
 //! [dev-dependencies]
-//! sockel-build = "0.2"
+//! sockel-build = "0.3"
 //! ```
 //!
 //! <br>
@@ -388,7 +388,7 @@
 //!
 //! ```toml
 //! [dependencies]
-//! sockel = { version = "0.2", default-features = false, features = ["field", "input", "layout"] }
+//! sockel = { version = "0.3", default-features = false, features = ["field", "input", "layout"] }
 //! ```
 //!
 //! A feature gates a component's Rust and its CSS together. [`STYLESHEET`](https://docs.rs/sockel/latest/sockel/constant.STYLESHEET.html) and
