@@ -25,6 +25,14 @@ pub enum Glyph {
     Eye,
     EyeOff,
     Copy,
+    Home,
+    Desktop,
+    Document,
+    Download,
+    Music,
+    Picture,
+    Film,
+    Drive,
 }
 
 impl Glyph {
@@ -43,6 +51,14 @@ impl Glyph {
         Glyph::Eye,
         Glyph::EyeOff,
         Glyph::Copy,
+        Glyph::Home,
+        Glyph::Desktop,
+        Glyph::Document,
+        Glyph::Download,
+        Glyph::Music,
+        Glyph::Picture,
+        Glyph::Film,
+        Glyph::Drive,
     ];
 }
 
@@ -111,6 +127,28 @@ fn built_in(glyph: Glyph) -> Html {
         ),
         Glyph::Copy => svg(
             html! { <><rect x="5.5" y="5.5" width="8" height="8" rx="1.5" /><path d="M10.5 5.5v-2a1 1 0 0 0-1-1h-6a1 1 0 0 0-1 1v6a1 1 0 0 0 1 1h2" /></> },
+        ),
+        Glyph::Home => svg(html! { <path d="M2 7.5L8 2.5l6 5M3.5 6.5v7h3.5v-4h2v4h3.5v-7" /> }),
+        Glyph::Desktop => svg(
+            html! { <><rect x="1.5" y="2.5" width="13" height="8.5" rx="1" /><path d="M8 11v3M5.5 14h5" /></> },
+        ),
+        Glyph::Document => svg(
+            html! { <><path d="M3.5 1.5h5.5l3.5 3.5v9.5h-9z" /><path d="M9 1.5V5h3.5M6 8.5h4M6 11h4" /></> },
+        ),
+        Glyph::Download => svg(
+            html! { <path d="M8 2v8M4.5 6.5L8 10l3.5-3.5M2.5 10.5v2a1 1 0 0 0 1 1h9a1 1 0 0 0 1-1v-2" /> },
+        ),
+        Glyph::Music => svg(
+            html! { <><path d="M6 12V3.5l7-1.5v8.5" /><circle cx="4.5" cy="12" r="1.5" /><circle cx="11.5" cy="10.5" r="1.5" /></> },
+        ),
+        Glyph::Picture => svg(
+            html! { <><rect x="1.5" y="2.5" width="13" height="11" rx="1" /><path d="M1.5 11l4-4 3.5 3.5 2-2 3.5 3.5" /><circle cx="11" cy="5.5" r="1" /></> },
+        ),
+        Glyph::Film => svg(
+            html! { <><rect x="2.5" y="1.5" width="11" height="13" rx="1" /><path d="M5 1.5v13M11 1.5v13M2.5 5H5M2.5 8H5M2.5 11H5M11 5h2.5M11 8h2.5M11 11h2.5" /></> },
+        ),
+        Glyph::Drive => svg(
+            html! { <><path d="M3 9l1.5-6h7L13 9" /><rect x="1.5" y="9" width="13" height="4.5" rx="1" /><path d="M11 11.25h.01" /></> },
         ),
     }
 }

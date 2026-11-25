@@ -56,6 +56,10 @@ pub struct NavListProps {
     pub on_select: Callback<AttrValue>,
     /// What the navigation is for (`aria-label` of the `nav`).
     pub label: AttrValue,
+    /// Below the phone breakpoint, the column folds into one row that
+    /// scrolls sideways ([`class::FOLD`]).
+    #[prop_or_default]
+    pub fold: bool,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
 }
@@ -71,7 +75,7 @@ pub fn nav_list() -> Classes {
 pub fn NavList(props: &NavListProps) -> Html {
     with_testid(
         html! {
-            <nav class={classes!(nav_list(), props.class.clone())}
+            <nav class={classes!(nav_list(), props.fold.then_some(class::FOLD), props.class.clone())}
                 aria-label={props.label.clone()}>
                 <ul class={class::NAV_LIST_ITEMS}>
                     { for props.items.iter().map(|item| {
@@ -118,11 +122,16 @@ mod tests {
     use super::*;
 
     fn render(value: Option<&str>, items: Vec<NavItem>) -> String {
+        render_with(value, items, false)
+    }
+
+    fn render_with(value: Option<&str>, items: Vec<NavItem>, fold: bool) -> String {
         futures::executor::block_on(
             yew::LocalServerRenderer::<NavList>::with_props(yew::props!(NavListProps {
                 items: items,
                 value: value.map(AttrValue::from),
-                label: "Settings"
+                label: "Settings",
+                fold: fold
             }))
             .hydratable(false)
             .render(),
@@ -158,5 +167,15 @@ mod tests {
         assert!(html.contains("href=\"#a\""), "{html}");
         assert!(!html.contains("#c"), "{html}");
         assert_eq!(html.matches("disabled=").count(), 1, "{html}");
+    }
+
+    #[test]
+    fn a_folding_list_has_the_fold_modifier() {
+        assert!(!render(None, items()).contains(class::FOLD));
+        let html = render_with(None, items(), true);
+        assert!(
+            html.contains(&format!("{} {}", class::NAV_LIST, class::FOLD)),
+            "{html}"
+        );
     }
 }

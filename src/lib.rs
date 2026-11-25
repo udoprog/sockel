@@ -1193,7 +1193,7 @@ pub use field::{
 #[cfg(feature = "file-browser")]
 pub use file_browser::{
     EntryKind, FileBrowser, FileBrowserMode, FileBrowserProps, ListRequest, Listing, ListingEntry,
-    Place, PlaceKind, file_browser_note,
+    Place, PlaceKind, file_browser_body, file_browser_note,
 };
 #[cfg(feature = "picker")]
 pub use filter_picker::{

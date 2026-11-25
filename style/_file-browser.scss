@@ -1,10 +1,51 @@
-// FileBrowser (src/file_browser.rs): a Dialog (_dialog.scss) holding places
-// (buttons in a cluster), the location (an input), the directory's entries
-// (`.sockel-pick-row`s in a boxed `.sockel-row-list`, _rows.scss) and,
-// saving, a name field. Choosing a folder lists directories only.
+// FileBrowser (src/file_browser.rs): a Dialog (_dialog.scss) holding a rail
+// of places (a `.sockel-nav-list.sockel-fold`, _tabs.scss) beside the
+// location (an input), the directory's entries (`.sockel-pick-row`s in a
+// boxed `.sockel-row-list`, _rows.scss) and, saving, a name field. Choosing
+// a folder lists directories only.
 //
-// - `.sockel-file-browser-note`: loading, nothing here or no folders here, over the rows,
+// - `.sockel-file-browser-body`: the rail and the rest side by side, the
+//   rail at its own width (at most a third). Below the phone breakpoint the
+//   rail sits on top, its places one row, without its label.
+// - `.sockel-file-browser-places`: the rail; `-label` its label, muted.
+// - `.sockel-file-browser-note`: loading, nothing here or no folders here,
+//   over the rows,
 //   muted.
+
+@use "tokens" as base;
+
+.sockel-file-browser-body {
+    display: flex;
+    align-items: flex-start;
+    gap: var(--space-4);
+
+    @include base.below("phone") {
+        flex-direction: column;
+        align-items: stretch;
+        gap: var(--space-3);
+    }
+}
+
+.sockel-file-browser-places {
+    flex: none;
+    min-width: 0;
+    max-width: 33%;
+
+    @include base.below("phone") {
+        max-width: none;
+    }
+}
+
+.sockel-file-browser-places-label {
+    margin: 0;
+    padding-inline: var(--space-3);
+    @include base.field-label;
+    color: var(--muted);
+
+    @include base.below("phone") {
+        display: none;
+    }
+}
 
 .sockel-file-browser-note {
     margin: 0;

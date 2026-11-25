@@ -32,7 +32,8 @@
 //   or buttons, in `.sockel-nav-list-items`); the current one
 //   (`aria-current`) takes the accent colour on `--selection` (a tint of
 //   the accent when the app sets none). Parts: `-icon`,
-//   `-label`.
+//   `-label`. `.sockel-fold`: below the phone breakpoint the column folds
+//   into one row of items at their own width, scrolling sideways.
 
 @use "tokens" as base;
 
@@ -272,5 +273,16 @@
 
     .sockel-nav-label {
         @include base.truncate;
+    }
+
+    @include base.below("phone") {
+        .sockel-nav-list.sockel-fold .sockel-nav-list-items {
+            flex-direction: row;
+            @include base.scroll-fade;
+        }
+
+        .sockel-nav-list.sockel-fold .sockel-nav-list-items > li {
+            flex: none;
+        }
     }
 }

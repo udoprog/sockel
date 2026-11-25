@@ -37,8 +37,12 @@ const TREE: &[(&str, &[Entry])] = &[
         &[
             (".config", EntryKind::Directory, None),
             (".profile", EntryKind::File, Some(807)),
+            ("Desktop", EntryKind::Directory, None),
             ("Documents", EntryKind::Directory, None),
             ("Downloads", EntryKind::Directory, None),
+            ("Music", EntryKind::Directory, None),
+            ("Pictures", EntryKind::Directory, None),
+            ("Videos", EntryKind::Directory, None),
             ("archive_2026.gz", EntryKind::File, Some(3 * 1024 * 1024)),
             ("notes_typography.txt", EntryKind::File, Some(1536)),
             ("player.sock", EntryKind::Other, None),
@@ -60,7 +64,29 @@ const TREE: &[(&str, &[Entry])] = &[
             ("report.gz", EntryKind::File, Some(7_340_032)),
         ],
     ),
+    ("/home/me/Desktop", &[]),
     ("/home/me/Downloads", &[]),
+    (
+        "/home/me/Music",
+        &[("set_01.flac", EntryKind::File, Some(41_943_040))],
+    ),
+    (
+        "/home/me/Pictures",
+        &[("harbour.jpg", EntryKind::File, Some(2_411_724))],
+    ),
+    ("/home/me/Videos", &[]),
+];
+
+/// The places a service would send, in their order.
+const PLACES: &[(PlaceKind, &str)] = &[
+    (PlaceKind::Home, HOME),
+    (PlaceKind::Desktop, "/home/me/Desktop"),
+    (PlaceKind::Documents, "/home/me/Documents"),
+    (PlaceKind::Downloads, "/home/me/Downloads"),
+    (PlaceKind::Music, "/home/me/Music"),
+    (PlaceKind::Pictures, "/home/me/Pictures"),
+    (PlaceKind::Videos, "/home/me/Videos"),
+    (PlaceKind::Root, "/"),
 ];
 
 fn parent(path: &str) -> Option<String> {
@@ -85,24 +111,13 @@ fn listed(path: &str, file: Option<String>) -> Option<Listing> {
             })
             .collect(),
         file,
-        places: vec![
-            Place {
-                kind: PlaceKind::Home,
-                path: HOME.into(),
-            },
-            Place {
-                kind: PlaceKind::Documents,
-                path: format!("{HOME}/Documents"),
-            },
-            Place {
-                kind: PlaceKind::Downloads,
-                path: format!("{HOME}/Downloads"),
-            },
-            Place {
-                kind: PlaceKind::Root,
-                path: "/".into(),
-            },
-        ],
+        places: PLACES
+            .iter()
+            .map(|(kind, path)| Place {
+                kind: *kind,
+                path: (*path).to_owned(),
+            })
+            .collect(),
     })
 }
 

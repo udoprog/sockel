@@ -916,7 +916,7 @@ pub const PAGES: &[Page] = &[
         id: "file-browser",
         title: "FileBrowser",
         group: Group::Pickers,
-        about: "A dialog choosing a path on a machine the browser cannot see, to open, to save to or a folder: places, an editable location (Enter goes there), the directory's entries with hidden ones on request, and, saving, a name that warns when it replaces a file. Choosing a folder lists only directories and chooses the one on screen. The app answers each ListRequest; here a made-up machine does. Open it, browse, pick a .gz with the filter on.",
+        about: "A dialog choosing a path on a machine the browser cannot see, to open, to save to or a folder: a rail of places (a row on a phone; none when the app sends none), an editable location (Enter goes there), the directory's entries with hidden ones on request, and, saving, a name that warns when it replaces a file. Choosing a folder lists only directories and chooses the one on screen. The app answers each ListRequest; here a made-up machine does. Open it, browse, pick a .gz with the filter on.",
         covers: &[
             "FileBrowser",
             "FileBrowserProps",
@@ -928,6 +928,7 @@ pub const PAGES: &[Page] = &[
             "Place",
             "PlaceKind",
             "file_browser_note",
+            "file_browser_body",
         ],
         render: || html! { <file_browser::FileBrowserPage /> },
         holds: &[hold(sockel::class::BUTTON, Size::Box, Across::All)],

@@ -12,8 +12,8 @@ use yew::prelude::*;
 
 use crate::phrasebookcatalog01::L10N;
 use crate::{
-    Button, ButtonSize, ButtonVariant, Cluster, Dialog, DialogSize, Field, Gap, Glyph, Icon,
-    Notice, PickRow, RowList, Stack, TextInput, Tone, class, field_describedby,
+    Button, ButtonSize, ButtonVariant, Dialog, DialogSize, Field, Gap, Glyph, Icon, NavItem,
+    NavList, Notice, PickRow, RowList, Stack, TextInput, Tone, class, field_describedby,
 };
 
 /// Whether a [`FileBrowser`] chooses a file to open, a path to save to or a
@@ -46,15 +46,35 @@ pub struct ListingEntry {
 }
 
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
+#[non_exhaustive]
 pub enum PlaceKind {
     Home,
+    Desktop,
     Documents,
     Downloads,
+    Music,
+    Pictures,
+    Videos,
     /// A file system root, labelled with its path.
     Root,
 }
 
-/// A place offered above the location.
+impl PlaceKind {
+    fn glyph(self) -> Glyph {
+        match self {
+            PlaceKind::Home => Glyph::Home,
+            PlaceKind::Desktop => Glyph::Desktop,
+            PlaceKind::Documents => Glyph::Document,
+            PlaceKind::Downloads => Glyph::Download,
+            PlaceKind::Music => Glyph::Music,
+            PlaceKind::Pictures => Glyph::Picture,
+            PlaceKind::Videos => Glyph::Film,
+            PlaceKind::Root => Glyph::Drive,
+        }
+    }
+}
+
+/// A place offered in the side rail, in the order given.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Place {
     pub kind: PlaceKind,
@@ -225,9 +245,14 @@ pub fn file_browser_note() -> Classes {
     classes!(class::FILE_BROWSER_NOTE)
 }
 
+/// A file browser's body: its places rail beside the rest.
+pub fn file_browser_body() -> Classes {
+    classes!(class::FILE_BROWSER_BODY)
+}
+
 /// A dialog browsing directories the owner lists, to choose a file to open,
 /// a path to save to or, in [`FileBrowserMode::Folder`], the listed
-/// directory: places, an editable location, the directory's
+/// directory: a rail of places, an editable location, the directory's
 /// entries (hidden ones on request) and, saving, a name that warns when it
 /// replaces a file.
 #[function_component]
@@ -382,34 +407,44 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
 
     let places = listing
         .as_ref()
+        .filter(|listing| !listing.places.is_empty())
         .map(|listing| {
-            listing
+            let items = listing
                 .places
                 .iter()
                 .map(|place| {
-                    let onclick = {
-                        let navigate = navigate.clone();
-                        let path = place.path.clone();
-                        Callback::from(move |_: MouseEvent| navigate.emit((path.clone(), false)))
-                    };
-
                     let label = match place.kind {
                         PlaceKind::Home => phrases.text("sockel-file-browser-home"),
+                        PlaceKind::Desktop => phrases.text("sockel-file-browser-desktop"),
                         PlaceKind::Documents => phrases.text("sockel-file-browser-documents"),
                         PlaceKind::Downloads => phrases.text("sockel-file-browser-downloads"),
+                        PlaceKind::Music => phrases.text("sockel-file-browser-music"),
+                        PlaceKind::Pictures => phrases.text("sockel-file-browser-pictures"),
+                        PlaceKind::Videos => phrases.text("sockel-file-browser-videos"),
                         PlaceKind::Root => place.path.as_str().into(),
                     };
 
-                    html! {
-                        <Button size={ButtonSize::Small} variant={ButtonVariant::Quiet}
-                            selected={listing.path == place.path} tip={place.path.clone()} {onclick}>
-                            { label }
-                        </Button>
-                    }
+                    NavItem::new(place.path.clone(), label)
+                        .icon(html!(<Icon glyph={place.kind.glyph()} />))
                 })
-                .collect::<Html>()
-        })
-        .unwrap_or_default();
+                .collect::<Vec<_>>();
+
+            let value = listing
+                .places
+                .iter()
+                .any(|place| place.path == listing.path)
+                .then(|| AttrValue::from(listing.path.clone()));
+
+            let on_select = navigate.reform(|path: AttrValue| (path.to_string(), false));
+            let label = phrases.text("sockel-file-browser-places-title");
+
+            html! {
+                <Stack gap={Gap::Snug} class={class::FILE_BROWSER_PLACES}>
+                    <p class={class::FILE_BROWSER_PLACES_LABEL} aria-hidden="true">{ label.clone() }</p>
+                    <NavList {items} {value} {on_select} {label} fold={true} />
+                </Stack>
+            }
+        });
 
     let up = {
         let parent = listing.as_ref().and_then(|l| l.parent.clone());
@@ -523,19 +558,21 @@ pub fn FileBrowser(props: &FileBrowserProps) -> Html {
         <Dialog open={props.open} on_dismiss={props.on_dismiss.reform(|_| ())}
             title={props.title.clone()} size={DialogSize::WideTall} {head_actions} {actions}
             testid={props.testid.clone()}>
-            <Stack>
-                <Cluster gap={Gap::Tight}>{ places }</Cluster>
-                <TextInput value={state.location.clone()} on_input={on_location}
-                    on_keydown={on_location_key}
-                    label={phrases.text("sockel-file-browser-location")}
-                    enterkeyhint="go" spellcheck={false} busy={state.loading} />
-                { error }
-                if let Some(note) = note {
-                    <p class={file_browser_note()}>{ note }</p>
-                }
-                <RowList tag="div" divided={true} boxed={true}>{ rows }</RowList>
-                { name_field }
-            </Stack>
+            <div class={file_browser_body()}>
+                { places }
+                <Stack class={class::GROW}>
+                    <TextInput value={state.location.clone()} on_input={on_location}
+                        on_keydown={on_location_key}
+                        label={phrases.text("sockel-file-browser-location")}
+                        enterkeyhint="go" spellcheck={false} busy={state.loading} />
+                    { error }
+                    if let Some(note) = note {
+                        <p class={file_browser_note()}>{ note }</p>
+                    }
+                    <RowList tag="div" divided={true} boxed={true}>{ rows }</RowList>
+                    { name_field }
+                </Stack>
+            </div>
         </Dialog>
     }
 }
@@ -641,6 +678,31 @@ mod tests {
             .map(|c| c.to_string())
             .collect();
         assert_eq!(names, [class::FILE_BROWSER_NOTE]);
+    }
+
+    #[test]
+    fn the_body_is_a_class() {
+        let names: Vec<_> = file_browser_body()
+            .into_iter()
+            .map(|c| c.to_string())
+            .collect();
+        assert_eq!(names, [class::FILE_BROWSER_BODY]);
+    }
+
+    #[test]
+    fn every_place_has_its_own_glyph() {
+        let kinds = [
+            PlaceKind::Home,
+            PlaceKind::Desktop,
+            PlaceKind::Documents,
+            PlaceKind::Downloads,
+            PlaceKind::Music,
+            PlaceKind::Pictures,
+            PlaceKind::Videos,
+            PlaceKind::Root,
+        ];
+        let glyphs: std::collections::HashSet<_> = kinds.iter().map(|k| k.glyph()).collect();
+        assert_eq!(glyphs.len(), kinds.len());
     }
 
     #[test]
