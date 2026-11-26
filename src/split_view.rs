@@ -61,14 +61,12 @@ pub fn split_view(open: bool) -> Classes {
     classes!(class::SPLIT_VIEW, open.then_some(class::OPEN))
 }
 
-/// A list and its detail. From `$split-view-breakpoint` (`tablet`) of its
-/// own width (a container query) they sit side by side on a [`Seam`], the
-/// detail pane holding `empty` while nothing is open; below it one pane
-/// shows, the detail while one is open and the list otherwise. The app's
-/// route says what is open, so back is the app's (or the browser's): a
-/// [`class::SPLIT_VIEW_BACK`] in the detail shows only while the panes are
-/// one at a time. Both panes stay mounted, so the list keeps its scroll and
-/// focus while a detail covers it. Give the split view a height.
+/// A list and its detail, side by side on a [`Seam`] when there is room and
+/// one at a time when there is not.
+///
+/// The app's route says what is open. A [`class::SPLIT_VIEW_BACK`] element
+/// in the detail shows only while the panes are one at a time. Both panes
+/// stay mounted, so the list keeps its scroll. Give the split view a height.
 #[function_component]
 pub fn SplitView(props: &SplitViewProps) -> Html {
     let at = use_state_eq(|| props.at);

@@ -274,8 +274,7 @@ fn a_component_s_feature_leaves_out_its_siblings() {
 
 /// Prints each feature's stylesheet size, the build with only it and what it
 /// brings in, as `<feature> <bytes>` lines, `(none)` and `full` too. Run by
-/// `scripts/feature-sizes.sh`, which writes them into the feature table in
-/// sockel's crate docs.
+/// `scripts/feature-sizes.sh`, which prints them in kilobytes.
 #[test]
 #[ignore = "prints the sizes for scripts/feature-sizes.sh"]
 fn feature_sizes() {

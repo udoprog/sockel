@@ -206,14 +206,12 @@ pub struct ReorderTreeProps {
     pub children: Html,
 }
 
-/// Nested lists whose rows move within a list and between lists, by a drag
-/// on their [`ReorderTreeHandle`] or by keyboard: Space lifts, the arrows
-/// step through every place the row may go in reading order (into a list
-/// inside a row and back out of it), Home and End aim at the ends of the
-/// current list, Space drops and Escape cancels; Alt and an arrow moves at
-/// once. A dragged row follows the pointer and aims at the innermost list
-/// under it that takes it. As in [`Reorder`](crate::Reorder) nothing
-/// reflows until the drop.
+/// Nested lists whose rows can be dragged within and between lists by their
+/// [`ReorderTreeHandle`].
+///
+/// From the keyboard, Space lifts a row, the arrows step through every place
+/// it may go (in and out of nested lists), Space drops it and Escape
+/// cancels. Nothing reflows until the drop.
 #[function_component]
 pub fn ReorderTree(props: &ReorderTreeProps) -> Html {
     let live = use_mut_ref(Live::default);

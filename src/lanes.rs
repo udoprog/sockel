@@ -54,17 +54,14 @@ pub fn lanes() -> Classes {
     classes!(class::LANES)
 }
 
-/// Lists side by side (a board's columns), each a [`Lane`] of
-/// [`ReorderItem`]s with a [`ReorderTreeHandle`](crate::ReorderTreeHandle)
-/// in each. A row moves by a drag (a mouse or pen from anywhere on it with
-/// `body_drag`, a finger by its handle) to a place in any lane; on a
-/// focused handle Space lifts, Up and Down move within the lane, Left and
-/// Right to the lane beside at the same place (or its end), Space drops
-/// and Escape cancels; Alt and an arrow moves at once. Each step is
-/// announced with the lane's name. The lanes scroll together in one area,
-/// their heads held at its top; below `$lanes-breakpoint` of their own
-/// width (a container query) each lane is nearly the area's width and
-/// snaps into view. Nothing reflows until the drop, as in [`ReorderTree`].
+/// Lists side by side, like a board's columns, whose rows can be dragged
+/// within and between them. Each is a [`Lane`] of [`ReorderItem`]s, each
+/// with a [`ReorderTreeHandle`](crate::ReorderTreeHandle).
+///
+/// From the keyboard, Space on a handle lifts the row, the arrows move it
+/// (Left and Right to the next lane), Space drops it and Escape cancels.
+/// On a narrow screen each lane takes nearly the full width and snaps into
+/// view. Nothing reflows until the drop.
 #[function_component]
 pub fn Lanes(props: &LanesProps) -> Html {
     html! {
