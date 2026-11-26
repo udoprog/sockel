@@ -3,7 +3,12 @@
 //! repeating its text in highlighted spans, beside a gutter of line numbers
 //! marking the lines with diagnostics (`style/_code-editor.scss`). The
 //! highlighting, the diagnostics and the completions come in through props.
-//! Offsets are bytes of the text.
+//! Offsets are UTF-8 byte offsets into the text; an offset past the end is
+//! clamped to the end and one inside a character floors to its start, so
+//! none panics. An app whose analyser counts characters converts with
+//! [`char_to_byte`].
+//!
+//! Colours are the `--code-*` custom properties, see [`CodeToken`].
 
 use crate::testid::with_testid;
 use std::ops::Range;
@@ -21,8 +26,21 @@ use crate::{
     use_popover,
 };
 
-/// What a highlighted span of code is, which picks its colour
-/// (`--code-keyword` and so on).
+/// What a highlighted span of code is, which picks its colour.
+///
+/// The `--code-*` custom properties (`--code-keyword`, `--code-name`,
+/// `--code-member`, `--code-type`, `--code-function`, `--code-number`,
+/// `--code-string`, `--code-comment`, `--code-operator` and
+/// `--code-punctuation`) are the supported theming surface. Their defaults
+/// are mixed from the app's `--text`, so they follow a light or dark theme
+/// and an app with no syntax palette sets nothing. An app with its own
+/// palette points them at it, on the same element as its colours:
+///
+/// ```css
+/// :root { --code-keyword: var(--syntax-keyword); --code-string: var(--syntax-string); }
+/// ```
+///
+/// An app maps its tokenizer's classes onto these with a `match`.
 #[derive(Clone, Copy, Debug, PartialEq, Eq)]
 pub enum CodeToken {
     Keyword,
@@ -36,7 +54,7 @@ pub enum CodeToken {
     Operator,
     Punctuation,
     Error,
-    /// A class of the app's own.
+    /// A class of the app's own; the app supplies that class's CSS.
     Class(&'static str),
 }
 
@@ -62,6 +80,8 @@ impl CodeToken {
 /// A highlighted span of the text.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CodeSpan {
+    /// UTF-8 byte offsets into the text; past the end clamps, off a char
+    /// boundary floors.
     pub range: Range<usize>,
     pub token: CodeToken,
 }
@@ -95,6 +115,8 @@ impl Severity {
 /// gutter. An empty span marks the place after it.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Diagnostic {
+    /// UTF-8 byte offsets into the text; past the end clamps, off a char
+    /// boundary floors.
     pub range: Range<usize>,
     pub severity: Severity,
     pub message: AttrValue,
@@ -117,12 +139,16 @@ pub struct Completion {
     pub label: AttrValue,
     pub detail: Option<AttrValue>,
     pub text: String,
+    /// The selection after accepting, as UTF-8 byte offsets into `text`;
+    /// past the end clamps, off a char boundary floors.
     pub select: Range<usize>,
 }
 
 /// The completions at the cursor, the list anchored at `start`.
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct Completions {
+    /// A UTF-8 byte offset into the text; past the end clamps, off a char
+    /// boundary floors.
     pub start: usize,
     pub items: Vec<Completion>,
 }
@@ -132,8 +158,18 @@ pub struct Completions {
 #[derive(Clone, Debug, PartialEq, Eq)]
 pub struct CompletionQuery {
     pub text: String,
+    /// The cursor as a UTF-8 byte offset into `text`, always on a char
+    /// boundary.
     pub cursor: usize,
     pub forced: bool,
+}
+
+/// The byte offset of character `chars` in `text`, for an analyser that
+/// counts characters; `text.len()` when `chars` is past the end.
+pub fn char_to_byte(text: &str, chars: usize) -> usize {
+    text.char_indices()
+        .nth(chars)
+        .map_or(text.len(), |(index, _)| index)
 }
 
 /// A code editor's classes: `code-editor`, `invalid` while a diagnostic is
@@ -956,6 +992,24 @@ mod tests {
 
     fn text(range: Range<usize>, span: Option<usize>, mark: Option<Severity>) -> Piece {
         Piece::Text { range, span, mark }
+    }
+
+    #[test]
+    fn char_to_byte_clamps() {
+        assert_eq!(char_to_byte("aéb", 0), 0);
+        assert_eq!(char_to_byte("aéb", 2), 3);
+        assert_eq!(char_to_byte("aéb", 3), 4);
+        assert_eq!(char_to_byte("aéb", 99), 4);
+        assert_eq!(char_to_byte("", 1), 0);
+    }
+
+    #[test]
+    fn pieces_floor_off_boundary_and_clamp() {
+        let spans = [span(0..99, CodeToken::Name)];
+        assert_eq!(
+            pieces("é", &spans, &[], &[Some(1)]),
+            [Piece::Point(0), text(0..2, Some(0), None)]
+        );
     }
 
     #[test]

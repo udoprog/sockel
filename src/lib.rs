@@ -1164,7 +1164,7 @@ pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, ChoiceStack, choi
 #[cfg(feature = "code-editor")]
 pub use code_editor::{
     CodeEditor, CodeEditorProps, CodeSpan, CodeToken, Completion, CompletionQuery, Completions,
-    Diagnostic, Severity, code_editor,
+    Diagnostic, Severity, char_to_byte, code_editor,
 };
 #[cfg(feature = "color-select")]
 pub use color_select::{

@@ -1160,6 +1160,7 @@ pub const PAGES: &[Page] = &[
             "Completions",
             "Diagnostic",
             "Severity",
+            "char_to_byte",
             "code_editor",
         ],
         render: || html! { <code_editor::CodeEditorPage /> },
