@@ -113,6 +113,49 @@ pub struct CodeEditorProps {
 /// line's indent, and a completion list at the cursor. Edits go through the
 /// browser's editing commands, so they are undone as typing is. It grows
 /// with the text and scrolls sideways, following the caret.
+///
+/// The textarea is uncontrolled: the browser keeps the text, and the
+/// parent mirrors it from `on_input`. Ignoring an `on_input` does not revert
+/// the textarea; to change its text, set a different `value`. Keep the text
+/// as an [`AttrValue`] (`text.set(value.into())`), so passing it on is an
+/// `Rc` clone, and derive `spans` and `diagnostics` with `use_memo` keyed on
+/// it, so they are worked out once per edit rather than once per render.
+///
+/// ```
+/// use std::rc::Rc;
+///
+/// use sockel::{CodeEditor, CodeSpan, Diagnostic};
+/// use yew::prelude::*;
+///
+/// fn highlight(text: &str) -> Vec<CodeSpan> {
+///     // The app's highlighter.
+/// #   let _ = text;
+///     Vec::new()
+/// }
+///
+/// fn check(text: &str) -> Vec<Diagnostic> {
+///     // The app's checker.
+/// #   let _ = text;
+///     Vec::new()
+/// }
+///
+/// #[function_component]
+/// fn Expression() -> Html {
+///     let text = use_state(AttrValue::default);
+///     let spans = use_memo((*text).clone(), |text| Rc::<[CodeSpan]>::from(highlight(text)));
+///     let diagnostics = use_memo((*text).clone(), |text| Rc::<[Diagnostic]>::from(check(text)));
+///
+///     let on_input = {
+///         let text = text.clone();
+///         Callback::from(move |value: String| text.set(value.into()))
+///     };
+///
+///     html! {
+///         <CodeEditor value={(*text).clone()} {on_input} label="Expression"
+///             spans={(*spans).clone()} diagnostics={(*diagnostics).clone()} />
+///     }
+/// }
+/// ```
 #[function_component]
 pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     let phrases = use_phrases_with(&L10N);
@@ -731,12 +774,12 @@ fn keydown(area: &HtmlTextAreaElement, event: &KeyboardEvent) -> bool {
 ///
 /// #[function_component]
 /// fn Expression() -> Html {
-///     let text = use_state(String::new);
+///     let text = use_state(AttrValue::default);
 ///     let editor = use_node_ref();
 ///
 ///     let on_input = {
 ///         let text = text.clone();
-///         Callback::from(move |value: String| text.set(value))
+///         Callback::from(move |value: String| text.set(value.into()))
 ///     };
 ///
 ///     let onclick = {

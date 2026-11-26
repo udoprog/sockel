@@ -193,7 +193,7 @@ fn complete(query: CompletionQuery, bound: &[String]) -> Option<Rc<Completions>>
 
 #[function_component]
 pub fn CodeEditorPage() -> Html {
-    let text = use_state(|| SAMPLE.to_owned());
+    let text = use_state(|| AttrValue::from(SAMPLE));
     let diagnostics = use_state(|| true);
     let completions = use_state(|| true);
     let readonly = use_state(|| false);
@@ -210,27 +210,45 @@ pub fn CodeEditorPage() -> Html {
     };
     let code = snippet(
         &[
-            "let spans: Rc<[CodeSpan]> = highlight(&text).into();".into(),
-            "let diagnostics: Rc<[Diagnostic]> = check(&text).into();".into(),
+            "// set_text does text.set(value.into()): passing it on is an Rc clone.".into(),
+            "let text = use_state(AttrValue::default);".into(),
+            "// Highlighted and checked once per edit, not once per render.".into(),
+            "let spans = use_memo((*text).clone(), |text| Rc::<[CodeSpan]>::from(highlight(text)));"
+                .into(),
+            "let diagnostics = use_memo((*text).clone(), |text| Rc::<[Diagnostic]>::from(check(text)));"
+                .into(),
         ],
         El::new("CodeEditor")
-            .expr("value", "text.clone()")
+            .expr("value", "(*text).clone()")
             .expr("on_input", "set_text")
             .text("label", "Expression")
-            .expr("spans", "spans")
-            .expr_if(*diagnostics, "diagnostics", "diagnostics")
+            .expr("spans", "(*spans).clone()")
+            .expr_if(*diagnostics, "diagnostics", "(*diagnostics).clone()")
             .expr_if(*completions, "complete", "Some(complete)")
             .expr_if(*rows != 4, "rows", rows.to_string())
             .flag("readonly", *readonly)
             .expr("node_ref", "editor.clone()"),
     );
 
-    let (spans, bound) = highlight(&text);
-    let found = if *diagnostics {
-        check(&text, &spans, &bound)
-    } else {
-        Vec::new()
-    };
+    // Highlighted and checked once per edit: the toggles re-render the
+    // page without touching the text.
+    let highlighted = use_memo((*text).clone(), |text| {
+        let (spans, bound) = highlight(text);
+        (Rc::<[CodeSpan]>::from(spans), Rc::<[String]>::from(bound))
+    });
+    let (spans, bound) = (*highlighted).clone();
+    let found = use_memo(((*text).clone(), *diagnostics), {
+        let spans = spans.clone();
+        let bound = bound.clone();
+        move |(text, on)| -> Rc<[Diagnostic]> {
+            if *on {
+                check(text, &spans, &bound).into()
+            } else {
+                Rc::from([])
+            }
+        }
+    });
+    let found = (*found).clone();
     let count = |s: Severity| found.iter().filter(|d| d.severity == s).count();
     let (errors, warnings, notes) = (
         count(Severity::Error),
@@ -244,9 +262,9 @@ pub fn CodeEditorPage() -> Html {
     });
     let on_input = {
         let text = text.clone();
-        Callback::from(move |value: String| text.set(value))
+        Callback::from(move |value: String| text.set(value.into()))
     };
-    let value = AttrValue::from((*text).clone());
+    let value = (*text).clone();
     // A press on a name puts it at the cursor, as a list of names beside
     // the editor would.
     let inserts = bound
@@ -268,8 +286,8 @@ pub fn CodeEditorPage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <CodeEditor {value} {on_input} label="Expression" spans={Rc::<[CodeSpan]>::from(spans)}
-                diagnostics={Rc::<[Diagnostic]>::from(found)} {complete}
+            <CodeEditor {value} {on_input} label="Expression" {spans}
+                diagnostics={found} {complete}
                 rows={*rows} readonly={*readonly} testid="code-editor" node_ref={editor.clone()} />
             <Cluster>{ inserts }</Cluster>
             <span class={class::CONTROL_LABEL}>
