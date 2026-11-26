@@ -408,64 +408,64 @@
 //!
 //! | Feature | Brings in | CSS alone |
 //! | --- | --- | --- |
-//! | `action-group` | | 3.8 KB |
-//! | `badge` | `icons` | 9.8 KB |
-//! | `button` | `icons`, `skeleton` | 13.6 KB |
-//! | `card-grid` | | 4.2 KB |
-//! | `checkbox` | `icons` | 6.6 KB |
-//! | `chip` | `icons` | 6.6 KB |
-//! | `chip-select` | `chip`, `layout`, `search-select` | 50.1 KB |
-//! | `choice` | | 7.2 KB |
-//! | `code-editor` | `code-snippet`, `overlay`, `select` | 52.2 KB |
-//! | `code-snippet` | | 6.1 KB |
-//! | `color-select` | `select` | 50.4 KB |
-//! | `composer` | `drop-zone`, `input` | 23.8 KB |
-//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.5 KB |
-//! | `disclosure` | `head`, `icons` | 15.8 KB |
-//! | `drop-zone` | `button` | 16.0 KB |
-//! | `field` | | 6.4 KB |
-//! | `file-browser` | `badge`, `button`, `field`, `icons`, `input`, `layout`, `notice`, `overlay`, `rows` | 61.5 KB |
-//! | `head` | `layout` | 13.0 KB |
-//! | `icons` | | 4.0 KB |
-//! | `input` | `icons` | 10.5 KB |
-//! | `lanes` | `badge`, `reorder` | 44.8 KB |
-//! | `layout` | | 9.1 KB |
-//! | `library-toolbar` | `input`, `layout` | 16.2 KB |
-//! | `lightbox` | `overlay` | 29.5 KB |
-//! | `loadable` | `notice`, `skeleton` | 24.3 KB |
-//! | `log-view` | `button` | 15.7 KB |
-//! | `media` | `icons` | 5.7 KB |
-//! | `menu` | `button`, `icons`, `overlay` | 33.2 KB |
-//! | `notice` | `badge`, `button` | 24.0 KB |
-//! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.7 KB |
-//! | `pager` | `icons` | 6.9 KB |
-//! | `panel` | | 4.9 KB |
-//! | `picker` | `overlay`, `pager`, `select` | 54.9 KB |
-//! | `property-list` | `button`, `input` | 23.0 KB |
-//! | `quantity` | `select`, `stepper` | 47.8 KB |
-//! | `reorder` | `icons`, `rows`, `tooltip` | 36.7 KB |
-//! | `rows` | `button` | 19.2 KB |
-//! | `search-select` | `select` | 47.5 KB |
-//! | `save-bar` | `button` | 14.7 KB |
-//! | `seam` | | 5.3 KB |
-//! | `select` | `input`, `menu`, `tooltip` | 46.1 KB |
-//! | `shell` | `badge` | 14.3 KB |
-//! | `shortcuts` | `overlay` | 29.2 KB |
-//! | `skeleton` | `icons`, `media` | 7.5 KB |
-//! | `split-view` | `seam` | 6.4 KB |
-//! | `stepper` | `input` | 12.1 KB |
-//! | `switch` | `icons` | 6.0 KB |
-//! | `table` | `icons` | 10.8 KB |
-//! | `tabs` | | 9.7 KB |
-//! | `time` | | 3.8 KB |
-//! | `toast` | `save-bar`, `toasts` | 36.4 KB |
-//! | `toasts` | `badge`, `button`, `overlay` | 35.3 KB |
-//! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.6 KB |
-//! | `tooltip` | `overlay` | 28.8 KB |
+//! | `action-group` | | 4.0 KB |
+//! | `badge` | `icons` | 10.0 KB |
+//! | `button` | `icons`, `skeleton` | 13.8 KB |
+//! | `card-grid` | | 4.4 KB |
+//! | `checkbox` | `icons` | 6.8 KB |
+//! | `chip` | `icons` | 6.8 KB |
+//! | `chip-select` | `chip`, `layout`, `search-select` | 50.3 KB |
+//! | `choice` | | 7.4 KB |
+//! | `code-editor` | `code-snippet`, `overlay`, `select` | 52.4 KB |
+//! | `code-snippet` | | 6.3 KB |
+//! | `color-select` | `select` | 50.6 KB |
+//! | `composer` | `drop-zone`, `input` | 24.0 KB |
+//! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.7 KB |
+//! | `disclosure` | `head`, `icons` | 16.0 KB |
+//! | `drop-zone` | `button` | 16.2 KB |
+//! | `field` | | 6.6 KB |
+//! | `file-browser` | `badge`, `button`, `confirm`, `field`, `icons`, `input`, `layout`, `notice`, `overlay`, `rows`, `tabs` | 63.1 KB |
+//! | `head` | `layout` | 13.2 KB |
+//! | `icons` | | 4.2 KB |
+//! | `input` | `icons` | 10.7 KB |
+//! | `lanes` | `badge`, `reorder` | 45.0 KB |
+//! | `layout` | | 9.3 KB |
+//! | `library-toolbar` | `input`, `layout` | 16.4 KB |
+//! | `lightbox` | `overlay` | 29.7 KB |
+//! | `loadable` | `notice`, `skeleton` | 24.5 KB |
+//! | `log-view` | `button` | 15.9 KB |
+//! | `media` | `icons` | 5.9 KB |
+//! | `menu` | `button`, `icons`, `overlay` | 33.4 KB |
+//! | `notice` | `badge`, `button` | 24.2 KB |
+//! | `overlay` | `action-group`, `button`, `head`, `icons` | 27.9 KB |
+//! | `pager` | `icons` | 7.1 KB |
+//! | `panel` | | 5.1 KB |
+//! | `picker` | `overlay`, `pager`, `select` | 55.1 KB |
+//! | `property-list` | `button`, `input` | 23.2 KB |
+//! | `quantity` | `select`, `stepper` | 48.0 KB |
+//! | `reorder` | `icons`, `rows`, `tooltip` | 36.9 KB |
+//! | `rows` | `button` | 19.4 KB |
+//! | `search-select` | `select` | 47.7 KB |
+//! | `save-bar` | `button` | 14.9 KB |
+//! | `seam` | | 5.5 KB |
+//! | `select` | `input`, `menu`, `tooltip` | 46.3 KB |
+//! | `shell` | `badge` | 14.5 KB |
+//! | `shortcuts` | `overlay` | 29.4 KB |
+//! | `skeleton` | `icons`, `media` | 7.7 KB |
+//! | `split-view` | `seam` | 6.6 KB |
+//! | `stepper` | `input` | 12.3 KB |
+//! | `switch` | `icons` | 6.2 KB |
+//! | `table` | `icons` | 11.0 KB |
+//! | `tabs` | | 9.9 KB |
+//! | `time` | | 4.0 KB |
+//! | `toast` | `save-bar`, `toasts` | 36.6 KB |
+//! | `toasts` | `badge`, `button`, `overlay` | 35.5 KB |
+//! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.8 KB |
+//! | `tooltip` | `overlay` | 29.0 KB |
 //!
 //! A feature is named for the component or family it gates; the
 //! [showcase](https://udoprog.github.io/sockel/) shows each one. "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
-//! with none it is 3.4 KB, and with `full` 146 KB. Each feature builds alone,
+//! with none it is 3.6 KB, and with `full` 146 KB. Each feature builds alone,
 //! and its CSS holds no other feature's rules.
 //! `scripts/feature-sizes.sh` in the repository measures every row and rewrites the
 //! column and these figures in place; run it when the styles change.
