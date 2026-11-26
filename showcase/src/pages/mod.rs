@@ -340,10 +340,12 @@ pub const PAGES: &[Page] = &[
         id: "field",
         title: "Field",
         group: Group::Inputs,
-        about: "A label, the control, a hint and an error. With reserve_error the error line keeps its room: set an error and nothing below moves.",
+        about: "A label, the control, a hint and an error. With reserve_error the error line keeps its room: set an error and nothing below moves. The third field holds a TextInput without ids: it takes the field's id, describedby and invalid, as any control reading use_field does.",
         covers: &[
             "Field",
             "FieldProps",
+            "FieldContext",
+            "use_field",
             "field",
             "field_error",
             "field_describedby",

@@ -2,6 +2,7 @@
 //! optional custom colour (`style/_color-select.scss`).
 
 use crate::testid::with_testid;
+use crate::use_field;
 use web_sys::{HtmlElement, HtmlInputElement};
 use yew::prelude::*;
 
@@ -200,6 +201,10 @@ fn swatch(value: &str, none: bool) -> Html {
 /// native colour input below the grid.
 #[function_component]
 pub fn ColorSelect(props: &ColorSelectProps) -> Html {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
     let id = use_state(|| crate::tooltip::next_id("color-select"));
     let overlays = use_overlays();
     let face = use_node_ref();
@@ -481,17 +486,17 @@ pub fn ColorSelect(props: &ColorSelectProps) -> Html {
 
     html! {
         <>
-            { with_testid(html! { <button ref={face} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face} type="button" id={field_id.clone()}
                 class={classes!(
-                    color_select(props.size, props.width, props.invalid, props.disabled, props.busy),
+                    color_select(props.size, props.width, invalid, props.disabled, props.busy),
                     props.class.clone()
                 )}
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
                 aria-controls={open.then(|| list_id.clone())}
                 aria-activedescendant={open.then(|| active.map(|i| option_id(&id, i))).flatten()}
                 aria-label={listbox::face_label(props.label.as_ref(), face_label.as_deref())}
-                aria-describedby={props.describedby.clone()}
-                aria-invalid={props.invalid.then_some("true")}
+                aria-describedby={describedby.clone()}
+                aria-invalid={invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled}
                 {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>

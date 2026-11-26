@@ -3,8 +3,8 @@ use std::sync::atomic::{AtomicUsize, Ordering};
 use yew::prelude::*;
 
 use sockel::{
-    Field, FieldCheck, FieldInputs, Fieldset, FormRow, FormRows, field, field_describedby,
-    field_error, form_row, form_rows,
+    Field, FieldCheck, FieldInputs, Fieldset, FormRow, FormRows, TextInput, field,
+    field_describedby, field_error, form_row, form_rows,
 };
 
 use crate::class;
@@ -43,11 +43,15 @@ const INPUTS_OPTIONS: &[(&str, FieldInputs)] = &[
 struct CaseProps {
     settings: Settings,
     row: bool,
+    /// A sockel `TextInput` without ids of its own, which takes the field's.
+    #[prop_or_default]
+    sockel: bool,
 }
 
 #[function_component]
 fn Case(props: &CaseProps) -> Html {
     let id = use_control_id();
+    let value = use_state(|| AttrValue::from("Ada"));
     let s = props.settings;
     let label = s.label.of("Display name");
     let hint = s.hint.of("Shown on your profile");
@@ -65,6 +69,15 @@ fn Case(props: &CaseProps) -> Html {
                 <input class={sockel::class::INPUT} value="Lovelace" aria-label="Last name"
                     required={s.required} disabled={s.disabled} />
             </>
+        }
+    } else if props.sockel {
+        let on_input = {
+            let value = value.clone();
+            Callback::from(move |text: String| value.set(text.into()))
+        };
+        html! {
+            <TextInput value={(*value).clone()} {on_input}
+                required={s.required} disabled={s.disabled} />
         }
     } else {
         html! {
@@ -198,6 +211,24 @@ fn field_code(name: &str, s: Settings) -> El {
     }
 }
 
+/// The field around a sockel control, which names no ids.
+fn sockel_field_code(s: Settings) -> El {
+    let html_of = |text: String| format!("html! {{ {text:?} }}");
+    let hint = s.hint.of("Shown on your profile");
+    let error = s.error.of("Use at least three letters");
+    El::new("Field")
+        .expr("id", "id.clone()")
+        .expr("label", html_of(s.label.of("Display name")))
+        .expr_if(!hint.is_empty(), "hint", html_of(hint))
+        .expr_if(!error.is_empty(), "error", html_of(error))
+        .flag("reserve_error", s.reserve_error)
+        .child(
+            El::new("TextInput")
+                .expr("value", "value")
+                .expr("on_input", "on_input"),
+        )
+}
+
 fn initial() -> Settings {
     Settings {
         label: Text::Short,
@@ -220,7 +251,13 @@ pub fn FieldPage() -> Html {
     let classes = field(settings.disabled, settings.busy);
     let error = field_error(settings.reserve_error);
 
-    let code = snippet(&[], field_code("Field", *settings));
+    let code = snippet(
+        &[],
+        El::new("")
+            .child(field_code("Field", *settings))
+            .line("// a sockel control takes the field's id, describedby and invalid")
+            .child(sockel_field_code(*settings)),
+    );
 
     html! {
         <Demo {controls} {code}>
@@ -229,6 +266,7 @@ pub fn FieldPage() -> Html {
             </code>
             <Case settings={*settings} row={false} />
             <Case settings={*settings} row={false} />
+            <Case settings={*settings} row={false} sockel={true} />
         </Demo>
     }
 }

@@ -2,7 +2,7 @@
 
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::testid::with_testid;
-use crate::{Glyph, Icon, class};
+use crate::{Glyph, Icon, class, use_field};
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -237,7 +237,11 @@ pub fn TextInput(props: &TextInputProps) -> Html {
     let onchange = props
         .on_change
         .reform(|e: Event| e.target_unchecked_into::<HtmlInputElement>().value());
-    let aria_invalid = props.invalid.then_some("true");
+    let (id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
+    let aria_invalid = invalid.then_some("true");
     let aria_busy = props.busy.then_some("true");
     {
         let node = props.node_ref.clone();
@@ -252,14 +256,14 @@ pub fn TextInput(props: &TextInputProps) -> Html {
     macro_rules! field {
         ($class:expr) => {
             with_testid(html! {
-                <input class={$class} id={props.id.clone()} name={props.name.clone()}
+                <input class={$class} id={id.clone()} name={props.name.clone()}
                     type={props.kind.attr()} value={props.value.clone()}
                     maxlength={props.maxlength.map(|n| n.to_string())} list={props.list.clone()}
                     inputmode={props.inputmode.clone()} enterkeyhint={props.enterkeyhint.clone()}
                     autocomplete={props.autocomplete.clone()}
                     spellcheck={props.spellcheck.map(|on| if on { "true" } else { "false" })}
                     placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
-                    aria-describedby={props.describedby.clone()}
+                    aria-describedby={describedby.clone()}
                     aria-invalid={aria_invalid} aria-busy={aria_busy}
                     disabled={props.disabled} readonly={props.readonly} required={props.required}
                     data-autofocus={props.autofocus.then_some("")} ref={props.node_ref.clone()}
@@ -271,12 +275,12 @@ pub fn TextInput(props: &TextInputProps) -> Html {
 
     match &props.unit {
         None => field!(classes!(
-            input(props.size, props.invalid, props.busy),
+            input(props.size, invalid, props.busy),
             props.class.clone()
         )),
         Some(unit) => html! {
             <span class={classes!(
-                input_box(props.size, props.invalid, props.disabled, props.busy),
+                input_box(props.size, invalid, props.disabled, props.busy),
                 props.class.clone()
             )}>
                 { field!(classes!(class::INPUT_CONTROL)) }
@@ -374,14 +378,18 @@ pub fn Textarea(props: &TextareaProps) -> Html {
         e.target_unchecked_into::<web_sys::HtmlTextAreaElement>()
             .value()
     });
+    let (id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
 
     with_testid(
         html! {
-            <textarea class={classes!(textarea(props.size, props.invalid, props.busy), props.class.clone())}
-                id={props.id.clone()} name={props.name.clone()} rows={props.rows.to_string()}
+            <textarea class={classes!(textarea(props.size, invalid, props.busy), props.class.clone())}
+                {id} name={props.name.clone()} rows={props.rows.to_string()}
                 value={props.value.clone()} placeholder={props.placeholder.clone()}
-                aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-                aria-invalid={props.invalid.then_some("true")}
+                aria-label={props.label.clone()} aria-describedby={describedby}
+                aria-invalid={invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled} readonly={props.readonly} required={props.required} ref={props.node_ref.clone()}
                 {oninput} {onchange} onkeydown={props.on_keydown.clone()}

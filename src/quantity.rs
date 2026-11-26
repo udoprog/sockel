@@ -1,5 +1,6 @@
 //! QuantityField (`style/_quantity.scss`).
 
+use crate::field_context::NoField;
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::stepper::number_width;
 use crate::{InputSize, Select, SelectOption, Stepper, class};
@@ -240,9 +241,11 @@ pub fn QuantityField(props: &QuantityFieldProps) -> Html {
                 mixed={off} placeholder={off.then(|| AttrValue::from("–"))}
                 chars={Some(chars.min(usize::from(u8::MAX)) as u8)}
                 testid={props.testid.clone()} />
-            <Select<Option<usize>> {options} value={Some(picked)} on_change={on_unit}
-                label={unit_label} size={props.size} invalid={props.invalid}
-                disabled={props.disabled} testid={unit_testid} />
+            <NoField>
+                <Select<Option<usize>> {options} value={Some(picked)} on_change={on_unit}
+                    label={unit_label} size={props.size} invalid={props.invalid}
+                    disabled={props.disabled} testid={unit_testid} />
+            </NoField>
         </div>
     }
 }

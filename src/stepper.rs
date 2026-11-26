@@ -4,7 +4,7 @@ use crate::input::{InputSize, input_box};
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::testid::with_testid;
 use crate::timer::Timer;
-use crate::{Glyph, Icon, class};
+use crate::{Glyph, Icon, class, use_field};
 use phrasebook02::yew023::use_phrases_with;
 use std::rc::Rc;
 use wasm_bindgen::JsCast;
@@ -357,6 +357,10 @@ impl Default for StepperProps {
 /// change from the least value to the most.
 #[function_component]
 pub fn Stepper(props: &StepperProps) -> Html {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &None, props.invalid);
     let phrases = use_phrases_with(&L10N);
     let less_label = label(&phrases, &props.less_label, "sockel-stepper-decrease");
     let more_label = label(&phrases, &props.more_label, "sockel-stepper-increase");
@@ -608,7 +612,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
             props.testid.as_ref().map(|id| format!("{id}-{suffix}")),
         )
     };
-    let invalid = props.invalid || !typed_ok;
+    let invalid = invalid || !typed_ok;
 
     let stepper = html! {
         <span class={classes!(
@@ -620,7 +624,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
             style={format!("--stepper-chars: {chars}")}>
             { button(-1, Glyph::Minus, &less_label, "less", props.can_less) }
             { with_testid(html! { <input class={classes!(class::INPUT_CONTROL, class::STEPPER_CONTROL, (props.value == 0 && !mixed).then_some(class::ZERO))}
-                id={props.id.clone()} type="text" role="spinbutton" autocomplete="off"
+                id={field_id} type="text" role="spinbutton" autocomplete="off"
                 inputmode={if min < 0 { "text" } else if decimals > 0 { "decimal" } else { "numeric" }}
                 value={shown} aria-label={props.label.clone()}
                 placeholder={props.placeholder.clone().filter(|_| mixed)}
@@ -628,7 +632,7 @@ pub fn Stepper(props: &StepperProps) -> Html {
                 aria-valuenow={typed.map(|n| format_number(n, decimals, 0))}
                 aria-valuemin={format_number(min, decimals, 0)}
                 aria-valuemax={format_number(max, decimals, 0)}
-                aria-invalid={invalid.then_some("true")}
+                aria-describedby={describedby} aria-invalid={invalid.then_some("true")}
                 data-autofocus={props.autofocus.then_some("")}
                 disabled={props.disabled}
                 {oninput} {onchange} {onblur} {onfocus} {onkeydown} /> }, props.testid.clone()) }

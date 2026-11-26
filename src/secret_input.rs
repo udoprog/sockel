@@ -6,7 +6,7 @@ use std::rc::Rc;
 use crate::input::{InputSize, input_box};
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::timer::use_timeout;
-use crate::{Glyph, Icon, class};
+use crate::{Glyph, Icon, class, use_field};
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -155,6 +155,10 @@ impl Default for SecretInputProps {
 /// hidden), so showing, copying or typing moves nothing.
 #[function_component]
 pub fn SecretInput(props: &SecretInputProps) -> Html {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &None, props.invalid);
     let phrases = use_phrases_with(&L10N);
     let show_label = label(&phrases, &props.show_label, "sockel-secret-input-show");
     let hide_label = label(&phrases, &props.hide_label, "sockel-secret-input-hide");
@@ -250,13 +254,13 @@ pub fn SecretInput(props: &SecretInputProps) -> Html {
 
     html! {
         <span class={classes!(
-            input_box(props.size, props.invalid, props.disabled, props.busy),
+            input_box(props.size, invalid, props.disabled, props.busy),
             props.class.clone()
         )} aria-busy={props.busy.then_some("true")}>
             { with_testid(html! { <input class={class::INPUT_CONTROL} type={if shown { "text" } else { "password" }}
-                id={props.id.clone()} value={value.clone()}
+                id={field_id} value={value.clone()}
                 placeholder={props.placeholder.clone()} aria-label={props.label.clone()}
-                aria-invalid={props.invalid.then_some("true")} disabled={props.disabled}
+                aria-describedby={describedby} aria-invalid={invalid.then_some("true")} disabled={props.disabled}
                 autocomplete="off" spellcheck="false" autocapitalize="off"
                 data-autofocus={props.autofocus.then_some("")} {oninput} {onchange} /> }, props.testid.clone()) }
             { action(glyph, label, toggle) }

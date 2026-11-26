@@ -1,6 +1,7 @@
 //! Field, FormRows and Fieldset (`style/_fields.scss`).
 
 use crate::class;
+use crate::field_context::{FieldContext, FieldSlot};
 use crate::testid::with_testid;
 use yew::prelude::*;
 
@@ -140,6 +141,19 @@ fn controls(props: &FieldProps) -> Html {
     }
 }
 
+fn provide(props: &FieldProps, html: Html) -> Html {
+    let context = FieldSlot(Some(FieldContext {
+        id: (!props.group).then(|| props.id.clone()),
+        describedby: field_describedby(
+            &props.id,
+            props.hint.is_some(),
+            props.error.is_some() || props.reserve_error,
+        ),
+        invalid: props.error.is_some(),
+    }));
+    html! { <ContextProvider<FieldSlot> {context}>{ html }</ContextProvider<FieldSlot>> }
+}
+
 fn messages(props: &FieldProps) -> Html {
     let hint = props.hint.as_ref().map(|hint| {
         html! { <p id={format!("{}-hint", props.id)} class={class::FIELD_HINT}>{ hint.clone() }</p> }
@@ -158,7 +172,9 @@ fn messages(props: &FieldProps) -> Html {
 
 /// A label, the control, a hint and an error, stacked; the label's `for`
 /// names `id`, and the hint and error carry the ids
-/// [`field_describedby`] gives.
+/// [`field_describedby`] gives. sockel's controls inside take `id`,
+/// `describedby` and `invalid` from it unless set; a control of your own
+/// reads them with [`use_field`](crate::use_field).
 #[function_component]
 pub fn Field(props: &FieldProps) -> Html {
     with_testid(
@@ -170,7 +186,7 @@ pub fn Field(props: &FieldProps) -> Html {
                 <div class={class::FIELD_HEAD}>
                     { label_parts(props, classes!(class::FIELD_LABEL)) }
                 </div>
-                { controls(props) }
+                { provide(props, controls(props)) }
                 { messages(props) }
             </div>
         },
@@ -215,7 +231,7 @@ pub fn FormRow(props: &FieldProps) -> Html {
                     { label_parts(props, classes!(class::FIELD_LABEL)) }
                 </div>
                 <div class={class::FORM_CONTROL}>
-                    { controls(props) }
+                    { provide(props, controls(props)) }
                     { messages(props) }
                 </div>
             </div>
@@ -282,6 +298,7 @@ pub fn FieldCheck(props: &FieldCheckProps) -> Html {
 #[cfg(test)]
 mod tests {
     use super::*;
+    use crate::use_field;
 
     fn names(classes: Classes) -> Vec<String> {
         classes.into_iter().map(|c| c.to_string()).collect()
@@ -420,6 +437,67 @@ mod tests {
             "{html}"
         );
         assert!(!render::<FormRow>(props()).contains(class::FIELD_INPUTS));
+    }
+
+    #[cfg(feature = "input")]
+    #[test]
+    fn a_control_takes_the_fields_ids_unless_it_has_its_own() {
+        use crate::TextInput;
+        let field = |children| FieldProps {
+            hint: Some(html! { "A hint" }),
+            error: Some(html! { "Wrong" }),
+            children,
+            ..props()
+        };
+        let html = render::<Field>(field(html! {
+            <TextInput value="" on_input={Callback::noop()} />
+        }));
+        assert!(html.contains("<input value=\"\" id=\"name\""), "{html}");
+        assert!(
+            html.contains("aria-describedby=\"name-hint name-error\""),
+            "{html}"
+        );
+        assert!(html.contains("aria-invalid=\"true\""), "{html}");
+
+        let html = render::<FormRow>(field(html! {
+            <TextInput id="own" describedby="own-hint" value="" on_input={Callback::noop()} />
+        }));
+        assert!(html.contains("id=\"own\""), "{html}");
+        assert!(html.contains("aria-describedby=\"own-hint\""), "{html}");
+
+        let reserved = render::<Field>(FieldProps {
+            reserve_error: true,
+            children: html! { <TextInput value="" on_input={Callback::noop()} /> },
+            ..props()
+        });
+        assert!(
+            reserved.contains("aria-describedby=\"name-error\""),
+            "{reserved}"
+        );
+        assert!(!reserved.contains("aria-invalid"), "{reserved}");
+
+        let group = render::<Field>(FieldProps {
+            group: true,
+            children: html! { <TextInput value="" on_input={Callback::noop()} /> },
+            ..props()
+        });
+        assert!(group.contains("<input value=\"\" type="), "{group}");
+    }
+
+    #[cfg(feature = "input")]
+    #[test]
+    fn use_field_is_none_outside_a_field() {
+        #[function_component]
+        fn Probe() -> Html {
+            let field = use_field();
+            html! { { format!("{field:?}") } }
+        }
+        assert!(render::<Probe>(()).contains("None"));
+        let html = render::<Field>(FieldProps {
+            children: html! { <Probe /> },
+            ..props()
+        });
+        assert!(html.contains("Some(FieldContext"), "{html}");
     }
 
     #[test]

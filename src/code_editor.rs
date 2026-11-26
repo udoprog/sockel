@@ -12,6 +12,7 @@
 //! [`CodeToken`](crate::CodeToken).
 
 use crate::testid::with_testid;
+use crate::use_field;
 use std::ops::Range;
 use std::rc::Rc;
 
@@ -111,6 +112,7 @@ pub struct CodeEditorProps {
 #[function_component]
 pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     let phrases = use_phrases_with(&L10N);
+    let field = use_field().unwrap_or_default();
     let ids = use_state(|| (next_id("code-editor-list"), next_id("code-editor-notes")));
     let (list_id, notes_id) = (ids.0.clone(), ids.1.clone());
     let area = use_node_ref();
@@ -417,13 +419,14 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
         }
     });
 
-    let invalid = props
+    let errors = props
         .diagnostics
         .iter()
         .any(|d| d.severity == Severity::Error);
+    let (id, describedby, invalid) = field.control(&props.id, &props.describedby, errors);
     let has_notes = !props.diagnostics.is_empty();
     let describedby = [
-        props.describedby.as_ref().map(|d| d.to_string()),
+        describedby.map(|d| d.to_string()),
         has_notes.then(|| notes_id.to_string()),
     ]
     .into_iter()
@@ -445,7 +448,7 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
                     { for code }{ "\n " }
                 </pre>
                 <textarea ref={area} class={class::CODE_EDITOR_INPUT}
-                    id={props.id.clone()}
+                    id={id}
                     aria-label={props.label.clone()}
                     aria-describedby={describedby}
                     aria-invalid={invalid.then_some("true")}

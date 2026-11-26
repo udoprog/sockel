@@ -1028,8 +1028,11 @@ pub mod class {
 
 pub mod phrasebookcatalog01;
 
+mod field_context;
 #[allow(dead_code)]
 mod testid;
+
+pub use field_context::{FieldContext, use_field};
 
 #[cfg(feature = "action-group")]
 mod action_group;

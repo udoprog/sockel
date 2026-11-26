@@ -3,6 +3,7 @@
 //! a dialog (`style/_picker.scss`).
 
 use crate::testid::with_testid;
+use crate::use_field;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
@@ -868,6 +869,10 @@ pub fn Picker<T>(props: &PickerProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
     let face = use_node_ref();
     let open = use_state_eq(|| false);
     let on_dismiss = {
@@ -927,15 +932,15 @@ where
 
     html! {
         <>
-            { with_testid(html! { <button ref={face.clone()} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face.clone()} type="button" id={field_id.clone()}
                 class={classes!(
-                    picker(props.variant, props.fill, props.invalid, props.disabled),
+                    picker(props.variant, props.fill, invalid, props.disabled),
                     props.class.clone()
                 )}
                 aria-haspopup="listbox" aria-expanded={open.to_string()}
-                aria-label={name} aria-describedby={props.describedby.clone()}
+                aria-label={name} aria-describedby={describedby.clone()}
                 title={props.title.clone()}
-                aria-invalid={props.invalid.then_some("true")}
+                aria-invalid={invalid.then_some("true")}
                 disabled={props.disabled}
                 onclick={toggle} {onkeydown}>
                 { text }

@@ -2,6 +2,7 @@
 //! (`style/_search-select.scss`).
 
 use crate::testid::with_testid;
+use crate::use_field;
 use phrasebook02::yew023::use_phrases_with;
 use web_sys::HtmlInputElement;
 use yew::prelude::*;
@@ -267,6 +268,10 @@ pub fn SearchSelect<T>(props: &SearchSelectProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
     let phrases = use_phrases_with(&L10N);
     let id = use_state(|| crate::tooltip::next_id("search-select"));
     let overlays = use_overlays();
@@ -591,17 +596,17 @@ where
     html! {
         <>
             <span ref={field} class={classes!(
-                search_select(props.size, props.fill, props.invalid, props.disabled, props.busy),
+                search_select(props.size, props.fill, invalid, props.disabled, props.busy),
                 props.class.clone()
             )} aria-busy={props.busy.then_some("true")}>
                 <span class={class::INPUT_MARK}><Icon {glyph} /></span>
-                { with_testid(html! { <input class={class::INPUT_CONTROL} type="text" id={props.id.clone()}
+                { with_testid(html! { <input class={class::INPUT_CONTROL} type="text" id={field_id.clone()}
                     value={text} placeholder={props.label.clone()}
                     role="combobox" aria-autocomplete="list" aria-expanded={open.to_string()}
                     aria-controls={open.then(|| list_id.clone())}
                     aria-activedescendant={active.map(|i| option_id(&id, i))}
-                    aria-label={props.label.clone()} aria-describedby={props.describedby.clone()}
-                    aria-invalid={props.invalid.then_some("true")}
+                    aria-label={props.label.clone()} aria-describedby={describedby.clone()}
+                    aria-invalid={invalid.then_some("true")}
                     autocomplete="off" spellcheck="false" disabled={props.disabled}
                     data-autofocus={props.autofocus.then_some("")}
                     {oninput} onkeydown={escape.after(onkeydown)} {onclick} /> }, props.testid.clone()) }

@@ -2,6 +2,7 @@
 //! its options (`style/_select.scss`).
 
 use crate::testid::with_testid;
+use crate::use_field;
 use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use web_sys::HtmlElement;
@@ -299,6 +300,10 @@ pub fn Select<T>(props: &SelectProps<T>) -> Html
 where
     T: PartialEq + Clone + 'static,
 {
+    let (field_id, describedby, invalid) =
+        use_field()
+            .unwrap_or_default()
+            .control(&props.id, &props.describedby, props.invalid);
     let phrases = use_phrases_with(&L10N);
     let filter_label = label(&phrases, &props.filter_label, "sockel-select-filter-label");
     let overlays = use_overlays();
@@ -770,9 +775,9 @@ where
 
     html! {
         <>
-            { with_testid(html! { <button ref={face} type="button" id={props.id.clone()}
+            { with_testid(html! { <button ref={face} type="button" id={field_id.clone()}
                 class={classes!(
-                    select(props.size, props.width, props.invalid, props.disabled, props.busy),
+                    select(props.size, props.width, invalid, props.disabled, props.busy),
                     props.class.clone()
                 )}
                 role="combobox" aria-haspopup="listbox" aria-expanded={open.to_string()}
@@ -782,8 +787,8 @@ where
                     props.label.as_ref(),
                     many.as_deref().or(current.map(|i| options[i].label.as_str())),
                 )}
-                aria-describedby={props.describedby.clone()}
-                aria-invalid={props.invalid.then_some("true")}
+                aria-describedby={describedby.clone()}
+                aria-invalid={invalid.then_some("true")}
                 aria-busy={props.busy.then_some("true")}
                 disabled={props.disabled}
                 {onclick} {onmousedown} onkeydown={escape.after(onkeydown)}>
