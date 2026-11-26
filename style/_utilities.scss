@@ -4,6 +4,9 @@
 //
 // - `.sockel-focus-ring`: the focus ring on keyboard focus.
 // - `.sockel-numeric`: tabular figures (counts, readouts, pagers, clocks).
+// - `.sockel-reserve-ch`: at least `--reserve-ch` characters wide
+//   (`style="--reserve-ch: 12"`).
+// - `.sockel-mono`: the code editor's face (`--code-font`).
 // - `.sockel-scroll-area`: scrolls, its scrollbar's room always kept.
 // - `.sockel-truncate`: one line and an ellipsis; `.sockel-clamp-2`,
 //   `.sockel-clamp-3`, `.sockel-clamp-4`: that many lines.
@@ -22,6 +25,18 @@
 @if base.emits("utilities.numeric") {
     .sockel-numeric {
         @include base.numeric;
+    }
+}
+
+@if base.emits("utilities.reserve-ch") {
+    .sockel-reserve-ch {
+        @include base.reserve-ch;
+    }
+}
+
+@if base.emits("utilities.mono") {
+    .sockel-mono {
+        @include base.mono;
     }
 }
 

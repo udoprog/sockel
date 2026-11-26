@@ -795,7 +795,7 @@ fn main() {
 | disclosure | `disclosure.heading` (the heading, `level`), `disclosure.detail` (the muted `summary`) |
 | confirm | `confirm.inline` |
 | drop | `drop.tall` |
-| utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
+| utilities | `utilities.focus-ring`, `utilities.numeric`, `utilities.reserve-ch`, `utilities.mono`, `utilities.scroll-area`, `utilities.truncate`, `utilities.clamp`, `utilities.phone-only`, `utilities.desktop-only` (Pager's `phone_steps: false` uses it) |
 
 <br>
 
@@ -835,6 +835,8 @@ rule of the same weight; none uses `!important`.
 | `focus-ring` | `.sockel-focus-ring` (`FOCUS_RING`) | A `:focus-visible` outline from the `--focus-ring-*` tokens: never a border, so focus adds nothing to the box. |
 | `reserved-border($color: transparent, $width: var(--space-px))` | | The border is always there; a state changes only its colour. |
 | `numeric` | `.sockel-numeric` (`NUMERIC`) | Tabular figures: a count, readout, pager or clock keeps its width as it changes. |
+| `reserve-ch($ch: var(--reserve-ch, 0))` | `.sockel-reserve-ch` (`RESERVE_CH`) | At least that many characters wide (`style="--reserve-ch: 12"`): a value that changes keeps its room. |
+| `mono` | `.sockel-mono` (`MONO`) | The code editor's face (`--code-font`), for types and literals in an input or a span. |
 | `scroll-area` | `.sockel-scroll-area` (`SCROLL_AREA`) | Scrolls, with `scrollbar-gutter: stable`: content does not jump when it starts to scroll. Contains overscroll and may shrink in a flex column. |
 | | `.sockel-toolbar` | Scrolls sideways with its scrollbar hidden, so its height does not change when its controls start to overflow; the edge with hidden controls fades (a CSS scroll-driven animation: browsers without `animation-timeline` show no fade). Wheel, touch and keyboard still scroll it. |
 | `truncate` | `.sockel-truncate` (`TRUNCATE`) | One line, cut with an ellipsis. |

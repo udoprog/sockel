@@ -98,6 +98,8 @@ mod tests {
         for rule in [
             ".sockel-focus-ring:focus-visible{outline:var(--focus-ring-width)solidvar(--focus-ring-color);",
             ".sockel-numeric{font-variant-numeric:tabular-nums;}",
+            ".sockel-reserve-ch{min-width:calc(var(--reserve-ch,0)*1ch);}",
+            ".sockel-mono{font-family:var(--code-font);}",
             "scrollbar-gutter:stable;}",
             ".sockel-truncate{min-width:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}",
             ".sockel-clamp-2{",

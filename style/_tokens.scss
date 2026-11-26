@@ -775,8 +775,9 @@ $-parts: (
     "tokens.actions", "tokens.card-grid", "tokens.code-editor", "tokens.color-select", "tokens.drop", "tokens.fields",
     "tokens.filter-picker", "tokens.media", "tokens.panel", "tokens.picker", "tokens.seam",
     "tokens.table", "tokens.toast", "tokens.toggles", "tokens.tooltip",
-    "utilities.clamp", "utilities.desktop-only", "utilities.focus-ring", "utilities.numeric",
-    "utilities.phone-only", "utilities.scroll-area", "utilities.truncate",
+    "utilities.clamp", "utilities.desktop-only", "utilities.focus-ring", "utilities.mono",
+    "utilities.numeric", "utilities.phone-only", "utilities.reserve-ch", "utilities.scroll-area",
+    "utilities.truncate",
 );
 
 @each $part in $omit {
@@ -1005,9 +1006,10 @@ $-feature-parts: (
         --seam-grip: #{$seam-grip};
         --seam-min: #{$seam-min};
     }
+    // The code face, in every build (`.sockel-mono` reads it).
+    --code-font: #{$code-font};
     // A code editor's type and highlighting.
     @if emits("tokens.code-editor") {
-        --code-font: #{$code-font};
         --code-text: #{$code-text};
         --code-line-height: #{$code-line-height};
         --code-tab-size: #{$code-tab-size};
@@ -1185,6 +1187,18 @@ $-feature-parts: (
 // changes.
 @mixin numeric {
     font-variant-numeric: tabular-nums;
+}
+
+// Room for `$ch` characters kept whatever the content, so a value that
+// changes does not move what follows it. The utility reads `--reserve-ch`.
+@mixin reserve-ch($ch: var(--reserve-ch, 0)) {
+    min-width: calc(#{$ch} * 1ch);
+}
+
+// The code editor's face (`--code-font`): for types, literals and code in
+// an input or a span.
+@mixin mono {
+    font-family: var(--code-font);
 }
 
 // A scrolling container whose scrollbar's room is kept whether it scrolls

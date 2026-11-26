@@ -58,6 +58,8 @@ pub fn FoundationsPage() -> Html {
     let lines = use_state(|| Some(sockel::class::TRUNCATE));
     let figure = use_state(|| "1111");
     let numeric = use_state(|| true);
+    let reserve = use_state(|| true);
+    let mono = use_state(|| true);
     let count = use_state(|| 3);
     let scroll_area = use_state(|| true);
     let mark = use_state(|| class::BY_BACKGROUND);
@@ -69,6 +71,8 @@ pub fn FoundationsPage() -> Html {
             <Select<Option<&'static str>> label="Lines" options={LINES} value={*lines} on_change={bind(&lines)} />
             <Select<&'static str> label="Figure" options={FIGURES} value={*figure} on_change={bind(&figure)} />
             <Toggle label="numeric" value={*numeric} on_change={bind(&numeric)} />
+            <Toggle label="reserve-ch" value={*reserve} on_change={bind(&reserve)} />
+            <Toggle label="mono" value={*mono} on_change={bind(&mono)} />
             <Select<usize> label="Scrolled items" options={COUNTS} value={*count} on_change={bind(&count)} />
             <Toggle label="scroll-area" value={*scroll_area} on_change={bind(&scroll_area)} />
             <Select<&'static str> label="current by" options={MARKS} value={*mark} on_change={bind(&mark)} />
@@ -110,6 +114,20 @@ pub fn FoundationsPage() -> Html {
                 "<span{}>{}</span>",
                 class_of(*numeric, sockel::class::NUMERIC),
                 text_node(*figure)
+            ))
+            .line(if *reserve {
+                format!(
+                    "<span class={{{}}} style=\"--reserve-ch: 6\">{}</span>",
+                    constant(sockel::class::RESERVE_CH),
+                    text_node(*figure)
+                )
+            } else {
+                format!("<span>{}</span>", text_node(*figure))
+            })
+            .line(format!(
+                "<span{}>{}</span>",
+                class_of(*mono, sockel::class::MONO),
+                text_node("List<Int>")
             ))
             .child(
                 El::new("div")
@@ -157,6 +175,20 @@ pub fn FoundationsPage() -> Html {
                         <span class={classes!(class::READOUT, numeric.then_some(sockel::class::NUMERIC))}>
                             { *figure }
                         </span>
+                    </Stack>
+                    <Stack gap={Gap::Snug}>
+                        <span class={class::FRAME_LABEL}>{ "Reserved width (6ch)" }</span>
+                        <span>
+                            <span class={classes!(class::READOUT, reserve.then_some(sockel::class::RESERVE_CH))}
+                                style="--reserve-ch: 6; display: inline-block; outline: 1px dashed currentColor;">
+                                { *figure }
+                            </span>
+                            { " follows" }
+                        </span>
+                    </Stack>
+                    <Stack gap={Gap::Snug}>
+                        <span class={class::FRAME_LABEL}>{ "Code face" }</span>
+                        <span class={classes!(mono.then_some(sockel::class::MONO))}>{ "List<Int> = [4, 2, 6]" }</span>
                     </Stack>
                     <Stack gap={Gap::Snug}>
                         <span class={class::FRAME_LABEL}>{ "Scroll area" }</span>
