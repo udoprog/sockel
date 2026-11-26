@@ -1,0 +1,9 @@
+[package]
+name = "dependency-app"
+edition = "2024"
+publish = false
+
+[dependencies]
+dependency-editor = { path = "../editor" }
+
+[workspace]

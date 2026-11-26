@@ -16,6 +16,11 @@ use crate::{Config, Error, const_name};
 #[derive(Clone, Debug, Default)]
 pub struct Usage {
     sources: Vec<PathBuf>,
+    dependencies: Vec<String>,
+    /// Where `cargo metadata` is asked from, when not the build script's
+    /// package (tests).
+    manifest_dir: Option<PathBuf>,
+    resolved: std::sync::OnceLock<Vec<PathBuf>>,
     dynamic: Vec<String>,
     foreign: Vec<String>,
     unprefixed: Vec<String>,
@@ -30,6 +35,18 @@ impl Usage {
     /// A directory (searched for `.rs` files) or a file the project writes classes in.
     pub fn source(mut self, path: impl Into<PathBuf>) -> Self {
         self.sources.push(path.into());
+        self
+    }
+
+    /// A crate the project depends on whose Rust is read like a
+    /// [source](Usage::source): the directory of its library's root file,
+    /// found with `cargo metadata` from the build script's package
+    /// (`CARGO_MANIFEST_DIR`). Name a library that renders sockel's
+    /// components (`.dependency("evalite-sockel")`) so
+    /// [`Config::prune`] keeps their rules. Every version of the package in
+    /// the build graph is read; one not in it is an [`Error`].
+    pub fn dependency(mut self, name: impl Into<String>) -> Self {
+        self.dependencies.push(name.into());
         self
     }
 
@@ -85,7 +102,7 @@ impl Usage {
             .collect();
         let mut files = Vec::new();
         let mut known = Helpers::new();
-        for source in &self.sources {
+        for source in &self.sources()? {
             for file in rust_files(source)? {
                 let code = code(&std::fs::read_to_string(&file)?);
                 helpers(&code, &mut known);
@@ -180,8 +197,38 @@ impl Usage {
         Ok(report)
     }
 
-    pub(crate) fn sources(&self) -> &[PathBuf] {
-        &self.sources
+    /// The sources, then the source directory of each
+    /// [dependency](Usage::dependency).
+    pub(crate) fn sources(&self) -> Result<Vec<PathBuf>, Error> {
+        let mut sources = self.sources.clone();
+        if self.dependencies.is_empty() {
+            return Ok(sources);
+        }
+        if let Some(resolved) = self.resolved.get() {
+            sources.extend(resolved.iter().cloned());
+            return Ok(sources);
+        }
+        let manifest_dir = self
+            .manifest_dir
+            .clone()
+            .or_else(|| std::env::var_os("CARGO_MANIFEST_DIR").map(PathBuf::from));
+        let mut resolved = Vec::new();
+        for name in &self.dependencies {
+            for dir in crate::metadata::sources(manifest_dir.as_deref(), name)? {
+                if !resolved.contains(&dir) {
+                    resolved.push(dir);
+                }
+            }
+        }
+        sources.extend(resolved.iter().cloned());
+        let _ = self.resolved.set(resolved);
+        Ok(sources)
+    }
+
+    #[cfg(test)]
+    fn manifest_dir(mut self, dir: impl Into<PathBuf>) -> Self {
+        self.manifest_dir = Some(dir.into());
+        self
     }
 
     /// The sockel classes among `classes` that sockel's Rust in `sockel_src`
@@ -194,7 +241,7 @@ impl Usage {
         classes: &[String],
     ) -> Result<BTreeSet<String>, Error> {
         let mut app = String::new();
-        for source in &self.sources {
+        for source in &self.sources()? {
             for file in rust_files(source)? {
                 app.push_str(&code(&std::fs::read_to_string(&file)?));
                 app.push('\n');
@@ -1070,6 +1117,30 @@ mod tests {
         let tail = |css: &str| css[css.find(".usage-").unwrap()..].to_owned();
         assert_eq!(tail(&pruned.css), tail(&plain.css));
         assert!(pruned.css.len() < plain.css.len());
+    }
+
+    #[test]
+    fn keeps_the_components_a_dependency_renders() {
+        let dir = Path::new(env!("CARGO_MANIFEST_DIR")).join("tests/dependency");
+        let app = Usage::new()
+            .source(dir.join("app/src"))
+            .manifest_dir(dir.join("app"));
+        let alone = crate::sockel().prune(app.clone()).build().unwrap();
+        assert!(!alone.css.contains("\n.sockel-button {"));
+        let usage = app.dependency("dependency-editor");
+        assert_eq!(
+            usage.sources().unwrap(),
+            [dir.join("app/src"), dir.join("editor/src")]
+        );
+        let kept = crate::sockel().prune(usage).build().unwrap();
+        assert!(kept.css.contains("\n.sockel-button {"));
+        assert!(!kept.css.contains(".sockel-error-box"));
+
+        let missing = Usage::new()
+            .manifest_dir(dir.join("app"))
+            .dependency("no-such-package");
+        let error = crate::sockel().prune(missing).build().unwrap_err();
+        assert!(error.to_string().contains("no-such-package"), "{error}");
     }
 
     #[test]

@@ -108,7 +108,7 @@ sockel_build::Config::new()
     .compile();
 ```
 
-Name every crate that renders sockel's components in the `Usage`, or their rules go. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
+Name every crate that renders sockel's components in the `Usage`, or their rules go: the app's own as sources, and a library built on sockel with [`Usage::dependency`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.dependency) (`.dependency("evalite-sockel")`), which reads its sources where `cargo metadata` finds them. A library built on sockel should tell the apps using it to name it so. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
 
 <br>
 

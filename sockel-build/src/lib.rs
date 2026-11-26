@@ -104,7 +104,7 @@
 //!     .compile();
 //! ```
 //!
-//! Name every crate that renders sockel's components in the `Usage`, or their rules go. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
+//! Name every crate that renders sockel's components in the `Usage`, or their rules go: the app's own as sources, and a library built on sockel with [`Usage::dependency`](https://docs.rs/sockel-build/latest/sockel_build/struct.Usage.html#method.dependency) (`.dependency("evalite-sockel")`), which reads its sources where `cargo metadata` finds them. A library built on sockel should tell the apps using it to name it so. [`Report::pruned`](https://docs.rs/sockel-build/latest/sockel_build/struct.Report.html#structfield.pruned) lists the classes dropped, with the rules and bytes. Off, the stylesheet is unchanged.
 //!
 //! <br>
 //!
@@ -239,6 +239,7 @@ fn test_sources() -> Sources {
     }
 }
 
+mod metadata;
 mod prune;
 mod usage;
 use usage::matches;
@@ -947,14 +948,14 @@ impl Config {
         println!("cargo:rerun-if-changed=build.rs");
         let style = self.style_dir().unwrap_or_else(|error| fail(&error));
         let src = style.join("../src");
-        let mut dirs = vec![&style];
-        dirs.extend(&self.local);
+        let mut dirs = vec![style.clone()];
+        dirs.extend(self.local.iter().cloned());
         if let Some(usage) = &self.prune {
-            dirs.push(&src);
-            dirs.extend(usage.sources());
+            dirs.push(src);
+            dirs.extend(usage.sources().unwrap_or_else(|error| fail(&error)));
         }
         for dir in dirs {
-            for path in local_files(dir).unwrap_or_else(|error| fail(&error)) {
+            for path in local_files(&dir).unwrap_or_else(|error| fail(&error)) {
                 println!("cargo:rerun-if-changed={}", path.display());
             }
         }
