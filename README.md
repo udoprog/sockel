@@ -185,7 +185,9 @@ most as utility classes: `numeric`, `reserve-ch`, `truncate`, `clamp`,
 `scroll-area`, `focus-ring`, `visually-hidden` and more. There are also
 mixins with the exact rules of sockel's components (`card`, `button`,
 `input`, `stack`, ...), for markup sockel does not render, such as a
-dependency's sign-in form:
+dependency's sign-in form (the [mixins
+reference](https://udoprog.github.io/sockel/#mixins) lists every one, with
+its arguments):
 
 ```scss
 @use "sockel" as p;
@@ -223,7 +225,8 @@ Every component, or family of components that only work together, is a Cargo
 feature. `full`, the default, enables them all. A feature gates a component's
 Rust and its CSS together, so a component whose feature is off does not
 compile, rather than rendering unstyled. Each feature brings in the features
-it needs.
+it needs; the [features reference](https://udoprog.github.io/sockel/#features)
+lists them all.
 
 `sockel-build` knows which features sockel was built with, and builds only
 their CSS. It can also prune rules for components the app never reaches, and
