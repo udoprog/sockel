@@ -20,18 +20,19 @@
 // - `.sockel-top` on the table tops the cells (a row whose text runs on).
 //   On a cell: `.sockel-wrap` wraps its text (and has room for it);
 //   `.sockel-actions` holds a row's actions, to the end; `.sockel-title` is a
-//   card's first line, bold (in cards); `.sockel-visually-hidden` on a heading keeps it
-//   for a screen reader only. `.sockel-flagged` on a row marks its start edge
+//   row's heading, bold (a card's first line, in cards); `.sockel-full` takes
+//   its card's whole line (in cards); `.sockel-visually-hidden` on a heading
+//   keeps it for a screen reader only. `.sockel-flagged` on a row marks its start edge
 //   in `--danger`.
 // - `.sockel-table.sockel-cards`: below the phone breakpoint a row is a card,
 //   not a row scrolled sideways: the head is for a screen reader only, the
 //   first cell takes a line of its own, the others follow wrapped, empty
-//   cells are gone, and the `.sockel-actions` cell sits at the card's top
-//   right (`--table-card-actions`, 5rem, is the room kept for it; a row with
-//   none sets it to 0rem). `.sockel-foot` on the table puts the actions on a
-//   line under the row instead. `.sockel-stacked` on the table makes each
-//   cell after the first a field, its label over its value, two to a line,
-//   with no room kept beside them for the actions.
+//   cells are gone, and the `.sockel-actions` cell sits at the end of the
+//   first line, beside the first cell (the lines under it keep no room for
+//   it, nor does a row without one). `.sockel-foot` on the table puts the
+//   actions on a line under the row instead. `.sockel-stacked` on the table
+//   makes each cell after the first a field, its label over its value, two
+//   to a line.
 // - `.sockel-sort-header`: a heading cell with a button
 //   (`.sockel-sort-header-button`) of its label and a mark
 //   (`.sockel-sort-header-mark`) in a box of the glyph size, kept whether
@@ -116,14 +117,23 @@
             }
 
             .sockel-table-row {
-                position: relative;
                 display: flex;
                 flex-wrap: wrap;
                 align-items: baseline;
-                gap: var(--space-1) var(--space-3);
+                // Lines are spaced by the cells' own margins, so the empty
+                // line break below adds no gap.
+                column-gap: var(--space-3);
                 padding: var(--space-3) var(--space-4);
-                padding-inline-end: calc(var(--space-4) + var(--table-card-actions, 5rem));
                 border-bottom: var(--space-px) solid var(--border);
+
+                // Ends the first line, after the first cell and the actions
+                // (ordered before it), so the other cells start a line of
+                // their own and only the first line holds the actions.
+                &::after {
+                    content: "";
+                    flex-basis: 100%;
+                    order: 2;
+                }
 
                 &:hover,
                 &:focus-within {
@@ -144,45 +154,39 @@
                 min-width: 0;
                 padding: 0;
                 border: 0;
+                margin-block-start: var(--space-1);
                 white-space: normal;
+                order: 3;
+
+                &.sockel-full {
+                    flex-basis: 100%;
+                }
 
                 &:first-child {
-                    flex-basis: 100%;
+                    flex: 1 1 0;
+                    order: 0;
+                    margin-block-start: 0;
                 }
 
                 &:empty {
                     display: none;
                 }
 
-                &.sockel-title {
-                    font-weight: 600;
-                }
-
                 &.sockel-actions {
-                    position: absolute;
-                    inset-block-start: var(--space-3);
-                    inset-inline-end: var(--space-3);
+                    flex: none;
+                    order: 1;
+                    margin-block-start: 0;
                     text-align: start;
                 }
             }
 
-            &.sockel-foot {
-                .sockel-table-row {
-                    padding-inline-end: var(--space-4);
-                }
-
-                .sockel-table-cell.sockel-actions {
-                    position: static;
-                    flex-basis: 100%;
-                    margin-block-start: var(--space-2);
-                }
+            &.sockel-foot .sockel-table-cell.sockel-actions {
+                flex-basis: 100%;
+                order: 4;
+                margin-block-start: var(--space-2);
             }
 
             &.sockel-stacked {
-                .sockel-table-row {
-                    padding-inline-end: var(--space-4);
-                }
-
                 .sockel-table-cell:not(:first-child, .sockel-actions) {
                     display: flex;
                     flex: 1 1 calc(50% - var(--space-3));
@@ -231,6 +235,10 @@
     &.sockel-wrap {
         min-width: 14rem;
         white-space: normal;
+    }
+
+    &.sockel-title {
+        font-weight: 600;
     }
 
     &.sockel-actions {

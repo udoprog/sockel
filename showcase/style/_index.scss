@@ -666,3 +666,26 @@ body {
     padding: var(--space-1) var(--space-2);
     font-size: var(--text-sm);
 }
+
+// The table page's chart cell (pages/tables.rs): name, bar and value lines
+// whose bar track takes the width left, as an app's chart in a cell would.
+.showcase-bars {
+    display: grid;
+    grid-template-columns: auto minmax(0, 1fr) auto;
+    align-items: center;
+    gap: var(--space-0) var(--space-2);
+    font-size: var(--text-sm);
+}
+
+.showcase-bar {
+    height: var(--space-2);
+    border-radius: var(--radius-xs);
+    background: var(--sample);
+}
+
+.showcase-bar-fill {
+    display: block;
+    height: 100%;
+    border-radius: inherit;
+    background: var(--accent);
+}

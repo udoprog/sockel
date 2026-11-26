@@ -19,15 +19,15 @@ pub struct TableProps {
     #[prop_or_default]
     pub sticky: bool,
     /// Below the phone breakpoint a row is a card: the head is for a screen
-    /// reader only, the first cell on a line of its own, empty cells gone,
-    /// and a cell with `actions` at the top right.
+    /// reader only, the first cell on a line of its own (with the `actions`
+    /// cell at its end, if any), empty cells gone.
     #[prop_or_default]
     pub cards: bool,
     /// With `cards`, the `actions` cell goes on a line under the row instead.
     #[prop_or_default]
     pub foot: bool,
     /// With `cards`, each cell after the first is a field, its label over its
-    /// value, two to a line, and no room is kept beside them for `actions`.
+    /// value, two to a line.
     #[prop_or_default]
     pub stacked: bool,
     /// Tops the cells, for rows whose text runs on.
@@ -188,12 +188,15 @@ pub struct TableCellProps {
     /// Wraps its text, with room for it.
     #[prop_or_default]
     pub wrap: bool,
-    /// A card's first line, in bold (with `cards`).
+    /// A row's heading, in bold: a card's first line (with `cards`).
     #[prop_or_default]
     pub title: bool,
-    /// A row's actions, to the end; at a card's top right (`cards`).
+    /// A row's actions, to the end; at the end of a card's first line (`cards`).
     #[prop_or_default]
     pub actions: bool,
+    /// Takes its card's whole line (with `cards`), as a chart needs.
+    #[prop_or_default]
+    pub full: bool,
     /// A heading for a screen reader only.
     #[prop_or_default]
     pub hidden: bool,
@@ -235,13 +238,20 @@ pub fn table_cell(head: bool, numeric: bool, cut: bool) -> Classes {
     )
 }
 
-/// A cell's extra classes: `wrap`, `title`, `actions`, and `hidden` (a heading
-/// for a screen reader only).
-pub fn table_cell_part(wrap: bool, title: bool, actions: bool, hidden: bool) -> Classes {
+/// A cell's extra classes: `wrap`, `title`, `actions`, `full` (a card's whole
+/// line), and `hidden` (a heading for a screen reader only).
+pub fn table_cell_part(
+    wrap: bool,
+    title: bool,
+    actions: bool,
+    full: bool,
+    hidden: bool,
+) -> Classes {
     classes!(
         wrap.then_some(class::WRAP),
         title.then_some(class::TITLE),
         actions.then_some(class::ACTIONS),
+        full.then_some(class::FULL),
         hidden.then_some(class::VISUALLY_HIDDEN)
     )
 }
@@ -251,7 +261,13 @@ pub fn table_cell_part(wrap: bool, title: bool, actions: bool, hidden: bool) -> 
 pub fn TableCell(props: &TableCellProps) -> Html {
     let class = classes!(
         table_cell(props.head, props.numeric, props.cut),
-        table_cell_part(props.wrap, props.title, props.actions, props.hidden),
+        table_cell_part(
+            props.wrap,
+            props.title,
+            props.actions,
+            props.full,
+            props.hidden
+        ),
         props.class.clone()
     );
     let style = props.width.as_ref().map(|w| format!("width: {w}"));
@@ -329,15 +345,20 @@ mod tests {
 
     #[test]
     fn a_cell_has_its_parts_by_modifier() {
-        assert!(names(table_cell_part(false, false, false, false)).is_empty());
+        assert!(names(table_cell_part(false, false, false, false, false)).is_empty());
         assert_eq!(
-            names(table_cell_part(true, true, true, true)),
+            names(table_cell_part(true, true, true, true, true)),
             [
                 class::WRAP,
                 class::TITLE,
                 class::ACTIONS,
+                class::FULL,
                 class::VISUALLY_HIDDEN
             ]
+        );
+        assert_eq!(
+            names(table_cell_part(false, false, false, true, false)),
+            [class::FULL]
         );
     }
 

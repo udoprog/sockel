@@ -89,6 +89,27 @@ fn sorted(
     rows
 }
 
+/// A chart of a row's size by part: name, bar and value lines on a grid
+/// whose bar track takes what is left, so it needs a width (`full`).
+fn chart(size: u32) -> Html {
+    let parts = [("Audio", 3), ("Video", 2), ("Text", 1)];
+    html! {
+        <div class={class::BARS}>
+            { for parts.iter().map(|(part, share)| {
+                let value = size * share / 6;
+                let fill = format!("width: {}%", share * 100 / 3);
+                html! {
+                    <>
+                        <span>{ *part }</span>
+                        <span class={class::BAR}><span class={class::BAR_FILL} style={fill} /></span>
+                        <span>{ value }</span>
+                    </>
+                }
+            }) }
+        </div>
+    }
+}
+
 fn direction_of(sort: Sort, column: Column) -> Option<SortDirection> {
     sort.filter(|(c, _)| *c == column).map(|(_, d)| d)
 }
@@ -115,6 +136,7 @@ pub fn TablePage() -> Html {
     let framed = use_state(|| false);
     let top = use_state(|| false);
     let flagged = use_state(|| true);
+    let charted = use_state(|| false);
     let sort = use_state(|| None::<(Column, SortDirection)>);
 
     let controls = html! {
@@ -134,6 +156,7 @@ pub fn TablePage() -> Html {
             <Toggle label="top" value={*top} on_change={bind(&top)} />
             <Toggle label="framed" value={*framed} on_change={bind(&framed)} />
             <Toggle label="flagged" value={*flagged} on_change={bind(&flagged)} />
+            <Toggle label="Chart (full)" value={*charted} on_change={bind(&charted)} />
         </>
     };
 
@@ -145,6 +168,9 @@ pub fn TablePage() -> Html {
             <SortHeader label="Size" numeric=true first={SortDirection::Descending}
                 direction={direction_of(*sort, Column::Size)} disabled={*disabled}
                 onsort={press(&sort, Column::Size)} />
+            if *charted {
+                <TableCell head=true width="12rem">{ "Parts" }</TableCell>
+            }
             <TableCell head=true hidden=true>{ "Actions" }</TableCell>
         </>
     };
@@ -158,6 +184,9 @@ pub fn TablePage() -> Html {
                     <TableCell cut=true title=true>{ name }</TableCell>
                     <TableCell cut=true>{ kind }</TableCell>
                     <TableCell numeric=true>{ size }</TableCell>
+                    if *charted {
+                        <TableCell full=true>{ chart(size) }</TableCell>
+                    }
                     <TableCell actions=true width="6rem">
                         <Button size={ButtonSize::Small}>{ "Open" }</Button>
                     </TableCell>
@@ -214,6 +243,7 @@ pub fn TablePage() -> Html {
                         text_node(&name.of("Item 1"))
                     ))
                     .line("<TableCell numeric=true>{ size }</TableCell>")
+                    .line_if(*charted, "<TableCell full=true>{ chart }</TableCell>")
                     .line("<TableCell actions=true>{ actions }</TableCell>"),
             )
             .line(each("rows", "row", *count, "row")),
@@ -221,7 +251,7 @@ pub fn TablePage() -> Html {
 
     html! {
         <Demo {controls} {code}>
-            <Table head={head} columns={4} fixed={*fixed} sticky={*sticky}
+            <Table head={head} columns={if *charted { 5 } else { 4 }} fixed={*fixed} sticky={*sticky}
                 cards={*cards} foot={*foot} stacked={*stacked} top={*top} framed={*framed}
                 bulk={bulk_bar} bulk_active={*bulk && *picked} {empty} label="Items">
                 { rows }
@@ -233,7 +263,7 @@ pub fn TablePage() -> Html {
             { shown("table_bulk(idle)", &table_bulk(!*picked)) }
             { shown("table_cell(head, numeric, cut)", &table_cell(false, true, true)) }
             { shown("table_mode(cards, foot, top)", &table_mode(*cards, *foot, *top)) }
-            { shown("table_cell_part(wrap, title, actions, hidden)", &table_cell_part(false, true, true, false)) }
+            { shown("table_cell_part(wrap, title, actions, full, hidden)", &table_cell_part(false, true, false, *charted, false)) }
         </Demo>
     }
 }
