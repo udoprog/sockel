@@ -45,7 +45,7 @@ pub struct ErrorBoxProps {
     /// The box's `id`, for `aria-describedby` and the like.
     #[prop_or_default]
     pub id: Option<AttrValue>,
-    /// The message.
+    /// The message; a block such as a CodeSnippet may follow its text.
     #[prop_or_default]
     pub children: Html,
 }
@@ -67,7 +67,7 @@ pub fn ErrorBox(props: &ErrorBoxProps) -> Html {
             if let Some(title) = &props.title {
                 <p class={class::ERROR_BOX_TITLE}>{ title.clone() }</p>
             }
-            <p class={class::ERROR_BOX_MESSAGE}>{ props.children.clone() }</p>
+            <div class={class::ERROR_BOX_MESSAGE}>{ props.children.clone() }</div>
             if let Some(cause) = &props.cause {
                 <p class={class::ERROR_BOX_CAUSE} title={cause.clone()}>{ cause.clone() }</p>
             }

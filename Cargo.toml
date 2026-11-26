@@ -27,6 +27,7 @@ chip = "chip"
 choice = "choice"
 card-grid = "card-grid"
 code-editor = "code-editor"
+code-snippet = "code-snippet"
 color-select = "color-select"
 composer = "composer"
 confirm = "confirm"
@@ -75,7 +76,7 @@ tooltip = "tooltip"
 
 [features]
 default = ["full"]
-full = ["action-group", "badge", "button", "card-grid", "checkbox", "chip", "chip-select", "choice", "code-editor", "color-select", "composer", "confirm", "disclosure", "drop-zone", "field", "file-browser", "head", "icons", "input", "lanes", "layout", "library-toolbar", "lightbox", "loadable", "log-view", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "property-list", "quantity", "reorder", "rows", "save-bar", "seam", "search-select", "select", "shell", "shortcuts", "skeleton", "split-view", "stepper", "switch", "table", "tabs", "time", "toast", "toasts", "toggles", "tooltip"]
+full = ["action-group", "badge", "button", "card-grid", "checkbox", "chip", "chip-select", "choice", "code-editor", "code-snippet", "color-select", "composer", "confirm", "disclosure", "drop-zone", "field", "file-browser", "head", "icons", "input", "lanes", "layout", "library-toolbar", "lightbox", "loadable", "log-view", "media", "menu", "notice", "overlay", "pager", "panel", "picker", "property-list", "quantity", "reorder", "rows", "save-bar", "seam", "search-select", "select", "shell", "shortcuts", "skeleton", "split-view", "stepper", "switch", "table", "tabs", "time", "toast", "toasts", "toggles", "tooltip"]
 action-group = []
 badge = ["icons"]
 button = ["icons", "skeleton"]
@@ -84,7 +85,8 @@ checkbox = ["icons"]
 chip = ["icons"]
 chip-select = ["chip", "layout", "search-select"]
 choice = []
-code-editor = ["overlay", "select"]
+code-editor = ["code-snippet", "overlay", "select"]
+code-snippet = []
 color-select = ["select"]
 composer = ["drop-zone", "input"]
 confirm = ["action-group", "badge", "button", "notice", "overlay"]

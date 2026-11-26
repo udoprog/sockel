@@ -795,7 +795,7 @@ $-feature-parts: (
     "skeleton.loadable": ("loadable",),
     "tokens.actions": ("rows",),
     "tokens.card-grid": ("card-grid",),
-    "tokens.code-editor": ("code-editor",),
+    "tokens.code-editor": ("code-editor", "code-snippet"),
     "tokens.color-select": ("color-select",),
     "tokens.drop": ("drop-zone",),
     "tokens.fields": ("field",),
@@ -1150,6 +1150,35 @@ $-feature-parts: (
 // changes its `border-color` only, so the box never grows a pixel.
 @mixin reserved-border($color: transparent, $width: var(--space-px)) {
     border: $width solid $color;
+}
+
+// A diagnostic's wavy underline in its severity: `--danger`, or
+// `.sockel-warning`'s or `.sockel-info`'s colour.
+@mixin code-mark {
+    text-decoration: underline wavy var(--danger);
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+
+    &.sockel-error {
+        text-decoration-color: var(--danger);
+    }
+
+    &.sockel-warning {
+        text-decoration-color: var(--warning);
+    }
+
+    &.sockel-info {
+        text-decoration-color: var(--accent);
+    }
+}
+
+// The `::after` of an underline with no text: an unseen character taking
+// no room (a space would not be underlined).
+@mixin code-empty-mark {
+    content: "x";
+    margin-inline-end: -1ch;
+    color: transparent;
 }
 
 // Figures of one width each, so a count or a clock does not move as it

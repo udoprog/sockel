@@ -289,9 +289,10 @@ fn feature_sizes() {
 }
 
 /// The most bytes the full stylesheet may compress to: 115,773 when the
-/// budget was set, and about 5% over; raised by CodeEditor's 3 KB, which a
-/// build without the `code-editor` feature leaves out.
-const BUDGET: usize = 124_500;
+/// budget was set, and about 5% over; raised by CodeEditor's 3 KB and
+/// CodeSnippet's 1 KB, which builds without the `code-editor` and
+/// `code-snippet` features leave out.
+const BUDGET: usize = 125_500;
 
 /// The stylesheet `@use "sockel/index"` gives, compressed, with `$omit` set.
 fn compressed(omit: &[&str]) -> usize {

@@ -36,7 +36,7 @@ fn eat(chars: &mut Peekable<CharIndices<'_>>, end: &mut usize, f: impl Fn(char) 
 }
 
 /// The spans of `text`, and the names `let` binds.
-fn highlight(text: &str) -> (Vec<CodeSpan>, Vec<String>) {
+pub(super) fn highlight(text: &str) -> (Vec<CodeSpan>, Vec<String>) {
     let mut spans = Vec::new();
     let mut bound = Vec::new();
     let mut chars = text.char_indices().peekable();

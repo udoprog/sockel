@@ -1,0 +1,99 @@
+// CodeSnippet (src/code_snippet.rs): code shown as written, in the code
+// editor's type, never wrapped.
+//
+// - `.sockel-code-snippet`: a `<pre>` block in a field's frame, scrolling
+//   sideways; `.sockel-inline` a `<code>` in the text around it, wrapping
+//   with it.
+// - `-mark`: a marked span's underline in its severity (`.sockel-error`,
+//   `.sockel-warning`, `.sockel-info`), as CodeEditor's; `-empty-mark` one
+//   with no text.
+// - `.sockel-code-token-*`: a highlighted span, by what it is, coloured by
+//   the `--code-*` tokens; CodeEditor's too.
+
+@use "tokens" as base;
+
+.sockel-code-snippet {
+    display: block;
+    box-sizing: border-box;
+    max-width: 100%;
+    margin: 0;
+    padding: var(--space-2) var(--space-3);
+    overflow-x: auto;
+    overscroll-behavior-x: contain;
+    border: var(--space-px) solid var(--field-border);
+    border-radius: var(--radius-sm);
+    background: var(--field-bg);
+    color: var(--text);
+    font-family: var(--code-font);
+    font-size: var(--code-text);
+    font-weight: normal;
+    line-height: var(--code-line-height);
+    letter-spacing: normal;
+    tab-size: var(--code-tab-size);
+    white-space: pre;
+    overflow-wrap: normal;
+
+    &.sockel-inline {
+        display: inline;
+        padding: 0;
+        overflow: visible;
+        border: 0;
+        background: none;
+        line-height: inherit;
+        white-space: pre-wrap;
+        overflow-wrap: anywhere;
+    }
+}
+
+.sockel-code-snippet-mark {
+    @include base.code-mark;
+}
+
+.sockel-code-snippet-empty-mark::after {
+    @include base.code-empty-mark;
+}
+
+.sockel-code-token-keyword {
+    color: var(--code-keyword);
+}
+
+.sockel-code-token-name {
+    color: var(--code-name);
+}
+
+.sockel-code-token-member {
+    color: var(--code-member);
+}
+
+.sockel-code-token-type {
+    color: var(--code-type);
+}
+
+.sockel-code-token-function {
+    color: var(--code-function);
+}
+
+.sockel-code-token-number {
+    color: var(--code-number);
+}
+
+.sockel-code-token-string {
+    color: var(--code-string);
+}
+
+.sockel-code-token-comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.sockel-code-token-operator {
+    color: var(--code-operator);
+}
+
+.sockel-code-token-punctuation {
+    color: var(--code-punctuation);
+}
+
+.sockel-code-token-error {
+    color: var(--danger);
+}

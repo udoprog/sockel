@@ -2,6 +2,7 @@ mod actions;
 mod badges;
 mod buttons;
 mod code_editor;
+mod code_snippet;
 mod color_select;
 mod confirms;
 mod conversation;
@@ -1165,6 +1166,19 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <code_editor::CodeEditorPage /> },
         holds: &[hold(sockel::class::CODE_EDITOR, Size::Width, Across::All)],
+    },
+    Page {
+        id: "code-snippet",
+        title: "CodeSnippet",
+        group: Group::Feedback,
+        about: "Code shown as written, never wrapped: the app's highlighting as CodeEditor shows it, and marked spans underlined in their severity, each mark's message its tooltip. A block scrolls sideways, so a mark at the end of a long line stays under its text; it can stand in an ErrorBox's message, for an error pointing into source. Inline, it sits in a sentence or a table cell.",
+        covers: &["CodeSnippet", "CodeSnippetProps", "code_snippet"],
+        render: || html! { <code_snippet::CodeSnippetPage /> },
+        holds: &[hold(
+            sockel::class::CODE_SNIPPET,
+            Size::Width,
+            Across::Except(&["inline", "in ErrorBox"]),
+        )],
     },
     Page {
         id: "composer",
