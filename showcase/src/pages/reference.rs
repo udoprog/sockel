@@ -31,10 +31,24 @@ pub struct Var {
     pub property: Option<&'static str>,
 }
 
+pub struct MixinSection {
+    pub title: &'static str,
+    pub mixins: &'static [Mixin],
+}
+
+pub struct Mixin {
+    pub name: &'static str,
+    /// Its arguments as declared, empty when it takes none.
+    pub args: &'static str,
+    /// Whether it wraps the block given to its `@include`.
+    pub content: bool,
+    pub doc: &'static str,
+}
+
 include!(concat!(env!("OUT_DIR"), "/reference.rs"));
 
 /// Text with its `code` spans set as code.
-fn prose(text: &str) -> Html {
+pub(super) fn prose(text: &str) -> Html {
     text.split('`')
         .enumerate()
         .map(|(n, part)| {
@@ -47,7 +61,7 @@ fn prose(text: &str) -> Html {
         .collect()
 }
 
-fn head(names: &[&'static str]) -> Html {
+pub(super) fn head(names: &[&'static str]) -> Html {
     names
         .iter()
         .map(|name| html! { <TableCell head=true>{ *name }</TableCell> })

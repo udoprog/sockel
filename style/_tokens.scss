@@ -48,10 +48,11 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
     @return map.get($breakpoints, $name);
 }
 
-// A popup as a sheet from the bottom: full width, `--popover-sheet-height`
-// tall at most, radius-lg top corners, and (`$popover-sheet-edge: top`, with
-// `$edge`) only its top edge bordered. `$min-width` clears the popup's own
-// least width; the content lands between the size and the corners.
+//// Popover
+/// A popup as a sheet from the bottom: full width, `--popover-sheet-height`
+/// tall at most, radius-lg top corners, and (`$popover-sheet-edge: top`, with
+/// `$edge`) only its top edge bordered. `$min-width` clears the popup's own
+/// least width; the content lands between the size and the corners.
 @mixin sheet($min-width: false, $edge: true) {
     top: auto;
     right: 0;
@@ -71,7 +72,7 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
     border-radius: var(--radius-lg) var(--radius-lg) 0 0;
 }
 
-// The scrim behind a sheet: the whole window, over the page, under the sheet.
+/// The scrim behind a sheet: the whole window, over the page, under the sheet.
 @mixin sheet-scrim {
     position: fixed;
     inset: 0;
@@ -80,14 +81,16 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
     background: var(--scrim);
 }
 
-// Below a breakpoint and from it up: never both, at the breakpoint's own
-// width.
+//// Breakpoints
+/// Below a breakpoint's width; `above` is the other side, so never both
+/// apply at the breakpoint's own width.
 @mixin below($name) {
     @media (width < #{breakpoint($name)}) {
         @content;
     }
 }
 
+/// From a breakpoint's width up; the other side of `below`.
 @mixin above($name) {
     @media (width >= #{breakpoint($name)}) {
         @content;
@@ -1326,8 +1329,9 @@ $-feature-parts: (
     }
 }
 
-// A page's content column: the workspace unless it is given the reading
-// column.
+//// Page
+/// A page's content column: the workspace unless it is given the reading
+/// column.
 @mixin page($width: var(--page-workspace)) {
     // The full column whatever it holds: auto margins alone let a page
     // shrink to its content, so two pages differed in width.
@@ -1336,17 +1340,19 @@ $-feature-parts: (
     margin-inline: auto;
 }
 
-// A container whose rounded items sit just inside it: the one inset on
-// every side, and its items' corners concentric with its own (its radius
-// less the inset and its border). Buttons, tabs and menu rows take it as
-// `--radius-inner`, falling back to `--radius-sm` outside such a container.
+//// Layout
+/// A container whose rounded items sit just inside it: the one inset on
+/// every side, and its items' corners concentric with its own (its radius
+/// less the inset and its border). Buttons, tabs and menu rows take it as
+/// `--radius-inner`, falling back to `--radius-sm` outside such a container.
 @mixin nests($radius, $border: 1px) {
     padding: var(--nest-inset);
     --radius-inner: calc(#{$radius} - var(--nest-inset) - #{$border});
 }
 
-// The tone modifiers every mark and message shares (`Tone` in src/badge.rs):
-// each sets `--tone` and nothing else. Neutral has no class.
+//// Colours
+/// The tone modifiers every mark and message shares (`Tone` in src/badge.rs):
+/// each sets `--tone` and nothing else. Neutral has no class.
 @mixin tones {
     &.sockel-accent,
     &.sockel-busy {
@@ -1366,8 +1372,9 @@ $-feature-parts: (
     }
 }
 
-// The focus ring, on keyboard focus only: an outline, never a border, so
-// it adds nothing to the box.
+//// Against jitter
+/// The focus ring, on keyboard focus only: an outline, never a border, so
+/// it adds nothing to the box.
 @mixin focus-ring {
     &:focus-visible {
         outline: var(--focus-ring-width) solid var(--focus-ring-color);
@@ -1375,14 +1382,15 @@ $-feature-parts: (
     }
 }
 
-// A border that is always there, transparent unless given a colour: a state
-// changes its `border-color` only, so the box never grows a pixel.
+/// A border that is always there, transparent unless given a colour: a state
+/// changes its `border-color` only, so the box never grows a pixel.
 @mixin reserved-border($color: transparent, $width: var(--space-px)) {
     border: $width solid $color;
 }
 
-// A diagnostic's wavy underline in its severity: `--danger`, or
-// `.sockel-warning`'s or `.sockel-info`'s colour.
+//// Code
+/// A diagnostic's wavy underline in its severity: `--danger`, or
+/// `.sockel-warning`'s or `.sockel-info`'s colour.
 @mixin code-mark {
     text-decoration: underline wavy var(--danger);
     text-decoration-skip-ink: none;
@@ -1402,34 +1410,35 @@ $-feature-parts: (
     }
 }
 
-// The `::after` of an underline with no text: an unseen character taking
-// no room (a space would not be underlined).
+/// The `::after` of an underline with no text: an unseen character taking
+/// no room (a space would not be underlined).
 @mixin code-empty-mark {
     content: "x";
     margin-inline-end: -1ch;
     color: transparent;
 }
 
-// Figures of one width each, so a count or a clock does not move as it
-// changes.
+//// Against jitter
+/// Figures of one width each, so a count or a clock does not move as it
+/// changes.
 @mixin numeric {
     font-variant-numeric: tabular-nums;
 }
 
-// Room for `$ch` characters kept whatever the content, so a value that
-// changes does not move what follows it. The utility reads `--reserve-ch`.
+/// Room for `$ch` characters kept whatever the content, so a value that
+/// changes does not move what follows it. The utility reads `--reserve-ch`.
 @mixin reserve-ch($ch: var(--reserve-ch, 0)) {
     min-width: calc(#{$ch} * 1ch);
 }
 
-// The code editor's face (`--code-font`): for types, literals and code in
-// an input or a span.
+/// The code editor's face (`--code-font`): for types, literals and code in
+/// an input or a span.
 @mixin mono {
     font-family: var(--code-font);
 }
 
-// A scrolling container whose scrollbar's room is kept whether it scrolls
-// or not, so its content does not jump when it starts to.
+/// A scrolling container whose scrollbar's room is kept whether it scrolls
+/// or not, so its content does not jump when it starts to.
 @mixin scroll-area {
     min-height: 0;
     overflow: auto;
@@ -1437,7 +1446,7 @@ $-feature-parts: (
     scrollbar-gutter: stable;
 }
 
-// One line, cut with an ellipsis.
+/// One line, cut with an ellipsis.
 @mixin truncate {
     min-width: 0;
     overflow: hidden;
@@ -1445,7 +1454,7 @@ $-feature-parts: (
     white-space: nowrap;
 }
 
-// At most `$lines` lines, the last cut with an ellipsis.
+/// At most `$lines` lines, the last cut with an ellipsis.
 @mixin clamp($lines) {
     display: -webkit-box;
     min-width: 0;
@@ -1455,7 +1464,7 @@ $-feature-parts: (
     line-clamp: $lines;
 }
 
-// Read by a screen reader, not shown.
+/// Read by a screen reader, not shown.
 @mixin visually-hidden {
     position: absolute;
     width: 1px;
@@ -1468,21 +1477,23 @@ $-feature-parts: (
     white-space: nowrap;
 }
 
+/// Shown only below `$visibility-breakpoint`.
 @mixin phone-only {
     @include above($visibility-breakpoint) {
         display: none;
     }
 }
 
+/// Shown only from `$visibility-breakpoint` up.
 @mixin desktop-only {
     @include below($visibility-breakpoint) {
         display: none;
     }
 }
 
-// Scrolls sideways with the scrollbar hidden and the edge that has hidden
-// content faded (a scroll-driven animation, none runs when nothing
-// overflows; `@property` and keyframes are in `_layout.scss`).
+/// Scrolls sideways with the scrollbar hidden and the edge that has hidden
+/// content faded (a scroll-driven animation, none runs when nothing
+/// overflows; `@property` and keyframes are in `_layout.scss`).
 @mixin scroll-fade {
     min-width: 0;
     overflow-x: auto;
@@ -1502,10 +1513,10 @@ $-feature-parts: (
     }
 }
 
-// The current or selected item (`aria-current`, `aria-selected="true"`,
-// a radio's `aria-checked="true"` or a toggle's `aria-pressed="true"`),
-// marked by its colour, background or underline, never its weight, so it
-// keeps its width. `$by` is `background`, `color` or `underline`.
+/// The current or selected item (`aria-current`, `aria-selected="true"`,
+/// a radio's `aria-checked="true"` or a toggle's `aria-pressed="true"`),
+/// marked by its colour, background or underline, never its weight, so it
+/// keeps its width. `$by` is `background`, `color` or `underline`.
 @mixin current($by: background) {
     &[aria-current]:not([aria-current="false"]),
     &[aria-selected="true"],
@@ -1525,9 +1536,10 @@ $-feature-parts: (
     }
 }
 
-// A table: collapsed edges, full width, its columns sized by their content.
-// `$fixed` sizes them by the first row alone, so data arriving or a sort
-// never moves a column.
+//// Recipes
+/// A table: collapsed edges, full width, its columns sized by their content.
+/// `$fixed` sizes them by the first row alone, so data arriving or a sort
+/// never moves a column.
 @mixin table-base($fixed: false) {
     width: 100%;
     border-collapse: separate;
@@ -1538,8 +1550,8 @@ $-feature-parts: (
     }
 }
 
-// A heading cell: a row high, its line reserved, held to the top of a
-// scrolling wrap on a surface so rows pass under it.
+/// A heading cell: a row high, its line reserved, held to the top of a
+/// scrolling wrap on a surface so rows pass under it.
 @mixin table-head-cell {
     position: sticky;
     top: 0;
@@ -1556,7 +1568,7 @@ $-feature-parts: (
     white-space: nowrap;
 }
 
-// A body cell: at least a row high, its line reserved.
+/// A body cell: at least a row high, its line reserved.
 @mixin table-cell {
     box-sizing: border-box;
     height: var(--control-height);
@@ -1565,7 +1577,7 @@ $-feature-parts: (
     vertical-align: middle;
 }
 
-// The tint of a hovered row; the box does not change.
+/// The tint of a hovered row; the box does not change.
 @mixin table-row-hover {
     background: color-mix(in srgb, var(--text) 4%, transparent);
 }
@@ -1574,7 +1586,7 @@ $-feature-parts: (
 // dependency's sign-in forms, say), so it looks the same. Each is the rule
 // of the class it names, which includes it.
 
-// `.sockel-stack`: a column, its blocks `$gap` apart.
+/// `.sockel-stack`: a column, its blocks `$gap` apart.
 @mixin stack($gap: var(--space-3)) {
     display: flex;
     flex-direction: column;
@@ -1582,8 +1594,8 @@ $-feature-parts: (
     min-width: 0;
 }
 
-// `.sockel-cluster`: a row, its items centred, `$gap` apart; `$wrap: false`
-// keeps it to one line.
+/// `.sockel-cluster`: a row, its items centred, `$gap` apart; `$wrap: false`
+/// keeps it to one line.
 @mixin cluster($gap: var(--space-2), $wrap: true) {
     display: flex;
     @if $wrap {
@@ -1596,7 +1608,7 @@ $-feature-parts: (
     min-width: 0;
 }
 
-// `.sockel-card`: a surface lifted off the page.
+/// `.sockel-card`: a surface lifted off the page.
 @mixin card {
     padding: $card-padding;
     @include reserved-border(var(--card-border), var(--card-border-width));
@@ -1608,7 +1620,7 @@ $-feature-parts: (
     --button-surface: #{$card-button-fill};
 }
 
-// `.sockel-field`: a label, its control, a hint and an error, stacked.
+/// `.sockel-field`: a label, its control, a hint and an error, stacked.
 @mixin field {
     display: flex;
     flex-direction: column;
@@ -1616,7 +1628,7 @@ $-feature-parts: (
     min-width: 0;
 }
 
-// `.sockel-field-label`.
+/// `.sockel-field-label`.
 @mixin field-label {
     min-width: 0;
     font-size: var(--text-sm);
@@ -1642,6 +1654,8 @@ $-button-variants: (
     success: (ink: var(--success), edge: var(--success), hover-edge: var(--text)),
 );
 
+/// A button variant's colours alone (`primary`, `secondary`, `ghost`,
+/// `quiet`, `danger` or `success`), without the button's box.
 @mixin button-variant($variant) {
     @if not map.has-key($-button-variants, $variant) {
         @error "button-variant: secondary, primary, ghost, quiet, danger, ghost-danger or success, not #{$variant}";
@@ -1665,9 +1679,9 @@ $-button-variants: (
     }
 }
 
-// The base of a button that is not `.sockel-button` (a switch, a cross, a
-// clear, a face, a menu item, a step): the `$button-part-*` settings, first in
-// its rule so its own declarations win.
+/// The base of a button that is not `.sockel-button` (a switch, a cross, a
+/// clear, a face, a menu item, a step): the `$button-part-*` settings, first in
+/// its rule so its own declarations win.
 @mixin button-part($radius: false) {
     @if $button-part-justify {
         justify-content: $button-part-justify;
@@ -1680,9 +1694,9 @@ $-button-variants: (
     }
 }
 
-// `.sockel-button`, the plain one; pass a variant for another. Its states
-// (hover, focus, `aria-pressed`, `aria-busy`, disabled) come with it. A
-// button's content is laid out by the app's markup, as a row with a gap.
+/// `.sockel-button`, the plain one; pass a variant for another. Its states
+/// (hover, focus, `aria-pressed`, `aria-busy`, disabled) come with it. A
+/// button's content is laid out by the app's markup, as a row with a gap.
 @mixin button($variant: secondary) {
     @include button-variant(secondary);
     @if $variant != secondary {
@@ -1759,8 +1773,8 @@ $-button-variants: (
     }
 }
 
-// The box of a text field (`.sockel-input`, `.sockel-textarea`,
-// `.sockel-input-box`): its border, fill and the size modifiers.
+/// The box of a text field (`.sockel-input`, `.sockel-textarea`,
+/// `.sockel-input-box`): its border, fill and the size modifiers.
 @mixin input-box {
     --input-height: var(--control-height);
     --input-edge: var(--field-border);
@@ -1814,7 +1828,7 @@ $-button-variants: (
     }
 }
 
-// `.sockel-input`: a bare text input.
+/// `.sockel-input`: a bare text input.
 @mixin input {
     @include input-box;
     flex: none;
@@ -1853,7 +1867,7 @@ $-button-variants: (
     }
 }
 
-// `.sockel-native-select`: a native `<select>`, worn with `.sockel-input`.
+/// `.sockel-native-select`: a native `<select>`, worn with `.sockel-input`.
 @mixin native-select {
     width: max-content;
     max-width: 100%;

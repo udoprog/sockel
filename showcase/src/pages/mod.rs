@@ -9,6 +9,7 @@ mod conversation;
 mod dialog;
 mod disclosures;
 mod drops;
+mod features;
 mod fields;
 mod file_browser;
 mod foundations;
@@ -22,6 +23,7 @@ mod library;
 mod loading;
 mod media;
 mod menus;
+mod mixins;
 mod notices;
 mod overlays;
 mod pagers;
@@ -141,7 +143,14 @@ const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
 
 /// A page with no states for the probe to cycle.
 #[cfg(test)]
-const UNPROBED: &[&str] = &["intro", "reference", "styles", "translations"];
+const UNPROBED: &[&str] = &[
+    "intro",
+    "reference",
+    "features",
+    "mixins",
+    "styles",
+    "translations",
+];
 
 /// Every page, in the navigation's order. A name sockel exports must be in
 /// some page's `covers`, which the test below checks.
@@ -2289,6 +2298,24 @@ pub const PAGES: &[Page] = &[
         about: "Every Sass variable sockel can be configured with, its default and what it sets, generated from style/_tokens.scss.",
         covers: &[],
         render: || html! { <reference::ReferencePage /> },
+        holds: &[],
+    },
+    Page {
+        id: "features",
+        title: "Features",
+        group: Group::Foundations,
+        about: "Every Cargo feature of sockel, what it brings in and the features it enables, generated from Cargo.toml.",
+        covers: &[],
+        render: || html! { <features::FeaturesPage /> },
+        holds: &[],
+    },
+    Page {
+        id: "mixins",
+        title: "Mixins",
+        group: Group::Foundations,
+        about: "Every public mixin of sockel's Sass, its arguments and what it does, generated from style/_tokens.scss.",
+        covers: &[],
+        render: || html! { <mixins::MixinsPage /> },
         holds: &[],
     },
     Page {
