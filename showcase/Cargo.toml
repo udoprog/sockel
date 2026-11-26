@@ -6,16 +6,16 @@ publish = false
 [dependencies]
 js-sys = "0.3.77"
 phrasebook02 = { package = "phrasebook", version = "0.2.0", features = ["browser", "yew023"] }
-sockel = "0.3.4"
+sockel = "0.3.5"
 wasm-bindgen = "0.2.100"
 wasm-bindgen-futures = "0.4.50"
 web-sys = { version = "0.3.77", features = ["Clipboard", "CssStyleDeclaration", "Document", "DomRect", "DomTokenList", "Element", "Event", "EventInit", "File", "HtmlCollection", "HtmlElement", "HtmlInputElement", "KeyboardEvent", "KeyboardEventInit", "Location", "Navigator", "NodeList", "Window"] }
 yew = { version = "0.23.0", features = ["csr"] }
 
 [build-dependencies]
-sockel-build = "0.3.4"
+sockel-build = "0.3.5"
 
 [dev-dependencies]
 futures = { version = "0.3", default-features = false, features = ["executor"] }
-sockel-build = "0.3.4"
+sockel-build = "0.3.5"
 yew = { version = "0.23.0", features = ["csr", "ssr"] }
