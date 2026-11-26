@@ -112,6 +112,9 @@ pub struct ButtonProps {
     /// Whether what it opens is open (`aria-expanded`).
     #[prop_or_default]
     pub expanded: Option<bool>,
+    /// The id of what it shows or hides (`aria-controls`).
+    #[prop_or_default]
+    pub controls: Option<AttrValue>,
     /// What it opens (`aria-haspopup`: `"menu"`, `"listbox"`, `"dialog"`).
     #[prop_or_default]
     pub haspopup: Option<AttrValue>,
@@ -314,6 +317,7 @@ pub fn Button(props: &ButtonProps) -> Html {
             html! {
                 <a {class} ref={props.node_ref.clone()}
                     aria-expanded={expanded.clone()}
+                    aria-controls={props.controls.clone()}
                     aria-haspopup={props.haspopup.clone()}
                     href={(!props.disabled).then(|| href.clone())}
                     aria-disabled={(props.disabled || props.unavailable).then_some("true")}
@@ -350,6 +354,7 @@ pub fn Button(props: &ButtonProps) -> Html {
             html! {
                 <button ref={props.node_ref.clone()}
                     aria-expanded={expanded.clone()}
+                    aria-controls={props.controls.clone()}
                     aria-haspopup={props.haspopup.clone()}
                     type={if props.submit { "submit" } else { "button" }}
                     form={props.form.clone()}
@@ -439,6 +444,7 @@ mod tests {
             unavailable: false,
             node_ref: NodeRef::default(),
             expanded: None,
+            controls: None,
             haspopup: None,
             href: None,
             submit: false,
@@ -854,6 +860,26 @@ mod tests {
         assert!(html.contains("aria-expanded=\"true\""), "{html}");
         assert!(html.contains("aria-haspopup=\"menu\""), "{html}");
         assert!(!render(props()).contains("aria-expanded"));
+    }
+
+    #[test]
+    fn a_toggle_names_what_it_controls() {
+        let html = render(ButtonProps {
+            expanded: Some(true),
+            controls: Some("fields".into()),
+            ..props()
+        });
+        assert!(html.contains("aria-controls=\"fields\""), "{html}");
+        let link = render(ButtonProps {
+            href: Some("/x".into()),
+            controls: Some("fields".into()),
+            ..props()
+        });
+        assert!(
+            link.starts_with("<a") && link.contains("aria-controls=\"fields\""),
+            "{link}"
+        );
+        assert!(!render(props()).contains("aria-controls"));
     }
 
     #[test]

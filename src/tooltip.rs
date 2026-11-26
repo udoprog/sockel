@@ -491,6 +491,7 @@ pub fn ReasonButton(props: &ReasonButtonProps) -> Html {
         unavailable: props.reason.is_some(),
         node_ref: anchor.clone(),
         expanded: None,
+        controls: None,
         haspopup: None,
         href: None,
         submit: props.submit,
