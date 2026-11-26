@@ -918,6 +918,33 @@ formats them. `tests/english_literals.rs` fails on a capitalised literal in
 both ways. The showcase provides the catalog and switches language (the
 Translations page).
 
+<br>
+
+### Writing a library on sockel
+
+A component library built on sockel ships its own catalog the way sockel
+does: every id under its own prefix, read in each component with
+`use_phrases_with(&L10N)`, and label props resolved with
+[`label`](https://docs.rs/sockel/latest/sockel/phrasebookcatalog01/fn.label.html):
+
+```rust
+use phrasebook02::Phrases;
+use phrasebookcatalog01::Catalog;
+use yew::AttrValue;
+
+pub static L10N: Catalog = Catalog::new("mylib", &[]).with_prefix("mylib-");
+
+fn close(phrases: &Phrases, close_label: &Option<AttrValue>) -> AttrValue {
+    sockel::phrasebookcatalog01::label(phrases, close_label, "mylib-close")
+}
+```
+
+Apps add the library's catalog between their own and sockel's, so each
+can reword the ones after it:
+`.catalog(&APP).catalog(&mylib::L10N).catalog(&sockel::phrasebookcatalog01::L10N)`.
+Apps that prune sockel's stylesheet also add `Usage::dependency("mylib")`
+to their `Usage`, so classes the library uses are kept.
+
 [phrasebook-catalog]: https://docs.rs/phrasebook-catalog
 
 <br>
