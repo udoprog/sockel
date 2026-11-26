@@ -43,8 +43,9 @@ pub static L10N: Catalog = Catalog::new(
 )
 .with_prefix("sockel-");
 
-/// The label given on a use, else `id`'s message.
-pub(crate) fn label(phrases: &Phrases, given: &Option<AttrValue>, id: &str) -> AttrValue {
+/// The label given on a use, else `id`'s message from `phrases`: how a
+/// component honours an `Option<AttrValue>` label prop.
+pub fn label(phrases: &Phrases, given: &Option<AttrValue>, id: &str) -> AttrValue {
     match given {
         Some(given) => given.clone(),
         None => AttrValue::from(phrases.text(id)),
