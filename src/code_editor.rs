@@ -129,6 +129,9 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     // Set while an accepted completion is inserted, so its `input` does not
     // offer completions again.
     let accepting = use_mut_ref(|| false);
+    // The text the last `input` emitted, taken by the value effect: a
+    // `value` equal to it is already in the textarea.
+    let emitted = use_mut_ref(|| None::<String>);
     let overlays = use_overlays();
 
     let open = offers.is_some();
@@ -148,10 +151,15 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     );
 
     // The textarea is uncontrolled: only a value from outside is written
-    // into it, which typing never needs.
+    // into it, which typing never needs. The text it just emitted is not
+    // read back to compare.
     {
-        let area = area.clone();
+        let (area, emitted) = (area.clone(), emitted.clone());
         use_effect_with(props.value.clone(), move |value| {
+            if emitted.borrow_mut().take().as_deref() == Some(value.as_str()) {
+                return;
+            }
+
             if let Some(el) = area.cast::<HtmlTextAreaElement>()
                 && el.value() != value.as_str()
             {
@@ -227,18 +235,21 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     };
 
     let on_input = {
-        let (on_input, refresh, track, accepting) = (
+        let (on_input, refresh, track, accepting, emitted) = (
             props.on_input.clone(),
             refresh.clone(),
             track.clone(),
             accepting.clone(),
+            emitted.clone(),
         );
         Callback::from(move |e: InputEvent| {
             let Some(el) = e.target_dyn_into::<HtmlTextAreaElement>() else {
                 return;
             };
 
-            on_input.emit(el.value());
+            let text = el.value();
+            *emitted.borrow_mut() = Some(text.clone());
+            on_input.emit(text);
             track();
 
             if !*accepting.borrow() {
