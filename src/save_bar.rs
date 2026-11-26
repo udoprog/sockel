@@ -6,6 +6,7 @@ use std::cell::Cell;
 use phrasebook02::yew023::use_phrases_with;
 use wasm_bindgen::JsCast;
 use wasm_bindgen::closure::Closure;
+use web_sys::{Element, HtmlElement};
 use yew::prelude::*;
 
 use crate::phrasebookcatalog01::{L10N, label};
@@ -88,6 +89,139 @@ pub fn use_unload_guard(active: bool) {
     });
 }
 
+/// What scrolls `bar`: the nearest element around it that scrolls up and
+/// down, else the page.
+fn scroller_of(bar: &Element) -> Option<Element> {
+    let window = web_sys::window()?;
+    let mut at = bar.parent_element();
+    while let Some(el) = at {
+        if let Ok(Some(style)) = window.get_computed_style(&el)
+            && let Ok(overflow) = style.get_property_value("overflow-y")
+            && matches!(overflow.as_str(), "auto" | "scroll")
+        {
+            return Some(el);
+        }
+        at = el.parent_element();
+    }
+    window.document()?.scrolling_element()
+}
+
+/// What must stay clear of the bar while `focused` has focus: its field,
+/// hint and error included, where it is in one.
+fn kept_clear(focused: Element) -> Element {
+    #[cfg(feature = "field")]
+    if let Ok(Some(field)) = focused.closest(&format!(".{}", class::FIELD)) {
+        return field;
+    }
+    focused
+}
+
+/// How far to scroll so that `kept` (a box, from its top to its bottom)
+/// ends `gap` above `bar` (its top and bottom), without scrolling
+/// `focused_top` above `view_top`. None when it is clear already, or beyond
+/// the bar, where the browser's own scrolling brings it in.
+fn overlap(
+    kept: (f64, f64),
+    focused_top: f64,
+    bar: (f64, f64),
+    gap: f64,
+    view_top: f64,
+) -> Option<f64> {
+    let ((top, bottom), (bar_top, bar_bottom)) = (kept, bar);
+    if bottom <= bar_top - gap || top >= bar_bottom {
+        return None;
+    }
+    let by = (bottom + gap - bar_top).min(focused_top - view_top);
+    (by >= 1.0).then_some(by)
+}
+
+/// Scrolls the focused element (its field, where it is in one) out from
+/// under a sticky `bar`.
+fn clear_focus(bar: &Element) {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let Some(focused) = window.document().and_then(|d| d.active_element()) else {
+        return;
+    };
+    if bar.contains(Some(&focused)) || focused.tag_name() == "BODY" {
+        return;
+    }
+    let Some(scroller) = scroller_of(bar) else {
+        return;
+    };
+    let page = window
+        .document()
+        .and_then(|d| d.scrolling_element())
+        .is_some_and(|p| p == scroller);
+    let view_top = if page {
+        0.0
+    } else {
+        scroller.get_bounding_client_rect().top()
+    };
+    let gap = window
+        .get_computed_style(bar)
+        .ok()
+        .flatten()
+        .and_then(|s| s.get_property_value("bottom").ok())
+        .and_then(|b| b.strip_suffix("px").and_then(|n| n.parse::<f64>().ok()))
+        .unwrap_or(0.0);
+    let bar_rect = bar.get_bounding_client_rect();
+    let focused_rect = focused.get_bounding_client_rect();
+    let kept = kept_clear(focused).get_bounding_client_rect();
+    if let Some(by) = overlap(
+        (kept.top(), kept.bottom()),
+        focused_rect.top(),
+        (bar_rect.top(), bar_rect.bottom()),
+        gap,
+        view_top,
+    ) {
+        scroller.scroll_by_with_x_and_y(0.0, by);
+    }
+}
+
+/// While held, keeps whatever takes focus clear of a sticky bar.
+struct FocusClearance {
+    closure: Option<Closure<dyn Fn(web_sys::Event)>>,
+}
+
+impl FocusClearance {
+    fn new(bar: NodeRef) -> Self {
+        let closure = Closure::<dyn Fn(web_sys::Event)>::new(move |_: web_sys::Event| {
+            if let Some(bar) = bar.cast::<HtmlElement>() {
+                clear_focus(&bar);
+            }
+        });
+        let added = web_sys::window()
+            .and_then(|w| w.document())
+            .is_some_and(|d| {
+                d.add_event_listener_with_callback_and_bool(
+                    "focusin",
+                    closure.as_ref().unchecked_ref(),
+                    true,
+                )
+                .is_ok()
+            });
+        Self {
+            closure: added.then_some(closure),
+        }
+    }
+}
+
+impl Drop for FocusClearance {
+    fn drop(&mut self) {
+        if let (Some(document), Some(closure)) =
+            (web_sys::window().and_then(|w| w.document()), &self.closure)
+        {
+            _ = document.remove_event_listener_with_callback_and_bool(
+                "focusin",
+                closure.as_ref().unchecked_ref(),
+                true,
+            );
+        }
+    }
+}
+
 #[derive(Properties, PartialEq)]
 pub struct SaveBarProps {
     /// There is something to save; clean, the bar is hidden and keeps its room.
@@ -120,7 +254,8 @@ pub struct SaveBarProps {
     /// elsewhere.
     #[prop_or(true)]
     pub guard: bool,
-    /// Stays at the bottom of its scroll container.
+    /// Stays at the bottom of its scroll container, raised over the form,
+    /// and while dirty scrolls the focused field out from under itself.
     #[prop_or_default]
     pub sticky: bool,
     #[prop_or_default]
@@ -171,10 +306,23 @@ pub fn save_bar(idle: bool, sticky: bool) -> Classes {
 pub fn SaveBar(props: &SaveBarProps) -> Html {
     use_unload_guard(props.guard && props.dirty);
     let phrases = use_phrases_with(&L10N);
+    let bar = use_node_ref();
+    use_effect_with(
+        (props.sticky && props.dirty, bar.clone()),
+        |(watch, bar)| {
+            let clearance = watch.then(|| {
+                if let Some(element) = bar.cast::<HtmlElement>() {
+                    clear_focus(&element);
+                }
+                FocusClearance::new(bar.clone())
+            });
+            move || drop(clearance)
+        },
+    );
 
     with_testid(
         html! {
-            <div class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}>
+            <div ref={bar} class={classes!(save_bar(!props.dirty, props.sticky), props.class.clone())}>
                 <span class={class::SAVE_BAR_NOTE} role="status">{ label(&phrases, &props.label, "sockel-save-bar-unsaved") }</span>
                 <span class={class::SAVE_BAR_STATUS} role="status">{ props.status.clone() }</span>
                 <span class={class::SAVE_BAR_ACTIONS}>
@@ -212,6 +360,20 @@ mod tests {
             names(save_bar(true, true)),
             [class::SAVE_BAR, class::IDLE, class::STICKY]
         );
+    }
+
+    #[test]
+    fn overlap_clears_the_focused_field() {
+        let bar = (100.0, 150.0);
+        // Clear of the bar, or beyond it.
+        assert_eq!(overlap((0.0, 80.0), 40.0, bar, 8.0, 0.0), None);
+        assert_eq!(overlap((150.0, 190.0), 160.0, bar, 8.0, 0.0), None);
+        // Under the bar, or too near it: scrolled to end `gap` above it.
+        assert_eq!(overlap((60.0, 120.0), 80.0, bar, 8.0, 0.0), Some(28.0));
+        assert_eq!(overlap((110.0, 140.0), 110.0, bar, 8.0, 0.0), Some(48.0));
+        assert_eq!(overlap((50.0, 95.0), 50.0, bar, 8.0, 0.0), Some(3.0));
+        // Taller than the room: the focused element's top stays in view.
+        assert_eq!(overlap((10.0, 300.0), 20.0, bar, 8.0, 0.0), Some(20.0));
     }
 
     #[test]

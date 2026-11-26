@@ -4,7 +4,10 @@
 //   flow at one height, as SelectionBar is: `.sockel-idle` hides it while
 //   nothing is unsaved and keeps its room, so the form never moves when
 //   it lights. `.sockel-sticky` keeps it at the bottom of its scroll
-//   container, still in the flow. Parts: `-note` (what is unsaved, at
+//   container, still in the flow and at the same size: a raised, rounded
+//   bar a little above the bottom edge, its content inset, its top border
+//   swapped for a ring that takes no room. While dirty, SaveBar scrolls
+//   the focused field out from under it. Parts: `-note` (what is unsaved, at
 //   most one line), `-status` (how the last save went) and `-actions`.
 
 @use "tokens" as base;
@@ -25,9 +28,15 @@
 
     &.sockel-sticky {
         position: sticky;
-        bottom: 0;
+        bottom: var(--space-2);
         z-index: var(--layer-sticky);
-        background: var(--surface);
+        padding-inline: var(--space-3);
+        border-top-color: transparent;
+        border-radius: var(--radius-md);
+        background: var(--surface-raised);
+        box-shadow:
+            0 0 0 var(--space-px) var(--border),
+            var(--shadow-1);
     }
 }
 

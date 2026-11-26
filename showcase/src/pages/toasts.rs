@@ -2,7 +2,12 @@ use yew::prelude::*;
 
 use crate::class;
 
-use sockel::{Button, Glyph, Icon, SaveBar, Toast, ToastHost, Tone, save_bar, toast, toast_host};
+use sockel::{
+    Button, Field, Glyph, Icon, SaveBar, TextInput, Toast, ToastHost, Tone, field_describedby,
+    save_bar, toast, toast_host,
+};
+
+use super::fields::use_control_id;
 
 use crate::code::{El, snippet, text_node};
 use crate::controls::{Demo, Select, Text, Toggle, bind};
@@ -112,6 +117,8 @@ pub fn SaveBarPage() -> Html {
     let text = use_state(|| Text::Short);
     let status = use_state(|| Text::Empty);
     let saves = use_state(|| 0);
+    let name = use_state(|| AttrValue::from("Ada"));
+    let name_id = use_control_id();
 
     let controls = html! {
         <>
@@ -130,6 +137,13 @@ pub fn SaveBarPage() -> Html {
         Callback::from(move |_: MouseEvent| saves.set(*saves + 1))
     };
     let ondiscard = Callback::from(|_: MouseEvent| ());
+    let on_name = {
+        let (name, dirty) = (name.clone(), dirty.clone());
+        Callback::from(move |value: String| {
+            name.set(value.into());
+            dirty.set(true);
+        })
+    };
 
     let label = text.of("Unsaved changes");
     let status_text = status.of("Could not save: offline");
@@ -153,7 +167,11 @@ pub fn SaveBarPage() -> Html {
     html! {
         <Demo {controls} {code}>
             { shown("save_bar(idle, sticky)", &save_bar(!*dirty, *sticky)) }
-            <div class={class::SAMPLE}>{ "The form" }</div>
+            <Field id={name_id.clone()} label={html! { "Name" }}
+                hint={html! { "Sticky, in a short window: focused, it scrolls clear of the bar." }}>
+                <TextInput id={name_id.clone()} value={(*name).clone()} on_input={on_name}
+                    describedby={field_describedby(&name_id, true, false)} />
+            </Field>
             <SaveBar dirty={*dirty} busy={*busy} disabled={*disabled} sticky={*sticky}
                 label={(*text != Text::Short).then_some(label)}
                 status={html! { { status_text } }}
