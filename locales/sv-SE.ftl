@@ -117,6 +117,7 @@ sockel-lightbox-zoom-in = Zooma in
 sockel-lightbox-zoom-out = Zooma ut
 sockel-lightbox-open = Öppna originalet
 sockel-lightbox-close = Stäng
+sockel-code-editor-completions = Förslag
 sockel-log-view-to-latest = Till det senaste
 sockel-log-view-new = { $count } nya
 sockel-composer-label = Meddelande

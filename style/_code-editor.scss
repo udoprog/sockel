@@ -1,0 +1,197 @@
+// CodeEditor (src/code_editor.rs): a frame with a field's look, scrolling
+// sideways, holding a gutter of line numbers and, in one grid cell, the
+// highlighted code laid over a textarea whose text is transparent. Both
+// share the font, padding and line height, so the two never drift apart;
+// the textarea grows with the code rather than scrolling.
+//
+// - `.sockel-code-editor`: the frame, `--code-editor-rows` lines tall at
+//   least; `.sockel-invalid` while a diagnostic is an error.
+// - `-gutter`: the line numbers (`-line`), a line with diagnostics marked
+//   (`-marker`) in its worst severity, `.sockel-error`, `.sockel-warning`
+//   or `.sockel-info`.
+// - `-code` (the highlighted copy) over `-input` (the textarea); `-caret`
+//   is the caret's place in the copy, which following the caret measures.
+// - `-mark`: a diagnostic's underline in its severity; `-empty-mark` one
+//   with no text.
+// - `-option`: a completion's label, in the code's type.
+// - `.sockel-code-token-*`: a highlighted span, by what it is, coloured by
+//   the `--code-*` tokens.
+
+@use "tokens" as base;
+
+.sockel-code-editor {
+    @include base.input-box;
+    --code-editor-pad: var(--space-2);
+    display: grid;
+    grid-template-columns: auto minmax(max-content, 1fr);
+    width: 100%;
+    overflow: auto;
+    overscroll-behavior-x: contain;
+    font-family: var(--code-font);
+    font-size: var(--code-text);
+    line-height: var(--code-line-height);
+
+    &:focus-within {
+        outline: var(--focus-ring-width) solid var(--focus-ring-color);
+        outline-offset: var(--focus-ring-offset);
+    }
+
+    &.sockel-invalid {
+        --input-edge: var(--danger);
+    }
+}
+
+.sockel-code-editor-gutter {
+    position: sticky;
+    inset-inline-start: 0;
+    z-index: 2;
+    grid-area: 1 / 1;
+    padding-block: var(--code-editor-pad);
+    border-inline-end: var(--space-px) solid var(--border);
+    border-start-start-radius: inherit;
+    border-end-start-radius: inherit;
+    background: var(--field-bg);
+    color: var(--muted);
+    user-select: none;
+}
+
+.sockel-code-editor-line {
+    @include base.numeric;
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    gap: var(--space-1);
+    min-width: 4.5ch;
+    padding-inline: var(--space-1) var(--space-2);
+
+    &.sockel-error {
+        color: var(--danger);
+    }
+
+    &.sockel-warning {
+        color: var(--warning);
+    }
+
+    &.sockel-info {
+        color: var(--accent);
+    }
+}
+
+// The dot beside a line with diagnostics.
+.sockel-code-editor-marker {
+    flex: none;
+    width: var(--dot-size);
+    height: var(--dot-size);
+    border-radius: var(--radius-pill);
+    background: currentColor;
+}
+
+.sockel-code-editor-code,
+.sockel-code-editor-input {
+    box-sizing: border-box;
+    grid-area: 1 / 2;
+    width: 100%;
+    min-height: calc(var(--code-editor-rows, 4) * 1lh + 2 * var(--code-editor-pad));
+    margin: 0;
+    padding: var(--code-editor-pad) var(--space-3);
+    border: 0;
+    border-radius: 0;
+    font: inherit;
+    letter-spacing: normal;
+    tab-size: var(--code-tab-size);
+    white-space: pre;
+    overflow-wrap: normal;
+}
+
+// Above the textarea, so its selection is painted under the text.
+.sockel-code-editor-code {
+    z-index: 1;
+    color: var(--text);
+    pointer-events: none;
+}
+
+.sockel-code-editor-input {
+    align-self: stretch;
+    overflow: hidden;
+    resize: none;
+    outline: none;
+    background: transparent;
+    color: transparent;
+    caret-color: var(--text);
+}
+
+.sockel-code-editor-caret {
+    display: inline;
+}
+
+.sockel-code-editor-mark {
+    text-decoration: underline wavy var(--danger);
+    text-decoration-skip-ink: none;
+    text-decoration-thickness: 2px;
+    text-underline-offset: 3px;
+
+    &.sockel-warning {
+        text-decoration-color: var(--warning);
+    }
+
+    &.sockel-info {
+        text-decoration-color: var(--accent);
+    }
+}
+
+// An underlined, unseen character taking no room (a space would not be
+// underlined).
+.sockel-code-editor-empty-mark::after {
+    content: "x";
+    margin-inline-end: -1ch;
+    color: transparent;
+}
+
+.sockel-code-editor-option {
+    font-family: var(--code-font);
+}
+
+.sockel-code-token-keyword {
+    color: var(--code-keyword);
+}
+
+.sockel-code-token-name {
+    color: var(--code-name);
+}
+
+.sockel-code-token-member {
+    color: var(--code-member);
+}
+
+.sockel-code-token-type {
+    color: var(--code-type);
+}
+
+.sockel-code-token-function {
+    color: var(--code-function);
+}
+
+.sockel-code-token-number {
+    color: var(--code-number);
+}
+
+.sockel-code-token-string {
+    color: var(--code-string);
+}
+
+.sockel-code-token-comment {
+    color: var(--code-comment);
+    font-style: italic;
+}
+
+.sockel-code-token-operator {
+    color: var(--code-operator);
+}
+
+.sockel-code-token-punctuation {
+    color: var(--code-punctuation);
+}
+
+.sockel-code-token-error {
+    color: var(--danger);
+}

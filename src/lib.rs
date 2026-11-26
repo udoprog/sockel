@@ -416,13 +416,14 @@
 //! | `chip` | `icons` | 6.6 KB |
 //! | `chip-select` | `chip`, `layout`, `search-select` | 50.1 KB |
 //! | `choice` | | 7.2 KB |
+//! | `code-editor` | `overlay`, `select` | 50.9 KB |
 //! | `color-select` | `select` | 50.4 KB |
 //! | `composer` | `drop-zone`, `input` | 23.8 KB |
 //! | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.5 KB |
 //! | `disclosure` | `head`, `icons` | 15.8 KB |
 //! | `drop-zone` | `button` | 16.0 KB |
 //! | `field` | | 6.4 KB |
-//! | `file-browser` | `badge`, `button`, `field`, `icons`, `input`, `layout`, `notice`, `overlay`, `rows` | 53.2 KB |
+//! | `file-browser` | `badge`, `button`, `field`, `icons`, `input`, `layout`, `notice`, `overlay`, `rows` | 61.5 KB |
 //! | `head` | `layout` | 13.0 KB |
 //! | `icons` | | 4.0 KB |
 //! | `input` | `icons` | 10.5 KB |
@@ -444,7 +445,7 @@
 //! | `reorder` | `icons`, `rows`, `tooltip` | 36.7 KB |
 //! | `rows` | `button` | 19.2 KB |
 //! | `search-select` | `select` | 47.5 KB |
-//! | `save-bar` | `button` | 14.5 KB |
+//! | `save-bar` | `button` | 14.7 KB |
 //! | `seam` | | 5.3 KB |
 //! | `select` | `input`, `menu`, `tooltip` | 46.1 KB |
 //! | `shell` | `badge` | 14.3 KB |
@@ -454,16 +455,16 @@
 //! | `stepper` | `input` | 12.1 KB |
 //! | `switch` | `icons` | 6.0 KB |
 //! | `table` | `icons` | 10.8 KB |
-//! | `tabs` | | 9.1 KB |
+//! | `tabs` | | 9.7 KB |
 //! | `time` | | 3.8 KB |
-//! | `toast` | `save-bar`, `toasts` | 36.2 KB |
+//! | `toast` | `save-bar`, `toasts` | 36.4 KB |
 //! | `toasts` | `badge`, `button`, `overlay` | 35.3 KB |
 //! | `toggles` | `checkbox`, `chip`, `choice`, `switch` | 14.6 KB |
 //! | `tooltip` | `overlay` | 28.8 KB |
 //!
 //! A feature is named for the component or family it gates; the
 //! [showcase](https://udoprog.github.io/sockel/) shows each one. "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
-//! with none it is 3.4 KB, and with `full` 137 KB. Each feature builds alone,
+//! with none it is 3.4 KB, and with `full` 145 KB. Each feature builds alone,
 //! and its CSS holds no other feature's rules.
 //! `scripts/feature-sizes.sh` in the repository measures every row and rewrites the
 //! column and these figures in place; run it when the styles change.
@@ -768,7 +769,7 @@
 //!
 //! | Partial | Parts |
 //! | --- | --- |
-//! | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
+//! | tokens | `tokens.actions`, `tokens.card-grid`, `tokens.code-editor`, `tokens.color-select`, `tokens.drop`, `tokens.fields`, `tokens.filter-picker`, `tokens.media`, `tokens.panel`, `tokens.picker`, `tokens.seam`, `tokens.table`, `tokens.toast`, `tokens.toggles`, `tokens.tooltip`: the `:root` tokens only that partial reads (`--avatar-*` are `tokens.media`'s, `--action-overlay-*` are `tokens.actions`'s) |
 //! | layout | `layout.toolbar` (the toolbar, its parts, the library toolbar and the `--band-*` tokens), `layout.grow` (with its bases), `layout.pages` (the workspace and library pages), `layout.plain-list`, `layout.lines`, `layout.flush` (a stack's or cluster's), `layout.gap-none`, `-hair`, `-snug`, `-tight`, `-medium`, `-loose`, `-wide`, `layout.card-compact`, `layout.card-dense`, `layout.card-link` |
 //! | fields | `fields.field` ([`Field`](https://docs.rs/sockel/latest/sockel/struct.Field.html) itself, not a [`FormRow`](https://docs.rs/sockel/latest/sockel/struct.FormRow.html)), `fields.required`, `fields.help`, `fields.error` (with `reserve_error`), `fields.disabled`, `fields.busy`, `fields.inputs`, `fields.fieldset` (with the legend), `fields.check` |
 //! | heads | `heads.trail` (`crumbs`), `heads.crumbs` (`back`, `meta`, `.sockel-compact`, `.sockel-one-row`), `heads.label`, `heads.list` |
@@ -1016,6 +1017,8 @@ mod chip;
 mod chip_select;
 #[cfg(feature = "choice")]
 mod choice;
+#[cfg(feature = "code-editor")]
+mod code_editor;
 #[cfg(feature = "color-select")]
 mod color_select;
 #[cfg(feature = "composer")]
@@ -1158,6 +1161,11 @@ pub use chip::{
 pub use chip_select::{ChipSelect, ChipSelectProps, chip_select};
 #[cfg(feature = "choice")]
 pub use choice::{Choice, ChoiceFit, ChoiceOption, ChoiceProps, ChoiceStack, choice};
+#[cfg(feature = "code-editor")]
+pub use code_editor::{
+    CodeEditor, CodeEditorProps, CodeSpan, CodeToken, Completion, CompletionQuery, Completions,
+    Diagnostic, Severity, code_editor,
+};
 #[cfg(feature = "color-select")]
 pub use color_select::{
     ColorOption, ColorSelect, ColorSelectProps, ColorSelectWidth, color_index, color_input_value,

@@ -1,6 +1,7 @@
 mod actions;
 mod badges;
 mod buttons;
+mod code_editor;
 mod color_select;
 mod confirms;
 mod conversation;
@@ -1143,6 +1144,26 @@ pub const PAGES: &[Page] = &[
         ],
         render: || html! { <conversation::LogViewPage /> },
         holds: &[hold(sockel::class::LOG_VIEW, Size::Box, Across::All)],
+    },
+    Page {
+        id: "code-editor",
+        title: "CodeEditor",
+        group: Group::Inputs,
+        about: "A code editor that knows no language: a textarea under its text highlighted by the app's spans, with line numbers, diagnostics underlined and marked in the gutter, Tab and Shift+Tab indenting, Enter keeping the indent and a completion list at the cursor. Edits undo as typing does; it grows with the code and scrolls sideways after the caret. The highlighter here is a toy one.",
+        covers: &[
+            "CodeEditor",
+            "CodeEditorProps",
+            "CodeSpan",
+            "CodeToken",
+            "Completion",
+            "CompletionQuery",
+            "Completions",
+            "Diagnostic",
+            "Severity",
+            "code_editor",
+        ],
+        render: || html! { <code_editor::CodeEditorPage /> },
+        holds: &[hold(sockel::class::CODE_EDITOR, Size::Width, Across::All)],
     },
     Page {
         id: "composer",

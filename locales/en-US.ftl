@@ -117,6 +117,7 @@ sockel-lightbox-zoom-in = Zoom in
 sockel-lightbox-zoom-out = Zoom out
 sockel-lightbox-open = Open the original
 sockel-lightbox-close = Close
+sockel-code-editor-completions = Completions
 sockel-log-view-to-latest = Jump to latest
 sockel-log-view-new = { $count } new
 sockel-composer-label = Message

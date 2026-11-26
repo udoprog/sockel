@@ -45,6 +45,10 @@
 // - `--menu-width`, `--menu-width-wide`, `--menu-width-wider`: a menu's
 //   least widths; `--menu-width-panel`: a panel menu's width.
 // - `--seam-grip` and `--seam-min`: a seam's divider and each pane's least length.
+// - `--code-font`, `--code-text`, `--code-line-height` and `--code-tab-size`:
+//   a code editor's type; `--code-keyword`, `-name`, `-member`, `-type`,
+//   `-function`, `-number`, `-string`, `-comment`, `-operator` and
+//   `-punctuation`: its highlighting, derived from the app's colours.
 // - Colours derived from the app's seven (`--danger`, `--success`,
 //   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
 //   `--field-border`, `--field-bg`, `--card-border`, `--panel-ground`,
@@ -672,6 +676,22 @@ $menu-width-wider: 20rem !default;
 $menu-width-panel: 34rem !default;
 $seam-grip: var(--space-3) !default;
 $seam-min: 8rem !default;
+$code-font: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace !default;
+$code-text: var(--text-sm) !default;
+$code-line-height: 1.6 !default;
+$code-tab-size: 4 !default;
+// The hues are mixed toward the app's text, as the status hues are, so they
+// keep their contrast in a light and a dark scheme alike.
+$code-keyword: color-mix(in srgb, #b4237a 65%, var(--text)) !default;
+$code-name: var(--text) !default;
+$code-member: color-mix(in srgb, #6b45b8 65%, var(--text)) !default;
+$code-type: color-mix(in srgb, #a05a00 65%, var(--text)) !default;
+$code-function: color-mix(in srgb, #0b5cad 65%, var(--text)) !default;
+$code-number: color-mix(in srgb, #00838f 70%, var(--text)) !default;
+$code-string: color-mix(in srgb, #2f8a4f 70%, var(--text)) !default;
+$code-comment: var(--muted) !default;
+$code-operator: color-mix(in srgb, var(--accent) 45%, var(--muted)) !default;
+$code-punctuation: var(--muted) !default;
 // The status hues are mixed toward the app's text, so they keep their
 // contrast on its background in a light and a dark scheme alike.
 $danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
@@ -752,7 +772,7 @@ $-parts: (
     "skeleton.group", "skeleton.loadable", "skeleton.row", "skeleton.short", "skeleton.spinner",
     "table.sort-header",
     "tabs.fill", "tabs.nav", "tabs.segmented", "tabs.stacked",
-    "tokens.actions", "tokens.card-grid", "tokens.color-select", "tokens.drop", "tokens.fields",
+    "tokens.actions", "tokens.card-grid", "tokens.code-editor", "tokens.color-select", "tokens.drop", "tokens.fields",
     "tokens.filter-picker", "tokens.media", "tokens.panel", "tokens.picker", "tokens.seam",
     "tokens.table", "tokens.toast", "tokens.toggles", "tokens.tooltip",
     "utilities.clamp", "utilities.desktop-only", "utilities.focus-ring", "utilities.numeric",
@@ -775,6 +795,7 @@ $-feature-parts: (
     "skeleton.loadable": ("loadable",),
     "tokens.actions": ("rows",),
     "tokens.card-grid": ("card-grid",),
+    "tokens.code-editor": ("code-editor",),
     "tokens.color-select": ("color-select",),
     "tokens.drop": ("drop-zone",),
     "tokens.fields": ("field",),
@@ -983,6 +1004,23 @@ $-feature-parts: (
     @if emits("tokens.seam") {
         --seam-grip: #{$seam-grip};
         --seam-min: #{$seam-min};
+    }
+    // A code editor's type and highlighting.
+    @if emits("tokens.code-editor") {
+        --code-font: #{$code-font};
+        --code-text: #{$code-text};
+        --code-line-height: #{$code-line-height};
+        --code-tab-size: #{$code-tab-size};
+        --code-keyword: #{$code-keyword};
+        --code-name: #{$code-name};
+        --code-member: #{$code-member};
+        --code-type: #{$code-type};
+        --code-function: #{$code-function};
+        --code-number: #{$code-number};
+        --code-string: #{$code-string};
+        --code-comment: #{$code-comment};
+        --code-operator: #{$code-operator};
+        --code-punctuation: #{$code-punctuation};
     }
 
     // Derived from the app's colours on `:root`: an app that sets those on
