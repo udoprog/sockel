@@ -2,13 +2,13 @@ use yew::prelude::*;
 
 use sockel::{
     Button, ButtonVariant, Card, CardGrid, Choice, ChoiceOption, Cluster, ColorOption, ColorSelect,
-    Count, Field, Gap, Inset, Pill, SectionHead, Stack, Switch, TextInput, Tone,
+    Count, Field, Gap, Inset, Pill, Stack, Switch, TextInput, Tone,
 };
 
 use super::fields::use_control_id;
 use crate::class;
 use crate::code::CodeCard;
-use crate::controls::Toggle;
+use crate::controls::{Toggle, section_head};
 
 const DOCS: &str = "https://docs.rs/sockel";
 const REPOSITORY: &str = "https://github.com/udoprog/sockel";
@@ -94,7 +94,7 @@ pub fn IntroPage() -> Html {
             </CardGrid>
             <Compare />
             <Playground />
-            <SectionHead title="Getting started" />
+            { section_head("intro", "Getting started") }
             <p class={class::PROSE}>
                 { "Add sockel with the features you render, build the stylesheet in build.rs \
                    and mount it once. Every component has a page here, in the navigation; the \
@@ -137,7 +137,7 @@ fn Compare() -> Html {
 
     html! {
         <Stack gap={Gap::Loose}>
-            <SectionHead title="Without and with sockel" />
+            { section_head("intro", "Without and with sockel") }
             <p class={class::PROSE}>
                 { "Flip the states and watch the outlined neighbours. On the left, plain \
                    markup: the button's label grows, the count gains digits and the error \
@@ -402,7 +402,7 @@ fn Playground() -> Html {
 
     html! {
         <Stack gap={Gap::Loose}>
-            <SectionHead title="Bring your own colours" />
+            { section_head("intro", "Bring your own colours") }
             <p class={class::PROSE}>
                 { "sockel supplies no colours: it reads the app's. Pick a theme and an accent \
                    and the components below take them at once, set as custom properties on the \

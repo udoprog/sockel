@@ -7,7 +7,7 @@ use yew::prelude::*;
 use crate::class;
 use crate::code::CodeCard;
 
-use sockel::{Card, Cluster, Gap, Stack};
+use sockel::{Card, Cluster, Gap, SectionHead, Stack};
 
 #[derive(Properties, PartialEq)]
 pub struct SelectProps<T: PartialEq + 'static> {
@@ -170,4 +170,18 @@ pub fn button(label: String, primary: bool, small: bool) -> Html {
             <span class={class::LABEL_TEXT}>{ label }</span>
         </button>
     }
+}
+
+/// A heading's text as a link to itself, its id the link's target, so a
+/// heading can be linked to and its address copied.
+pub fn heading_link(id: impl Into<AttrValue>, text: &'static str) -> Html {
+    let id = id.into();
+    html! {
+        <a id={id.clone()} href={format!("#{id}")} class={class::HEADING_LINK}>{ text }</a>
+    }
+}
+
+/// A section's head on a page, linkable as `#<page>/<section>`.
+pub fn section_head(page: &str, title: &'static str) -> Html {
+    html! { <SectionHead title={heading_link(crate::route::section(page, title), title)} /> }
 }

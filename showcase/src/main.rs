@@ -1,9 +1,10 @@
-//! An interactive gallery of every sockel component.
+//! The Sockel documentation site: a page of controls for every component.
 
 mod code;
 mod controls;
 mod pages;
 mod probe;
+mod route;
 
 /// The showcase's own classes (`style/`), from sockel-build.
 mod class {
@@ -17,10 +18,11 @@ use phrasebook02::{Lang, Phrasebook, Phrases, browser};
 use wasm_bindgen::{JsCast, closure::Closure};
 use yew::prelude::*;
 
-use sockel::{Cluster, Gap, OverlayHost, PageHead, SectionHead, Stack};
+use sockel::{Cluster, Gap, OverlayHost, PageHead, SearchField, SectionHead, Stack};
 
-use controls::Select;
-use pages::{FALLBACK, Group, PAGES, in_group};
+use controls::{Select, heading_link};
+use pages::{Group, PAGES, in_group};
+use route::Route;
 
 #[derive(Clone, Copy, PartialEq, Eq)]
 enum Theme {
@@ -64,23 +66,41 @@ fn apply(theme: Theme) {
     };
 }
 
-/// The page the address names, else the fallback.
-fn initial_page() -> usize {
+/// The route the address names.
+fn current_route() -> Route {
     let hash = web_sys::window()
         .and_then(|w| w.location().hash().ok())
         .unwrap_or_default();
-    let id = hash.trim_start_matches('#');
-    let find = |id: &str| PAGES.iter().position(|p| p.id == id);
-    find(id).or_else(|| find(FALLBACK)).unwrap_or_default()
+    route::parse(&hash)
+}
+
+/// Shows what a route names: its section, else the page's top; and names
+/// the page in the window's title.
+fn show(route: &Route) {
+    let Some(window) = web_sys::window() else {
+        return;
+    };
+    let document = window.document();
+    if let (Some(document), Some(page)) = (&document, PAGES.get(route.page)) {
+        document.set_title(&format!("{} · Sockel documentation", page.title));
+    }
+    let target = route
+        .target
+        .as_deref()
+        .and_then(|id| document?.get_element_by_id(id));
+    match target {
+        Some(target) => target.scroll_into_view(),
+        None => window.scroll_to_with_x_and_y(0.0, 0.0),
+    }
 }
 
 #[function_component]
 fn App() -> Html {
-    let current = use_state(initial_page);
+    let route = use_state(current_route);
     {
-        let current = current.clone();
+        let route = route.clone();
         use_effect_with((), move |()| {
-            let listener = Closure::<dyn Fn()>::new(move || current.set(initial_page()));
+            let listener = Closure::<dyn Fn()>::new(move || route.set(current_route()));
             let window = web_sys::window();
             if let Some(window) = &window {
                 let _ = window.add_event_listener_with_callback(
@@ -98,6 +118,8 @@ fn App() -> Html {
             }
         });
     }
+    use_effect_with((*route).clone(), show);
+    let filter = use_state(String::new);
     let theme = use_state(|| Theme::System);
     let on_theme = {
         let theme = theme.clone();
@@ -119,23 +141,35 @@ fn App() -> Html {
     };
 
     let link = |index: usize| {
-        let page = &PAGES[index];
-        let onclick = {
-            let current = current.clone();
-            Callback::from(move |_: MouseEvent| current.set(index))
-        };
-
-        html! {
+        let page = PAGES.get(index)?;
+        Some(html! {
             <li>
-                <a href={format!("#{}", page.id)} class={class::NAV_LINK}
-                    aria-current={(index == *current).then_some("page")} {onclick}>
+                <a href={format!("#{}", route::slug(page))} class={class::NAV_LINK}
+                    aria-current={(index == route.page).then_some("page")}>
                     { page.title }
                 </a>
             </li>
-        }
+        })
+    };
+    let groups: Vec<(Group, Vec<usize>)> = Group::ALL
+        .iter()
+        .map(|&group| {
+            let found: Vec<usize> = in_group(group)
+                .into_iter()
+                .filter(|&index| PAGES.get(index).is_some_and(|p| route::matches(p, &filter)))
+                .collect();
+            (group, found)
+        })
+        .filter(|(_, found)| !found.is_empty())
+        .collect();
+    let on_filter = {
+        let filter = filter.clone();
+        Callback::from(move |text: String| filter.set(text))
     };
 
-    let page = &PAGES[*current];
+    let Some(page) = PAGES.get(route.page) else {
+        return Html::default();
+    };
 
     html! {
         <ContextProvider<Phrases> context={(*phrases).clone()}>
@@ -144,26 +178,35 @@ fn App() -> Html {
             <sockel::Styles css={STYLESHEET} />
             <nav class={class::NAV} aria-label="Components">
                 <Stack gap={Gap::Loose}>
-                    <strong class={class::NAME}>{ "sockel" }</strong>
-                    { for Group::ALL.iter().map(|&group| html! {
+                    <strong class={class::NAME}>{ "Sockel documentation" }</strong>
+                    <SearchField value={(*filter).clone()} on_input={on_filter} label="Filter components"
+                        placeholder="Filter" />
+                    { for groups.into_iter().map(|(group, found)| html! {
                         <Stack gap={Gap::Snug}>
                             <SectionHead title={group.title()} class={sockel::class::LABEL} />
                             <ul class={classes!(sockel::class::PLAIN_LIST, class::NAV_LIST)}>
-                                { for in_group(group).into_iter().map(link) }
+                                { for found.into_iter().filter_map(link) }
                             </ul>
                         </Stack>
                     }) }
+                    if !PAGES.iter().any(|p| route::matches(p, &filter)) {
+                        <p class={classes!(class::PROSE, class::MUTED)}>{ "No component matches." }</p>
+                    }
                     <Select<Theme> label="Theme" options={THEMES} value={*theme} on_change={on_theme} />
                     <Select<Lang> label="Language" options={LANGUAGES} value={phrases.lang()} on_change={on_lang} />
                 </Stack>
             </nav>
             <main class={class::MAIN}>
                 <Stack gap={Gap::Loose} class={sockel::class::WORKSPACE_PAGE}>
-                    <PageHead title={page.title} />
+                    <PageHead title={heading_link(route::slug(page), page.title)} />
                     <p class={classes!(class::PROSE, class::MUTED)}>{ page.about }</p>
                     if !page.covers.is_empty() {
                         <Cluster gap={Gap::Snug}>
-                            { for page.covers.iter().map(|name| html! { <code class={class::CHIP}>{ *name }</code> }) }
+                            { for page.covers.iter().map(|name| html! {
+                                <a href={format!("#{name}")} class={class::HEADING_LINK}>
+                                    <code class={class::CHIP}>{ *name }</code>
+                                </a>
+                            }) }
                         </Cluster>
                     }
                     <div key={page.id} class={sockel::class::CONTENTS}>{ (page.render)() }</div>
