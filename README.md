@@ -420,7 +420,8 @@ member wants more gets the union.
 | `chip` | `icons` | 6.6 KB |
 | `chip-select` | `chip`, `layout`, `search-select` | 50.1 KB |
 | `choice` | | 7.2 KB |
-| `code-editor` | `overlay`, `select` | 50.9 KB |
+| `code-editor` | `code-snippet`, `overlay`, `select` | 52.2 KB |
+| `code-snippet` | | 6.1 KB |
 | `color-select` | `select` | 50.4 KB |
 | `composer` | `drop-zone`, `input` | 23.8 KB |
 | `confirm` | `action-group`, `badge`, `button`, `notice`, `overlay` | 39.5 KB |
@@ -468,7 +469,7 @@ member wants more gets the union.
 
 A feature is named for the component or family it gates; the
 [showcase](https://udoprog.github.io/sockel/) shows each one. "CSS alone" is `STYLESHEET` (bytes / 1000) with only that feature and what it brings in;
-with none it is 3.4 KB, and with `full` 145 KB. Each feature builds alone,
+with none it is 3.4 KB, and with `full` 146 KB. Each feature builds alone,
 and its CSS holds no other feature's rules.
 `scripts/feature-sizes.sh` in the repository measures every row and rewrites the
 column and these figures in place; run it when the styles change.
