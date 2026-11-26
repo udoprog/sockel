@@ -496,8 +496,24 @@ impl Module {
     }
 }
 
+/// The identifiers [`code`] names, outside its string literals: a literal,
+/// such as an attribute's `feature = "name"`, names no item.
 fn idents(code: &str) -> BTreeSet<String> {
-    words(&code.replace(|c: char| !c.is_alphanumeric() && c != '_', " "))
+    let mut out = String::new();
+    let mut inside = false;
+    for c in code.chars() {
+        match c {
+            '\u{1}' => inside = true,
+            '\u{2}' => {
+                inside = false;
+                out.push(' ');
+            }
+            _ if inside => {}
+            c if c.is_alphanumeric() || c == '_' => out.push(c),
+            _ => out.push(' '),
+        }
+    }
+    words(&out)
 }
 
 fn words(text: &str) -> BTreeSet<String> {
@@ -1068,6 +1084,8 @@ mod tests {
         .map(|stem| format!("sockel-{stem}"));
         let usage = Usage::new().source(dir.join("app"));
         let src = dir.join("sockel/src");
+        // Beta, reached, has `#[cfg(feature = "delta")]`: the literal does not
+        // reach the `delta` export.
         let unreached = usage.unreached(&src, &classes).unwrap();
         assert_eq!(
             unreached.into_iter().collect::<Vec<_>>(),
