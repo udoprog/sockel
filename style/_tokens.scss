@@ -2,67 +2,11 @@
 // primitive reads, the breakpoints, and the recipes for a page's column and
 // for rounded things nested in rounded things.
 //
-// - Type `--text-3xs`…`--text-2xl` (base `--text-base`, 15px);
-//   `--section-title-size`, a section head's title.
-// - Space `--space-0` (2px), `--space-px`, `--space-1`…`--space-9`.
-// - Radii `--radius-xs` (check boxes), `--radius-sm` (controls),
-//   `--radius-md` (bars and panels between), `--radius-lg` (cards, panels, dialogs), `--radius-pill`.
-// - `--control-height` and `--control-height-small`: every field, button
-//   and picker button is one of the two, so a row of them never jumps.
-// - `--glyph-size`: the box of one of sockel's own icons, whatever icon fills it
-//   (`$glyph-phone-size` below the phone breakpoint, when set).
-// - `--swatch-size`: a colour swatch's box; `--color-select-width`: a ColorSelect face's width.
-// - `--skeleton-duration`: the time a skeleton's shimmer takes to cross.
-// - `--table-max-height`: where a table with a sticky head starts to scroll.
-// - `--drop-min-height`, `--drop-tint`, `--drop-tint-over`: a drop zone's least
-//   height and the strength of its overlay.
-// - `--avatar-sm`, `-md`, `-lg`, `-xl`: an avatar's fixed sizes.
-// - `--filter-width`: a list's filter button, one width whatever it says.
-// - `--picker-rows`: the rows a searching list's height holds, loading or loaded.
-// - `--field-label-width`: the label column of wide-label `FormRows`;
-//   `--field-message-line` and `--field-error-lines`: the line a field's hint and
-//   error are set on, and how many lines its reserved error line holds.
-// - `--mark-height` and `--touch-height`: a mark's and a touch target's height.
-// - `--dot-size` and `--corner-size`: a dot's size and a corner badge's height.
-// - `--page-workspace` and `--page-reading`: the two content columns;
-//   `--page-wide` the widest, `--page-gutter` the space at a page's sides.
-// - `--focus-ring-*`: the focus ring's colour, width and offset.
-// - `--layer-*`: the stacking order of what floats (sticky, overlay, toast,
-//   tooltip). Popovers, menus, lists and dialogs share `--layer-overlay`; the
-//   one opened later is later in the overlay host, so it is on top.
-//   `--layer-host` is the overlay host's own z-index, `auto` by default (no
-//   stacking context): an app whose own overlays sit at 1000 or more raises
-//   it above them, and the layers inside keep their order.
-// - `--tooltip-max-width`: a tooltip's widest; `--toast-max-width`: a toast's.
-//   An app with a tray at the window's bottom sets `--toast-tray` to its height.
-// - `--popover-max-width` and `--popover-sheet-height`: a popover's widest,
-//   and a sheet's tallest; `$sheet-breakpoint` is where a popover turns
-//   into a sheet.
-// - `--dialog-width`, `--dialog-width-wide`, `--dialog-min-height`,
-//   `--dialog-height-tall`, `--dialog-top` and `--dialog-sheet-height`: a
-//   dialog's widths, its least and its tall height, its distance from the
-//   window's top, and a dialog sheet's tallest.
-// - `--menu-width`, `--menu-width-wide`, `--menu-width-wider`: a menu's
-//   least widths; `--menu-width-panel`: a panel menu's width.
-// - `--seam-grip` and `--seam-min`: a seam's divider and each pane's least length.
-// - `--code-font`, `--code-text`, `--code-line-height` and `--code-tab-size`:
-//   a code editor's type; `--code-keyword`, `-name`, `-member`, `-type`,
-//   `-function`, `-number`, `-string`, `-comment`, `-operator` and
-//   `-punctuation`: its highlighting, derived from the app's colours.
-// - Colours derived from the app's seven (`--danger`, `--success`,
-//   `--warning`, `--on-accent`, `--surface-raised`, `--scrim`,
-//   `--field-border`, `--field-bg`, `--card-border`, `--panel-ground`,
-//   `--panel-tint`, `--panel-border`, `--panel-tint-text`, `--band-chrome-ground`,
-//   `--menu-item-icon-ink`):
-//   each a default an app overrides by name.
-// - `--card-border-width`: a card's edge's width (`0` for no frame).
-// - `--panel-text`, `--panel-space-after`, `--panel-tint-space-after` and
-//   `--panel-tint-radius`: a panel's type, the room it leaves under it (a
-//   tint panel's), and a tint panel's corners.
-// - `--band-chrome-gap` and `--band-search-text`: a chrome band's gap and a
-//   search band's type.
-// - `--action-overlay-radius` and `--action-overlay-padding`: the corners and
-//   the side padding of an action row laid over the end of a row.
+// - Every configurable variable, documented by the `///` line above it and
+//   grouped by `////` headings, which the showcase's reference page lists.
+//   The page also says which are emitted as custom properties on `:root`.
+// - `--toast-tray`: not a token; an app with a tray at the window's bottom
+//   sets it to the tray's height, and a raised toast sits above it.
 // - `below($name)` / `above($name)`: media queries at the breakpoints.
 // - `page($width)`, `nests($radius, $border)`.
 // - Against jitter: `focus-ring`, `reserved-border`, `numeric`,
@@ -91,6 +35,8 @@ $-default-breakpoints: (
     "broad": 90rem,
     "desktop": 100rem,
 );
+//// Breakpoints
+/// Breakpoints to move or add, merged over sockel's: `("phone": 42rem)`.
 $breakpoints: () !default;
 $breakpoints: map.merge($-default-breakpoints, $breakpoints);
 
@@ -148,601 +94,884 @@ $breakpoints: map.merge($-default-breakpoints, $breakpoints);
     }
 }
 
-// Component settings the rules read directly: a card's padding, its padding
-// below the phone breakpoint (none by default), and a toolbar's gap.
-$card-padding: var(--space-4) !default;
-$card-padding-phone: null !default;
-$toolbar-gap: var(--space-1) !default;
-// A button's padding at its sides, regular and small, and a primary
-// button's font weight (`null`: the weight it inherits).
-$button-padding: var(--space-3) !default;
-$button-padding-small: var(--space-2) !default;
-$button-primary-weight: null !default;
-// A button's corners, the gap between what an app's markup puts straight in
-// it, the colour laid over it while it is pressed down and its transition
-// (`null`: none of the last three).
-$button-radius: var(--radius-inner, var(--radius-sm)) !default;
-$button-gap: null !default;
-$button-press-shade: null !default;
-$button-transition: null !default;
-// A button's colours per variant, over sockel's: a map from `secondary`,
-// `primary`, `ghost`, `quiet`, `danger`, `ghost-danger` (a ghost button that
-// is also danger: `.sockel-ghost.sockel-danger`) or `success` to any of `fill`,
-// `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`,
-// `pressed-ink` and `pressed-edge`. A variant falls back on the plain button's.
-$button-colours: () !default;
-// A button's type size (`null`: its parent's) and a small one's, the gap
-// between its icon and label, a leading icon's inline-start margin beside a
-// label (a negative one sets it into the padding; `null`: none), and its
-// height below the phone breakpoint (every size's but touch, a small one
-// there taking the regular type; `null`: its size's).
-$button-text: null !default;
-$button-line-height: 1 !default;
-$button-text-small: var(--text-sm) !default;
-$button-content-gap: var(--space-2) !default;
-$button-icon-offset: null !default;
-$button-phone-height: null !default;
-// A disabled button's cursor.
-$button-disabled-cursor: not-allowed !default;
-// A button's least width, under `--button-min-width` (`auto`: its content's).
-$button-min-width: auto !default;
-// A small button's least width (`var(--button-height)`: a square at least, so
-// a short label such as "All" stays a tap target; `auto`: its content's).
-$button-small-min-width: var(--button-height) !default;
-// What a switch, a chip's cross, a field's clear and action, a picker's face,
-// a menu item and a stepper's step take from an app's blanket button rule
-// when it has one (`null`: nothing is set, the browser's own): their
-// justify-content, least width and corner radius (a switch's and a cross's).
-$button-part-justify: null !default;
-$button-part-min-width: null !default;
-$button-part-radius: null !default;
-// A field's clear and action: its least height, and the opacity and cursor
-// when disabled (`null`: none).
-$input-clear-min-height: null !default;
-$input-clear-disabled-opacity: null !default;
-$input-clear-disabled-cursor: null !default;
-// A dialog's padding (the head's start, the body's sides and bottom, the
-// foot's sides), that padding below `$sheet-breakpoint` (`null`: the
-// same), the gap between its body's children (`null`: the body is a plain
-// block; set, its paragraphs lose their margins) and its shadow.
-$dialog-padding: var(--space-5) !default;
-$dialog-padding-phone: null !default;
-$dialog-body-gap: null !default;
-$dialog-shadow: var(--shadow-1) !default;
-// A dialog's head padding, the rule under its head (`null`: none), its
-// body's padding, and its title's size and weight (`null`: a section head's).
-$dialog-head-padding: var(--space-3) var(--space-3) 0 var(--dialog-pad) !default;
-$dialog-head-rule: null !default;
-$dialog-body-padding: var(--space-3) var(--dialog-pad) var(--dialog-pad) !default;
-$dialog-title-size: null !default;
-$dialog-title-weight: null !default;
-// Whether a dialog is centred in the window instead of hanging from
-// `--dialog-top` (content that grows then moves both its edges), its tallest
-// above `$sheet-breakpoint` (`null`: the window's room), its body's
-// `scrollbar-gutter` (`stable`: the scrollbar's room is kept, so text does
-// not rewrap once it scrolls), and the edges a sheet keeps (`all`: its sides
-// too, the bottom transparent; `top`: only its top).
-$dialog-centred: false !default;
-$dialog-max-height: null !default;
-$dialog-scroll-gutter: stable !default;
-$dialog-sheet-edge: all !default;
-// A popover's body padding and its shadow (a hover card's too).
-$popover-padding: var(--space-3) !default;
-// A listbox's widest (a Select's list), and its active row's fill.
-$listbox-max-width: var(--popover-max-width) !default;
-$listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
-// A listbox's tallest below the room beside its opener (`null`: that room),
-// and its group headings' case and letter spacing (`null`: as written).
-$listbox-max-height: null !default;
-// A listbox's shadow (`null`: the menu surface's, `--shadow-1`).
-$listbox-shadow: null !default;
-// A Select's rows in its phone sheet (`null`: `--control-height`, as
-// above the breakpoint; `var(--touch-height)` gives a finger room).
-$select-sheet-row-height: null !default;
-// A Stepper's number's weight, and its ink and weight at zero (`null`:
-// the field's, as any other number).
-$stepper-number-weight: null !default;
-$stepper-zero-ink: null !default;
-$stepper-zero-weight: null !default;
-// The touch size's number (size and weight) and button glyphs (`null`: as
-// the other sizes'), for steppers used at arm's length.
-$stepper-touch-number-size: null !default;
-$stepper-touch-number-weight: null !default;
-$stepper-touch-glyph-size: null !default;
-// A Stepper's box: its edge, ground and shadow (`null`: the field's edge
-// and ground, no shadow), for a stepper that reads as a raised control
-// rather than a text field.
-$stepper-edge: null !default;
-$stepper-ground: null !default;
-$stepper-shadow: null !default;
-// A Stepper's buttons: their width (`null`: the box's height, a square),
-// their ink and fill on hover (`null`: no fill), and whether they fill the
-// box's ends (`true`: outer corners following the box's, inner ones square,
-// for a hover fill that meets the edge).
-$stepper-button-width: null !default;
-$stepper-button-hover-ink: var(--accent) !default;
-$stepper-button-hover-fill: null !default;
-$stepper-button-ends: false !default;
-// A line each side of the number (`null`: none), and its padding inside it.
-$stepper-divider: null !default;
-$stepper-number-padding: var(--space-2) !default;
-// The box's edge on hover and while it has the focus (`null`: a field's),
-// and whether the focus ring is drawn (`false`: the focus edge alone).
-$stepper-hover-edge: null !default;
-$stepper-focus-edge: null !default;
-$stepper-focus-ring: true !default;
-// The box's height and its buttons' width on a coarse pointer (`null`: as
-// on a fine one), for steps a finger can hit.
-$stepper-coarse-size: null !default;
-// The box's text size, every size alike (`null`: a field's; `inherit`: its
-// container's, as a number in running text).
-$stepper-text-size: null !default;
-// The font style of a faint number (`.sockel-faint`) and of the
-// placeholder (`null`: upright).
-$stepper-faint-style: null !default;
-// A Disclosure's row height (`var(--touch-height)` gives a finger room),
-// and its title's ink (`null`: the text's).
-$disclosure-row-height: var(--control-height) !default;
-$disclosure-title-ink: null !default;
-$listbox-group-name-transform: null !default;
-$listbox-group-name-letter-spacing: null !default;
-$popover-shadow: var(--shadow-1) !default;
-// A menu's surface (its edge, ground, shadow, padding, type and
-// `scrollbar-gutter`) and its rows (height, padding, gap, corners, hover
-// fill); `null` keeps the shared list's and row's.
-$menu-edge: null !default;
-$menu-ground: null !default;
-$menu-shadow: null !default;
-$menu-padding: null !default;
-$menu-text: null !default;
-$menu-scroll-gutter: null !default;
-$menu-item-height: null !default;
-$menu-item-padding: null !default;
-$menu-item-gap: null !default;
-$menu-item-radius: null !default;
-$menu-item-hover-fill: null !default;
-// `outline`: a menu row reserves no border and draws its focus edge as an
-// inset outline in the same place, so a row taller than its least height is
-// its content's height; `null` keeps the reserved border.
-$menu-item-edge: null !default;
-// A menu's corners (`null`: `--radius-md`), its rows' height below the
-// phone breakpoint (`null`: as above it; as `$button-phone-height`) and the
-// ink of a check's or radio's mark (`null`: `--accent`).
-$menu-radius: null !default;
-$menu-item-phone-height: null !default;
-$menu-item-mark-ink: null !default;
-// A menu's parts: a separator's block margin and rule colour (`null`:
-// `var(--space-1)`, `--border`), a heading's and a note's padding, font
-// size and ink, and a heading's weight (`null` keeps each part's own).
-$menu-separator-margin: null !default;
-$menu-separator-edge: null !default;
-$menu-heading-padding: null !default;
-$menu-heading-text: null !default;
-$menu-heading-ink: null !default;
-$menu-heading-weight: null !default;
-$menu-note-padding: null !default;
-$menu-note-text: null !default;
-$menu-note-ink: null !default;
-// A popover's corners, the edges its sheet keeps and its body's
-// `scrollbar-gutter` (as the dialog's).
-$popover-radius: var(--radius-md) !default;
-$popover-sheet-edge: all !default;
-$popover-scroll-gutter: stable !default;
-// The room between what a confirm says and its buttons.
-$confirm-gap: var(--space-3) !default;
-// A confirm popover's body never scrolls: `auto` gives it a gutter only
-// where it does (`stable` keeps the popover's).
-$confirm-scroll-gutter: auto !default;
-
-// A selection bar's ground, the rule above it, its padding, least height,
-// corners, outer margin and type, an inset one's side padding and margin,
-// and its count's ink, weight and padding; `null` leaves each out.
-$selection-bar-ground: null !default;
-$selection-bar-rule: var(--space-px) solid var(--border) !default;
-$selection-bar-padding: var(--space-2) 0 !default;
-$selection-bar-min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px)) !default;
-$selection-bar-radius: null !default;
-$selection-bar-margin: null !default;
-$selection-bar-text: null !default;
-$selection-bar-inset-padding: var(--space-3) !default;
-$selection-bar-inset-margin: null !default;
-$selection-bar-count-ink: null !default;
-$selection-bar-count-weight: null !default;
-$selection-bar-count-padding: null !default;
-$selection-bar-count-wrap: false !default;
-
-// A row list's row: its least height (`null`: none), padding, hover fill
-// and whether a name wraps (anywhere) instead of being cut to one line.
-$row-list-item-height: var(--control-height) !default;
-$row-list-item-padding: 0 var(--space-3) !default;
-// The width of the line a row reserves above itself (`--row-line` draws in it);
-// `0` leaves a row without the edge, and a `.sockel-divided` list without lines.
-$row-list-item-edge: var(--space-px) !default;
-$row-list-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
-$row-list-name-wrap: false !default;
-// A row's main part: its vertical padding and the gap between its lines
-// (`null`: none), and its name's least height (`null`: none).
-$row-list-main-padding: var(--space-1) !default;
-$row-list-main-gap: null !default;
-$row-list-name-height: null !default;
-
-// A pick row's least height, padding, gap, corners, type and hover fill,
-// and its detail's ink and size; `null` leaves the type inherited.
-$pick-row-height: var(--control-height) !default;
-$pick-row-padding: 0 var(--space-3) !default;
-$pick-row-gap: var(--space-3) !default;
-$pick-row-radius: var(--radius-sm) !default;
-$pick-row-text: null !default;
-$pick-row-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
-$pick-row-detail-ink: color-mix(in srgb, currentcolor 70%, transparent) !default;
-$pick-row-detail-text: var(--text-sm) !default;
-
-// A skeleton's fill, edge (a 1px line inside it; `null`: none), corners,
-// a line's height and the transparent inset that thins it (`null`: a fifth
-// of a line), and a block's height below the phone breakpoint (`null`: as
-// above it).
-$skeleton-fill: color-mix(in srgb, var(--text) 8%, var(--surface)) !default;
-$skeleton-edge: null !default;
-$skeleton-radius: var(--radius-sm) !default;
-$skeleton-line-height: 1lh !default;
-$skeleton-line-inset: null !default;
-$skeleton-phone-height: null !default;
-
-// A pager's gap, its buttons' corners, ink, type size (`null`: inherited),
-// hover fill and ink (`null`: as at rest), the current page's fill and ink,
-// the chevrons' ink (`null`: the button's), and its controls' height below
-// the phone breakpoint (`null`: as above it). `$pager-button-height` is a
-// button's and gap's height (default the control height);
-// `$pager-button-padding` the room either side of its number in the slot;
-// `$pager-padding-top` the room above the row (`null`: none); `$pager-current-edge`
-// the current page's edge colour (`null`: the ordinary edge);
-// `$pager-range-text` the range text's size (`null`: inherited).
-$pager-gap: var(--space-1) !default;
-$pager-button-radius: var(--radius-sm) !default;
-$pager-button-ink: var(--text) !default;
-$pager-button-text: null !default;
-$pager-button-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
-$pager-button-hover-ink: null !default;
-$pager-current-fill: var(--accent) !default;
-$pager-current-ink: var(--on-accent) !default;
-$pager-step-ink: null !default;
-$pager-phone-height: null !default;
-$pager-button-height: var(--control-height) !default;
-$pager-button-padding: var(--space-2) !default;
-$pager-padding-top: null !default;
-$pager-current-edge: null !default;
-$pager-range-text: null !default;
-// A summary pager's padding (`null`: none), for one that ends a list or
-// table and lines up with its rows.
-$pager-summary-padding: null !default;
-
-// A drag handle's square side, its side below the phone breakpoint
-// (`null`: as above it), its corners and its hover fill.
-$drag-handle-size: var(--control-height-small) !default;
-$drag-handle-phone-size: null !default;
-$drag-handle-radius: var(--radius-xs) !default;
-$drag-handle-hover-fill: color-mix(in srgb, var(--text) 6%, transparent) !default;
-$drag-handle-compact-size: 1rem !default;
-// A picked row a Reorder's lifted row carries, dimmed where it lies.
-$reorder-carried-opacity: 0.5 !default;
-// A Notice's padding, gap, corners, fill, edge colour, the way its parts
-// line up on the cross axis, its least height, its text's padding above and
-// below, the text's line height its icon's height and ink and a danger notice's text ink (`null`: the text's). The defaults centre
-// a line in one small control's height; a project that lets the text set
-// the height sets `-min-height`, `-body-padding`, `-line-height` and
-// `-icon-height` to `0`, `0`, `inherit` and `auto`.
-$notice-padding: var(--space-2) var(--space-3) !default;
-$notice-gap: var(--space-2) !default;
-$notice-radius: var(--radius-md) !default;
-$notice-fill: color-mix(in srgb, var(--tone) 10%, var(--surface)) !default;
-$notice-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
-$notice-align: flex-start !default;
-$notice-min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px)) !default;
-$notice-body-padding: calc((var(--control-height-small) - 1lh) / 2) !default;
-$notice-line-height: 1.4 !default;
-$notice-icon-height: var(--control-height-small) !default;
-$notice-icon-ink: var(--tone) !default;
-$notice-danger-ink: null !default;
-// An EmptyState's padding, edge (a border, e.g. `1px dashed var(--border)`),
-// corner radius (`-compact-radius` of the compact one) and icon size, and its
-// icon's fill, ink, box (width and height) and radius, to draw it as a
-// card with a round icon (`null`: none emitted, the icon the text's size).
-$empty-state-padding: var(--space-7) var(--space-4) !default;
-$empty-state-edge: null !default;
-$empty-state-radius: null !default;
-$empty-state-compact-radius: null !default;
-$empty-state-icon-size: var(--text-2xl) !default;
-$empty-state-icon-fill: null !default;
-$empty-state-icon-ink: null !default;
-$empty-state-icon-box: null !default;
-$empty-state-icon-radius: null !default;
-$empty-state-title-size: var(--text-md) !default;
-$empty-state-title-ink: var(--text) !default;
-$empty-state-title-weight: 600 !default;
-$empty-state-compact-title-size: null !default;
-$empty-state-compact-title-weight: null !default;
-$empty-state-compact-title-ink: null !default;
-$empty-state-compact-icon-box: null !default;
-$empty-state-compact-icon-fill: null !default;
-$empty-state-compact-icon-ink: null !default;
-$empty-state-compact-justify: null !default;
-// Whether a compact empty state's actions may wrap onto a second line
-// (`wrap`), which its one-row height clips; `nowrap` keeps them on the row.
-$empty-state-compact-actions-wrap: wrap !default;
-$empty-state-hint-max-width: null !default;
-$empty-state-icon-gap: null !default;
-// An ErrorBox's padding, gap, fill, edge colour and shadow, its message's
-// weight, and its cause's font and size (`null`: none, or inherited).
-$error-box-padding: var(--space-4) !default;
-$error-box-gap: var(--space-2) !default;
-$error-box-fill: color-mix(in srgb, var(--tone) 8%, var(--surface)) !default;
-$error-box-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
-$error-box-shadow: null !default;
-$error-box-message-weight: null !default;
-$error-box-cause-font: ui-monospace, monospace !default;
-$error-box-cause-text: var(--text-xs) !default;
-// The space under a flanked box's text (`null`: as much as above it, which
-// centres one line against the icon and the dismiss button).
-$error-box-text-end: null !default;
-
-// Every token, configurable with `@use ... with (...)`; `:root` emits
-// each as its custom property.
+//// Type
+/// The type scale's smallest size.
 $text-3xs: 0.625rem !default;
+/// A type size, between `$text-3xs` and `$text-xs`.
 $text-2xs: 0.6875rem !default;
+/// A type size for captions and causes.
 $text-xs: 0.75rem !default;
+/// A type size for secondary text and small controls.
 $text-sm: 0.8125rem !default;
+/// A type size for dense text.
 $text-md: 0.875rem !default;
+/// The body text's size, which the scale is set around.
 $text-base: 0.9375rem !default;
+/// A type size for small headings.
 $text-heading: 1.125rem !default;
+/// A type size for section titles.
 $text-lg: 1.25rem !default;
+/// A type size for page titles.
 $text-title: 1.4rem !default;
+/// A type size for large icons and display text.
 $text-xl: 1.5rem !default;
+/// The type scale's largest size.
 $text-2xl: 1.75rem !default;
-$section-title-size: var(--text-lg) !default;
-$page-title-size: null !default;
-$page-head-crumbs-align: baseline !default;
-// The mark after each crumb in a head's trail: a string, or (when
-// `$head-trail-mark` is set) none. `$head-trail-mark` is a mask image (a
-// `url(...)`, a gradient) drawn in the muted ink, an icon in place of the
-// character.
-$head-trail-separator: "\203A" !default;
-$head-trail-mark: null !default;
-$head-trail-mark-size: 1em !default;
-$card-button-fill: var(--surface) !default;
+
+//// Space
+/// The smallest gap (2px).
 $space-0: 0.125rem !default;
+/// A hairline: edges and rules.
 $space-px: 1px !default;
+/// A space step.
 $space-1: 0.25rem !default;
+/// A space step.
 $space-2: 0.5rem !default;
+/// A space step.
 $space-3: 0.75rem !default;
+/// A space step.
 $space-4: 1rem !default;
+/// A space step.
 $space-5: 1.25rem !default;
+/// A space step.
 $space-6: 1.5rem !default;
+/// A space step.
 $space-7: 2rem !default;
+/// A space step.
 $space-8: 2.5rem !default;
+/// The largest space step.
 $space-9: 3rem !default;
+
+//// Radii
+/// The corners of check boxes and other small marks.
 $radius-xs: 4px !default;
+/// The corners of controls.
 $radius-sm: 8px !default;
+/// The corners of bars and panels between controls and cards.
 $radius-md: 10px !default;
+/// The corners of cards, panels and dialogs.
 $radius-lg: 16px !default;
+/// Fully round ends.
 $radius-pill: 999px !default;
+/// The gap between a rounded container and the rounded items in it.
 $nest-inset: var(--space-1) !default;
+
+//// Sizes
+/// The height of every field, button and picker button.
 $control-height: 2.25rem !default;
+/// A small control's height, for dense places.
 $control-height-small: 1.75rem !default;
+/// The height of a mark beside text: an icon or a badge.
 $mark-height: 1.5rem !default;
+/// A touch target's height.
 $touch-height: 2.75rem !default;
+/// A status dot's size.
 $dot-size: 0.5rem !default;
+/// A corner badge's height.
 $corner-size: 1.125rem !default;
-// A pill's text: its tone mixed toward the app's text, so it reads at 4.5:1
-// on the pill's own tint of that tone.
-$pill-ink: color-mix(in srgb, var(--tone) 70%, var(--text)) !default;
-// A pill button's text on hover, mixed further toward the app's text, so it
-// reads at 4.5:1 on the hover's deeper tint.
-$pill-button-hover-ink: color-mix(in srgb, var(--tone) 45%, var(--text)) !default;
-// A badge's height and the ink of its neutral tone, the edge-and-fill tint a
-// toned badge takes (`null`: none; a percentage fills it with its tone and
-// tints its edge), and a count's height and inline padding.
-$badge-height: var(--mark-height) !default;
-$badge-neutral-tone: var(--muted) !default;
-$badge-tint: null !default;
-$corner-transform: translate(50%, -50%) !default;
-$count-height: var(--mark-height) !default;
-$count-padding: var(--space-2) !default;
+/// The box of one of sockel's icons, whatever icon fills it.
 $glyph-size: 1em !default;
-// The glyph box below the phone breakpoint (`null`: as above it).
+/// The icon box below the phone breakpoint (`null`: as above it).
 $glyph-phone-size: null !default;
-$swatch-size: 1.25rem !default;
-$color-select-width: 10rem !default;
-$skeleton-duration: 1.4s !default;
+/// A checkbox's box.
 $check-size: 1.25rem !default;
-$switch-width: 2.5rem !default;
-$switch-height: 1.5rem !default;
-$switch-fill: var(--surface) !default;
-$switch-on-thumb: var(--on-accent) !default;
-$switch-thumb-inset: null !default;
-$choice-width: 6rem !default;
-// A choice's look: the group's height, ground, radius and inset, an
-// option's inline padding, ink and font size (`null`: inherited), the rule
-// between options (`null`: none), the hover fill and ink (`null`: as at
-// rest), the selected option's fill and ink, and the breakpoint below which
-// a `.sockel-stack-narrow` choice is stacked.
-$choice-height: var(--control-height) !default;
-// A choice's option columns: `1fr` all as wide as the widest, `auto` each
-// its own width.
-$choice-columns: 1fr !default;
-// A choice's `align-self` in a flex or grid parent (`null`: unset), at no
-// specificity, so a class (`.sockel-self-start`) wins; and the gap between an
-// option's icon and label.
-$choice-align-self: null !default;
-$choice-gap: var(--space-2) !default;
-// An icon-only option's least width, its padding none (`null`: its icon
-// and the padding).
-$choice-icon-width: null !default;
-$choice-fill: var(--surface) !default;
-$choice-radius: var(--radius-md) !default;
-$choice-inset: var(--nest-inset) !default;
-$choice-padding: var(--space-3) !default;
-$choice-ink: var(--text) !default;
-$choice-font-size: null !default;
-$choice-divider: null !default;
-$choice-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
-$choice-hover-ink: null !default;
-// The group's border while one of its options has the focus (`null`: as
-// at rest).
-$choice-focus-edge: null !default;
-$choice-selected-fill: var(--accent) !default;
-$choice-selected-ink: var(--on-accent) !default;
-$choice-stack-breakpoint: "phone" !default;
-// A tab's icon-to-label gap, and whether its icon stays below the phone
-// breakpoint.
-$tab-gap: var(--space-2) !default;
-$tab-phone-icons: false !default;
-// A stacked tab bar's icon size and its icon-to-label gap.
-$tab-bar-icon-size: var(--text-xl) !default;
-$tab-bar-gap: var(--space-1) !default;
-// A chip's look (ChipToggle and Chip): its height (`auto`: as its content,
-// with `$chip-padding-block`), padding, gap, font size (`inherit`: its
-// parent's) and line height; how far a leading avatar sits from its start
-// edge and an icon (`null`: at the padding); and an on toggle's edge, fill
-// and ink.
-$chip-height: var(--control-height-small) !default;
-$chip-padding-block: 0 !default;
-$chip-padding: var(--space-3) !default;
-$chip-gap: var(--space-2) !default;
-$chip-font-size: var(--text-sm) !default;
-$chip-line-height: 1 !default;
-$chip-media-inset: var(--space-1) !default;
-$chip-icon-inset: null !default;
-$chip-on-edge: var(--accent) !default;
-$chip-on-fill: var(--accent) !default;
-$chip-on-ink: var(--on-accent) !default;
-// The size of an item chip's remove cross (`null`: the glyph's own).
-$chip-remove-glyph-size: null !default;
-$filter-width: 10.5rem !default;
-$picker-rows: 6 !default;
-$picker-popup-width: var(--menu-width-wide) !default;
-$field-label-width: 12rem !default;
-$field-message-line: 1rem !default;
-$field-error-lines: 1 !default;
-$card-grid-min: 15rem !default;
-$card-grid-wide: 18rem !default;
-$card-grid-narrow: 10.5rem !default;
-$card-grid-narrow-phone: 9rem !default;
-$table-max-height: 24rem !default;
-$drop-min-height: var(--touch-height) !default;
-$drop-tint: 12% !default;
-$drop-tint-over: 28% !default;
-// A drop zone's overlay: how far it reaches past the zone's edge (a
-// negative inset draws it outside); `$drop-edge-width`, when set, has the
-// overlay draw the zone's edge at that width in place of the zone's own
-// one-pixel border, so the zone takes no border at all.
-$drop-overlay-inset: 0 !default;
-$drop-edge-width: null !default;
-// A tall zone's (`tall`) label: kept this far inside the viewport's top
-// and bottom while the zone is taller than the screen.
-$drop-tall-label-offset: 40vh !default;
-// A duration: the busy label pulses at it (`null`: it holds still).
-$drop-busy-pulse: null !default;
-$avatar-sm: 1.75rem !default;
-$avatar-md: 2.5rem !default;
-$avatar-lg: 3.5rem !default;
-$avatar-xl: 7rem !default;
+
+//// Page
+/// The width of a workspace page's column.
 $page-workspace: 64rem !default;
+/// The width of a reading page's column.
 $page-reading: 40rem !default;
+/// The widest page column.
 $page-wide: 90rem !default;
+/// The space at a page's sides.
 $page-gutter: var(--space-8) !default;
+
+//// Layout
+/// A toolbar's gap.
+$toolbar-gap: var(--space-1) !default;
+
+//// Focus ring
+/// The focus ring's colour.
 $focus-ring-color: var(--accent) !default;
+/// The focus ring's width.
 $focus-ring-width: 2px !default;
+/// The focus ring's distance from its control.
 $focus-ring-offset: 2px !default;
+
+//// Layers
+/// The z-index of sticky heads and bars.
 $layer-sticky: 10 !default;
+/// The overlay host's own z-index (`auto`: no stacking context); raise it above an app's own overlays.
 $layer-host: auto !default;
+/// The z-index of popovers, menus, lists and dialogs; the one opened later is on top.
 $layer-overlay: 100 !default;
-// Kept so a `with()` config that sets it still compiles; nothing reads it.
+/// Unused: dialogs sit at `$layer-overlay`. Kept so a configuration that sets it still compiles.
 $layer-dialog: 200 !default;
+/// The z-index of toasts.
 $layer-toast: 300 !default;
+/// The z-index of tooltips.
 $layer-tooltip: 400 !default;
-$popover-max-width: 22rem !default;
-$popover-sheet-height: 75dvh !default;
-$dialog-width: 32rem !default;
-$dialog-width-wide: 48rem !default;
-$dialog-min-height: 10rem !default;
-$dialog-height-tall: 40rem !default;
-$dialog-top: 8dvh !default;
-$dialog-sheet-height: 85dvh !default;
-$tooltip-max-width: 24rem !default;
-$toast-max-width: 28rem !default;
-$menu-width: 12rem !default;
-$menu-width-wide: 16rem !default;
-$menu-width-wider: 20rem !default;
-$menu-width-panel: 34rem !default;
-$seam-grip: var(--space-3) !default;
-$seam-min: 8rem !default;
-$code-font: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace !default;
-$code-text: var(--text-sm) !default;
-$code-line-height: 1.6 !default;
-$code-tab-size: 4 !default;
-// The hues are mixed toward the app's text, as the status hues are, so they
-// keep their contrast in a light and a dark scheme alike.
-$code-keyword: color-mix(in srgb, #b4237a 65%, var(--text)) !default;
-$code-name: var(--text) !default;
-$code-member: color-mix(in srgb, #6b45b8 65%, var(--text)) !default;
-$code-type: color-mix(in srgb, #a05a00 65%, var(--text)) !default;
-$code-function: color-mix(in srgb, #0b5cad 65%, var(--text)) !default;
-$code-number: color-mix(in srgb, #00838f 70%, var(--text)) !default;
-$code-string: color-mix(in srgb, #2f8a4f 70%, var(--text)) !default;
-$code-comment: var(--muted) !default;
-$code-operator: color-mix(in srgb, var(--accent) 45%, var(--muted)) !default;
-$code-punctuation: var(--muted) !default;
-// The status hues are mixed toward the app's text, so they keep their
-// contrast on its background in a light and a dark scheme alike.
-$danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
-$success: color-mix(in srgb, #12a150 65%, var(--text)) !default;
-$warning: color-mix(in srgb, #dc8a00 70%, var(--text)) !default;
-$on-accent: var(--bg) !default;
-$surface-raised: var(--surface) !default;
-$scrim: rgb(0 0 0 / 0.45) !default;
-$field-border: var(--border) !default;
-$field-bg: var(--surface) !default;
-$card-border: var(--border) !default;
-$card-border-width: var(--space-px) !default;
-$panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
-$panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
-$panel-border: var(--border) !default;
-$panel-tint-text: var(--text) !default;
-$menu-item-icon-ink: currentColor !default;
-$panel-text: 1em !default;
-$panel-space-after: 0 !default;
-$panel-tint-space-after: var(--panel-space-after) !default;
-$panel-tint-radius: var(--radius-pill) !default;
-$band-chrome-ground: var(--surface) !default;
-$band-chrome-gap: $toolbar-gap !default;
-$band-search-text: var(--text-sm) !default;
-$action-overlay-radius: var(--radius-sm) !default;
-$action-overlay-padding: var(--space-3) var(--space-2) !default;
-// The breakpoint `phone-only` and `desktop-only` switch at.
+
+//// Breakpoints
+/// Where `phone-only` and `desktop-only` switch.
 $visibility-breakpoint: "phone" !default;
-// The breakpoint below which a popover is a sheet from the bottom.
+/// Below it, a popover is a sheet from the bottom.
 $sheet-breakpoint: "phone" !default;
-// The breakpoints, of their own width, below which an AppShell's navigation
-// is a bar at the bottom and a SplitView shows one pane.
+/// Below it (the shell's own width), an AppShell's navigation is a bar at the bottom.
 $app-shell-breakpoint: "phone" !default;
+/// Below it (the view's own width), a SplitView shows one pane.
 $split-view-breakpoint: "tablet" !default;
-// The breakpoint, of their own width, below which Lanes snap one at a time.
+/// Below it (their own width), Lanes snap one at a time.
 $lanes-breakpoint: "phone" !default;
 
-// A text field's edge on hover and while focused (`null`: as at rest), its
-// focus ring's offset (`null`: `--focus-ring-offset`; a negative one draws
-// the ring over the edge), its inline padding, its text size (`null`:
-// inherited) and its height below the phone breakpoint (`null`: as above).
-$input-hover-edge: var(--accent) !default;
-$input-focus-edge: null !default;
-$input-ring-offset: null !default;
-$input-padding-inline: var(--space-2) !default;
-$input-text: null !default;
-$input-phone-height: null !default;
+//// Colours
+/// The danger tone, mixed toward `--text` so it keeps its contrast in light and dark schemes.
+$danger: color-mix(in srgb, #d92d20 70%, var(--text)) !default;
+/// The success tone, mixed toward `--text`.
+$success: color-mix(in srgb, #12a150 65%, var(--text)) !default;
+/// The warning tone, mixed toward `--text`.
+$warning: color-mix(in srgb, #dc8a00 70%, var(--text)) !default;
+/// Text and icons on an `--accent` fill.
+$on-accent: var(--bg) !default;
+/// The ground of what floats: menus, lists, popovers.
+$surface-raised: var(--surface) !default;
+/// The shade behind a dialog or a sheet.
+$scrim: rgb(0 0 0 / 0.45) !default;
+/// A field's edge.
+$field-border: var(--border) !default;
+/// A field's ground.
+$field-bg: var(--surface) !default;
+/// A card's edge.
+$card-border: var(--border) !default;
+/// A card's edge's width (`0`: no frame).
+$card-border-width: var(--space-px) !default;
+/// A menu row's icon colour.
+$menu-item-icon-ink: currentColor !default;
 
-// Optional parts an app leaves out of its CSS, by name (README, "Leaving
-// parts out"): the modifiers, variants and tokens of components it never
-// renders. Empty, every part is emitted.
+//// Actions
+/// The corners of an action row laid over a row's end; a rounded row gives it its end corners.
+$action-overlay-radius: var(--radius-sm) !default;
+/// That overlay row's start and end padding.
+$action-overlay-padding: var(--space-3) var(--space-2) !default;
+
+//// Badges and pills
+/// A badge's height.
+$badge-height: var(--mark-height) !default;
+/// The ink of a neutral badge.
+$badge-neutral-tone: var(--muted) !default;
+/// How much of its tone a toned, unfilled badge is filled with and its edge tinted by (`null`: no fill, a neutral edge).
+$badge-tint: null !default;
+/// A pill's text: its tone mixed toward `--text`, so it reads at 4.5:1 on the pill's tint.
+$pill-ink: color-mix(in srgb, var(--tone) 70%, var(--text)) !default;
+/// A pill button's text on hover, mixed further toward `--text` for the deeper tint.
+$pill-button-hover-ink: color-mix(in srgb, var(--tone) 45%, var(--text)) !default;
+/// How a corner badge sits on its parent's corner (`none`: inside it).
+$corner-transform: translate(50%, -50%) !default;
+/// A count's height.
+$count-height: var(--mark-height) !default;
+/// A count's inline padding, which its least width includes.
+$count-padding: var(--space-2) !default;
+
+//// Bands
+/// A chrome band's ground.
+$band-chrome-ground: var(--surface) !default;
+/// A chrome band's gap.
+$band-chrome-gap: $toolbar-gap !default;
+/// A search band's type size.
+$band-search-text: var(--text-sm) !default;
+
+//// Buttons
+/// A button's side padding.
+$button-padding: var(--space-3) !default;
+/// A small button's side padding.
+$button-padding-small: var(--space-2) !default;
+/// A primary button's font weight (`null`: inherited).
+$button-primary-weight: null !default;
+/// A button's corners.
+$button-radius: var(--radius-inner, var(--radius-sm)) !default;
+/// The gap between what an app's markup puts straight in a button (`null`: none).
+$button-gap: null !default;
+/// The colour laid over a button while it is pressed (`null`: none).
+$button-press-shade: null !default;
+/// A button's transition (`null`: none).
+$button-transition: null !default;
+/// Per variant (`secondary`, `primary`, `ghost`, `quiet`, `danger`, `ghost-danger`, `success`), a map of any of `fill`, `ink`, `edge`, `hover-edge`, `hover-fill`, `hover-ink`, `pressed-fill`, `pressed-ink`, `pressed-edge`; a variant falls back on the plain button's.
+$button-colours: () !default;
+/// A button's type size (`null`: its parent's).
+$button-text: null !default;
+/// A button's line height (`inherit` suits labels with descenders in a clipped part).
+$button-line-height: 1 !default;
+/// A small button's type size.
+$button-text-small: var(--text-sm) !default;
+/// The gap between a button's icon and label.
+$button-content-gap: var(--space-2) !default;
+/// A leading icon's inline-start margin beside a label; a negative one sets it into the padding (`null`: none).
+$button-icon-offset: null !default;
+/// Every size's height but touch below the phone breakpoint, a small button there taking the regular type (`null`: its size's).
+$button-phone-height: null !default;
+/// A disabled button's cursor.
+$button-disabled-cursor: not-allowed !default;
+/// A button's least width, under `--button-min-width` (`auto`: its content's).
+$button-min-width: auto !default;
+/// A small button's least width (`var(--button-height)`: at least a square; `auto`: its content's).
+$button-small-min-width: var(--button-height) !default;
+/// The justify-content a switch, cross, clear, picker face, menu item or step takes from an app's blanket button rule (`null`: none set).
+$button-part-justify: null !default;
+/// Their least width, likewise (`null`: none set).
+$button-part-min-width: null !default;
+/// A switch's and a cross's corners, likewise (`null`: none set).
+$button-part-radius: null !default;
+
+//// Cards
+/// A card's padding.
+$card-padding: var(--space-4) !default;
+/// A card's padding below the phone breakpoint (`null`: `$card-padding`).
+$card-padding-phone: null !default;
+/// The fill of a secondary button on a card.
+$card-button-fill: var(--surface) !default;
+/// A CardGrid's least column width.
+$card-grid-min: 15rem !default;
+/// A `wide` CardGrid's least column width.
+$card-grid-wide: 18rem !default;
+/// A `narrow` CardGrid's least column width.
+$card-grid-narrow: 10.5rem !default;
+/// A `narrow` CardGrid's least column width on a phone.
+$card-grid-narrow-phone: 9rem !default;
+
+//// Checkbox and switch
+/// A switch's track width.
+$switch-width: 2.5rem !default;
+/// A switch's track height.
+$switch-height: 1.5rem !default;
+/// A switch's track fill while off.
+$switch-fill: var(--surface) !default;
+/// A switch's thumb colour while on.
+$switch-on-thumb: var(--on-accent) !default;
+/// The thumb's distance from the track's outer edge (`null`: two `--space-px`).
+$switch-thumb-inset: null !default;
+
+//// Chips
+/// A chip's height (`auto`: its content's, with `$chip-padding-block`).
+$chip-height: var(--control-height-small) !default;
+/// A chip's block padding.
+$chip-padding-block: 0 !default;
+/// A chip's inline padding.
+$chip-padding: var(--space-3) !default;
+/// The gap between a chip's parts.
+$chip-gap: var(--space-2) !default;
+/// A chip's type size (`inherit`: its parent's).
+$chip-font-size: var(--text-sm) !default;
+/// A chip's line height.
+$chip-line-height: 1 !default;
+/// How far a chip's avatar sits from its start edge.
+$chip-media-inset: var(--space-1) !default;
+/// How far a chip's icon sits from its start edge (`null`: at the padding).
+$chip-icon-inset: null !default;
+/// An on toggle chip's edge.
+$chip-on-edge: var(--accent) !default;
+/// An on toggle chip's fill.
+$chip-on-fill: var(--accent) !default;
+/// An on toggle chip's ink.
+$chip-on-ink: var(--on-accent) !default;
+/// The size of an item chip's remove cross (`null`: the glyph's own).
+$chip-remove-glyph-size: null !default;
+
+//// Choice
+/// A choice option's least width.
+$choice-width: 6rem !default;
+/// A choice's height, and a stacked option's least.
+$choice-height: var(--control-height) !default;
+/// The options' columns: `1fr` all as wide as the widest, `auto` each its own.
+$choice-columns: 1fr !default;
+/// The group's `align-self`, at no specificity so a class wins (`null`: unset).
+$choice-align-self: null !default;
+/// The gap between an option's icon and label.
+$choice-gap: var(--space-2) !default;
+/// An icon-only option's least width, unpadded (`null`: its icon and padding).
+$choice-icon-width: null !default;
+/// A choice's ground.
+$choice-fill: var(--surface) !default;
+/// A choice's corners.
+$choice-radius: var(--radius-md) !default;
+/// The inset between a choice's edge and its options.
+$choice-inset: var(--nest-inset) !default;
+/// An option's inline padding.
+$choice-padding: var(--space-3) !default;
+/// An option's ink.
+$choice-ink: var(--text) !default;
+/// An option's type size (`null`: inherited).
+$choice-font-size: null !default;
+/// The rule between options (`null`: none).
+$choice-divider: null !default;
+/// An option's fill on hover.
+$choice-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
+/// An option's ink on hover (`null`: as at rest).
+$choice-hover-ink: null !default;
+/// The group's edge while it holds the focus (`null`: as at rest).
+$choice-focus-edge: null !default;
+/// The selected option's fill.
+$choice-selected-fill: var(--accent) !default;
+/// The selected option's ink.
+$choice-selected-ink: var(--on-accent) !default;
+/// Where a `Narrow` choice stacks its options.
+$choice-stack-breakpoint: "phone" !default;
+
+//// Code
+/// A code editor's and snippet's font.
+$code-font: ui-monospace, "SF Mono", "Cascadia Code", Menlo, Consolas, monospace !default;
+/// Their type size.
+$code-text: var(--text-sm) !default;
+/// Their line height.
+$code-line-height: 1.6 !default;
+/// Their tab width.
+$code-tab-size: 4 !default;
+/// Highlighting: keywords (the hues are mixed toward `--text` to keep contrast).
+$code-keyword: color-mix(in srgb, #b4237a 65%, var(--text)) !default;
+/// Highlighting: names.
+$code-name: var(--text) !default;
+/// Highlighting: members.
+$code-member: color-mix(in srgb, #6b45b8 65%, var(--text)) !default;
+/// Highlighting: types.
+$code-type: color-mix(in srgb, #a05a00 65%, var(--text)) !default;
+/// Highlighting: functions.
+$code-function: color-mix(in srgb, #0b5cad 65%, var(--text)) !default;
+/// Highlighting: numbers.
+$code-number: color-mix(in srgb, #00838f 70%, var(--text)) !default;
+/// Highlighting: strings.
+$code-string: color-mix(in srgb, #2f8a4f 70%, var(--text)) !default;
+/// Highlighting: comments.
+$code-comment: var(--muted) !default;
+/// Highlighting: operators.
+$code-operator: color-mix(in srgb, var(--accent) 45%, var(--muted)) !default;
+/// Highlighting: punctuation.
+$code-punctuation: var(--muted) !default;
+
+//// Colour select
+/// A colour swatch's box.
+$swatch-size: 1.25rem !default;
+/// A ColorSelect face's width.
+$color-select-width: 10rem !default;
+
+//// Confirm
+/// The room between what a confirm says and its buttons.
+$confirm-gap: var(--space-3) !default;
+/// A confirm's body `scrollbar-gutter` (`auto`: only where it scrolls; `stable`: the popover's).
+$confirm-scroll-gutter: auto !default;
+
+//// Dialog
+/// A dialog's width.
+$dialog-width: 32rem !default;
+/// A wide dialog's width.
+$dialog-width-wide: 48rem !default;
+/// A dialog's least height.
+$dialog-min-height: 10rem !default;
+/// A tall dialog's height.
+$dialog-height-tall: 40rem !default;
+/// A dialog's distance from the window's top.
+$dialog-top: 8dvh !default;
+/// A dialog sheet's tallest.
+$dialog-sheet-height: 85dvh !default;
+/// A dialog's padding (head start, body sides and bottom, foot sides), as `--dialog-pad`.
+$dialog-padding: var(--space-5) !default;
+/// That padding on a sheet (`null`: `$dialog-padding`).
+$dialog-padding-phone: null !default;
+/// The gap between the body's children (`null`: a plain block; set, paragraphs lose their margins).
+$dialog-body-gap: null !default;
+/// A dialog's shadow.
+$dialog-shadow: var(--shadow-1) !default;
+/// The head's padding.
+$dialog-head-padding: var(--space-3) var(--space-3) 0 var(--dialog-pad) !default;
+/// The rule under the head, as its `border-bottom` (`null`: none).
+$dialog-head-rule: null !default;
+/// The body's padding.
+$dialog-body-padding: var(--space-3) var(--dialog-pad) var(--dialog-pad) !default;
+/// The title's size (`null`: a section head's).
+$dialog-title-size: null !default;
+/// The title's weight (`null`: a section head's).
+$dialog-title-weight: null !default;
+/// Whether a dialog is centred in the window instead of hung from `--dialog-top`.
+$dialog-centred: false !default;
+/// A dialog's tallest above `$sheet-breakpoint` (`null`: the window's room).
+$dialog-max-height: null !default;
+/// The body's `scrollbar-gutter` (`stable`: text does not rewrap once it scrolls).
+$dialog-scroll-gutter: stable !default;
+/// The edges a sheet keeps (`all`: its sides too; `top`: only its top).
+$dialog-sheet-edge: all !default;
+
+//// Disclosure
+/// A Disclosure's row height (`var(--touch-height)` gives a finger room).
+$disclosure-row-height: var(--control-height) !default;
+/// Its title's ink (`null`: the text's).
+$disclosure-title-ink: null !default;
+
+//// Drop zone
+/// A drop zone's least height.
+$drop-min-height: var(--touch-height) !default;
+/// The strength of its overlay.
+$drop-tint: 12% !default;
+/// The strength of its overlay while something is dragged over it.
+$drop-tint-over: 28% !default;
+/// How far the overlay reaches past the zone's edge (negative: outside it).
+$drop-overlay-inset: 0 !default;
+/// When set, the overlay draws the zone's edge at this width in place of its border (`null`: the zone's border).
+$drop-edge-width: null !default;
+/// How far a `tall` zone's label stays inside the viewport's top and bottom.
+$drop-tall-label-offset: 40vh !default;
+/// The duration the busy label pulses at (`null`: it holds still).
+$drop-busy-pulse: null !default;
+
+//// Fields
+/// The label column of wide-label FormRows.
+$field-label-width: 12rem !default;
+/// The line a field's hint and error are set on.
+$field-message-line: 1rem !default;
+/// How many lines a field's reserved error line holds.
+$field-error-lines: 1 !default;
+
+//// Heads
+/// A section head's title size.
+$section-title-size: var(--text-lg) !default;
+/// A page head's title size (`null`: the browser's heading size).
+$page-title-size: null !default;
+/// The cross-axis alignment of a crumb head's back link, `/` and title.
+$page-head-crumbs-align: baseline !default;
+/// The mark after each crumb in a head's trail.
+$head-trail-separator: "\203A" !default;
+/// A mask image drawn in the muted ink in place of the separator (`null`: the separator).
+$head-trail-mark: null !default;
+/// That mark's size.
+$head-trail-mark-size: 1em !default;
+
+//// Inputs
+/// A text field's edge on hover.
+$input-hover-edge: var(--accent) !default;
+/// Its edge while focused (`null`: as at rest).
+$input-focus-edge: null !default;
+/// Its focus ring's offset (`null`: `--focus-ring-offset`; negative draws over the edge).
+$input-ring-offset: null !default;
+/// Its inline padding.
+$input-padding-inline: var(--space-2) !default;
+/// Its type size (`null`: inherited).
+$input-text: null !default;
+/// Its height below the phone breakpoint (`null`: as above it).
+$input-phone-height: null !default;
+/// A field's clear and action button's least height (`null`: none).
+$input-clear-min-height: null !default;
+/// Their opacity when disabled (`null`: none).
+$input-clear-disabled-opacity: null !default;
+/// Their cursor when disabled (`null`: none).
+$input-clear-disabled-cursor: null !default;
+
+//// Listbox and select
+/// A listbox's widest, a Select's list included.
+$listbox-max-width: var(--popover-max-width) !default;
+/// A listbox's active row's fill.
+$listbox-active-fill: color-mix(in srgb, var(--text) 7%, transparent) !default;
+/// A listbox's tallest, within the room beside its opener (`null`: that room).
+$listbox-max-height: null !default;
+/// A listbox's shadow (`null`: `--shadow-1`).
+$listbox-shadow: null !default;
+/// Its group headings' `text-transform` (`null`: as written).
+$listbox-group-name-transform: null !default;
+/// Its group headings' `letter-spacing` (`null`: none).
+$listbox-group-name-letter-spacing: null !default;
+/// A Select's rows in its phone sheet (`null`: `--control-height`).
+$select-sheet-row-height: null !default;
+
+//// Media
+/// A small avatar's size.
+$avatar-sm: 1.75rem !default;
+/// A medium avatar's size.
+$avatar-md: 2.5rem !default;
+/// A large avatar's size.
+$avatar-lg: 3.5rem !default;
+/// An extra large avatar's size.
+$avatar-xl: 7rem !default;
+
+//// Menus
+/// A menu's least width.
+$menu-width: 12rem !default;
+/// A wide menu's least width.
+$menu-width-wide: 16rem !default;
+/// A wider menu's least width.
+$menu-width-wider: 20rem !default;
+/// A panel menu's width.
+$menu-width-panel: 34rem !default;
+/// A menu's edge colour (`null`: `--border`).
+$menu-edge: null !default;
+/// A menu's ground (`null`: `--surface-raised`).
+$menu-ground: null !default;
+/// A menu's shadow (`null`: `--shadow-1`).
+$menu-shadow: null !default;
+/// A menu's padding (`null`: `--nest-inset`).
+$menu-padding: null !default;
+/// A menu's type size (`null`: inherited).
+$menu-text: null !default;
+/// A menu's `scrollbar-gutter` (`null`: `stable`).
+$menu-scroll-gutter: null !default;
+/// A menu's corners (`null`: `--radius-md`).
+$menu-radius: null !default;
+/// A row's least height (`null`: `--control-height`).
+$menu-item-height: null !default;
+/// A row's padding (`null`: `var(--space-1) var(--space-3)`).
+$menu-item-padding: null !default;
+/// A row's gap (`null`: `var(--space-2)`).
+$menu-item-gap: null !default;
+/// A row's corners (`null`: the nested radius).
+$menu-item-radius: null !default;
+/// A row's hover and focus fill (`null`: 7% of `--text`).
+$menu-item-hover-fill: null !default;
+/// `outline`: a row reserves no border and draws its focus edge as an inset outline (`null`: a reserved border).
+$menu-item-edge: null !default;
+/// A row's least height below the phone breakpoint (`null`: as above it).
+$menu-item-phone-height: null !default;
+/// A check's or radio's mark (`null`: `--accent`).
+$menu-item-mark-ink: null !default;
+/// A separator's block margin (`null`: `var(--space-1)`).
+$menu-separator-margin: null !default;
+/// A separator's colour (`null`: `--border`).
+$menu-separator-edge: null !default;
+/// A heading's padding (`null`: its own).
+$menu-heading-padding: null !default;
+/// A heading's type size (`null`: `--text-xs`).
+$menu-heading-text: null !default;
+/// A heading's ink (`null`: `--muted`).
+$menu-heading-ink: null !default;
+/// A heading's weight (`null`: 600).
+$menu-heading-weight: null !default;
+/// A note's padding (`null`: its own).
+$menu-note-padding: null !default;
+/// A note's type size (`null`: `--text-sm`).
+$menu-note-text: null !default;
+/// A note's ink (`null`: `--muted`).
+$menu-note-ink: null !default;
+
+//// Notices
+/// A Notice's padding.
+$notice-padding: var(--space-2) var(--space-3) !default;
+/// The gap between its parts.
+$notice-gap: var(--space-2) !default;
+/// Its corners.
+$notice-radius: var(--radius-md) !default;
+/// Its fill.
+$notice-fill: color-mix(in srgb, var(--tone) 10%, var(--surface)) !default;
+/// Its edge colour.
+$notice-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
+/// How its parts line up on the cross axis.
+$notice-align: flex-start !default;
+/// Its least height: one small control plus padding and edge (`0` lets the text set it).
+$notice-min-height: calc(var(--control-height-small) + 2 * var(--space-2) + 2 * var(--space-px)) !default;
+/// Its text's padding above and below, centring one line in a small control (`0` lets the text set it).
+$notice-body-padding: calc((var(--control-height-small) - 1lh) / 2) !default;
+/// Its text's line height.
+$notice-line-height: 1.4 !default;
+/// Its icon's height.
+$notice-icon-height: var(--control-height-small) !default;
+/// Its icon's ink.
+$notice-icon-ink: var(--tone) !default;
+/// A danger notice's text ink (`null`: the text's).
+$notice-danger-ink: null !default;
+/// An EmptyState's padding.
+$empty-state-padding: var(--space-7) var(--space-4) !default;
+/// Its border, such as `1px dashed var(--border)` (`null`: none).
+$empty-state-edge: null !default;
+/// Its corners (`null`: none).
+$empty-state-radius: null !default;
+/// A compact one's corners (`null`: none).
+$empty-state-compact-radius: null !default;
+/// Its icon's size.
+$empty-state-icon-size: var(--text-2xl) !default;
+/// Its icon's fill (`null`: none).
+$empty-state-icon-fill: null !default;
+/// Its icon's ink (`null`: the text's).
+$empty-state-icon-ink: null !default;
+/// Its icon's box, width and height (`null`: the icon's size).
+$empty-state-icon-box: null !default;
+/// Its icon box's corners (`null`: none).
+$empty-state-icon-radius: null !default;
+/// The gap under its icon (`null`: none).
+$empty-state-icon-gap: null !default;
+/// Its title's size.
+$empty-state-title-size: var(--text-md) !default;
+/// Its title's ink.
+$empty-state-title-ink: var(--text) !default;
+/// Its title's weight.
+$empty-state-title-weight: 600 !default;
+/// Its hint's widest (`null`: none).
+$empty-state-hint-max-width: null !default;
+/// A compact one's title size (`null`: as the regular one).
+$empty-state-compact-title-size: null !default;
+/// A compact one's title weight (`null`: as the regular one).
+$empty-state-compact-title-weight: null !default;
+/// A compact one's title ink (`null`: as the regular one).
+$empty-state-compact-title-ink: null !default;
+/// A compact one's icon box (`null`: as the regular one).
+$empty-state-compact-icon-box: null !default;
+/// A compact one's icon fill (`null`: as the regular one).
+$empty-state-compact-icon-fill: null !default;
+/// A compact one's icon ink (`null`: as the regular one).
+$empty-state-compact-icon-ink: null !default;
+/// A compact one's justify-content (`null`: as the regular one).
+$empty-state-compact-justify: null !default;
+/// Whether a compact one's actions may wrap (`wrap`, clipped by its one-row height) or stay on the row (`nowrap`).
+$empty-state-compact-actions-wrap: wrap !default;
+/// An ErrorBox's padding.
+$error-box-padding: var(--space-4) !default;
+/// The gap between its parts.
+$error-box-gap: var(--space-2) !default;
+/// Its fill.
+$error-box-fill: color-mix(in srgb, var(--tone) 8%, var(--surface)) !default;
+/// Its edge colour.
+$error-box-edge: color-mix(in srgb, var(--tone) 45%, var(--border)) !default;
+/// Its shadow (`null`: none).
+$error-box-shadow: null !default;
+/// Its message's weight (`null`: inherited).
+$error-box-message-weight: null !default;
+/// Its cause's font.
+$error-box-cause-font: ui-monospace, monospace !default;
+/// Its cause's size.
+$error-box-cause-text: var(--text-xs) !default;
+/// The space under a flanked box's text (`null`: as above it, centring one line).
+$error-box-text-end: null !default;
+
+//// Pager
+/// A pager's gap, between its buttons.
+$pager-gap: var(--space-1) !default;
+/// A button's and a gap's height.
+$pager-button-height: var(--control-height) !default;
+/// The room either side of a button's number.
+$pager-button-padding: var(--space-2) !default;
+/// A button's corners.
+$pager-button-radius: var(--radius-sm) !default;
+/// A button's ink.
+$pager-button-ink: var(--text) !default;
+/// A button's type size (`null`: inherited).
+$pager-button-text: null !default;
+/// A button's fill on hover.
+$pager-button-hover-fill: color-mix(in srgb, var(--accent) 12%, transparent) !default;
+/// A button's ink on hover (`null`: as at rest).
+$pager-button-hover-ink: null !default;
+/// The current page's fill.
+$pager-current-fill: var(--accent) !default;
+/// The current page's ink.
+$pager-current-ink: var(--on-accent) !default;
+/// The current page's edge colour (`null`: the ordinary edge).
+$pager-current-edge: null !default;
+/// The chevrons' ink (`null`: the button's).
+$pager-step-ink: null !default;
+/// The controls' height below the phone breakpoint (`null`: as above it).
+$pager-phone-height: null !default;
+/// The room above the row (`null`: none).
+$pager-padding-top: null !default;
+/// The range text's size (`null`: inherited).
+$pager-range-text: null !default;
+/// A summary pager's padding, to line up with a list's rows (`null`: none).
+$pager-summary-padding: null !default;
+
+//// Panel
+/// A Panel's ground.
+$panel-ground: color-mix(in srgb, var(--text) 4%, var(--bg)) !default;
+/// A tint panel's ground.
+$panel-tint: color-mix(in srgb, var(--accent) 14%, transparent) !default;
+/// A panel's edge.
+$panel-border: var(--border) !default;
+/// A tint panel's text colour.
+$panel-tint-text: var(--text) !default;
+/// A panel's type size (`1em`: its parent's).
+$panel-text: 1em !default;
+/// The room a panel leaves under it.
+$panel-space-after: 0 !default;
+/// The room a tint panel leaves under it.
+$panel-tint-space-after: var(--panel-space-after) !default;
+/// A tint panel's corners.
+$panel-tint-radius: var(--radius-pill) !default;
+
+//// Pickers
+/// A list's filter button's width, whatever it says.
+$filter-width: 10.5rem !default;
+/// The rows a searching list's height holds, loading or loaded.
+$picker-rows: 6 !default;
+/// A Picker's or PickerMenu's list's least width; never measured from its text.
+$picker-popup-width: var(--menu-width-wide) !default;
+
+//// Popover
+/// A popover's widest.
+$popover-max-width: 22rem !default;
+/// A sheet's tallest.
+$popover-sheet-height: 75dvh !default;
+/// A popover's body padding, a hover card's too.
+$popover-padding: var(--space-3) !default;
+/// A popover's shadow, a hover card's too.
+$popover-shadow: var(--shadow-1) !default;
+/// A popover's corners.
+$popover-radius: var(--radius-md) !default;
+/// The edges its sheet keeps, as `$dialog-sheet-edge`.
+$popover-sheet-edge: all !default;
+/// Its body's `scrollbar-gutter` (`stable`: as wide scrolling or not).
+$popover-scroll-gutter: stable !default;
+
+//// Reorder
+/// A drag handle's square side.
+$drag-handle-size: var(--control-height-small) !default;
+/// Its side below the phone breakpoint (`null`: as above it).
+$drag-handle-phone-size: null !default;
+/// Its corners.
+$drag-handle-radius: var(--radius-xs) !default;
+/// Its hover fill.
+$drag-handle-hover-fill: color-mix(in srgb, var(--text) 6%, transparent) !default;
+/// A compact handle's side.
+$drag-handle-compact-size: 1rem !default;
+/// The opacity of a picked row where it lies while its lifted copy is carried.
+$reorder-carried-opacity: 0.5 !default;
+
+//// Rows
+/// A row's least height (`null`: none).
+$row-list-item-height: var(--control-height) !default;
+/// A row's padding.
+$row-list-item-padding: 0 var(--space-3) !default;
+/// The line a row reserves above itself for `--row-line` (`0`: none, and no lines in a divided list).
+$row-list-item-edge: var(--space-px) !default;
+/// A row's hover fill.
+$row-list-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
+/// Whether a name wraps anywhere instead of being cut to one line.
+$row-list-name-wrap: false !default;
+/// A row's main part's vertical padding.
+$row-list-main-padding: var(--space-1) !default;
+/// The gap between its lines (`null`: none).
+$row-list-main-gap: null !default;
+/// A name's least height (`null`: none).
+$row-list-name-height: null !default;
+/// A pick row's least height.
+$pick-row-height: var(--control-height) !default;
+/// Its padding.
+$pick-row-padding: 0 var(--space-3) !default;
+/// Its gap.
+$pick-row-gap: var(--space-3) !default;
+/// Its corners.
+$pick-row-radius: var(--radius-sm) !default;
+/// Its type size (`null`: inherited).
+$pick-row-text: null !default;
+/// Its hover fill.
+$pick-row-hover-fill: color-mix(in srgb, var(--text) 4%, transparent) !default;
+/// Its detail's ink.
+$pick-row-detail-ink: color-mix(in srgb, currentcolor 70%, transparent) !default;
+/// Its detail's size.
+$pick-row-detail-text: var(--text-sm) !default;
+/// A selection bar's ground (`null`: none).
+$selection-bar-ground: null !default;
+/// The rule above it.
+$selection-bar-rule: var(--space-px) solid var(--border) !default;
+/// Its padding.
+$selection-bar-padding: var(--space-2) 0 !default;
+/// Its least height: a control plus its padding and rule.
+$selection-bar-min-height: calc(var(--control-height) + 2 * var(--space-2) + var(--space-px)) !default;
+/// Its corners (`null`: none).
+$selection-bar-radius: null !default;
+/// Its outer margin (`null`: none).
+$selection-bar-margin: null !default;
+/// Its type size (`null`: inherited).
+$selection-bar-text: null !default;
+/// An `inset` bar's side padding.
+$selection-bar-inset-padding: var(--space-3) !default;
+/// An `inset` bar's margin (`null`: none).
+$selection-bar-inset-margin: null !default;
+/// Its count's ink (`null`: inherited).
+$selection-bar-count-ink: null !default;
+/// Its count's weight (`null`: inherited).
+$selection-bar-count-weight: null !default;
+/// Its count's start padding (`null`: none).
+$selection-bar-count-padding: null !default;
+/// Whether a count that does not fit wraps, growing the bar, instead of being cut.
+$selection-bar-count-wrap: false !default;
+
+//// Seam
+/// A Seam's grip width.
+$seam-grip: var(--space-3) !default;
+/// Each side's least size.
+$seam-min: 8rem !default;
+
+//// Skeleton
+/// The time a skeleton's shimmer takes to cross.
+$skeleton-duration: 1.4s !default;
+/// A skeleton's fill.
+$skeleton-fill: color-mix(in srgb, var(--text) 8%, var(--surface)) !default;
+/// A 1px line inside its edge (`null`: none).
+$skeleton-edge: null !default;
+/// Its corners.
+$skeleton-radius: var(--radius-sm) !default;
+/// A line's height.
+$skeleton-line-height: 1lh !default;
+/// The transparent inset that thins a line (`null`: a fifth of a line).
+$skeleton-line-inset: null !default;
+/// A block's height below the phone breakpoint (`null`: as above it).
+$skeleton-phone-height: null !default;
+
+//// Stepper
+/// A Stepper's number's weight (`null`: the field's).
+$stepper-number-weight: null !default;
+/// The number's ink at zero (`null`: as any other).
+$stepper-zero-ink: null !default;
+/// The number's weight at zero (`null`: as any other).
+$stepper-zero-weight: null !default;
+/// The touch size's number size (`null`: as the other sizes').
+$stepper-touch-number-size: null !default;
+/// The touch size's number weight (`null`: as the other sizes').
+$stepper-touch-number-weight: null !default;
+/// The touch size's button glyphs (`null`: as the other sizes').
+$stepper-touch-glyph-size: null !default;
+/// The box's edge (`null`: a field's).
+$stepper-edge: null !default;
+/// The box's ground (`null`: a field's).
+$stepper-ground: null !default;
+/// The box's shadow (`null`: none).
+$stepper-shadow: null !default;
+/// The buttons' width (`null`: the box's height, a square).
+$stepper-button-width: null !default;
+/// The buttons' ink on hover.
+$stepper-button-hover-ink: var(--accent) !default;
+/// The buttons' fill on hover (`null`: none).
+$stepper-button-hover-fill: null !default;
+/// Whether the buttons fill the box's ends, so a hover fill meets the edge.
+$stepper-button-ends: false !default;
+/// A line each side of the number (`null`: none).
+$stepper-divider: null !default;
+/// The number's padding.
+$stepper-number-padding: var(--space-2) !default;
+/// The box's edge on hover (`null`: a field's).
+$stepper-hover-edge: null !default;
+/// The box's edge while focused (`null`: a field's).
+$stepper-focus-edge: null !default;
+/// Whether the focus ring is drawn (`false`: the focus edge alone).
+$stepper-focus-ring: true !default;
+/// The box's height and the buttons' width on a coarse pointer (`null`: as on a fine one).
+$stepper-coarse-size: null !default;
+/// The box's type size (`null`: a field's; `inherit`: its container's).
+$stepper-text-size: null !default;
+/// The font style of a faint number and of the placeholder (`null`: upright).
+$stepper-faint-style: null !default;
+
+//// Table
+/// Where a table with a sticky head starts to scroll.
+$table-max-height: 24rem !default;
+
+//// Tabs
+/// A tab's icon-to-label gap.
+$tab-gap: var(--space-2) !default;
+/// Whether a tab's icon stays below the phone breakpoint.
+$tab-phone-icons: false !default;
+/// A stacked tab's icon size.
+$tab-bar-icon-size: var(--text-xl) !default;
+/// A stacked tab's icon-to-label gap.
+$tab-bar-gap: var(--space-1) !default;
+
+//// Toasts and tooltips
+/// A toast's widest.
+$toast-max-width: 28rem !default;
+/// A tooltip's widest.
+$tooltip-max-width: 24rem !default;
+
+//// Leaving parts out
+/// The optional parts an app leaves out of its CSS, by name (empty: every part is emitted).
 $omit: () !default;
 $-parts: (
     "badges.count", "badges.dot", "badges.pill", "badges.status",
@@ -786,9 +1015,7 @@ $-parts: (
     }
 }
 
-// The features of this build, as a map of enabled names (trug's
-// `pkg:sockel/features` `$features`): the parts below are left out while
-// none of their features is on. Null, they follow `$omit` alone.
+/// The build's enabled features, as trug's `pkg:sockel/features` gives them; a part a feature owns is left out while none of its features is on (`null`: `$omit` alone).
 $features: null !default;
 // The parts a feature owns, with the features that read them, as
 // sockel-build's FEATURE_PARTS.

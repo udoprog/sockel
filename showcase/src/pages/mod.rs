@@ -30,6 +30,7 @@ mod pickers;
 mod popover;
 mod property_list;
 mod quantities;
+mod reference;
 mod reorder;
 mod reorder_tree;
 mod rows;
@@ -140,7 +141,7 @@ const fn hold(part: &'static str, size: Size, across: Across) -> Hold {
 
 /// A page with no states for the probe to cycle.
 #[cfg(test)]
-const UNPROBED: &[&str] = &["intro", "styles", "translations"];
+const UNPROBED: &[&str] = &["intro", "reference", "styles", "translations"];
 
 /// Every page, in the navigation's order. A name sockel exports must be in
 /// some page's `covers`, which the test below checks.
@@ -2280,6 +2281,15 @@ pub const PAGES: &[Page] = &[
             Size::Box,
             Across::Only(&["Current", "disabled", "links", "icons", "focus", "click"]),
         )],
+    },
+    Page {
+        id: "reference",
+        title: "Configuration",
+        group: Group::Foundations,
+        about: "Every Sass variable sockel can be configured with, its default and what it sets, generated from style/_tokens.scss.",
+        covers: &[],
+        render: || html! { <reference::ReferencePage /> },
+        holds: &[],
     },
     Page {
         id: "styles",
