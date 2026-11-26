@@ -8,8 +8,8 @@ use std::str::CharIndices;
 use yew::prelude::*;
 
 use sockel::{
-    CodeEditor, CodeSpan, CodeToken, Completion, CompletionQuery, Completions, Diagnostic,
-    Severity, code_editor,
+    Button, ButtonSize, Cluster, CodeEditor, CodeSpan, CodeToken, Completion, CompletionQuery,
+    Completions, Diagnostic, Severity, code_editor, code_editor_insert,
 };
 
 use crate::class;
@@ -198,6 +198,7 @@ pub fn CodeEditorPage() -> Html {
     let completions = use_state(|| true);
     let readonly = use_state(|| false);
     let rows = use_state(|| 4u32);
+    let editor = use_node_ref();
 
     let controls = html! {
         <>
@@ -220,7 +221,8 @@ pub fn CodeEditorPage() -> Html {
             .expr_if(*diagnostics, "diagnostics", "diagnostics")
             .expr_if(*completions, "complete", "Some(complete)")
             .expr_if(*rows != 4, "rows", rows.to_string())
-            .flag("readonly", *readonly),
+            .flag("readonly", *readonly)
+            .expr("node_ref", "editor.clone()"),
     );
 
     let (spans, bound) = highlight(&text);
@@ -245,12 +247,31 @@ pub fn CodeEditorPage() -> Html {
         Callback::from(move |value: String| text.set(value))
     };
     let value = AttrValue::from((*text).clone());
+    // A press on a name puts it at the cursor, as a list of names beside
+    // the editor would.
+    let inserts = bound
+        .iter()
+        .map(String::as_str)
+        .chain(FUNCTIONS.iter().map(|(f, _)| *f))
+        .map(|name| {
+            let (editor, name) = (editor.clone(), name.to_owned());
+            let label = format!("Insert {name}");
+            let testid = format!("code-editor-insert-{name}");
+            let onclick = Callback::from(move |_: MouseEvent| {
+                code_editor_insert(&editor, &name);
+            });
+            html! {
+                <Button size={ButtonSize::Small} disabled={*readonly} {onclick} {testid}>{ label }</Button>
+            }
+        })
+        .collect::<Html>();
 
     html! {
         <Demo {controls} {code}>
             <CodeEditor {value} {on_input} label="Expression" spans={Rc::<[CodeSpan]>::from(spans)}
                 diagnostics={Rc::<[Diagnostic]>::from(found)} {complete}
-                rows={*rows} readonly={*readonly} testid="code-editor" />
+                rows={*rows} readonly={*readonly} testid="code-editor" node_ref={editor.clone()} />
+            <Cluster>{ inserts }</Cluster>
             <span class={class::CONTROL_LABEL}>
                 { format!(
                     "{} errors, {} warnings, {} notes. Tab and Shift+Tab indent and outdent, Enter keeps the indent, Ctrl+Space asks for completions; code_editor({invalid}) → \"{}\".",

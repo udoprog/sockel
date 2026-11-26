@@ -101,6 +101,10 @@ pub struct CodeEditorProps {
     pub class: Classes,
     #[prop_or_default]
     pub testid: Option<AttrValue>,
+    /// Set to the textarea, for [`code_editor_insert`]. The ref given on
+    /// the first render is the one kept.
+    #[prop_or_default]
+    pub node_ref: NodeRef,
 }
 
 /// A code editor: the text in a monospace textarea, highlighted by
@@ -115,7 +119,7 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     let field = use_field().unwrap_or_default();
     let ids = use_state(|| (next_id("code-editor-list"), next_id("code-editor-notes")));
     let (list_id, notes_id) = (ids.0.clone(), ids.1.clone());
-    let area = use_node_ref();
+    let area = (*use_state(|| props.node_ref.clone())).clone();
     let frame = use_node_ref();
     let anchor = use_node_ref();
     let list = use_node_ref();
@@ -702,6 +706,71 @@ fn keydown(area: &HtmlTextAreaElement, event: &KeyboardEvent) -> bool {
     true
 }
 
+/// Insert `text` into the [`CodeEditor`] whose `node_ref` is `node_ref`,
+/// in place of its selection (at the cursor when nothing is selected),
+/// leaving the cursor after it. It goes through the browser's editing
+/// commands as typing does, so Ctrl+Z undoes it and `on_input` is called
+/// with the new text. The editor takes the keyboard. `false`, and nothing
+/// done, when the ref is not on a mounted editor or the editor is
+/// `readonly`.
+///
+/// ```
+/// use sockel::{CodeEditor, code_editor_insert};
+/// use yew::prelude::*;
+///
+/// #[function_component]
+/// fn Expression() -> Html {
+///     let text = use_state(String::new);
+///     let editor = use_node_ref();
+///
+///     let on_input = {
+///         let text = text.clone();
+///         Callback::from(move |value: String| text.set(value))
+///     };
+///
+///     let onclick = {
+///         let editor = editor.clone();
+///         Callback::from(move |_: MouseEvent| {
+///             code_editor_insert(&editor, "price");
+///         })
+///     };
+///
+///     html! {
+///         <>
+///             <CodeEditor value={(*text).clone()} {on_input} label="Expression"
+///                 node_ref={editor} />
+///             <button {onclick}>{ "price" }</button>
+///         </>
+///     }
+/// }
+/// ```
+pub fn code_editor_insert(node_ref: &NodeRef, text: &str) -> bool {
+    let Some(area) = node_ref.cast::<HtmlTextAreaElement>() else {
+        return false;
+    };
+
+    if !area.is_connected() || area.read_only() {
+        return false;
+    }
+
+    let _ = area.focus();
+    let value = area.value();
+    let s16 = area.selection_start().ok().flatten().unwrap_or(0);
+    let e16 = area.selection_end().ok().flatten().unwrap_or(s16);
+    let (start, end) = (byte_offset(&value, s16), byte_offset(&value, e16));
+    let (start, end) = (start.min(end), start.max(end));
+    let after = start.saturating_add(text.len());
+
+    let edit = Edit {
+        replace: start..end,
+        text: text.to_owned(),
+        select: after..after,
+    };
+
+    apply(&area, &value, &edit);
+    true
+}
+
 /// Make `edit` through the browser's editing commands, so that it lands on
 /// its undo stack and fires `input` as typing does.
 fn apply(area: &HtmlTextAreaElement, value: &str, edit: &Edit) {
@@ -894,6 +963,11 @@ mod tests {
         );
     }
 
+    #[test]
+    fn inserting_without_an_editor_does_nothing() {
+        assert!(!code_editor_insert(&NodeRef::default(), "x"));
+    }
+
     fn render(props: CodeEditorProps) -> String {
         futures::executor::block_on(
             yew::LocalServerRenderer::<CodeEditor>::with_props(props)
@@ -921,6 +995,7 @@ mod tests {
             describedby: None,
             class: Classes::new(),
             testid: Some("editor".into()),
+            node_ref: NodeRef::default(),
         });
         assert!(
             html.contains("class=\"sockel-code-editor sockel-invalid\""),
