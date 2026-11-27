@@ -1162,7 +1162,7 @@ pub const PAGES: &[Page] = &[
         id: "code-editor",
         title: "CodeEditor",
         group: Group::Inputs,
-        about: "A code editor that knows no language: a textarea under its text highlighted by the app's spans, with line numbers, diagnostics underlined and marked in the gutter, Tab and Shift+Tab indenting, Enter keeping the indent and a completion list at the cursor. Edits undo as typing does; it grows with the code and scrolls sideways after the caret. `code_editor_insert` puts text at the cursor from outside, as the buttons under it do. The highlighter here is a toy one.",
+        about: "A code editor that knows no language: a textarea under its text highlighted by the app's spans, with line numbers, diagnostics underlined and marked in the gutter, Tab and Shift+Tab indenting, Enter keeping the indent and a completion list at the cursor. Edits undo as typing does; it grows with the code and scrolls sideways after the caret. With a `size` it is one line as tall as an input of that size, without the gutter, for a row of inputs (`code_editor_compact`); Enter is then no newline and Tab moves on. `code_editor_insert` puts text at the cursor from outside, as the buttons under it do. The highlighter here is a toy one.",
         covers: &[
             "CodeEditor",
             "CodeEditorProps",
@@ -1175,6 +1175,7 @@ pub const PAGES: &[Page] = &[
             "Severity",
             "char_to_byte",
             "code_editor",
+            "code_editor_compact",
             "code_editor_insert",
         ],
         render: || html! { <code_editor::CodeEditorPage /> },

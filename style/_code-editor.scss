@@ -6,6 +6,10 @@
 //
 // - `.sockel-code-editor`: the frame, `--code-editor-rows` lines tall at
 //   least; `.sockel-invalid` while a diagnostic is an error.
+// - `.sockel-code-editor.sockel-compact`: one line, as tall as an input
+//   (`--input-height`, by `.sockel-small` and `.sockel-touch` as an input's)
+//   and with its inline padding, the line centred in it; no gutter, no
+//   scrollbar (it still scrolls sideways after the caret).
 // - `-gutter`: the line numbers (`-line`), a line with diagnostics marked
 //   (`-marker`) in its worst severity, `.sockel-error`, `.sockel-warning`
 //   or `.sockel-info`.
@@ -22,6 +26,7 @@
 .sockel-code-editor {
     @include base.input-box;
     --code-editor-pad: var(--space-2);
+    --code-editor-pad-inline: var(--space-3);
     display: grid;
     grid-template-columns: auto minmax(max-content, 1fr);
     width: 100%;
@@ -38,6 +43,15 @@
 
     &.sockel-invalid {
         --input-edge: var(--danger);
+    }
+
+    // Inside the reserved border, the line centred in the input's height.
+    &.sockel-compact {
+        --code-editor-pad: calc((var(--input-height) - 1lh) / 2 - var(--space-px));
+        --code-editor-pad-inline: #{base.$input-padding-inline};
+        height: var(--input-height);
+        overflow-y: hidden;
+        scrollbar-width: none;
     }
 }
 
@@ -93,7 +107,7 @@
     width: 100%;
     min-height: calc(var(--code-editor-rows, 4) * 1lh + 2 * var(--code-editor-pad));
     margin: 0;
-    padding: var(--code-editor-pad) var(--space-3);
+    padding: var(--code-editor-pad) var(--code-editor-pad-inline);
     border: 0;
     border-radius: 0;
     font: inherit;

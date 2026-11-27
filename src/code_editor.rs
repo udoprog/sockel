@@ -10,6 +10,9 @@
 //!
 //! Colours are the `--code-*` custom properties, see
 //! [`CodeToken`](crate::CodeToken).
+//!
+//! With a `size` it is one line as tall as a [`TextInput`](crate::TextInput)
+//! of that size, without the gutter, to sit in a row of inputs.
 
 use crate::testid::with_testid;
 use crate::use_field;
@@ -22,11 +25,12 @@ use web_sys::{Element, HtmlDocument, HtmlTextAreaElement};
 use yew::prelude::*;
 
 use crate::code::{CodeSpan, Diagnostic, Piece, Severity, floor, pieces};
+use crate::input::size_class;
 use crate::phrasebookcatalog01::{L10N, label};
 use crate::tooltip::next_id;
 use crate::{
-    Dismiss, PopoverAlign, Side, class, listbox, listbox_option, option_id, use_overlays,
-    use_popover,
+    Dismiss, InputSize, PopoverAlign, Side, class, listbox, listbox_option, option_id,
+    use_overlays, use_popover,
 };
 
 /// One completion: what the list shows, and the whole text and the
@@ -67,6 +71,18 @@ pub fn code_editor(invalid: bool) -> Classes {
     classes!(class::CODE_EDITOR, invalid.then_some(class::INVALID))
 }
 
+/// A one-line code editor's classes, as tall as an input of `size`:
+/// `code-editor`, `compact`, the size's, `invalid` while a diagnostic is an
+/// error.
+pub fn code_editor_compact(size: InputSize, invalid: bool) -> Classes {
+    classes!(
+        class::CODE_EDITOR,
+        class::COMPACT,
+        size_class(size),
+        invalid.then_some(class::INVALID)
+    )
+}
+
 #[derive(Properties, PartialEq)]
 pub struct CodeEditorProps {
     pub value: AttrValue,
@@ -81,9 +97,16 @@ pub struct CodeEditorProps {
     /// Ctrl+Space; none, no list.
     #[prop_or_default]
     pub complete: Option<Callback<CompletionQuery, Option<Rc<Completions>>>>,
-    /// The lines it is tall at least.
+    /// The lines it is tall at least; one with a `size`.
     #[prop_or(4)]
     pub rows: u32,
+    /// One line, as tall as a [`TextInput`](crate::TextInput) of this size
+    /// and with its padding, for a row of inputs: no gutter, and Enter and
+    /// Tab are not edits (Enter is left to an ancestor's `onkeydown`, Tab
+    /// moves on). Diagnostics and completions are as without. Text with a
+    /// newline in it (pasted, or a `value`) still shows its first line only.
+    #[prop_or_default]
+    pub size: Option<InputSize>,
     #[prop_or_default]
     pub readonly: bool,
     /// The accessible name, when there is no label for `id`.
@@ -301,6 +324,8 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
         })
     };
 
+    let compact = props.size.is_some();
+
     let on_keydown = {
         let (area, offers, active, refresh, accept, readonly) = (
             area.clone(),
@@ -349,6 +374,15 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
                     }
                     _ => {}
                 }
+            }
+
+            if compact {
+                // One line: Enter is no newline, and goes on to the host;
+                // Tab moves the focus as in any other input.
+                if key == "Enter" && !e.is_composing() {
+                    e.prevent_default();
+                }
+                return;
             }
 
             if let Some(el) = area.cast::<HtmlTextAreaElement>()
@@ -463,7 +497,11 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
         },
     });
 
-    let lines = gutter(source, &props.diagnostics);
+    let lines = if compact {
+        Vec::new()
+    } else {
+        gutter(source, &props.diagnostics)
+    };
     let gutter = lines.iter().enumerate().map(|(line, (severity, notes))| {
         let number = line.saturating_add(1);
 
@@ -491,19 +529,27 @@ pub fn CodeEditor(props: &CodeEditorProps) -> Html {
     .flatten()
     .collect::<Vec<_>>();
     let describedby = (!describedby.is_empty()).then(|| describedby.join(" "));
-    let style = format!("--code-editor-rows: {};", props.rows.max(1));
+    let rows = if compact { 1 } else { props.rows.max(1) };
+    let style = format!("--code-editor-rows: {rows};");
+    let classes = match props.size {
+        Some(size) => code_editor_compact(size, invalid),
+        None => code_editor(invalid),
+    };
 
     with_testid(
         html! {
-            <div ref={frame} class={classes!(code_editor(invalid), props.class.clone())} {style}>
+            <div ref={frame} class={classes!(classes, props.class.clone())} {style}>
                 // First: yew matches unkeyed children from the end, so the
                 // list coming and going there would rebuild the textarea.
                 { for popup }
-                <div class={class::CODE_EDITOR_GUTTER} aria-hidden="true">{ for gutter }</div>
+                if !compact {
+                    <div class={class::CODE_EDITOR_GUTTER} aria-hidden="true">{ for gutter }</div>
+                }
                 // The spare line keeps the textarea's text inside its box,
-                // so that it never has anything to scroll.
+                // so that it never has anything to scroll; one line has no
+                // room for it, and no line to add.
                 <pre class={class::CODE_EDITOR_CODE} aria-hidden="true">
-                    { for code }{ "\n " }
+                    { for code }{ (!compact).then_some("\n ") }
                 </pre>
                 <textarea ref={area} class={class::CODE_EDITOR_INPUT}
                     id={id}
@@ -1015,6 +1061,20 @@ mod tests {
             code_editor(true).to_string(),
             format!("{} {}", class::CODE_EDITOR, class::INVALID)
         );
+        assert_eq!(
+            code_editor_compact(InputSize::Regular, false).to_string(),
+            format!("{} {}", class::CODE_EDITOR, class::COMPACT)
+        );
+        assert_eq!(
+            code_editor_compact(InputSize::Small, true).to_string(),
+            format!(
+                "{} {} {} {}",
+                class::CODE_EDITOR,
+                class::COMPACT,
+                class::SMALL,
+                class::INVALID
+            )
+        );
     }
 
     #[test]
@@ -1042,6 +1102,7 @@ mod tests {
             diagnostics: Rc::from([Diagnostic::new(6..7, Severity::Error, "bad")]),
             complete: None,
             rows: 2,
+            size: None,
             readonly: false,
             label: Some("Code".into()),
             completions_label: None,
@@ -1071,5 +1132,35 @@ mod tests {
         assert!(html.contains("aria-invalid=\"true\""), "{html}");
         assert!(html.contains(">2: bad</li>"), "{html}");
         assert!(html.contains("data-testid=\"editor\""), "{html}");
+        assert!(html.contains(class::CODE_EDITOR_GUTTER), "{html}");
+        assert!(html.contains("\n </pre>"), "{html}");
+    }
+
+    #[test]
+    fn a_compact_one_is_one_line_without_the_gutter() {
+        let html = render(CodeEditorProps {
+            value: "a + b".into(),
+            on_input: Callback::noop(),
+            spans: Rc::from([]),
+            diagnostics: Rc::from([Diagnostic::new(4..5, Severity::Error, "bad")]),
+            complete: None,
+            rows: 4,
+            size: Some(InputSize::Small),
+            readonly: false,
+            label: Some("Value".into()),
+            completions_label: None,
+            id: None,
+            describedby: None,
+            class: Classes::new(),
+            testid: None,
+            node_ref: NodeRef::default(),
+        });
+        let classes = code_editor_compact(InputSize::Small, true).to_string();
+        assert!(html.contains(&format!("class=\"{classes}\"")), "{html}");
+        assert!(html.contains("--code-editor-rows: 1;"), "{html}");
+        assert!(!html.contains(class::CODE_EDITOR_GUTTER), "{html}");
+        assert!(!html.contains("\n </pre>"), "{html}");
+        assert!(html.contains(class::CODE_EDITOR_MARK), "{html}");
+        assert!(html.contains(">1: bad</li>"), "{html}");
     }
 }

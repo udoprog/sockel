@@ -533,7 +533,7 @@ pub use code::{CodeSpan, CodeToken, Diagnostic, Severity, char_to_byte};
 #[cfg(feature = "code-editor")]
 pub use code_editor::{
     CodeEditor, CodeEditorProps, Completion, CompletionQuery, Completions, code_editor,
-    code_editor_insert,
+    code_editor_compact, code_editor_insert,
 };
 #[cfg(feature = "code-snippet")]
 pub use code_snippet::{CodeSnippet, CodeSnippetProps, code_snippet};

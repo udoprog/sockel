@@ -9,7 +9,8 @@ use yew::prelude::*;
 
 use sockel::{
     Button, ButtonSize, Cluster, CodeEditor, CodeSpan, CodeToken, Completion, CompletionQuery,
-    Completions, Diagnostic, Severity, code_editor, code_editor_insert,
+    Completions, Diagnostic, InputSize, Severity, TextInput, code_editor, code_editor_compact,
+    code_editor_insert,
 };
 
 use crate::class;
@@ -27,6 +28,16 @@ const FUNCTIONS: &[(&str, &str)] = &[
 ];
 
 const ROWS: &[(&str, u32)] = &[("2", 2), ("4", 4), ("8", 8)];
+
+/// No size: the full editor; a size: one line in a row of inputs.
+const SIZES: &[(&str, Option<InputSize>)] = &[
+    ("none", None),
+    ("regular", Some(InputSize::Regular)),
+    ("small", Some(InputSize::Small)),
+    ("touch", Some(InputSize::Touch)),
+];
+
+const LINE: &str = "round(price * rate(\"SE\"))";
 
 /// Takes the chars `f` accepts, moving `end` past them.
 fn eat(chars: &mut Peekable<CharIndices<'_>>, end: &mut usize, f: impl Fn(char) -> bool) {
@@ -198,6 +209,10 @@ pub fn CodeEditorPage() -> Html {
     let completions = use_state(|| true);
     let readonly = use_state(|| false);
     let rows = use_state(|| 4u32);
+    let size = use_state(|| None::<InputSize>);
+    let line = use_state(|| AttrValue::from(LINE));
+    let name = use_state(|| AttrValue::from("total"));
+    let kind = use_state(|| AttrValue::from("number"));
     let editor = use_node_ref();
 
     let controls = html! {
@@ -206,8 +221,11 @@ pub fn CodeEditorPage() -> Html {
             <Toggle label="complete" value={*completions} on_change={bind(&completions)} />
             <Toggle label="readonly" value={*readonly} on_change={bind(&readonly)} />
             <Select<u32> label="rows" options={ROWS} value={*rows} on_change={bind(&rows)} />
+            <Select<Option<InputSize>> label="size" options={SIZES} value={*size} on_change={bind(&size)} />
         </>
     };
+    let compact = *size;
+    let size_expr = compact.map(|s| format!("InputSize::{s:?}"));
     let code = snippet(
         &[
             "// set_text does text.set(value.into()): passing it on is an Rc clone.".into(),
@@ -225,19 +243,25 @@ pub fn CodeEditorPage() -> Html {
             .expr("spans", "(*spans).clone()")
             .expr_if(*diagnostics, "diagnostics", "(*diagnostics).clone()")
             .expr_if(*completions, "complete", "Some(complete)")
-            .expr_if(*rows != 4, "rows", rows.to_string())
+            .expr_if(*rows != 4 && compact.is_none(), "rows", rows.to_string())
+            .expr_if(compact.is_some(), "size", size_expr.clone().unwrap_or_default())
             .flag("readonly", *readonly)
             .expr("node_ref", "editor.clone()"),
     );
 
     // Highlighted and checked once per edit: the toggles re-render the
     // page without touching the text.
-    let highlighted = use_memo((*text).clone(), |text| {
+    let shown = if compact.is_some() {
+        (*line).clone()
+    } else {
+        (*text).clone()
+    };
+    let highlighted = use_memo(shown.clone(), |text| {
         let (spans, bound) = highlight(text);
         (Rc::<[CodeSpan]>::from(spans), Rc::<[String]>::from(bound))
     });
     let (spans, bound) = (*highlighted).clone();
-    let found = use_memo(((*text).clone(), *diagnostics), {
+    let found = use_memo((shown.clone(), *diagnostics), {
         let spans = spans.clone();
         let bound = bound.clone();
         move |(text, on)| -> Rc<[Diagnostic]> {
@@ -261,10 +285,13 @@ pub fn CodeEditorPage() -> Html {
         Callback::from(move |query: CompletionQuery| complete(query, &bound))
     });
     let on_input = {
-        let text = text.clone();
-        Callback::from(move |value: String| text.set(value.into()))
+        let (text, line) = (text.clone(), line.clone());
+        Callback::from(move |value: String| match compact {
+            Some(_) => line.set(value.into()),
+            None => text.set(value.into()),
+        })
     };
-    let value = (*text).clone();
+    let value = shown;
     // A press on a name puts it at the cursor, as a list of names beside
     // the editor would.
     let inserts = bound
@@ -284,18 +311,46 @@ pub fn CodeEditorPage() -> Html {
         })
         .collect::<Html>();
 
+    let editor_html = html! {
+        <CodeEditor {value} {on_input} label="Expression" {spans}
+            diagnostics={found} {complete} size={compact}
+            class={classes!(compact.map(|_| [sockel::class::GROW, sockel::class::BASIS_LG]))}
+            rows={*rows} readonly={*readonly} testid="code-editor" node_ref={editor.clone()} />
+    };
+    let about = match compact {
+        Some(size) => format!(
+            "{errors} errors, {warnings} warnings, {notes} notes. One line beside inputs of its size: Enter is no newline (an ancestor's onkeydown sees it), Tab moves on, Ctrl+Space asks for completions; code_editor_compact(InputSize::{size:?}, {invalid}) → \"{}\".",
+            code_editor_compact(size, invalid).to_string(),
+        ),
+        None => format!(
+            "{errors} errors, {warnings} warnings, {notes} notes. Tab and Shift+Tab indent and outdent, Enter keeps the indent, Ctrl+Space asks for completions; code_editor({invalid}) → \"{}\".",
+            code_editor(invalid).to_string(),
+        ),
+    };
+    let input = |state: &UseStateHandle<AttrValue>, label: &'static str, testid: &'static str| {
+        let state = state.clone();
+        let value = (*state).clone();
+        let on_input = Callback::from(move |v: String| state.set(v.into()));
+        html! {
+            <TextInput {value} {on_input} {label} {testid}
+                size={compact.unwrap_or_default()}
+                class={classes!(sockel::class::GROW, sockel::class::BASIS_SM)} />
+        }
+    };
+
     html! {
         <Demo {controls} {code}>
-            <CodeEditor {value} {on_input} label="Expression" {spans}
-                diagnostics={found} {complete}
-                rows={*rows} readonly={*readonly} testid="code-editor" node_ref={editor.clone()} />
+            if compact.is_some() {
+                <Cluster nowrap=true>
+                    { input(&name, "Name", "code-editor-row-name") }
+                    { input(&kind, "Type", "code-editor-row-type") }
+                    { editor_html }
+                </Cluster>
+            } else {
+                { editor_html }
+            }
             <Cluster>{ inserts }</Cluster>
-            <span class={class::CONTROL_LABEL}>
-                { format!(
-                    "{} errors, {} warnings, {} notes. Tab and Shift+Tab indent and outdent, Enter keeps the indent, Ctrl+Space asks for completions; code_editor({invalid}) → \"{}\".",
-                    errors, warnings, notes, code_editor(invalid).to_string(),
-                ) }
-            </span>
+            <span class={class::CONTROL_LABEL}>{ about }</span>
         </Demo>
     }
 }

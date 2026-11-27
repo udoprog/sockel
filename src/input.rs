@@ -45,7 +45,7 @@ impl InputKind {
     }
 }
 
-fn size_class(size: InputSize) -> Option<&'static str> {
+pub(crate) fn size_class(size: InputSize) -> Option<&'static str> {
     match size {
         InputSize::Regular => None,
         InputSize::Small => Some(class::SMALL),
