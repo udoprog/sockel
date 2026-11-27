@@ -42,14 +42,14 @@ In `Cargo.toml`, pick the features the app renders (or leave out
 <!-- check: Cargo.toml -->
 ```toml
 [dependencies]
-sockel = { version = "0.3", default-features = false, features = ["button", "layout", "overlay"] }
+sockel = { version = "0.4", default-features = false, features = ["button", "layout", "overlay"] }
 yew = { version = "0.23", features = ["csr"] }
 
 [build-dependencies]
-sockel-build = "0.3"
+sockel-build = "0.4"
 
 [dev-dependencies]
-sockel-build = "0.3"
+sockel-build = "0.4"
 ```
 
 The app's Sass lives in `style/`, with an `_index.scss` that loads sockel's
