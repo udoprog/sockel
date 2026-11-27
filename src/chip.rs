@@ -63,6 +63,10 @@ pub struct ChipProps {
     /// More `data-*` attributes (`("data-group", ..)`) the app's code reads.
     #[prop_or_default]
     pub data: Vec<(&'static str, AttrValue)>,
+    /// Cuts the label to the room its cell leaves (`trim`) rather than
+    /// widening an auto table's column or a phone card.
+    #[prop_or_default]
+    pub trim: bool,
     /// The label, cut with an ellipsis when the chip is out of room.
     #[prop_or_default]
     pub children: Html,
@@ -77,6 +81,7 @@ pub fn Chip(props: &ChipProps) -> Html {
     let still = props.href.is_none() && props.on_click.is_none();
     let class = classes!(
         chip(still, props.media.is_some(), props.icon.is_some()),
+        props.trim.then_some(class::TRIM),
         props.class.clone()
     );
 
@@ -94,7 +99,13 @@ pub fn Chip(props: &ChipProps) -> Html {
         <>
             { for props.media.clone().map(|media| html! { <span class={class::CHIP_MEDIA}>{ media }</span> }) }
             { for props.icon.clone().map(|icon| html! { <span class={class::CHIP_ICON} aria-hidden="true">{ icon }</span> }) }
-            <span class={class::CHIP_LABEL}>{ props.children.clone() }</span>
+            <span class={class::CHIP_LABEL}>
+                if props.trim {
+                    <span class={class::CHIP_TEXT}>{ props.children.clone() }</span>
+                } else {
+                    { props.children.clone() }
+                }
+            </span>
             { props.after.clone() }
             { for remove }
         </>
@@ -267,6 +278,25 @@ mod tests {
             children: html! { "Ada" }
         }));
         assert!(!link.contains(class::CHIP_REMOVE), "{link}");
+    }
+
+    #[test]
+    fn a_trimmed_chip_wraps_its_text() {
+        let plain = render(yew::props!(ChipProps {
+            children: html! { "Ada" }
+        }));
+        assert!(!plain.contains(class::TRIM), "{plain}");
+        assert!(!plain.contains(class::CHIP_TEXT), "{plain}");
+
+        let trimmed = render(yew::props!(ChipProps {
+            trim: true,
+            children: html! { "Ada" }
+        }));
+        assert!(trimmed.contains(class::TRIM), "{trimmed}");
+        assert!(
+            trimmed.contains(&format!("<span class=\"{}\">Ada</span>", class::CHIP_TEXT)),
+            "{trimmed}"
+        );
     }
 
     #[test]

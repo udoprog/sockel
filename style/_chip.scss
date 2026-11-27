@@ -8,6 +8,10 @@
 //   (`-icon`, `.sockel-lead-icon`), an item removable by a cross
 //   (`-remove`). `--chip-media-display: none` on the chip hides its media.
 //   `.sockel-chip-list` wraps chips and keeps one row's height when empty.
+// - `.sockel-trim` on a chip whose label is wrapped in `.sockel-chip-text`:
+//   the label asks for no width of its own, so in an auto table's cell or a
+//   phone card a long label is cut to the room its neighbours leave instead
+//   of widening the column.
 
 @use "tokens" as base;
 
@@ -79,6 +83,17 @@
 }
 
 .sockel-chip-label {
+    @include base.truncate;
+}
+
+// A grid track of `minmax(0, max-content)` sizes the label to its text but
+// gives it no minimum, so the chip's min-content holds only its other parts.
+.sockel-chip.sockel-trim > .sockel-chip-label {
+    display: inline-grid;
+    grid-template-columns: minmax(0, max-content);
+}
+
+.sockel-chip-text {
     @include base.truncate;
 }
 

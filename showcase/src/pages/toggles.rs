@@ -4,8 +4,8 @@ use crate::class;
 
 use sockel::{
     Avatar, Checkbox, Chip, ChipList, ChipToggle, Choice, ChoiceFit, ChoiceOption, Cluster,
-    DataTips, Glyph, Icon, OptionCard, OptionCardKind, Stack, Switch, checkbox, chip, chip_count,
-    choice, option_card, switch,
+    DataTips, Glyph, Icon, OptionCard, OptionCardKind, Stack, Switch, Table, TableCell, TableRow,
+    checkbox, chip, chip_count, choice, option_card, switch,
 };
 
 use crate::code::{El, snippet, text_node};
@@ -374,12 +374,22 @@ const LEADS: &[(&str, Lead)] = &[
     ("Icon", Lead::Icon),
 ];
 
+#[derive(Clone, Copy, PartialEq, Eq)]
+enum Place {
+    List,
+    Table,
+}
+
+const PLACES: &[(&str, Place)] = &[("Chip list", Place::List), ("Table (cards)", Place::Table)];
+
 #[function_component]
 pub fn ChipItemPage() -> Html {
     let form = use_state(|| Form::Item);
     let lead = use_state(|| Lead::Media);
     let text = use_state(|| Text::Short);
     let removable = use_state(|| true);
+    let trim = use_state(|| false);
+    let place = use_state(|| Place::List);
     let removed = use_state(|| 0u32);
 
     let controls = html! {
@@ -388,6 +398,8 @@ pub fn ChipItemPage() -> Html {
             <Select<Lead> label="Lead" options={LEADS} value={*lead} on_change={bind(&lead)} />
             <Select<Text> label="Label" options={Text::OPTIONS} value={*text} on_change={bind(&text)} />
             <Toggle label="removable" value={*removable} on_change={bind(&removable)} />
+            <Toggle label="trim" value={*trim} on_change={bind(&trim)} />
+            <Select<Place> label="In" options={PLACES} value={*place} on_change={bind(&place)} />
         </>
     };
 
@@ -413,8 +425,12 @@ pub fn ChipItemPage() -> Html {
         )
         .expr_if(*lead == Lead::Icon, "icon", "html! { <Icon .. /> }")
         .expr_if(on_remove.is_some(), "on_remove", "on_remove")
+        .expr_if(*trim, "trim", "true")
         .line(text_node(&label));
     let code = snippet(&[], code);
+    let chip_node = html! {
+        <Chip {href} {on_click} {media} {icon} {on_remove} trim={*trim}>{ label }</Chip>
+    };
 
     html! {
         <Demo {controls} {code}>
@@ -426,9 +442,26 @@ pub fn ChipItemPage() -> Html {
                         chip(still, led, iconed).to_string()
                     ) }
                 </code>
-                <ChipList label="People">
-                    <Chip {href} {on_click} {media} {icon} {on_remove}>{ label }</Chip>
-                </ChipList>
+                { match *place {
+                    Place::List => html! {
+                        <ChipList label="People">{ chip_node }</ChipList>
+                    },
+                    Place::Table => html! {
+                        <Table columns=3 cards=true head={html! {
+                            <>
+                                <TableCell head=true>{ "Name" }</TableCell>
+                                <TableCell head=true>{ "Author" }</TableCell>
+                                <TableCell head=true>{ "Status" }</TableCell>
+                            </>
+                        }}>
+                            <TableRow>
+                                <TableCell title=true>{ "Notes on the engine" }</TableCell>
+                                <TableCell>{ chip_node }</TableCell>
+                                <TableCell>{ "Draft" }</TableCell>
+                            </TableRow>
+                        </Table>
+                    },
+                } }
                 <span class={class::CONTROL_LABEL}>{ format!("{} removed", *removed) }</span>
             </Stack>
         </Demo>
