@@ -29,10 +29,11 @@
 //   icon in the muted ink instead, `$head-trail-mark-size` (`1em`) its box.
 // - `.sockel-page-head.sockel-compact`: the head of a compact page (the game's): the
 //   actions as icons (their label text hidden), and on a phone one row,
-//   the title on two lines and the back link's words (`.sockel-page-head-back-label`)
-//   gone.
-// - `.sockel-page-head.sockel-one-row`: a crumb head that stays one row on a phone,
-//   the back link's words (`.sockel-page-head-back-label`) gone and its icon left.
+//   the title on two lines, the actions on their row and the back link's
+//   words (`.sockel-page-head-back-label`) gone.
+// - `.sockel-page-head.sockel-one-row`: a head that stays one row on a phone. With
+//   crumbs, the back link's words (`.sockel-page-head-back-label`) go and its icon
+//   stays; without, the title takes two lines and the actions keep their row.
 //
 // Neither has outer margins: the page's or section's stack spaces it.
 // Either is at least `--control-height` high, with or without actions,
@@ -222,31 +223,75 @@
         flex-wrap: wrap;
         gap: var(--space-1) var(--space-2);
     }
+}
 
-    // The compact head's actions are icons: their words (the label text) hide,
-    // and a phone's buttons are tighter (`base.button`).
-    .sockel-page-head.sockel-compact {
-        --label-display: none;
+// The compact head's actions are icons: their words (the label text) hide,
+// and a phone's buttons are tighter (`base.button`).
+.sockel-page-head.sockel-compact {
+    --label-display: none;
+}
+
+// A compact or one-row head on a phone: one row, with or without crumbs.
+@include base.below("phone") {
+    // The title has what the actions leave: on two lines before it is cut.
+    %-phone-title {
+        display: -webkit-box;
+        overflow: hidden;
+        line-height: 1.15;
+        white-space: normal;
+        -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2;
+        line-clamp: 2;
     }
 
-    @include base.below("phone") {
-        .sockel-page-head.sockel-compact {
-            flex-wrap: nowrap;
+    // The actions keep their row: the title, not the actions, gives way.
+    %-phone-actions {
+        flex-wrap: nowrap;
+        flex-shrink: 0;
+        gap: var(--space-0);
+    }
 
+    .sockel-page-head.sockel-compact,
+    .sockel-page-head.sockel-one-row {
+        flex-wrap: nowrap;
+
+        // Without crumbs, the title sits in the heading group, which gives way.
+        > .sockel-head-heading {
+            flex: 1 1 auto;
+
+            > .sockel-page-head-title {
+                @extend %-phone-title;
+            }
+        }
+    }
+
+    .sockel-page-head.sockel-compact {
+        > .sockel-head-heading > .sockel-page-head-title {
+            font-size: var(--text-base);
+        }
+
+        > .sockel-page-head-actions {
+            @extend %-phone-actions;
+
+            --button-min-width: 2.25rem;
+            --button-pad-x: var(--space-2);
+        }
+    }
+
+    // A crumb head's actions keep their own wrapping, as before.
+    .sockel-page-head.sockel-one-row:not(.sockel-crumb) > .sockel-page-head-actions {
+        @extend %-phone-actions;
+    }
+
+    @if base.emits("heads.crumbs") {
+        .sockel-page-head.sockel-compact {
             > .sockel-page-head-crumbs {
                 flex: 1 1 auto;
 
-                // The title has what the icons leave: on two lines before it
-                // is cut.
                 > .sockel-page-head-title {
-                    display: -webkit-box;
-                    overflow: hidden;
+                    @extend %-phone-title;
+
                     font-size: var(--text-base);
-                    line-height: 1.15;
-                    white-space: normal;
-                    -webkit-box-orient: vertical;
-                    -webkit-line-clamp: 2;
-                    line-clamp: 2;
                 }
             }
 
@@ -255,22 +300,9 @@
             .sockel-page-head-meta {
                 display: none;
             }
-
-            // The icons keep their row: the title, not the actions, gives way.
-            > .sockel-page-head-actions {
-                flex-wrap: nowrap;
-                flex-shrink: 0;
-                gap: var(--space-0);
-                --button-min-width: 2.25rem;
-                --button-pad-x: var(--space-2);
-            }
         }
-    }
 
-    @include base.below("phone") {
         .sockel-page-head.sockel-one-row {
-            flex-wrap: nowrap;
-
             > .sockel-page-head-crumbs {
                 flex: 1 1 auto;
             }

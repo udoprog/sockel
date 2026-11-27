@@ -333,13 +333,40 @@ mod tests {
     #[test]
     fn a_compact_heads_icons_never_shrink_under_its_title() {
         let sass = include_str!("../style/_heads.scss");
-        let rule = sass
-            .split(".sockel-page-head.sockel-compact {\n            flex-wrap: nowrap;")
+        let actions = sass
+            .split("%-phone-actions {")
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the phone actions' rule");
+        assert!(actions.contains("flex-wrap: nowrap;"), "{actions}");
+        assert!(actions.contains("flex-shrink: 0;"), "{actions}");
+        let compact = sass
+            .split(".sockel-page-head.sockel-compact {\n        > .sockel-head-heading")
             .nth(1)
             .and_then(|rest| rest.split("> .sockel-page-head-actions {").nth(1))
             .and_then(|rest| rest.split('}').next())
             .expect("the compact head's actions on a phone");
-        assert!(rule.contains("flex-shrink: 0;"), "{rule}");
+        assert!(compact.contains("@extend %-phone-actions;"), "{compact}");
+    }
+
+    #[test]
+    fn a_one_row_head_without_crumbs_keeps_its_actions_on_their_row() {
+        let sass = include_str!("../style/_heads.scss");
+        let rule = sass
+            .split(
+                ".sockel-page-head.sockel-one-row:not(.sockel-crumb) > .sockel-page-head-actions {",
+            )
+            .nth(1)
+            .and_then(|rest| rest.split('}').next())
+            .expect("the one-row head's actions on a phone");
+        assert!(rule.contains("@extend %-phone-actions;"), "{rule}");
+        let heading = sass
+            .split(".sockel-page-head.sockel-one-row {\n        flex-wrap: nowrap;")
+            .nth(1)
+            .and_then(|rest| rest.split("> .sockel-page-head-title {").nth(1))
+            .and_then(|rest| rest.split('}').next())
+            .expect("the one-row head's title on a phone");
+        assert!(heading.contains("@extend %-phone-title;"), "{heading}");
     }
 
     #[test]
